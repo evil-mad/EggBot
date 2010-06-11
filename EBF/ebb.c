@@ -2,7 +2,9 @@
 // 1.8 - 
 // 1.8.1 5/19/10 - Only change is to recompile with Microchip USB Stack v2.7
 // 1.8.2 5/31/10 - Only change is to change name in USB enumeration string to Ei Bot Board - using new PID for SchmalzHaus
-
+// 1.9   6/11/10 - Added two commands:
+//					SQ - Solenoid Query - returns 0 or 1 for down and up
+//					ST - Solenoid Toggle - toggles state of the servo/solenoid
 
 
 
@@ -133,6 +135,7 @@ static unsigned char UseBuiltInDrivers;
 static unsigned char UseServoForUpDown;
 static unsigned int g_servo_max;
 static unsigned int g_servo_min;
+static PenStateType PenState;
 
 // ISR
 // PORTB is the step and direction port 
@@ -386,7 +389,6 @@ void high_ISR(void)
 				// causes the compiler to generate enormous amounts of setup/teardown
 				// code and things run way too slowly.
 				// Process_S2(1, g_servo2_min, 4, g_servo2_rate);
-				gUseRCServo2 = TRUE;
 				gRC2Rate[0] = g_servo2_rate;
 				gRC2Target[0] = g_servo2_min;
 				gRC2Pin[0] = 4;
@@ -410,6 +412,7 @@ void high_ISR(void)
 			{
 				AllDone = FALSE;
 			}
+			PenState = PEN_UP;
 		}
 		else if (Command == COMMAND_PEN_DOWN)
 		{
@@ -426,7 +429,6 @@ void high_ISR(void)
 				// causes the compiler to generate enormous amounts of setup/teardown
 				// code and things run way too slowly.
 				// Process_S2(1, g_servo2_max, 4, g_servo2_rate);			
-				gUseRCServo2 = TRUE;
 				gRC2Rate[0] = g_servo2_rate;
 				gRC2Target[0] = g_servo2_max;
 				gRC2Pin[0] = 4;
@@ -450,6 +452,7 @@ void high_ISR(void)
 			{
 				AllDone = FALSE;
 			}
+			PenState = PEN_DOWN;
 		}
 		else
 		{
@@ -577,13 +580,8 @@ void EBB_Init(void)
 	ANCON0 = 0xFE;	// Let AN0 (RA0) be an analog input
 	ANCON1 = 0x1F;	// Set all the rest to digital I/O
 
-	#if defined(DEMO_MODE)
-		Enable1IO = DISABLE_MOTOR;
-		Enable2IO = DISABLE_MOTOR;
-	#else
-		Enable1IO = ENABLE_MOTOR;
-		Enable2IO = ENABLE_MOTOR;
-	#endif
+	Enable1IO = ENABLE_MOTOR;
+	Enable2IO = ENABLE_MOTOR;
 	MS1_1IO = 1;
 	MS2_1IO = 1;
 	MS1_2IO	= 1;
@@ -639,68 +637,18 @@ void EBB_Init(void)
 	TRISC = 0;		// Make portC outputs
 #endif
 
-#if defined(DEMO_MODE)
-	DemoModeActive = FALSE;
-#endif
-
 	// Set up pen up/down direction as output
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
 
-	SolenoidState = SOLENOID_OFF;
+	SolenoidState = SOLENOID_ON;
 	UseBuiltInDrivers = TRUE;
 	gUseRCServo1 = FALSE;
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
-	gUseRCServo2 = FALSE;
+	gUseRCServo2 = TRUE;
 #endif
+	PenState = PEN_UP;
 }
-
-#if defined(DEMO_MODE)
-void DemoModeStateMachine(void)
-{
-	unsigned int duration;
-	unsigned int A1steps;
-	unsigned int A2steps;
-	
-	// If we have space for the next command
-	if (AllDone)
-	{
-		// Then load the next command
-		if (packet_list[comd_counter].comd == COMD_SM)
-		{
-			duration = packet_list[comd_counter].duration;
-			A1steps = packet_list[comd_counter].A1steps;
-			A2steps = packet_list[comd_counter].A2steps;
-
-			process_SM(duration, A1steps, A2steps, 0, 0);
-		
-			AllDone = FALSE;
-		}
-		else if (packet_list[comd_counter].comd == COMD_SP)
-		{
-			process_SP(packet_list[comd_counter].duration);
-
-			AllDone = FALSE;
-		}
-
-		// Advance to the next command
-		comd_counter++;
-
-		// Check to see if we're done
-		if (
-			(packet_list[comd_counter].comd == COMD_END)
-			||
-			(packet_list[comd_counter].comd > COMD_SP)
-		)
-		{
-			DemoModeActive = FALSE;
-			Enable1IO = DISABLE_MOTOR;
-			Enable2IO = DISABLE_MOTOR;
-			comd_counter = 0;
-		}
-	}
-}
-#endif
 
 // Stepper (mode) Configure command
 // SC,1,0<CR> will use solenoid output for pen up/down (default)
@@ -775,7 +723,7 @@ void parse_SC_packet (void)
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
 			Process_S2(1, g_servo2_min, 4, g_servo2_rate);
 #endif
-			process_SP(1, 0);			// Start servo up 
+			process_SP(PEN_UP, 0);			// Start servo up 
 		}
 #endif
 	}
@@ -1012,8 +960,47 @@ static void process_SM(
 
 }
 
+// Query Pen
+// Usage: QP<CR>
+// Returns: 0 for down, 1 for up, then OK<CR>
+void parse_QP_packet(void)
+{
+	printf((far rom char *)"%d\n\r", PenState);
+
+	print_ack();
+}
+
+// Toggle Pen
+// Usage: TP<CR>
+// Returns: OK<CR>
+// Just toggles state of pen arm
+void parse_TP_packet(void)
+{
+	unsigned short CommandDuration = 500;
+
+	// Extract each of the values.
+	extract_number (kUINT, &CommandDuration, kOPTIONAL);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+	if (PenState == PEN_UP)
+	{
+		process_SP(PEN_DOWN, CommandDuration);
+	}
+	else
+	{
+		process_SP(PEN_UP, CommandDuration);
+	}
+
+	print_ack();
+}
+
 // Set Pen
-// Usage: SP,<1,0><CR>
+// Usage: SP,<1,0>,<Duration><CR>
 void parse_SP_packet(void)
 {
 	unsigned char State = 0;
@@ -1034,13 +1021,13 @@ void parse_SP_packet(void)
 	print_ack();
 }
 
-void process_SP(unsigned char NewState, unsigned short CommandDuration)
+void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
 {	
 	// Trial: Spin here until there's space in the fifo
 	while(NextReady)
 	;
 
-	if (NewState)
+	if (NewState == PEN_UP)
 	{
 		ToLoadCommand = COMMAND_PEN_UP;
 	}

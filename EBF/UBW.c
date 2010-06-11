@@ -127,15 +127,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.8.2\r\n"};
+	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.8.2\r\n"};
+	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.8.2\r\n"};
+	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9\r\n"};
 #elif defined(BOARD_EBB_V13)
-	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.8.2\r\n"};
+	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 1.8.2\r\n"};
+	const rom char st_version[] = {"UBW EB Firmware Version 1.9\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -787,59 +787,6 @@ void ProcessIO(void)
 
 	BlinkUSBStatus();
 
-#if defined(DEMO_MODE)
-	// Check to see if user has pressed and released the PRG button
-	if (!swStartDemo)
-	{
-		if (button_state == 0)
-		{
-			button_ctr++;
-	
-			if (button_ctr == 1000)
-			{
-				button_state = 1;
-				button_ctr = 0;
-			}
-		}
-	}
-	else
-	{
-		if (button_state == 1)
-		{
-			button_ctr++;
-
-			if (button_ctr == 1000)
-			{
-				button_state = 0;
-				button_ctr = 0;
-				if (DemoModeActive)
-				{
-					DemoModeActive = FALSE;
-					comd_counter = 0;
-					PenUpDownIO = 0;
-					Enable1IO = DISABLE_MOTOR;
-					Enable2IO = DISABLE_MOTOR;
-				}
-				else
-				{
-					DemoModeActive = TRUE;
-					Enable1IO = ENABLE_MOTOR;
-					Enable2IO = ENABLE_MOTOR;
-				}
-			}
-		}
-		else
-		{
-			button_state = 0;
-			button_ctr = 0;
-		}
-	}
-
-	if (DemoModeActive == TRUE)
-	{
-		DemoModeStateMachine();
-	}
-#endif
 	// Check for any new I packets (from T command) ready to go out
 	while (ISR_D_FIFO_length > 0)
 	{
@@ -1324,6 +1271,18 @@ void parse_packet(void)
 		{
 			// SP for set pen
 			parse_SP_packet ();
+			break;
+		}
+		case ('T' * 256) + 'P':
+		{
+			// TP for toggle pen
+			parse_TP_packet ();
+			break;
+		}
+		case ('Q' * 256) + 'P':
+		{
+			// QP for query pen
+			parse_QP_packet ();
 			break;
 		}
 		case ('E' * 256) + 'M':
@@ -2993,27 +2952,7 @@ void BlinkUSBStatus(void)
 {
     static WORD LEDCount = 0;
 	static unsigned char LEDState = 0;
-#if defined(DEMO_MODE)
-	static word DemoCount = 0;
-#endif
     
-#if defined(DEMO_MODE)
-	if (DemoModeActive)
-	{
-		DemoCount++;
-
-		if (DemoCount == 30000U)
-		{
-			mLED_2_Toggle();
-			DemoCount = 0;
-		}
-	}
-	else
-	{
-		mLED_2_Off();
-	}
-#endif
-
     if (
 		USBDeviceState == DETACHED_STATE
        	||

@@ -71,7 +71,7 @@ physical extremes of its motion.
 
 This RCServo2 method will only be available on the 18F45J50 based
 EggBotBoards, because it requires the PPS (perhipheral pin select)
-facility to be practical.
+facility to be possible.
 
 Timer3 will be configured to clock at Fosc/4 = 12MHz.
 At this rate, a 1ms high pulse would need a CCPR2 value of 12,000.
@@ -138,7 +138,7 @@ void RCServo2_Init(void)
 	gUseRCServo2 = TRUE;
 	g_servo2_rate = 400;
 	Process_S2(1, g_servo2_min, 4, g_servo2_rate);
-	process_SP(1, 0);			// Start servo up 
+	process_SP(PEN_UP, 0);			// Start servo up 
 
 }
 

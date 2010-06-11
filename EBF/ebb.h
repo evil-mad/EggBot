@@ -6,14 +6,22 @@
 #define ENABLE_MOTOR	(0)
 #define DISABLE_MOTOR	(1)
 
+typedef enum
+{
+	PEN_DOWN = 0,
+	PEN_UP
+} PenStateType;
+
 extern unsigned int DemoModeActive;
 extern near unsigned char NextReady;
 extern unsigned int comd_counter;
 void parse_SM_packet(void);
 void parse_SC_packet(void);
 void parse_SP_packet(void);
+void parse_TP_packet(void);
+void parse_QP_packet(void);
 void EBB_Init(void);
 void parse_EM_packet(void);
 void DemoModeStateMachine(void);
-void process_SP(unsigned char NewState, unsigned short CommandDuration);
+void process_SP(PenStateType NewState, unsigned short CommandDuration);
 #endif
