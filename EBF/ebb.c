@@ -13,6 +13,7 @@
 //					SN - sets move (node) count
 //					QN - Query node count
 //					QB - Query Button command
+// 1.9.3 6/16/10 - Replaced SN with CL (Clear Node) command
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1284,23 +1285,11 @@ void parse_EM_packet(void)
 	print_ack();
 }
 
-// Set Node counter
-// Usage: SN,<NewNodeCount><CR>
-void parse_SN_packet(void)
+// Clear Node counter
+// Usage: CN<CR>
+void parse_CN_packet(void)
 {
-	unsigned int NewNodeCount = 0;
-
-	// Extract each of the values.
-	extract_number (kUINT, &NewNodeCount, kREQUIRED);
-
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
-
-	// Just copy it over
-	NodeCount = NewNodeCount;
+	NodeCount = 0;
 
 	print_ack();
 }
