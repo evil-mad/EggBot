@@ -18,7 +18,8 @@ extern unsigned int g_servo2_max;
 extern unsigned int g_servo2_min;
 extern unsigned char gRC2Slots;
 extern unsigned char gRC2SlotMS;
-extern unsigned int g_servo2_rate;
+extern unsigned int g_servo2_rate_up;
+extern unsigned int g_servo2_rate_down;
 
 void RCServo2_Init(void);
 void RCServo2_S2_command(void);

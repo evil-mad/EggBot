@@ -5,9 +5,14 @@
 // 1.9   6/11/10 - Added two commands:
 //					SQ - Solenoid Query - returns 0 or 1 for down and up
 //					ST - Solenoid Toggle - toggles state of the servo/solenoid
-
-
-
+// 1.9.2 6/15/10 - Added commands:
+//					SC,11 sets pen up speed
+//					SC,12 sets pen down speed
+//					SL - sets the current layer
+//					QL - queries the current layer
+//					SN - sets move (node) count
+//					QN - Query node count
+//					QB - Query Button command
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -105,7 +110,6 @@ static void process_SM(
 	signed int A4Stp
 );
 
-
 #pragma udata access fast_vars
 // Working registers
 static near unsigned int StepAcc[4];
@@ -136,6 +140,9 @@ static unsigned char UseServoForUpDown;
 static unsigned int g_servo_max;
 static unsigned int g_servo_min;
 static PenStateType PenState;
+static unsigned long NodeCount;
+static char Layer;
+static BOOL ButtonPushed;
 
 // ISR
 // PORTB is the step and direction port 
@@ -287,6 +294,7 @@ void high_ISR(void)
 					AllDone = FALSE;
 				}
 #endif	
+
 				if (TookStep)
 				{
 #if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
@@ -388,8 +396,8 @@ void high_ISR(void)
 				// the function because a real function inside the ISR 
 				// causes the compiler to generate enormous amounts of setup/teardown
 				// code and things run way too slowly.
-				// Process_S2(1, g_servo2_min, 4, g_servo2_rate);
-				gRC2Rate[0] = g_servo2_rate;
+				// Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
+				gRC2Rate[0] = g_servo2_rate_up;
 				gRC2Target[0] = g_servo2_min;
 				gRC2Pin[0] = 4;
 				if (gRC2Value[0] == 0)
@@ -428,8 +436,8 @@ void high_ISR(void)
 				// the function because a real function inside the ISR 
 				// causes the compiler to generate enormous amounts of setup/teardown
 				// code and things run way too slowly.
-				// Process_S2(1, g_servo2_max, 4, g_servo2_rate);			
-				gRC2Rate[0] = g_servo2_rate;
+				// Process_S2(1, g_servo2_max, 4, g_servo2_rate_down);
+				gRC2Rate[0] = g_servo2_rate_down;
 				gRC2Target[0] = g_servo2_max;
 				gRC2Pin[0] = 4;
 				if (gRC2Value[0] == 0)
@@ -460,17 +468,32 @@ void high_ISR(void)
 		}
 	
 		// Load the next move set in
-		if (AllDone && NextReady)
+		if (AllDone)
 		{
-			for (i=0; i<4; i++)
+			if (Command == COMMAND_MOVE)
 			{
-				StepAdd[i] = ToLoadStepAdd[i];
-				StepsCounter[i] = ToLoadStepsCounter[i];
+				NodeCount++;
 			}
-			DirBits = ToLoadDirBits;
-			Command = ToLoadCommand;
-			DelayCounter = ToLoadDelayCounter;
-			NextReady = FALSE;
+			Command = COMMAND_NONE;
+			if (NextReady)
+			{
+				for (i=0; i<4; i++)
+				{
+					StepAdd[i] = ToLoadStepAdd[i];
+					StepsCounter[i] = ToLoadStepsCounter[i];
+				}
+				DirBits = ToLoadDirBits;
+				Command = ToLoadCommand;
+				DelayCounter = ToLoadDelayCounter;
+				NextReady = FALSE;
+			}
+		}
+		
+
+		// Check for button being pushed
+		if (!swProgram)
+		{
+			ButtonPushed = TRUE;
 		}
 	}
 }
@@ -648,6 +671,9 @@ void EBB_Init(void)
 	gUseRCServo2 = TRUE;
 #endif
 	PenState = PEN_UP;
+	Layer = 0;
+	NodeCount = 0;
+	ButtonPushed = FALSE;
 }
 
 // Stepper (mode) Configure command
@@ -668,8 +694,9 @@ void EBB_Init(void)
 // SC,7,<servo_max><CR> will set <servo_max> as the maximum value for the servo (1 to 11890)
 // SC,8,<servo2_slots><CR> sets the number of slots for the servo2 system (1 to 24)
 // SC,9,<servo2_slotMS><CR> sets the number of ms in duration for each slot (1 to 6)
-// SC,10,<servo2_rate><CR> sets the rate of change for the servo
-//
+// SC,10,<servo2_rate><CR> sets the rate of change for the servo (both up and down)
+// SC,11,<servo2_rate><CR> sets the pen up speed
+// SC,12,<servo2_rate><CR> sets the pen down speed
 void parse_SC_packet (void)
 {
 	unsigned char Para1 = 0;
@@ -721,7 +748,7 @@ void parse_SC_packet (void)
 			gUseRCServo1 = FALSE;
 			TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
-			Process_S2(1, g_servo2_min, 4, g_servo2_rate);
+			Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
 #endif
 			process_SP(PEN_UP, 0);			// Start servo up 
 		}
@@ -808,7 +835,20 @@ void parse_SC_packet (void)
 	else if (Para1 == 10)
 	{
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
-		g_servo2_rate = Para2;
+		g_servo2_rate_up = Para2;
+		g_servo2_rate_down = Para2;
+#endif
+	}
+	else if (Para1 == 11)
+	{
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+		g_servo2_rate_up = Para2;
+#endif
+	}
+	else if (Para1 == 12)
+	{
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+		g_servo2_rate_down = Para2;
 #endif
 	}
 	print_ack();
@@ -1241,5 +1281,76 @@ void parse_EM_packet(void)
 	}
 #endif
 #endif
+	print_ack();
+}
+
+// Set Node counter
+// Usage: SN,<NewNodeCount><CR>
+void parse_SN_packet(void)
+{
+	unsigned int NewNodeCount = 0;
+
+	// Extract each of the values.
+	extract_number (kUINT, &NewNodeCount, kREQUIRED);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+	// Just copy it over
+	NodeCount = NewNodeCount;
+
+	print_ack();
+}
+
+// Query Node counter
+// Usage: QN<CR>
+// Returns: <NodeCount><CR>
+// OK<CR>
+void parse_QN_packet(void)
+{
+	printf ((far rom char*)"%020li\r\n", NodeCount);
+
+	print_ack();
+}
+
+// Set Layer
+// Usage: SL,<NewLayer><CR>
+void parse_SL_packet(void)
+{
+	// Extract each of the values.
+	extract_number (kUINT, &Layer, kREQUIRED);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+	print_ack();
+}
+
+// Query Layer
+// Usage: QL<CR>
+// Returns: <Layer><CR>
+// OK<CR>
+void parse_QL_packet(void)
+{
+	printf ((far rom char*)"%03i\r\n", Layer);
+
+	print_ack();
+}
+
+// Query Button
+// Usage: QB<CR>
+// Returns: <HasButtonBeenPushedSinceLastQB><CR> (0 or 1)
+// OK<CR>
+void parse_QB_packet(void)
+{
+	printf ((far rom char*)"%1i\r\n", ButtonPushed);
+	ButtonPushed = FALSE;
+
 	print_ack();
 }

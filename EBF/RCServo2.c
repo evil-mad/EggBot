@@ -56,7 +56,8 @@ unsigned char gRC2SlotMS;
 far ram unsigned char * gRC2RPORPtr; 
 unsigned int g_servo2_max;
 unsigned int g_servo2_min;
-unsigned int g_servo2_rate;
+unsigned int g_servo2_rate_up;
+unsigned int g_servo2_rate_down;
 
 /*
 The idea with RCServo2 is to use the ECCP2 module and timer 3.
@@ -136,8 +137,9 @@ void RCServo2_Init(void)
 	gUseRCServo1 = FALSE;
 	TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
 	gUseRCServo2 = TRUE;
-	g_servo2_rate = 400;
-	Process_S2(1, g_servo2_min, 4, g_servo2_rate);
+	g_servo2_rate_up = 400;
+	g_servo2_rate_down = 400;
+	Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
 	process_SP(PEN_UP, 0);			// Start servo up 
 
 }

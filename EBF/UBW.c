@@ -127,15 +127,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9\r\n"};
+	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9.2\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9\r\n"};
+	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9.2\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9\r\n"};
+	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9.2\r\n"};
 #elif defined(BOARD_EBB_V13)
-	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9\r\n"};
+	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9.2\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 1.9\r\n"};
+	const rom char st_version[] = {"UBW EB Firmware Version 1.9.2\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -1295,6 +1295,36 @@ void parse_packet(void)
 		{
 			// SC for stepper mode configure
 			parse_SC_packet();
+			break;
+		}
+		case ('S' * 256) + 'N':
+		{
+			// SN for Set Node count
+			parse_SN_packet();
+			break;
+		}
+		case ('Q' * 256) + 'N':
+		{
+			// QC for Query Node count
+			parse_QN_packet();
+			break;
+		}
+		case ('S' * 256) + 'L':
+		{
+			// SL for Set Layer
+			parse_SL_packet();
+			break;
+		}
+		case ('Q' * 256) + 'L':
+		{
+			// QL for Query Layer count
+			parse_QL_packet();
+			break;
+		}
+		case ('Q' * 256) + 'B':
+		{
+			// QL for Query Button (program)
+			parse_QB_packet();
 			break;
 		}
 		case ('S' * 256) + '2':
