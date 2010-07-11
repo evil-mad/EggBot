@@ -2,7 +2,7 @@
 MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
 Version=1.0
 [File000]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\main.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\main.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -15,7 +15,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File001]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\ebb.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\ebb.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -28,7 +28,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File002]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\RCServo2.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\RCServo2.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -41,7 +41,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File003]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\UBW.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\UBW.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -54,7 +54,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File004]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_descriptors.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\usb_descriptors.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -67,7 +67,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File005]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_device.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\usb_device.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -80,7 +80,7 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File006]
-Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_function_cdc.o
+Location=E:\projects\EggBot\SE\EBF\EBB_V11\usb_function_cdc.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -93,6 +93,162 @@ ToolArgsString=-DBOARD_EBB_V11 -Opa-
 TraceCmdString=
 DebugOptions=
 [File007]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\main.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File008]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\ebb.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File009]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\RCServo2.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File010]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\UBW.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File011]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_descriptors.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File012]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_device.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File013]
+Location=D:\Projects\EggBot\SE\EBF\EBB_V11\usb_function_cdc.o
+Folder=Intermediary
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={E56A1C86-9D32-4DF6-8C34-FE0388B1B644}
+LanguageToolLocation=C:\MCC18\bin\mcc18.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=-DBOARD_EBB_V11 -Opa-
+TraceCmdString=
+DebugOptions=
+[File014]
+Location=E:\projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.cof
+Folder=Output
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={96C98149-AA1B-4CF9-B967-FAE79CAB663C}
+LanguageToolLocation=C:\MCC18\bin\mplink.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
+TraceCmdString=
+DebugOptions=
+[File015]
+Location=E:\projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.hex
+Folder=Output
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={96C98149-AA1B-4CF9-B967-FAE79CAB663C}
+LanguageToolLocation=C:\MCC18\bin\mplink.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
+TraceCmdString=
+DebugOptions=
+[File016]
+Location=E:\projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.cod
+Folder=Output
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={96C98149-AA1B-4CF9-B967-FAE79CAB663C}
+LanguageToolLocation=C:\MCC18\bin\mplink.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
+TraceCmdString=
+DebugOptions=
+[File017]
+Location=E:\projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.lst
+Folder=Output
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={96C98149-AA1B-4CF9-B967-FAE79CAB663C}
+LanguageToolLocation=C:\MCC18\bin\mplink.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
+TraceCmdString=
+DebugOptions=
+[File018]
+Location=E:\projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.map
+Folder=Output
+DeviceName=PIC18F46J50
+LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
+LanguageToolID={96C98149-AA1B-4CF9-B967-FAE79CAB663C}
+LanguageToolLocation=C:\MCC18\bin\mplink.exe
+PPAD=$(BINDIR)|.\EBB_V11||$(TMPDIR)|.\EBB_V11||$(AINDIR)||$(INCDIR)|c:\mcc18\h;Microchip_USB_2_7\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
+SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7\USB\usb_device.c|Microchip_USB_2_7\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
+SuiteArgsString=
+ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
+TraceCmdString=
+DebugOptions=
+[File019]
 Location=D:\Projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.cof
 Folder=Output
 DeviceName=PIC18F46J50
@@ -105,7 +261,7 @@ SuiteArgsString=
 ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
-[File008]
+[File020]
 Location=D:\Projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.hex
 Folder=Output
 DeviceName=PIC18F46J50
@@ -118,7 +274,7 @@ SuiteArgsString=
 ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
-[File009]
+[File021]
 Location=D:\Projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.cod
 Folder=Output
 DeviceName=PIC18F46J50
@@ -131,7 +287,7 @@ SuiteArgsString=
 ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
-[File010]
+[File022]
 Location=D:\Projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.lst
 Folder=Output
 DeviceName=PIC18F46J50
@@ -144,7 +300,7 @@ SuiteArgsString=
 ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
-[File011]
+[File023]
 Location=D:\Projects\EggBot\SE\EBF\.\EBB_V11\EBF_EBBv11.map
 Folder=Output
 DeviceName=PIC18F46J50

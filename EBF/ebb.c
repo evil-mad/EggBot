@@ -14,6 +14,13 @@
 //					QN - Query node count
 //					QB - Query Button command
 // 1.9.3 6/16/10 - Replaced SN with CL (Clear Node) command
+// 1.9.4 6/22/10 - Node Count now incremented on pauses (SM with zero step size) as well
+// 1.9.5 7/2/10 - Node count no longer incrimented at all except for NI command
+//					NI - Node count Incriment
+//					ND - Node count Decriment
+//					SN - Set Node count (with 8 byte variable)
+//					BL - With latest bootloader, will jumpt to Boot Load mode
+// 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX files - use c018i_HID_BL.o now
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -471,10 +478,6 @@ void high_ISR(void)
 		// Load the next move set in
 		if (AllDone)
 		{
-			if (Command == COMMAND_MOVE)
-			{
-				NodeCount++;
-			}
 			Command = COMMAND_NONE;
 			if (NextReady)
 			{
@@ -1285,12 +1288,41 @@ void parse_EM_packet(void)
 	print_ack();
 }
 
-// Clear Node counter
-// Usage: CN<CR>
-void parse_CN_packet(void)
+// Node counter Incriment
+// Usage: NI<CR>
+void parse_NI_packet(void)
 {
-	NodeCount = 0;
+	if (NodeCount < 0xFFFFFFFEL)
+	{
+		NodeCount++;
+	}
+	print_ack();
+}
 
+// Node counter Deccriment
+// Usage: ND<CR>
+void parse_ND_packet(void)
+{
+	if (NodeCount)
+	{
+		NodeCount--;
+	}
+	print_ack();
+}
+
+// Set Node counter
+// Usage: SN,<value><CR>
+// <value> is a 4 byte unsigned value
+void parse_SN_packet(void)
+{
+	unsigned long Temp;
+	ExtractReturnType RetVal;
+	
+	RetVal = extract_number (kULONG, &Temp, kREQUIRED);
+	if (kEXTRACT_OK == RetVal)
+	{
+		NodeCount = Temp;
+	}
 	print_ack();
 }
 
@@ -1300,7 +1332,7 @@ void parse_CN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
-	printf ((far rom char*)"%020li\r\n", NodeCount);
+	printf ((far rom char*)"%010lu\r\n", NodeCount);
 
 	print_ack();
 }
@@ -1310,7 +1342,7 @@ void parse_QN_packet(void)
 void parse_SL_packet(void)
 {
 	// Extract each of the values.
-	extract_number (kUINT, &Layer, kREQUIRED);
+	extract_number (kUCHAR, &Layer, kREQUIRED);
 
 	// Bail if we got a conversion error
 	if (error_byte)

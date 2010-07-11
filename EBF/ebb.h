@@ -22,11 +22,12 @@ void parse_TP_packet(void);
 void parse_QP_packet(void);
 void parse_SN_packet(void);
 void parse_QN_packet(void);
+void parse_NI_packet(void);
+void parse_ND_packet(void);
 void parse_SL_packet(void);
 void parse_QL_packet(void);
 void parse_QB_packet(void);
-void EBB_Init(void);
 void parse_EM_packet(void);
-void DemoModeStateMachine(void);
+void EBB_Init(void);
 void process_SP(PenStateType NewState, unsigned short CommandDuration);
 #endif

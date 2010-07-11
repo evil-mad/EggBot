@@ -72,6 +72,8 @@ typedef enum {
 	,kUINT
 	,kASCII_CHAR
 	,kUCASE_ASCII_CHAR
+	,kLONG
+	,kULONG
 } ExtractType;
 
 typedef enum {

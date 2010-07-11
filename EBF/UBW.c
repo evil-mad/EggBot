@@ -127,15 +127,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9.3\r\n"};
+	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9.6\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9.3\r\n"};
+	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9.6\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9.3\r\n"};
+	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9.6\r\n"};
 #elif defined(BOARD_EBB_V13)
-	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9.3\r\n"};
+	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9.6\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 1.9.3\r\n"};
+	const rom char st_version[] = {"UBW EB Firmware Version 1.9.6\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -203,7 +203,7 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
 BOOL SwitchIsPressed (void);	// Check to see if the user (PRG) switch is pressed
 void parse_packet (void);		// Take a full packet and dispatch it to the right function
-signed char extract_digit (signed short long * acc, unsigned char digits); // Pull a character out of the packet
+signed char extract_digit (unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void parse_R_packet (void);		// R for resetting UBW
 void parse_C_packet (void);		// C for configuring I/O and analog pins
 void parse_CX_packet (void); 	// CX For configuring serial port
@@ -232,6 +232,8 @@ void parse_RI_packet (void);	// RI Receive I2C
 void parse_CI_packet (void);	// CI Configure I2C
 void parse_PG_packet (void);	// PG Pulse Go
 void parse_PC_packet (void);	// PC Pulse Configure
+void parse_BL_packet (void);	// BL Boot Load command
+void parse_CK_packet (void);	// CK ChecK command
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -995,9 +997,22 @@ void ProcessIO(void)
 
 // This is our replacement for the standard putc routine
 // This enables printf() and all related functions to print to
-// the UBS output (i.e. to the PC) buffer
+// the USB output (i.e. to the PC) buffer
 int _user_putc (char c)
 {
+	BYTE OldPtr = g_TX_buf_in;
+
+	// Check to see if adding this byte will cause us to be full
+	OldPtr++;
+	if (kTX_BUF_SIZE == OldPtr)
+	{
+		OldPtr = 0;
+	}
+	// If so, then wait until some bytes go away first and make room
+	if (OldPtr == g_TX_buf_out)
+	{
+		check_and_send_TX_data();
+	}
 	// Copy the character into the output buffer
 	g_TX_buf[g_TX_buf_in] = c;
 	g_TX_buf_in++;
@@ -1024,19 +1039,25 @@ void check_and_send_TX_data (void)
 	char temp;
 
 	// Only send if we're not already sending something
-	if (
-		USBUSARTIsTxTrfReady()
+//	if (
+//		USBUSARTIsTxTrfReady()
 //		&&
 //		!(
 //			(USBDeviceState < CONFIGURED_STATE) 
 //			|| 
 //			(USBSuspendControl==1)
 //		)
-	)
-	{
+//	)
+//	{
 		// And only send if there's something there to send
 		if (g_TX_buf_out != g_TX_buf_in)
 		{
+			while (!USBUSARTIsTxTrfReady())
+			{
+				CDCTxService();
+				USBDeviceTasks();				
+			}
+
 			// Now decide if we need to break it up into two parts or not
 			if (g_TX_buf_in > g_TX_buf_out)
 			{
@@ -1058,9 +1079,9 @@ void check_and_send_TX_data (void)
 				// update the pointer
 				g_TX_buf_out = 0;
 			}
+			CDCTxService();
 		}
-	}
-	CDCTxService();
+//	}
 }
 
 
@@ -1297,10 +1318,10 @@ void parse_packet(void)
 			parse_SC_packet();
 			break;
 		}
-		case ('C' * 256) + 'N':
+		case ('S' * 256) + 'N':
 		{
-			// CN for Clear Node count
-			parse_CN_packet();
+			// SN for Clear Node count
+			parse_SN_packet();
 			break;
 		}
 		case ('Q' * 256) + 'N':
@@ -1325,6 +1346,30 @@ void parse_packet(void)
 		{
 			// QL for Query Button (program)
 			parse_QB_packet();
+			break;
+		}
+		case ('N' * 256) + 'I':
+		{
+			// NI for Node count Incriment
+			parse_NI_packet();
+			break;
+		}
+		case ('N' * 256) + 'D':
+		{
+			// ND Node count Decriment
+			parse_ND_packet();
+			break;
+		}
+		case ('B' * 256) + 'L':
+		{
+			// BL for Boot Load
+			parse_BL_packet();
+			break;
+		}
+		case ('C' * 256) + 'K':
+		{
+			// CL for Check
+			parse_CK_packet();
 			break;
 		}
 		case ('S' * 256) + '2':
@@ -2738,6 +2783,48 @@ void parse_PG_packet (void)
 	print_ack ();
 }	
 
+// BL command : simply jump to the bootloader
+// Example: "BL<CR>"
+void parse_BL_packet()
+{
+	// First, kill interrupts though
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts on
+    INTCONbits.GIEL = 0;	// Turn low priority interrupts on
+	_asm goto 0x00001E _endasm
+}
+
+// Just used for testing/debugging the packet parsing routines
+void parse_CK_packet()
+{
+	unsigned char UByte;
+	signed char SByte;
+	unsigned int UInt;
+	signed int SInt;
+	unsigned long ULong;
+	signed long SLong;
+	unsigned char UChar;
+	unsigned char UCaseChar;
+
+	extract_number(kCHAR, &SByte, kREQUIRED);
+	extract_number(kUCHAR, &UByte, kREQUIRED);
+	extract_number(kINT, &SInt, kREQUIRED);
+	extract_number(kUINT, &UInt, kREQUIRED);
+	extract_number(kLONG, &SLong, kREQUIRED);
+	extract_number(kULONG, &ULong, kREQUIRED);
+	extract_number(kASCII_CHAR, &UChar, kREQUIRED);
+	extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
+
+	printf ((rom char far *)"Param1=%d\r\n", SByte);
+	printf ((rom char far *)"Param2=%d\r\n", UByte);
+	printf ((rom char far *)"Param3=%d\r\n", SInt);
+	printf ((rom char far *)"Param4=%u\r\n", UInt);
+	printf ((rom char far *)"Param5=%ld\r\n", SLong);
+	printf ((rom char far *)"Param6=%lu\r\n", ULong);
+	printf ((rom char far *)"Param7=%c\r\n", UChar);
+	printf ((rom char far *)"Param8=%c\r\n", UCaseChar);
+	
+	print_ack();
+}
 
 // Look at the string pointed to by ptr
 // There should be a comma where ptr points to upon entry.
@@ -2754,8 +2841,9 @@ ExtractReturnType extract_number(
 	unsigned char Required
 )
 {
-	signed short long Accumulator;
-	unsigned char Negative = FALSE;
+	unsigned long ULAccumulator;
+	signed long Accumulator;
+	BOOL Negative = FALSE;
 
 	// Check to see if we're already at the end
 	if (kCR == g_RX_buf[g_RX_buf_out])
@@ -2807,6 +2895,8 @@ ExtractReturnType extract_number(
 			(kUCHAR == Type)
 			||
 			(kUINT == Type)
+			||
+			(kULONG == Type)
 		)
 		{
 			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2827,74 +2917,99 @@ ExtractReturnType extract_number(
 		(kUCASE_ASCII_CHAR != Type)
 	)
 	{
-		extract_digit(&Accumulator, 5);
+		extract_digit(&ULAccumulator, 10);
 	}
 	else
 	{
 		// Otherwise just copy the byte
-		Accumulator = g_RX_buf[g_RX_buf_out];
+		ULAccumulator = g_RX_buf[g_RX_buf_out];
 	
 		// Force uppercase if that's what type we have
 		if (kUCASE_ASCII_CHAR == Type)
 		{
-			Accumulator = toupper (Accumulator);
+			ULAccumulator = toupper (ULAccumulator);
 		}
 		
 		// Move to the next character
 		advance_RX_buf_out ();
 	}
 
-	// Handle the negative sign
+	// Range check absolute values
 	if (Negative)
 	{
-		Accumulator = -Accumulator;
-	}
+		if (
+			(
+				kCHAR == Type
+				&&
+				(ULAccumulator > (unsigned long)128)
+			)
+			||
+			(
+				kINT == Type
+				&&
+				(ULAccumulator > (unsigned long)32768)
+			)
+			||
+			(
+				kLONG == Type
+				&&
+				(ULAccumulator > (unsigned long)0x80000000L)
+			)
+		)
+		{
+			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+			return (kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
+		}
 
-	// Range check the new value
-	if (
-		(
-			kCHAR == Type
-			&&
-			(
-				(Accumulator > 127)
-				||
-				(Accumulator < -128)
-			)
-		)
-		||
-		(
-			kUCHAR == Type
-			&&
-			(
-				(Accumulator > 255)
-				||
-				(Accumulator < 0)
-			)
-		)
-		||
-		(
-			kINT == Type
-			&&
-			(
-				(Accumulator > 32767)
-				||
-				(Accumulator < -32768)
-			)
-		)
-		||
-		(
-			kUINT == Type
-			&&
-			(
-				(Accumulator > 65535)
-				||
-				(Accumulator < 0)
-			)
-		)
-	)
+		Accumulator = ULAccumulator;
+		// Then apply the negative if that's the right thing to do
+		if (Negative)
+		{
+			Accumulator = -Accumulator;
+		}
+	}
+	else
 	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		return (kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
+		if (
+			(
+				kCHAR == Type
+				&&
+				(ULAccumulator > (unsigned long)127)
+			)
+			||
+			(
+				kUCHAR == Type
+				&&
+				(ULAccumulator > (unsigned long)255)
+			)
+			||
+			(
+				kINT == Type
+				&&
+				(ULAccumulator > (unsigned long)32767)
+			)
+			||
+			(
+				kUINT == Type
+				&&
+				(ULAccumulator > (unsigned long)65535)
+			)
+			||
+			(
+				kLONG == Type
+				&&
+				(ULAccumulator > (unsigned long)0x7FFFFFFFL)
+			)
+		)
+		{
+			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+			return (kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
+		}
+
+		if (kULONG != Type)
+		{
+			Accumulator = ULAccumulator;
+		}
 	}
 
 	// If all went well, then copy the result
@@ -2914,6 +3029,12 @@ ExtractReturnType extract_number(
 		case kUINT:
 			*(unsigned int *)ReturnValue = (unsigned int)Accumulator;
 			break;
+		case kLONG:
+			*(signed long *)ReturnValue = Accumulator;
+			break;
+		case kULONG:
+			*(unsigned long *)ReturnValue = ULAccumulator;
+			break;
 		default:
 			return (kEXTRACT_INVALID_TYPE);
 	}	
@@ -2926,7 +3047,7 @@ ExtractReturnType extract_number(
 // powers of ten as well. If you hit a non-numerical
 // char, then return FALSE, otherwise return TRUE.
 // Store result as you go in *acc.
-signed char extract_digit(signed short long * acc,	unsigned char digits)
+signed char extract_digit(unsigned long * acc,	unsigned char digits)
 {
 	unsigned char val;
 	unsigned char digit_cnt;

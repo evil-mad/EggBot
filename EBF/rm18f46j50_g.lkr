@@ -15,8 +15,9 @@ LIBPATH .
     FILES p18f46j50_e.lib
 
   #ELSE
-    FILES c018i.o
-    FILES clib.lib
+    //FILES c018i.o
+    FILES c018i_HID_BL.o
+	FILES clib.lib
     FILES p18f46j50.lib
   #FI
 
