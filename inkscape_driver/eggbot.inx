@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Eggbot </_name>
+  <id>command.evilmadscience.plotd.eggbot</id>
+  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+  <dependency type="executable" location="extensions">eggbot.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <param name="tab" type="notebook">
+  
+  	<page name="splash" _gui-text="Plot">
+	  <_param name="splashpage" type="description" xml:space="preserve">
+Welcome to the Egg-Bot interface!
+
+Press 'Apply' to begin plotting.
+
+Or, look in the other tabs for
+configuration and other options.
+
+            </_param>
+        </page>
+	<page name="resume" _gui-text="Resume">
+	  <_param name="instructions_resume" type="description" xml:space="preserve">
+To pause a plot in progress, press the "PRG" 
+button on the circuit board. After pausing, you
+can change the Eggbot settings or perform any
+manual adjustments that are needed.
+
+To resume plotting-- or just cancel and return
+home --press 'Apply' with this tab selected.  
+
+Plot progress is stored in the inkscape file;
+if you need to quit inkscape and resume later, 
+be sure to save the document first.
+</_param>
+<param name="cancelOnly" type="boolean" _gui-text="Cancel and return home only:">false</param> 
+	</page>	
+
+
+	<page name='timing' _gui-text='Timing'>
+		<param name="penDownSpeed" type="int" min="1" max="10000" _gui-text="Speed when pen is down (steps/s):">500</param>	
+		<param name="penUpSpeed" type="int" min="1" max="10000"   _gui-text="Speed when pen is up (step/s):">700</param>
+		<param name="ServoSpeed" type="int" min="1" max="1600"      _gui-text="Pen up/down speed (%/s):">50</param>
+		<param name="penDownDelay" type="int" min="1" max="5000"    _gui-text="Delay after lowering down (ms):">500</param>
+		<param name="penUpDelay" type="int" min="1" max="5000"      _gui-text="Delay after raising pen (ms):">500</param>
+		<_param name="help_timing" type="description">
+(Pressing 'Apply' in this frame
+ will save parameters, not plot.)</_param>
+	</page>
+	<page name='options' _gui-text='Options'>
+    		<param name="penUpPosition" type="int" min="0" max="100"   _gui-text="Pen up position, 0-100%:">50</param>
+		<param name="penDownPosition" type="int" min="0" max="100" _gui-text="Pen down position, 0-100%:">40</param>
+		<param name="startCentered" type="boolean"                 _gui-text="Start with pen centered:">true</param>	
+		<param name="returnToHome" type="boolean"                  _gui-text="Return home when done:">true</param> 
+		<param name="wraparound" type="boolean"                    _gui-text="Egg (x) axis wraps around:">true</param> 			<param name="togglePenNow" type="boolean"                  _gui-text="Toggle pen up/down on 'Apply':">false</param>
+		<param name="smoothness" type="float"                      _gui-text="Curve smoothing (lower for more):">.2</param>
+		<_param name="help_options" type="description">
+(Pressing 'Apply' in this frame
+ will save parameters, not plot.)</_param>
+		</page>	
+	<page name="manual" _gui-text="Manual">
+	  <_param name="instructions_manual" type="description" xml:space="preserve">Eggbot Manual Control
+
+You can use this frame to send "manual" commands
+to the Eggbot: Walk the stepper motors, raise or
+lower the pen, enable or disable the motors, or 
+check the circuit board (EBB) firmware version.
+</_param>
+
+<param name="manualType" type="enum" _gui-text="       Command: ">
+				<item value="none"           >   -- Select --   </item>
+				<item value="raise-pen"      >Raise the Pen</item>
+				<item value="lower-pen"      >Lower the Pen</item>
+				<item value="walk-egg-motor" >Walk Motor 2 (egg)</item>				
+				<item value="walk-pen-motor" >Walk Motor 1 (pen)</item>
+				<item value="enable-motors"  >Enable Motors</item>
+				<item value="disable-motors" >Disable Motors</item>
+				<item value="version-check"  >Check EBB Version</item></param>
+
+<param name="WalkDistance" type="int" min="-3200" max="3200" 
+            _gui-text="               Walk distance (steps):">5</param>
+<_param name="instructions_manual2" type="description" xml:space="preserve">Note: Walk distance can be positive or negative.
+
+Press 'Apply' to execute the command.</_param>
+	</page>	
+	<page name="layers" _gui-text="Layers">
+	  <_param name="instructions_layer" type="description" xml:space="preserve">
+Normally, we plot paths from all layers.  
+You can also choose to plot a single layer 
+or group of layers, for example to change
+pens between plotting layers.
+
+Pressing 'Apply' from this frame will plot
+only layers whose names begin with the 
+selected number, which can be up to 100.
+
+</_param>
+<param name="layernumber" type="int" min="0" max="100" _gui-text="   Plot only layers beginning with: ">1</param>
+	</page>			
+	<page name="Help" _gui-text="*">
+	  <_param name="instructions_general" type="description" xml:space="preserve">
+EggBot Inkscape extension 
+http://www.egg-bot.com/
+(Preview version 7/30/2010)
+
+*Motor wiring should be (L-R):
+Grey-Green-Yellow-Pink, for both motors
+
+*Firmware 1.96 required for pen toggle,
+ manual walks and plot-resume functions.
+
+Known issues:
+* "Cancel" function does not work while plotting.
+ (This is due to a known bug in Inkscape.) 
+            </_param>
+        </page>
+    </param>
+  <effect needs-live-preview="false" needs-document="no">
+	<object-type>all</object-type>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot.py</command>
+  </script>
+</inkscape-extension>
