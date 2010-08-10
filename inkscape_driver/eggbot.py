@@ -467,9 +467,10 @@ class EggBot(inkex.Effect):
 ##	paths.  The function keeps track of the composite transformation
 ##	that should be applied to each path.
 ##
-##	This function handles path, group, line, rect, polyline and polygon
-##      elements.  Notable elements not handled include clone, circle, ellipse
-##      and text.  Unhandled elements should be converted to paths in Inkscape.
+##	This function handles path, group, line, rect, polyline, polygon,
+##      circle and ellipse elements.  Notable elements not handled include
+##      clone and text.  Unhandled elements should be converted to paths in
+##      Inkscape.
 
 	def recursivelyTraverseSvg(self, aNodeList, matCurrent = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
 		for node in aNodeList:
@@ -506,7 +507,7 @@ class EggBot(inkex.Effect):
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 					
-			elif node.tag == inkex.addNS('rect','svg'):
+			elif node.tag == inkex.addNS('rect','svg') or node.tag == 'rect':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -540,7 +541,7 @@ class EggBot(inkex.Effect):
                                     newpath.set('d', simplepath.formatPath(a))
                                     self.plotPath(newpath, matNew)
 
-                        elif node.tag == inkex.addNS('line','svg'):
+                        elif node.tag == inkex.addNS('line','svg') or node.tag == 'line':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -574,7 +575,7 @@ class EggBot(inkex.Effect):
                                         self.svgLastPath += 1
                                         self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('polyline','svg'):
+			elif node.tag == inkex.addNS('polyline','svg') or node.tag == 'polyline':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -606,7 +607,7 @@ class EggBot(inkex.Effect):
                                     else:
                                         pass
 
-			elif node.tag == inkex.addNS('polygon','svg'):
+			elif node.tag == inkex.addNS('polygon','svg') or node.tag == 'polygon':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -639,6 +640,53 @@ class EggBot(inkex.Effect):
                                             self.svgLastPathNC = self.nodeCount
                                     else:
                                         pass
+
+			elif node.tag == inkex.addNS('ellipse','svg') or \
+                             node.tag == 'ellipse' or \
+                             node.tag == inkex.addNS('circle','svg') or \
+                             node.tag == 'circle':
+
+				self.pathcount += 1
+				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
+				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+				# self.nodeCount equal to self.svgLastPathNC
+				
+				if self.resumeMode and (self.pathcount == self.svgLastPath):
+					self.nodeCount = self.svgLastPathNC
+
+				if self.resumeMode and (self.pathcount < self.svgLastPath):
+					pass
+
+                                else:
+                                    if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
+                                        rx = float(node.get('rx', '0'))
+                                        ry = float(node.get('ry', '0'))
+                                    else:
+                                        rx = float(node.get('r', '0'))
+                                        ry = rx
+                                    if rx == 0 or ry == 0:
+                                        pass
+                                    cx = float(node.get('cx', '0'))
+                                    cy = float(node.get('cy', '0'))
+                                    x1 = cx - rx
+                                    x2 = cx + rx
+                                    d = 'M %f,%f ' % (x1,cy) + \
+                                        'A %f,%f ' % (rx,ry) + \
+                                        '0 1 0 %f,%f ' % (x2,cy) + \
+                                        'A %f,%f ' % (rx,ry) + \
+                                        '0 1 0 %f,%f' % (x1,cy)
+                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+                                    newpath.set('d', d);
+                                    s = node.get('style')
+                                    if s:
+                                        newpath.set('style',s)
+                                    t = node.get('transform')
+                                    if t:
+                                        newpath.set('transform', t)
+                                    self.plotPath(newpath, matNew)
+                                    if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+                                        self.svgLastPath += 1
+                                        self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS('pattern','svg') or node.tag == 'pattern':
 				pass            

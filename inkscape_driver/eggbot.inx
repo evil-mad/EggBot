@@ -100,7 +100,7 @@ selected number, which can be up to 100.
 	  <_param name="instructions_general" type="description" xml:space="preserve">
 EggBot Inkscape extension 
 http://www.egg-bot.com/
-(Preview version 8/9/2010-A)
+(Preview version 8/10/2010-A)
 
 *Motor wiring should be (L-R):
 Grey-Green-Yellow-Pink, for both motors
