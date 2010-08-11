@@ -578,7 +578,7 @@ class EggBot(inkex.Effect):
 			elif node.tag == inkex.addNS('polyline','svg') or node.tag == 'polyline':
 
                                 # Ignore polylines with no 'points' attribute
-                                pl = node.get('points', '')
+                                pl = node.get('points', '').strip()
                                 if pl == '':
                                     pass
 
@@ -612,7 +612,7 @@ class EggBot(inkex.Effect):
 			elif node.tag == inkex.addNS('polygon','svg') or node.tag == 'polygon':
 
                                 # Ignore polygons which have no 'points' attributes
-                                pl = node.get('points', '')
+                                pl = node.get('points', '').strip()
                                 if pl == '':
                                     pass
 
