@@ -468,12 +468,19 @@ class EggBot(inkex.Effect):
 ##	that should be applied to each path.
 ##
 ##	This function handles path, group, line, rect, polyline, polygon,
-##      circle and ellipse elements.  Notable elements not handled include
-##      clone and text.  Unhandled elements should be converted to paths in
+##      circle, ellipse and clone elements.  Notable elements not handled
+##      include text.  Unhandled elements should be converted to paths in
 ##      Inkscape.
 
-	def recursivelyTraverseSvg(self, aNodeList, matCurrent = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]):
+	def recursivelyTraverseSvg(self, aNodeList, matCurrent = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], parent_visibility = 'visible'):
 		for node in aNodeList:
+
+                        ''' Ignore invisible nodes '''
+                        v = node.get('visibility', 'visible')
+                        if v == 'inherit':
+                            v = parent_visibility
+                        if v == 'hidden' or v == 'collapse':
+                            pass
 
 			''' first apply the current matrix transform to this node's tranform '''
 			matNew = composeTransform(matCurrent, parseTransform(node.get("transform")))
@@ -483,10 +490,28 @@ class EggBot(inkex.Effect):
 					if self.allLayers == False:
 						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
 						self.DoWePlotLayer(node.get(inkex.addNS('label', 'inkscape')))
-				self.recursivelyTraverseSvg(node, matNew)
+				self.recursivelyTraverseSvg(node, matNew, parent_visibility = v)
 			elif node.tag == inkex.addNS('use','svg') or node.tag == 'use':
-				# HANDLE CLONES!
-				pass
+				refid = node.get(inkex.addNS('href','xlink'))
+                                if refid:
+                                   # [1:] to ignore leading '#' in reference
+                                   path = '//*[@id="%s"]' % refid[1:]
+                                   refnode = node.xpath(path)
+                                   if refnode:
+                                      x = float(node.get('x','0'))
+                                      y = float(node.get('y','0'))
+                                      tran = node.get('transform')
+                                      if tran:
+                                          tran += ' translate(%f,%f)' % (x,y)
+                                      else:
+                                          tran = 'translate(%f,%f)' % (x,y)
+                                      matNew2 = composeTransform(matNew, parseTransform(tran))
+                                      v = node.get('visibility','')
+                                      self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
+                                   else:
+                                      pass
+                                else:
+                                   pass
 			elif node.tag == inkex.addNS('path','svg'):
 
 				self.pathcount += 1
