@@ -476,7 +476,7 @@ class EggBot(inkex.Effect):
 		for node in aNodeList:
 
                         ''' Ignore invisible nodes '''
-                        v = node.get('visibility', 'visible')
+                        v = node.get('visibility', parent_visibility)
                         if v == 'inherit':
                             v = parent_visibility
                         if v == 'hidden' or v == 'collapse':
@@ -506,7 +506,7 @@ class EggBot(inkex.Effect):
                                       else:
                                           tran = 'translate(%f,%f)' % (x,y)
                                       matNew2 = composeTransform(matNew, parseTransform(tran))
-                                      v = node.get('visibility','')
+                                      v = node.get('visibility',v)
                                       self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
                                    else:
                                       pass
