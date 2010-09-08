@@ -14,10 +14,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 '''
 
-#TODO: Restrict individual segments to 5 s maximum & reduce timeout value
+#TODO: Fix possible timeout when raising/lowering pen, and in manual mode.
 #TODO: Clean up serial search code, esp. for Windows
-#TODO: Store save/resume data in inkscape document itself (?)
-#TODO: Check why manual raise/lower pen don't use correct values ### Fix added, needs testing.
 
 import inkex, cubicsuperpath, simplepath, cspsubdiv
 from simpletransform import *
@@ -190,7 +188,15 @@ class EggBot(inkex.Effect):
                         action="store", type="inkbool",
                         dest="cancelOnly", default=False,
                         help="Cancel plot and return home only.")
-
+		self.OptionParser.add_option("--revPenMotor",
+                        action="store", type="inkbool",
+                        dest="revPenMotor", default=False,
+                        help="Reverse motion of pen motor.")
+		self.OptionParser.add_option("--revEggMotor",
+                        action="store", type="inkbool",
+                        dest="revEggMotor", default=False,
+                        help="Reverse motion of egg motor.")
+						
 		self.bPenIsUp = True
 		self.virtualPenIsUp = False  #Keeps track of pen postion when stepping through plot before resuming
 		self.fX = None
@@ -418,7 +424,11 @@ class EggBot(inkex.Effect):
 			if strVersion[0] == '1':
 				#inkex.errormsg('Pen is up' )
 				self.fSpeed = self.options.penUpSpeed
-
+				
+			if (self.options.revPenMotor):
+				self.nDeltaY = -1 * self.nDeltaY
+			if (self.options.revEggMotor):
+				self.nDeltaX = -1 * self.nDeltaX
 			self.nTime = int(round(1000.0/self.fSpeed * distance(self.nDeltaX, self.nDeltaY)))
 			strOutput = ','.join(['SM', str(self.nTime), str(self.nDeltaY), str(self.nDeltaX)]) + '\r'
 			self.doCommand(strOutput)
@@ -475,12 +485,12 @@ class EggBot(inkex.Effect):
 	def recursivelyTraverseSvg(self, aNodeList, matCurrent = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], parent_visibility = 'visible'):
 		for node in aNodeList:
 
-                        ''' Ignore invisible nodes '''
-                        v = node.get('visibility', parent_visibility)
-                        if v == 'inherit':
-                            v = parent_visibility
-                        if v == 'hidden' or v == 'collapse':
-                            pass
+			''' Ignore invisible nodes '''
+			v = node.get('visibility', parent_visibility)
+			if v == 'inherit':
+				v = parent_visibility
+			if v == 'hidden' or v == 'collapse':
+				pass
 
 			''' first apply the current matrix transform to this node's tranform '''
 			matNew = composeTransform(matCurrent, parseTransform(node.get("transform")))
@@ -493,25 +503,25 @@ class EggBot(inkex.Effect):
 				self.recursivelyTraverseSvg(node, matNew, parent_visibility = v)
 			elif node.tag == inkex.addNS('use','svg') or node.tag == 'use':
 				refid = node.get(inkex.addNS('href','xlink'))
-                                if refid:
-                                   # [1:] to ignore leading '#' in reference
-                                   path = '//*[@id="%s"]' % refid[1:]
-                                   refnode = node.xpath(path)
-                                   if refnode:
-                                      x = float(node.get('x','0'))
-                                      y = float(node.get('y','0'))
-                                      tran = node.get('transform')
-                                      if tran:
-                                          tran += ' translate(%f,%f)' % (x,y)
-                                      else:
-                                          tran = 'translate(%f,%f)' % (x,y)
-                                      matNew2 = composeTransform(matNew, parseTransform(tran))
-                                      v = node.get('visibility',v)
-                                      self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
-                                   else:
-                                      pass
-                                else:
-                                   pass
+				if refid:
+					# [1:] to ignore leading '#' in reference
+					path = '//*[@id="%s"]' % refid[1:]
+					refnode = node.xpath(path)
+					if refnode:
+						x = float(node.get('x','0'))
+						y = float(node.get('y','0'))
+						tran = node.get('transform')
+						if tran:
+							tran += ' translate(%f,%f)' % (x,y)
+						else:
+							tran = 'translate(%f,%f)' % (x,y)
+						matNew2 = composeTransform(matNew, parseTransform(tran))
+						v = node.get('visibility',v)
+						self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
+					else:
+						pass
+				else:
+					pass
 			elif node.tag == inkex.addNS('path','svg'):
 
 				self.pathcount += 1
@@ -545,28 +555,28 @@ class EggBot(inkex.Effect):
 				if self.resumeMode and (self.pathcount < self.svgLastPath):
 					pass
 				else: 
-                                    # Create a path with the outline of the rectangle
-                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-                                    x = float(node.get('x'))
-                                    y = float(node.get('y'))
-                                    w = float(node.get('width'))
-                                    h = float(node.get('height'))
-                                    s = node.get('style')
-                                    if s:
-                                        newpath.set('style',s)
-                                    t = node.get('transform')
-                                    if t:
-                                        newpath.set('transform', t)
-                                    a = []
-                                    a.append(['M ',[x,y]])
-                                    a.append([' l ',[w,0]])
-                                    a.append([' l ', [0,h]])
-                                    a.append([' l ',[-w,0]])
-                                    a.append([' Z', []])
-                                    newpath.set('d', simplepath.formatPath(a))
-                                    self.plotPath(newpath, matNew)
+					# Create a path with the outline of the rectangle
+					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+					x = float(node.get('x'))
+					y = float(node.get('y'))
+					w = float(node.get('width'))
+					h = float(node.get('height'))
+					s = node.get('style')
+					if s:
+						newpath.set('style',s)
+					t = node.get('transform')
+					if t:
+						newpath.set('transform', t)
+					a = []
+					a.append(['M ',[x,y]])
+					a.append([' l ',[w,0]])
+					a.append([' l ', [0,h]])
+					a.append([' l ',[-w,0]])
+					a.append([' Z', []])
+					newpath.set('d', simplepath.formatPath(a))
+					self.plotPath(newpath, matNew)
 
-                        elif node.tag == inkex.addNS('line','svg') or node.tag == 'line':
+			elif node.tag == inkex.addNS('line','svg') or node.tag == 'line':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -579,144 +589,144 @@ class EggBot(inkex.Effect):
 				if self.resumeMode and (self.pathcount < self.svgLastPath):
 					pass
 				else:
-                                    # Create a path to contain the line
-                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-                                    x1 = float(node.get('x1'))
-                                    y1 = float(node.get('y1'))
-                                    x2 = float(node.get('x2'))
-                                    y2 = float(node.get('y2'))
-                                    s = node.get('style')
-                                    if s:
-                                        newpath.set('style',s)
-                                    t = node.get('transform')
-                                    if t:
-                                        newpath.set('transform', t)
-                                    a = []
-                                    a.append(['M ',[x1,y1]])
-                                    a.append([' L ',[x2,y2]])
-                                    newpath.set('d', simplepath.formatPath(a))
-                                    self.plotPath(newpath, matNew)
-                                    if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
-                                        self.svgLastPath += 1
-                                        self.svgLastPathNC = self.nodeCount
+					# Create a path to contain the line
+					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+					x1 = float(node.get('x1'))
+					y1 = float(node.get('y1'))
+					x2 = float(node.get('x2'))
+					y2 = float(node.get('y2'))
+					s = node.get('style')
+					if s:
+						newpath.set('style',s)
+					t = node.get('transform')
+					if t:
+						newpath.set('transform', t)
+					a = []
+					a.append(['M ',[x1,y1]])
+					a.append([' L ',[x2,y2]])
+					newpath.set('d', simplepath.formatPath(a))
+					self.plotPath(newpath, matNew)
+					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+						self.svgLastPath += 1
+						self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS('polyline','svg') or node.tag == 'polyline':
 
-                                # Ignore polylines with no 'points' attribute
-                                pl = node.get('points', '').strip()
-                                if pl == '':
-                                    pass
-
-                                self.pathcount += 1
-                                #if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-                                #if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
-                                # self.nodeCount equal to self.svgLastPathNC
-
-                                if self.resumeMode and (self.pathcount == self.svgLastPath):
-                                    self.nodeCount = self.svgLastPathNC
-
-                                if self.resumeMode and (self.pathcount < self.svgLastPath):
-                                    pass
-
-                                else:
-                                    pa = pl.split()
-                                    d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
-                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-                                    newpath.set('d', d);
-                                    s = node.get('style')
-                                    if s:
-                                        newpath.set('style',s)
-                                    t = node.get('transform')
-                                    if t:
-                                        newpath.set('transform', t)
-                                    self.plotPath(newpath, matNew)
-                                    if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
-                                        self.svgLastPath += 1
-                                        self.svgLastPathNC = self.nodeCount
-
-			elif node.tag == inkex.addNS('polygon','svg') or node.tag == 'polygon':
-
-                                # Ignore polygons which have no 'points' attributes
-                                pl = node.get('points', '').strip()
-                                if pl == '':
-                                    pass
-
-                                self.pathcount += 1
-                                #if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-                                #if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
-                                # self.nodeCount equal to self.svgLastPathNC
-				
-                                if self.resumeMode and (self.pathcount == self.svgLastPath):
-                                    self.nodeCount = self.svgLastPathNC
-
-                                if self.resumeMode and (self.pathcount < self.svgLastPath):
-                                    pass
-
-                                else:
-                                    pa = pl.split()
-                                    d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
-                                    d += " Z"
-                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-                                    newpath.set('d', d);
-                                    s = node.get('style')
-                                    if s:
-                                        newpath.set('style',s)
-                                    t = node.get('transform')
-                                    if t:
-                                        newpath.set('transform', t)
-                                    self.plotPath(newpath, matNew)
-                                    if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
-                                        self.svgLastPath += 1
-                                        self.svgLastPathNC = self.nodeCount
-
-			elif node.tag == inkex.addNS('ellipse','svg') or \
-                             node.tag == 'ellipse' or \
-                             node.tag == inkex.addNS('circle','svg') or \
-                             node.tag == 'circle':
-
-                                # Ellipses or circles with a radius attribute of value 0 are ignored
-                                if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
-                                    rx = float(node.get('rx', '0'))
-                                    ry = float(node.get('ry', '0'))
-                                else:
-                                    rx = float(node.get('r', '0'))
-                                    ry = rx
-                                if rx == 0 or ry == 0:
-                                    pass
+				# Ignore polylines with no 'points' attribute
+				pl = node.get('points', '').strip()
+				if pl == '':
+					pass
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
 				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
-				
+
 				if self.resumeMode and (self.pathcount == self.svgLastPath):
 					self.nodeCount = self.svgLastPathNC
 
 				if self.resumeMode and (self.pathcount < self.svgLastPath):
 					pass
 
-                                else:
-                                    cx = float(node.get('cx', '0'))
-                                    cy = float(node.get('cy', '0'))
-                                    x1 = cx - rx
-                                    x2 = cx + rx
-                                    d = 'M %f,%f ' % (x1,cy) + \
-                                        'A %f,%f ' % (rx,ry) + \
-                                        '0 1 0 %f,%f ' % (x2,cy) + \
-                                        'A %f,%f ' % (rx,ry) + \
-                                        '0 1 0 %f,%f' % (x1,cy)
-                                    newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-                                    newpath.set('d', d);
-                                    s = node.get('style')
-                                    if s:
-                                        newpath.set('style',s)
-                                    t = node.get('transform')
-                                    if t:
-                                        newpath.set('transform', t)
-                                    self.plotPath(newpath, matNew)
-                                    if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
-                                        self.svgLastPath += 1
-                                        self.svgLastPathNC = self.nodeCount
+				else:
+					pa = pl.split()
+					d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
+					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+					newpath.set('d', d);
+					s = node.get('style')
+					if s:
+						newpath.set('style',s)
+					t = node.get('transform')
+					if t:
+						newpath.set('transform', t)
+					self.plotPath(newpath, matNew)
+					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+						self.svgLastPath += 1
+						self.svgLastPathNC = self.nodeCount
+
+			elif node.tag == inkex.addNS('polygon','svg') or node.tag == 'polygon':
+
+				# Ignore polygons which have no 'points' attributes
+				pl = node.get('points', '').strip()
+				if pl == '':
+					pass
+
+				self.pathcount += 1
+				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
+				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+				# self.nodeCount equal to self.svgLastPathNC
+
+				if self.resumeMode and (self.pathcount == self.svgLastPath):
+					self.nodeCount = self.svgLastPathNC
+
+				if self.resumeMode and (self.pathcount < self.svgLastPath):
+					pass
+
+				else:
+					pa = pl.split()
+					d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
+					d += " Z"
+					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+					newpath.set('d', d);
+					s = node.get('style')
+					if s:
+						newpath.set('style',s)
+					t = node.get('transform')
+					if t:
+						newpath.set('transform', t)
+					self.plotPath(newpath, matNew)
+					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+						self.svgLastPath += 1
+						self.svgLastPathNC = self.nodeCount
+
+			elif node.tag == inkex.addNS('ellipse','svg') or \
+				 node.tag == 'ellipse' or \
+				 node.tag == inkex.addNS('circle','svg') or \
+				 node.tag == 'circle':
+
+					# Ellipses or circles with a radius attribute of value 0 are ignored
+					if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
+						rx = float(node.get('rx', '0'))
+						ry = float(node.get('ry', '0'))
+					else:
+						rx = float(node.get('r', '0'))
+						ry = rx
+					if rx == 0 or ry == 0:
+						pass
+
+					self.pathcount += 1
+					#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
+					#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+					# self.nodeCount equal to self.svgLastPathNC
+					
+					if self.resumeMode and (self.pathcount == self.svgLastPath):
+						self.nodeCount = self.svgLastPathNC
+
+					if self.resumeMode and (self.pathcount < self.svgLastPath):
+						pass
+
+					else:
+						cx = float(node.get('cx', '0'))
+						cy = float(node.get('cy', '0'))
+						x1 = cx - rx
+						x2 = cx + rx
+						d = 'M %f,%f ' % (x1,cy) + \
+							'A %f,%f ' % (rx,ry) + \
+							'0 1 0 %f,%f ' % (x2,cy) + \
+							'A %f,%f ' % (rx,ry) + \
+							'0 1 0 %f,%f' % (x1,cy)
+						newpath = inkex.etree.Element(inkex.addNS('path','svg'))
+						newpath.set('d', d);
+						s = node.get('style')
+						if s:
+							newpath.set('style',s)
+						t = node.get('transform')
+						if t:
+							newpath.set('transform', t)
+						self.plotPath(newpath, matNew)
+						if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+							self.svgLastPath += 1
+							self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS('pattern','svg') or node.tag == 'pattern':
 				pass            
@@ -939,6 +949,8 @@ class EggBot(inkex.Effect):
 			nTime = int(math.ceil(1000/self.fSpeed * distance(self.nDeltaX, self.nDeltaY)))
 
 
+
+
 			while ((abs(self.nDeltaX) > 0) or (abs(self.nDeltaY) > 0)):
 				if (nTime > 750):
 					xd = int(round((750.0 * self.nDeltaX)/nTime))
@@ -952,7 +964,20 @@ class EggBot(inkex.Effect):
 						td = 1		# don't allow zero-time moves.
 
 				if (self.resumeMode != True):
-					strOutput = ','.join(['SM', str(td), str(-yd), str(xd)]) + '\r'
+					
+					
+					if (self.options.revPenMotor):
+						yd2 = yd
+					else:
+						yd2 = -yd
+					if (self.options.revEggMotor):
+						xd2 = -xd
+					else:
+						xd2 = xd
+					
+					
+					
+					strOutput = ','.join(['SM', str(td), str(yd2), str(xd2)]) + '\r'
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
 					self.doCommand(strOutput)

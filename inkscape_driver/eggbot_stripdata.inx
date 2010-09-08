@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Strip Eggbot Data</_name>
+  <id>command.evilmadscience.eggbot_stripdata1.eggbot</id>
+  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+  <dependency type="executable" location="extensions">eggbot_stripdata.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <effect needs-live-preview="false" needs-document="no">
+		<object-type>all</object-type>
+	<effects-menu>
+		<submenu _name="EggBot"/>
+	</effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot_stripdata.py</command>
+  </script>
+</inkscape-extension>

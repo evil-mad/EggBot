@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Eggbot </_name>
-  <id>command.evilmadscience.plotd.eggbot</id>
+  <_name>Eggbot Control</_name>
+  <id>command.evilmadscience.plotd1.eggbot</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -15,6 +15,8 @@ Press 'Apply' to begin plotting.
 
 Or, look in the other tabs for
 configuration and other options.
+
+Need help? Visit http://egg-bot.com/
 
             </_param>
         </page>
@@ -37,25 +39,27 @@ be sure to save the document first.
 
 
 	<page name='timing' _gui-text='Timing'>
-		<param name="penDownSpeed" type="int" min="1" max="10000" _gui-text="Speed when pen is down (steps/s):">500</param>	
-		<param name="penUpSpeed" type="int" min="1" max="10000"   _gui-text="Speed when pen is up (step/s):">700</param>
-		<param name="ServoSpeed" type="int" min="1" max="1600"      _gui-text="Pen up/down speed (%/s):">50</param>
-		<param name="penDownDelay" type="int" min="1" max="5000"    _gui-text="Delay after lowering down (ms):">500</param>
-		<param name="penUpDelay" type="int" min="1" max="5000"      _gui-text="Delay after raising pen (ms):">500</param>
+		<param name="penDownSpeed" type="int" min="1" max="10000" _gui-text="Speed when pen is down (steps/s):">300</param>	
+		<param name="penUpSpeed" type="int" min="1" max="10000"   _gui-text="Speed when pen is up (step/s):">500</param>
+		<param name="ServoSpeed" type="int" min="1" max="1600"      _gui-text="Pen up/down speed (%/s):">20</param>
+		<param name="penDownDelay" type="int" min="1" max="5000"    _gui-text="Delay after lowering down (ms):">400</param>
+		<param name="penUpDelay" type="int" min="1" max="5000"      _gui-text="Delay after raising pen (ms):">400</param>
 		<_param name="help_timing" type="description">
 (Pressing 'Apply' in this frame
- will save parameters, not plot.)</_param>
+ will apply parameters, not plot.)</_param>
 	</page>
 	<page name='options' _gui-text='Options'>
-    		<param name="penUpPosition" type="int" min="0" max="100"   _gui-text="Pen up position, 0-100%:">50</param>
-		<param name="penDownPosition" type="int" min="0" max="100" _gui-text="Pen down position, 0-100%:">40</param>
+    		<param name="penUpPosition" type="int" min="0" max="100"   _gui-text="Pen up position, 0-100%:">55</param>
+		<param name="penDownPosition" type="int" min="0" max="100" _gui-text="Pen down position, 0-100%:">50</param>
 		<param name="startCentered" type="boolean"                 _gui-text="Start with pen centered:">true</param>	
 		<param name="returnToHome" type="boolean"                  _gui-text="Return home when done:">true</param> 
 		<param name="wraparound" type="boolean"                    _gui-text="Egg (x) axis wraps around:">true</param> 			<param name="togglePenNow" type="boolean"                  _gui-text="Toggle pen up/down on 'Apply':">false</param>
 		<param name="smoothness" type="float"                      _gui-text="Curve smoothing (lower for more):">.2</param>
+		<param name="revPenMotor" type="boolean"                   _gui-text="Reverse motion of Motor 1 (pen):">false</param>	
+		<param name="revEggMotor" type="boolean"                   _gui-text="Reverse motion of Motor 2 (egg):">false</param> 
 		<_param name="help_options" type="description">
 (Pressing 'Apply' in this frame
- will save parameters, not plot.)</_param>
+ will apply parameters, not plot.)</_param>
 		</page>	
 	<page name="manual" _gui-text="Manual">
 	  <_param name="instructions_manual" type="description" xml:space="preserve">Eggbot Manual Control
@@ -98,9 +102,9 @@ selected number, which can be up to 100.
 	</page>			
 	<page name="Help" _gui-text="*">
 	  <_param name="instructions_general" type="description" xml:space="preserve">
-EggBot Inkscape extension 
+EggBot Control Inkscape extension 
 http://www.egg-bot.com/
-(Preview version 8/29/2010-B)
+(Preview version 9/7/2010-A)
 
 *Motor wiring should be (L-R):
 Grey-Green-Yellow-Pink, for both motors
@@ -115,7 +119,10 @@ Known issues:
         </page>
     </param>
   <effect needs-live-preview="false" needs-document="no">
-	<object-type>all</object-type>
+		<object-type>all</object-type>
+	<effects-menu>
+		<submenu _name="EggBot"/>
+	</effects-menu>
   </effect>
   <script>
     <command reldir="extensions" interpreter="python">eggbot.py</command>
