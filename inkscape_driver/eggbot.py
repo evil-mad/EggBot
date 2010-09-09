@@ -1071,7 +1071,7 @@ class EggBot(inkex.Effect):
 			# Before searching, first check to see if the
 			# last known serial port is still good.
 
-			if self.svgSerialPort in device_list:
+			if self.svgSerialPort[5:] in device_list:
 				serialPort = self.testSerialPort(self.svgSerialPort)
 				if serialPort != None:
 					return serialPort
