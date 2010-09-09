@@ -28,9 +28,6 @@ import time
 from math import sqrt
 import string
 
-
-
-
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
 N_PEN_UP_DELAY = 400      # delay (ms) for the pen to up down before the next move
@@ -59,7 +56,7 @@ if platform == 'win32':
     MISC_OUTPUT_FILE = 'C:/misc.txt'	
     #STR_DEFAULT_COM_PORT = 'COM6'
 else:
-    import os #, tty
+    import os, re #, tty
     DEBUG_OUTPUT_FILE = os.getenv('HOME') + '/test.hpgl'
     MISC_OUTPUT_FILE = os.getenv('HOME') + '/misc.txt'	
     DRY_RUN_OUTPUT_FILE = os.getenv('HOME') + '/dry_run.txt'
@@ -196,7 +193,7 @@ class EggBot(inkex.Effect):
                         action="store", type="inkbool",
                         dest="revEggMotor", default=False,
                         help="Reverse motion of egg motor.")
-						
+
 		self.bPenIsUp = True
 		self.virtualPenIsUp = False  #Keeps track of pen postion when stepping through plot before resuming
 		self.fX = None
@@ -1070,12 +1067,28 @@ class EggBot(inkex.Effect):
 				strPrefix = 'ttyACM'
 
 			device_list = os.listdir(strDir)
+
 			# Before searching, first check to see if the
 			# last known serial port is still good.
+
 			if self.svgSerialPort in device_list:
 				serialPort = self.testSerialPort(self.svgSerialPort)
 				if serialPort != None:
 					return serialPort
+
+                        # Before going through the entire device list, try
+                        # another approach to finding the Eggbot serial port
+
+                        if platform == 'darwin':
+                            usbdata = os.popen('/usr/sbin/system_profiler SPUSBDataType').read()
+                            match = re.match(r".*EiBotBoard:.*?Location ID: 0x(\w+).*", str(usbdata), re.M | re.S)
+                            if match != None:
+                                locid = int(match.group(1), 16)
+                                strComPort = '/dev/cu.usbmodem%x' % ((locid >> 16) + 1)
+                                serialPort = self.testSerialPort(strComPort)
+                                if serialPort != None:
+                                    self.svgSerialPort = strComPort
+                                    return serialPort
 
 			for device in device_list:
 				if strPrefix != None:
