@@ -220,7 +220,7 @@ class EggBot(inkex.Effect):
 		self.nDeltaX = 0
 		self.nDeltaY = 0
 		self.DoubleStepSize = True
-		
+
 		try:
 			import motor1600
 		except ImportError:
@@ -1071,7 +1071,7 @@ class EggBot(inkex.Effect):
 			# Before searching, first check to see if the
 			# last known serial port is still good.
 
-			if self.svgSerialPort[5:] in device_list:
+			if self.svgSerialPort[len(strDir)+1:] in device_list:
 				serialPort = self.testSerialPort(self.svgSerialPort)
 				if serialPort != None:
 					return serialPort
