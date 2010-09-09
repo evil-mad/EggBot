@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Reorder Paths for Eggbot</_name>
+  <id>command.evilmadscience.eggbot_reorder1.eggbot</id>
+  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+  <dependency type="executable" location="extensions">eggbot_reorder.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <!-- Written by Matthew Beckler for the Egg-Bot project. Email questions and comments to matthew at mbeckler dot org -->
+
+  <param name="reverse" type="boolean" _gui-text="Enable 'reverse path direction' optimizations (not yet implemented)">false</param>
+
+  <effect needs-live-preview="false" needs-document="no">
+    <object-type>all</object-type>
+    <effects-menu>
+        <submenu _name="EggBot"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot_reorder.py</command>
+  </script>
+</inkscape-extension>
