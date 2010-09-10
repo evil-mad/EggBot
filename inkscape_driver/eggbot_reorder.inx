@@ -1,13 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Reorder Paths for Eggbot</_name>
-  <id>command.evilmadscience.eggbot_reorder1.eggbot</id>
+  <_name>Reorder Paths for Speed</_name>
+  <id>command.evilmadscience.eggbot_reorder2.eggbot</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot_reorder.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
   <!-- Written by Matthew Beckler for the Egg-Bot project. Email questions and comments to matthew at mbeckler dot org -->
 
-  <param name="reverse" type="boolean" _gui-text="Enable 'reverse path direction' optimizations (not yet implemented)">false</param>
+	  <_param name="Header" type="description" xml:space="preserve">
+ This extension will perform simple optimizations 
+ of selected paths. It will try to change the 
+ order of plotting so as to reduce the amount
+ of "pen-up" travel that occurs while plotting.
+ 
+ Solving for optimal plot order is a difficult
+ problem, known in computer science as the
+ "travelling salesman problem," or just "TSP."  
+ 
+ This routine does not look for the best possible
+ solution; that can be slow. Instead it tries a
+ few quick methods that can often reduce pen-up 
+ travel time by 30% or more. Be sure to save a
+ copy of your document before running this
+ routine, as it is considered experimental.
+            </_param>
+
+  <param name="reverse" type="boolean" _gui-text="Allow paths to be reversed*">false</param>
+  <param name="wrap" type="boolean" _gui-text="Allow wrap-around egg axis*">false</param>
+
+	  <_param name="nyet" type="description" xml:space="preserve">
+  *This method not yet implemented.
+            </_param>
 
   <effect needs-live-preview="false" needs-document="no">
     <object-type>all</object-type>

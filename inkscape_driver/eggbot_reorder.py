@@ -92,38 +92,40 @@ def conv(x, y, trans_matrix=None):
         return x, y
 
 class EggBotReorderPaths(inkex.Effect):
-	def __init__(self):
-		inkex.Effect.__init__(self)
-                self.OptionParser.add_option('-r', '--reverse', action='store', type="inkbool",
-                        dest="reverse", default=False, help="Enable 'reverse path direction' optimizations")
+    def __init__(self):
+        inkex.Effect.__init__(self)
+        self.OptionParser.add_option('-r', '--reverse', action='store', type="inkbool",
+            dest="reverse", default=True, help="Enable 'reverse path direction' optimizations")
+        self.OptionParser.add_option('-w', '--wrap', action='store', type="inkbool",
+                dest="wrap", default=True, help="Enable 'wrap egg axis' optimizations")
 
 
-        # Given a node, return the start and end points
-        def get_start_end(self, node, transform):
-            d = node.get('d')
-            sp = simplepath.parsePath(d)
-            # simplepath converts coordinates to absolute and cleans them up, but
-            # these are still some big assumptions here, are they always valid? TODO
-            startX = sp[0][1][0]
-            startY = sp[0][1][1]
-            if sp[-1][0] == 'Z':
-                # go back to start
-                endX = startX
-                endY = startY
-            else:
-                endX = sp[-1][1][-2]
-                endY = sp[-1][1][-1]
+    # Given a node, return the start and end points
+    def get_start_end(self, node, transform):
+        d = node.get('d')
+        sp = simplepath.parsePath(d)
+        # simplepath converts coordinates to absolute and cleans them up, but
+        # these are still some big assumptions here, are they always valid? TODO
+        startX = sp[0][1][0]
+        startY = sp[0][1][1]
+        if sp[-1][0] == 'Z':
+            # go back to start
+            endX = startX
+            endY = startY
+        else:
+            endX = sp[-1][1][-2]
+            endY = sp[-1][1][-1]
 
-            sx, sy = conv(startX, startY, transform)
-            ex, ey = conv(endX, endY, transform)
-            return (sx, sy, ex, ey)
+        sx, sy = conv(startX, startY, transform)
+        ex, ey = conv(endX, endY, transform)
+        return (sx, sy, ex, ey)
 
 
         # This is the main entry point
-	def effect(self):
+    def effect(self):
             # based partially on the restack.py extension
-            if len(self.selected) > 0:
-		svg = self.document.getroot()
+        if len(self.selected) > 0:
+            svg = self.document.getroot()
                 # TODO check for non-path elements?
                 # TODO it seems like the order of selection is not consistent
 
@@ -133,28 +135,32 @@ class EggBotReorderPaths(inkex.Effect):
                 # I can think of two options:
                 # 1. Iterate over all paths in root, then iterate over all layers, and their paths
                 # 2. Some magic with xpath? (would this limit us to specific node types?)
-                objlist = []
-                for id, node in self.selected.iteritems():
-                    transform = node.get('transform')
-                    if transform:
-                        transform = simpletransform.parseTransform(transform)
+            objlist = []
+            for id, node in self.selected.iteritems():
+                transform = node.get('transform')
+                if transform:
+                    transform = simpletransform.parseTransform(transform)
 
-                    item = (id, self.get_start_end(node, transform))
-                    objlist.append(item)
-                    
-                # sort / order the objects
-                sort_order, air_distance_default, air_distance_ordered = find_ordering_naive(objlist)
-
-                for id in sort_order:
-                    # There's some good magic here, that you can use an
-                    # object id to index into self.selected. Brilliant!
-                    self.current_layer.append(self.selected[id])
-
-                #fid.close()
+                item = (id, self.get_start_end(node, transform))
+                objlist.append(item)
                 
-                improvement_pct = 100 * ((air_distance_default - air_distance_ordered) / (air_distance_default))
-		inkex.errormsg(gettext.gettext("Okay, this Inkscape file has been reordered and optimized for quicker Eggbot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % (air_distance_default, air_distance_ordered, improvement_pct)))
+            # sort / order the objects
+            sort_order, air_distance_default, air_distance_ordered = find_ordering_naive(objlist)
 
+            for id in sort_order:
+                # There's some good magic here, that you can use an
+                # object id to index into self.selected. Brilliant!
+                self.current_layer.append(self.selected[id])
+
+            #fid.close()
+            
+            if air_distance_default > 0 :  #don't divide by zero. :P
+                improvement_pct = 100 * ((air_distance_default - air_distance_ordered) / (air_distance_default))
+                inkex.errormsg(gettext.gettext("Okay, selected paths have been reordered and optimized for quicker Eggbot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % (air_distance_default, air_distance_ordered, improvement_pct)))
+            else:
+                inkex.errormsg(gettext.gettext("doh-- need to have multiple distinct paths selected!"))
+
+        
 e = EggBotReorderPaths()
 e.affect()
 
