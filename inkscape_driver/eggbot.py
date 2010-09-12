@@ -1,32 +1,33 @@
-'''
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+# TODO: Fix possible timeout when raising/lowering pen, and in manual mode.
+# TODO: Clean up serial search code, esp. for Windows
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-'''
-
-#TODO: Fix possible timeout when raising/lowering pen, and in manual mode.
-#TODO: Clean up serial search code, esp. for Windows
-
-import inkex, cubicsuperpath, simplepath, cspsubdiv
-from simpletransform import *
-#import pathmodifier
 from bezmisc import *
-import gettext
-import sys
-import serial
-import time
 from math import sqrt
+from simpletransform import *
+import gettext
+#import inkex
+#import cubicsuperpath
+import simplepath
+import cspsubdiv
+import serial
 import string
+import sys
+import time
+#import pathmodifier
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
@@ -39,11 +40,11 @@ N_PEN_DOWN_POS = 40      # Default pen-down position
 N_SERVOSPEED = 50			# Default pen-lift speed
 N_WALK_DEFAULT = 10		# Default steps for walking stepper motors
 N_DEFAULT_LAYER = 1			# Default inkscape layer
-'''
-if bDebug = True, create an HPGL file to show what is being plotted.
-Pen up moves are shown in a different color if bDrawPenUpLines = True.
-Try viewing the .hpgl file in a shareware program or create a simple viewer.
-'''
+
+# if bDebug = True, create an HPGL file to show what is being plotted.
+# Pen up moves are shown in a different color if bDrawPenUpLines = True.
+# Try viewing the .hpgl file in a shareware program or create a simple viewer.
+
 bDebug = False
 miscDebug = False
 bDrawPenUpLines = False
@@ -60,6 +61,7 @@ else:
 	DEBUG_OUTPUT_FILE = os.getenv( 'HOME' ) + '/test.hpgl'
 	MISC_OUTPUT_FILE = os.getenv( 'HOME' ) + '/misc.txt'
 	DRY_RUN_OUTPUT_FILE = os.getenv( 'HOME' ) + '/dry_run.txt'
+
 ##    if platform == 'darwin':
 ##	''' There's no good value for OS X '''
 ##	STR_DEFAULT_COM_PORT = '/dev/cu.usbmodem1a21'
@@ -70,20 +72,17 @@ else:
 ##	''' Works fine on Ubuntu; YMMV '''
 ##	STR_DEFAULT_COM_PORT = '/dev/ttyACM0'
 
-'''
-Break up a bezier curve into smaller curves, each of which
-is approximately a straight line within a given tolerance
-(the "smoothness" defined by [flat]).
-
-This is a modified version of cspsubdiv.cspsubdiv(). I rewrote the recursive
-call because it caused recursion-depth errors on complicated line segments.
-'''
 def subdivideCubicPath( sp, flat, i=1 ):
+	"""
+	Break up a bezier curve into smaller curves, each of which
+	is approximately a straight line within a given tolerance
+	(the "smoothness" defined by [flat]).
+
+	This is a modified version of cspsubdiv.cspsubdiv(). I rewrote the recursive
+	call because it caused recursion-depth errors on complicated line segments.
+	"""
 
 	while True:
-
-		#m = 0
-
 		while True:
 
 			if i >= len( sp ):
@@ -107,9 +106,8 @@ def subdivideCubicPath( sp, flat, i=1 ):
 		p = [one[2], one[3], two[1]]
 		sp[i:1] = [p]
 
-#class EggBot(pathmodifier.PathModifier):
-
 class EggBot( inkex.Effect ):
+
 	def __init__( self ):
 		inkex.Effect.__init__( self )
 
@@ -226,8 +224,9 @@ class EggBot( inkex.Effect ):
 		except ImportError:
 			self.DoubleStepSize = False
 
-	'''Main entry point: check to see which tab is selected, and act accordingly.'''
-	def effect( self ):		#Pick main course of action, depending on active GUI tab when "Apply" was pressed.
+	def effect( self ):
+		'''Main entry point: check to see which tab is selected, and act accordingly.'''
+
 		self.svg = self.document.getroot()
 		self.CheckSVGforEggbotData()
 
@@ -370,11 +369,8 @@ class EggBot( inkex.Effect ):
 					self.svgTotalDeltaX = 0
 					self.svgTotalDeltaY = 0
 
-
-
-
-	def manualCommand( self ):	#execute commands from the "manual" tab
-		#self.options.manualType
+	def manualCommand( self ):
+		"""Execute commands from the "manual" tab"""
 
 		if self.options.manualType == "none":
 			return
@@ -414,7 +410,8 @@ class EggBot( inkex.Effect ):
 			else:
 				return
 
-			strVersion = self.doRequest( 'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
+			#Query pen position: 1 up, 0 down (followed by OK)
+			strVersion = self.doRequest( 'QP\r' )
 			if strVersion[0] == '0':
 				#inkex.errormsg('Pen is down' )
 				self.fSpeed = self.options.penDownSpeed
@@ -431,8 +428,9 @@ class EggBot( inkex.Effect ):
 			self.doCommand( strOutput )
 
 
-	'''Perform the actual plotting, if selected in the interface:'''
-	def plotToEggBot( self ):		#parse the svg data as a series of line segments and send each segment to be plotted
+	def plotToEggBot( self ):
+		'''Perform the actual plotting, if selected in the interface:'''
+		#parse the svg data as a series of line segments and send each segment to be plotted
 
 		if self.serialPort is None:
 			return
@@ -445,12 +443,14 @@ class EggBot( inkex.Effect ):
 				self.debugOut.write( 'IN;SP1;' )
 			else:
 				self.debugOut.write( 'IN;PD;' )
-		try:    # wrap everything in a try so we can for sure close the serial port
+
+		try:
+			# wrap everything in a try so we can for sure close the serial port
 			#self.recursivelyTraverseSvg(self.document.getroot())
 			self.recursivelyTraverseSvg( self.svg )
 			self.penUp()   #Always end with pen-up
 
-			''' return to home, if returnToHome = True '''
+			# return to home, if returnToHome = True
 			if ( ( self.bStopped == False ) and self.options.returnToHome and ( self.ptFirst != None ) ):
 				self.fX = self.ptFirst[0]
 				self.fY = self.ptFirst[1]
@@ -469,27 +469,28 @@ class EggBot( inkex.Effect ):
 		finally:
 			return
 
+	def recursivelyTraverseSvg( self, aNodeList,
+			matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+			parent_visibility='visible' ):
+		"""
+		Recursively traverse the svg file to plot out all of the
+		paths.  The function keeps track of the composite transformation
+		that should be applied to each path.
 
-##	Recursively traverse the svg file to plot out all of the
-##	paths.  The function keeps track of the composite transformation
-##	that should be applied to each path.
-##
-##	This function handles path, group, line, rect, polyline, polygon,
-##      circle, ellipse and clone elements.  Notable elements not handled
-##      include text.  Unhandled elements should be converted to paths in
-##      Inkscape.
-
-	def recursivelyTraverseSvg( self, aNodeList, matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], parent_visibility='visible' ):
+		This function handles path, group, line, rect, polyline, polygon,
+		circle, ellipse and clone elements.  Notable elements not handled
+		include text.  Unhandled elements should be converted to paths in
+		Inkscape.
+		"""
 		for node in aNodeList:
-
-			''' Ignore invisible nodes '''
+			# Ignore invisible nodes
 			v = node.get( 'visibility', parent_visibility )
 			if v == 'inherit':
 				v = parent_visibility
 			if v == 'hidden' or v == 'collapse':
 				pass
 
-			''' first apply the current matrix transform to this node's tranform '''
+			# first apply the current matrix transform to this node's tranform
 			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
 			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
 				self.penUp()
@@ -520,17 +521,15 @@ class EggBot( inkex.Effect ):
 				else:
 					pass
 			elif node.tag == inkex.addNS( 'path', 'svg' ):
-
 				self.pathcount += 1
-				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+
+				# if we're in resume mode AND self.pathcount < self.svgLastPath,
+				#    then skip over this path.
+				# if we're in resume mode and self.pathcount = self.svgLastPath,
+				#    then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
-
-
-
 				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
-
 				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
@@ -542,13 +541,14 @@ class EggBot( inkex.Effect ):
 			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
 				self.pathcount += 1
-				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+				# if we're in resume mode AND self.pathcount < self.svgLastPath,
+				#    then skip over this path.
+				# if we're in resume mode and self.pathcount = self.svgLastPath,
+				#    then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
 				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
-
 				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
@@ -576,13 +576,14 @@ class EggBot( inkex.Effect ):
 			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
 
 				self.pathcount += 1
-				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
+				# if we're in resume mode AND self.pathcount < self.svgLastPath,
+				#    then skip over this path.
+				# if we're in resume mode and self.pathcount = self.svgLastPath,
+				#    then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
 				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
-
 				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
@@ -608,7 +609,6 @@ class EggBot( inkex.Effect ):
 						self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
-
 				# Ignore polylines with no 'points' attribute
 				pl = node.get( 'points', '' ).strip()
 				if pl == '':
@@ -742,22 +742,22 @@ class EggBot( inkex.Effect ):
 				inkex.errormsg( 'Warning: unable to draw object, please convert it to a path first.' )
 				pass
 
-	#We are only plotting *some* layers. Check to see
-	#   whether or not we're going to plot this one.
-	#
-	# First: scan first 4 chars of node id for first non-numeric character,
-	#  and scan the part before that (if any) into a number
-	#
-	# Then, see if the number matches the layer.
-
-	#	self.plotCurrentLayer =  False
-
 	def DoWePlotLayer( self, strLayerName ):
+		"""
+		We are only plotting *some* layers. Check to see
+		whether or not we're going to plot this one.
+
+		First: scan first 4 chars of node id for first non-numeric character,
+		and scan the part before that (if any) into a number
+
+		Then, see if the number matches the layer.
+		"""
+
 		TempNumString = 'x'
 		stringPos = 1
 		CurrentLayerName = string.lstrip( strLayerName ) #remove leading whitespace
 
-		#Look at layer name.  Sample first character, then first two, and
+		# Look at layer name.  Sample first character, then first two, and
 		# so on, until the string ends or the string no longer consists of
 		# digit characters only.
 
@@ -777,12 +777,13 @@ class EggBot( inkex.Effect ):
 				self.LayersPlotted += 1
 		#Note: this function is only called if we are NOT plotting all layers.
 
-	'''
-	Plot the path while applying the transformation defined
-	by the matrix [matTransform].
-	'''
 	def plotPath( self, path, matTransform ):
-		''' turn this path into a cubicsuperpath (list of beziers)... '''
+		'''
+		Plot the path while applying the transformation defined
+		by the matrix [matTransform].
+		'''
+		# turn this path into a cubicsuperpath (list of beziers)...
+
 		d = path.get( 'd' )
 
 		if len( simplepath.parsePath( d ) ) == 0:
@@ -790,13 +791,11 @@ class EggBot( inkex.Effect ):
 
 		p = cubicsuperpath.parsePath( d )
 
-		''' ...and apply the transformation to each point '''
+		# ...and apply the transformation to each point
 		applyTransformToPath( matTransform, p )
 
-		'''
-		p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
-		where the start-point is the last point in the previous segment.
-		'''
+		# p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
+		# where the start-point is the last point in the previous segment.
 		for sp in p:
 
 			subdivideCubicPath( sp, self.options.smoothness )
@@ -824,10 +823,10 @@ class EggBot( inkex.Effect ):
 					self.fX = float( csp[1][0] )
 					self.fY = float( csp[1][1] )
 
-				''' store home '''
+				# store home
 				if self.ptFirst is None:
 
-					''' if we should start at center, then the first line segment should draw from there '''
+					# if we should start at center, then the first line segment should draw from there
 					if self.options.startCentered:
 						self.fPrevX = self.fX
 						#self.fPrevY = N_PEN_AXIS_STEPS / 2.0
@@ -900,11 +899,12 @@ class EggBot( inkex.Effect ):
 	def stop( self ):
 		self.bStopped = True
 
-	'''
-	Send commands out the com port as a line segment (dx, dy) and a time (ms) the segment
-	should take to implement
-	'''
 	def plotLineAndTime( self ):
+		'''
+		Send commands out the com port as a line segment (dx, dy) and a time (ms) the segment
+		should take to implement
+		'''
+
 		if self.bStopped:
 			return
 		if ( self.fPrevX is None ):
@@ -945,9 +945,6 @@ class EggBot( inkex.Effect ):
 
 			nTime = int( math.ceil( 1000 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
 
-
-
-
 			while ( ( abs( self.nDeltaX ) > 0 ) or ( abs( self.nDeltaY ) > 0 ) ):
 				if ( nTime > 750 ):
 					xd = int( round( ( 750.0 * self.nDeltaX ) / nTime ) )
@@ -961,8 +958,6 @@ class EggBot( inkex.Effect ):
 						td = 1		# don't allow zero-time moves.
 
 				if ( self.resumeMode != True ):
-
-
 					if ( self.options.revPenMotor ):
 						yd2 = yd
 					else:
@@ -971,8 +966,6 @@ class EggBot( inkex.Effect ):
 						xd2 = -xd
 					else:
 						xd2 = xd
-
-
 
 					strOutput = ','.join( ['SM', str( td ), str( yd2 ), str( xd2 )] ) + '\r'
 					self.svgTotalDeltaX += xd
@@ -995,8 +988,7 @@ class EggBot( inkex.Effect ):
 				self.bStopped = True
 				return
 
-		''' note: the pen-motor is first, and it corresponds to the y-axis on-screen '''
-
+	# note: the pen-motor is first, and it corresponds to the y-axis on-screen
 
 	def EggbotOpenSerial( self ):
 		if not bDryRun:
@@ -1018,15 +1010,14 @@ class EggBot( inkex.Effect ):
 			self.serialPort = None
 			return
 
-
-
-	'''
-look at COM1 to COM20 and return a SerialPort object
-for the first port with an EBB (eggbot board).
-
-YOU are responsible for closing this serial port!
-'''
 	def testSerialPort( self, strComPort ):
+		'''
+		look at COM1 to COM20 and return a SerialPort object
+		for the first port with an EBB (eggbot board).
+
+		YOU are responsible for closing this serial port!
+		'''
+
 		try:
 			serialPort = serial.Serial( strComPort, timeout=1 ) # 1 second timeout!
 
@@ -1130,15 +1121,15 @@ YOU are responsible for closing this serial port!
 		try:
 			self.serialPort.write( cmd )
 			response = self.serialPort.readline()
-			responseDummy = self.serialPort.readline() #read in extra blank/OK line
+			unused_response = self.serialPort.readline() #read in extra blank/OK line
 		except:
 			inkex.errormsg( gettext.gettext( "Error reading serial data." ) )
 
 		return response
-'''
-Pythagorean theorem!
-'''
 def distance( x, y ):
+	'''
+	Pythagorean theorem!
+	'''
 	return sqrt( x * x + y * y )
 
 e = EggBot()
