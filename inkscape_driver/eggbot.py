@@ -51,24 +51,24 @@ bDryRun = False # write the commands to a text file instead of the serial port
 
 platform = sys.platform.lower()
 if platform == 'win32':
-    DEBUG_OUTPUT_FILE = 'C:/test.hpgl'
-    DRY_RUN_OUTPUT_FILE = 'C:/dry_run.txt'
-    MISC_OUTPUT_FILE = 'C:/misc.txt'
-    #STR_DEFAULT_COM_PORT = 'COM6'
+	DEBUG_OUTPUT_FILE = 'C:/test.hpgl'
+	DRY_RUN_OUTPUT_FILE = 'C:/dry_run.txt'
+	MISC_OUTPUT_FILE = 'C:/misc.txt'
+	#STR_DEFAULT_COM_PORT = 'COM6'
 else:
-    import os, re #, tty
-    DEBUG_OUTPUT_FILE = os.getenv('HOME') + '/test.hpgl'
-    MISC_OUTPUT_FILE = os.getenv('HOME') + '/misc.txt'
-    DRY_RUN_OUTPUT_FILE = os.getenv('HOME') + '/dry_run.txt'
+	import os #, tty
+	DEBUG_OUTPUT_FILE = os.getenv( 'HOME' ) + '/test.hpgl'
+	MISC_OUTPUT_FILE = os.getenv( 'HOME' ) + '/misc.txt'
+	DRY_RUN_OUTPUT_FILE = os.getenv( 'HOME' ) + '/dry_run.txt'
 ##    if platform == 'darwin':
-##        ''' There's no good value for OS X '''
-##        STR_DEFAULT_COM_PORT = '/dev/cu.usbmodem1a21'
+##	''' There's no good value for OS X '''
+##	STR_DEFAULT_COM_PORT = '/dev/cu.usbmodem1a21'
 ##    elif platform == 'sunos':
-##        ''' Untested: YMMV '''
-##        STR_DEFAULT_COM_PORT = '/dev/term/0'
+##	''' Untested: YMMV '''
+##	STR_DEFAULT_COM_PORT = '/dev/term/0'
 ##    else:
-##        ''' Works fine on Ubuntu; YMMV '''
-##        STR_DEFAULT_COM_PORT = '/dev/ttyACM0'
+##	''' Works fine on Ubuntu; YMMV '''
+##	STR_DEFAULT_COM_PORT = '/dev/ttyACM0'
 
 '''
 Break up a bezier curve into smaller curves, each of which
@@ -78,7 +78,7 @@ is approximately a straight line within a given tolerance
 This is a modified version of cspsubdiv.cspsubdiv(). I rewrote the recursive
 call because it caused recursion-depth errors on complicated line segments.
 '''
-def subdivideCubicPath(sp,flat,i=1):
+def subdivideCubicPath( sp, flat, i=1 ):
 
 	while True:
 
@@ -86,113 +86,113 @@ def subdivideCubicPath(sp,flat,i=1):
 
 		while True:
 
-			if i >= len(sp):
+			if i >= len( sp ):
 				return
 
-			p0 = sp[i-1][1]
-			p1 = sp[i-1][2]
+			p0 = sp[i - 1][1]
+			p1 = sp[i - 1][2]
 			p2 = sp[i][0]
 			p3 = sp[i][1]
 
-			b = (p0,p1,p2,p3)
+			b = ( p0, p1, p2, p3 )
 
-			if cspsubdiv.maxdist(b) > flat:
+			if cspsubdiv.maxdist( b ) > flat:
 				break
 
 			i += 1
 
-		one, two = beziersplitatt(b,0.5)
-		sp[i-1][2] = one[1]
+		one, two = beziersplitatt( b, 0.5 )
+		sp[i - 1][2] = one[1]
 		sp[i][0] = two[2]
-		p = [one[2],one[3],two[1]]
+		p = [one[2], one[3], two[1]]
 		sp[i:1] = [p]
 
 #class EggBot(pathmodifier.PathModifier):
 
-class EggBot(inkex.Effect):
-	def __init__(self):
-		inkex.Effect.__init__(self)
+class EggBot( inkex.Effect ):
+	def __init__( self ):
+		inkex.Effect.__init__( self )
 
-		self.OptionParser.add_option("--smoothness",
-                        action="store", type="float",
-                        dest="smoothness", default=.2,
-                        help="Smoothness of curves")
+		self.OptionParser.add_option( "--smoothness",
+			action="store", type="float",
+			dest="smoothness", default=.2,
+			help="Smoothness of curves" )
 ##		self.OptionParser.add_option( "--comPort",
-##                        action="store", type="string",
-##                        dest="comport", default=STR_DEFAULT_COM_PORT,
-##                        help="USB COM port to connect eggbot.")
-		self.OptionParser.add_option("--startCentered",
-                        action="store", type="inkbool",
-                        dest="startCentered", default=True,
-                        help="Start plot with pen centered in the y-axis.")
-		self.OptionParser.add_option("--returnToHome",
-                        action="store", type="inkbool",
-                        dest="returnToHome", default=True,
-                        help="Return to home at end of plot.")
-		self.OptionParser.add_option("--wraparound",
-                        action="store", type="inkbool",
-                        dest="wraparound", default=True,
-                        help="Egg (x) axis wraps around-- take shortcuts!")
-		self.OptionParser.add_option("--penUpSpeed",
-                        action="store", type="int",
-                        dest="penUpSpeed", default=F_DEFAULT_SPEED,
-                        help="Speed (step/sec) while pen is up.")
-		self.OptionParser.add_option("--penDownSpeed",
-                        action="store", type="int",
-                        dest="penDownSpeed", default=F_DEFAULT_SPEED,
-                        help="Speed (step/sec) while pen is down.")
-		self.OptionParser.add_option("--penDownDelay",
-                        action="store", type="int",
-                        dest="penDownDelay", default=N_PEN_DOWN_DELAY,
-                        help="Delay after pen down (msec).")
-		self.OptionParser.add_option("--penUpDelay",
-                        action="store", type="int",
-                        dest="penUpDelay", default=N_PEN_UP_DELAY,
-                        help="Delay after pen up (msec).")
-		self.OptionParser.add_option("--togglePenNow",
-                        action="store", type="inkbool",
-                        dest="togglePenNow", default=False,
-                        help="Toggle the pen up/down on Apply.")
-		self.OptionParser.add_option("--tab",
-		                action="store", type="string",
-						dest="tab", default="controls",
-						help="The active tab when Apply was pressed")
-		self.OptionParser.add_option("--penUpPosition",
-		                action="store", type="int",
-						dest="penUpPosition", default=N_PEN_UP_POS,
-						help="Position of pen when lifted")
-		self.OptionParser.add_option("--ServoSpeed",
-		                action="store", type="int",
-						dest="ServoSpeed", default=N_SERVOSPEED,
-						help="Rate of lifting/lowering pen ")
-		self.OptionParser.add_option("--penDownPosition",
-		                action="store", type="int",
-						dest="penDownPosition", default=N_PEN_DOWN_POS,
-						help="Position of pen when lowered")
-		self.OptionParser.add_option("--layernumber",
-		                action="store", type="int",
-						dest="layernumber", default=N_DEFAULT_LAYER,
-						help="Selected layer for multilayer plotting")
-		self.OptionParser.add_option("--manualType",
-		                action="store", type="string",
-						dest="manualType", default="controls",
-						help="The active tab when Apply was pressed")
-		self.OptionParser.add_option("--WalkDistance",
-		                action="store", type="int",
-						dest="WalkDistance", default=N_WALK_DEFAULT,
-						help="Selected layer for multilayer plotting")
-		self.OptionParser.add_option("--cancelOnly",
-                        action="store", type="inkbool",
-                        dest="cancelOnly", default=False,
-                        help="Cancel plot and return home only.")
-		self.OptionParser.add_option("--revPenMotor",
-                        action="store", type="inkbool",
-                        dest="revPenMotor", default=False,
-                        help="Reverse motion of pen motor.")
-		self.OptionParser.add_option("--revEggMotor",
-                        action="store", type="inkbool",
-                        dest="revEggMotor", default=False,
-                        help="Reverse motion of egg motor.")
+##			action="store", type="string",
+##			dest="comport", default=STR_DEFAULT_COM_PORT,
+##			help="USB COM port to connect eggbot.")
+		self.OptionParser.add_option( "--startCentered",
+			action="store", type="inkbool",
+			dest="startCentered", default=True,
+			help="Start plot with pen centered in the y-axis." )
+		self.OptionParser.add_option( "--returnToHome",
+			action="store", type="inkbool",
+			dest="returnToHome", default=True,
+			help="Return to home at end of plot." )
+		self.OptionParser.add_option( "--wraparound",
+			action="store", type="inkbool",
+			dest="wraparound", default=True,
+			help="Egg (x) axis wraps around-- take shortcuts!" )
+		self.OptionParser.add_option( "--penUpSpeed",
+			action="store", type="int",
+			dest="penUpSpeed", default=F_DEFAULT_SPEED,
+			help="Speed (step/sec) while pen is up." )
+		self.OptionParser.add_option( "--penDownSpeed",
+			action="store", type="int",
+			dest="penDownSpeed", default=F_DEFAULT_SPEED,
+			help="Speed (step/sec) while pen is down." )
+		self.OptionParser.add_option( "--penDownDelay",
+			action="store", type="int",
+			dest="penDownDelay", default=N_PEN_DOWN_DELAY,
+			help="Delay after pen down (msec)." )
+		self.OptionParser.add_option( "--penUpDelay",
+			action="store", type="int",
+			dest="penUpDelay", default=N_PEN_UP_DELAY,
+			help="Delay after pen up (msec)." )
+		self.OptionParser.add_option( "--togglePenNow",
+			action="store", type="inkbool",
+			dest="togglePenNow", default=False,
+			help="Toggle the pen up/down on Apply." )
+		self.OptionParser.add_option( "--tab",
+			action="store", type="string",
+			dest="tab", default="controls",
+			help="The active tab when Apply was pressed" )
+		self.OptionParser.add_option( "--penUpPosition",
+			action="store", type="int",
+			dest="penUpPosition", default=N_PEN_UP_POS,
+			help="Position of pen when lifted" )
+		self.OptionParser.add_option( "--ServoSpeed",
+			action="store", type="int",
+			dest="ServoSpeed", default=N_SERVOSPEED,
+			help="Rate of lifting/lowering pen " )
+		self.OptionParser.add_option( "--penDownPosition",
+			action="store", type="int",
+			dest="penDownPosition", default=N_PEN_DOWN_POS,
+			help="Position of pen when lowered" )
+		self.OptionParser.add_option( "--layernumber",
+			action="store", type="int",
+			dest="layernumber", default=N_DEFAULT_LAYER,
+			help="Selected layer for multilayer plotting" )
+		self.OptionParser.add_option( "--manualType",
+			action="store", type="string",
+			dest="manualType", default="controls",
+			help="The active tab when Apply was pressed" )
+		self.OptionParser.add_option( "--WalkDistance",
+			action="store", type="int",
+			dest="WalkDistance", default=N_WALK_DEFAULT,
+			help="Selected layer for multilayer plotting" )
+		self.OptionParser.add_option( "--cancelOnly",
+			action="store", type="inkbool",
+			dest="cancelOnly", default=False,
+			help="Cancel plot and return home only." )
+		self.OptionParser.add_option( "--revPenMotor",
+			action="store", type="inkbool",
+			dest="revPenMotor", default=False,
+			help="Reverse motion of pen motor." )
+		self.OptionParser.add_option( "--revEggMotor",
+			action="store", type="inkbool",
+			dest="revEggMotor", default=False,
+			help="Reverse motion of egg motor." )
 
 		self.bPenIsUp = True
 		self.virtualPenIsUp = False  #Keeps track of pen postion when stepping through plot before resuming
@@ -204,18 +204,18 @@ class EggBot(inkex.Effect):
 		self.bStopped = False
 		self.fSpeed = 1
 		self.resumeMode = False
-		self.nodeCount = int(0)		#NOTE: python uses 32-bit ints.
-		self.nodeTarget = int(0)
-		self.pathcount = int(0)
+		self.nodeCount = int( 0 )		#NOTE: python uses 32-bit ints.
+		self.nodeTarget = int( 0 )
+		self.pathcount = int( 0 )
 		self.LayersPlotted = 0
 		self.svgSerialPort = ''
-		self.svgLayer = int(0)
-		self.svgNodeCount = int(0)
+		self.svgLayer = int( 0 )
+		self.svgNodeCount = int( 0 )
 		self.svgDataRead = False
-		self.svgLastPath = int(0)
-		self.svgLastPathNC = int(0)
-		self.svgTotalDeltaX = int(0)
-		self.svgTotalDeltaY = int(0)
+		self.svgLastPath = int( 0 )
+		self.svgLastPathNC = int( 0 )
+		self.svgTotalDeltaX = int( 0 )
+		self.svgTotalDeltaY = int( 0 )
 
 		self.nDeltaX = 0
 		self.nDeltaY = 0
@@ -227,7 +227,7 @@ class EggBot(inkex.Effect):
 			self.DoubleStepSize = False
 
 	'''Main entry point: check to see which tab is selected, and act accordingly.'''
-	def effect(self):		#Pick main course of action, depending on active GUI tab when "Apply" was pressed.
+	def effect( self ):		#Pick main course of action, depending on active GUI tab when "Apply" was pressed.
 		self.svg = self.document.getroot()
 		self.CheckSVGforEggbotData()
 
@@ -237,21 +237,21 @@ class EggBot(inkex.Effect):
 			self.EggbotOpenSerial()
 			self.svgNodeCount = 0
 			self.svgLastPath = 0
-			strButton = self.doRequest('QB\r') #Query if button pressed
+			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.svgLayer = 12345;  # indicate that we are plotting all layers.
 			self.plotToEggBot()
 
 
 		elif self.options.tab == '"resume"':
 			self.EggbotOpenSerial()
-			strButton = self.doRequest('QB\r') #Query if button pressed
+			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.resumePlotSetup()
 			if self.resumeMode:
 				self.plotToEggBot()
-			elif (self.options.cancelOnly == True):
+			elif ( self.options.cancelOnly == True ):
 				pass
 			else:
-				inkex.errormsg(gettext.gettext("Truly sorry, there does not seem to be any in-progress plot to resume."))
+				inkex.errormsg( gettext.gettext( "Truly sorry, there does not seem to be any in-progress plot to resume." ) )
 
 		elif self.options.tab == '"layers"':
 			self.allLayers = False
@@ -259,12 +259,12 @@ class EggBot(inkex.Effect):
 			self.LayersPlotted = 0
 			self.svgLastPath = 0
 			self.EggbotOpenSerial()
-			strButton = self.doRequest('QB\r') #Query if button pressed
+			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.svgNodeCount = 0;
 			self.svgLayer = self.options.layernumber
 			self.plotToEggBot()
-			if (self.LayersPlotted == 0):
-				inkex.errormsg(gettext.gettext("Truly sorry, but I did not find any named layers to plot."))
+			if ( self.LayersPlotted == 0 ):
+				inkex.errormsg( gettext.gettext( "Truly sorry, but I did not find any named layers to plot." ) )
 
 		elif self.options.tab == '"manual"':
 			self.EggbotOpenSerial()
@@ -281,81 +281,81 @@ class EggBot(inkex.Effect):
 			if self.serialPort is not None:
 				self.ServoSetupWrapper()
 				if self.options.togglePenNow:
-					self.doCommand('TP\r')		#Toggle pen
+					self.doCommand( 'TP\r' )		#Toggle pen
 
 		self.svgDataRead = False
-		self.UpdateSVGEggbotData(self.svg)
+		self.UpdateSVGEggbotData( self.svg )
 		self.EggbotCloseSerial()
 		return
 
 
-	def CheckSVGforEggbotData(self):
+	def CheckSVGforEggbotData( self ):
 		self.svgDataRead = False
-		self.recursiveEggbotDataScan(self.svg)
-		if (self.svgDataRead == False):    #if there is no eggbot data, add some:
-			eggbotlayer = inkex.etree.SubElement(self.svg, 'eggbot')
-			eggbotlayer.set('serialport', '')
-			eggbotlayer.set('layer', str(0))
-			eggbotlayer.set('node', str(0))
-			eggbotlayer.set('lastpath', str(0))
-			eggbotlayer.set('lastpathnc', str(0))
-			eggbotlayer.set('totaldeltax', str(0))
-			eggbotlayer.set('totaldeltay', str(0))
+		self.recursiveEggbotDataScan( self.svg )
+		if ( self.svgDataRead == False ):    #if there is no eggbot data, add some:
+			eggbotlayer = inkex.etree.SubElement( self.svg, 'eggbot' )
+			eggbotlayer.set( 'serialport', '' )
+			eggbotlayer.set( 'layer', str( 0 ) )
+			eggbotlayer.set( 'node', str( 0 ) )
+			eggbotlayer.set( 'lastpath', str( 0 ) )
+			eggbotlayer.set( 'lastpathnc', str( 0 ) )
+			eggbotlayer.set( 'totaldeltax', str( 0 ) )
+			eggbotlayer.set( 'totaldeltay', str( 0 ) )
 
-	def recursiveEggbotDataScan(self, aNodeList):
-		if (self.svgDataRead != True):
+	def recursiveEggbotDataScan( self, aNodeList ):
+		if ( self.svgDataRead != True ):
 			for node in aNodeList:
 				if node.tag == 'svg':
-					self.recursiveEggbotDataScan(node)
-				elif node.tag == inkex.addNS('eggbot','svg') or node.tag == 'eggbot':
-					self.svgSerialPort = node.get('serialport')
-					self.svgLayer = int(node.get('layer'))
-					self.svgNodeCount = int(node.get('node'))
+					self.recursiveEggbotDataScan( node )
+				elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
+					self.svgSerialPort = node.get( 'serialport' )
+					self.svgLayer = int( node.get( 'layer' ) )
+					self.svgNodeCount = int( node.get( 'node' ) )
 
 					try:
-						self.svgLastPath = int(node.get('lastpath'))
-						self.svgLastPathNC = int(node.get('lastpathnc'))
-						self.svgTotalDeltaX = int(node.get('totaldeltax'))
-						self.svgTotalDeltaY = int(node.get('totaldeltay'))
+						self.svgLastPath = int( node.get( 'lastpath' ) )
+						self.svgLastPathNC = int( node.get( 'lastpathnc' ) )
+						self.svgTotalDeltaX = int( node.get( 'totaldeltax' ) )
+						self.svgTotalDeltaY = int( node.get( 'totaldeltay' ) )
 						self.svgDataRead = True
 					except:
-						node.set('lastpath', str(0))
-						node.set('lastpathnc', str(0))
-						node.set('totaldeltax', str(0))
-						node.set('totaldeltay', str(0))
+						node.set( 'lastpath', str( 0 ) )
+						node.set( 'lastpathnc', str( 0 ) )
+						node.set( 'totaldeltax', str( 0 ) )
+						node.set( 'totaldeltay', str( 0 ) )
 						self.svgDataRead = True
 
-	def UpdateSVGEggbotData(self, aNodeList):
-		if (self.svgDataRead != True):
+	def UpdateSVGEggbotData( self, aNodeList ):
+		if ( self.svgDataRead != True ):
 			for node in aNodeList:
 				if node.tag == 'svg':
-					self.UpdateSVGEggbotData(node)
-				elif node.tag == inkex.addNS('eggbot','svg') or node.tag == 'eggbot':
-					node.set('serialport', self.svgSerialPort)
-					node.set('layer', str(self.svgLayer))
-					node.set('node', str(self.svgNodeCount))
-					node.set('lastpath', str(self.svgLastPath))
-					node.set('lastpathnc', str(self.svgLastPathNC))
-					node.set('totaldeltax', str(self.svgTotalDeltaX))
-					node.set('totaldeltay', str(self.svgTotalDeltaY))
+					self.UpdateSVGEggbotData( node )
+				elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
+					node.set( 'serialport', self.svgSerialPort )
+					node.set( 'layer', str( self.svgLayer ) )
+					node.set( 'node', str( self.svgNodeCount ) )
+					node.set( 'lastpath', str( self.svgLastPath ) )
+					node.set( 'lastpathnc', str( self.svgLastPathNC ) )
+					node.set( 'totaldeltax', str( self.svgTotalDeltaX ) )
+					node.set( 'totaldeltay', str( self.svgTotalDeltaY ) )
 					self.svgDataRead = True
 
-	def resumePlotSetup(self):
+	def resumePlotSetup( self ):
 		self.LayerFound = False
-		if (self.svgLayer < 101) and (self.svgLayer >= 0):
+		if ( self.svgLayer < 101 ) and ( self.svgLayer >= 0 ):
 			self.options.layernumber = self.svgLayer
 			self.allLayers = False
 			self.plotCurrentLayer = False
 			self.LayerFound = True
-		elif (self.svgLayer == 12345):  # Plot all layers
+		elif ( self.svgLayer == 12345 ):  # Plot all layers
 			self.allLayers = True
 			self.plotCurrentLayer = True
 			self.LayerFound = True
-		if (self.LayerFound == True):
-			if (self.svgNodeCount > 0):
+		if ( self.LayerFound == True ):
+			if ( self.svgNodeCount > 0 ):
 				self.nodeTarget = self.svgNodeCount
 				self.resumeMode = True
-				if (self.options.cancelOnly == True):
+				if ( self.options.cancelOnly == True ):
 					self.resumeMode = False
 					self.fPrevX = self.svgTotalDeltaX
 					self.fPrevY = self.svgTotalDeltaY
@@ -373,7 +373,7 @@ class EggBot(inkex.Effect):
 
 
 
-	def manualCommand(self):	#execute commands from the "manual" tab
+	def manualCommand( self ):	#execute commands from the "manual" tab
 		#self.options.manualType
 
 		if self.options.manualType == "none":
@@ -401,8 +401,8 @@ class EggBot(inkex.Effect):
 			self.sendDisableMotors()
 
 		elif self.options.manualType == "version-check":
-			strVersion = self.doRequest('v\r')
-			inkex.errormsg('I asked the EBB for its version info, and it replied:\n ' + strVersion )
+			strVersion = self.doRequest( 'v\r' )
+			inkex.errormsg( 'I asked the EBB for its version info, and it replied:\n ' + strVersion )
 
 		else:  # self.options.manualType is "walk-egg-motor" or "walk-pen-motor":
 			if self.options.manualType == "walk-egg-motor":
@@ -414,7 +414,7 @@ class EggBot(inkex.Effect):
 			else:
 				return
 
-			strVersion = self.doRequest('QP\r') #Query pen position: 1 up, 0 down (followed by OK)
+			strVersion = self.doRequest( 'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
 			if strVersion[0] == '0':
 				#inkex.errormsg('Pen is down' )
 				self.fSpeed = self.options.penDownSpeed
@@ -422,17 +422,17 @@ class EggBot(inkex.Effect):
 				#inkex.errormsg('Pen is up' )
 				self.fSpeed = self.options.penUpSpeed
 
-			if (self.options.revPenMotor):
+			if ( self.options.revPenMotor ):
 				self.nDeltaY = -1 * self.nDeltaY
-			if (self.options.revEggMotor):
+			if ( self.options.revEggMotor ):
 				self.nDeltaX = -1 * self.nDeltaX
-			self.nTime = int(round(1000.0/self.fSpeed * distance(self.nDeltaX, self.nDeltaY)))
-			strOutput = ','.join(['SM', str(self.nTime), str(self.nDeltaY), str(self.nDeltaX)]) + '\r'
-			self.doCommand(strOutput)
+			self.nTime = int( round( 1000.0 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
+			strOutput = ','.join( ['SM', str( self.nTime ), str( self.nDeltaY ), str( self.nDeltaX )] ) + '\r'
+			self.doCommand( strOutput )
 
 
 	'''Perform the actual plotting, if selected in the interface:'''
-	def plotToEggBot(self):		#parse the svg data as a series of line segments and send each segment to be plotted
+	def plotToEggBot( self ):		#parse the svg data as a series of line segments and send each segment to be plotted
 
 		if self.serialPort is None:
 			return
@@ -440,25 +440,25 @@ class EggBot(inkex.Effect):
 		self.ServoSetup()
 
 		if bDebug:
-			self.debugOut = open(DEBUG_OUTPUT_FILE, 'w')
+			self.debugOut = open( DEBUG_OUTPUT_FILE, 'w' )
 			if bDrawPenUpLines:
-				self.debugOut.write('IN;SP1;')
+				self.debugOut.write( 'IN;SP1;' )
 			else:
-				self.debugOut.write('IN;PD;')
+				self.debugOut.write( 'IN;PD;' )
 		try:    # wrap everything in a try so we can for sure close the serial port
 			#self.recursivelyTraverseSvg(self.document.getroot())
-			self.recursivelyTraverseSvg(self.svg)
+			self.recursivelyTraverseSvg( self.svg )
 			self.penUp()   #Always end with pen-up
 
 			''' return to home, if returnToHome = True '''
-			if ((self.bStopped == False) and self.options.returnToHome and (self.ptFirst != None)):
+			if ( ( self.bStopped == False ) and self.options.returnToHome and ( self.ptFirst != None ) ):
 				self.fX = self.ptFirst[0]
 				self.fY = self.ptFirst[1]
 				#self.penUp()
 				self.nodeCount = self.nodeTarget    # enablesfpx return-to-home only option
 				self.plotLineAndTime()
 			#inkex.errormsg('Final node count: ' + str(self.svgNodeCount))  #Node Count - Debug option
-			if (self.bStopped == False):
+			if ( self.bStopped == False ):
 				self.svgLayer = 0
 				self.svgNodeCount = 0
 				self.svgLastPath = 0
@@ -479,47 +479,47 @@ class EggBot(inkex.Effect):
 ##      include text.  Unhandled elements should be converted to paths in
 ##      Inkscape.
 
-	def recursivelyTraverseSvg(self, aNodeList, matCurrent = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], parent_visibility = 'visible'):
+	def recursivelyTraverseSvg( self, aNodeList, matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], parent_visibility='visible' ):
 		for node in aNodeList:
 
 			''' Ignore invisible nodes '''
-			v = node.get('visibility', parent_visibility)
+			v = node.get( 'visibility', parent_visibility )
 			if v == 'inherit':
 				v = parent_visibility
 			if v == 'hidden' or v == 'collapse':
 				pass
 
 			''' first apply the current matrix transform to this node's tranform '''
-			matNew = composeTransform(matCurrent, parseTransform(node.get("transform")))
-			if node.tag == inkex.addNS('g','svg') or node.tag == 'g':
+			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
+			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
 				self.penUp()
-				if (node.get(inkex.addNS('groupmode', 'inkscape')) == 'layer'):
+				if ( node.get( inkex.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
 					if self.allLayers == False:
 						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
-						self.DoWePlotLayer(node.get(inkex.addNS('label', 'inkscape')))
-				self.recursivelyTraverseSvg(node, matNew, parent_visibility = v)
-			elif node.tag == inkex.addNS('use','svg') or node.tag == 'use':
-				refid = node.get(inkex.addNS('href','xlink'))
+						self.DoWePlotLayer( node.get( inkex.addNS( 'label', 'inkscape' ) ) )
+				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
+			elif node.tag == inkex.addNS( 'use', 'svg' ) or node.tag == 'use':
+				refid = node.get( inkex.addNS( 'href', 'xlink' ) )
 				if refid:
 					# [1:] to ignore leading '#' in reference
 					path = '//*[@id="%s"]' % refid[1:]
-					refnode = node.xpath(path)
+					refnode = node.xpath( path )
 					if refnode:
-						x = float(node.get('x','0'))
-						y = float(node.get('y','0'))
-						tran = node.get('transform')
+						x = float( node.get( 'x', '0' ) )
+						y = float( node.get( 'y', '0' ) )
+						tran = node.get( 'transform' )
 						if tran:
-							tran += ' translate(%f,%f)' % (x,y)
+							tran += ' translate(%f,%f)' % ( x, y )
 						else:
-							tran = 'translate(%f,%f)' % (x,y)
-						matNew2 = composeTransform(matNew, parseTransform(tran))
-						v = node.get('visibility',v)
-						self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
+							tran = 'translate(%f,%f)' % ( x, y )
+						matNew2 = composeTransform( matNew, parseTransform( tran ) )
+						v = node.get( 'visibility', v )
+						self.recursivelyTraverseSvg( refnode, matNew2, parent_visibility=v )
 					else:
 						pass
 				else:
 					pass
-			elif node.tag == inkex.addNS('path','svg'):
+			elif node.tag == inkex.addNS( 'path', 'svg' ):
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
@@ -528,89 +528,89 @@ class EggBot(inkex.Effect):
 
 
 
-				if self.resumeMode and (self.pathcount == self.svgLastPath):
+				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount < self.svgLastPath):
+				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
-					self.plotPath(node, matNew)
-					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+					self.plotPath( node, matNew )
+					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('rect','svg') or node.tag == 'rect':
+			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
 				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount == self.svgLastPath):
+				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount < self.svgLastPath):
+				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
 					# Create a path with the outline of the rectangle
-					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-					x = float(node.get('x'))
-					y = float(node.get('y'))
-					w = float(node.get('width'))
-					h = float(node.get('height'))
-					s = node.get('style')
+					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+					x = float( node.get( 'x' ) )
+					y = float( node.get( 'y' ) )
+					w = float( node.get( 'width' ) )
+					h = float( node.get( 'height' ) )
+					s = node.get( 'style' )
 					if s:
-						newpath.set('style',s)
-					t = node.get('transform')
+						newpath.set( 'style', s )
+					t = node.get( 'transform' )
 					if t:
-						newpath.set('transform', t)
+						newpath.set( 'transform', t )
 					a = []
-					a.append(['M ',[x,y]])
-					a.append([' l ',[w,0]])
-					a.append([' l ', [0,h]])
-					a.append([' l ',[-w,0]])
-					a.append([' Z', []])
-					newpath.set('d', simplepath.formatPath(a))
-					self.plotPath(newpath, matNew)
+					a.append( ['M ', [x, y]] )
+					a.append( [' l ', [w, 0]] )
+					a.append( [' l ', [0, h]] )
+					a.append( [' l ', [-w, 0]] )
+					a.append( [' Z', []] )
+					newpath.set( 'd', simplepath.formatPath( a ) )
+					self.plotPath( newpath, matNew )
 
-			elif node.tag == inkex.addNS('line','svg') or node.tag == 'line':
+			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
 
 				self.pathcount += 1
 				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
 				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount == self.svgLastPath):
+				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount < self.svgLastPath):
+				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 				else:
 					# Create a path to contain the line
-					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-					x1 = float(node.get('x1'))
-					y1 = float(node.get('y1'))
-					x2 = float(node.get('x2'))
-					y2 = float(node.get('y2'))
-					s = node.get('style')
+					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+					x1 = float( node.get( 'x1' ) )
+					y1 = float( node.get( 'y1' ) )
+					x2 = float( node.get( 'x2' ) )
+					y2 = float( node.get( 'y2' ) )
+					s = node.get( 'style' )
 					if s:
-						newpath.set('style',s)
-					t = node.get('transform')
+						newpath.set( 'style', s )
+					t = node.get( 'transform' )
 					if t:
-						newpath.set('transform', t)
+						newpath.set( 'transform', t )
 					a = []
-					a.append(['M ',[x1,y1]])
-					a.append([' L ',[x2,y2]])
-					newpath.set('d', simplepath.formatPath(a))
-					self.plotPath(newpath, matNew)
-					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+					a.append( ['M ', [x1, y1]] )
+					a.append( [' L ', [x2, y2]] )
+					newpath.set( 'd', simplepath.formatPath( a ) )
+					self.plotPath( newpath, matNew )
+					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('polyline','svg') or node.tag == 'polyline':
+			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
 
 				# Ignore polylines with no 'points' attribute
-				pl = node.get('points', '').strip()
+				pl = node.get( 'points', '' ).strip()
 				if pl == '':
 					pass
 
@@ -619,32 +619,32 @@ class EggBot(inkex.Effect):
 				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount == self.svgLastPath):
+				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount < self.svgLastPath):
+				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 
 				else:
 					pa = pl.split()
-					d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
-					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-					newpath.set('d', d);
-					s = node.get('style')
+					d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+					newpath.set( 'd', d );
+					s = node.get( 'style' )
 					if s:
-						newpath.set('style',s)
-					t = node.get('transform')
+						newpath.set( 'style', s )
+					t = node.get( 'transform' )
 					if t:
-						newpath.set('transform', t)
-					self.plotPath(newpath, matNew)
-					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+						newpath.set( 'transform', t )
+					self.plotPath( newpath, matNew )
+					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('polygon','svg') or node.tag == 'polygon':
+			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 
 				# Ignore polygons which have no 'points' attributes
-				pl = node.get('points', '').strip()
+				pl = node.get( 'points', '' ).strip()
 				if pl == '':
 					pass
 
@@ -653,40 +653,40 @@ class EggBot(inkex.Effect):
 				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount == self.svgLastPath):
+				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 
-				if self.resumeMode and (self.pathcount < self.svgLastPath):
+				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 					pass
 
 				else:
 					pa = pl.split()
-					d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0,len(pa))])
+					d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
 					d += " Z"
-					newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-					newpath.set('d', d);
-					s = node.get('style')
+					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+					newpath.set( 'd', d );
+					s = node.get( 'style' )
 					if s:
-						newpath.set('style',s)
-					t = node.get('transform')
+						newpath.set( 'style', s )
+					t = node.get( 'transform' )
 					if t:
-						newpath.set('transform', t)
-					self.plotPath(newpath, matNew)
-					if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+						newpath.set( 'transform', t )
+					self.plotPath( newpath, matNew )
+					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('ellipse','svg') or \
-				 node.tag == 'ellipse' or \
-				 node.tag == inkex.addNS('circle','svg') or \
-				 node.tag == 'circle':
+			elif node.tag == inkex.addNS( 'ellipse', 'svg' ) or \
+				node.tag == 'ellipse' or \
+				node.tag == inkex.addNS( 'circle', 'svg' ) or \
+				node.tag == 'circle':
 
 					# Ellipses or circles with a radius attribute of value 0 are ignored
-					if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
-						rx = float(node.get('rx', '0'))
-						ry = float(node.get('ry', '0'))
+					if node.tag == inkex.addNS( 'ellipse', 'svg' ) or node.tag == 'ellipse':
+						rx = float( node.get( 'rx', '0' ) )
+						ry = float( node.get( 'ry', '0' ) )
 					else:
-						rx = float(node.get('r', '0'))
+						rx = float( node.get( 'r', '0' ) )
 						ry = rx
 					if rx == 0 or ry == 0:
 						pass
@@ -696,50 +696,50 @@ class EggBot(inkex.Effect):
 					#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
 					# self.nodeCount equal to self.svgLastPathNC
 
-					if self.resumeMode and (self.pathcount == self.svgLastPath):
+					if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 						self.nodeCount = self.svgLastPathNC
 
-					if self.resumeMode and (self.pathcount < self.svgLastPath):
+					if self.resumeMode and ( self.pathcount < self.svgLastPath ):
 						pass
 
 					else:
-						cx = float(node.get('cx', '0'))
-						cy = float(node.get('cy', '0'))
+						cx = float( node.get( 'cx', '0' ) )
+						cy = float( node.get( 'cy', '0' ) )
 						x1 = cx - rx
 						x2 = cx + rx
-						d = 'M %f,%f ' % (x1,cy) + \
-							'A %f,%f ' % (rx,ry) + \
-							'0 1 0 %f,%f ' % (x2,cy) + \
-							'A %f,%f ' % (rx,ry) + \
-							'0 1 0 %f,%f' % (x1,cy)
-						newpath = inkex.etree.Element(inkex.addNS('path','svg'))
-						newpath.set('d', d);
-						s = node.get('style')
+						d = 'M %f,%f ' % ( x1, cy ) + \
+							'A %f,%f ' % ( rx, ry ) + \
+							'0 1 0 %f,%f ' % ( x2, cy ) + \
+							'A %f,%f ' % ( rx, ry ) + \
+							'0 1 0 %f,%f' % ( x1, cy )
+						newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
+						newpath.set( 'd', d );
+						s = node.get( 'style' )
 						if s:
-							newpath.set('style',s)
-						t = node.get('transform')
+							newpath.set( 'style', s )
+						t = node.get( 'transform' )
 						if t:
-							newpath.set('transform', t)
-						self.plotPath(newpath, matNew)
-						if (self.bStopped == False):	#an "index" for resuming plots quickly-- record last complete path
+							newpath.set( 'transform', t )
+						self.plotPath( newpath, matNew )
+						if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
 							self.svgLastPath += 1
 							self.svgLastPathNC = self.nodeCount
 
-			elif node.tag == inkex.addNS('pattern','svg') or node.tag == 'pattern':
+			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
 				pass
-			elif node.tag == inkex.addNS('metadata','svg') or node.tag == 'metadata':
+			elif node.tag == inkex.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
 				pass
-			elif node.tag == inkex.addNS('defs','svg') or node.tag == 'defs':
+			elif node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs':
 				pass
-			elif node.tag == inkex.addNS('namedview','sodipodi') or node.tag == 'namedview':
+			elif node.tag == inkex.addNS( 'namedview', 'sodipodi' ) or node.tag == 'namedview':
 				pass
-			elif node.tag == inkex.addNS('eggbot','svg') or node.tag == 'eggbot':
+			elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
 				pass
-			elif node.tag == inkex.addNS('text','svg') or node.tag == 'text':
-				inkex.errormsg('Warning: unable to draw text, please convert it to a path first.')
+			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
+				inkex.errormsg( 'Warning: unable to draw text, please convert it to a path first.' )
 				pass
 			else:
-				inkex.errormsg('Warning: unable to draw object, please convert it to a path first.')
+				inkex.errormsg( 'Warning: unable to draw object, please convert it to a path first.' )
 				pass
 
 	#We are only plotting *some* layers. Check to see
@@ -752,28 +752,28 @@ class EggBot(inkex.Effect):
 
 	#	self.plotCurrentLayer =  False
 
-	def DoWePlotLayer(self, strLayerName):
+	def DoWePlotLayer( self, strLayerName ):
 		TempNumString = 'x'
 		stringPos = 1
-		CurrentLayerName = string.lstrip(strLayerName) #remove leading whitespace
+		CurrentLayerName = string.lstrip( strLayerName ) #remove leading whitespace
 
 		#Look at layer name.  Sample first character, then first two, and
 		# so on, until the string ends or the string no longer consists of
 		# digit characters only.
 
-		MaxLength = len(CurrentLayerName)
+		MaxLength = len( CurrentLayerName )
 		if MaxLength > 0:
 			while stringPos <= MaxLength:
-				if str.isdigit( CurrentLayerName[:stringPos]):
+				if str.isdigit( CurrentLayerName[:stringPos] ):
 					TempNumString = CurrentLayerName[:stringPos] # Store longest numeric string so far
 					stringPos = stringPos + 1
 				else:
 					break
 
-		self.plotCurrentLayer =  False    #Temporarily assume that we aren't plotting the layer
-		if (str.isdigit(TempNumString)):
-			if (self.svgLayer == int(float(TempNumString))):
-				self.plotCurrentLayer =  True	#We get to plot the layer!
+		self.plotCurrentLayer = False    #Temporarily assume that we aren't plotting the layer
+		if ( str.isdigit( TempNumString ) ):
+			if ( self.svgLayer == int( float( TempNumString ) ) ):
+				self.plotCurrentLayer = True	#We get to plot the layer!
 				self.LayersPlotted += 1
 		#Note: this function is only called if we are NOT plotting all layers.
 
@@ -781,17 +781,17 @@ class EggBot(inkex.Effect):
 	Plot the path while applying the transformation defined
 	by the matrix [matTransform].
 	'''
-	def plotPath(self, path, matTransform):
+	def plotPath( self, path, matTransform ):
 		''' turn this path into a cubicsuperpath (list of beziers)... '''
-		d = path.get('d')
+		d = path.get( 'd' )
 
-		if len(simplepath.parsePath(d)) == 0:
+		if len( simplepath.parsePath( d ) ) == 0:
 			return
 
-		p = cubicsuperpath.parsePath(d)
+		p = cubicsuperpath.parsePath( d )
 
 		''' ...and apply the transformation to each point '''
-		applyTransformToPath(matTransform, p)
+		applyTransformToPath( matTransform, p )
 
 		'''
 		p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
@@ -799,7 +799,7 @@ class EggBot(inkex.Effect):
 		'''
 		for sp in p:
 
-			subdivideCubicPath(sp, self.options.smoothness)
+			subdivideCubicPath( sp, self.options.smoothness )
 			nIndex = 0
 
 			for csp in sp:
@@ -817,12 +817,12 @@ class EggBot(inkex.Effect):
 
 				nIndex += 1
 
-				if (self.DoubleStepSize == True):
-					self.fX = float(csp[1][0]) / 2.0
-					self.fY = float(csp[1][1]) / 2.0
+				if ( self.DoubleStepSize == True ):
+					self.fX = float( csp[1][0] ) / 2.0
+					self.fY = float( csp[1][1] ) / 2.0
 				else:
-					self.fX = float(csp[1][0])
-					self.fY = float(csp[1][1])
+					self.fX = float( csp[1][0] )
+					self.fY = float( csp[1][1] )
 
 				''' store home '''
 				if self.ptFirst is None:
@@ -832,58 +832,58 @@ class EggBot(inkex.Effect):
 						self.fPrevX = self.fX
 						#self.fPrevY = N_PEN_AXIS_STEPS / 2.0
 
-						if (self.DoubleStepSize == True):
+						if ( self.DoubleStepSize == True ):
 							self.fPrevY = N_PEN_AXIS_STEPS / 4.0
 						else:
 							self.fPrevY = N_PEN_AXIS_STEPS / 2.0
 
-						self.ptFirst = (self.fPrevX, self.fPrevY)
+						self.ptFirst = ( self.fPrevX, self.fPrevY )
 					else:
-						self.ptFirst = (self.fX, self.fY)
+						self.ptFirst = ( self.fX, self.fY )
 
 				if self.plotCurrentLayer:
 					self.plotLineAndTime()
 					self.fPrevX = self.fX
 					self.fPrevY = self.fY
 
-	def sendEnableMotors(self):
-		self.doCommand('EM,1,1\r')
+	def sendEnableMotors( self ):
+		self.doCommand( 'EM,1,1\r' )
 
-	def sendDisableMotors(self):
-		self.doCommand('EM,0,0\r')
+	def sendDisableMotors( self ):
+		self.doCommand( 'EM,0,0\r' )
 
-	def penUp(self):
-		if ((self.resumeMode != True) or (self.virtualPenIsUp != True)):
-			self.doCommand('SP,1\r')
-			self.doCommand('SM,' + str(self.options.penUpDelay) + ',0,0\r') # pause for pen to go up
+	def penUp( self ):
+		if ( ( self.resumeMode != True ) or ( self.virtualPenIsUp != True ) ):
+			self.doCommand( 'SP,1\r' )
+			self.doCommand( 'SM,' + str( self.options.penUpDelay ) + ',0,0\r' ) # pause for pen to go up
 			self.bPenIsUp = True
 		self.virtualPenIsUp = True
 
-	def penDown(self):
+	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-		if (self.resumeMode != True):
-			self.doCommand('SP,0\r')
-			self.doCommand('SM,' + str(self.options.penDownDelay) + ',0,0\r') # pause for pen to go down
+		if ( self.resumeMode != True ):
+			self.doCommand( 'SP,0\r' )
+			self.doCommand( 'SM,' + str( self.options.penDownDelay ) + ',0,0\r' ) # pause for pen to go down
 			self.bPenIsUp = False
 
-	def ServoSetupWrapper(self):
+	def ServoSetupWrapper( self ):
 		self.ServoSetup()
-		strVersion = self.doRequest('QP\r') #Query pen position: 1 up, 0 down (followed by OK)
+		strVersion = self.doRequest( 'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
 		if strVersion[0] == '0':
 			#inkex.errormsg('Pen is down' )
-			self.doCommand('SP,0\r') #Lower Pen
+			self.doCommand( 'SP,0\r' ) #Lower Pen
 		else:
-			self.doCommand('SP,1\r') #Raise pen
+			self.doCommand( 'SP,1\r' ) #Raise pen
 
-	def ServoSetup(self):
+	def ServoSetup( self ):
 		# Pen position units range from 0% to 100%, which correspond to
 		# a timing range of 6000 - 30000 in units of 1/(12 MHz).
 		# 1% corresponds to 20 us, or 240 units of 1/(12 MHz).
 
-		intTemp = 240 * (self.options.penUpPosition + 25)
-		self.doCommand('SC,4,' + str(intTemp) + '\r')
-		intTemp = 240 * (self.options.penDownPosition + 25)
-		self.doCommand('SC,5,' + str(intTemp) + '\r')
+		intTemp = 240 * ( self.options.penUpPosition + 25 )
+		self.doCommand( 'SC,4,' + str( intTemp ) + '\r' )
+		intTemp = 240 * ( self.options.penDownPosition + 25 )
+		self.doCommand( 'SC,5,' + str( intTemp ) + '\r' )
 
 		# Servo speed units are in units of %/second, referring to the
 		# percentages above.  The EBB takes speeds in units of 1/(12 MHz) steps
@@ -893,104 +893,104 @@ class EggBot(inkex.Effect):
 		# to within 1 %.
 
 		intTemp = 5 * self.options.ServoSpeed
-		self.doCommand('SC,10,' + str(intTemp) + '\r')
+		self.doCommand( 'SC,10,' + str( intTemp ) + '\r' )
 		#inkex.errormsg('Setting up Servo Motors!')
 
 
-	def stop(self):
+	def stop( self ):
 		self.bStopped = True
 
 	'''
 	Send commands out the com port as a line segment (dx, dy) and a time (ms) the segment
 	should take to implement
 	'''
-	def plotLineAndTime(self):
+	def plotLineAndTime( self ):
 		if self.bStopped:
 			return
-		if (self.fPrevX is None):
+		if ( self.fPrevX is None ):
 			return
 
-		self.nDeltaX = int(self.fX) - int(self.fPrevX)
-		self.nDeltaY = int(self.fY) - int(self.fPrevY)
+		self.nDeltaX = int( self.fX ) - int( self.fPrevX )
+		self.nDeltaY = int( self.fY ) - int( self.fPrevY )
 
 		if self.bPenIsUp:
 			self.fSpeed = self.options.penUpSpeed
 
-			if (self.options.wraparound == True):
-				if (self.DoubleStepSize == True):
-					if (self.nDeltaX > 800):
+			if ( self.options.wraparound == True ):
+				if ( self.DoubleStepSize == True ):
+					if ( self.nDeltaX > 800 ):
 						self.nDeltaX -= 1600
-					elif (self.nDeltaX < -800):
+					elif ( self.nDeltaX < -800 ):
 						self.nDeltaX += 1600
 				else:
-					if (self.nDeltaX > 1600):
+					if ( self.nDeltaX > 1600 ):
 						self.nDeltaX -= 3200
-					elif (self.nDeltaX < -1600):
+					elif ( self.nDeltaX < -1600 ):
 						self.nDeltaX += 3200
 
 		else:
 			self.fSpeed = self.options.penDownSpeed
 
 
-		if (distance(self.nDeltaX, self.nDeltaY) > 0):
+		if ( distance( self.nDeltaX, self.nDeltaY ) > 0 ):
 			self.nodeCount += 1
 
 			if self.resumeMode:
-				if (self.nodeCount > self.nodeTarget):
+				if ( self.nodeCount > self.nodeTarget ):
 					self.resumeMode = False
 					#inkex.errormsg('First node plotted will be number: ' + str(self.nodeCount))
-					if (self.virtualPenIsUp != True):
+					if ( self.virtualPenIsUp != True ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
 
-			nTime = int(math.ceil(1000/self.fSpeed * distance(self.nDeltaX, self.nDeltaY)))
+			nTime = int( math.ceil( 1000 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
 
 
 
 
-			while ((abs(self.nDeltaX) > 0) or (abs(self.nDeltaY) > 0)):
-				if (nTime > 750):
-					xd = int(round((750.0 * self.nDeltaX)/nTime))
-					yd = int(round((750.0 * self.nDeltaY)/nTime))
-					td = int(750)
+			while ( ( abs( self.nDeltaX ) > 0 ) or ( abs( self.nDeltaY ) > 0 ) ):
+				if ( nTime > 750 ):
+					xd = int( round( ( 750.0 * self.nDeltaX ) / nTime ) )
+					yd = int( round( ( 750.0 * self.nDeltaY ) / nTime ) )
+					td = int( 750 )
 				else:
 					xd = self.nDeltaX
 					yd = self.nDeltaY
 					td = nTime
-					if (td < 1):
+					if ( td < 1 ):
 						td = 1		# don't allow zero-time moves.
 
-				if (self.resumeMode != True):
+				if ( self.resumeMode != True ):
 
 
-					if (self.options.revPenMotor):
+					if ( self.options.revPenMotor ):
 						yd2 = yd
 					else:
 						yd2 = -yd
-					if (self.options.revEggMotor):
+					if ( self.options.revEggMotor ):
 						xd2 = -xd
 					else:
 						xd2 = xd
 
 
 
-					strOutput = ','.join(['SM', str(td), str(yd2), str(xd2)]) + '\r'
+					strOutput = ','.join( ['SM', str( td ), str( yd2 ), str( xd2 )] ) + '\r'
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
-					self.doCommand(strOutput)
+					self.doCommand( strOutput )
 
 				self.nDeltaX -= xd
 				self.nDeltaY -= yd
 				nTime -= td
 
 			#self.doCommand('NI\r')  #Increment node counter on EBB
-			strButton = self.doRequest('QB\r') #Query if button pressed
+			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
 			if strButton[0] == '0':
 				pass #button not pressed
 			else:
 				self.svgNodeCount = self.nodeCount;
-				inkex.errormsg('Plot paused by button press after segment number ' + str(self.nodeCount) + '.')
-				inkex.errormsg('Use the "resume" feature to continue.' )
+				inkex.errormsg( 'Plot paused by button press after segment number ' + str( self.nodeCount ) + '.' )
+				inkex.errormsg( 'Use the "resume" feature to continue.' )
 				#self.penUp()  # Should be redundant...
 				self.bStopped = True
 				return
@@ -998,16 +998,16 @@ class EggBot(inkex.Effect):
 		''' note: the pen-motor is first, and it corresponds to the y-axis on-screen '''
 
 
-	def EggbotOpenSerial(self):
+	def EggbotOpenSerial( self ):
 		if not bDryRun:
 			self.serialPort = self.getSerialPort()
 		else:
-			self.serialPort = open(DRY_RUN_OUTPUT_FILE, 'w')
+			self.serialPort = open( DRY_RUN_OUTPUT_FILE, 'w' )
 
 		if self.serialPort is None:
-			inkex.errormsg(gettext.gettext("Unable to find an Eggbot on any serial port. :("))
+			inkex.errormsg( gettext.gettext( "Unable to find an Eggbot on any serial port. :(" ) )
 
-	def EggbotCloseSerial(self):
+	def EggbotCloseSerial( self ):
 		try:
 			if self.serialPort != None:
 				self.serialPort.flush()
@@ -1021,26 +1021,26 @@ class EggBot(inkex.Effect):
 
 
 	'''
-    look at COM1 to COM20 and return a SerialPort object
-    for the first port with an EBB (eggbot board).
+look at COM1 to COM20 and return a SerialPort object
+for the first port with an EBB (eggbot board).
 
-    YOU are responsible for closing this serial port!
-    '''
-	def testSerialPort(self, strComPort):
+YOU are responsible for closing this serial port!
+'''
+	def testSerialPort( self, strComPort ):
 		try:
-			serialPort = serial.Serial(strComPort, timeout=1) # 1 second timeout!
+			serialPort = serial.Serial( strComPort, timeout=1 ) # 1 second timeout!
 
 			serialPort.setRTS()  # ??? remove
 			serialPort.setDTR()  # ??? remove
 			serialPort.flushInput()
 			serialPort.flushOutput()
 
-			time.sleep(0.1)
+			time.sleep( 0.1 )
 
-			serialPort.write('v\r')
+			serialPort.write( 'v\r' )
 			strVersion = serialPort.readline()
 
-			if strVersion != None and strVersion.startswith('EBB'):
+			if strVersion != None and strVersion.startswith( 'EBB' ):
 				# do version control here to check the firmware...
 				return serialPort
 			serialPort.close()
@@ -1048,19 +1048,19 @@ class EggBot(inkex.Effect):
 			pass
 		return None
 
-	def getSerialPort(self):
+	def getSerialPort( self ):
 		if platform == 'win32':
 
 			# Before searching, first check to see if the
 			# last known serial port is still good.
 
-			serialPort = self.testSerialPort(self.svgSerialPort)
+			serialPort = self.testSerialPort( self.svgSerialPort )
 			if serialPort != None:
 				return serialPort
 
-			for i in range(1, 100):
-				strComPort = 'COM' + str(i)
-				serialPort = self.testSerialPort(strComPort)
+			for i in range( 1, 100 ):
+				strComPort = 'COM' + str( i )
+				serialPort = self.testSerialPort( strComPort )
 				if serialPort != None:
 					return serialPort
 		else:
@@ -1074,13 +1074,13 @@ class EggBot(inkex.Effect):
 				strDir = '/dev'
 				strPrefix = 'ttyACM'
 
-			device_list = os.listdir(strDir)
+			device_list = os.listdir( strDir )
 
 			# Before searching, first check to see if the
 			# last known serial port is still good.
 
-			if self.svgSerialPort[len(strDir)+1:] in device_list:
-				serialPort = self.testSerialPort(self.svgSerialPort)
+			if self.svgSerialPort[len( strDir ) + 1:] in device_list:
+				serialPort = self.testSerialPort( self.svgSerialPort )
 				if serialPort != None:
 					return serialPort
 
@@ -1088,58 +1088,58 @@ class EggBot(inkex.Effect):
 			# another approach to finding the Eggbot serial port
 
 			if platform == 'darwin':
-				usbdata = os.popen('/usr/sbin/system_profiler SPUSBDataType').read()
-				match = re.match(r".*EiBotBoard:.*?Location ID: 0x(\w+).*", str(usbdata), re.M | re.S)
+				usbdata = os.popen( '/usr/sbin/system_profiler SPUSBDataType' ).read()
+				match = re.match( r".*EiBotBoard:.*?Location ID: 0x(\w+).*", str( usbdata ), re.M | re.S )
 				if match != None:
-					locid = int(match.group(1), 16)
-					strComPort = '/dev/cu.usbmodem%x' % ((locid >> 16) + 1)
-					serialPort = self.testSerialPort(strComPort)
+					locid = int( match.group( 1 ), 16 )
+					strComPort = '/dev/cu.usbmodem%x' % ( ( locid >> 16 ) + 1 )
+					serialPort = self.testSerialPort( strComPort )
 					if serialPort != None:
 						self.svgSerialPort = strComPort
 						return serialPort
 
 			for device in device_list:
 				if strPrefix != None:
-					if not device.startswith(strPrefix):
+					if not device.startswith( strPrefix ):
 						continue
 				strComPort = strDir + '/' + device
-				serialPort = self.testSerialPort(strComPort)
+				serialPort = self.testSerialPort( strComPort )
 				if serialPort != None:
 					self.svgSerialPort = strComPort
 					return serialPort
 		return None
 
-	def doCommand(self, cmd):
+	def doCommand( self, cmd ):
 		try:
-			self.serialPort.write(cmd)
+			self.serialPort.write( cmd )
 			response = self.serialPort.readline()
-			if (response != 'OK\r\n'):
-				if (response != ''):
-					inkex.errormsg('After command ' + cmd + ',')
-					inkex.errormsg('Received bad response from EBB: ' + str(response) + '.')
+			if ( response != 'OK\r\n' ):
+				if ( response != '' ):
+					inkex.errormsg( 'After command ' + cmd + ',' )
+					inkex.errormsg( 'Received bad response from EBB: ' + str( response ) + '.' )
 					#inkex.errormsg('BTW:: Node number is ' + str(self.nodeCount) + '.')
 
 				else:
-					inkex.errormsg('EBB Serial Timeout.')
+					inkex.errormsg( 'EBB Serial Timeout.' )
 
 		except:
 			pass
 
-	def doRequest(self, cmd):
+	def doRequest( self, cmd ):
 		response = ''
 		try:
-			self.serialPort.write(cmd)
+			self.serialPort.write( cmd )
 			response = self.serialPort.readline()
 			responseDummy = self.serialPort.readline() #read in extra blank/OK line
 		except:
-			inkex.errormsg(gettext.gettext("Error reading serial data."))
+			inkex.errormsg( gettext.gettext( "Error reading serial data." ) )
 
 		return response
 '''
 Pythagorean theorem!
 '''
-def distance(x, y):
-   return sqrt(x*x + y*y)
+def distance( x, y ):
+	return sqrt( x * x + y * y )
 
 e = EggBot()
 #e.affect(output=False)
