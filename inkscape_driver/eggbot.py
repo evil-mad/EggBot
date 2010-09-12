@@ -19,15 +19,13 @@ from bezmisc import *
 from math import sqrt
 from simpletransform import *
 import gettext
-#import inkex
-#import cubicsuperpath
 import simplepath
 import cspsubdiv
+import os
 import serial
 import string
 import sys
 import time
-#import pathmodifier
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
@@ -51,16 +49,14 @@ bDrawPenUpLines = False
 bDryRun = False # write the commands to a text file instead of the serial port
 
 platform = sys.platform.lower()
+
+HOME = os.getenv( 'HOME' )
 if platform == 'win32':
-	DEBUG_OUTPUT_FILE = 'C:/test.hpgl'
-	DRY_RUN_OUTPUT_FILE = 'C:/dry_run.txt'
-	MISC_OUTPUT_FILE = 'C:/misc.txt'
-	#STR_DEFAULT_COM_PORT = 'COM6'
-else:
-	import os #, tty
-	DEBUG_OUTPUT_FILE = os.getenv( 'HOME' ) + '/test.hpgl'
-	MISC_OUTPUT_FILE = os.getenv( 'HOME' ) + '/misc.txt'
-	DRY_RUN_OUTPUT_FILE = os.getenv( 'HOME' ) + '/dry_run.txt'
+	HOME = os.path.realpath( "C:/" )  # Arguably, this should be %APPDATA% or %TEMP%
+
+DEBUG_OUTPUT_FILE = os.path.join( HOME, 'test.hpgl' )
+DRY_RUN_OUTPUT_FILE = os.path.join( HOME, 'dry_run.txt' )
+MISC_OUTPUT_FILE = os.path.join( HOME, 'misc.txt' )
 
 ##    if platform == 'darwin':
 ##	''' There's no good value for OS X '''
@@ -84,7 +80,6 @@ def subdivideCubicPath( sp, flat, i=1 ):
 
 	while True:
 		while True:
-
 			if i >= len( sp ):
 				return
 
@@ -236,14 +231,14 @@ class EggBot( inkex.Effect ):
 			self.EggbotOpenSerial()
 			self.svgNodeCount = 0
 			self.svgLastPath = 0
-			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
+			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.svgLayer = 12345;  # indicate that we are plotting all layers.
 			self.plotToEggBot()
 
 
 		elif self.options.tab == '"resume"':
 			self.EggbotOpenSerial()
-			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
+			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.resumePlotSetup()
 			if self.resumeMode:
 				self.plotToEggBot()
@@ -258,7 +253,7 @@ class EggBot( inkex.Effect ):
 			self.LayersPlotted = 0
 			self.svgLastPath = 0
 			self.EggbotOpenSerial()
-			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
+			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
 			self.svgNodeCount = 0;
 			self.svgLayer = self.options.layernumber
 			self.plotToEggBot()
@@ -1044,7 +1039,6 @@ class EggBot( inkex.Effect ):
 
 			# Before searching, first check to see if the
 			# last known serial port is still good.
-
 			serialPort = self.testSerialPort( self.svgSerialPort )
 			if serialPort != None:
 				return serialPort
