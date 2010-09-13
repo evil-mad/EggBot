@@ -479,9 +479,9 @@ class EggBot( inkex.Effect ):
 		that should be applied to each path.
 
 		This function handles path, group, line, rect, polyline, polygon,
-		circle, ellipse and clone elements.  Notable elements not handled
-		include text.  Unhandled elements should be converted to paths in
-		Inkscape.
+		circle, ellipse and use (clone) elements.  Notable elements not
+		handled include text.  Unhandled elements should be converted to
+		paths in Inkscape.
 		"""
 		for node in aNodeList:
 			# Ignore invisible nodes
@@ -493,14 +493,31 @@ class EggBot( inkex.Effect ):
 
 			# first apply the current matrix transform to this node's tranform
 			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
+
 			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
+
 				self.penUp()
 				if ( node.get( inkex.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
 					if self.allLayers == False:
 						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
 						self.DoWePlotLayer( node.get( inkex.addNS( 'label', 'inkscape' ) ) )
 				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
+
 			elif node.tag == inkex.addNS( 'use', 'svg' ) or node.tag == 'use':
+
+				# A <use> element refers to another SVG element via an xlink:href="#blah"
+				# attribute.  We will handle the element by doing an XPath search through
+				# the document, looking for the element with the matching id="blah"
+				# attribute.  We then recursively process that element after applying
+				# any necessary (x,y) translation.
+				#
+				# Notes:
+				#  1. We ignore the height and width attributes as they do not apply to
+				#     path-like elements, and
+				#  2. Even if the use element has visibility="hidden", SVG still calls
+				#     for processing the referenced element.  The referenced element is
+				#     hidden only if its visibility is "inherit" or "hidden".
+
 				refid = node.get( inkex.addNS( 'href', 'xlink' ) )
 				if refid:
 					# [1:] to ignore leading '#' in reference
@@ -521,7 +538,9 @@ class EggBot( inkex.Effect ):
 						pass
 				else:
 					pass
+
 			elif node.tag == inkex.addNS( 'path', 'svg' ):
+
 				self.pathcount += 1
 
 				# if we're in resume mode AND self.pathcount < self.svgLastPath,
@@ -541,13 +560,23 @@ class EggBot( inkex.Effect ):
 
 			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
+				# Manually transform
+				#
+				#    <rect x="X" y="Y" width="W" height="H"/>
+				#
+				# into
+				#
+				#    <path d="MX,Y lW,0 l0,H l-W,0 z"/>
+				#
+				# I.e., explicitly draw three sides of the rectangle and the
+				# fourth side implicitly
+
 				self.pathcount += 1
 				# if we're in resume mode AND self.pathcount < self.svgLastPath,
 				#    then skip over this path.
 				# if we're in resume mode and self.pathcount = self.svgLastPath,
 				#    then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
-
 				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
 					self.nodeCount = self.svgLastPathNC
 				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
@@ -575,6 +604,14 @@ class EggBot( inkex.Effect ):
 					self.plotPath( newpath, matNew )
 
 			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
+
+				# Convert
+				#
+				#   <line x1="X1" y1="Y1" x2="X2" y2="Y2/>
+				#
+				# to
+				#
+				#   <path d="MX1,Y1 LX2,Y2"/>
 
 				self.pathcount += 1
 				# if we're in resume mode AND self.pathcount < self.svgLastPath,
@@ -610,7 +647,17 @@ class EggBot( inkex.Effect ):
 						self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
-				# Ignore polylines with no 'points' attribute
+
+				# Convert
+				#
+				#  <polyline points="x1,y1 x2,y2 x3,y3 [...]"/>
+				#
+				# to
+				#
+				#   <path d="Mx1,y1 Lx2,y2 Lx3,y3 [...]"/>
+				#
+				# Note: we ignore polylines with no points
+
 				pl = node.get( 'points', '' ).strip()
 				if pl == '':
 					pass
@@ -644,7 +691,16 @@ class EggBot( inkex.Effect ):
 
 			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 
-				# Ignore polygons which have no 'points' attributes
+				# Convert
+				#
+				#  <polygon points="x1,y1 x2,y2 x3,y3 [...]"/>
+				#
+				# to
+				#
+				#   <path d="Mx1,y1 Lx2,y2 Lx3,y3 [...] Z"/>
+				#
+				# Note: we ignore polygons with no points
+
 				pl = node.get( 'points', '' ).strip()
 				if pl == '':
 					pass
@@ -682,7 +738,22 @@ class EggBot( inkex.Effect ):
 				node.tag == inkex.addNS( 'circle', 'svg' ) or \
 				node.tag == 'circle':
 
-					# Ellipses or circles with a radius attribute of value 0 are ignored
+					# Convert circles and ellipses to a path with two 180 degree arcs.
+					# In general (an ellipse), we convert
+					#
+					#   <ellipse rx="RX" ry="RY" cx="X" cy="Y"/>
+					#
+					# to
+					#
+					#   <path d="MX1,CY A RX,RY 0 1 0 X2,CY A RX,RY 0 1 0 X1,CY"/>
+					#
+					# where
+					#
+					#   X1 = CX - RX
+					#   X2 = CX + RX
+					#
+					# Note: ellipses or circles with a radius attribute of value 0 are ignored
+
 					if node.tag == inkex.addNS( 'ellipse', 'svg' ) or node.tag == 'ellipse':
 						rx = float( node.get( 'rx', '0' ) )
 						ry = float( node.get( 'ry', '0' ) )
