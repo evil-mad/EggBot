@@ -26,6 +26,7 @@ import serial
 import string
 import sys
 import time
+import eggbot_scan
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
@@ -1035,63 +1036,26 @@ class EggBot( inkex.Effect ):
 		return None
 
 	def getSerialPort( self ):
-		if platform == 'win32':
 
-			# Before searching, first check to see if the
-			# last known serial port is still good.
-			serialPort = self.testSerialPort( self.svgSerialPort )
+		# Before searching, first check to see if the last known
+		# serial port is still good.
+
+		serialPort = self.testSerialPort( self.svgSerialPort )
+		if serialPort != None:
+			return serialPort
+
+		# Try any devices which seem to have EBB boards attached
+		for strComPort in eggbot_scan.findEiBotBoards():
+			serialPort = self.testSerialPort( strComPort )
 			if serialPort != None:
 				return serialPort
 
-			for i in range( 1, 100 ):
-				strComPort = 'COM' + str( i )
-				serialPort = self.testSerialPort( strComPort )
-				if serialPort != None:
-					return serialPort
-		else:
-			if platform == 'darwin':
-				strDir = '/dev'
-				strPrefix = 'cu.usbmodem'
-			elif platform == 'sunos5':
-				strDir = '/dev/term'
-				strPrefix = None
-			else:
-				strDir = '/dev'
-				strPrefix = 'ttyACM'
+		# Try any likely ports
+		for strComPort in eggbot_scan.findPorts():
+			serialPort = self.testSerialPort( strComPort )
+			if serialPort != None:
+				return serialPort
 
-			device_list = os.listdir( strDir )
-
-			# Before searching, first check to see if the
-			# last known serial port is still good.
-
-			if self.svgSerialPort[len( strDir ) + 1:] in device_list:
-				serialPort = self.testSerialPort( self.svgSerialPort )
-				if serialPort != None:
-					return serialPort
-
-			# Before going through the entire device list, try
-			# another approach to finding the Eggbot serial port
-
-			if platform == 'darwin':
-				usbdata = os.popen( '/usr/sbin/system_profiler SPUSBDataType' ).read()
-				match = re.match( r".*EiBotBoard:.*?Location ID: 0x(\w+).*", str( usbdata ), re.M | re.S )
-				if match != None:
-					locid = int( match.group( 1 ), 16 )
-					strComPort = '/dev/cu.usbmodem%x' % ( ( locid >> 16 ) + 1 )
-					serialPort = self.testSerialPort( strComPort )
-					if serialPort != None:
-						self.svgSerialPort = strComPort
-						return serialPort
-
-			for device in device_list:
-				if strPrefix != None:
-					if not device.startswith( strPrefix ):
-						continue
-				strComPort = strDir + '/' + device
-				serialPort = self.testSerialPort( strComPort )
-				if serialPort != None:
-					self.svgSerialPort = strComPort
-					return serialPort
 		return None
 
 	def doCommand( self, cmd ):
