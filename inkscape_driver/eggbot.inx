@@ -113,8 +113,6 @@ Grey-Green-Yellow-Pink, for both motors
 Known issues:
 * "Cancel" function does not work while plotting.
  (This is due to a known bug in Inkscape.) 
-
-* Align mode (pen up, motors off) not yet implemented.
             </_param>
         </page>
     </param>

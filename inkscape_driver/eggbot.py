@@ -382,6 +382,11 @@ class EggBot( inkex.Effect ):
 			self.ServoSetupWrapper()
 			self.penUp()
 
+		elif self.options.manualType == "align-mode":
+			self.ServoSetupWrapper()
+			self.penUp()
+			self.sendDisableMotors()
+
 		elif self.options.manualType == "lower-pen":
 			self.ServoSetupWrapper()
 			self.penDown()
