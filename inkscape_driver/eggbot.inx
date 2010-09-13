@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Eggbot Control</_name>
-  <id>command.evilmadscience.plotd3.eggbot</id>
+  <id>command.evilmadscience.plotd4.eggbot</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -69,7 +69,7 @@ check the circuit board (EBB) firmware version.
 
 <param name="manualType" type="enum" _gui-text="       Command: ">
 				<item value="none"           >   -- Select --   </item>
-				<item value="align-mode"     >Egg-motor off, pen up</item>				
+				<item value="align-mode"     >Motors off, pen up</item>				
 				<item value="raise-pen"      >Raise the Pen</item>
 				<item value="lower-pen"      >Lower the Pen</item>
 				<item value="walk-egg-motor" >Walk Motor 2 (egg)</item>				
@@ -114,7 +114,7 @@ Known issues:
 * "Cancel" function does not work while plotting.
  (This is due to a known bug in Inkscape.) 
 
-* Align mode (pen up, egg-motor off) not yet implemented.
+* Align mode (pen up, motors off) not yet implemented.
             </_param>
         </page>
     </param>
