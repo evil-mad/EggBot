@@ -1048,12 +1048,14 @@ class EggBot( inkex.Effect ):
 		for strComPort in eggbot_scan.findEiBotBoards():
 			serialPort = self.testSerialPort( strComPort )
 			if serialPort != None:
+				self.svgSerialPort = strComPort
 				return serialPort
 
 		# Try any likely ports
 		for strComPort in eggbot_scan.findPorts():
 			serialPort = self.testSerialPort( strComPort )
 			if serialPort != None:
+				self.svgSerialPort = strComPort
 				return serialPort
 
 		return None
