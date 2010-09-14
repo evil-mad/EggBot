@@ -245,7 +245,7 @@ class EggBot( inkex.Effect ):
 			self.resumePlotSetup()
 			if self.resumeMode:
 				self.plotToEggBot()
-			elif ( self.options.cancelOnly == True ):
+			elif ( self.options.cancelOnly ):
 				pass
 			else:
 				inkex.errormsg( gettext.gettext( "Truly sorry, there does not seem to be any in-progress plot to resume." ) )
@@ -289,7 +289,7 @@ class EggBot( inkex.Effect ):
 	def CheckSVGforEggbotData( self ):
 		self.svgDataRead = False
 		self.recursiveEggbotDataScan( self.svg )
-		if ( self.svgDataRead == False ):    #if there is no eggbot data, add some:
+		if ( not self.svgDataRead ):    #if there is no eggbot data, add some:
 			eggbotlayer = inkex.etree.SubElement( self.svg, 'eggbot' )
 			eggbotlayer.set( 'serialport', '' )
 			eggbotlayer.set( 'layer', str( 0 ) )
@@ -300,7 +300,7 @@ class EggBot( inkex.Effect ):
 			eggbotlayer.set( 'totaldeltay', str( 0 ) )
 
 	def recursiveEggbotDataScan( self, aNodeList ):
-		if ( self.svgDataRead != True ):
+		if ( not self.svgDataRead ):
 			for node in aNodeList:
 				if node.tag == 'svg':
 					self.recursiveEggbotDataScan( node )
@@ -323,7 +323,7 @@ class EggBot( inkex.Effect ):
 						self.svgDataRead = True
 
 	def UpdateSVGEggbotData( self, aNodeList ):
-		if ( self.svgDataRead != True ):
+		if ( not self.svgDataRead ):
 			for node in aNodeList:
 				if node.tag == 'svg':
 					self.UpdateSVGEggbotData( node )
@@ -348,11 +348,11 @@ class EggBot( inkex.Effect ):
 			self.allLayers = True
 			self.plotCurrentLayer = True
 			self.LayerFound = True
-		if ( self.LayerFound == True ):
+		if ( self.LayerFound ):
 			if ( self.svgNodeCount > 0 ):
 				self.nodeTarget = self.svgNodeCount
 				self.resumeMode = True
-				if ( self.options.cancelOnly == True ):
+				if ( self.options.cancelOnly ):
 					self.resumeMode = False
 					self.fPrevX = self.svgTotalDeltaX
 					self.fPrevY = self.svgTotalDeltaY
@@ -454,14 +454,14 @@ class EggBot( inkex.Effect ):
 			self.penUp()   #Always end with pen-up
 
 			# return to home, if returnToHome = True
-			if ( ( self.bStopped == False ) and self.options.returnToHome and ( self.ptFirst != None ) ):
+			if ( ( not self.bStopped ) and self.options.returnToHome and ( self.ptFirst ) ):
 				self.fX = self.ptFirst[0]
 				self.fY = self.ptFirst[1]
 				#self.penUp()
 				self.nodeCount = self.nodeTarget    # enablesfpx return-to-home only option
 				self.plotLineAndTime()
 			#inkex.errormsg('Final node count: ' + str(self.svgNodeCount))  #Node Count - Debug option
-			if ( self.bStopped == False ):
+			if ( not self.bStopped ):
 				self.svgLayer = 0
 				self.svgNodeCount = 0
 				self.svgLastPath = 0
@@ -500,7 +500,7 @@ class EggBot( inkex.Effect ):
 
 				self.penUp()
 				if ( node.get( inkex.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
-					if self.allLayers == False:
+					if not self.allLayers:
 						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
 						self.DoWePlotLayer( node.get( inkex.addNS( 'label', 'inkscape' ) ) )
 				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
@@ -556,7 +556,7 @@ class EggBot( inkex.Effect ):
 					pass
 				else:
 					self.plotPath( node, matNew )
-					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
+					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
@@ -644,7 +644,7 @@ class EggBot( inkex.Effect ):
 					a.append( [' L ', [x2, y2]] )
 					newpath.set( 'd', simplepath.formatPath( a ) )
 					self.plotPath( newpath, matNew )
-					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
+					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
@@ -687,7 +687,7 @@ class EggBot( inkex.Effect ):
 					if t:
 						newpath.set( 'transform', t )
 					self.plotPath( newpath, matNew )
-					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
+					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
@@ -731,7 +731,7 @@ class EggBot( inkex.Effect ):
 					if t:
 						newpath.set( 'transform', t )
 					self.plotPath( newpath, matNew )
-					if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
+					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
@@ -795,7 +795,7 @@ class EggBot( inkex.Effect ):
 						if t:
 							newpath.set( 'transform', t )
 						self.plotPath( newpath, matNew )
-						if ( self.bStopped == False ):	#an "index" for resuming plots quickly-- record last complete path
+						if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 							self.svgLastPath += 1
 							self.svgLastPathNC = self.nodeCount
 
@@ -917,7 +917,7 @@ class EggBot( inkex.Effect ):
 		self.doCommand( 'EM,0,0\r' )
 
 	def penUp( self ):
-		if ( ( self.resumeMode != True ) or ( self.virtualPenIsUp != True ) ):
+		if ( ( not self.resumeMode ) or ( not self.virtualPenIsUp ) ):
 			self.doCommand( 'SP,1\r' )
 			self.doCommand( 'SM,' + str( self.options.penUpDelay ) + ',0,0\r' ) # pause for pen to go up
 			self.bPenIsUp = True
@@ -925,7 +925,7 @@ class EggBot( inkex.Effect ):
 
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-		if ( self.resumeMode != True ):
+		if ( not self.resumeMode ):
 			self.doCommand( 'SP,0\r' )
 			self.doCommand( 'SM,' + str( self.options.penDownDelay ) + ',0,0\r' ) # pause for pen to go down
 			self.bPenIsUp = False
@@ -998,7 +998,7 @@ class EggBot( inkex.Effect ):
 				if ( self.nodeCount > self.nodeTarget ):
 					self.resumeMode = False
 					#inkex.errormsg('First node plotted will be number: ' + str(self.nodeCount))
-					if ( self.virtualPenIsUp != True ):
+					if ( not self.virtualPenIsUp ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
 
@@ -1016,7 +1016,7 @@ class EggBot( inkex.Effect ):
 					if ( td < 1 ):
 						td = 1		# don't allow zero-time moves.
 
-				if ( self.resumeMode != True ):
+				if ( not self.resumeMode ):
 					if ( self.options.revPenMotor ):
 						yd2 = yd
 					else:
@@ -1060,7 +1060,7 @@ class EggBot( inkex.Effect ):
 
 	def EggbotCloseSerial( self ):
 		try:
-			if self.serialPort != None:
+			if self.serialPort:
 				self.serialPort.flush()
 				self.serialPort.close()
 			if bDebug:
@@ -1090,7 +1090,7 @@ class EggBot( inkex.Effect ):
 			serialPort.write( 'v\r' )
 			strVersion = serialPort.readline()
 
-			if strVersion != None and strVersion.startswith( 'EBB' ):
+			if strVersion and strVersion.startswith( 'EBB' ):
 				# do version control here to check the firmware...
 				return serialPort
 			serialPort.close()
@@ -1104,20 +1104,20 @@ class EggBot( inkex.Effect ):
 		# serial port is still good.
 
 		serialPort = self.testSerialPort( self.svgSerialPort )
-		if serialPort != None:
+		if serialPort:
 			return serialPort
 
 		# Try any devices which seem to have EBB boards attached
 		for strComPort in eggbot_scan.findEiBotBoards():
 			serialPort = self.testSerialPort( strComPort )
-			if serialPort != None:
+			if serialPort:
 				self.svgSerialPort = strComPort
 				return serialPort
 
 		# Try any likely ports
 		for strComPort in eggbot_scan.findPorts():
 			serialPort = self.testSerialPort( strComPort )
-			if serialPort != None:
+			if serialPort:
 				self.svgSerialPort = strComPort
 				return serialPort
 
