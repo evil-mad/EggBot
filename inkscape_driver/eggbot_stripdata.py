@@ -22,7 +22,8 @@ class EggBotStripData( inkex.Effect ):
 	def effect( self ):
 		'''Main entry point: check to see which tab is selected, and act accordingly.'''
 		self.svg = self.document.getroot()
-		inkex.etree.strip_elements( self.svg, inkex.addNS( 'eggbot', 'svg' ) )
+		for node in self.svg.xpath( '//svg:eggbot', namespaces=inkex.NSS ):
+			self.svg.remove( node )
 		inkex.errormsg( gettext.gettext( "Okay, I've removed all Eggbot data from this Inkscape file.  Have a nice day!" ) )
 
 e = EggBotStripData()
