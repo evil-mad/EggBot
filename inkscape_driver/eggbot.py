@@ -13,7 +13,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 # TODO: Fix possible timeout when raising/lowering pen, and in manual mode.
-# TODO: Clean up serial search code, esp. for Windows
+# TODO: Add and honor advisory locking around device open/close for non Win32
 
 from bezmisc import *
 from math import sqrt
