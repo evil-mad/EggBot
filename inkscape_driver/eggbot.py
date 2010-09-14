@@ -213,12 +213,14 @@ class EggBot( inkex.Effect ):
 
 		self.nDeltaX = 0
 		self.nDeltaY = 0
-		self.DoubleStepSize = True
 
+		# Hack for Craig's mismatched EBB/motors,
+		# which are half as accurate as the rest of the world
 		try:
 			import motor1600
+			self.step_scaling_factor = 2
 		except ImportError:
-			self.DoubleStepSize = False
+			self.step_scaling_factor = 1
 
 	def effect( self ):
 		'''Main entry point: check to see which tab is selected, and act accordingly.'''
@@ -888,12 +890,8 @@ class EggBot( inkex.Effect ):
 
 				nIndex += 1
 
-				if ( self.DoubleStepSize == True ):
-					self.fX = float( csp[1][0] ) / 2.0
-					self.fY = float( csp[1][1] ) / 2.0
-				else:
-					self.fX = float( csp[1][0] )
-					self.fY = float( csp[1][1] )
+				self.fX = float( csp[1][0] ) / self.step_scaling_factor
+				self.fY = float( csp[1][1] ) / self.step_scaling_factor
 
 				# store home
 				if self.ptFirst is None:
@@ -901,12 +899,7 @@ class EggBot( inkex.Effect ):
 					# if we should start at center, then the first line segment should draw from there
 					if self.options.startCentered:
 						self.fPrevX = self.fX
-						#self.fPrevY = N_PEN_AXIS_STEPS / 2.0
-
-						if ( self.DoubleStepSize == True ):
-							self.fPrevY = N_PEN_AXIS_STEPS / 4.0
-						else:
-							self.fPrevY = N_PEN_AXIS_STEPS / 2.0
+						self.fPrevY = N_PEN_AXIS_STEPS / ( 2 * self.step_scaling_factor )
 
 						self.ptFirst = ( self.fPrevX, self.fPrevY )
 					else:
@@ -988,17 +981,11 @@ class EggBot( inkex.Effect ):
 		if self.bPenIsUp:
 			self.fSpeed = self.options.penUpSpeed
 
-			if ( self.options.wraparound == True ):
-				if ( self.DoubleStepSize == True ):
-					if ( self.nDeltaX > 800 ):
-						self.nDeltaX -= 1600
-					elif ( self.nDeltaX < -800 ):
-						self.nDeltaX += 1600
-				else:
-					if ( self.nDeltaX > 1600 ):
-						self.nDeltaX -= 3200
-					elif ( self.nDeltaX < -1600 ):
-						self.nDeltaX += 3200
+			if ( self.options.wraparound ):
+				if ( self.nDeltaX > 1600 / self.step_scaling_factor ):
+					self.nDeltaX -= 3200 / self.step_scaling_factor
+				elif ( self.nDeltaX < -1600 / self.step_scaling_factor ):
+					self.nDeltaX += 3200 / self.step_scaling_factor
 
 		else:
 			self.fSpeed = self.options.penDownSpeed
