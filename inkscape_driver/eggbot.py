@@ -143,10 +143,10 @@ class EggBot( inkex.Effect ):
 			action="store", type="int",
 			dest="penUpDelay", default=N_PEN_UP_DELAY,
 			help="Delay after pen up (msec)." )
-		self.OptionParser.add_option( "--togglePenNow",
+		self.OptionParser.add_option( "--engraving",
 			action="store", type="inkbool",
-			dest="togglePenNow", default=False,
-			help="Toggle the pen up/down on Apply." )
+			dest="engraving", default=False,
+			help="Enable optional engraving tool." )
 		self.OptionParser.add_option( "--tab",
 			action="store", type="string",
 			dest="tab", default="controls",
@@ -155,10 +155,14 @@ class EggBot( inkex.Effect ):
 			action="store", type="int",
 			dest="penUpPosition", default=N_PEN_UP_POS,
 			help="Position of pen when lifted" )
-		self.OptionParser.add_option( "--ServoSpeed",
+		self.OptionParser.add_option( "--ServoDownSpeed",
 			action="store", type="int",
-			dest="ServoSpeed", default=N_SERVOSPEED,
-			help="Rate of lifting/lowering pen " )
+			dest="ServoDownSpeed", default=N_SERVOSPEED,
+			help="Rate of lowering pen " )
+		self.OptionParser.add_option( "--ServoUpSpeed",
+			action="store", type="int",
+			dest="ServoUpSpeed", default=N_SERVOSPEED,
+			help="Rate of lifting pen " )
 		self.OptionParser.add_option( "--penDownPosition",
 			action="store", type="int",
 			dest="penDownPosition", default=N_PEN_DOWN_POS,
@@ -167,10 +171,14 @@ class EggBot( inkex.Effect ):
 			action="store", type="int",
 			dest="layernumber", default=N_DEFAULT_LAYER,
 			help="Selected layer for multilayer plotting" )
+		self.OptionParser.add_option( "--setupType",
+			action="store", type="string",
+			dest="setupType", default="controls",
+			help="The active option when Apply was pressed" )
 		self.OptionParser.add_option( "--manualType",
 			action="store", type="string",
 			dest="manualType", default="controls",
-			help="The active tab when Apply was pressed" )
+			help="The active option when Apply was pressed" )
 		self.OptionParser.add_option( "--WalkDistance",
 			action="store", type="int",
 			dest="WalkDistance", default=N_WALK_DEFAULT,
@@ -214,8 +222,8 @@ class EggBot( inkex.Effect ):
 		self.nDeltaX = 0
 		self.nDeltaY = 0
 
-		# Hack for Craig's mismatched EBB/motors,
-		# which are half as accurate as the rest of the world
+		# Hack for mismatched EBB/motors,
+		# which have half resolution
 		try:
 			import motor1600
 			self.step_scaling_factor = 2
@@ -261,25 +269,25 @@ class EggBot( inkex.Effect ):
 			self.svgLayer = self.options.layernumber
 			self.plotToEggBot()
 			if ( self.LayersPlotted == 0 ):
-				inkex.errormsg( gettext.gettext( "Truly sorry, but I did not find any named layers to plot." ) )
+				inkex.errormsg( gettext.gettext( "Truly sorry, but I did not find any numbered layers to plot." ) )
+
+		elif self.options.tab == '"setup"':
+			self.EggbotOpenSerial()
+			self.setupCommand()
 
 		elif self.options.tab == '"manual"':
 			self.EggbotOpenSerial()
 			self.manualCommand()
 
-
-		elif self.options.tab == '"timing"':
-			self.EggbotOpenSerial()
-			if self.serialPort is not None:
-				self.ServoSetupWrapper()
-
-		elif self.options.tab == '"options"':
-			self.EggbotOpenSerial()
-			if self.serialPort is not None:
-				self.ServoSetupWrapper()
-				if self.options.togglePenNow:
-					self.doCommand( 'TP\r' )		#Toggle pen
-
+##		elif self.options.tab == '"timing"':
+##			self.EggbotOpenSerial()
+##			if self.serialPort is not None:
+##				self.ServoSetupWrapper()
+##
+##		elif self.options.tab == '"options"':
+##			self.EggbotOpenSerial()
+##			if self.serialPort is not None:
+##
 		self.svgDataRead = False
 		self.UpdateSVGEggbotData( self.svg )
 		self.EggbotCloseSerial()
@@ -376,9 +384,8 @@ class EggBot( inkex.Effect ):
 		if self.serialPort is None:
 			return
 
-		self.ServoSetup()
-		#walks are done at pen-down speed.
-		#TODO: Add auto-detect if pen is up or down.
+##		self.ServoSetup()
+		#walks are done at pen-down speed. 
 
 		if self.options.manualType == "raise-pen":
 			self.ServoSetupWrapper()
@@ -429,6 +436,24 @@ class EggBot( inkex.Effect ):
 			self.nTime = int( round( 1000.0 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
 			strOutput = ','.join( ['SM', str( self.nTime ), str( self.nDeltaY ), str( self.nDeltaX )] ) + '\r'
 			self.doCommand( strOutput )
+
+
+
+	def setupCommand( self ):
+		"""Execute commands from the "setup" tab"""
+
+		if self.serialPort is None:
+			return
+
+		self.ServoSetupWrapper()
+
+		if self.options.setupType == "align-mode":
+			self.penUp()
+			self.sendDisableMotors()
+
+		elif self.options.setupType == "toggle-pen":
+			self.doCommand( 'TP\r' )		#Toggle pen
+
 
 
 	def plotToEggBot( self ):
@@ -956,10 +981,13 @@ class EggBot( inkex.Effect ):
 		# to 5.04 steps/21 ms.  Rounding this to 5 steps/21 ms is correct
 		# to within 1 %.
 
-		intTemp = 5 * self.options.ServoSpeed
-		self.doCommand( 'SC,10,' + str( intTemp ) + '\r' )
+##		intTemp = 5 * self.options.ServoSpeed
+##		self.doCommand( 'SC,10,' + str( intTemp ) + '\r' )
 		#inkex.errormsg('Setting up Servo Motors!')
-
+		intTemp = 5 * self.options.ServoUpSpeed
+		self.doCommand( 'SC,11,' + str( intTemp ) + '\r' )
+		intTemp = 5 * self.options.ServoDownSpeed
+		self.doCommand( 'SC,12,' + str( intTemp ) + '\r' )
 
 	def stop( self ):
 		self.bStopped = True
