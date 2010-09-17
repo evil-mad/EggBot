@@ -31,9 +31,9 @@ Need help? Visit http://egg-bot.com/
 	  <_param name="instructions_setup2" type="description" xml:space="preserve">
 </_param>
 
-<param name="setupType" type="enum" _gui-text="Action on 'Apply': ">
-				<item value="toggle-pen"     >Toggle pen up/down</item>
-				<item value="align-mode"     >Raise pen, turn off motors</item>	
+<param name="setupType" type="optiongroup" appearance="" _gui-text="Action on 'Apply': ">
+				<_option value="toggle-pen"     >Toggle pen up/down</_option>
+				<_option value="align-mode"     >Raise pen, turn off motors</_option>	
 </param>
 <_param name="instructions_setup3" type="description" xml:space="preserve">
 - Raise and lower pen to check the
@@ -71,15 +71,14 @@ lower the pen, enable or disable the motors, or
 check the circuit board (EBB) firmware version.
 </_param>
 
-<param name="manualType" type="enum" _gui-text="       Command: ">
-				<item value="none"           >   -- Select --   </item>
-				<item value="raise-pen"      >Raise the Pen</item>
-				<item value="lower-pen"      >Lower the Pen</item>
-				<item value="walk-egg-motor" >Walk Motor 2 (egg)</item>				
-				<item value="walk-pen-motor" >Walk Motor 1 (pen)</item>
-				<item value="enable-motors"  >Enable Motors</item>
-				<item value="disable-motors" >Disable Motors</item>
-				<item value="version-check"  >Check EBB Version</item>
+<param name="manualType" type="optiongroup" appearance="" _gui-text="               Command: ">
+            <_option value="raise-pen"      >Raise the Pen</_option>
+            <_option value="lower-pen"      >Lower the Pen</_option>
+            <_option value="walk-egg-motor" >Walk Motor 2 (egg)</_option>
+            <_option value="walk-pen-motor" >Walk Motor 1 (pen)</_option>
+            <_option value="enable-motors"  >Enable Motors</_option>
+            <_option value="disable-motors" >Disable Motors</_option>
+            <_option value="version-check"  >Check EBB Version</_option>
 </param>
 
 <param name="WalkDistance" type="int" min="-3200" max="3200" 
