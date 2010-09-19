@@ -96,8 +96,9 @@ lower the pen, enable or disable the motors, or
 check the circuit board (EBB) firmware version.
 </_param>
 
-      <param name="manualType" type="optiongroup" appearance=""
+      <param name="manualType" type="optiongroup" appearance="minimal"
 	     _gui-text="               Command: ">
+	<_option value="none"           >- Select -</_option>
 	<_option value="raise-pen"      >Raise the Pen</_option>
 	<_option value="lower-pen"      >Lower the Pen</_option>
 	<_option value="walk-egg-motor" >Walk Motor 2 (egg)</_option>
