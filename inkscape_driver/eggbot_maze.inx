@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+    <_name>Eggmazing</_name>
+    <id>eggmazing.eggbot</id>
+    <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+    <dependency type="executable" location="extensions">eggbot_maze.py</dependency>
+    <dependency type="executable" location="extensions">inkex.py</dependency>
+    <param name="mazeSize" type="optiongroup" appearance="" _gui-text="Maze dimensions (w x h):">
+      <option value="SMALL">Small (32 x 6)</option>
+      <option value="MEDIUM">Medium (64 x 12)</option>
+      <option value="LARGE">Large (96 x 18)</option>
+      <option value="XLARGE">Extra large (128 x 24)</option>
+    </param>
+
+    <effect needs-live-preview="false">
+      <object-type>all</object-type>
+      <effects-menu>
+	<submenu _name="EggBot"/>
+      </effects-menu>
+    </effect>
+
+    <script>
+      <command reldir="extensions" interpreter="python">eggbot_maze.py</command>
+    </script>
+
+</inkscape-extension>
