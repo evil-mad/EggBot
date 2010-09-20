@@ -20,7 +20,18 @@
 //					ND - Node count Decriment
 //					SN - Set Node count (with 8 byte variable)
 //					BL - With latest bootloader, will jumpt to Boot Load mode
-// 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX files - use c018i_HID_BL.o now
+// 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX files 
+//					- use c018i_HID_BL.o now
+// 2.0.0 9/9/10 - Add in
+//					QC - Query Current - reads voltage of current adjustment pot
+//						NOTE: This is NOT done the 'right way'. Instead, we set up the pin for 
+//						analog input at boot, then when the QC comes in, we activate the ADC and
+//						take one reading and then shut it down. Eventually, we should re-write the
+//						'UBW' ADC routines to work with the much more flexible ADC in the 46J50 part
+//						and then just use that generic code for reading the value of the pot.
+//					SC,13,{0,1} - enables/disables RB0 as another PRG button for pause detection
+// 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause button.
+//					switched it to RB2 on v1.1 hardware
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -29,17 +40,14 @@
 #include <delays.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
 #include "usb_config.h"
-#include "Usb\usb_device.h"
 #include "HardwareProfile.h"
 #include "ubw.h"
 #include "ebb.h"
 #include "delays.h"
 #include "ebb_demo.h"
 /// TODO: Fix this based upon type of CPU
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	#include "RCServo2.h"
 #endif
 
@@ -76,7 +84,7 @@
 	#define DIR1_BIT	(0x02)
 	#define STEP2_BIT	(0x04)
 	#define DIR2_BIT	(0x08)
-#elif defined(BOARD_EBB_V13) 
+#elif defined(BOARD_EBB_V13_AND_ABOVE) 
 /// TODO: Edit these
 	#define STEP1_BIT	(0x01)
 	#define DIR1_BIT	(0x02)
@@ -151,6 +159,8 @@ static PenStateType PenState;
 static unsigned long NodeCount;
 static char Layer;
 static BOOL ButtonPushed;
+static BOOL UseAltPause;
+unsigned char QC_ms_timer;
 
 // ISR
 // PORTB is the step and direction port 
@@ -210,7 +220,7 @@ void high_ISR(void)
 				{
 					PORTC = DirBits;
 				}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 				if (UseBuiltInDrivers)
 				{
 					if (DirBits & DIR1_BIT)
@@ -314,7 +324,7 @@ void high_ISR(void)
 					{
 						PORTC = OutByte;
 					}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 					if (UseBuiltInDrivers)
 					{
 						if (OutByte & STEP1_BIT)
@@ -374,7 +384,7 @@ void high_ISR(void)
 					{
 						PORTC = DirBits;
 					}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 					if (UseBuiltInDrivers)
 					{
 						Step1IO = 0;
@@ -396,7 +406,7 @@ void high_ISR(void)
 			{
 				g_RC_value[9] = g_servo_min;
 			}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			else if (gUseRCServo2)
 			{
 				// This code below is the meat of the Process_S2() function
@@ -436,7 +446,7 @@ void high_ISR(void)
 			{
 				g_RC_value[9] = g_servo_max;
 			}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			else if (gUseRCServo2)
 			{
 				// This code below is the meat of the Process_S2() function
@@ -495,7 +505,19 @@ void high_ISR(void)
 		
 
 		// Check for button being pushed
-		if (!swProgram)
+		if (
+			(!swProgram)
+			||
+			(
+				UseAltPause
+				&&
+#if defined(BOARD_EBB_V11)
+				!PORTBbits.RB2		// For v1.1 hardware, use RB2 rather than RB0 for alt pause
+#else
+				!PORTBbits.RB0
+#endif
+			)
+		)
 		{
 			ButtonPushed = TRUE;
 		}
@@ -529,7 +551,7 @@ void EBB_Init(void)
 	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
 	T1CONbits.T1SYNC = 0;
 	T1CONbits.TMR1CS = 0; 	// Use Fosc/4 to clock timer
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	// Set up TMR1 for our 25KHz High ISR for stepping
 	T1CONbits.RD16 = 0; 	// Set 8 bit mode
 	T1CONbits.TMR1CS1 = 0; 	// System clocked from Fosc/4
@@ -620,7 +642,7 @@ void EBB_Init(void)
 	Step2IO	= 0;	
 	Dir2IO = 0;	
 
-#elif defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 //	PORTA = 0;
 	RefRA0_IO_TRIS = INPUT_PIN;
 //	PORTB = 0;
@@ -632,7 +654,7 @@ void EBB_Init(void)
 //	PORTE = 0;
 //	TRISE = 0;	
 	ANCON0 = 0xFE;	// Let AN0 (RA0) be an analog input
-	ANCON1 = 0x1F;	// Set all the rest to digital I/O
+	ANCON1 = 0x17;	// Let AN11 (V+) also be an analog input
 
 	MS1_IO = 1;
 	MS1_IO_TRIS = OUTPUT_PIN;
@@ -671,13 +693,23 @@ void EBB_Init(void)
 	SolenoidState = SOLENOID_ON;
 	UseBuiltInDrivers = TRUE;
 	gUseRCServo1 = FALSE;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	gUseRCServo2 = TRUE;
 #endif
 	PenState = PEN_UP;
 	Layer = 0;
 	NodeCount = 0;
 	ButtonPushed = FALSE;
+	// Default RB0 to be an input, with the pull-up enabled, for use as alternate
+	// PAUSE button (just like PRG)
+	// Except for v1.1 hardware, use RB2
+#if defined(BOARD_EBB_V11)
+	TRISBbits.TRISB2 = 1;
+#else
+	TRISBbits.TRISB0 = 1;
+#endif
+	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
+	UseAltPause = TRUE;
 }
 
 // Stepper (mode) Configure command
@@ -701,6 +733,8 @@ void EBB_Init(void)
 // SC,10,<servo2_rate><CR> sets the rate of change for the servo (both up and down)
 // SC,11,<servo2_rate><CR> sets the pen up speed
 // SC,12,<servo2_rate><CR> sets the pen down speed
+// SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
+// SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
 void parse_SC_packet (void)
 {
 	unsigned char Para1 = 0;
@@ -722,14 +756,14 @@ void parse_SC_packet (void)
 	{
 		if (Para2 == 0)
 		{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			gUseRCServo2 = FALSE;
 #endif
 			gUseRCServo1 = FALSE;
 			// Turn off RC Servo pulses on RB1
 			g_RC_value[9] = 0;
 		}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)					// NOTE: Only VBB V1.1 and above have this RC Servo option
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)					// NOTE: Only VBB V1.1 and above have this RC Servo option
 		else if (Para2 == 1)
 		{
 			gUseRCServo1 = TRUE;
@@ -751,7 +785,7 @@ void parse_SC_packet (void)
 		{
 			gUseRCServo1 = FALSE;
 			TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
 #endif
 			process_SP(PEN_UP, 0);			// Start servo up 
@@ -769,7 +803,7 @@ void parse_SC_packet (void)
 			Dir2AltIO_TRIS = 0;
 			Step1AltIO_TRIS = 0;
 			Step2AltIO_TRIS = 0;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			Enable1AltIO_TRIS = 0;
 			Enable2AltIO_TRIS = 0;
 #endif
@@ -782,14 +816,14 @@ void parse_SC_packet (void)
 	// Set <min_servo> for Servo2 method
 	else if (Para1 == 4)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_min = Para2;
 #endif
 	}
 	// Set <max_servo> for Servo2
 	else if (Para1 == 5)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_max = Para2;
 #endif
 	}
@@ -800,14 +834,14 @@ void parse_SC_packet (void)
 		{
 			Para2 = MAX_RC_DURATION;
 		}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo_min = Para2;
 #endif
 	}
 	// Set <max_servo>
 	else if (Para1 == 7)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		if (Para2 > MAX_RC_DURATION)
 		{
 			Para2 = MAX_RC_DURATION;
@@ -818,7 +852,7 @@ void parse_SC_packet (void)
 	// Set <gRC2Slots>
 	else if (Para1 == 8)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		if (Para2 > MAX_RC2_SERVOS)
 		{
 			Para2 = MAX_RC2_SERVOS;
@@ -828,7 +862,7 @@ void parse_SC_packet (void)
 	}
 	else if (Para1 == 9)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		if (Para2 > 6)
 		{
 			Para2 = 6;
@@ -838,23 +872,34 @@ void parse_SC_packet (void)
 	}
 	else if (Para1 == 10)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_up = Para2;
 		g_servo2_rate_down = Para2;
 #endif
 	}
 	else if (Para1 == 11)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_up = Para2;
 #endif
 	}
 	else if (Para1 == 12)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_down = Para2;
 #endif
 	}
+	if (Para1 == 13)
+	{
+		if (Para2)
+		{
+			UseAltPause = TRUE;
+		}
+		else
+		{
+			UseAltPause = FALSE;
+		}			
+	}	
 	print_ack();
 }
 
@@ -914,7 +959,7 @@ static void process_SM(
 		ToLoadDirBits = 0;
 		
 		// Always enable both motors when we want to move them
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		Enable1IO = ENABLE_MOTOR;
 		Enable2IO = ENABLE_MOTOR;
 #if defined(BOARD_EBB_V10)
@@ -1104,7 +1149,7 @@ void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
 // driver chip)
 void parse_EM_packet(void)
 {
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	unsigned char EA1, EA2, EA3, EA4;
 	ExtractReturnType RetVal;
 
@@ -1122,7 +1167,7 @@ void parse_EM_packet(void)
 			if (EA1 > 0)
 			{
 				Enable1IO = ENABLE_MOTOR;
-#if defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 				if (EA1 == 1)
 				{
 					MS1_IO = 1;
@@ -1207,7 +1252,7 @@ void parse_EM_packet(void)
 			if (EA2 > 0)
 			{
 				Enable2IO = ENABLE_MOTOR;
-#if !(defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13))
+#if !(defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE))
 /// TODO: fix this based upon type of driver chip
 				if (EA2 == 1)
 				{
@@ -1375,3 +1420,71 @@ void parse_QB_packet(void)
 
 	print_ack();
 }
+
+// Query Current
+// Usage: QC<CR>
+// Returns: <voltage_on_REF_RA0_net>,<voltage_on_v+_net><CR>
+// Both values have a range of 0 to 1023 (10-bit ADC)
+// The ADC is set up with 0V = 0 and 3.3V = 1023
+// For the REF_RA0 (current adjustment pot) a value of 0V-ADC (0 counts) = 46mA
+// and a value of 2.58V-ADC (800 counts) = 1.35A
+// For the V+ net a value of 0V-ADC (0 counts) = 0V on V+
+// and a value of 3.36V-ADC (1023 counts) = 37V on V+
+// REF_RA0 comes in on AN0 (RA0)
+// V+ comes in on AN11 (RC2)
+void parse_QC_packet(void)
+{
+	unsigned int  AN0 = 0;
+	unsigned int  AN11 = 0;
+
+	// Set the channel to zero to start off with (AN0)
+	ADCON0 = 0;
+	// Set up right justified, 8Tad tim, Fosc/4
+	ADCON1 = 0b10100100;
+	
+	// Clear the interrupt
+	PIR1bits.ADIF = 0;
+
+	// And make sure to always use low priority.
+	IPR1bits.ADIP = 0;
+
+	// Make sure it's on!
+	ADCON0bits.ADON = 1;
+
+	// Wait for 10ms
+	QC_ms_timer = 10;
+	while (QC_ms_timer);
+
+	// And tell the A/D to GO!
+	ADCON0bits.GO_DONE = 1;
+	
+	// Now sit and wait until the conversion is done
+	while (ADCON0bits.GO_DONE)
+	;
+
+	// Now grab our result
+	AN0 = (ADRESH << 8) + ADRESL;
+	
+	// Set the channel to AN11
+	ADCON0 = 0b00101101;
+	
+	// Wait for 10ms
+	QC_ms_timer = 10;
+	while (QC_ms_timer);
+
+	// And tell the A/D to GO!
+	ADCON0bits.GO_DONE = 1;
+	
+	// Now sit and wait until the conversion is done
+	while (ADCON0bits.GO_DONE)
+	;
+	
+	// Now grab our result
+	AN11 = (ADRESH << 8) + ADRESL;
+	
+	// Print out our results
+	printf ((far rom char*)"%04i,%04i\r\n", AN0, AN11);
+
+	print_ack();	
+}	
+	

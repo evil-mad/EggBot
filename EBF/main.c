@@ -70,10 +70,7 @@
 
 /** I N C L U D E S **********************************************************/
 
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
 #include "usb_config.h"
-#include "USB\usb_device.h"
 
 #include "UBW.h"
 
@@ -221,7 +218,7 @@ static void InitializeSystem(void)
     ANCON0 = 0xFF;                  // Default all pins to digital
     ANCON1 = 0xFF;                  // Default all pins to digital
     WDTCONbits.ADSHR = 0;			// Select normal SFR locations
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	unsigned int pll_startup_counter;	//Used for software delay while pll is starting up
 
 	//Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices

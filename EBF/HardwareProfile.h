@@ -61,8 +61,8 @@
 	#include "HardwareProfile_EBB_V11.h"
 #elif defined(BOARD_EBB_V12)
 	#include "HardwareProfile_EBB_V12.h"
-#elif defined(BOARD_EBB_V13)
-	#include "HardwareProfile_EBB_V13.h"
+#elif defined(BOARD_EBB_V13_AND_ABOVE)
+	#include "HardwareProfile_EBB_V13_and_above.h"
 #endif
 
 #if !defined(DEMO_BOARD)

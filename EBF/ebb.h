@@ -15,6 +15,7 @@ typedef enum
 extern unsigned int DemoModeActive;
 extern near unsigned char NextReady;
 extern unsigned int comd_counter;
+extern unsigned char QC_ms_timer;
 void parse_SM_packet(void);
 void parse_SC_packet(void);
 void parse_SP_packet(void);
@@ -28,6 +29,7 @@ void parse_SL_packet(void);
 void parse_QL_packet(void);
 void parse_QB_packet(void);
 void parse_EM_packet(void);
+void parse_QC_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, unsigned short CommandDuration);
 #endif

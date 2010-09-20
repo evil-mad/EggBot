@@ -68,14 +68,11 @@
 #include <delays.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
 #include "usb_config.h"
-#include "Usb\usb_device.h"
 #include "HardwareProfile.h"
 #include "UBW.h"
 #include "ebb.h"
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	#include "RCServo2.h"
 #endif
 
@@ -127,15 +124,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 1.9.6\r\n"};
+	const rom char st_version[] = {"EBBv10 EB Firmware Version 2.0.1\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 1.9.6\r\n"};
+	const rom char st_version[] = {"EBBv11 EB Firmware Version 2.0.1\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 1.9.6\r\n"};
-#elif defined(BOARD_EBB_V13)
-	const rom char st_version[] = {"EBBv13 EB Firmware Version 1.9.6\r\n"};
+	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.0.1\r\n"};
+#elif defined(BOARD_EBB_V13_AND_ABOVE)
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.0.1\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 1.9.6\r\n"};
+	const rom char st_version[] = {"UBW EB Firmware Version 2.0.1\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -244,7 +241,7 @@ int _user_putc (char c);		// Our UBS based stream character printer
 void low_ISR(void)
 {	
 	unsigned int i;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	signed int RC2Difference = 0;
 #endif
 
@@ -329,7 +326,7 @@ void low_ISR(void)
 			}
 		}
 
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		// Only run this code if user has turned on RC method 2
 		else if (gUseRCServo2) 
 		{
@@ -545,6 +542,12 @@ void low_ISR(void)
 			}
 		}
 
+		// Software timer for QC command
+		if (QC_ms_timer)
+		{
+			QC_ms_timer--;
+		}	
+
 	} // end of 1ms interrupt
 
 	// Do we have an analog interrupt?
@@ -736,7 +739,7 @@ void UserInit(void)
 	// Call the ebb init function to setup whatever it needs
 	EBB_Init();   
 
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	RCServo2_Init();
 #endif
 
@@ -1326,7 +1329,7 @@ void parse_packet(void)
 		}
 		case ('Q' * 256) + 'N':
 		{
-			// QC for Query Node count
+			// QN for Query Node count
 			parse_QN_packet();
 			break;
 		}
@@ -1372,10 +1375,16 @@ void parse_packet(void)
 			parse_CK_packet();
 			break;
 		}
+		case ('Q' * 256) + 'C':
+		{
+			// QC for Query Current
+			parse_QC_packet();
+			break;
+		}
 		case ('S' * 256) + '2':
 		{
 			// S2 for RC Servo method 2
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			RCServo2_S2_command();
 #endif
 			break;
@@ -1604,7 +1613,7 @@ void parse_C_packet(void)
 	TRISA = PA;
 	TRISB = PB;
 	TRISC = PC;
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	TRISD = PD;
 	TRISE = PE;
 #endif
@@ -1687,7 +1696,7 @@ void parse_O_packet(void)
 	{
 		LATC = Value;
 	}
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
 	if (error_byte) return;
 	if (kEXTRACT_OK == RetVal)
@@ -1756,7 +1765,7 @@ void parse_I_packet(void)
 		PORTH,
 		PORTJ
 	);
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	printf (
 		(far rom char*)"I,%03i,%03i,%03i,%03i,%03i\r\n", 
 		PORTA,
@@ -1936,7 +1945,7 @@ void parse_PD_packet(void)
 			bitset (TRISC, pin);  	
 		}		
 	}
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	else if ('D' == port)
 	{
 		if (0 == direction)
@@ -2057,7 +2066,7 @@ void parse_PI_packet(void)
 	{
 		value = bittst (PORTC, pin);  	
 	}
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	else if ('D' == port)
 	{
 		value = bittst (PORTD, pin);  	
@@ -2163,7 +2172,7 @@ void parse_PO_packet(void)
 			bitset (LATC, pin);  	
 		}		
 	}
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13)
+#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	else if ('D' == port)
 	{
 		if (0 == value)
