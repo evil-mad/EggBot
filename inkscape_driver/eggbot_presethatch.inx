@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+   <_name>Preset hatch for fills</_name>
+   <id>command.evilmadscience.hatch.eggbot</id>
+       <dependency type="executable" location="extensions">eggbot_presethatch.py</dependency>
+       <dependency type="executable" location="extensions">inkex.py</dependency>
+       <_param name="title" type="description" xml:space="preserve">
+This extension applies a set of eggbot-friendly
+default presets to the live path effect called
+"Hatch (rough)."
+
+It affects all objects in your document that
+already have the live hatch effect applied. 
+
+After using this tool to apply presets, use
+the "Edit paths by node" tool to change the 
+frequency, direction, and/or bending of the 
+hatching, by dragging the diamond control 
+points.
+</_param>
+   <effect>
+               <object-type>path</object-type>
+                <effects-menu>
+      <submenu _name="EggBot"/>
+                </effects-menu>
+   </effect>
+   <script>
+       <command reldir="extensions" interpreter="python">eggbot_presethatch.py</command>
+   </script>
+</inkscape-extension>
