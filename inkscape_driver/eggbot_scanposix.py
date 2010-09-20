@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 
 platform = sys.platform.lower()
 
@@ -17,7 +18,7 @@ def findEiBotBoards():
 
 def findPorts():
 	for device in os.listdir( strDir ):
-		if strPrefix != None:
+		if strPrefix:
 			if not device.startswith( strPrefix ):
 				continue
-			yield strDir + '/' + device
+			yield os.path.join( strDir, device )
