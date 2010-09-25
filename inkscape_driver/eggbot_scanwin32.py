@@ -12,9 +12,19 @@ def findEiBotBoards():
 			fname,t = _winreg.QueryValueEx( hKey2, "FriendlyName" )
 			match = re.search( r".*\((.*)\)$", fname )
 			yield match.group( 1 )
+		except GeneratorExit:
+			_winreg.CloseKey( hKey )
+			_winreg.CloseKey( hReg )
+			raise StopIteration
 		except:
 			pass
-		_winreg.CloseKey( hKey2 )
+		finally:
+			_winreg.CloseKey( hKey2 )
+
+	# The next two lines may not executed when our caller
+	# succeeds in finding an Eggbot device: in that case
+	# the caller may do a "break" which then triggers the
+	# "except GeneratorExit" clause above.
 	_winreg.CloseKey( hKey )
 	_winreg.CloseKey( hReg )
 
@@ -27,11 +37,20 @@ def findPorts():
 		n,v,t = _winreg.EnumValue( hKey, i )
 		if n[0:3] == 'COM':
 			found = 1
-			if n[-1] == ':':
-				yield n[:-1]
-			else:
-				yield n
+			try:
+				if n[-1] == ':':
+					yield n[:-1]
+				else:
+					yield n
+			except GeneratorExit:
+				_winreg.CloseKey( hKey )
+				_winreg.CloseKey( hReg )
+				raise StopIteration
 
+	# The next two lines may not executed when our caller
+	# succeeds in finding an Eggbot device: in that case
+	# the caller may do a "break" which then triggers the
+	# "except GeneratorExit" clause above.
 	_winreg.CloseKey( hKey )
 	_winreg.CloseKey( hReg )
 
