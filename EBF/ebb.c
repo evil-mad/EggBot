@@ -32,6 +32,7 @@
 //					SC,13,{0,1} - enables/disables RB0 as another PRG button for pause detection
 // 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause button.
 //					switched it to RB2 on v1.1 hardware
+// 2.0.2 10/3/10 - Bug fix - QC command not returning proper results - added cast and now works OK
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1463,7 +1464,7 @@ void parse_QC_packet(void)
 	;
 
 	// Now grab our result
-	AN0 = (ADRESH << 8) + ADRESL;
+	AN0 = ((UINT)ADRESH << 8) + ADRESL;
 	
 	// Set the channel to AN11
 	ADCON0 = 0b00101101;
@@ -1480,7 +1481,7 @@ void parse_QC_packet(void)
 	;
 	
 	// Now grab our result
-	AN11 = (ADRESH << 8) + ADRESL;
+	AN11 = ((UINT)ADRESH << 8) + ADRESL;
 	
 	// Print out our results
 	printf ((far rom char*)"%04i,%04i\r\n", AN0, AN11);

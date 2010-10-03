@@ -11,7 +11,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File001]
@@ -24,7 +24,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File002]
@@ -37,7 +37,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File003]
@@ -50,7 +50,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File004]
@@ -63,7 +63,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File005]
@@ -76,7 +76,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File006]
@@ -89,7 +89,7 @@ LanguageToolLocation=C:\MCC18\bin\mcc18.exe
 PPAD=$(BINDIR)|.\EBB_V13_and_above||$(TMPDIR)|.\EBB_V13_and_above||$(AINDIR)||$(INCDIR)|c:\mcc18\h;.\Microchip_USB_2_7a\Include;..\EBF||$(LIBDIR)|C:\MCC18\lib||$(LKRDIR)||
 SOLK=<src>|main.c|ebb.c|RCServo2.c|UBW.c|usb_descriptors.c|Microchip_USB_2_7a\USB\usb_device.c|Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c||<obj>||<lib>||<lkr>|rm18f46j50_g.lkr||
 SuiteArgsString=
-ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -Opa-
+ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE -O-
 TraceCmdString=
 DebugOptions=
 [File007]

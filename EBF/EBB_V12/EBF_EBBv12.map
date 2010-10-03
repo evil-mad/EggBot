@@ -1,5 +1,5 @@
 MPLINK 4.37, Linker
-Linker Map File - Created Mon Sep 13 15:05:54 2010
+Linker Map File - Created Sun Oct 03 11:26:44 2010
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -10,57 +10,57 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                    .cinit    romdata   0x00102a    program   0x00001a
               .code_UBW.o       code   0x001044    program   0x002a88
        .code_usb_device.o       code   0x003acc    program   0x0010fa
-              .code_ebb.o       code   0x004bc6    program   0x000e0a
-         .code_vfprintf.o       code   0x0059d0    program   0x000c22
- .code_usb_function_cdc.o       code   0x0065f2    program   0x00043c
-         .code_RCServo2.o       code   0x006a2e    program   0x0002ca
-             .stringtable    romdata   0x006cf8    program   0x000207
-.romdata_usb_function_cdc.o    romdata   0x006eff    program   0x000000
-        .romdata_printf.o    romdata   0x006eff    program   0x000000
-          .idata_putc.o_i    romdata   0x006eff    program   0x000000
-           .romdata_ebb.o    romdata   0x006eff    program   0x000000
-      .idata_vfprintf.o_i    romdata   0x006eff    program   0x000000
-      .idata_RCServo2.o_i    romdata   0x006eff    program   0x000000
-      .idata_fxd3232u.o_i    romdata   0x006eff    program   0x000000
-             .code_main.o       code   0x006f00    program   0x000124
-               _cinit_scn       code   0x007024    program   0x00009e
-                   STRING       code   0x0070c2    program   0x00009a
-           .code_printf.o       code   0x00715c    program   0x000098
-                     PROG       code   0x0071f4    program   0x000096
-.romdata_usb_descriptors.o    romdata   0x00728a    program   0x00008f
-        .idata_printf.o_i    romdata   0x007319    program   0x000000
-    .romdata_usb_device.o    romdata   0x007319    program   0x000000
-.idata_usb_function_cdc.o_i    romdata   0x007319    program   0x000000
-         .romdata_c018i.o    romdata   0x007319    program   0x000000
-          .romdata_main.o    romdata   0x007319    program   0x000000
-           .idata_ebb.o_i    romdata   0x007319    program   0x000000
-  .code_usb_descriptors.o       code   0x00731a    program   0x000000
-             .code_putc.o       code   0x00731a    program   0x000084
-          .code_fxm3232.o       code   0x00739e    program   0x000070
-                    CTYPE       code   0x00740e    program   0x00004c
-         .code_fxd3232u.o       code   0x00745a    program   0x000048
-           .romdata_UBW.o    romdata   0x0074a2    program   0x00002b
-         .idata_c018i.o_i    romdata   0x0074cd    program   0x000000
-        .romdata_stdout.o    romdata   0x0074cd    program   0x000000
-          .idata_main.o_i    romdata   0x0074cd    program   0x000000
-    .idata_usb_device.o_i    romdata   0x0074cd    program   0x000000
-       .romdata_fxm3232.o    romdata   0x0074cd    program   0x000000
-        .romdata___init.o    romdata   0x0074cd    program   0x000000
-           .code_stdout.o       code   0x0074ce    program   0x000000
-                    .code       code   0x0074ce    program   0x000020
-             _startup_scn       code   0x0074ee    program   0x00001c
-                    STDIO       code   0x00750a    program   0x00001c
-      .romdata_vfprintf.o    romdata   0x007526    program   0x000011
-      .romdata_RCServo2.o    romdata   0x007537    program   0x000000
-        .idata___init.o_i    romdata   0x007537    program   0x000000
-       .idata_fxm3232.o_i    romdata   0x007537    program   0x000000
-      .romdata_fxd3232u.o    romdata   0x007537    program   0x000000
-          .romdata_putc.o    romdata   0x007537    program   0x000000
-.idata_usb_descriptors.o_i    romdata   0x007537    program   0x000000
-           .code___init.o       code   0x007538    program   0x000002
-            .code_c018i.o       code   0x007538    program   0x000000
-        .idata_stdout.o_i    romdata   0x00753a    program   0x000002
-           .idata_UBW.o_i    romdata   0x00753c    program   0x000064
+              .code_ebb.o       code   0x004bc6    program   0x000e18
+         .code_vfprintf.o       code   0x0059de    program   0x000c22
+ .code_usb_function_cdc.o       code   0x006600    program   0x00043c
+         .code_RCServo2.o       code   0x006a3c    program   0x0002ca
+             .stringtable    romdata   0x006d06    program   0x000207
+.romdata_usb_function_cdc.o    romdata   0x006f0d    program   0x000000
+        .romdata_printf.o    romdata   0x006f0d    program   0x000000
+          .idata_putc.o_i    romdata   0x006f0d    program   0x000000
+           .romdata_ebb.o    romdata   0x006f0d    program   0x000000
+      .idata_vfprintf.o_i    romdata   0x006f0d    program   0x000000
+      .idata_RCServo2.o_i    romdata   0x006f0d    program   0x000000
+      .idata_fxd3232u.o_i    romdata   0x006f0d    program   0x000000
+             .code_main.o       code   0x006f0e    program   0x000124
+               _cinit_scn       code   0x007032    program   0x00009e
+                   STRING       code   0x0070d0    program   0x00009a
+           .code_printf.o       code   0x00716a    program   0x000098
+                     PROG       code   0x007202    program   0x000096
+.romdata_usb_descriptors.o    romdata   0x007298    program   0x00008f
+        .idata_printf.o_i    romdata   0x007327    program   0x000000
+    .romdata_usb_device.o    romdata   0x007327    program   0x000000
+.idata_usb_function_cdc.o_i    romdata   0x007327    program   0x000000
+         .romdata_c018i.o    romdata   0x007327    program   0x000000
+          .romdata_main.o    romdata   0x007327    program   0x000000
+           .idata_ebb.o_i    romdata   0x007327    program   0x000000
+  .code_usb_descriptors.o       code   0x007328    program   0x000000
+             .code_putc.o       code   0x007328    program   0x000084
+          .code_fxm3232.o       code   0x0073ac    program   0x000070
+                    CTYPE       code   0x00741c    program   0x00004c
+         .code_fxd3232u.o       code   0x007468    program   0x000048
+           .romdata_UBW.o    romdata   0x0074b0    program   0x00002b
+         .idata_c018i.o_i    romdata   0x0074db    program   0x000000
+        .romdata_stdout.o    romdata   0x0074db    program   0x000000
+          .idata_main.o_i    romdata   0x0074db    program   0x000000
+    .idata_usb_device.o_i    romdata   0x0074db    program   0x000000
+       .romdata_fxm3232.o    romdata   0x0074db    program   0x000000
+        .romdata___init.o    romdata   0x0074db    program   0x000000
+           .code_stdout.o       code   0x0074dc    program   0x000000
+                    .code       code   0x0074dc    program   0x000020
+             _startup_scn       code   0x0074fc    program   0x00001c
+                    STDIO       code   0x007518    program   0x00001c
+      .romdata_vfprintf.o    romdata   0x007534    program   0x000011
+      .romdata_RCServo2.o    romdata   0x007545    program   0x000000
+        .idata___init.o_i    romdata   0x007545    program   0x000000
+       .idata_fxm3232.o_i    romdata   0x007545    program   0x000000
+      .romdata_fxd3232u.o    romdata   0x007545    program   0x000000
+          .romdata_putc.o    romdata   0x007545    program   0x000000
+.idata_usb_descriptors.o_i    romdata   0x007545    program   0x000000
+           .code___init.o       code   0x007546    program   0x000002
+            .code_c018i.o       code   0x007546    program   0x000000
+        .idata_stdout.o_i    romdata   0x007548    program   0x000002
+           .idata_UBW.o_i    romdata   0x00754a    program   0x000064
                 fast_vars      udata   0x000000       data   0x000035
                 MATH_DATA      udata   0x000035       data   0x000014
                  .tmpdata      udata   0x000049       data   0x000009
@@ -122,12 +122,12 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                             0x001000    0x001005      
                             0x001008    0x00100d      
                             0x001018    0x00101d      
-                            0x00102a    0x006efe      
-                            0x006f00    0x007318      
-                            0x00731a    0x0074cc      
-                            0x0074ce    0x007536      
-                            0x007538    0x00759f      
-            25988 out of 65538 program addresses used, program memory utilization is 39%
+                            0x00102a    0x006f0c      
+                            0x006f0e    0x007326      
+                            0x007328    0x0074da      
+                            0x0074dc    0x007544      
+                            0x007546    0x0075ad      
+            26002 out of 65538 program addresses used, program memory utilization is 39%
 
 
 
@@ -135,31 +135,31 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
            BlinkUSBStatus   0x0039c6    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                CDCInitEP   0x00668e    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-             CDCTxService   0x0068e4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+                CDCInitEP   0x00669c    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             CDCTxService   0x0068f2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
                  EBB_Init   0x004edc    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
-                 FXD3232U   0x00745a    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
-                 FXM1616S   0x0071f4    program     extern C:\MCC18\src\traditional\math\fxm1616s.asm
-                 FXM1616U   0x00724e    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
-                  FXM3232   0x00739e    program     extern C:\MCC18\src\traditional\math\fxm3232.c
-         InitializeSystem   0x006f0c    program     static D:\Projects\EggBot\SE\EBF\main.c
+                 FXD3232U   0x007468    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
+                 FXM1616S   0x007202    program     extern C:\MCC18\src\traditional\math\fxm1616s.asm
+                 FXM1616U   0x00725c    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
+                  FXM3232   0x0073ac    program     extern C:\MCC18\src\traditional\math\fxm3232.c
+         InitializeSystem   0x006f1a    program     static D:\Projects\EggBot\SE\EBF\main.c
                 ProcessIO   0x001a16    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-               Process_S2   0x006c30    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
-            RCServo2_Init   0x006a2e    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
-      RCServo2_S2_command   0x006b42    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+               Process_S2   0x006c3e    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+            RCServo2_Init   0x006a3c    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+      RCServo2_S2_command   0x006b50    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
         Remapped_High_ISR   0x001008    program     extern D:\Projects\EggBot\SE\EBF\main.c
          Remapped_Low_ISR   0x001018    program     extern D:\Projects\EggBot\SE\EBF\main.c
-               TSIGN1616A   0x007240    program     static C:\MCC18\src\traditional\math\fxm1616s.asm
-       USBCBCheckOtherReq   0x006f68    program     extern D:\Projects\EggBot\SE\EBF\main.c
-        USBCBErrorHandler   0x006f66    program     extern D:\Projects\EggBot\SE\EBF\main.c
-              USBCBInitEP   0x006f6e    program     extern D:\Projects\EggBot\SE\EBF\main.c
-          USBCBSendResume   0x006f72    program     extern D:\Projects\EggBot\SE\EBF\main.c
-    USBCBStdSetDscHandler   0x006f6c    program     extern D:\Projects\EggBot\SE\EBF\main.c
-             USBCBSuspend   0x006f60    program     extern D:\Projects\EggBot\SE\EBF\main.c
-     USBCBWakeFromSuspend   0x006f62    program     extern D:\Projects\EggBot\SE\EBF\main.c
-        USBCB_SOF_Handler   0x006f64    program     extern D:\Projects\EggBot\SE\EBF\main.c
+               TSIGN1616A   0x00724e    program     static C:\MCC18\src\traditional\math\fxm1616s.asm
+       USBCBCheckOtherReq   0x006f76    program     extern D:\Projects\EggBot\SE\EBF\main.c
+        USBCBErrorHandler   0x006f74    program     extern D:\Projects\EggBot\SE\EBF\main.c
+              USBCBInitEP   0x006f7c    program     extern D:\Projects\EggBot\SE\EBF\main.c
+          USBCBSendResume   0x006f80    program     extern D:\Projects\EggBot\SE\EBF\main.c
+    USBCBStdSetDscHandler   0x006f7a    program     extern D:\Projects\EggBot\SE\EBF\main.c
+             USBCBSuspend   0x006f6e    program     extern D:\Projects\EggBot\SE\EBF\main.c
+     USBCBWakeFromSuspend   0x006f70    program     extern D:\Projects\EggBot\SE\EBF\main.c
+        USBCB_SOF_Handler   0x006f72    program     extern D:\Projects\EggBot\SE\EBF\main.c
               USBCancelIO   0x004b16    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
-       USBCheckCDCRequest   0x0065f2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+       USBCheckCDCRequest   0x006600    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
        USBCheckStdRequest   0x00401e    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
      USBConfigureEndpoint   0x004812    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
          USBCtrlEPService   0x003db4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
@@ -182,22 +182,22 @@ USBPrepareForNextSetupTrf   0x003fba    program     extern D:\Projects\EggBot\SE
                USBSuspend   0x003d62    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
      USBTransferOnePacket   0x004a24    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
        USBWakeFromSuspend   0x003d88    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\usb_device.c
-               USB_CD_Ptr   0x007311    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-               USB_SD_Ptr   0x007313    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-USER_USB_CALLBACK_EVENT_HANDLER   0x006f8e    program     extern D:\Projects\EggBot\SE\EBF\main.c
+               USB_CD_Ptr   0x00731f    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+               USB_SD_Ptr   0x007321    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+USER_USB_CALLBACK_EVENT_HANDLER   0x006f9c    program     extern D:\Projects\EggBot\SE\EBF\main.c
                  UserInit   0x001894    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-              _2jContinue   0x0070e2    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   _2jEnd   0x007146    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                   _3jEnd   0x0070ec    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-     ___case_114_lbl00029   0x007012    program     static                          
-     ___case_115_lbl00025   0x007002    program     static                          
-     ___case_116_lbl00027   0x00700a    program     static                          
-     ___case_117_lbl00026   0x007006    program     static                          
-       ___case_1_lbl00022   0x006ff6    program     static                          
-       ___case_2_lbl00023   0x006ffa    program     static                          
-   ___case_32767_lbl00028   0x00700e    program     static                          
-       ___case_3_lbl00024   0x006ffe    program     static                          
-      ___default_lbl00030   0x007016    program     static                          
+              _2jContinue   0x0070f0    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   _2jEnd   0x007154    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   _3jEnd   0x0070fa    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+     ___case_114_lbl00029   0x007020    program     static                          
+     ___case_115_lbl00025   0x007010    program     static                          
+     ___case_116_lbl00027   0x007018    program     static                          
+     ___case_117_lbl00026   0x007014    program     static                          
+       ___case_1_lbl00022   0x007004    program     static                          
+       ___case_2_lbl00023   0x007008    program     static                          
+   ___case_32767_lbl00028   0x00701c    program     static                          
+       ___case_3_lbl00024   0x00700c    program     static                          
+      ___default_lbl00030   0x007024    program     static                          
          ___else_lbl00007   0x004c3e    program     static                          
          ___else_lbl00009   0x004c48    program     static                          
          ___else_lbl00011   0x004c54    program     static                          
@@ -253,153 +253,153 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x006f8e    program     extern D:\Projects\Egg
            ___if_lbl00056   0x004eb4    program     static                          
            ___if_lbl00059   0x004ecc    program     static                          
            ___if_lbl00060   0x004ecc    program     static                          
-       ___return_lbl00000   0x00740c    program     static                          
+       ___return_lbl00000   0x00741a    program     static                          
        ___return_lbl00000   0x004ecc    program     static                          
        ___return_lbl00000   0x001004    program     static                          
-       ___return_lbl00000   0x007508    program     static                          
-       ___return_lbl00000   0x0074a0    program     static                          
+       ___return_lbl00000   0x007516    program     static                          
+       ___return_lbl00000   0x0074ae    program     static                          
        ___return_lbl00001   0x00100c    program     static                          
-       ___return_lbl00001   0x0070c0    program     static                          
+       ___return_lbl00001   0x0070ce    program     static                          
        ___return_lbl00002   0x00101c    program     static                          
-       ___return_lbl00020   0x00701c    program     static                          
+       ___return_lbl00020   0x00702a    program     static                          
        ___return_lbl00341   0x0031b0    program     static                          
-   ___switchexit_lbl00021   0x007018    program     static                          
-                   __init   0x007538    program     extern C:\MCC18\src\traditional\stdclib\__init.c
-                   __pa_0   0x006310    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_1   0x006318    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_10   0x0063cc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_11   0x0063da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_12   0x0063f0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_13   0x00640a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_14   0x006422    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_15   0x006432    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_16   0x006448    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_17   0x00645a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_18   0x00646c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_19   0x006476    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_2   0x006322    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_20   0x006486    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_21   0x006496    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_22   0x0064a6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_23   0x0064b2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_24   0x0064c0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_25   0x0064c8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_26   0x0064d2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_27   0x0064dc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_28   0x0064e4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_29   0x0064f2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_3   0x00632c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_30   0x00650e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_31   0x006528    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_32   0x006542    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_33   0x00655a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_34   0x006564    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_35   0x006572    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_36   0x00657a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_37   0x006584    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_38   0x006594    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_39   0x0065a2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_4   0x006344    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_40   0x0065ae    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_41   0x0065ba    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_42   0x0065c2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_43   0x0065cc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_44   0x0065d2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_45   0x0065dc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_46   0x0065e8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_5   0x006358    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_6   0x006374    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_7   0x00637e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_8   0x00638a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_9   0x0063ac    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-               __string_0   0x006d1a    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_1   0x006d11    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-              __string_10   0x006e71    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_11   0x006e50    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_12   0x006e37    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_13   0x006e14    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_14   0x006dec    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_15   0x006dcf    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_16   0x006dcd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_17   0x006dc7    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_18   0x006dbd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_19   0x006db4    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_2   0x006d0a    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-              __string_20   0x006da8    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_21   0x006d9c    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_22   0x006d90    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_23   0x006d84    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_24   0x006d77    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_25   0x006d6a    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_26   0x006d5e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_27   0x006d52    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_28   0x006d2b    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_29   0x006d1f    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_3   0x006ef3    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_3   0x006d04    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_4   0x006ef0    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_4   0x006cf8    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_5   0x006eed    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_6   0x006ee7    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_7   0x006ec8    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_8   0x006eac    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_9   0x006e90    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __tmplbl_0   0x006faa    program     static                          
+   ___switchexit_lbl00021   0x007026    program     static                          
+                   __init   0x007546    program     extern C:\MCC18\src\traditional\stdclib\__init.c
+                   __pa_0   0x00631e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_1   0x006326    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_10   0x0063da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_11   0x0063e8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_12   0x0063fe    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_13   0x006418    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_14   0x006430    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_15   0x006440    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_16   0x006456    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_17   0x006468    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_18   0x00647a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_19   0x006484    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_2   0x006330    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_20   0x006494    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_21   0x0064a4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_22   0x0064b4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_23   0x0064c0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_24   0x0064ce    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_25   0x0064d6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_26   0x0064e0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_27   0x0064ea    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_28   0x0064f2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_29   0x006500    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_3   0x00633a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_30   0x00651c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_31   0x006536    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_32   0x006550    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_33   0x006568    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_34   0x006572    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_35   0x006580    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_36   0x006588    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_37   0x006592    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_38   0x0065a2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_39   0x0065b0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_4   0x006352    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_40   0x0065bc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_41   0x0065c8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_42   0x0065d0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_43   0x0065da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_44   0x0065e0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_45   0x0065ea    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_46   0x0065f6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_5   0x006366    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_6   0x006382    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_7   0x00638c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_8   0x006398    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_9   0x0063ba    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+               __string_0   0x006d28    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_1   0x006d1f    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+              __string_10   0x006e7f    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_11   0x006e5e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_12   0x006e45    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_13   0x006e22    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_14   0x006dfa    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_15   0x006ddd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_16   0x006ddb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_17   0x006dd5    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_18   0x006dcb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_19   0x006dc2    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_2   0x006d18    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+              __string_20   0x006db6    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_21   0x006daa    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_22   0x006d9e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_23   0x006d92    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_24   0x006d85    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_25   0x006d78    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_26   0x006d6c    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_27   0x006d60    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_28   0x006d39    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_29   0x006d2d    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_3   0x006f01    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_3   0x006d12    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_4   0x006efe    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_4   0x006d06    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_5   0x006efb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_6   0x006ef5    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_7   0x006ed6    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_8   0x006eba    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_9   0x006e9e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __tmplbl_0   0x006fb8    program     static                          
                __tmplbl_0   0x004c30    program     static                          
                __tmplbl_1   0x004c28    program     static                          
-               __tmplbl_1   0x006fb6    program     static                          
+               __tmplbl_1   0x006fc4    program     static                          
                __tmplbl_2   0x004c22    program     static                          
-               __tmplbl_2   0x006fc0    program     static                          
+               __tmplbl_2   0x006fce    program     static                          
                __tmplbl_3   0x004c1c    program     static                          
-               __tmplbl_3   0x006fca    program     static                          
+               __tmplbl_3   0x006fd8    program     static                          
                __tmplbl_4   0x004ec6    program     static                          
-               __tmplbl_4   0x006fd4    program     static                          
-              __tmplbl_42   0x0064a6    program     static                          
-              __tmplbl_43   0x0062ee    program     static                          
-              __tmplbl_44   0x0062d4    program     static                          
-               __tmplbl_5   0x006fde    program     static                          
+               __tmplbl_4   0x006fe2    program     static                          
+              __tmplbl_42   0x0064b4    program     static                          
+              __tmplbl_43   0x0062fc    program     static                          
+              __tmplbl_44   0x0062e2    program     static                          
+               __tmplbl_5   0x006fec    program     static                          
                __tmplbl_5   0x004eba    program     static                          
-               __tmplbl_6   0x006fe8    program     static                          
+               __tmplbl_6   0x006ff6    program     static                          
                __tmplbl_6   0x004ec0    program     static                          
-               __tmplbl_7   0x006ff2    program     static                          
-              __tmplbl_85   0x005a26    program     static                          
-            __zero_memory   0x0074ce    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                _do_cinit   0x007024    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                   _false   0x00749c    program     static                          
+               __tmplbl_7   0x007000    program     static                          
+              __tmplbl_85   0x005a34    program     static                          
+            __zero_memory   0x0074dc    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                _do_cinit   0x007032    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                   _false   0x0074aa    program     static                          
                    _reset   0x001000    program     extern D:\Projects\EggBot\SE\EBF\main.c
-                 _startup   0x0074ee    program     extern C:\MCC18\src\traditional\startup\c018i.c
-              _usart_putc   0x00750a    program     extern C:\MCC18\src\pmc_common\USART\_usartpc.asm
+                 _startup   0x0074fc    program     extern C:\MCC18\src\traditional\startup\c018i.c
+              _usart_putc   0x007518    program     extern C:\MCC18\src\pmc_common\USART\_usartpc.asm
                _user_putc   0x001dfc    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
    check_and_send_TX_data   0x001e66    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                compare_l   0x0074e4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-        configDescriptor1   0x00729c    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                copy_loop   0x007096    program     static                          
-            copy_one_byte   0x00709c    program     static                          
-               device_dsc   0x00728a    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                     done   0x0070c0    program     static                          
-             done_copying   0x0070aa    program     static                          
+                compare_l   0x0074f2    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+        configDescriptor1   0x0072aa    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                copy_loop   0x0070a4    program     static                          
+            copy_one_byte   0x0070aa    program     static                          
+               device_dsc   0x007298    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                     done   0x0070ce    program     static                          
+             done_copying   0x0070b8    program     static                          
             extract_digit   0x00388a    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
            extract_number   0x003426    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-             getsUSBUSART   0x0066f4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             getsUSBUSART   0x006702    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
                  high_ISR   0x004bc6    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
-                  isdigit   0x007436    program     extern C:\MCC18\src\traditional\stdclib\isdigit.asm
-                     jEnd   0x007110    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                     jEnd   0x0070f4    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                     jEnd   0x007148    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                    jLoop   0x007130    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                    jLoop   0x007106    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                    jLoop   0x0070d6    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   jMatch   0x007456    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
-                 jNoMatch   0x007458    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
-                 jNoMatch   0x007434    program     static C:\MCC18\src\traditional\stdclib\toupper.asm
-                     loop   0x0074fe    program     static                          
-                     loop   0x00751a    program     static C:\MCC18\src\pmc_common\USART\_usartpc.asm
-                     loop   0x007468    program     static                          
-                   loop_h   0x0074dc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_l   0x0074e6    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  isdigit   0x007444    program     extern C:\MCC18\src\traditional\stdclib\isdigit.asm
+                     jEnd   0x00711e    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                     jEnd   0x007102    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                     jEnd   0x007156    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                    jLoop   0x00713e    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                    jLoop   0x007114    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                    jLoop   0x0070e4    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   jMatch   0x007464    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
+                 jNoMatch   0x007466    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
+                 jNoMatch   0x007442    program     static C:\MCC18\src\traditional\stdclib\toupper.asm
+                     loop   0x00750c    program     static                          
+                     loop   0x007528    program     static C:\MCC18\src\pmc_common\USART\_usartpc.asm
+                     loop   0x007476    program     static                          
+                   loop_h   0x0074ea    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_l   0x0074f4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
                   low_ISR   0x001044    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                     main   0x006f00    program     extern D:\Projects\EggBot\SE\EBF\main.c
-                   memset   0x0070c2    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
+                     main   0x006f0e    program     extern D:\Projects\EggBot\SE\EBF\main.c
+                   memset   0x0070d0    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
            parse_A_packet   0x002824    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
           parse_BC_packet   0x003018    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
           parse_BL_packet   0x0031a8    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
@@ -447,27 +447,27 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x006f8e    program     extern D:\Projects\Egg
              parse_packet   0x001efc    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
                 print_ack   0x0023e2    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
              print_status   0x00399e    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                   printf   0x00715c    program     extern C:\MCC18\src\traditional\stdclib\printf.c
+                   printf   0x00716a    program     extern C:\MCC18\src\traditional\stdclib\printf.c
                process_SM   0x0052ea    program     static D:\Projects\EggBot\SE\EBF\ebb.c
                process_SP   0x005670    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
-              putUSBUSART   0x0067b4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-                     putc   0x00731a    program     extern C:\MCC18\src\traditional\stdclib\putc.c
-            putrsUSBUSART   0x006862    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-             putsUSBUSART   0x0067e2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-                 s_digits   0x007526    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-            s_put_n_chars   0x0059d0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                    sd000   0x0072df    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                    sd001   0x0072e3    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                    sd002   0x0072fb    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                  st_LFCR   0x0074a7    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                    st_OK   0x0074a2    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-               st_version   0x0074aa    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                   strlen   0x0070f6    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
-                strlenpgm   0x007112    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                     test   0x00703e    program     static                          
-                  toupper   0x00740e    program     extern C:\MCC18\src\traditional\stdclib\toupper.asm
-                 vfprintf   0x0059fc    program     extern C:\MCC18\src\traditional\stdclib\vfprintf.c
-               zero_block   0x0074dc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+              putUSBUSART   0x0067c2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+                     putc   0x007328    program     extern C:\MCC18\src\traditional\stdclib\putc.c
+            putrsUSBUSART   0x006870    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             putsUSBUSART   0x0067f0    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+                 s_digits   0x007534    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+            s_put_n_chars   0x0059de    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                    sd000   0x0072ed    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                    sd001   0x0072f1    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                    sd002   0x007309    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                  st_LFCR   0x0074b5    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+                    st_OK   0x0074b0    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+               st_version   0x0074b8    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+                   strlen   0x007104    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
+                strlenpgm   0x007120    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                     test   0x00704c    program     static                          
+                  toupper   0x00741c    program     extern C:\MCC18\src\traditional\stdclib\toupper.asm
+                 vfprintf   0x005a0a    program     extern C:\MCC18\src\traditional\stdclib\vfprintf.c
+               zero_block   0x0074ea    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1225,188 +1225,188 @@ USBPrepareForNextSetupTrf   0x003fba    program     extern D:\Projects\EggBot\SE
           parse_QL_packet   0x0058a4    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
           parse_QB_packet   0x0058da    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
           parse_QC_packet   0x005914    program     extern D:\Projects\EggBot\SE\EBF\ebb.c
-            s_put_n_chars   0x0059d0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                 vfprintf   0x0059fc    program     extern C:\MCC18\src\traditional\stdclib\vfprintf.c
-              __tmplbl_85   0x005a26    program     static                          
-              __tmplbl_44   0x0062d4    program     static                          
-              __tmplbl_43   0x0062ee    program     static                          
-                   __pa_0   0x006310    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_1   0x006318    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_2   0x006322    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_3   0x00632c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_4   0x006344    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_5   0x006358    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_6   0x006374    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_7   0x00637e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_8   0x00638a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __pa_9   0x0063ac    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_10   0x0063cc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_11   0x0063da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_12   0x0063f0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_13   0x00640a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_14   0x006422    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_15   0x006432    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_16   0x006448    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_17   0x00645a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_18   0x00646c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_19   0x006476    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_20   0x006486    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_21   0x006496    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-              __tmplbl_42   0x0064a6    program     static                          
-                  __pa_22   0x0064a6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_23   0x0064b2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_24   0x0064c0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_25   0x0064c8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_26   0x0064d2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_27   0x0064dc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_28   0x0064e4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_29   0x0064f2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_30   0x00650e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_31   0x006528    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_32   0x006542    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_33   0x00655a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_34   0x006564    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_35   0x006572    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_36   0x00657a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_37   0x006584    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_38   0x006594    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_39   0x0065a2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_40   0x0065ae    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_41   0x0065ba    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_42   0x0065c2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_43   0x0065cc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_44   0x0065d2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_45   0x0065dc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                  __pa_46   0x0065e8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-       USBCheckCDCRequest   0x0065f2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-                CDCInitEP   0x00668e    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-             getsUSBUSART   0x0066f4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-              putUSBUSART   0x0067b4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-             putsUSBUSART   0x0067e2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-            putrsUSBUSART   0x006862    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-             CDCTxService   0x0068e4    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
-            RCServo2_Init   0x006a2e    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
-      RCServo2_S2_command   0x006b42    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
-               Process_S2   0x006c30    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
-               __string_4   0x006cf8    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_3   0x006d04    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_2   0x006d0a    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_1   0x006d11    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-               __string_0   0x006d1a    program     static D:\Projects\EggBot\SE\EBF\ebb.c
-              __string_29   0x006d1f    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_28   0x006d2b    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_27   0x006d52    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_26   0x006d5e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_25   0x006d6a    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_24   0x006d77    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_23   0x006d84    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_22   0x006d90    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_21   0x006d9c    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_20   0x006da8    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_19   0x006db4    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_18   0x006dbd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_17   0x006dc7    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_16   0x006dcd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_15   0x006dcf    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_14   0x006dec    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_13   0x006e14    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_12   0x006e37    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_11   0x006e50    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-              __string_10   0x006e71    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_9   0x006e90    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_8   0x006eac    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_7   0x006ec8    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_6   0x006ee7    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_5   0x006eed    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_4   0x006ef0    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-               __string_3   0x006ef3    program     static D:\Projects\EggBot\SE\EBF\UBW.c
-                     main   0x006f00    program     extern D:\Projects\EggBot\SE\EBF\main.c
-         InitializeSystem   0x006f0c    program     static D:\Projects\EggBot\SE\EBF\main.c
-             USBCBSuspend   0x006f60    program     extern D:\Projects\EggBot\SE\EBF\main.c
-     USBCBWakeFromSuspend   0x006f62    program     extern D:\Projects\EggBot\SE\EBF\main.c
-        USBCB_SOF_Handler   0x006f64    program     extern D:\Projects\EggBot\SE\EBF\main.c
-        USBCBErrorHandler   0x006f66    program     extern D:\Projects\EggBot\SE\EBF\main.c
-       USBCBCheckOtherReq   0x006f68    program     extern D:\Projects\EggBot\SE\EBF\main.c
-    USBCBStdSetDscHandler   0x006f6c    program     extern D:\Projects\EggBot\SE\EBF\main.c
-              USBCBInitEP   0x006f6e    program     extern D:\Projects\EggBot\SE\EBF\main.c
-          USBCBSendResume   0x006f72    program     extern D:\Projects\EggBot\SE\EBF\main.c
-USER_USB_CALLBACK_EVENT_HANDLER   0x006f8e    program     extern D:\Projects\EggBot\SE\EBF\main.c
-               __tmplbl_0   0x006faa    program     static                          
-               __tmplbl_1   0x006fb6    program     static                          
-               __tmplbl_2   0x006fc0    program     static                          
-               __tmplbl_3   0x006fca    program     static                          
-               __tmplbl_4   0x006fd4    program     static                          
-               __tmplbl_5   0x006fde    program     static                          
-               __tmplbl_6   0x006fe8    program     static                          
-               __tmplbl_7   0x006ff2    program     static                          
-       ___case_1_lbl00022   0x006ff6    program     static                          
-       ___case_2_lbl00023   0x006ffa    program     static                          
-       ___case_3_lbl00024   0x006ffe    program     static                          
-     ___case_115_lbl00025   0x007002    program     static                          
-     ___case_117_lbl00026   0x007006    program     static                          
-     ___case_116_lbl00027   0x00700a    program     static                          
-   ___case_32767_lbl00028   0x00700e    program     static                          
-     ___case_114_lbl00029   0x007012    program     static                          
-      ___default_lbl00030   0x007016    program     static                          
-   ___switchexit_lbl00021   0x007018    program     static                          
-       ___return_lbl00020   0x00701c    program     static                          
-                _do_cinit   0x007024    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     test   0x00703e    program     static                          
-                copy_loop   0x007096    program     static                          
-            copy_one_byte   0x00709c    program     static                          
-             done_copying   0x0070aa    program     static                          
-                     done   0x0070c0    program     static                          
-       ___return_lbl00001   0x0070c0    program     static                          
-                   memset   0x0070c2    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
-                    jLoop   0x0070d6    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-              _2jContinue   0x0070e2    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   _3jEnd   0x0070ec    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                     jEnd   0x0070f4    program     static C:\MCC18\src\traditional\stdclib\memset.asm
-                   strlen   0x0070f6    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
-                    jLoop   0x007106    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                     jEnd   0x007110    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
-                strlenpgm   0x007112    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                    jLoop   0x007130    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                   _2jEnd   0x007146    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                     jEnd   0x007148    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
-                   printf   0x00715c    program     extern C:\MCC18\src\traditional\stdclib\printf.c
-                 FXM1616S   0x0071f4    program     extern C:\MCC18\src\traditional\math\fxm1616s.asm
-               TSIGN1616A   0x007240    program     static C:\MCC18\src\traditional\math\fxm1616s.asm
-                 FXM1616U   0x00724e    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
-               device_dsc   0x00728a    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-        configDescriptor1   0x00729c    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                    sd000   0x0072df    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                    sd001   0x0072e3    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                    sd002   0x0072fb    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-               USB_CD_Ptr   0x007311    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-               USB_SD_Ptr   0x007313    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
-                     putc   0x00731a    program     extern C:\MCC18\src\traditional\stdclib\putc.c
-                  FXM3232   0x00739e    program     extern C:\MCC18\src\traditional\math\fxm3232.c
-       ___return_lbl00000   0x00740c    program     static                          
-                  toupper   0x00740e    program     extern C:\MCC18\src\traditional\stdclib\toupper.asm
-                 jNoMatch   0x007434    program     static C:\MCC18\src\traditional\stdclib\toupper.asm
-                  isdigit   0x007436    program     extern C:\MCC18\src\traditional\stdclib\isdigit.asm
-                   jMatch   0x007456    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
-                 jNoMatch   0x007458    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
-                 FXD3232U   0x00745a    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
-                     loop   0x007468    program     static                          
-                   _false   0x00749c    program     static                          
-       ___return_lbl00000   0x0074a0    program     static                          
-                    st_OK   0x0074a2    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-                  st_LFCR   0x0074a7    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-               st_version   0x0074aa    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
-            __zero_memory   0x0074ce    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               zero_block   0x0074dc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_h   0x0074dc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                compare_l   0x0074e4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_l   0x0074e6    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 _startup   0x0074ee    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     loop   0x0074fe    program     static                          
-       ___return_lbl00000   0x007508    program     static                          
-              _usart_putc   0x00750a    program     extern C:\MCC18\src\pmc_common\USART\_usartpc.asm
-                     loop   0x00751a    program     static C:\MCC18\src\pmc_common\USART\_usartpc.asm
-                 s_digits   0x007526    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
-                   __init   0x007538    program     extern C:\MCC18\src\traditional\stdclib\__init.c
+            s_put_n_chars   0x0059de    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                 vfprintf   0x005a0a    program     extern C:\MCC18\src\traditional\stdclib\vfprintf.c
+              __tmplbl_85   0x005a34    program     static                          
+              __tmplbl_44   0x0062e2    program     static                          
+              __tmplbl_43   0x0062fc    program     static                          
+                   __pa_0   0x00631e    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_1   0x006326    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_2   0x006330    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_3   0x00633a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_4   0x006352    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_5   0x006366    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_6   0x006382    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_7   0x00638c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_8   0x006398    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __pa_9   0x0063ba    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_10   0x0063da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_11   0x0063e8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_12   0x0063fe    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_13   0x006418    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_14   0x006430    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_15   0x006440    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_16   0x006456    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_17   0x006468    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_18   0x00647a    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_19   0x006484    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_20   0x006494    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_21   0x0064a4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+              __tmplbl_42   0x0064b4    program     static                          
+                  __pa_22   0x0064b4    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_23   0x0064c0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_24   0x0064ce    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_25   0x0064d6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_26   0x0064e0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_27   0x0064ea    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_28   0x0064f2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_29   0x006500    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_30   0x00651c    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_31   0x006536    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_32   0x006550    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_33   0x006568    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_34   0x006572    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_35   0x006580    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_36   0x006588    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_37   0x006592    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_38   0x0065a2    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_39   0x0065b0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_40   0x0065bc    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_41   0x0065c8    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_42   0x0065d0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_43   0x0065da    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_44   0x0065e0    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_45   0x0065ea    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                  __pa_46   0x0065f6    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+       USBCheckCDCRequest   0x006600    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+                CDCInitEP   0x00669c    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             getsUSBUSART   0x006702    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+              putUSBUSART   0x0067c2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             putsUSBUSART   0x0067f0    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+            putrsUSBUSART   0x006870    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+             CDCTxService   0x0068f2    program     extern D:\Projects\EggBot\SE\EBF\Microchip_USB_2_7a\USB\CDC Device Driver\usb_function_cdc.c
+            RCServo2_Init   0x006a3c    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+      RCServo2_S2_command   0x006b50    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+               Process_S2   0x006c3e    program     extern D:\Projects\EggBot\SE\EBF\RCServo2.c
+               __string_4   0x006d06    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_3   0x006d12    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_2   0x006d18    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_1   0x006d1f    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+               __string_0   0x006d28    program     static D:\Projects\EggBot\SE\EBF\ebb.c
+              __string_29   0x006d2d    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_28   0x006d39    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_27   0x006d60    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_26   0x006d6c    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_25   0x006d78    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_24   0x006d85    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_23   0x006d92    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_22   0x006d9e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_21   0x006daa    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_20   0x006db6    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_19   0x006dc2    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_18   0x006dcb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_17   0x006dd5    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_16   0x006ddb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_15   0x006ddd    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_14   0x006dfa    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_13   0x006e22    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_12   0x006e45    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_11   0x006e5e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+              __string_10   0x006e7f    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_9   0x006e9e    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_8   0x006eba    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_7   0x006ed6    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_6   0x006ef5    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_5   0x006efb    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_4   0x006efe    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+               __string_3   0x006f01    program     static D:\Projects\EggBot\SE\EBF\UBW.c
+                     main   0x006f0e    program     extern D:\Projects\EggBot\SE\EBF\main.c
+         InitializeSystem   0x006f1a    program     static D:\Projects\EggBot\SE\EBF\main.c
+             USBCBSuspend   0x006f6e    program     extern D:\Projects\EggBot\SE\EBF\main.c
+     USBCBWakeFromSuspend   0x006f70    program     extern D:\Projects\EggBot\SE\EBF\main.c
+        USBCB_SOF_Handler   0x006f72    program     extern D:\Projects\EggBot\SE\EBF\main.c
+        USBCBErrorHandler   0x006f74    program     extern D:\Projects\EggBot\SE\EBF\main.c
+       USBCBCheckOtherReq   0x006f76    program     extern D:\Projects\EggBot\SE\EBF\main.c
+    USBCBStdSetDscHandler   0x006f7a    program     extern D:\Projects\EggBot\SE\EBF\main.c
+              USBCBInitEP   0x006f7c    program     extern D:\Projects\EggBot\SE\EBF\main.c
+          USBCBSendResume   0x006f80    program     extern D:\Projects\EggBot\SE\EBF\main.c
+USER_USB_CALLBACK_EVENT_HANDLER   0x006f9c    program     extern D:\Projects\EggBot\SE\EBF\main.c
+               __tmplbl_0   0x006fb8    program     static                          
+               __tmplbl_1   0x006fc4    program     static                          
+               __tmplbl_2   0x006fce    program     static                          
+               __tmplbl_3   0x006fd8    program     static                          
+               __tmplbl_4   0x006fe2    program     static                          
+               __tmplbl_5   0x006fec    program     static                          
+               __tmplbl_6   0x006ff6    program     static                          
+               __tmplbl_7   0x007000    program     static                          
+       ___case_1_lbl00022   0x007004    program     static                          
+       ___case_2_lbl00023   0x007008    program     static                          
+       ___case_3_lbl00024   0x00700c    program     static                          
+     ___case_115_lbl00025   0x007010    program     static                          
+     ___case_117_lbl00026   0x007014    program     static                          
+     ___case_116_lbl00027   0x007018    program     static                          
+   ___case_32767_lbl00028   0x00701c    program     static                          
+     ___case_114_lbl00029   0x007020    program     static                          
+      ___default_lbl00030   0x007024    program     static                          
+   ___switchexit_lbl00021   0x007026    program     static                          
+       ___return_lbl00020   0x00702a    program     static                          
+                _do_cinit   0x007032    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     test   0x00704c    program     static                          
+                copy_loop   0x0070a4    program     static                          
+            copy_one_byte   0x0070aa    program     static                          
+             done_copying   0x0070b8    program     static                          
+                     done   0x0070ce    program     static                          
+       ___return_lbl00001   0x0070ce    program     static                          
+                   memset   0x0070d0    program     extern C:\MCC18\src\traditional\stdclib\memset.asm
+                    jLoop   0x0070e4    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+              _2jContinue   0x0070f0    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   _3jEnd   0x0070fa    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                     jEnd   0x007102    program     static C:\MCC18\src\traditional\stdclib\memset.asm
+                   strlen   0x007104    program     extern C:\MCC18\src\traditional\stdclib\strlen.asm
+                    jLoop   0x007114    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                     jEnd   0x00711e    program     static C:\MCC18\src\traditional\stdclib\strlen.asm
+                strlenpgm   0x007120    program     extern C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                    jLoop   0x00713e    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   _2jEnd   0x007154    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                     jEnd   0x007156    program     static C:\MCC18\src\traditional\stdclib\slenpgm.asm
+                   printf   0x00716a    program     extern C:\MCC18\src\traditional\stdclib\printf.c
+                 FXM1616S   0x007202    program     extern C:\MCC18\src\traditional\math\fxm1616s.asm
+               TSIGN1616A   0x00724e    program     static C:\MCC18\src\traditional\math\fxm1616s.asm
+                 FXM1616U   0x00725c    program     extern C:\MCC18\src\traditional\math\fxm1616u.asm
+               device_dsc   0x007298    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+        configDescriptor1   0x0072aa    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                    sd000   0x0072ed    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                    sd001   0x0072f1    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                    sd002   0x007309    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+               USB_CD_Ptr   0x00731f    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+               USB_SD_Ptr   0x007321    program     extern D:\Projects\EggBot\SE\EBF\usb_descriptors.c
+                     putc   0x007328    program     extern C:\MCC18\src\traditional\stdclib\putc.c
+                  FXM3232   0x0073ac    program     extern C:\MCC18\src\traditional\math\fxm3232.c
+       ___return_lbl00000   0x00741a    program     static                          
+                  toupper   0x00741c    program     extern C:\MCC18\src\traditional\stdclib\toupper.asm
+                 jNoMatch   0x007442    program     static C:\MCC18\src\traditional\stdclib\toupper.asm
+                  isdigit   0x007444    program     extern C:\MCC18\src\traditional\stdclib\isdigit.asm
+                   jMatch   0x007464    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
+                 jNoMatch   0x007466    program     static C:\MCC18\src\traditional\stdclib\isdigit.asm
+                 FXD3232U   0x007468    program     extern C:\MCC18\src\traditional\math\fxd3232u.c
+                     loop   0x007476    program     static                          
+                   _false   0x0074aa    program     static                          
+       ___return_lbl00000   0x0074ae    program     static                          
+                    st_OK   0x0074b0    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+                  st_LFCR   0x0074b5    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+               st_version   0x0074b8    program     extern D:\Projects\EggBot\SE\EBF\UBW.c
+            __zero_memory   0x0074dc    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               zero_block   0x0074ea    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_h   0x0074ea    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                compare_l   0x0074f2    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_l   0x0074f4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 _startup   0x0074fc    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     loop   0x00750c    program     static                          
+       ___return_lbl00000   0x007516    program     static                          
+              _usart_putc   0x007518    program     extern C:\MCC18\src\pmc_common\USART\_usartpc.asm
+                     loop   0x007528    program     static C:\MCC18\src\pmc_common\USART\_usartpc.asm
+                 s_digits   0x007534    program     static C:\MCC18\src\traditional\stdclib\vfprintf.c
+                   __init   0x007546    program     extern C:\MCC18\src\traditional\stdclib\__init.c
                   StepAcc   0x000000       data     static D:\Projects\EggBot\SE\EBF\ebb.c
                   StepAdd   0x000008       data     static D:\Projects\EggBot\SE\EBF\ebb.c
              StepsCounter   0x000010       data     static D:\Projects\EggBot\SE\EBF\ebb.c
