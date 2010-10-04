@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Eggbot Control</_name>
-  <id>command.evilmadscience.plotd5.eggbot</id>
+  <id>command.evilmadscience.plotd6.eggbot</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -156,19 +156,17 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-http://www.egg-bot.com/
-(Preview version)
-
-*Motor wiring should be (L-R):
-Grey-Green-Yellow-Pink, for each motor.
+Release 2.0.0, dated 10/4/2010
 
 *EBB Firmware 1.96 or newer required for certain
- functions. Version 2.0 or newer recommended.
+ functions. Version 2.0.2 or newer recommended.
 
 Known issues:
-* Engraver not yet implemented
+* Engraving function is not yet implemented
+* Very long manual movements or pen lifts
+  can cause a serial timeout error.
 * "Cancel" function does not work while plotting.
- (This is due to a known bug in Inkscape.)
+  (This is due to a known bug in Inkscape.)
 </_param>
     </page>
   </param>
