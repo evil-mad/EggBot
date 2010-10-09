@@ -85,16 +85,23 @@ class EggBot_PostProcessTraceBitmap( inkex.Effect ):
 			layer.append( path )
 
 		# Remove any image
-		# Actually, in removing the image we will have nothing left
-		# in the layer ("Layer 1") which contained a group which
-		# then contained the image and the color filled paths.  So
-		# go ahead and remove the whole chain.
+		# For color scans, Trace Bitmap seems to put the
+		# image in the same layer & group as the traced regions.
+		# BUT, for gray scans, it seems to leave the image by
+		# itself as a child of the root document
 
 		if self.options.removeImage:
 			for node in self.document.xpath( '//svg:image', namespaces=inkex.NSS ):
 				parent = node.getparent()
-				gparent = parent.getparent()
-				gparent.remove( parent )
+				if ( parent.tag == 'svg' ) or \
+				   ( parent.tag == inkex.addNS( 'svg', 'svg' ) ):
+					parent.remove( node )
+				else:
+					gparent = parent.getparent()
+					try:
+						gparent.remove( parent )
+					except:
+						parent.remove( node)
 
 		inkex.errormsg( gettext.gettext( 'Finished.  Created %d layers' ) % count )
 
