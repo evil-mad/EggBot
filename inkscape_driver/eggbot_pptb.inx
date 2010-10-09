@@ -23,7 +23,7 @@ Running this extension:
     bitmap image from the drawing
 3. Can optionally turn off the colored
     fill within the traced regions
-3. Can optionally outline the traced
+4. Can optionally outline the traced
     regions
     </_param>
 
