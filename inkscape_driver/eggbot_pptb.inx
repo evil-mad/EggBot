@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-    <_name>Post process bitmap trace</_name>
+    <_name>Post process trace bitmap</_name>
     <id>pptb.eggbot</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <dependency type="executable" location="extensions">eggbot_pptb.py</dependency>
