@@ -385,7 +385,7 @@ class EggBot( inkex.Effect ):
 			return
 
 ##		self.ServoSetup()
-		#walks are done at pen-down speed. 
+		#walks are done at pen-down speed.
 
 		if self.options.manualType == "raise-pen":
 			self.ServoSetupWrapper()
@@ -836,6 +836,8 @@ class EggBot( inkex.Effect ):
 				pass
 			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
 				inkex.errormsg( 'Warning: unable to draw text, please convert it to a path first.' )
+				pass
+			elif not isinstance( node.tag, basestring ):
 				pass
 			else:
 				inkex.errormsg( 'Warning: unable to draw object, please convert it to a path first.' )
