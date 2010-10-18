@@ -31,8 +31,8 @@ import eggbot_scan
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
 N_PEN_UP_DELAY = 400      # delay (ms) for the pen to up down before the next move
-N_PEN_AXIS_STEPS = 1000   # steps the pen motor can move
-N_EGG_AXIS_STEPS = 1000   # steps for the egg motor move in one revolution
+N_PAGE_HEIGHT = 800       # Default page height (each unit equiv. to one step)
+N_PAGE_WIDTH = 3200       # Default page width (each unit equiv. to one step)
 
 N_PEN_UP_POS = 50      # Default pen-up position
 N_PEN_DOWN_POS = 40      # Default pen-down position
@@ -68,6 +68,29 @@ MISC_OUTPUT_FILE = os.path.join( HOME, 'misc.txt' )
 ##    else:
 ##	''' Works fine on Ubuntu; YMMV '''
 ##	STR_DEFAULT_COM_PORT = '/dev/ttyACM0'
+
+def parseLengthWithUnits( str ):
+	'''
+	Parse an SVG value which may or may not have units attached
+	This version is greatly simplified in that it only allows: no units,
+	units of px, and units of %.  Everything else, it returns None for.
+	There is a more general routine to consider in scour.py if more
+	generality is ever needed.
+	'''
+	u = 'px'
+	s = str.strip()
+	if s[-2:] == 'px':
+		s = s[:-2]
+	elif s[-1:] == '%':
+		u = '%'
+		s = s[:-1]
+
+	try:
+		v = float( s )
+	except:
+		return None, None
+
+	return v, u
 
 def subdivideCubicPath( sp, flat, i=1 ):
 	"""
@@ -221,6 +244,9 @@ class EggBot( inkex.Effect ):
 
 		self.nDeltaX = 0
 		self.nDeltaY = 0
+
+		self.svgWidth = float( N_PAGE_WIDTH )
+		self.svgHeight = float( N_PAGE_HEIGHT )
 
 		# Hack for mismatched EBB/motors,
 		# which have half resolution
@@ -461,6 +487,15 @@ class EggBot( inkex.Effect ):
 		#parse the svg data as a series of line segments and send each segment to be plotted
 
 		if self.serialPort is None:
+			return
+
+		if self.options.startCentered and ( not self.getDocProps() ):
+			# Cannot handle the document's dimensions!!!
+			inkex.errormsg( gettext.gettext(
+			'The document to be plotted has invalid dimensions. ' +
+			'The dimensions must be unitless or have units of pixels (px) or ' +
+			'percentages (%). Document dimensions may be set in Inkscape with ' +
+			'File > Document Properties' ) )
 			return
 
 		self.ServoSetup()
@@ -878,6 +913,42 @@ class EggBot( inkex.Effect ):
 				self.LayersPlotted += 1
 		#Note: this function is only called if we are NOT plotting all layers.
 
+	def getLength( self, name, default ):
+		'''
+		Get the <svg> attribute with name "name" and default value "default"
+		Parse the attribute into a value and associated units.  Then, accept
+		no units (''), units of pixels ('px'), and units of percentage ('%').
+		'''
+		str = self.svg.get( name )
+		if str:
+			v, u = parseLengthWithUnits( str )
+			if not v:
+				# Couldn't parse the value
+				return None
+			elif ( u == '' ) or ( u == 'px' ):
+				return v
+			elif u == '%':
+				return float( default ) * v / 100.0
+			else:
+				# Unsupported units
+				return None
+		else:
+			# No width specified; assume the default value
+			return float( default )
+
+	def getDocProps( self ):
+		'''
+		Get the document's height and width attributes from the <svg> tag.
+		Use a default value in case the property is not present or is
+		expressed in units of percentages.
+		'''
+		self.svgHeight = self.getLength( 'height', N_PAGE_HEIGHT )
+		self.svgWidth = self.getLength( 'width', N_PAGE_WIDTH )
+		if ( self.svgHeight == None ) or ( self.svgWidth == None ):
+			return False
+		else:
+			return True
+
 	def plotPath( self, path, matTransform ):
 		'''
 		Plot the path while applying the transformation defined
@@ -925,8 +996,8 @@ class EggBot( inkex.Effect ):
 
 					# if we should start at center, then the first line segment should draw from there
 					if self.options.startCentered:
-						self.fPrevX = self.fX
-						self.fPrevY = N_PEN_AXIS_STEPS / ( 2 * self.step_scaling_factor )
+						self.fPrevX = self.svgWidth / ( 2 * self.step_scaling_factor )
+						self.fPrevY = self.svgHeight / ( 2 * self.step_scaling_factor )
 
 						self.ptFirst = ( self.fPrevX, self.fPrevY )
 					else:
