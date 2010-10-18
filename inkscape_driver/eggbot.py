@@ -737,7 +737,15 @@ class EggBot( inkex.Effect ):
 
 				else:
 					pa = pl.split()
-					d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+					if not len( pa ):
+						pass
+					# Issue 29: pre 2.5.? versions of Python do not have
+					#    "statement-1 if expression-1 else statement-2"
+					# which came out of PEP 308, Conditional Expressions
+					#d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+					d = "M " + pa[0]
+					for i in range( 1, len( pa ) ):
+						d += " L " + pa[i]
 					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
 					newpath.set( 'd', d );
 					s = node.get( 'style' )
@@ -780,7 +788,15 @@ class EggBot( inkex.Effect ):
 
 				else:
 					pa = pl.split()
-					d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+					if not len( pa ):
+						pass
+					# Issue 29: pre 2.5.? versions of Python do not have
+					#    "statement-1 if expression-1 else statement-2"
+					# which came out of PEP 308, Conditional Expressions
+					#d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+					d = "M " + pa[0]
+					for i in range( 1, len( pa ) ):
+						d += " L " + pa[i]
 					d += " Z"
 					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
 					newpath.set( 'd', d );
