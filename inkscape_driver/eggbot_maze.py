@@ -490,7 +490,12 @@ class Maze(inkex.Effect):
 
 	def draw_horizontal(self, y, wall, isborder):
 
-		dy = 0 if wall == Maze._NORTH else 1
+		# Cater to Python 2.4 and earlier
+		# dy = 0 if wall == Maze._NORTH else 1
+		if wall == Maze._NORTH:
+			dy = 0
+		else:
+			dy = 1
 		thickness = 4 if isborder else 1
 
 		tracing = False
@@ -519,7 +524,12 @@ class Maze(inkex.Effect):
 
 	def draw_vertical(self, x, wall, isborder):
 
-		dx = 0 if wall == Maze._WEST else 1
+		# Cater to Python 2.4 and earlier
+		# dx = 0 if wall == Maze._WEST else 1
+		if wall == Maze._WEST:
+			dx = 0
+		else:
+			dx = 1
 		thickness = 4 if isborder else 1
 
 		# We alternate the direction in which we draw each vertical wall.
