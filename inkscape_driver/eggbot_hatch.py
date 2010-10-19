@@ -820,11 +820,14 @@ class Eggbot_Hatch( inkex.Effect ):
 		   elements and can now be intersected with those graphical elements.
 		'''
 
-		# Determine the width and height of the bounding box containing
-		# all the polygons to be hatched
+		# If this is the first call, do some one time initializations
+		# When generating cross hatches, we may be called more than once
 		if init:
 			self.getBoundingBox()
 			self.grid = []
+
+		# Determine the width and height of the bounding box containing
+		# all the polygons to be hatched
 		w = self.xmax - self.xmin
 		h = self.ymax - self.ymin
 
@@ -857,12 +860,20 @@ class Eggbot_Hatch( inkex.Effect ):
 		i = -d
 		while i <= d:
 			# Line starts at (i,-d) and goes to (i,+d)
-			x1 = ( i * ca ) + ( d * sa ) #  i * ca - (-d) * sa
-			y1 = ( i * sa ) - ( d * ca ) #  i * sa + (-d) * ca
-			x2 = ( i * ca ) - ( d * sa ) #  i * ca - (+d) * sa
-			y2 = ( i * sa ) + ( d * ca ) #  i * sa + (+d) * ca
-			self.grid.append( ( x1 + cx, y1 + cy, x2 + cx, y2 + cy ) )
+			x1 = cx + ( i * ca ) + ( d * sa ) #  i * ca - (-d) * sa
+			y1 = cy + ( i * sa ) - ( d * ca ) #  i * sa + (-d) * ca
+			x2 = cx + ( i * ca ) - ( d * sa ) #  i * ca - (+d) * sa
+			y2 = cy + ( i * sa ) + ( d * ca ) #  i * sa + (+d) * ca
 			i += spacing
+			# We were very generous in sizing the grid.  Go ahead
+			# and curtail it some
+			if (( x1 < self.xmin ) and ( x2 < self.xmin )) or \
+				(( x1 > self.xmax ) and ( x2 > self.xmax )):
+				continue
+			if (( y1 < self.ymin ) and ( y2 < self.ymin )) or \
+				(( y1 > self.ymax ) and ( y2 > self.ymax )):
+				continue
+			self.grid.append( ( x1, y1, x2, y2 ) )
 
 	def effect( self ):
 
