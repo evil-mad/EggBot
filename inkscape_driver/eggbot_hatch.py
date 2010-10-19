@@ -848,20 +848,18 @@ class Eggbot_Hatch( inkex.Effect ):
 		w = self.xmax - self.xmin
 		h = self.ymax - self.ymin
 
-		# Now cook up a length which is more than long enough to be at
-		# least as large as the radius of the circle encompassing the
-		# bounding box.  We could compute the actual radius, but an
-		# easy to compute larger value is just fine
-		d = float( 2 * ( w + h ) )
+		# Nice thing about rectangles is that the diameter of the circle
+		# encompassing them is the length the rectangle's diagonal...
+		r = math.sqrt ( w * w + h * h) / 2.0
 
 		# Now generate hatch lines within the square
 		# centered at (0, 0) and with side length at least d
 
 		# While we could generate these lines running back and forth,
 		# that makes for weird behavior later when applying odd/even
-		# rules AND there are nested polygons.  Instead, when we generate
-		# the SVG <path> elements with the hatch line segments, we can
-		# do the back and forth weaving.
+		# rules AND there are nested polygons.  Instead, when we
+		# generate the SVG <path> elements with the hatch line
+		# segments, we can do the back and forth weaving.
 
 		# Rotation information
 		ca = math.cos( math.radians( 90 - angle ) )
@@ -874,16 +872,16 @@ class Eggbot_Hatch( inkex.Effect ):
 		# Since the spacing may be fractional (e.g., 6.5), we
 		# don't try to use range() or other integer iterator
 		spacing = float( abs( spacing ) )
-		i = -d
-		while i <= d:
-			# Line starts at (i,-d) and goes to (i,+d)
-			x1 = cx + ( i * ca ) + ( d * sa ) #  i * ca - (-d) * sa
-			y1 = cy + ( i * sa ) - ( d * ca ) #  i * sa + (-d) * ca
-			x2 = cx + ( i * ca ) - ( d * sa ) #  i * ca - (+d) * sa
-			y2 = cy + ( i * sa ) + ( d * ca ) #  i * sa + (+d) * ca
+		i = -r
+		while i <= r:
+			# Line starts at (i, -r) and goes to (i, +r)
+			x1 = cx + ( i * ca ) + ( r * sa ) #  i * ca - (-r) * sa
+			y1 = cy + ( i * sa ) - ( r * ca ) #  i * sa + (-r) * ca
+			x2 = cx + ( i * ca ) - ( r * sa ) #  i * ca - (+r) * sa
+			y2 = cy + ( i * sa ) + ( r * ca ) #  i * sa + (+r) * ca
 			i += spacing
-			# We were very generous in sizing the grid.  Go ahead
-			# and curtail it some
+			# Remove any potential hatch lines which are entirely
+			# outside of the bounding box
 			if (( x1 < self.xmin ) and ( x2 < self.xmin )) or \
 				(( x1 > self.xmax ) and ( x2 > self.xmax )):
 				continue
