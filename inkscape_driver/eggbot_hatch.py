@@ -312,8 +312,6 @@ def interstices( P1, P2, vertices, hatches ):
 		y2 = P1[1] + sa[i+1][0] * ( P2[1] - P1[1] )
 		hatches[sa[i][1]].append( [[x1, y1], [x2, y2]] )
 
-# Lifted with impunity from eggbot.py
-
 def inverseTransform ( tran ):
 	'''
 	An SVG transform matrix looks like
@@ -354,6 +352,8 @@ def inverseTransform ( tran ):
 			(tran[0][1]*tran[1][2] - tran[1][1]*tran[0][2])/D],
 			[-tran[1][0]/D, tran[0][0]/D,
 			(tran[1][0]*tran[0][2] - tran[0][0]*tran[1][2])/D]]
+
+# Lifted with impunity from eggbot.py
 
 def subdivideCubicPath( sp, flat, i=1 ):
 
