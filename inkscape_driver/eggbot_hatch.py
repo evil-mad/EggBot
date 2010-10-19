@@ -109,6 +109,7 @@ import cubicsuperpath
 import cspsubdiv
 import bezmisc
 import math
+#import time
 
 '''
 Geometry 101: Determing if two lines intersect
@@ -182,9 +183,25 @@ def intersect( P1, P2, P3, P4 ):
 	intersection occurs.
 	'''
 
+	# Precompute these values -- note that we're basically shifting from
+	#
+	#       P = P1 + s (P2 - P1)
+	#
+	# to
+	#
+	#       P = P1 + s D
+	#
+	# where D is a direction vector.  The solution remains the same of
+	# course.  We'll just be computing D once for each line rather than
+	# computing it a couple of times
+
+	D21x = P2[0] - P1[0]
+	D21y = P2[1] - P1[1]
+	D43x = P4[0] - P3[0]
+	D43y = P4[1] - P3[1]
+
 	# Denominator
-	d = ( P4[1] - P3[1] ) * ( P2[0] - P1[0] ) - \
-			( P2[1] - P1[1] ) * ( P4[0] - P3[0] )
+	d = D21x * D43y - D21y * D43x
 
 	# Return now if the denominator is zero
 	if d == 0:
@@ -199,16 +216,15 @@ def intersect( P1, P2, P3, P4 ):
 	# more likely to indicate an intersection with a
 	# much a long line containing P3 & P4.
 
-	nb = ( P1[1] - P3[1] ) * ( P2[0] - P1[0] ) - \
-			( P2[1] - P1[1] ) * ( P1[0] - P3[0] )
+	nb = ( P1[1] - P3[1] ) * D21x - ( P1[0] - P3[0] ) * D21y
+
 	# Could first check if abs(nb) > abs(d) or if
 	# the signs differ.
 	sb = float( nb ) / float( d )
 	if ( sb < 0 ) or ( sb > 1 ):
 		return float( -1 )
 
-	na = ( P1[1] - P3[1] ) * ( P4[0] - P3[0] ) - \
-			( P4[1] - P3[1] ) * ( P1[0] - P3[0] )
+	na = ( P1[1] - P3[1] ) * D43x -  ( P1[0] - P3[0] ) * D43y
 	sa = float( na ) / float( d )
 	if ( sa < 0 ) or ( sa > 1 ):
 		return float( -1 )
@@ -409,6 +425,7 @@ class Eggbot_Hatch( inkex.Effect ):
 	def __init__( self ):
 
 		inkex.Effect.__init__( self )
+		#self.t0 = time.clock()
 		self.xmin, self.ymin = ( float( 0 ), float( 0 ) )
 		self.xmax, self.ymax = ( float( 0 ), float( 0 ) )
 		self.vertices = []
@@ -940,6 +957,8 @@ class Eggbot_Hatch( inkex.Effect ):
 						( pt2[0], pt2[1], pt1[0] - pt2[0], pt1[1] - pt2[1] )
 				direction = not direction
 			self.joinFillsWithNode( key, path[:-1] )
+
+		#inkex.errormsg("Elapsed CPU time was %f" % (time.clock()-self.t0))
 
 if __name__ == '__main__':
 
