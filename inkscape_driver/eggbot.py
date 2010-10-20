@@ -12,7 +12,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# TODO: Fix possible timeout when raising/lowering pen, and in manual mode.
 # TODO: Add and honor advisory locking around device open/close for non Win32
 
 from bezmisc import *
@@ -1030,10 +1029,22 @@ class EggBot( inkex.Effect ):
 	def sendDisableMotors( self ):
 		self.doCommand( 'EM,0,0\r' )
 
+	def doTimedPause( self, nPause ):
+		while ( nPause > 0 ):
+			if ( nPause > 750 ):
+				td = int( 750 )
+			else:
+				td = nPause
+				if ( td < 1 ):
+					td = int( 1 ) # don't allow zero-time moves
+			if ( not self.resumeMode ):
+				self.doCommand( 'SM,' + str( td ) + ',0,0\r' )
+			nPause -= td
+
 	def penUp( self ):
 		if ( ( not self.resumeMode ) or ( not self.virtualPenIsUp ) ):
 			self.doCommand( 'SP,1\r' )
-			self.doCommand( 'SM,' + str( self.options.penUpDelay ) + ',0,0\r' ) # pause for pen to go up
+			self.doTimedPause( self.options.penUpDelay ) # pause for pen to go up
 			self.bPenIsUp = True
 		self.virtualPenIsUp = True
 
@@ -1041,7 +1052,7 @@ class EggBot( inkex.Effect ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
 		if ( not self.resumeMode ):
 			self.doCommand( 'SP,0\r' )
-			self.doCommand( 'SM,' + str( self.options.penDownDelay ) + ',0,0\r' ) # pause for pen to go down
+			self.doTimedPause( self.options.penDownDelay ) # pause for pen to go down
 			self.bPenIsUp = False
 
 	def ServoSetupWrapper( self ):
