@@ -220,6 +220,8 @@ class EggBot( inkex.Effect ):
 
 		self.bPenIsUp = True
 		self.virtualPenIsUp = False  #Keeps track of pen postion when stepping through plot before resuming
+		self.engraverIsOn = False
+		self.penDownActivatesEngraver = False
 		self.fX = None
 		self.fY = None
 		self.fPrevX = None
@@ -435,6 +437,20 @@ class EggBot( inkex.Effect ):
 			strVersion = self.doRequest( 'v\r' )
 			inkex.errormsg( 'I asked the EBB for its version info, and it replied:\n ' + strVersion )
 
+		elif self.options.manualType == "enable-engraver":
+			if ( not self.options.engraving ):
+				inkex.errormsg( gettext.gettext( "The engraver option is disabled. " + \
+				" Please enable it first from the \"Options\" tab." ) )
+			else:
+				self.engraverOn()
+
+		elif self.options.manualType == 'disable-engraver':
+			if ( not self.options.engraving ):
+				inkex.errormsg( gettext.gettext( "The engraver option is disabled. " + \
+				" Please enable it first from the \"Options\" tab." ) )
+			else:
+				self.engraverOff()
+
 		else:  # self.options.manualType is "walk-egg-motor" or "walk-pen-motor":
 			if self.options.manualType == "walk-egg-motor":
 				self.nDeltaX = self.options.WalkDistance
@@ -499,6 +515,11 @@ class EggBot( inkex.Effect ):
 
 		self.ServoSetup()
 
+		# Ensure that the engraver is turned off for the time being
+		# It will be turned back on when the first non-virtual pen-down occurs
+		if self.options.engraving:
+			self.engraverOff()
+
 		if bDebug:
 			self.debugOut = open( DEBUG_OUTPUT_FILE, 'w' )
 			if bDrawPenUpLines:
@@ -509,8 +530,13 @@ class EggBot( inkex.Effect ):
 		try:
 			# wrap everything in a try so we can for sure close the serial port
 			#self.recursivelyTraverseSvg(self.document.getroot())
+			self.penDownActivatesEngraver = True
 			self.recursivelyTraverseSvg( self.svg )
 			self.penUp()   #Always end with pen-up
+
+			# Logically, we want to turn the engraver off here as well,
+			# but we put that in our finally clause instead
+			# self.engraverOff()
 
 			# return to home, if returnToHome = True
 			if ( ( not self.bStopped ) and self.options.returnToHome and ( self.ptFirst ) ):
@@ -529,7 +555,10 @@ class EggBot( inkex.Effect ):
 				self.svgTotalDeltaY = 0
 
 		finally:
-			return
+			# We may have had an exception and lost the serial port...
+			self.penDownActivatesEngraver = False
+			if ( not ( self.serialPort is None ) ) and ( self.options.engraving ):
+				self.engraverOff()
 
 	def recursivelyTraverseSvg( self, aNodeList,
 			matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -1027,6 +1056,10 @@ class EggBot( inkex.Effect ):
 		self.doCommand( 'EM,1,1\r' )
 
 	def sendDisableMotors( self ):
+		# Insist on turning the engraver off.  Otherwise, if it is on
+		# and the pen is down, then the engraver's vibration may cause
+		# the loose pen arm to start moving or the egg to start turning.
+		self.engraverOff() # Call will check if engraver option is enabled
 		self.doCommand( 'EM,0,0\r' )
 
 	def doTimedPause( self, nPause ):
@@ -1051,9 +1084,23 @@ class EggBot( inkex.Effect ):
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
 		if ( not self.resumeMode ):
+			if self.penDownActivatesEngraver:
+					self.engraverOn() # will check self.enableEngraver
 			self.doCommand( 'SP,0\r' )
 			self.doTimedPause( self.options.penDownDelay ) # pause for pen to go down
 			self.bPenIsUp = False
+
+	def engraverOff( self ):
+		# Note: we don't bother checking self.engraverIsOn -- turn it off regardless
+		# Reason being that we may not know the true hardware state
+		if self.options.engraving:
+			self.doCommand( 'PO,B,3,0\r' )
+			self.engraverIsOn = False
+
+	def engraverOn( self ):
+		if self.options.engraving and ( not self.engraverIsOn ):
+			self.engraverIsOn = True
+			self.doCommand( 'PO,B,3,1\r' )
 
 	def ServoSetupWrapper( self ):
 		self.ServoSetup()
@@ -1172,6 +1219,7 @@ class EggBot( inkex.Effect ):
 				inkex.errormsg( 'Plot paused by button press after segment number ' + str( self.nodeCount ) + '.' )
 				inkex.errormsg( 'Use the "resume" feature to continue.' )
 				#self.penUp()  # Should be redundant...
+				self.engraverOff()
 				self.bStopped = True
 				return
 
@@ -1277,6 +1325,7 @@ class EggBot( inkex.Effect ):
 			inkex.errormsg( gettext.gettext( "Error reading serial data." ) )
 
 		return response
+
 def distance( x, y ):
 	'''
 	Pythagorean theorem!

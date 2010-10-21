@@ -105,6 +105,8 @@ check the circuit board (EBB) firmware version.
 	<_option value="walk-pen-motor" >Walk Motor 1 (pen)</_option>
 	<_option value="enable-motors"  >Enable Motors</_option>
 	<_option value="disable-motors" >Disable Motors</_option>
+	<_option value="enable-engraver"  >Enable Engraver</_option>
+	<_option value="disable-engraver" >Disable Engraver</_option>
 	<_option value="version-check"  >Check EBB Version</_option>
       </param>
 
@@ -156,7 +158,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.0.1, dated 10/20/2010
+Release 2.0.1, dated 10/21/2010
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
