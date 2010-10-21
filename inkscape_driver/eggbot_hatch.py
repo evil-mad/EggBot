@@ -2,87 +2,62 @@
 
 # eggbot_hatch.py
 #
-# Generate hatch fills for all polygons in the current document.  The fill
-# rule is an odd/even rule: odd numbered intersections (1, 3, 5, etc.)
-# are a hatch line entering a polygon while even numbered intersections
-# (2, 4, 6, etc.) are the same hatch line exiting the polygon.
+# Generate hatch fills for the closed polygons in the the currently selected
+# paths.  If no paths are selected, then all the closed polygons throughout
+# the documented are hatched.  The fill rule is an odd/even rule: odd numbered
+# intersections (1, 3, 5, etc.) are a hatch line entering a polygon while even
+# numbered intersections (2, 4, 6, etc.) are the same hatch line exiting the
+# polygon.
 #
-# This extension first decomposes every visible <path>, <rect>, <line>,
+# This extension first decomposes the visible <path>, <rect>, <line>,
 # <polyline>, <polygon>, <circle>, and <ellipse> into individual move to
 # and line to coordinates using the same procedure that eggbot.py does
 # for plotting.  These coordinates are then used to build vertex lists
-# for each polygon in each of the visible graphical elements (e.g., <path>,
-# <rect>, etc.).  Note that a single graphical element may be composed of
-# several polygons.  That is, a graphical element may contain multiple,
-# disjoint paths.  We refer to each of these disjoint paths as "subpaths"
-# and say that each graphical element is comprised of zero or more subpaths.
+# for each (closed) polygon in each of the visible graphical elements
+# (e.g., <path>, <rect>, etc.).  Note that a single graphical element
+# may be composed of several polygons.  That is, a graphical element
+# may be composed of multiple, disjoint subpaths.
 #
-# The vertices for all the graphical elements that contain one or more
-# subpaths are then stored in a single list named "self.vertices".  This
-# single list has the format,
+# Once the lists of all the vertices are built, potential hatch lines are
+# "projected" through the bounding box containing all of the vertices.
+# For each potential hatch line, all intersections with all the polygon
+# edges are determined.  These intersections are stored as decimal fractions
+# indicating where along the length of the hatch line the intersection
+# occurs.  These values will always be in the range [0, 1].  A value of 0
+# indicates that the intersection is at the start of the hatch line, a value
+# of 0.5 midway, and a value of 1 at the end of the hatch line.
 #
-#    Graphical element 1 pointer [lxml.etree Element pointer]
-#       Subpath 1, vertex 1 (x, y) coordinate [2-tuple of 2 floats]
-#       Subpath 1, vertex 2 (x, y) coordinate
-#       ...
-#       Subpath 1, vertex N1,1 (x, y) coordinate
-#    Graphical element 1 pointer
-#       Subpath 2, vertex 1 (x, y) coordinate
-#       Subpath 2, vertex 2 (x, y) coordinate
-#       ...
-#       Subpath 2, vertex N1,2 (x, y) coordinate
-#    ...
-#    Graphical element 2 pointer
-#       Subpath 1, vertex 1 (x, y) coordinate
-#       Subpath 1, vertex 2 (x, y) coordinate
-#       ...
-#       Subpath 1, vertex N2,1 (x, y) coordinate
-#    Graphical element 2 pointer
-#       Subpath 2, vertex 1 (x, y) coordinate
-#       Subpath 2, vertex 2 (x, y) coordinate
-#       ...
-#       Subpath 2, vertex N2,2 (x, y) coordinate
-#    ...
+# For a given hatch line, all the fractional values are sorted and any
+# duplicates removed.  Duplicates occur, for instance, when the hatch
+# line passes through a polygon vertex and thus intersects two edges
+# segments of the polygon: the end of one edge and the start of
+# another.
 #
-#  Once the list of all the vertices is built, potential hatch lines are
-#  "projected" through the entire drawing.  For each potential hatch line,
-#  all intersections with all the polygons are determined.  These
-#  intersections are stored as decimal fractions indicating where along the
-#  length of the hatch line the intersection occurs.  These values will
-#  always be in the range [0, 1].  A value of 0 indicates that the
-#  intersection is at the start of the hatch line, a value of 0.5 midway,
-#  and a value of 1 at the end of the hatch line.
+# Once sorted and duplicates removed, an odd/even rule is applied to
+# determine which segments of the potential hatch line are within
+# polygons.  These segments found to be within polygons are then saved
+# and become the hatch fill lines which will be drawn.
 #
-#  For a given hatch line, all the fractional values are sorted and any
-#  duplicates removed.  Duplicates occur, for instance, when the hatch
-#  line passes through a polygon vertex and thus intersects two line
-#  segments of the polygon: the end of one line segment and the start of
-#  another.
+# With each saved hatch fill line, information about which SVG graphical
+# element it is within is saved.  This way, the hatch fill lines can
+# later be grouped with the element they are associated with.  This makes
+# it possible to manipulate the two -- graphical element and hatch lines --
+# as a single object within Inkscape.
 #
-#  Once sorted and duplicates removed, an odd/even rule is applied to
-#  determine which segments of the potential hatch line are within
-#  polygons.  These segments found to be within polygons are then saved
-#  and become the hatch fill lines which will be drawn.
-#
-#  With each saved hatch fill line, information about which SVG graphical
-#  element it is within is saved.  This way, the hatch fill lines can
-#  later be grouped with the element they are associated with.  This makes
-#  it possible to manipulate the two -- graphical element and hatch lines --
-#  as a single object within Inkscape.
-#
-#  Note: we also save the transformation matrix for each graphical element.
-#  That way, when we group the hatch fills with the element they are
-#  filling, we can invert the transformation.  That is, in order to compute
-#  the hatch fills, we first have had apply ALL applicable transforms to
-#  all the graphical elements.  We need to do that so that we know where in
-#  the drawing  each of the graphical elements are relative to one another.
-#  However, this means that the hatch lines have been computed in a setting
-#  where no further transforms are needed.  If we then put these hatch lines
-#  into the same groups as the elements being hatched in the ORIGINAL
-#  drawing, then the hatch lines will get transforms applied again.  So,
-#  once we compute the hatch lines, we need to invert the transforms of
-#  the group they will be placed in.  Hence the need to save the transform
-#  matrix for every graphical element.
+# Note: we also save the transformation matrix for each graphical element.
+# That way, when we group the hatch fills with the element they are
+# filling, we can invert the transformation.  That is, in order to compute
+# the hatch fills, we first have had apply ALL applicable transforms to
+# all the graphical elements.  We need to do that so that we know where in
+# the drawing  each of the graphical elements are relative to one another.
+# However, this means that the hatch lines have been computed in a setting
+# where no further transforms are needed.  If we then put these hatch lines
+# into the same groups as the elements being hatched in the ORIGINAL
+# drawing, then the hatch lines will have transforms applied again.  So,
+# once we compute the hatch lines, we need to invert the transforms of
+# the group they will be placed in and apply this inverse transform to the
+# hatch lines.  Hence the need to save the transform matrix for every
+# graphical element.
 #
 # Written by Daniel C. Newman for the Eggbot Project
 # 15 October 2010
@@ -185,15 +160,15 @@ def intersect( P1, P2, P3, P4 ):
 
 	# Precompute these values -- note that we're basically shifting from
 	#
-	#       P = P1 + s (P2 - P1)
+	#		P = P1 + s (P2 - P1)
 	#
 	# to
 	#
-	#       P = P1 + s D
+	# 		P = P1 + s D
 	#
 	# where D is a direction vector.  The solution remains the same of
 	# course.  We'll just be computing D once for each line rather than
-	# computing it a couple of times
+	# computing it a couple of times.
 
 	D21x = P2[0] - P1[0]
 	D21y = P2[1] - P1[1]
@@ -231,17 +206,16 @@ def intersect( P1, P2, P3, P4 ):
 
 	return sa
 
-def interstices( P1, P2, vertices, hatches ):
+def interstices( P1, P2, paths, hatches ):
 
 	'''
 	For the line L defined by the points P1 & P2, determine the segments
-	of L which lie within the polygons described in the vertex list,
-	"vertices".
+	of L which lie within the polygons described by the paths stored in
+	"paths"
 
-	P1 -- (x,y) coordinate [2-tuple]
-	P2 -- (x,y) coordinate [2-tuple]
-	vertices -- List of vertices for each polygon.  Format as per the
-				  introduction to this extension.  (See way above.)
+	P1 -- (x,y) coordinate [list]
+	P2 -- (x,y) coordinate [list]
+	paths -- Dictionary of all the paths to check for intersections
 
 	When an intersection of the line L is found with a polygon edge, then
 	the fractional distance along the line L is saved along with the
@@ -270,27 +244,19 @@ def interstices( P1, P2, vertices, hatches ):
 	segment's starting and ending points.
 	'''
 
-	# First entry in vertices is an lxml.etree node pointer
-	# We don't hatch a point [a single vertex; len(vertices) == 2]
-	# We don't hatch a line [only two vertices; len(vertices) == 3]
-	if len( vertices ) < 3:
-		return None
-
 	sa = []
 
 	# P1 & P2 is the hatch line
 	# P3 & P4 is the polygon edge to check
-	current_node = vertices[0]
-	P3 = vertices[1]
-	for P4 in vertices[2:]:
-		if len( P4 ) == 0:
-			current_node = P4
-		elif len( P3 ):
-			s = intersect( P1, P2, P3, P4 )
-			if ( s >= 0.0 ) and ( s <= 1.0 ):
-				# Save this intersection point along the hatch line
-				sa.append( ( s, current_node ) )
-		P3 = P4
+	for path in paths:
+		for subpath in paths[path]:
+			P3 = subpath[0]
+			for P4 in subpath[1:]:
+				s = intersect( P1, P2, P3, P4 )
+				if ( s >= 0.0 ) and ( s <= 1.0 ):
+					# Save this intersection point along the hatch line
+					sa.append( ( s, path ) )
+				P3 = P4
 
 	# Return now if there were no intersections
 	if len( sa ) == 0:
@@ -345,8 +311,9 @@ def inverseTransform ( tran ):
 	And, no reasonable 2d coordinate transform will have
 	the products ad and bc equal.
 
-	SVG represents the transform matrix as matrix(a b c d e f)
-	while Inkscape extensions store the transform matrix as
+	SVG represents the transform matrix column by column as
+	matrix(a b c d e f) while Inkscape extensions store the
+	transform matrix as
 
 		[[a, c, e], [b, d, f]]
 
@@ -378,8 +345,8 @@ def subdivideCubicPath( sp, flat, i=1 ):
 	is approximately a straight line within a given tolerance
 	(the "smoothness" defined by [flat]).
 
-	This is a modified version of cspsubdiv.cspsubdiv(). I rewrote the recursive
-	call because it caused recursion-depth errors on complicated line segments.
+	This is a modified version of cspsubdiv.cspsubdiv() rewritten
+	to avoid recurrence.
 	"""
 
 	while True:
@@ -428,10 +395,11 @@ class Eggbot_Hatch( inkex.Effect ):
 		#self.t0 = time.clock()
 		self.xmin, self.ymin = ( float( 0 ), float( 0 ) )
 		self.xmax, self.ymax = ( float( 0 ), float( 0 ) )
-		self.vertices = []
+		self.paths = {}
 		self.grid = []
 		self.hatches = {}
 		self.transforms = {}
+
 		self.OptionParser.add_option(
 			"--crossHatch", action="store", dest="crossHatch",
 			type="inkbool", default=False,
@@ -449,15 +417,14 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		'''
 		Decompose the path data from an SVG element into individual
-		move to and line to coordinates.  Place these coordinates into a
-		list of polygon vertices.  This list begins with the lxml.etree
-		node pointer for the SVG element which owns the path data.  It is
-		then followed by all the points (vertices) in a subpath.  When
-		that subpath ends then either we're done, or there are more
-		subpaths to add.  If there are more subpaths to add, then we
-		again add the lxml.etree node pointer and follow it by the
-		vertices from the next subpath.  This continues until we have
-		exhausted all the subpaths for the SVG element.
+		subpaths, each starting with an absolute move-to (x, y)
+		coordinate followed by one or more absolute line-to (x, y)
+		coordinates.  Each subpath is stored as a list of (x, y)
+		coordinates, with the first entry understood to be a
+		move-to coordinate and the rest line-to coordinates.  A list
+		is then made of all the subpath lists and then stored in the
+		self.paths dictionary using the path's lxml.etree node pointer
+		as the dictionary key.
 		'''
 
 		if ( not path ) or ( len( path ) == 0 ):
@@ -478,7 +445,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			simpletransform.applyTransformToPath( transform, p )
 
 		# Now traverse the simplified path
-		path_vertices = []
+		subpaths = []
 		subpath_vertices = []
 		for sp in p:
 			# We've started a new subpath
@@ -486,10 +453,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			if len( subpath_vertices ):
 				if distanceSquared( subpath_vertices[0], subpath_vertices[-1] ) < 1:
 					# Keep the prior subpath: it appears to be a closed path
-					if len( path_vertices ):
-						# Put in a flag between the prior subpath and this one
-						path_vertices.append( node )
-					path_vertices += subpath_vertices
+					subpaths.append( subpath_vertices )
 			subpath_vertices = []
 			subdivideCubicPath( sp, float( 0.2 ) )
 			for csp in sp:
@@ -500,20 +464,14 @@ class Eggbot_Hatch( inkex.Effect ):
 		if len( subpath_vertices ):
 			if distanceSquared( subpath_vertices[0], subpath_vertices[-1] ) < 1:
 				# Path appears to be closed so let's keep it
-				if len( path_vertices ):
-					# Put in a flag between the prior subpath and this one
-					path_vertices.append( node )
-				path_vertices += subpath_vertices
+				subpaths.append( subpath_vertices )
 
 		# Empty path?
-		if len( path_vertices ) == 0:
+		if len( subpaths ) == 0:
 			return
 
-		# Start these vertices off with their lxml node pointer
-		self.vertices.append( node )
-
-		# And append this to our list of growing vertices
-		self.vertices += path_vertices
+		# And add this path to our dictionary of paths
+		self.paths[node] = subpaths
 
 		# And save the transform for this element in a dictionary keyed
 		# by the element's lxml node pointer
@@ -525,27 +483,20 @@ class Eggbot_Hatch( inkex.Effect ):
 		Determine the bounding box for our collection of polygons
 		'''
 
-		if len( self.vertices ) < 2:
-			return
+		self.xmin, self.xmax = float( 1.0E70 ), float( -1.0E70 )
+		self.ymin, self.ymax = float( 1.0E70 ), float( -1.0E70 )
 
-		# First vertex is a pointer
-		self.xmin, self.ymin = self.vertices[1]
-		self.xmax, self.ymax = self.vertices[1]
-
-		for v in self.vertices[2:]:
-
-			# Skip over pointers
-			if len( v ) == 0:
-				continue
-
-			if v[0] < self.xmin:
-				self.xmin = v[0]
-			elif v[0] > self.xmax:
-				self.xmax = v[0]
-			if v[1] < self.ymin:
-				self.ymin = v[1]
-			elif v[1] > self.ymax:
-				self.ymax = v[1]
+		for path in self.paths:
+			for subpath in self.paths[path]:
+				for vertex in subpath:
+					if vertex[0] < self.xmin:
+						self.xmin = vertex[0]
+					elif vertex[0] > self.xmax:
+						self.xmax = vertex[0]
+					if vertex[1] < self.ymin:
+						self.ymin = vertex[1]
+					elif vertex[1] > self.ymax:
+						self.ymax = vertex[1]
 
 	def recursivelyTraverseSvg( self, aNodeList,
 			matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -893,7 +844,6 @@ class Eggbot_Hatch( inkex.Effect ):
 	def effect( self ):
 
 		# Build a list of the vertices for the document's graphical elements
-		self.vertices = []
 		if self.options.ids:
 			# Traverse the selected objects
 			for id in self.options.ids:
@@ -911,7 +861,7 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		# Now loop over our hatch lines looking for intersections
 		for h in self.grid:
-			interstices( (h[0], h[1]), (h[2], h[3]), self.vertices, self.hatches )
+			interstices( (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches )
 
 		# Now, dump the hatch fills sorted by which document element
 		# they correspond to.  This is made easy by the fact that we
@@ -922,12 +872,16 @@ class Eggbot_Hatch( inkex.Effect ):
 		for key in self.hatches:
 			path = ''
 			direction = True
+			if self.transforms.has_key( key ):
+				transform = inverseTransform( self.transforms[key] )
+			else:
+				transform = None
 			for segment in self.hatches[key]:
 				pt1 = segment[0]
 				pt2 = segment[1]
 				# Okay, we're going to put these hatch lines into the same
 				# group as the element they hatch.  That element is down
-				# some chaing of SVG elements, some of which may have
+				# some chain of SVG elements, some of which may have
 				# transforms attached.  But, our hatch lines have been
 				# computed assuming that those transforms have already
 				# been applied (since we had to apply them so as to know
@@ -938,10 +892,8 @@ class Eggbot_Hatch( inkex.Effect ):
 				# transform attribute of the <path> element.  Having it
 				# set in the path element seems a bit counterintuitive
 				# after the fact (i.e., what's this tranform here for?).
-				# So, we compute the inverse transform here AND apply it
-				# here as well.
-				if self.transforms.has_key( key ):
-					transform = inverseTransform( self.transforms[key] )
+				# So, we compute the inverse transform and apply it here.
+				if transform != None:
 					simpletransform.applyTransformToPoint( transform, pt1 )
 					simpletransform.applyTransformToPoint( transform, pt2 )
 				# Now generate the path data for the <path>
