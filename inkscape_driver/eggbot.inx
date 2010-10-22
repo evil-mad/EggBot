@@ -105,8 +105,8 @@ check the circuit board (EBB) firmware version.
 	<_option value="walk-pen-motor" >Walk Motor 1 (pen)</_option>
 	<_option value="enable-motors"  >Enable Motors</_option>
 	<_option value="disable-motors" >Disable Motors</_option>
-	<_option value="enable-engraver"  >Enable Engraver</_option>
-	<_option value="disable-engraver" >Disable Engraver</_option>
+	<_option value="enable-engraver"  >Engraver On</_option>
+	<_option value="disable-engraver" >Engraver Off</_option>
 	<_option value="version-check"  >Check EBB Version</_option>
       </param>
 
