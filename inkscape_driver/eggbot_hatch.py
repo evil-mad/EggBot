@@ -2,21 +2,20 @@
 
 # eggbot_hatch.py
 #
-# Generate hatch fills for the closed polygons in the the currently selected
-# paths.  If no paths are selected, then all the closed polygons throughout
-# the documented are hatched.  The fill rule is an odd/even rule: odd numbered
-# intersections (1, 3, 5, etc.) are a hatch line entering a polygon while even
-# numbered intersections (2, 4, 6, etc.) are the same hatch line exiting the
-# polygon.
+# Generate hatch fills for the closed paths (polygons) in the currently
+# selected document elements.  If no elements are selected, then all the
+# polygons throughout the document are hatched.  The fill rule is an odd/even
+# rule: odd numbered intersections (1, 3, 5, etc.) are a hatch line entering
+# a polygon while even numbered intersections (2, 4, 6, etc.) are the same
+# hatch line exiting the polygon.
 #
-# This extension first decomposes the visible <path>, <rect>, <line>,
-# <polyline>, <polygon>, <circle>, and <ellipse> into individual move to
-# and line to coordinates using the same procedure that eggbot.py does
-# for plotting.  These coordinates are then used to build vertex lists
-# for each (closed) polygon in each of the visible graphical elements
-# (e.g., <path>, <rect>, etc.).  Note that a single graphical element
-# may be composed of several polygons.  That is, a graphical element
-# may be composed of multiple, disjoint subpaths.
+# This extension first decomposes the selected <path>, <rect>, <line>,
+# <polyline>, <polygon>, <circle>, and <ellipse> elements into individual
+# moveto and lineto coordinates using the same procedure that eggbot.py uses
+# for plotting.  These coordinates are then used to build vertex lists.
+# Only the vertex lists corresponding to polygons (closed paths) are
+# kept.  Note that a single graphical element may be composed of several
+# subpaths, each subpath potentially a polygon.
 #
 # Once the lists of all the vertices are built, potential hatch lines are
 # "projected" through the bounding box containing all of the vertices.
@@ -60,6 +59,7 @@
 # graphical element.
 #
 # Written by Daniel C. Newman for the Eggbot Project
+# dan dot newman at mtbaldy dot us
 # 15 October 2010
 #
 # This program is free software; you can redistribute it and/or modify
@@ -111,11 +111,12 @@ for which
 
 	Pa = Pb
 
-Or, equivalently,
+Or, equivalently, we ask if there exists values of sa and sb for which
+the equation
 
 	P1 + sa (P2 - P1) = P3 + sb (P4 - P3)
 
-If we confine ourselves to a two-dimensional plane, and take
+holds.  If we confine ourselves to a two-dimensional plane, and take
 
 	P1 = (x1, y1)
 	P2 = (x2, y2)
