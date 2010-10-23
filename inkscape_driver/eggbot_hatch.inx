@@ -38,7 +38,7 @@ between hatch lines measured in
 units of motor steps.
   </_param>
 
-  <param name="hatchAngle" type="float" min="0" max="180"
+  <param name="hatchAngle" type="float" min="-360" max="360"
 	 _gui-text="   Hatch angle (degrees)">90</param>
   <param name="hatchSpacing" type="float" min="0" max="1000"
 	 _gui-text="   Hatch spacing (steps)">8.0</param>
