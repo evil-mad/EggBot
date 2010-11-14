@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <_name>Post process trace bitmap</_name>
-    <id>command.evilmadscience.eggbot_pptb.eggbot</id>
+    <id>eggbot_pptb.contributed.eggbot</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <dependency type="executable" location="extensions">eggbot_pptb.py</dependency>
     <dependency type="executable" location="extensions">inkex.py</dependency>       <dependency type="executable" location="extensions">simplestyle.py</dependency>
@@ -34,7 +34,7 @@ Running this extension:
     <effect needs-live-preview="false">
       <object-type>all</object-type>
       <effects-menu>
-	<submenu _name="EggBot"/>
+	<submenu _name="EggBot Contributed"/>
       </effects-menu>
     </effect>
 
