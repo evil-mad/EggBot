@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Twist</_name>
+  <id>twist.contributed.eggbot</id>
+  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+  <dependency type="executable" location="extensions">eggbot_twist.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <dependency type="executable" location="extensions">simplepath.py</dependency>
+  <dependency type="executable" location="extensions">simpletransform.py</dependency>
+  <dependency type="executable" location="extensions">simplestyle.py</dependency>
+  <dependency type="executable" location="extensions">cubicsuperpath.py</dependency>
+  <dependency type="executable" location="extensions">cspsubdiv.py</dependency>
+  <dependency type="executable" location="extensions">bezmisc.py</dependency>
+
+  <_param name="Header" type="description" xml:space="preserve">
+Iteratively twist and self-inscribe
+a polygon within itself.
+
+The number of twists is how many
+iterations to perform.
+
+The step ratio is the fractional
+distance along an edge to move each
+vertex.
+
+***
+This extension is intended as an
+example of how to write an Inkscape
+extension for use with the Eggbot.
+See the eggbot_twist.py file in the
+Inkscape extensions directory for
+this extensions' Python code.
+***
+  </_param>
+
+  <param name="nSteps" type="int" min="1" max="100"
+	 _gui-text="   Number of twists">8</param>
+  <param name="fRatio" type="float" min="-10" max="10" precision="5"
+	 _gui-text="   Step ratio">0.15</param>
+
+  <effect needs-live-preview="false">
+    <object-type>all</object-type>
+    <effects-menu>
+      <submenu _name="EggBot Contributed"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot_twist.py</command>
+  </script>
+</inkscape-extension>
