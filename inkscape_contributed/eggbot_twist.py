@@ -39,6 +39,18 @@ import cubicsuperpath
 import cspsubdiv
 import bezmisc
 
+def parseTransforms( transforms, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]] ):
+
+    if ( transforms == "" ) or ( transforms == None ):
+        return( mat )
+
+    list = transforms.split( ") " )
+    for transf in list[:-1]:
+        matNew = simpletransform.parseTransform( transf + ")", mat )
+        mat = matNew
+    matNew = simpletransform.parseTransform( list[-1], mat )
+    return ( matNew )
+
 def subdivideCubicPath( sp, flat, i=1 ):
 
 	'''
@@ -138,8 +150,9 @@ class Twist( inkex.Effect ):
 		'''
 
 		self.paths = {}
+		self.paths_clone_transform = {}
 
-	def addPathVertices( self, path, node=None, transform=None ):
+	def addPathVertices( self, path, node=None, transform=None, cloneTransform=None ):
 
 		'''
 		Decompose the path data from an SVG element into individual
@@ -194,10 +207,11 @@ class Twist( inkex.Effect ):
 
 		# Store the list of subpaths in a dictionary keyed off of the path's node pointer
 		self.paths[node] = subpath_list
+		self.paths_clone_transform[node] = cloneTransform
 
 	def recursivelyTraverseSvg( self, aNodeList,
 		matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
-		parent_visibility='visible' ):
+		parent_visibility='visible', cloneTransform=None ):
 
 		'''
 		[ This too is largely lifted from eggbot.py ]
@@ -266,16 +280,16 @@ class Twist( inkex.Effect ):
 					else:
 						tran = 'translate(%f,%f)' % ( x, y )
 					matNew2 = simpletransform.composeTransform( matNew,
-						simpletransform.parseTransform( tran ) )
+						parseTransforms( tran ) )
 					v = node.get( 'visibility', v )
 					self.recursivelyTraverseSvg( refnode, matNew2,
-						parent_visibility=v )
+						parent_visibility=v, cloneTransform=tran )
 
 			elif node.tag == inkex.addNS( 'path', 'svg' ):
 
 				path_data = node.get( 'd')
 				if path_data:
-					self.addPathVertices( path_data, node, matNew )
+					self.addPathVertices( path_data, node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
@@ -303,7 +317,7 @@ class Twist( inkex.Effect ):
 				a.append( [' l ', [0, h]] )
 				a.append( [' l ', [-w, 0]] )
 				a.append( [' Z', []] )
-				self.addPathVertices( simplepath.formatPath( a ), node, matNew )
+				self.addPathVertices( simplepath.formatPath( a ), node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
 
@@ -324,7 +338,7 @@ class Twist( inkex.Effect ):
 				a = []
 				a.append( ['M ', [x1, y1]] )
 				a.append( [' L ', [x2, y2]] )
-				self.addPathVertices( simplepath.formatPath( a ), node, matNew )
+				self.addPathVertices( simplepath.formatPath( a ), node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
 
@@ -344,7 +358,7 @@ class Twist( inkex.Effect ):
 
 				pa = pl.split()
 				d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
-				self.addPathVertices( d, node, matNew )
+				self.addPathVertices( d, node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 
@@ -365,7 +379,7 @@ class Twist( inkex.Effect ):
 				pa = pl.split()
 				d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
 				d += " Z"
-				self.addPathVertices( d, node, matNew )
+				self.addPathVertices( d, node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'ellipse', 'svg' ) or \
 				node.tag == 'ellipse' or \
@@ -406,7 +420,7 @@ class Twist( inkex.Effect ):
 						'0 1 0 %f,%f ' % ( x2, cy ) + \
 						'A %f,%f ' % ( rx, ry ) + \
 						'0 1 0 %f,%f' % ( x1, cy )
-					self.addPathVertices( d, node, matNew )
+					self.addPathVertices( d, node, matNew, cloneTransform )
 
 			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
 
@@ -443,7 +457,7 @@ class Twist( inkex.Effect ):
 				inkex.errormsg( 'Warning: unable to draw object <%s>, please convert it to a path first.' % node.tag )
 				pass
 
-	def joinWithNode ( self, node, path, makeGroup=False ):
+	def joinWithNode ( self, node, path, makeGroup=False, cloneTransform=None ):
 
 		'''
 		Generate a SVG <path> element containing the path data "path".
@@ -475,10 +489,12 @@ class Twist( inkex.Effect ):
 		else:
 			g = node.getparent()
 
-		# Now make a <path> element which contains the hatches & is a child
+		# Now make a <path> element which contains the twist & is a child
 		# of the new <g> element
 		style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': '1' }
 		line_attribs = { 'style':simplestyle.formatStyle( style ), 'd': path }
+		if ( cloneTransform != None ) and ( cloneTransform != '' ):
+			line_attribs['transform'] = cloneTransform
 		inkex.etree.SubElement( g, inkex.addNS( 'path', 'svg' ), line_attribs )
 
 	def twist( self, ratio ):
@@ -512,7 +528,7 @@ class Twist( inkex.Effect ):
 						pdata = 'M %f,%f' % ( vertex[0], vertex[1] )
 					else:
 						pdata += ' L %f,%f' %  ( vertex[0], vertex[1] )
-				self.joinWithNode( path, pdata, makeGroup )
+				self.joinWithNode( path, pdata, makeGroup, self.paths_clone_transform[path] )
 
 	def effect( self ):
 
