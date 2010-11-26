@@ -41,15 +41,15 @@ import bezmisc
 
 def parseTransforms( transforms, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]] ):
 
-    if ( transforms == "" ) or ( transforms == None ):
-        return( mat )
+	if ( transforms == "" ) or ( transforms == None ):
+		return( mat )
 
-    list = transforms.split( ") " )
-    for transf in list[:-1]:
-        matNew = simpletransform.parseTransform( transf + ")", mat )
-        mat = matNew
-    matNew = simpletransform.parseTransform( list[-1], mat )
-    return ( matNew )
+	list = transforms.split( ") " )
+	for transf in list[:-1]:
+		matNew = simpletransform.parseTransform( transf + ")", mat )
+		mat = matNew
+	matNew = simpletransform.parseTransform( list[-1], mat )
+	return ( matNew )
 
 def subdivideCubicPath( sp, flat, i=1 ):
 
