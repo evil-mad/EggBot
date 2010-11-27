@@ -39,18 +39,6 @@ import cubicsuperpath
 import cspsubdiv
 import bezmisc
 
-def parseTransforms( transforms, mat=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]] ):
-
-	if ( transforms == "" ) or ( transforms == None ):
-		return( mat )
-
-	list = transforms.split( ") " )
-	for transf in list[:-1]:
-		matNew = simpletransform.parseTransform( transf + ")", mat )
-		mat = matNew
-	matNew = simpletransform.parseTransform( list[-1], mat )
-	return ( matNew )
-
 def subdivideCubicPath( sp, flat, i=1 ):
 
 	'''
@@ -274,13 +262,11 @@ class Twist( inkex.Effect ):
 				if refnode:
 					x = float( node.get( 'x', '0' ) )
 					y = float( node.get( 'y', '0' ) )
-					tran = node.get( 'transform' )
-					if tran:
-						tran += ' translate(%f,%f)' % ( x, y )
+					# Note: the transform has already been applied
+					if ( x != 0 ) or (y != 0 ):
+						matNew2 = composeTransform( matNew, parseTransform( 'translate(%f,%f)' % (x,y) ) )
 					else:
-						tran = 'translate(%f,%f)' % ( x, y )
-					matNew2 = simpletransform.composeTransform( matNew,
-						parseTransforms( tran ) )
+						matNew2 = matNew
 					v = node.get( 'visibility', v )
 					self.recursivelyTraverseSvg( refnode, matNew2,
 						parent_visibility=v, cloneTransform=tran )
