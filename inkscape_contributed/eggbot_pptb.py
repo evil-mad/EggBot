@@ -7,7 +7,10 @@
 # of a given "scanned" color are put into a single <path>.  This makes
 # it easy to put all the traced regions of a single color into a single
 # layer: just put each <path> into its own layer.
-#
+
+# Written by Daniel C. Newman ( dan dot newman at mtbaldy dot us )
+# 9 October 2010
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
