@@ -269,7 +269,7 @@ class Twist( inkex.Effect ):
 						matNew2 = matNew
 					v = node.get( 'visibility', v )
 					self.recursivelyTraverseSvg( refnode, matNew2,
-						parent_visibility=v, cloneTransform=tran )
+						parent_visibility=v, cloneTransform=node.get( 'transform' ) )
 
 			elif node.tag == inkex.addNS( 'path', 'svg' ):
 
