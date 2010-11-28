@@ -248,6 +248,7 @@ class EggBot( inkex.Effect ):
 
 		self.svgWidth = float( N_PAGE_WIDTH )
 		self.svgHeight = float( N_PAGE_HEIGHT )
+		self.svgTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
 		# Hack for mismatched EBB/motors,
 		# which have half resolution
@@ -513,6 +514,17 @@ class EggBot( inkex.Effect ):
 			'File > Document Properties' ) )
 			return
 
+		# Viewbox handling
+		# Presently ignores minx, miny info (translation)
+		# Also ignores the preserveAspectRatio attribute
+		viewbox = self.svg.get( 'viewBox' )
+		if viewbox:
+			vinfo = viewbox.strip().replace( ',', ' ' ).split( ' ' )
+			if ( vinfo[2] != 0 ) and ( vinfo[3] != 0 ):
+				sx = self.svgWidth / float( vinfo[2] )
+				sy = self.svgHeight / float( vinfo[3] )
+				self.svgTransform = parseTransform( 'scale(%f,%f)' % (sx, sy) )
+
 		self.ServoSetup()
 
 		# Ensure that the engraver is turned off for the time being
@@ -531,7 +543,7 @@ class EggBot( inkex.Effect ):
 			# wrap everything in a try so we can for sure close the serial port
 			#self.recursivelyTraverseSvg(self.document.getroot())
 			self.penDownActivatesEngraver = True
-			self.recursivelyTraverseSvg( self.svg )
+			self.recursivelyTraverseSvg( self.svg, self.svgTransform )
 			self.penUp()   #Always end with pen-up
 
 			# Logically, we want to turn the engraver off here as well,
