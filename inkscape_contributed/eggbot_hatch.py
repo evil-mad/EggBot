@@ -85,7 +85,9 @@ import cubicsuperpath
 import cspsubdiv
 import bezmisc
 import math
-#import time
+
+N_PAGE_WIDTH = 3200
+N_PAGE_HEIGHT = 800
 
 '''
 Geometry 101: Determing if two lines intersect
@@ -338,6 +340,31 @@ def inverseTransform ( tran ):
 			[-tran[1][0]/D, tran[0][0]/D,
 			(tran[1][0]*tran[0][2] - tran[0][0]*tran[1][2])/D]]
 
+def parseLengthWithUnits( str ):
+
+	'''
+	Parse an SVG value which may or may not have units attached
+	This version is greatly simplified in that it only allows: no units,
+	units of px, and units of %.  Everything else, it returns None for.
+	There is a more general routine to consider in scour.py if more
+	generality is ever needed.
+	'''
+
+	u = 'px'
+	s = str.strip()
+	if s[-2:] == 'px':
+		s = s[:-2]
+	elif s[-1:] == '%':
+		u = '%'
+		s = s[:-1]
+
+	try:
+		v = float( s )
+	except:
+		return None, None
+
+	return v, u
+
 # Lifted with impunity from eggbot.py
 
 def subdivideCubicPath( sp, flat, i=1 ):
@@ -394,13 +421,20 @@ class Eggbot_Hatch( inkex.Effect ):
 	def __init__( self ):
 
 		inkex.Effect.__init__( self )
-		#self.t0 = time.clock()
+
 		self.xmin, self.ymin = ( float( 0 ), float( 0 ) )
 		self.xmax, self.ymax = ( float( 0 ), float( 0 ) )
 		self.paths = {}
 		self.grid = []
 		self.hatches = {}
 		self.transforms = {}
+
+		# For handling an SVG viewbox attribute, we will need to know the
+		# values of the document's <svg> width and height attributes as well
+		# as establishing a transform from the viewbox to the display.
+		self.docWidth = float( N_PAGE_WIDTH )
+		self.docHeight = float( N_PAGE_HEIGHT )
+		self.docTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
 		self.OptionParser.add_option(
 			"--crossHatch", action="store", dest="crossHatch",
@@ -414,6 +448,61 @@ class Eggbot_Hatch( inkex.Effect ):
 			"--hatchSpacing", action="store", type="float",
 			dest="hatchSpacing", default=10.0,
 			help="Spacing between hatch lines" )
+
+	def getLength( self, name, default ):
+
+		'''
+		Get the <svg> attribute with name "name" and default value "default"
+		Parse the attribute into a value and associated units.  Then, accept
+		no units (''), units of pixels ('px'), and units of percentage ('%').
+		'''
+
+		str = self.document.getroot().get( name )
+		if str:
+			v, u = parseLengthWithUnits( str )
+			if not v:
+				# Couldn't parse the value
+				return None
+			elif ( u == '' ) or ( u == 'px' ):
+				return v
+			elif u == '%':
+				return float( default ) * v / 100.0
+			else:
+				# Unsupported units
+				return None
+		else:
+			# No width specified; assume the default value
+			return float( default )
+
+	def getDocProps( self ):
+
+		'''
+		Get the document's height and width attributes from the <svg> tag.
+		Use a default value in case the property is not present or is
+		expressed in units of percentages.
+		'''
+
+		self.docHeight = self.getLength( 'height', N_PAGE_HEIGHT )
+		self.docWidth = self.getLength( 'width', N_PAGE_WIDTH )
+		if ( self.docHeight == None ) or ( self.docWidth == None ):
+			return False
+		else:
+			return True
+
+	def handleViewBox( self ):
+
+		'''
+		Set up the document-wide transform in the event that the document has an SVG viewbox
+		'''
+
+		viewbox = self.document.getroot().get( 'viewBox' )
+		if viewbox:
+			if self.getDocProps():
+				vinfo = viewbox.strip().replace( ',', ' ' ).split( ' ' )
+				if ( vinfo[2] != 0 ) and ( vinfo[3] != 0 ):
+					sx = self.docWidth / float( vinfo[2] )
+					sy = self.docHeight / float( vinfo[3] )
+					self.docTransform = simpletransform.parseTransform( 'scale(%f,%f)' % (sx, sy) )
 
 	def addPathVertices( self, path, node=None, transform=None ):
 
@@ -443,7 +532,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			return
 
 		# Apply any transformation
-		if transform:
+		if transform != None:
 			simpletransform.applyTransformToPath( transform, p )
 
 		# Now traverse the simplified path
@@ -742,7 +831,7 @@ class Eggbot_Hatch( inkex.Effect ):
 				inkex.errormsg( 'Warning: unable to draw object <%s>, please convert it to a path first.' % node.tag )
 				pass
 
-	def joinFillsWithNode ( self, node, path ):
+	def joinFillsWithNode ( self, node, stroke_width, path ):
 
 		'''
 		Generate a SVG <path> element containing the path data "path".
@@ -765,7 +854,7 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		# Now make a <path> element which contains the hatches & is a child
 		# of the new <g> element
-		style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': '1' }
+		style = { 'stroke': '#000000', 'fill': 'none', 'stroke-width': '%f' % stroke_width}
 		line_attribs = { 'style':simplestyle.formatStyle( style ), 'd': path }
 		tran = node.get( 'transform' )
 		if ( tran != None ) and ( tran != '' ):
@@ -846,18 +935,21 @@ class Eggbot_Hatch( inkex.Effect ):
 
 	def effect( self ):
 
+		# Viewbox handling
+		self.handleViewBox()
+
 		# Build a list of the vertices for the document's graphical elements
 		if self.options.ids:
 			# Traverse the selected objects
 			for id in self.options.ids:
-				self.recursivelyTraverseSvg( [self.selected[id]] )
+				self.recursivelyTraverseSvg( [self.selected[id]], self.docTransform )
 		else:
 			# Traverse the entire document
-			self.recursivelyTraverseSvg( self.document.getroot() )
+			self.recursivelyTraverseSvg( self.document.getroot(), self.docTransform )
 
 		# Build a grid of possible hatch lines
 		self.makeHatchGrid( float( self.options.hatchAngle ),
-				    float( self.options.hatchSpacing ), True )
+				float( self.options.hatchSpacing ), True )
 		if self.options.crossHatch:
 			self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),
 				float( self.options.hatchSpacing ), False )
@@ -872,13 +964,26 @@ class Eggbot_Hatch( inkex.Effect ):
 		# pointer as the dictionary key under which to save the hatch
 		# fills for that node.
 
+		s = 1 / math.sqrt(2)
 		for key in self.hatches:
 			path = ''
 			direction = True
 			if self.transforms.has_key( key ):
 				transform = inverseTransform( self.transforms[key] )
+				# Determine the scaled stroke width for a hatch line
+				# We produce a line segment of unit length, transform
+				# its endpoints and then determine the length of the
+				# resulting line segment.
+				pt1 = [0, 0]
+				pt2 = [s, s]
+				simpletransform.applyTransformToPoint( transform, pt1 )
+				simpletransform.applyTransformToPoint( transform, pt2 )
+				dx = pt2[0] - pt1[0]
+				dy = pt2[1] - pt1[1]
+				stroke_width = math.sqrt( dx * dx + dy * dy )
 			else:
 				transform = None
+				stroke_width = float( 1.0 )
 			for segment in self.hatches[key]:
 				pt1 = segment[0]
 				pt2 = segment[1]
@@ -909,7 +1014,7 @@ class Eggbot_Hatch( inkex.Effect ):
 					path += 'M %f,%f l %f,%f ' % \
 						( pt2[0], pt2[1], pt1[0] - pt2[0], pt1[1] - pt2[1] )
 				direction = not direction
-			self.joinFillsWithNode( key, path[:-1] )
+			self.joinFillsWithNode( key, stroke_width, path[:-1] )
 
 		#inkex.errormsg("Elapsed CPU time was %f" % (time.clock()-self.t0))
 
