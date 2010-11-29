@@ -60,7 +60,7 @@
 
 # Written by Daniel C. Newman for the Eggbot Project
 # dan dot newman at mtbaldy dot us
-# Last updated 27 November 2010
+# Last updated 28 November 2010
 # 15 October 2010
 
 # This program is free software; you can redistribute it and/or modify
@@ -495,9 +495,9 @@ class Eggbot_Hatch( inkex.Effect ):
 		Set up the document-wide transform in the event that the document has an SVG viewbox
 		'''
 
-		viewbox = self.document.getroot().get( 'viewBox' )
-		if viewbox:
-			if self.getDocProps():
+		if self.getDocProps():
+			viewbox = self.document.getroot().get( 'viewBox' )
+			if viewbox:
 				vinfo = viewbox.strip().replace( ',', ' ' ).split( ' ' )
 				if ( vinfo[2] != 0 ) and ( vinfo[3] != 0 ):
 					sx = self.docWidth / float( vinfo[2] )
@@ -958,13 +958,29 @@ class Eggbot_Hatch( inkex.Effect ):
 		for h in self.grid:
 			interstices( (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches )
 
+		# Target stroke width will be (doc width + doc height) / 2 / 1000
+		# stroke_width_target = ( self.docHeight + self.docWidth ) / 2000
+		stroke_width_target = 1
+
+		# Each hatch line stroke will be within an SVG object which may
+		# be subject to transforms.  So, on an object by object basis,
+		# we need to transform our target width to a width suitable
+		# for that object (so that after the object and its hatches are
+		# transformed, the result has the desired width).
+
+		# To aid in the process, we use a diagonal line segment of length
+		# stroke_width_target.  We then run this segment through an object's
+		# inverse transform and see what the resulting length of the inversely
+		# transformed segment is.  We could, alternatively, look at the
+		# x and y scaling factors in the transform and average them.
+		s = stroke_width_target / math.sqrt( 2 )
+
 		# Now, dump the hatch fills sorted by which document element
 		# they correspond to.  This is made easy by the fact that we
 		# saved the information and used each element's lxml.etree node
 		# pointer as the dictionary key under which to save the hatch
 		# fills for that node.
 
-		s = 1 / math.sqrt(2)
 		for key in self.hatches:
 			path = ''
 			direction = True
