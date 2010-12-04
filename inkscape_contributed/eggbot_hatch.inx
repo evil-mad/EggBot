@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hatch fill</_name>
-  <id>eggbot_hatch.contributed.eggbot</id>
+  <id>command.eggbot.contributed.eggbot_hatch</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot_hatch.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>

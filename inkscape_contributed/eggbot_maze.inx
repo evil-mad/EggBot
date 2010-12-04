@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
     <_name>Eggmazing</_name>
-    <id>eggmazing.contributed.eggbot</id>
+    <id>command.eggbot.contributed.eggmazing</id>
     <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
     <dependency type="executable" location="extensions">eggbot_maze.py</dependency>
     <dependency type="executable" location="extensions">inkex.py</dependency>
