@@ -340,8 +340,7 @@ class Map( inkex.Effect ):
 				pass
 
 			# First apply the current matrix transform to this node's tranform
-			matNew = simpletransform.composeTransform( matCurrent,
-				simpletransform.parseTransform( node.get( "transform" ) ) )
+			matNew = simpletransform.composeTransform( matCurrent, simpletransform.parseTransform( node.get( "transform" ) ) )
 
 			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
 
@@ -623,7 +622,7 @@ class Map( inkex.Effect ):
 				else:
 					return simpletransform.composeTransform( parent_tranform, tr )
 		else:
-			return None
+			return self.docTransform
 
 	def effect( self ):
 
