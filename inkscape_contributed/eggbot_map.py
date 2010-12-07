@@ -620,7 +620,7 @@ class Map( inkex.Effect ):
 				if parent_transform is None:
 					return tr
 				else:
-					return simpletransform.composeTransform( parent_tranform, tr )
+					return simpletransform.composeTransform( parent_transform, tr )
 		else:
 			return self.docTransform
 
