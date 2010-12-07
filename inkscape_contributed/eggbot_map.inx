@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Map</_name>
+  <id>command.eggbot.contributed.map</id>
+  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
+  <dependency type="executable" location="extensions">map.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <dependency type="executable" location="extensions">simpletransform.py</dependency>
+  <dependency type="executable" location="extensions">cubicsuperpath.py</dependency>
+  <dependency type="executable" location="extensions">cspsubdiv.py</dependency>
+  <dependency type="executable" location="extensions">bezmisc.py</dependency>
+
+  <_param name="Header" type="description" xml:space="preserve">
+This extension will horizontally
+stretch your drawing.  The amount
+of stretch increases towards the
+poles of your egg (i.e., increases
+with distance away from the equator).
+
+A vertical line passing through your
+documents center (width/2) will remain
+unchanged.  The farther a vertical
+line is from the center, the more it
+will be distorted.
+
+Hatch line angles are measured
+from horizontal: 0 is horizontal
+and 90 is vertical.
+
+The vertical smoothing is the vertical
+segment length to break non-horizontal
+lines into so that they appear smooth
+when distorted.
+
+The curve smoothing value is the
+same control as in the Eggbot Control
+extension.  It needs to be applied
+here before plotting as all curves
+will be rendered to straight line
+segments by this extension.
+  </_param>
+
+  <param name="maxDy" type="float" min="0.0001" max="999.0"
+	 _gui-text="Vertical smoothing (lower for more)">5.0</param>
+  <param name="smoothness" type="float" min="0.0001" max="5"
+	 _gui-text="   Curve smoothing (lower for more)">0.2</param>
+
+  <effect needs-live-preview="false">
+    <object-type>all</object-type>
+    <effects-menu>
+      <submenu _name="EggBot Contributed"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">map.py</command>
+  </script>
+</inkscape-extension>
