@@ -3,7 +3,7 @@
   <_name>Map</_name>
   <id>command.eggbot.contributed.map</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-  <dependency type="executable" location="extensions">map.py</dependency>
+  <dependency type="executable" location="extensions">eggbot_map.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
   <dependency type="executable" location="extensions">simpletransform.py</dependency>
   <dependency type="executable" location="extensions">cubicsuperpath.py</dependency>
@@ -11,33 +11,36 @@
   <dependency type="executable" location="extensions">bezmisc.py</dependency>
 
   <_param name="Header" type="description" xml:space="preserve">
-This extension will horizontally
-stretch your drawing.  The amount
-of stretch increases towards the
-poles of your egg (i.e., increases
-with distance away from the equator).
+This extension will horizontally stretch your drawing.  The
+amount of stretch increases towards the poles of your egg
+(i.e., increases with distance away from the equator).  The
+stretching is such that when plotted, the resulting plot
+appears much like your original drawing.  The stretching of
+the horizontal near the poles counters the decreasing
+circumference of lines of latitude as you approach the poles
+of a sphere or egg.
 
-A vertical line passing through your
-documents center (width/2) will remain
-unchanged.  The farther a vertical
-line is from the center, the more it
+Apply this extension just before plotting.  Note that it
+turns all objects into paths composed of line segments.
+
+If no objects are selected, then the entire document is
+transformed.  In this case, a vertical line passing through
+your document's center (width / 2) will remain unchanged.
+The farther a vertical line is from the center, the more it
 will be distorted.
 
-Hatch line angles are measured
-from horizontal: 0 is horizontal
-and 90 is vertical.
+If objects are selected then a vertical line passing through
+the horizontal midpoint of the bounding box containing the
+selected objects will remain unchanged.
 
-The vertical smoothing is the vertical
-segment length to break non-horizontal
-lines into so that they appear smooth
-when distorted.
+The vertical smoothing is the vertical segment length to
+break non-horizontal lines into so that they are smoothly but
+continuously distorted.
 
-The curve smoothing value is the
-same control as in the Eggbot Control
-extension.  It needs to be applied
-here before plotting as all curves
-will be rendered to straight line
-segments by this extension.
+The curve smoothing value is the same control as in the
+Eggbot Control extension.  It needs to be applied here
+before plotting as all curves will be rendered to straight
+line segments by this extension.
   </_param>
 
   <param name="maxDy" type="float" min="0.0001" max="999.0"
@@ -52,6 +55,6 @@ segments by this extension.
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">map.py</command>
+    <command reldir="extensions" interpreter="python">eggbot_map.py</command>
   </script>
 </inkscape-extension>
