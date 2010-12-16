@@ -1169,9 +1169,11 @@ class EggBot( inkex.Effect ):
 
 			if ( self.options.wraparound ):
 				if ( self.nDeltaX > 1600 / self.step_scaling_factor ):
-					self.nDeltaX -= 3200 / self.step_scaling_factor
+					while ( self.nDeltaX > 1600 / self.step_scaling_factor ):
+						self.nDeltaX -= 3200 / self.step_scaling_factor
 				elif ( self.nDeltaX < -1600 / self.step_scaling_factor ):
-					self.nDeltaX += 3200 / self.step_scaling_factor
+					while ( self.nDeltaX < -1600 / self.step_scaling_factor ):
+						self.nDeltaX += 3200 / self.step_scaling_factor
 
 		else:
 			self.fSpeed = self.options.penDownSpeed
