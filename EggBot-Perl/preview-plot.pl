@@ -66,32 +66,3 @@ foreach my $pen_color (@pen_order) {
 }
 $surface->write_to_png("plot-preview.png");
 
-# figure out all the line segments in a plot color
-sub segments {
-    my ($points) = @_;
-    my @segs;
-    # assume we start from zero 
-    my ($cur_x, $cur_y) = (0, 0);
-    foreach my $p (@{$points}) {
-        if ($p->[0] eq 'd') {
-            # create a segment if drawing
-            push @segs, [$cur_x, $cur_y, $p->[1], $p->[2]];
-        }
-        # always update the current cursor
-        ($cur_x, $cur_y) = ($p->[1], $p->[2]);
-        }
-    }
-    # now @segs has all line segments we expect
-    # to draw
-    # Go through them and build connected paths
-    my @paths;
-    my @segs2;
-    while (1) {
-        my $p = shift @segs;    # grab first segment
-        my ($ex, $ey) = ($p->[2], $p->[3]); # end of segment 
-        while (my $n = shift @segs) {
-            if ($s2[0] == $s[2] and $s2[1] eq $s[3]) {
-            }
-        }
-    }
-}
