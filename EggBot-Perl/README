@@ -1,0 +1,38 @@
+Perl support for the EggBot
+
+This is some code I've hacked together to drive the EggBot using perl scripts.
+It should be fairly easy to port it to other languages if you want although
+the existing Eggbot extension scripts are in Python.
+
+EggBot.pm - this is the core module, use EggBot->new() to instantiate a new
+            eggbot controller object.
+
+HPGL.pm - Parse (simply) the HPGL language. HPGL ".PLT" files are very simple
+        text files consisting of PU (pen up) and PD (pen down) commands which
+        are analogs for move_to and draw_to operations. SP (set pen) sets the
+        current pen color. HPGL will collect all the lines drawn by each color
+        into a separate list.
+
+egg_drive.pl - a program that uses EggBot.pm and lets you send arbitrary
+            commands to the EBB. This can substitute for a terminal connection
+            since it lets you send any string through.
+
+egg_plot.pl - reads an HPGL file, and then after asking you to home the pen
+            plots it. It will stop and ask for pen changes based on the 
+            HP standard pen colors (for pens 1 through 8). 
+
+preview-plot.pl - this does what egg_plot does except that rather than send
+            the plot to an egg it creates a PNG (portable network graphics)
+            bitmap file which represents what would have been plotted. Since
+            it doesn't show the warping that occurs from the round surface
+            of the egg. 
+
+svg-test.pl - this was a test program I wrote to see if perl could parse 
+            SVG files (uh doh!) and got worried that it would take too long
+            to deal with two new technologies (SVG + EggBot) and reduced it
+            to one (EggBot) by switching to HPGL (which many graphics programs
+            support out of the box).
+
+--Chuck
+December 2010
+
