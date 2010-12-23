@@ -158,15 +158,13 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.0.1, dated 10/21/2010
+Release 2.1.1, dated 12/22/2010
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
 
 Known issues:
 * Engraving function is not yet implemented
-* Very long manual movements or pen lifts
-  can cause a serial timeout error.
 * "Cancel" function does not work while plotting.
   (This is due to a known bug in Inkscape.)
 </_param>
