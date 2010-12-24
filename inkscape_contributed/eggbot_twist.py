@@ -458,7 +458,8 @@ class Twist( inkex.Effect ):
 		if makeGroup:
 			# Make a new SVG <group> element whose parent is the parent of node
 			parent = node.getparent()
-			if not parent:
+			#was: if not parent:
+			if parent is None:
 				parent = self.document.getroot()
 			g = inkex.etree.SubElement( parent, inkex.addNS( 'g', 'svg' ) )
 

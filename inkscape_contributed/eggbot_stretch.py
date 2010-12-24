@@ -610,7 +610,7 @@ class Map( inkex.Effect ):
 		its chain of ancestors.
 		'''
 		node = node.getparent()
-		if node:
+		if node is not None:
 			parent_transform = self.recursivelyGetEnclosingTransform( node )
 			node_transform = node.get( 'transform', None )
 			if node_transform is None:
