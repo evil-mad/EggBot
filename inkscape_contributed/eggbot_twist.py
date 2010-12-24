@@ -493,8 +493,9 @@ class Twist( inkex.Effect ):
 		for path in self.paths:
 			for subpath in self.paths[path]:
 				for i in range( 0, len( subpath ) - 1 ):
-					subpath[i][0] = subpath[i][0] + ratio * ( subpath[i+1][0] - subpath[i][0] )
-					subpath[i][1] = subpath[i][1] + ratio * ( subpath[i+1][1] - subpath[i][1] )
+					x = subpath[i][0] + ratio * ( subpath[i+1][0] - subpath[i][0] )
+					y = subpath[i][1] + ratio * ( subpath[i+1][1] - subpath[i][1] )
+					subpath[i] = [x, y]
 				subpath[-1] = subpath[0]
 
 	def draw( self, makeGroup=False ):
