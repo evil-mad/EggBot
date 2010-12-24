@@ -158,7 +158,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.1.2, dated 12/24/2010
+Release 2.1.3, dated 12/24/2010
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
