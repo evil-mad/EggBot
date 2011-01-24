@@ -56,7 +56,7 @@ class EggbotMachineToolFixup( inkex.Effect ):
 		  - Remove font name info so that we don't process this again
 		'''
 
-		if not node:
+		if node is None:
 			return
 
 		style_str = node.get( 'style' )
