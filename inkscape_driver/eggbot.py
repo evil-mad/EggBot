@@ -515,7 +515,6 @@ class EggBot( inkex.Effect ):
 			return
 
 		# Viewbox handling
-		# Presently ignores minx, miny info (translation)
 		# Also ignores the preserveAspectRatio attribute
 		viewbox = self.svg.get( 'viewBox' )
 		if viewbox:
@@ -523,7 +522,7 @@ class EggBot( inkex.Effect ):
 			if ( vinfo[2] != 0 ) and ( vinfo[3] != 0 ):
 				sx = self.svgWidth / float( vinfo[2] )
 				sy = self.svgHeight / float( vinfo[3] )
-				self.svgTransform = parseTransform( 'scale(%f,%f)' % (sx, sy) )
+				self.svgTransform = parseTransform( 'scale(%f,%f) translate(%f,%f)' % (sx, sy, -float( vinfo[0] ), -float( vinfo[1] ) ) )
 
 		self.ServoSetup()
 
