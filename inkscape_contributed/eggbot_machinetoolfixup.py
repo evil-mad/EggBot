@@ -16,6 +16,10 @@
 # Note that some of the characters in the Machine Tool font family ARE NOT
 # single stroke characters and thus will not work well with this extension.
 # For example, the @, %, and ! characters.
+#
+# As of this writing, the Machine Tool family of fonts are available at
+#
+#   http://www.featurecam.com/general/support/engrave_fonts.asp
 
 # Written by Daniel C. Newman ( dan dot newman at mtbaldy dot us )
 # 19 January 2011
@@ -49,7 +53,6 @@ class EggbotMachineToolFixup( inkex.Effect ):
 
 		'''
 		Fixup the style
-
 		  - Disable fill
 		  - Enable stroke
 		  - Set stroke-width to 1 if not already set
