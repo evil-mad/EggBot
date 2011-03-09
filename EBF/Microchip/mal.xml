@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 2010 Microchip Technology Inc. -->
+
+<!-- XML Format Policy -->
+<!-- In VERSION tag, use MAJOR/MINOR/DOT OR STRING, not both at the same time -->
+
+<DISTRIBUTION>
+
+  <INFO>
+    <NAME>Microchip Application Libraries</NAME>
+    <SHORT_NAME>MAL</SHORT_NAME>
+    <VERSION>
+      <STRING>2010-10-19</STRING>
+    </VERSION>
+  </INFO>
+
+  <LIBRARIES>
+
+    <LIBRARY>
+      <NAME>Graphics Library</NAME>
+      <SHORT_NAME>GFX</SHORT_NAME>
+      <VERSION>
+        <MAJOR>2</MAJOR>
+        <MINOR>11</MINOR>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Microchip Full Speed USB Library</NAME>
+      <SHORT_NAME>MPFSUSB</SHORT_NAME>
+      <VERSION>
+        <STRING>2.8</STRING>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Memory Disk Drive Library</NAME>
+      <SHORT_NAME>MDD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>2</MINOR>
+        <DOT>7</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>TCPIP Stack</NAME>
+      <SHORT_NAME>TCPIP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>5</MAJOR>
+        <MINOR>31</MINOR>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>mTouchCap Library</NAME>
+      <SHORT_NAME>MTOUCHCAP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>21</MINOR>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Smart Card Library</NAME>
+      <SHORT_NAME>SMCARD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>02</MINOR>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>MiWi(TM) DE</NAME>
+      <SHORT_NAME>MIWI</SHORT_NAME>
+      <VERSION>
+        <MAJOR>3</MAJOR>
+        <MINOR>1</MINOR>
+        <DOT>4</DOT>
+      </VERSION>
+    </LIBRARY>
+
+  </LIBRARIES>
+
+</DISTRIBUTION>
