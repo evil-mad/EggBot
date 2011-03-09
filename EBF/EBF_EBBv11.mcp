@@ -9,7 +9,7 @@ dir_bin=.\EBB_V11
 dir_tmp=.\EBB_V11
 dir_sin=
 dir_inc=c:\mcc18\h;Microchip_USB_2_7a\Include;..\EBF
-dir_lib=C:\MCC18\lib
+dir_lib=C:\Program Files\Microchip\mplabc18\v3.37.01\lib;C:\MCC18\lib
 dir_lkr=
 [CAT_FILTERS]
 filter_src=*.asm;*.c
