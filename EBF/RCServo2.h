@@ -5,6 +5,7 @@
 #include "Compiler.h"
 
 #define MAX_RC2_SERVOS	24		// This is 24 because there are 24 RPn pins
+#define DEFAULT_EBB_SERVO_PORTB_PIN	(1)	// Note, this indicates a PortB pin number, not RPn number
 
 extern BOOL gUseRCServo2;
 extern unsigned char gRC2msCounter;
@@ -20,6 +21,7 @@ extern unsigned char gRC2Slots;
 extern unsigned char gRC2SlotMS;
 extern unsigned int g_servo2_rate_up;
 extern unsigned int g_servo2_rate_down;
+extern unsigned char g_servo2_RPpin;
 
 void RCServo2_Init(void);
 void RCServo2_S2_command(void);

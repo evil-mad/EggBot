@@ -33,7 +33,19 @@
 // 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause button.
 //					switched it to RB2 on v1.1 hardware
 // 2.0.2 10/3/10 - Bug fix - QC command not returning proper results - added cast and now works OK
-
+// 2.1.0 10/21/10- Added in
+//					SE - Set Engraver - turns engraver (on RB3) on or off, or set to PWM power level
+// 				   Added code in init to pre-charge RC7 (USB_SENSE_IO) high before running rest of code
+//					to get around wrong resistor value on hardware.
+// 2.1.1 11/21/10- Removed Microchip USB stack v2.7, replaced it with v2.8 from MAL 2010_10_19,
+//					Also using generic Microchip folder now rather than re-named one (simpler to update)
+//				   Updated code in main.c (and others) to match updates from latest MAL CDC example
+// 2.1.1cTest1 01/17/11 - Added third paramter to SP command to use any PortB pin for servo output
+//                 For this version only - used PortB2 as standard servo output
+// 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
+//                 - Updated check_and_send_TX_data() to allow unlimited data to go out without overrunning
+//                    the output buffer, same as UBW 1.4.7
+// 
 #include <p18cxxx.h>
 #include <usart.h>
 #include <stdio.h>
@@ -162,6 +174,7 @@ static char Layer;
 static BOOL ButtonPushed;
 static BOOL UseAltPause;
 unsigned char QC_ms_timer;
+static UINT StoredEngraverPower;
 
 // ISR
 // PORTB is the step and direction port 
@@ -418,7 +431,7 @@ void high_ISR(void)
 				// Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
 				gRC2Rate[0] = g_servo2_rate_up;
 				gRC2Target[0] = g_servo2_min;
-				gRC2Pin[0] = 4;
+				gRC2Pin[0] = g_servo2_RPpin;
 				if (gRC2Value[0] == 0)
 				{
 					gRC2Value[0] = g_servo2_min;
@@ -458,7 +471,7 @@ void high_ISR(void)
 				// Process_S2(1, g_servo2_max, 4, g_servo2_rate_down);
 				gRC2Rate[0] = g_servo2_rate_down;
 				gRC2Target[0] = g_servo2_max;
-				gRC2Pin[0] = 4;
+				gRC2Pin[0] = g_servo2_RPpin;
 				if (gRC2Value[0] == 0)
 				{
 					gRC2Value[0] = g_servo2_max;
@@ -687,6 +700,39 @@ void EBB_Init(void)
 	TRISC = 0;		// Make portC outputs
 #endif
 
+	// For bug in VUSB divider resistor, set RC7 as output and set high
+	// Wait a little while to charge up
+	// Then set back as an input
+	// The idea here is to get the schmidt trigger input RC7 high before
+	// we make it an input, thus getting it above the 2.65V ST threshold
+	// And allowing VUSB to keep the logic level on the pin high at 2.5V
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+    #if defined(USE_USB_BUS_SENSE_IO)
+	    tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
+    	USB_BUS_SENSE = 1;
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		Delay1TCY();
+		tris_usb_bus_sense = INPUT_PIN;
+		USB_BUS_SENSE = 0;
+	#endif
+#endif
 	// Set up pen up/down direction as output
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
@@ -711,6 +757,37 @@ void EBB_Init(void)
 #endif
 	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
 	UseAltPause = TRUE;
+
+	// Set up PWM for Engraver control
+	// We will use ECCP1 and Timer2 for the engraver PWM output on RB3
+	// Our PWM will operate at about 40Khz.
+	
+	// Set our reload value
+	PR2 = 0xFF;
+
+	// Set to %50 power for testing
+	CCPR1L = 0x80;
+
+	// Initalize Timer2
+
+	// The prescaler will be at 1
+	T2CONbits.T2CKPS = 0b00;
+
+	// Do not generate an interrupt	
+    PIE1bits.TMR2IE = 0;
+
+	TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+	TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+
+	CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
+	CCP1CONbits.P1M = 0b00;		// Enhanged PWM mode: single ouptut
+	
+	// Set up output routing to go to RB3 (RP6)
+	RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
+
+	TRISBbits.TRISB3 = 0;		// Make RB3 an output
+	
+	T2CONbits.TMR2ON = 1;		// Turn it on
 }
 
 // Stepper (mode) Configure command
@@ -1090,21 +1167,34 @@ void parse_TP_packet(void)
 }
 
 // Set Pen
-// Usage: SP,<1,0>,<Duration><CR>
+// Usage: SP,<1,0>,<Duration>,<PortB_Pin><CR>
+// <PortB_Pin> is 0 to 7
 void parse_SP_packet(void)
 {
 	unsigned char State = 0;
 	unsigned short CommandDuration = 0;
+	unsigned char Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
 
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
 	extract_number (kUINT, &CommandDuration, kOPTIONAL);
+	extract_number (kUCHAR, &Pin, kOPTIONAL);
 
 	// Bail if we got a conversion error
 	if (error_byte)
 	{
 		return;
 	}
+
+	if (Pin > 7)
+	{
+		Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+	}
+	g_servo2_RPpin = Pin + 3;
+
+	// Make sure that the selected pin we're going to use is an output
+	// (This code only works for PortB - maybe expand it in the future for all ports.)
+	TRISB = TRISB & ~(1 << Pin);
 
 	process_SP(State, CommandDuration);
 
@@ -1488,4 +1578,56 @@ void parse_QC_packet(void)
 
 	print_ack();	
 }	
+
+// Set Engraver
+// Usage: SE,<state>,<power><CR>
+// <state> is 0 for off and 1 for on (required)
+// <power> is 10 bit PWM power level (optional)
+// We boot up with <power> at 1023 (full on)
+// The engraver motor is always assumed to be on RB3
+// So our init routine will map ECCP1
+//
+// Timer0 is RC command
+// Timer1 is stepper
+// Timer2 and ECCP1 is engraver PWM
+// Timer3 and ECCP2 is RC servo2 output
+// Timer4 is 1ms ISR
+
+void parse_SE_packet(void)
+{
+	BYTE State = 0;
+	UINT Power = 1024;
+	
+	// Extract each of the values.
+	extract_number (kUCHAR, &State, kREQUIRED);
+	extract_number (kUINT, &Power, kOPTIONAL);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+	// Limit check
+	if (Power <= 1023)
+	{
+		StoredEngraverPower = Power;
+	}
+
+	// Now act on the State
+	if (State)
+	{
+		// Set RB3 to StoredEngraverPower
+		CCPR1L = StoredEngraverPower >> 2;
+		CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+	}
+	else
+	{
+		// Set RB3 to low by setting PWM duty cycle to zero
+		CCPR1L = 0;
+		CCP1CON = (CCP1CON & 0b11001111);
+	}		
+
+	print_ack();
+}
 	

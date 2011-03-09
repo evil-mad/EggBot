@@ -83,7 +83,7 @@
 
 #define kISR_FIFO_A_DEPTH		3
 #define kISR_FIFO_D_DEPTH		3
-#define kPR2_RELOAD				250		// For 1ms TMR2 tick
+#define kPR4_RELOAD				250		// For 1ms TMR4 tick
 #define kCR						0x0D
 #define kLF						0x0A
 
@@ -124,15 +124,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 2.0.2\r\n"};
+	const rom char st_version[] = {"EBBv10 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 2.0.2\r\n"};
+	const rom char st_version[] = {"EBBv11 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.0.2\r\n"};
+	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.0.2\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 2.0.2\r\n"};
+	const rom char st_version[] = {"UBW EB Firmware Version 2.1.1d\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -245,11 +245,11 @@ void low_ISR(void)
 	signed int RC2Difference = 0;
 #endif
 
-	// Do we have a Timer2 interrupt? (1ms rate)
-	if (PIR1bits.TMR2IF)
+	// Do we have a Timer4 interrupt? (1ms rate)
+	if (PIR3bits.TMR4IF)
 	{
 		// Clear the interrupt 
-		PIR1bits.TMR2IF = 0;
+		PIR3bits.TMR4IF = 0;
 		
 		// Only run this code if user has turned on RC method 1
 		if (gUseRCServo1) {
@@ -676,16 +676,17 @@ void UserInit(void)
 	A_cur_channel = 0;
 	
     // Now init our registers
+	// Initalize Timer4
 	// The prescaler will be at 16
-    T2CONbits.T2CKPS1 = 1;
-    T2CONbits.T2CKPS0 = 1;
-    // We want the TMR2 post scaler to be a 3
-    T2CONbits.T2OUTPS3 = 0;
-    T2CONbits.T2OUTPS2 = 0;
-    T2CONbits.T2OUTPS1 = 1;
-    T2CONbits.T2OUTPS0 = 0;
+    T4CONbits.T4CKPS1 = 1;
+    T4CONbits.T4CKPS0 = 1;
+    // We want the TMR4 post scaler to be a 3
+    T4CONbits.T4OUTPS3 = 0;
+    T4CONbits.T4OUTPS2 = 0;
+    T4CONbits.T4OUTPS1 = 1;
+    T4CONbits.T4OUTPS0 = 0;
 	// Set our reload value
-	PR2 = kPR2_RELOAD;
+	PR4 = kPR4_RELOAD;
 
 	// Set up the Analog to Digital converter
 	// Clear out the FIFO data
@@ -731,10 +732,10 @@ void UserInit(void)
 
     // Enable interrupt priorities
     RCONbits.IPEN = 1;
-	T2CONbits.TMR2ON = 0;
+	T4CONbits.TMR4ON = 0;
     
-    PIE1bits.TMR2IE = 1;
-    IPR1bits.TMR2IP = 0;
+    PIE3bits.TMR4IE = 1;
+    IPR3bits.TMR4IP = 0;
     
 	// Call the ebb init function to setup whatever it needs
 	EBB_Init();   
@@ -746,8 +747,8 @@ void UserInit(void)
     INTCONbits.GIEH = 1;	// Turn high priority interrupts on
     INTCONbits.GIEL = 1;	// Turn low priority interrupts on
 
-	// Turn on the Timer2
-	T2CONbits.TMR2ON = 1; 
+	// Turn on the Timer4
+	T4CONbits.TMR4ON = 1; 
 }//end UserInit
 
 /******************************************************************************
@@ -1034,57 +1035,51 @@ int _user_putc (char c)
 	return (c);
 }
 
-// In this function, we check to see it is OK to transmit. If so
-// we see if there is any data to transmit to PC. If so, we schedule
-// it for sending.
+// In this function, we check to see if we have anything to transmit. 
+// If so then we schedule the data for sending.
 void check_and_send_TX_data (void)
 {
 	char temp;
 
-	// Only send if we're not already sending something
-//	if (
-//		USBUSARTIsTxTrfReady()
-//		&&
-//		!(
-//			(USBDeviceState < CONFIGURED_STATE) 
-//			|| 
-//			(USBSuspendControl==1)
-//		)
-//	)
-//	{
-		// And only send if there's something there to send
-		if (g_TX_buf_out != g_TX_buf_in)
+	// Oly send if there's something there to send
+	if (g_TX_buf_out != g_TX_buf_in)
+	{
+		// Yes, Microchip says not to do this. We'll be blocking
+		// here until there's room in the USB stack to send
+		// something new. But without making our buffers huge,
+		// I don't know how else to do it.
+		while (!USBUSARTIsTxTrfReady())
 		{
-			while (!USBUSARTIsTxTrfReady())
-			{
-				CDCTxService();
-				USBDeviceTasks();				
-			}
-
-			// Now decide if we need to break it up into two parts or not
-			if (g_TX_buf_in > g_TX_buf_out)
-			{
-				// Since IN is beyond OUT, only need one chunk
-				temp = g_TX_buf_in - g_TX_buf_out;
-				putUSBUSART((char *)&g_TX_buf[g_TX_buf_out], temp);
-				// Now that we've scheduled the data for sending,
-				// update the pointer
-				g_TX_buf_out = g_TX_buf_in;
-			}
-			else
-			{
-				// Since IN is before OUT, we need to send from OUT to the end
-				// of the buffer, then the next time around we'll catch
-				// from the beginning to IN.
-				temp = kTX_BUF_SIZE - g_TX_buf_out;
-				putUSBUSART((char *)&g_TX_buf[g_TX_buf_out], temp);
-				// Now that we've scheduled the data for sending,
-				// update the pointer
-				g_TX_buf_out = 0;
-			}
 			CDCTxService();
+#if defined(USB_POLLING)
+			USBDeviceTasks();				
+#endif
 		}
-//	}
+		// Now we know that the stack can transmit some new data
+
+		// Now decide if we need to break it up into two parts or not
+		if (g_TX_buf_in > g_TX_buf_out)
+		{
+			// Since IN is beyond OUT, only need one chunk
+			temp = g_TX_buf_in - g_TX_buf_out;
+			putUSBUSART((char *)&g_TX_buf[g_TX_buf_out], temp);
+			// Now that we've scheduled the data for sending,
+			// update the pointer
+			g_TX_buf_out = g_TX_buf_in;
+		}
+		else
+		{
+			// Since IN is before OUT, we need to send from OUT to the end
+			// of the buffer, then the next time around we'll catch
+			// from the beginning to IN.
+			temp = kTX_BUF_SIZE - g_TX_buf_out;
+			putUSBUSART((char *)&g_TX_buf[g_TX_buf_out], temp);
+			// Now that we've scheduled the data for sending,
+			// update the pointer
+			g_TX_buf_out = 0;
+		}
+		CDCTxService();
+	}
 }
 
 
@@ -1381,6 +1376,12 @@ void parse_packet(void)
 			parse_QC_packet();
 			break;
 		}
+		case ('S' * 256) + 'E':
+		{
+			// SE for Set Engraver
+			parse_SE_packet();
+			break;
+		}
 		case ('S' * 256) + '2':
 		{
 			// S2 for RC Servo method 2
@@ -1518,7 +1519,7 @@ void parse_T_packet(void)
 		}
 		else
 		{
-			T2CONbits.TMR2ON = 1;    
+			T4CONbits.TMR4ON = 1;    
 		
 			// Eventually gaurd this section from interrupts
 			ISR_D_RepeatRate = time_between_updates;
@@ -1533,7 +1534,7 @@ void parse_T_packet(void)
 		}
 		else
 		{
-			T2CONbits.TMR2ON = 1;    
+			T4CONbits.TMR4ON = 1;    
 		
 			// Eventually gaurd this section from interrupts
 			ISR_A_RepeatRate = time_between_updates;
@@ -1664,7 +1665,7 @@ void parse_C_packet(void)
 		// Tell ourselves how many channels to convert, and turn on ISR conversions
 //		AnalogEnable = AA;
 	
-//		T2CONbits.TMR2ON = 1;
+//		T4CONbits.TMR4ON = 1;
 //	}
 	
 	print_ack ();
@@ -2792,6 +2793,27 @@ void parse_PG_packet (void)
 	print_ack ();
 }	
 
+void LongDelay(void)
+{
+	unsigned char i;
+	//A basic for() loop decrementing a 16 bit number would be simpler, but seems to take more code space for
+	//a given delay.  So do this instead:	
+	for(i = 0; i < 0xFF; i++)
+	{
+		WREG = 0xFF;
+		while(WREG)
+		{
+			WREG--;
+			_asm
+			bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
+			bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
+			bra	0	//Equivalent to bra $+2, which takes half as much code as 2 nop instructions
+			_endasm	
+		}
+	}
+	//Delay is ~59.8ms at 48MHz.	
+}	
+
 // BL command : simply jump to the bootloader
 // Example: "BL<CR>"
 void parse_BL_packet()
@@ -2799,6 +2821,12 @@ void parse_BL_packet()
 	// First, kill interrupts though
     INTCONbits.GIEH = 0;	// Turn high priority interrupts on
     INTCONbits.GIEL = 0;	// Turn low priority interrupts on
+
+	UCONbits.SUSPND = 0;		//Disable USB module
+	UCON = 0x00;				//Disable USB module
+	//And wait awhile for the USB cable capacitance to discharge down to disconnected (SE0) state. 
+	//Otherwise host might not realize we disconnected/reconnected when we do the reset.
+	LongDelay();
 	_asm goto 0x00001E _endasm
 }
 

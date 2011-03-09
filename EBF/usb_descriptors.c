@@ -231,7 +231,7 @@ ROM BYTE configDescriptor1[]={
     //sizeof(USB_EP_DSC),DSC_EP,_EP02_IN,_INT,CDC_INT_EP_SIZE,0x02,
     0x07,/*sizeof(USB_EP_DSC)*/
     USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP02_IN,            //EndpointAddress
+    _EP01_IN,            //EndpointAddress
     _INTERRUPT,                       //Attributes
     0x08,0x00,                  //size
     0x02,                       //Interval
@@ -251,7 +251,7 @@ ROM BYTE configDescriptor1[]={
     //sizeof(USB_EP_DSC),DSC_EP,_EP03_OUT,_BULK,CDC_BULK_OUT_EP_SIZE,0x00,
     0x07,/*sizeof(USB_EP_DSC)*/
     USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP03_OUT,            //EndpointAddress
+    _EP02_OUT,            //EndpointAddress
     _BULK,                       //Attributes
     0x40,0x00,                  //size
     0x00,                       //Interval
@@ -260,7 +260,7 @@ ROM BYTE configDescriptor1[]={
     //sizeof(USB_EP_DSC),DSC_EP,_EP03_IN,_BULK,CDC_BULK_IN_EP_SIZE,0x00
     0x07,/*sizeof(USB_EP_DSC)*/
     USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP03_IN,            //EndpointAddress
+    _EP02_IN,            //EndpointAddress
     _BULK,                       //Attributes
     0x40,0x00,                  //size
     0x00,                       //Interval

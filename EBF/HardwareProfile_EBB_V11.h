@@ -64,7 +64,7 @@
     #define self_power          1
     #endif
 
-    #define USE_USB_BUS_SENSE_IO
+    //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISCbits.TRISC7    // Input
     #if defined(USE_USB_BUS_SENSE_IO)
     #define USB_BUS_SENSE       PORTCbits.RC7

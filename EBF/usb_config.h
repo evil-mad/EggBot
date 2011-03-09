@@ -40,6 +40,11 @@
   1.0   11/19/2004   Initial release
   2.1   02/26/2007   Updated for simplicity and to use common
                      coding style
+  2.8   8 Oct 2010   Added definitions for supporting new 
+                     USB_ENABLE_STATUS_STAGE_TIMEOUTS feature.
+                     Changed the CDC comm EP and data EP from 2,3
+                     (respectively) to 1,2 respectively, so as to
+                     save RAM.
  *******************************************************************/
 
 /*********************************************************************
@@ -94,6 +99,49 @@
 #define USB_SPEED_OPTION USB_FULL_SPEED
 //#define USB_SPEED_OPTION USB_LOW_SPEED //(not valid option for PIC24F devices)
 
+//------------------------------------------------------------------------------------------------------------------
+//Option to enable auto-arming of the status stage of control transfers, if no
+//"progress" has been made for the USB_STATUS_STAGE_TIMEOUT value.
+//If progress is made (any successful transactions completing on EP0 IN or OUT)
+//the timeout counter gets reset to the USB_STATUS_STAGE_TIMEOUT value.
+//
+//During normal control transfer processing, the USB stack or the application 
+//firmware will call USBCtrlEPAllowStatusStage() as soon as the firmware is finished
+//processing the control transfer.  Therefore, the status stage completes as 
+//quickly as is physically possible.  The USB_ENABLE_STATUS_STAGE_TIMEOUTS 
+//feature, and the USB_STATUS_STAGE_TIMEOUT value are only relevant, when:
+//1.  The application uses the USBDeferStatusStage() API function, but never calls
+//      USBCtrlEPAllowStatusStage().  Or:
+//2.  The application uses host to device (OUT) control transfers with data stage,
+//      and some abnormal error occurs, where the host might try to abort the control
+//      transfer, before it has sent all of the data it claimed it was going to send.
+//
+//If the application firmware never uses the USBDeferStatusStage() API function,
+//and it never uses host to device control transfers with data stage, then
+//it is not required to enable the USB_ENABLE_STATUS_STAGE_TIMEOUTS feature.
+
+#define USB_ENABLE_STATUS_STAGE_TIMEOUTS    //Comment this out to disable this feature.  
+
+//Section 9.2.6 of the USB 2.0 specifications indicate that:
+//1.  Control transfers with no data stage: Status stage must complete within 
+//      50ms of the start of the control transfer.
+//2.  Control transfers with (IN) data stage: Status stage must complete within 
+//      50ms of sending the last IN data packet in fullfilment of the data stage.
+//3.  Control transfers with (OUT) data stage: No specific status stage timing
+//      requirement.  However, the total time of the entire control transfer (ex:
+//      including the OUT data stage and IN status stage) must not exceed 5 seconds.
+//
+//Therefore, if the USB_ENABLE_STATUS_STAGE_TIMEOUTS feature is used, it is suggested
+//to set the USB_STATUS_STAGE_TIMEOUT value to timeout in less than 50ms.  If the
+//USB_ENABLE_STATUS_STAGE_TIMEOUTS feature is not enabled, then the USB_STATUS_STAGE_TIMEOUT
+//parameter is not relevant.
+
+#define USB_STATUS_STAGE_TIMEOUT     (BYTE)45   //Approximate timeout in milliseconds, except when
+                                                //USB_POLLING mode is used, and USBDeviceTasks() is called at < 1kHz
+                                                //In this special case, the timeout becomes approximately:
+//Timeout(in milliseconds) = ((1000 * (USB_STATUS_STAGE_TIMEOUT - 1)) / (USBDeviceTasks() polling frequency in Hz))
+//------------------------------------------------------------------------------------------------------------------
+
 #define USB_SUPPORT_DEVICE
 
 #define USB_NUM_STRING_DESCRIPTORS 3
@@ -114,15 +162,15 @@
 #define USB_USE_CDC
 
 /** ENDPOINTS ALLOCATION *******************************************/
-#define USB_MAX_EP_NUMBER	    3
+#define USB_MAX_EP_NUMBER	    2
 
 /* CDC */
 #define CDC_COMM_INTF_ID        0x0
-#define CDC_COMM_EP              2
+#define CDC_COMM_EP              1
 #define CDC_COMM_IN_EP_SIZE      8
 
 #define CDC_DATA_INTF_ID        0x01
-#define CDC_DATA_EP             3
+#define CDC_DATA_EP             2
 #define CDC_DATA_OUT_EP_SIZE    64
 #define CDC_DATA_IN_EP_SIZE     64
 
