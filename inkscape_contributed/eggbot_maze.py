@@ -7,6 +7,33 @@
 # Improvements and suggestions by W. Craig Trader
 # 20 September 2010
 
+# Update 26 April 2011 by Daniel C. Newman
+#
+# 1. Address Issue #40
+#    The extension now draws the maze by columns, going down
+#    one column of cells and then up the next column. By using
+#    this technique, the impact of slippage is largely limited
+#    the the West and East ends of the maze not meeting.  Otherwise,
+#    the maze will still look quite well aligned both locally and
+#    globally.  Only very gross slippage will impact the local
+#    appearance of the maze.
+#
+#    Note that this new drawing technique is nearly as fast as
+#    the prior method.  The prior method has been preserved and
+#    can be selected by setting self.hpp = True.  ("hpp" intended
+#    to mean "high plotting precision".)
+#
+# 2. Changed the page dimensions to use a height of 800 rather
+#    than 1000 pixels.
+#
+# 3. When drawing the solution layer, draw the ending cell last.
+#    Previously, the starting and ending cells were first drawn,
+#    and then the solution path itself.  That caused the pen to
+#    move to the beginning, the end, and then back to the beginning
+#    again to start the solution path.  Alternatively, the solution
+#    path might have been drawn from the end to the start.  However,
+#    just drawing the ending cell last was easier code-wise.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -32,7 +59,7 @@ import simplestyle
 random.seed()
 
 PLOT_WIDTH  = int( 3200 )    # Eggbot plot width in pixels
-PLOT_HEIGHT = int( 1000 )    # Eggbot plot height in pixels
+PLOT_HEIGHT = int( 800 )     # Eggbot plot height in pixels
 
 TARGET_WIDTH  = int( 3200 )  # Desired plot width in pixels
 TARGET_HEIGHT = int( 600 )   # Desired plot height in pixels
@@ -40,31 +67,33 @@ TARGET_HEIGHT = int( 600 )   # Desired plot height in pixels
 # Add a SVG path element to the document
 # We could do this just as easily as a polyline
 
-def draw_SVG_path(pts, c, t, l, parent):
-	if ( not pts ) or len( pts ) == 0: # Nothing to draw
+def draw_SVG_path( pts, c, t, parent ):
+	if ( pts is None ) or len( pts ) == 0: # Nothing to draw
 		return
-	assert len( pts ) % 2 == 0, "pts must have an even number of entries"
-	d = "M %d,%d" % ( pts[0], pts[1] )
-	for i in range( 2, len( pts ), 2 ):
-		d += " L %d,%d" % ( pts[i], pts[i+1] )
-	style = { 'stroke':c, 'stroke-width':str( t ), 'fill': 'none' }
-	line_attribs = { 'style':simplestyle.formatStyle( style ),
-					  inkex.addNS( 'label','inkscape' ):l,
-					  'd':d }
-	inkex.etree.SubElement( parent, inkex.addNS( 'path','svg' ),
-							line_attribs )
+	if isinstance( pts, list ):
+		assert len( pts ) % 3 == 0, "len(pts) must be a multiple of three"
+		d = "%s %d,%d" % ( pts[0], pts[1], pts[2] )
+		for i in range( 3, len( pts ), 3 ):
+			d += " %s %d,%d" % ( pts[i], pts[i+1], pts[i+2] )
+	elif isinstance( pts, str ):
+		d = pts
+	else:
+		return
+	style = { 'stroke':c, 'stroke-width':str( t ), 'fill':'none' }
+	line_attribs = { 'style':simplestyle.formatStyle( style ),'d':d }
+	inkex.etree.SubElement( parent, inkex.addNS( 'path','svg' ), line_attribs )
 
 # Add a SVG rect element to the document
-def draw_SVG_rect(x, y, w, h, c, t, fill, l, parent):
+
+def draw_SVG_rect( x, y, w, h, c, t, fill, parent ):
 	style = { 'stroke':c, 'stroke-width':str( t ), 'fill':fill }
 	rect_attribs = { 'style':simplestyle.formatStyle( style ),
-					  inkex.addNS( 'label','inkscape' ):l,
 					  'x':str( x ), 'y':str( y ),
 					  'width':str( w ), 'height':str( h ) }
 	inkex.etree.SubElement( parent, inkex.addNS( 'rect', 'svg' ),
 							rect_attribs )
 
-class Maze(inkex.Effect):
+class Maze( inkex.Effect ):
 
 	# Each cell in the maze is represented using 9 bits:
 	#
@@ -87,12 +116,24 @@ class Maze(inkex.Effect):
 	_SOUTH   = 0x0004
 	_WEST    = 0x0008
 
-	def __init__(self):
+	def __init__( self ):
+
 		inkex.Effect.__init__( self )
-		self.OptionParser.add_option( "--mazeSize", action="store",
-									   type="string", dest="mazeSize",
-									   default="MEDIUM",
-									   help="Difficulty of maze to build" )
+
+		self.OptionParser.add_option(
+			"--tab", action="store", type="string",
+			dest="tab", default="controls",
+			help="The active tab when Apply was pressed" )
+		self.OptionParser.add_option(
+			"--mazeSize", action="store", type="string", dest="mazeSize",
+			default="MEDIUM", help="Difficulty of maze to build" )
+		#self.OptionParser.add_option(
+		#	"--hpp", action="store", type="inkbool", dest="hpp", default=False,
+		#	help="Use a faster plotting technique that requires much better plotting precision" )
+		#self.hpp = self.options.hpp
+
+		self.hpp = False
+
 		self.w          = int( 0 )
 		self.h          = int( 0 )
 		self.solved     = int( 0 )
@@ -106,11 +147,10 @@ class Maze(inkex.Effect):
 
 		# Drawing information
 		self.scale      = float( 25.0 )
-		self.maze_layer = None
-		self.maze_color = '#000000'
-		self.segment_id = 0
+		self.last_point = None
+		self.path       = ''
 
-	def effect(self):
+	def effect( self ):
 
 		# These dimensions are chosen so as to maintain integral dimensions
 		# with a ratio of width to height of TARGET_WIDTH to TARGET_HEIGHT.
@@ -230,52 +270,62 @@ class Maze(inkex.Effect):
 		else:
 			self.scale = scale_y
 
+		self.last_point = None
+		self.path = ''
+
+		if not self.hpp:
+
+			# To draw the walls, we start at the left-most column of cells, draw down drawing
+			# the WEST and NORTH walls and then draw up drawing the EAST and SOUTH walls.
+			# By drawing in this back and forth fashion, we minimize the effect of slippage.
+
+			for x in range( 0, self.w, 2 ):
+				self.draw_vertical( x )
+
+		else:
+
+			# The drawing style of the "high plotting precision" / "faster plotting" mode
+			# is such that it minimizes the number of pen up / pen down operations
+			# but at the expense of requiring higher drawing precision.  It's style
+			# of drawing works best when there is very minimal slippage of the egg
+
+			# Draw the horizontal walls
+
+			self.draw_horizontal_hpp( 0, Maze._NORTH )
+			for y in range( 0, self.h - 1 ):
+				self.draw_horizontal_hpp( y, Maze._SOUTH )
+			self.draw_horizontal_hpp( self.h - 1, Maze._SOUTH )
+
+			# Draw the vertical walls
+
+			# Since this is a maze on the surface of a cylinder, we don't need
+			# to draw the vertical walls at the outer edges (x = 0 & x = w - 1)
+
+			for x in range( 0, self.w ):
+				self.draw_vertical_hpp( x, Maze._EAST )
+
 		# Maze in layer "1 - Maze"
-		attribs = { inkex.addNS( 'label', 'inkscape' ):'1 - Maze',
-					inkex.addNS( 'groupmode', 'inkscape' ):'layer',
-					'transform':t }
-		self.maze_layer = inkex.etree.SubElement( self.document.getroot(),
-													'g', attribs )
-		self.segment_id = 0
-		self.maze_color = '#000000'
-
-		# Draw the horizontal walls
-
-		self.draw_horizontal( 0, Maze._NORTH, 1 )
-		for y in range( 0, self.h - 1 ):
-			self.draw_horizontal( y, Maze._SOUTH, 0 )
-		self.draw_horizontal( self.h - 1, Maze._SOUTH, 1 )
-
-		# Draw the vertical walls
-
-		# Since this is a maze on the surface of a cylinder, we don't need
-		# to draw the vertical walls at the outer edges (x = 0 & x = w - 1)
-
-		for x in range( 0, self.w ):
-			self.draw_vertical( x, Maze._EAST, 0 )
+		attribs = {
+			inkex.addNS( 'label', 'inkscape' ) : '1 - Maze',
+			inkex.addNS( 'groupmode', 'inkscape' ) : 'layer',
+			'transform' : t }
+		maze_layer = inkex.etree.SubElement( self.document.getroot(), 'g', attribs )
+		draw_SVG_path( self.path, "#000000", float( 1 / self.scale ), maze_layer )
 
 		# Now draw the solution in red in layer "2 - Solution"
 
-		attribs = { inkex.addNS( 'label', 'inkscape' ):'2 - Solution',
-					inkex.addNS( 'groupmode', 'inkscape' ):'layer',
-					'transform':t }
-		self.maze_layer = inkex.etree.SubElement( self.document.getroot(),
-													'g', attribs )
-		self.maze_color = '#ff0000'
+		attribs = {
+			inkex.addNS( 'label', 'inkscape' ) : '2 - Solution',
+			inkex.addNS( 'groupmode', 'inkscape' ) : 'layer',
+			'transform' : t }
+		maze_layer = inkex.etree.SubElement( self.document.getroot(), 'g', attribs )
 
-		# Mark the starting and ending cells
+		# Mark the starting cell
 
 		draw_SVG_rect( 0.25 + 2 * self.start_x, 0.25 + 2 * self.start_y,
-					   1.5, 1.5, self.maze_color, 0, self.maze_color,
-					   'maze'+str( self.segment_id ), self.maze_layer )
-		self.segment_id += 1
+			1.5, 1.5, "#ff0000", 0, "#ff0000", maze_layer )
 
-		draw_SVG_rect( 0.25 + 2*self.finish_x, 0.25 + 2 * self.finish_y,
-					   1.5, 1.5, self.maze_color, 0, self.maze_color,
-					   'maze'+str( self.segment_id ), self.maze_layer )
-		self.segment_id += 1
-
-		# And now draw the solution path itself
+		# And now generate the solution path itself
 
 		# To minimize the number of plotted paths (and hence pen up / pen
 		# down operations), we generate as few SVG paths as possible.
@@ -285,9 +335,9 @@ class Maze(inkex.Effect):
 		# doesn't look as good in Inkscape.  So, we end the path and start
 		# a new one which is wrapped to the other edge of the document.
 
-		path = []
-		end_path = int( 0 )
-		i = int( 0 )
+		pts = []
+		end_path = False
+		i = 0
 		while i < self.solved:
 
 			x1 = self.solution_x[i]
@@ -304,29 +354,26 @@ class Maze(inkex.Effect):
 					x2 = x1 + 1
 				else:
 					x2 = x1 - 1
-				end_path = 1
+				end_path = True
 
 			if i == 1:
-				path.extend( [ 2 * x1 + 1, 2 * y1 + 1 ] )
-			path.extend( [ 2 * x2 + 1, 2 * y2 + 1 ] )
+				pts.extend( [ 'M', 2 * x1 + 1, 2 * y1 + 1 ] )
+			pts.extend( [ 'L', 2 * x2 + 1, 2 * y2 + 1 ] )
 
 			if not end_path:
 				continue
 
-			# Draw the path
-			draw_SVG_path( path, self.maze_color, float( 8 / self.scale ),
-						  'maze' + str( self.segment_id ), self.maze_layer )
-
-			self.segment_id += 1
-
 			x2 = self.solution_x[i]
 			y2 = self.solution_y[i]
-			path = [2 * x2 + 1, 2 * y2 + 1]
-			end_path = 0
+			pts.extend( [ 'M', 2 * x2 + 1, 2 * y2 + 1 ] )
+			end_path = False
 
-		# And finish the solution path
-		draw_SVG_path( path, '#ff0000', float( 8 / self.scale ),
-					  'maze' + str( self.segment_id ), self.maze_layer )
+		# Put the solution path into the drawing
+		draw_SVG_path( pts, '#ff0000', float( 8 / self.scale ), maze_layer )
+
+		# Now mark the ending cell
+		draw_SVG_rect( 0.25 + 2*self.finish_x, 0.25 + 2 * self.finish_y,
+			1.5, 1.5, "#ff0000", 0, "#ff0000", maze_layer )
 
 		# Restore the recursion limit
 		sys.setrecursionlimit( limit )
@@ -334,7 +381,7 @@ class Maze(inkex.Effect):
 		# Set some document properties
 		node = self.document.getroot()
 		node.set( 'width',  '3200' )
-		node.set( 'height', '1000' )
+		node.set( 'height', '800' )
 
 		# The following end up being ignored by Inkscape....
 		node = self.getNamedView()
@@ -344,11 +391,11 @@ class Maze(inkex.Effect):
 		node.set( inkex.addNS( 'showpageshadow', u'inkscape' ), 'false' )
 
 	# Mark the cell at (x, y) as "visited"
-	def visit(self, x, y):
+	def visit( self, x, y ):
 		self.cells[y * self.w + x] |= Maze._VISITED
 
 	# Return a non-zero value if the cell at (x, y) has been visited
-	def is_visited(self, x, y):
+	def is_visited( self, x, y ):
 		if self.cells[y * self.w + x] & Maze._VISITED:
 			return -1
 		else:
@@ -356,26 +403,26 @@ class Maze(inkex.Effect):
 
 	# Return a non-zero value if the cell at (x, y) has a wall
 	# in the direction d
-	def is_wall(self, x, y, d):
+	def is_wall( self, x, y, d ):
 		if self.cells[y * self.w + x] & d:
 			return -1
 		else:
 			return 0
 
 	# Remove the wall in the direction d from the cell at (x, y)
-	def remove_wall(self, x, y, d):
+	def remove_wall( self, x, y, d ):
 		self.cells[y * self.w + x] &= ~d
 
 	# Return a non-zero value if the cell at (x, y) has a border wall
 	# in the direction d
-	def is_border(self, x, y, d):
+	def is_border( self, x, y, d ):
 		if self.cells[y * self.w + x] & ( d << 4 ):
 			return -1
 		else:
 			return 0
 
 	# Remove the border in the direction d from the cell at (x, y)
-	def remove_border(self, x, y, d):
+	def remove_border( self, x, y, d ):
 		self.cells[y * self.w + x] &= ~( d << 4 )
 
 	# This is the DFS algorithm which builds the maze.  We start at depth 0
@@ -392,7 +439,7 @@ class Maze(inkex.Effect):
 	# no more than once.  As it turns out, each cell is visited, but that's a
 	# little harder to show.  Net, net, each cell is visited exactly once.
 
-	def handle_cell(self, depth, x, y):
+	def handle_cell( self, depth, x, y ):
 
 		# Mark the current cell as visited
 		self.visit( x, y )
@@ -478,17 +525,77 @@ class Maze(inkex.Effect):
 
 			self.handle_cell( depth + 1, nx, ny )
 
-	def draw_line(self, x1, y1, x2, y2, thickness):
-		draw_SVG_path( [ x1, y1, x2, y2 ], self.maze_color,
-					   float( thickness / self.scale ),
-					   'maze' + str( self.segment_id ), self.maze_layer )
-		self.segment_id += 1
+	def draw_line( self, x1, y1, x2, y2 ):
 
+		if self.last_point is not None:
+			if ( self.last_point[0] == x1 ) and ( self.last_point[1] == y1 ):
+				self.path += ' L %d,%d' % ( x2, y2 )
+				self.last_point = [ x2, y2 ]
+			elif ( self.last_point[0] == x2 ) and ( self.last_point[1] == y2 ):
+				self.path += ' L %d,%d L %d,%d' % ( x1, y1, x2, y2 )
+				# self.last_point unchanged
+			else:
+				self.path += ' M %d,%d L %d,%d' % ( x1, y1, x2, y2 )
+				self.last_point = [ x2, y2 ]
+		else:
+			self.path = 'M %d,%d L %d,%d' % ( x1, y1, x2, y2 )
+			self.last_point = [ x2, y2 ]
+
+	def draw_wall( self, x, y, d, dir ):
+
+		if dir > 0:
+			if d == Maze._NORTH:
+				self.draw_line( 2*(x+1), 2*y, 2*x, 2*y )
+			elif d == Maze._WEST:
+				self.draw_line( 2*x, 2*y, 2*x, 2*(y+1) )
+			elif d == Maze._SOUTH:
+				self.draw_line( 2*(x+1), 2*(y+1), 2*x, 2*(y+1) )
+			else:  # Mase._EAST
+				self.draw_line( 2*(x+1), 2*y, 2*(x+1), 2*(y+1) )
+		else:
+			if d == Maze._NORTH:
+				self.draw_line( 2*x, 2*y, 2*(x+1), 2*y )
+			elif d == Maze._WEST:
+				self.draw_line( 2*x, 2*(y+1), 2*x, 2*y )
+			elif d == Maze._SOUTH:
+				self.draw_line( 2*x, 2*(y+1), 2*(x+1), 2*(y+1) )
+			else:  # Maze._EAST
+				self.draw_line( 2*(x+1), 2*(y+1), 2*(x+1), 2*y )
+
+	# Draw the vertical walls of the maze along the column of cells at
+	# horizonal positions
+
+	def draw_vertical( self, x ):
+
+		# Drawing moving downwards from north to south
+
+		if self.is_wall( x, 0, Maze._NORTH ):
+			self.draw_wall( x, 0, Maze._NORTH, +1 )
+
+		for y in range( 0, self.h ):
+			if self.is_wall( x, y, Maze._WEST ):
+				self.draw_wall( x, y, Maze._WEST, +1 )
+			if self.is_wall( x, y, Maze._SOUTH ):
+				self.draw_wall( x, y, Maze._SOUTH, +1 )
+
+		# Now, return drawing upwards moving from south to north
+
+		x += 1
+		if x >= self.w:
+			return
+
+		for y in range( self.h - 1, -1, -1 ):
+			if self.is_wall( x, y, Maze._SOUTH ):
+				self.draw_wall( x, y, Maze._SOUTH, -1 )
+			if self.is_wall( x, y, Maze._WEST ):
+				self.draw_wall( x, y, Maze._WEST, -1 )
+		if self.is_wall( x, 0, Maze._NORTH ):
+			self.draw_wall( x, 0, Maze._NORTH, -1 )
 
 	# Draw the horizontal walls of the maze along the row of
-	# cells at "height" y
+	# cells at "height" y: "high plotting precision" version
 
-	def draw_horizontal(self, y, wall, isborder):
+	def draw_horizontal_hpp(self, y, wall ):
 
 		# Cater to Python 2.4 and earlier
 		# dy = 0 if wall == Maze._NORTH else 1
@@ -496,7 +603,6 @@ class Maze(inkex.Effect):
 			dy = 0
 		else:
 			dy = 1
-		thickness = 4 if isborder else 1
 
 		tracing = False
 		for x in range( 0, self.w ):
@@ -510,19 +616,19 @@ class Maze(inkex.Effect):
 				if tracing:
 					# Reached the end of a segment
 					self.draw_line( 2 * segment, 2 * (y + dy),
-									2 * x, 2 * (y + dy), thickness )
+									2 * x, 2 * (y + dy) )
 					tracing = False
 
 		if tracing:
 			# Draw the last wall segment
 			self.draw_line( 2 * segment, 2 * (y + dy),
-							2 * self.w, 2 * (y + dy), thickness )
+							2 * self.w, 2 * (y + dy) )
 
 
 	# Draw the vertical walls of the maze along the column of cells at
-	# horizonal position x
+	# horizonal position x: "high plotting precision" version
 
-	def draw_vertical(self, x, wall, isborder):
+	def draw_vertical_hpp(self, x, wall ):
 
 		# Cater to Python 2.4 and earlier
 		# dx = 0 if wall == Maze._WEST else 1
@@ -530,7 +636,6 @@ class Maze(inkex.Effect):
 			dx = 0
 		else:
 			dx = 1
-		thickness = 4 if isborder else 1
 
 		# We alternate the direction in which we draw each vertical wall.
 		# First, from North to South and then from South to North.  This
@@ -553,14 +658,13 @@ class Maze(inkex.Effect):
 				if tracing:
 					# Hit the end of a segment
 					self.draw_line( 2 * ( x + dx ), 2 * segment + offset,
-									2 * ( x + dx ), 2 * y + offset, thickness )
+									2 * ( x + dx ), 2 * y + offset )
 					tracing = False
 
 		if tracing:
 			# complete the last wall segment
 			self.draw_line( 2 * ( x + dx ), 2 * segment + offset,
-							2 * ( x + dx ), 2 * y_finis + offset, thickness )
-
+							2 * ( x + dx ), 2 * y_finis + offset )
 
 if __name__ == '__main__':
 	e = Maze()
