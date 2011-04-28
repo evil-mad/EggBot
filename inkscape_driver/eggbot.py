@@ -923,6 +923,8 @@ class EggBot( inkex.Effect ):
 				pass
 			elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
 				pass
+			elif node.tag == inkex.addNS( 'title', 'svg' ) or node.tag == 'title':
+				pass
 			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
 				inkex.errormsg( 'Warning: unable to draw text, please convert it to a path first.' )
 				pass
