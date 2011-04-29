@@ -17,12 +17,11 @@ Specify the number of times the text should wrap. This value
 need not be a whole number.  The text will then be scaled s
 as to have the length (number of times to wrap) x 3200 pixels.
 </_param>
-      <param name="wrap" type="float" min="1" max="100" _gui-text="Number of times to wrap ">9</param>
+      <param name="wrap" type="float" min="1" max="100" _gui-text="Number of times to wrap ">8.5</param>
       <param name="stretch" type="boolean" _gui-text="Stretch the text horizontally to account for the egg's geometry? ">true</param>
       <param name="flip" type="boolean" _gui-text="Plot with the egg's bottom at the egg motor? ">false</param>
       <param name="text" type="string" _gui-text="Text ">How do you drop an egg 2 meters without it breaking? Drop it from 3 meters: it won't break for the first 2!  *   If a rooster laid an egg at the peak of a roof, which side would it roll down? Neither side: roosters don't lay eggs!  *  What's the best day to eat eggs? Fry day  *  What happens when you tickle eggs? They crack up!  *  What sport are eggs good at? Running!  * What kind of jokes do eggs tell? Egg yolks  *  What's an egg's favorite robot? The Egg-Bot!</param>
 <!-- OMELET (2 servings): For a firm omelet, beat 2 eggs with a fork until blended.  Beat in 2 tablespoons cream or milk, 1/4 teaspoon salt, and a pinch of white pepper or paprika.  In a non-stick skillet, melt 3/4 tablespoons butter.  When hot, add the egg mixture and cook over low heat.  With a spatula, lift the edges and, by tilting the skillet, allow the uncooked custard to run underneath the omelet.  When the omelet is cooked to an even consistency, fold over and serve.  <times><i&>Bon appetit!</i></times> -->
-<!-- egg (eg) <times><i>n.</i></times> <b>1.</b> A female reproductive cell of humans and many kinds of animals from which an embryo develops; an egg cell or ovum.  In animals such as birds, turtles, frogs, fish, and insects, an egg contains nourishment for the developing embryo and may have a protective shell or covering.  <b>2.</b> The female reproductive cell of plants, algae, and certain fungi; an egg cell or ovum.  <b>3.</b> A hard-shelled egg, the contents of which are used for food, especially a chicken egg: <times><em>Scrambled eggs are a favorite of mine.</em></times>   <b>4.</b> <times><i>Informal</i></times> A person: <times><em>What a good egg!</em></times>  [First written down about 1340 in Middle English and spelled <times><em>eg</em></times> (meaning bird's egg), from Old Norse <times><em>egg.</em></times>] -->
       <param name="fontfamily" type="optiongroup" appearance="minimal"
 	     _gui-text="Starting font ">
 	<_option value="sans">Sans</_option>
