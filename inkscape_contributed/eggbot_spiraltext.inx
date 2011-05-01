@@ -9,12 +9,12 @@
   <param name="tab" type="notebook">
     <page name="splash" _gui-text="Render Text">
       <_param name="stuff" type="description">
-This extension renders passages of text as a single, long
-line of text, tilted slightly so that it spirals as it wraps around
+This extension renders passages of text as a single, long line
+of text, tilted slightly so that it spirals as it wraps around
 your egg.
 
 Specify the number of times the text should wrap. This value
-need not be a whole number.  The text will then be scaled s
+need not be a whole number.  The text will then be scaled so
 as to have the length (number of times to wrap) x 3200 pixels.
 </_param>
       <param name="wrap" type="float" min="1" max="100" _gui-text="Number of times to wrap ">8.5</param>
@@ -28,26 +28,11 @@ as to have the length (number of times to wrap) x 3200 pixels.
 	<_option value="times">Times</_option>
 	<_option value="script">Script</_option>
       </param>
-      <_param name="emptyspace1" type="description" xml:space="preserve"> 
-
-
-
-
-
-
-
-
-
-
-
-
-</_param>
     </page>
     <page name="markup" _gui-text="Markup">
       <_param name="aboutpage" type="description" xml:space="preserve">
-Simple markup may be used to switch between type faces
-(fonts) as well as to select bold, italic and emphasized
-type faces:
+Simple&#160;markup&#160;may&#160;be&#160;used&#160;to&#160;switch&#160;between&#160;type&#160;faces&#160;(fonts)
+as well as to select bold, italic and emphasized type faces.
 
 Font selection:
   &lt;sans&gt;Sans serif font&lt;/sans&gt;   (no italics)
@@ -64,51 +49,51 @@ Special characters:
   &gt;  --  Enter " &amp;gt; " in your text
   &amp;  --  Enter " &amp;amp; " in your text 
 </_param>
-      <_param name="emptyspace2" type="description" xml:space="preserve"> 
+    </page>
+    <page name="fonts1" _gui-text="Text Fonts">
+      <_param name="aboutpage1" type="description" xml:space="preserve">
+In addition to the sans, times and script type families, other text-oriented
+type faces are available.  For these faces, use of the &lt;b&gt;, &lt;em&gt; and
+&lt;i&gt; markups have no effect and are ignored.
 
-
-
+&lt;cyrillic&gt; -- Cyrillic
+&lt;futural&gt;, &lt;futram&gt; -- Sans 1-stroke, bold
+&lt;gothiceng&gt;,&#160;&lt;gothicger&gt;,&#160;&lt;gothicita&gt;&#160;--&#160;Gothic&#160;English,&#160;German,&#160;Italian
+&lt;greek&gt;, &lt;timesg;&gt; -- Greek 1-stroke, medium
+&lt;japanese&gt; -- Japanese
+&lt;scripts&gt;, &lt;scriptc&gt;, &lt;cursive&gt; -- Script&#160;1-stroke,&#160;medium,&#160;alternate
+&lt;timesi&gt;, &lt;timesib&gt; -- Serif medium italic, bold italic
+&lt;timesr&gt;, &lt;timesrb&gt; -- Serif medium, bold
 
 
 
 
 
 </_param>
-    </page>
-    <page name="fonts" _gui-text="Fonts">
-      <_param name="aboutpage" type="description" xml:space="preserve">
-In addition to the sans, times and script type families,
-other type faces are available.  For these faces, use of
-the &lt;b&gt;, &lt;em&gt; and &lt;i&gt; markups have no effect and
-are ignored.
+</page>
+    <page name="fonts2" _gui-text="Symbol Fonts">
+      <_param name="aboutpage1" type="description" xml:space="preserve">
+In addition to type faces for text, several type faces of symbols
+are also available.  When these type faces are used, the &lt;b&gt;,
+&lt;em&gt; and &lt;i&gt; markups have no effect and are ignored.
 
 &lt;astrology&gt; -- Astrology
-&lt;cursive&gt; -- Script 1-stroke (alternate)
-&lt;cyrillic&gt; -- Cyrillic
-&lt;futural&gt; -- Sans 1-stroke
-&lt;futuram&gt; -- Sans bold
-&lt;gothiceng&gt; -- Gothic English
-&lt;gothicger&gt; -- Gothic German
-&lt;gothicita&gt; -- Gothic Italian
-&lt;greek&gt; -- Greek 1-stroke
-&lt;japanese&gt; -- Japanese
 &lt;markers&gt; -- Markers
 &lt;mathlow&gt; -- Math (lower)
 &lt;mathupp&gt; -- Math (upper)
 &lt;meteorology&gt; -- Meteorology
 &lt;music&gt; -- Music
-&lt;scriptc&gt; -- Script medium
-&lt;scripts&gt; -- Script 1-stroke
 &lt;symbolic&gt; -- Symbolic
-&lt;timesg&gt; -- Greek medium
-&lt;timesi&gt; -- Serif medium italic
-&lt;timesib&gt; -- Serif bold italic
-&lt;timesr&gt; -- Serif medium
-&lt;timesrb&gt; -- Serif bold
+
+
+
+
+
+
 </_param>
 </page>
 <page name="info" _gui-text="About...">
-<_param name="aboutpage" type="description" xml:space="preserve">
+<_param name="aboutpage3" type="description" xml:space="preserve">
 This extension renders a passage of text tilted at an angle
 so as to wrap around an egg in a spiral.  To render the text,
 the "Hershey" fonts for plotters is used.  These fonts are
@@ -124,18 +109,6 @@ For additional information, please visit:
   www.evilmadscientist.com/go/hershey
 </_param>
       <_param name="emptyspace3" type="description" xml:space="preserve"> 
-
-
-
-
-
-
-
-
-
-
-
-
 </_param>
 </page>
 </param>
