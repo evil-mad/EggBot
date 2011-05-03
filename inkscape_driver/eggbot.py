@@ -250,6 +250,11 @@ class EggBot( inkex.Effect ):
 		self.svgHeight = float( N_PAGE_HEIGHT )
 		self.svgTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
+		# So that we only generate a warning once for each
+		# unsupported SVG element, we use a dictionary to track
+		# which elements have received a warning
+		self.warnings = {}
+
 		# Hack for mismatched EBB/motors,
 		# which have half resolution
 		try:
@@ -912,9 +917,6 @@ class EggBot( inkex.Effect ):
 						if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 							self.svgLastPath += 1
 							self.svgLastPathNC = self.nodeCount
-
-			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
-				pass
 			elif node.tag == inkex.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
 				pass
 			elif node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs':
@@ -925,13 +927,54 @@ class EggBot( inkex.Effect ):
 				pass
 			elif node.tag == inkex.addNS( 'title', 'svg' ) or node.tag == 'title':
 				pass
+			elif node.tag == inkex.addNS( 'desc', 'svg' ) or node.tag == 'desc':
+				pass
 			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
-				inkex.errormsg( 'Warning: unable to draw text, please convert it to a path first.' )
+				if not self.warnings.has_key( 'text' ):
+					inkex.errormsg( gettext.gettext( 'Warning: unable to draw text; ' +
+						'please convert it to a path first.  Consider using the ' +
+						'Hershey Text extension which is located under the '+
+						'"Render" category of extensions.' ) )
+					self.warnings['text'] = 1
+				pass
+			elif node.tag == inkex.addNS( 'image', 'svg' ) or node.tag == 'image':
+				if not self.warnings.has_key( 'image' ):
+					inkex.errormsg( gettext.gettext( 'Warning: unable to draw bitmap images; ' +
+						'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
+						'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
+						'cause cut-and-paste operations to paste in bitmap copies.' ) )
+					self.warnings['image'] = 1
+				pass
+			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
+				pass
+			elif node.tag == inkex.addNS( 'radialGradient', 'svg' ) or node.tag == 'radialGradient':
+				# Similar to pattern
+				pass
+			elif node.tag == inkex.addNS( 'linearGradient', 'svg' ) or node.tag == 'linearGradient':
+				# Similar in pattern
+				pass
+			elif node.tag == inkex.addNS( 'style', 'svg' ) or node.tag == 'style':
+				# This is a reference to an external style sheet and not the value
+				# of a style attribute to be inherited by child elements
+				pass
+			elif node.tag == inkex.addNS( 'cursor', 'svg' ) or node.tag == 'cursor':
+				pass
+			elif node.tag == inkex.addNS( 'color-profile', 'svg' ) or node.tag == 'color-profile':
+				# Gamma curves, color temp, etc. are not relevant to single color output
 				pass
 			elif not isinstance( node.tag, basestring ):
+				# This is likely an XML processing instruction such as an XML
+				# comment.  lxml uses a function reference for such node tags
+				# and as such the node tag is likely not a printable string.
+				# Further, converting it to a printable string likely won't
+				# be very useful.
 				pass
 			else:
-				inkex.errormsg( 'Warning: unable to draw object, please convert it to a path first.' )
+				if not self.warnings.has_key( str( node.tag ) ):
+					t = str( node.tag ).split( '}' )
+					inkex.errormsg( gettext.gettext( 'Warning: unable to draw <' + str( t[-1] ) +
+						'> object, please convert it to a path first.' ) )
+					self.warnings[str( node.tag )] = 1
 				pass
 
 	def DoWePlotLayer( self, strLayerName ):
