@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Name Poem</_name>
+  <id>command.eggbot.contributed.eggbot_acrostic</id>
+<!--
+  <dependency type="executable" location="extensions">hersheydata.py</dependency> -->
+  <dependency type="executable" location="extensions">simplestyle.py</dependency>
+  <dependency type="executable" location="extensions">eggbot_acrostic.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+  <param name="tab" type="notebook">
+    <page name="splash" _gui-text="Render Text">
+      <_param name="stuff" type="description">
+This extension helps you to draw a "name poem" (an acrostic
+poem).  Each line of poetry you will be drawn horizontally,
+with the second line below the first line, and so on.
+
+For each line of poetry, the first character will be drawn
+using the "Leading font".  The remainder of the line will be
+drawn using the "Secondary font".
+</_param>
+      <param name="stretch" type="boolean" _gui-text="Stretch the text horizontally to account for the egg's geometry? ">true</param>
+      <param name="flip" type="boolean" _gui-text="Plot with the egg's bottom at the egg motor? ">false</param>
+      <param name="face1" type="optiongroup" appearance="minimal"
+	     _gui-text="Leading font ">
+	<_option value="scriptc">Script medium</_option>
+	<_option value="scripts">Script 1-stroke</_option>
+	<_option value="cursive">Script 1-stroke (alt)</_option>
+
+	<_option value="futural">Sans 1-stroke</_option>
+	<_option value="futuram">Sans bold</_option> 
+
+	<_option value="timesr">Serif medium</_option>
+	<_option value="timesi">Serif medium italic</_option>
+	<_option value="timesib">Serif bold italic</_option>
+	<_option value="timesrb">Serif bold</_option>
+
+	<_option value="gothiceng">Gothic English</_option>
+	<_option value="gothicger">Gothic German</_option>
+	<_option value="gothicita">Gothic Italian</_option>	   
+
+	<_option value="greek">Greek 1-stroke</_option>
+	<_option value="timesg">Greek medium</_option>
+	<_option value="cyrillic">Cyrillic</_option>		
+	<_option value="japanese">Japanese</_option> 
+
+	<_option value="astrology">Astrology</_option>
+	<_option value="mathlow">Math (lower)</_option>
+	<_option value="mathupp">Math (upper)</_option>
+	<_option value="markers">Markers</_option> 
+	<_option value="meteorology">Meteorology</_option>
+	<_option value="music">Music</_option>
+	<_option value="symbolic">Symbolic</_option>
+      </param>
+      <param name="face2" type="optiongroup" appearance="minimal"
+	     _gui-text="Secondary font ">
+	<_option value="scripts">Script 1-stroke</_option>
+	<_option value="cursive">Script 1-stroke (alt)</_option>
+	<_option value="scriptc">Script medium</_option>
+
+	<_option value="futural">Sans 1-stroke</_option>
+	<_option value="futuram">Sans bold</_option> 
+
+	<_option value="timesr">Serif medium</_option>
+	<_option value="timesi">Serif medium italic</_option>
+	<_option value="timesib">Serif bold italic</_option>
+	<_option value="timesrb">Serif bold</_option>
+
+	<_option value="gothiceng">Gothic English</_option>
+	<_option value="gothicger">Gothic German</_option>
+	<_option value="gothicita">Gothic Italian</_option>	   
+
+	<_option value="greek">Greek 1-stroke</_option>
+	<_option value="timesg">Greek medium</_option>
+	<_option value="cyrillic">Cyrillic</_option>		
+	<_option value="japanese">Japanese</_option> 
+
+	<_option value="astrology">Astrology</_option>
+	<_option value="mathlow">Math (lower)</_option>
+	<_option value="mathupp">Math (upper)</_option>
+	<_option value="markers">Markers</_option> 
+	<_option value="meteorology">Meteorology</_option>
+	<_option value="music">Music</_option>
+	<_option value="symbolic">Symbolic</_option>
+      </param>
+      <param name="line01" type="string" _gui-text="Line  1">                              </param>
+      <param name="line02" type="string" _gui-text="Line  2">                              </param>
+      <param name="line03" type="string" _gui-text="Line  3">                              </param>
+      <param name="line04" type="string" _gui-text="Line  4">                              </param>
+      <param name="line05" type="string" _gui-text="Line  5">                              </param>
+      <param name="line06" type="string" _gui-text="Line  6">                              </param>
+      <param name="line07" type="string" _gui-text="Line  7">                              </param>
+      <param name="line08" type="string" _gui-text="Line  8">                              </param>
+      <param name="line09" type="string" _gui-text="Line  9">                              </param>
+      <param name="line10" type="string" _gui-text="Line 10">                              </param>
+      <param name="line11" type="string" _gui-text="Line 11">                              </param>
+      <param name="line12" type="string" _gui-text="Line 12">                              </param>
+    </page>
+<page name="info" _gui-text="About...">
+<_param name="aboutpage" type="description" xml:space="preserve">
+To render acrostic poetry, this extension uses the "Hershey"
+fonts for plotters.  These fonts are derived from NBS SP-424
+1976-04, "A contribution to computer typesetting techniques:
+Tables of Coordinates for Hershey's Repertory of Occidental
+Type Fonts and Graphic Symbols."
+
+To generte tables of the Herhsey Fonts, see the "Hershey Text"
+extension under the "Render" category of Extensions.
+
+For additional information, please visit:
+
+  www.evilmadscientist.com/go/hershey
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</_param>
+      <_param name="emptyspace3" type="description" xml:space="preserve"> 
+</_param>
+</page>
+</param>
+  <effect needs-live-preview="false" needs-document="no">
+    <object-type>all</object-type>
+    <effects-menu>
+      <submenu _name="EggBot Contributed"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot_acrostic.py</command>
+  </script>
+</inkscape-extension>
