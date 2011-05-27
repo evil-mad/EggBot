@@ -33,8 +33,8 @@ import simplestyle
 
 WIDTH     = 3200
 HEIGHT    = 800
-MAX_H     = 32
-LINE_SKIP = 6
+MAX_H     = 32		# Maximum height of a Hershey font character (parens)
+LINE_SKIP = 6		# Baseline skip between lines of text
 
 # Mapping table to map the names used here to the corresponding
 # names used in hersheydata.py.  This helps prevent end users from
@@ -91,6 +91,9 @@ def renderText( parent, w, y, text, typeface ):
 	the supplied typeface data.
 	'''
 
+	if ( text is None ) or ( text == '' ):
+		return
+
 	spacing = 3  # spacing between letters
 	letterVals = [ ord( q ) - 32 for q in text ]
 
@@ -105,20 +108,21 @@ def renderText( parent, w, y, text, typeface ):
 def renderLine( parent, x, y, line, typeface1, typeface2 ):
 
 	'''
-	Render a single line of text
-	The text runs horizontally from left to right starting at the point (x,y)
-	The first character of the line is written using "typeface1"
-	The remainder of the line of text is written using "typeface2"
+	Render a single line of text:
+	+ The text runs horizontally from left to right starting at the point (x,y)
+	+ The first character of the line is written using "typeface1"
+	+ The remainder of the line of text is written using "typeface2"
 
 	The entire line is stored as individual paths which are child elements
 	of the SVG element "parent".  The text in typeface2 (line[1:]) is also
 	placed in it's own subgroup.  The leading character is not placed in
 	that subgroup.  The reasoning is that the user may want to pick out
-	the first character of each line and put them in another layer for
-	plotting in a different color.
+	the first character of each line of text and put them in another layer
+	for plotting in a different color.
 	'''
 
-	if line == '':
+	# Return now if there's nothing to do
+	if ( line is None ) or ( line == '' ):
 		return
 
 	# Render the first character
@@ -199,9 +203,7 @@ class AcrosticText( inkex.Effect ):
 		if line_count == 0:
 			return
 
-		# The tallest character in the Hershey font set is 32 pixels
-		# high (parens).  If we allow for about a 20% spacing between
-		# lines, this means we need a height of
+		# Determine how much vertical room we need for our text
 		h = line_count * MAX_H + ( line_count - 1 ) * LINE_SKIP
 
 		svg = self.document.getroot()
@@ -219,7 +221,11 @@ class AcrosticText( inkex.Effect ):
 		else:
 			scale_x = scale_y
 
-		# Now draw, line by line
+		# Determine where to position the text
+		# We do not bother centering the text horizontally
+		# to do that we would need to pre-render the text to determine
+		# the length of the longest line.  That's too much bother so
+		# we just skip that potential nice-to-have.
 		x = float( doc_width ) / ( 2.0 * scale_x )
 		y = float( MAX_H ) / scale_y
 
@@ -233,11 +239,23 @@ class AcrosticText( inkex.Effect ):
 			name2 = map_our_names_to_hersheydata[name2]
 		face2 = eval( 'hersheydata.' + name2 )
 
+		# Create the group which will contain all of the text
+		# We DO NOT make this a child of the current layer as that
+		# would subject us to any transforms it might have.  That's
+		# an issue even in the simple case of someone opening a default
+		# document and then changing its dimensions to 3200 x 800:
+		# Inkscape imposes a transform in that situation.  While that
+		# transform is no big deal, it's another complication in trying
+		# to just make the resulting text look right (right size, right
+		# approximate position, etc.).
+
 		if self.options.flip:
-			attribs = { 'transform' : 'matrix(-%f,0,0,-%f,%d,%d)' % ( scale_x, scale_y, doc_width, doc_heigh ) }
+			attribs = { 'transform' : 'matrix(-%f,0,0,-%f,%d,%d)' % ( scale_x, scale_y, doc_width, doc_height ) }
 		else:
 			attribs = { 'transform' : 'scale(%f,%f)' % ( scale_x, scale_y ) }
 		container = inkex.etree.SubElement( self.document.getroot(), 'g', attribs )
+
+		# Finally, we render each line of text
 		for i in range( 0, len( lines ) ):
 			if lines[i] != '':
 				g = inkex.etree.SubElement( container, 'g' )
