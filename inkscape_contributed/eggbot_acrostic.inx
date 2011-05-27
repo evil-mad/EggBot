@@ -11,8 +11,8 @@
     <page name="splash" _gui-text="Render Text">
       <_param name="stuff" type="description">
 This extension helps you to draw a "name poem" (an acrostic
-poem).  Each line of poetry you will be drawn horizontally,
-with the second line below the first line, and so on.
+poem).  Each line of poetry will be drawn horizontally, with
+the second line below the first, and so on.
 
 For each line of poetry, the first character will be drawn
 using the "Leading font".  The remainder of the line will be
