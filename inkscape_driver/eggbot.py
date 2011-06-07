@@ -1155,6 +1155,7 @@ class EggBot( inkex.Effect ):
 	def engraverOn( self ):
 		if self.options.engraving and ( not self.engraverIsOn ):
 			self.engraverIsOn = True
+			self.doCommand( 'PD,B,3,0\r' )	#Added 6/6/2011, necessary.
 			self.doCommand( 'PO,B,3,1\r' )
 
 	def ServoSetupWrapper( self ):
