@@ -1,3 +1,9 @@
+# eggbot.py
+# Part of the Eggbot driver for Inkscape
+# http://code.google.com/p/eggbotcode/
+#
+# Version 2.2.0, dated 6/6/2011
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
