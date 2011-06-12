@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # http://code.google.com/p/eggbotcode/
 #
-# Version 2.2.0, dated 6/6/2011
+# Version 2.2.1, dated 6/12/2011
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -457,11 +457,7 @@ class EggBot( inkex.Effect ):
 				self.engraverOn()
 
 		elif self.options.manualType == 'disable-engraver':
-			if ( not self.options.engraving ):
-				inkex.errormsg( gettext.gettext( "The engraver option is disabled. " + \
-				" Please enable it first from the \"Options\" tab." ) )
-			else:
-				self.engraverOff()
+			self.engraverOffManual() #Force engraver off, even if it is not enabled.
 
 		else:  # self.options.manualType is "walk-egg-motor" or "walk-pen-motor":
 			if self.options.manualType == "walk-egg-motor":
@@ -1120,7 +1116,7 @@ class EggBot( inkex.Effect ):
 		# Insist on turning the engraver off.  Otherwise, if it is on
 		# and the pen is down, then the engraver's vibration may cause
 		# the loose pen arm to start moving or the egg to start turning.
-		self.engraverOff() # Call will check if engraver option is enabled
+		self.engraverOffManual()
 		self.doCommand( 'EM,0,0\r' )
 
 	def doTimedPause( self, nPause ):
@@ -1157,7 +1153,13 @@ class EggBot( inkex.Effect ):
 		if self.options.engraving:
 			self.doCommand( 'PO,B,3,0\r' )
 			self.engraverIsOn = False
-
+			
+	def engraverOffManual( self ):
+		# Turn off engraver, whether or not the engraver is enabled. 
+		# This is only called by manual commands like "engraver off" and "motors off."
+		self.doCommand( 'PO,B,3,0\r' )
+		self.engraverIsOn = False			
+			
 	def engraverOn( self ):
 		if self.options.engraving and ( not self.engraverIsOn ):
 			self.engraverIsOn = True
