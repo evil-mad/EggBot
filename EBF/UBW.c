@@ -130,7 +130,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.1d\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.2\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.1.1d\r\n"};
 #endif
@@ -231,6 +231,7 @@ void parse_PG_packet (void);	// PG Pulse Go
 void parse_PC_packet (void);	// PC Pulse Configure
 void parse_BL_packet (void);	// BL Boot Load command
 void parse_CK_packet (void);	// CK ChecK command
+void parse_MR_packet (void);	// MR Motors Run command
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -1390,6 +1391,18 @@ void parse_packet(void)
 #endif
 			break;
 		}
+		case ('R' * 256) + 'M':
+		{
+			// RM for Run Motor
+			parse_RM_packet();
+			break;
+		}
+		case ('Q' * 256) + 'M':
+		{
+			// QM for Query Motor
+			parse_QM_packet();
+			break;
+		}
 		default:
 		{
 			if (0 == cmd2)
@@ -2030,7 +2043,7 @@ void parse_PD_packet(void)
 // <port> is "A", "B", "C" and indicates the port
 // <pin> is a number between 0 and 7 and indicates which pin to read
 // The command returns a "PI,<value><CR>" packet,
-// where <value> is the value (0 or 1 for digital, 0 to 1024 for Analog)
+// where <value> is the value (0 or 1 for digital)
 // value for that pin.
 void parse_PI_packet(void)
 {
@@ -2101,6 +2114,12 @@ void parse_PI_packet(void)
 		return;	
 	}
 	
+    // Convert to just a binary 1 or 0
+    if (value)
+    {
+        value = 1;
+    }
+
 	// Now send back our response
 	printf(
 		 (far rom char *)"PI,%1u\r\n" 
@@ -3238,5 +3257,80 @@ void BlinkUSBStatus(void)
 		}
     }
 }
+
+volatile near unsigned char * RPnTRISPort[25] = {
+    &TRISA,      // RP0
+    &TRISA,      // RP1
+    &TRISA,      // RP2
+    &TRISB,      // RP3
+    &TRISB,      // RP4
+    &TRISB,      // RP5
+    &TRISB,      // RP6
+    &TRISB,      // RP7
+    &TRISB,      // RP8
+    &TRISB,      // RP9
+    &TRISB,      // RP10
+    &TRISC,      // RP11
+    &TRISC,      // RP12
+    &TRISC,      // RP13
+    &TRISC,      // RP14
+    &TRISC,      // RP15
+    &TRISC,      // RP16
+    &TRISC,      // RP17
+    &TRISC,      // RP18
+    &TRISD,      // RP19
+    &TRISD,      // RP20
+    &TRISD,      // RP21
+    &TRISD,      // RP22
+    &TRISD,      // RP23
+    &TRISD,      // RP24
+};
+
+const char RPnTRISBit[25] = {
+    0,          // RP0
+    1,          // RP1
+    5,          // RP2
+    0,          // RP3
+    1,          // RP4
+    2,          // RP5
+    3,          // RP6
+    4,          // RP7
+    5,          // RP8
+    6,          // RP9
+    7,          // RP10
+    0,          // RP11
+    1,          // RP12
+    2,          // RP13
+    3,          // RP14
+    4,          // RP15
+    5,          // RP16
+    6,          // RP17
+    7,          // RP18
+    2,          // RP19
+    3,          // RP20
+    4,          // RP21
+    5,          // RP22
+    6,          // RP23
+    7,          // RP24
+};
+
+// From RPn (Pin) number, set TRIS value for that pin
+void SetPinTRISFromRPn(char Pin, char State)
+{
+    if (Pin > 25)
+    {
+        return;
+    }
+
+    if (OUTPUT_PIN == State)
+    {
+        bitclr (*RPnTRISPort[Pin], RPnTRISBit[Pin]);
+    }
+    else
+    {
+        bitset (*RPnTRISPort[Pin], RPnTRISBit[Pin]);
+    }
+}
+
 
 /** EOF user.c ***************************************************************/

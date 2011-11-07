@@ -45,7 +45,16 @@
 // 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
 //                 - Updated check_and_send_TX_data() to allow unlimited data to go out without overrunning
 //                    the output buffer, same as UBW 1.4.7
-// 
+// 2.1.2 11/04/11 - Fixed PI command to return just a 0 or a 1
+//                - Updated to USB stack 2.9a
+//                - Created MPLAB X project for this firmware
+//                - Added SC,14,<state> to enable/disable solenoid output on RB4
+//                - Fixed bug with S2 command and solenoid command interaction - we now turn off solenoid
+//                      output on RB4 if user uses S2 command to use RB4 for RC servo output
+//                - Fixed bug with S2 command where a duration of 0 would not shut off the PWM channel
+//
+//
+
 #include <p18cxxx.h>
 #include <usart.h>
 #include <stdio.h>
@@ -175,6 +184,7 @@ static BOOL ButtonPushed;
 static BOOL UseAltPause;
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
+BOOL gUseSolenoid;
 
 // ISR
 // PORTB is the step and direction port 
@@ -421,7 +431,7 @@ void high_ISR(void)
 				g_RC_value[9] = g_servo_min;
 			}
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			else if (gUseRCServo2)
+			if (gUseRCServo2)
 			{
 				// This code below is the meat of the Process_S2() function
 				// We have to manually write it in here rather than calling
@@ -438,11 +448,11 @@ void high_ISR(void)
 				}
 			}
 #endif
-			else
+            if (gUseSolenoid)
 			{
 				SolenoidState = SOLENOID_OFF;
+    			PenUpDownIO = 0;
 			}		
-			PenUpDownIO = 0;
 
 			if (DelayCounter)
 			{
@@ -461,7 +471,7 @@ void high_ISR(void)
 				g_RC_value[9] = g_servo_max;
 			}
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			else if (gUseRCServo2)
+			if (gUseRCServo2)
 			{
 				// This code below is the meat of the Process_S2() function
 				// We have to manually write it in here rather than calling
@@ -476,13 +486,14 @@ void high_ISR(void)
 				{
 					gRC2Value[0] = g_servo2_max;
 				}
+                gUseRCServo2 = TRUE;
 			}
 #endif
-			else
+			if (gUseSolenoid)
 			{
 				SolenoidState = SOLENOID_ON;
+    			PenUpDownIO = 1;
 			}
-			PenUpDownIO = 1;
 
 			if (DelayCounter)
 			{
@@ -733,7 +744,10 @@ void EBB_Init(void)
 		USB_BUS_SENSE = 0;
 	#endif
 #endif
-	// Set up pen up/down direction as output
+    gUseSolenoid = TRUE;
+
+    // Set up pen up/down direction as output
+    /// TODO: This should be different based upon the board type, right?
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
 
@@ -765,8 +779,12 @@ void EBB_Init(void)
 	// Set our reload value
 	PR2 = 0xFF;
 
-	// Set to %50 power for testing
-	CCPR1L = 0x80;
+	// Set to %50 power on boot
+    StoredEngraverPower = 512;
+
+    // Set RB3 to StoredEngraverPower
+    CCPR1L = StoredEngraverPower >> 2;
+    CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
 
 	// Initalize Timer2
 
@@ -791,9 +809,9 @@ void EBB_Init(void)
 }
 
 // Stepper (mode) Configure command
-// SC,1,0<CR> will use solenoid output for pen up/down (default)
+// SC,1,0<CR> will use just solenoid output for pen up/down
 // SC,1,1<CR> will use servo on RB1 for pen up/down
-// SC,1,2<CR> will use servo on RB1 for pen up/down, but with ECCP2 (PWM) in hardware
+// SC,1,2<CR> will use servo on RB1 for pen up/down, but with ECCP2 (PWM) in hardware (default)
 // SC,2,0<CR> will use built-in stepper driver chips (default)
 // SC,2,1<CR> will use the following pins for stepper driver outputs (EBB_V11)
 //		ENABLE1 = RA5
@@ -813,6 +831,8 @@ void EBB_Init(void)
 // SC,12,<servo2_rate><CR> sets the pen down speed
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
+// SC,14,1<CR> enables solenoid output on RB4
+// SC,14,0<CR> disables solenoid output on RB4
 void parse_SC_packet (void)
 {
 	unsigned char Para1 = 0;
@@ -838,6 +858,7 @@ void parse_SC_packet (void)
 			gUseRCServo2 = FALSE;
 #endif
 			gUseRCServo1 = FALSE;
+            gUseSolenoid = TRUE;
 			// Turn off RC Servo pulses on RB1
 			g_RC_value[9] = 0;
 		}
@@ -977,7 +998,30 @@ void parse_SC_packet (void)
 		{
 			UseAltPause = FALSE;
 		}			
-	}	
+	}
+    if (Para1 == 14)
+    {
+        if (Para2)
+        {
+            gUseSolenoid = TRUE;
+        }
+        else
+        {
+            gUseSolenoid = FALSE;
+        }
+
+        // Now set the state of the output pin to match pen state
+        if (PenState == PEN_UP)
+        {
+            SolenoidState = SOLENOID_OFF;
+            PenUpDownIO = 0;
+        }
+        else
+        {
+            SolenoidState = SOLENOID_ON;
+            PenUpDownIO = 1;
+        }
+    }
 	print_ack();
 }
 
@@ -1174,11 +1218,12 @@ void parse_SP_packet(void)
 	unsigned char State = 0;
 	unsigned short CommandDuration = 0;
 	unsigned char Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+    ExtractReturnType Ret;
 
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
 	extract_number (kUINT, &CommandDuration, kOPTIONAL);
-	extract_number (kUCHAR, &Pin, kOPTIONAL);
+	Ret = extract_number (kUCHAR, &Pin, kOPTIONAL);
 
 	// Bail if we got a conversion error
 	if (error_byte)
@@ -1190,11 +1235,11 @@ void parse_SP_packet(void)
 	{
 		Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
 	}
-	g_servo2_RPpin = Pin + 3;
-
-	// Make sure that the selected pin we're going to use is an output
-	// (This code only works for PortB - maybe expand it in the future for all ports.)
-	TRISB = TRISB & ~(1 << Pin);
+    // Make sure that the selected pin we're going to use is an output
+    // (This code only works for PortB - maybe expand it in the future for all ports.)
+    TRISB = TRISB & ~(1 << Pin);
+    // Add 3 to get from PORTB pin number to RPn number
+    g_servo2_RPpin = Pin + 3;
 
 	process_SP(State, CommandDuration);
 
@@ -1206,6 +1251,10 @@ void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
 	// Trial: Spin here until there's space in the fifo
 	while(NextReady)
 	;
+
+#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+    gUseRCServo2 = TRUE;
+#endif
 
 	if (NewState == PEN_UP)
 	{
@@ -1630,4 +1679,23 @@ void parse_SE_packet(void)
 
 	print_ack();
 }
+
+// RM command
+// For Run Motor - allows completely independant running of the two stepper motors
+void parse_RM_packet(void)
+{
 	
+	
+}
+
+// QM command
+// For Query Motor - returns the curent status of each motor
+// QM takes no parameters, so useage is just QM<CR>
+// QM returns:
+// QM,<SyncFIFOSatus>,<Motor1Satus>,<Motor2Status><CR>
+// where <SyncFIFOStatus> is 0 (no command executing) or 1 (command executing)
+// and <MotorXStatus> is 0 (motor not executing a command) or 1 (motor executing a command)
+void parse_QM_packet(void)
+{
+	printf((far ROM char *)"QM,%i,%i,%i\n\r", NextReady, 0, 0);
+}

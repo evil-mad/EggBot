@@ -121,5 +121,7 @@ void low_ISR(void);
 void high_ISR(void);
 ExtractReturnType extract_number(ExtractType Type, void * ReturnValue, unsigned char Required);
 void print_ack (void);
+void SetPinTRISFromRPn(char Pin, char State);
+
 
 #endif //UBW_H

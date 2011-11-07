@@ -113,6 +113,7 @@
 
 	/** P E N   U P  D O W N *******************************************/
 	#define PenUpDownIO			LATBbits.LATB4
+    #define PEN_UP_DOWN_RPN     7
 	#define PenUpDownIO_TRIS	TRISBbits.TRISB4
 
 	/** D R I V E R   E N A B L E **************************************/

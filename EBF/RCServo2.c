@@ -43,6 +43,7 @@
 #include "ebb.h"
 #include "UBW.h"
 #include "RCServo2.h"
+#include "HardwareProfile.h"
 
 BOOL gUseRCServo2;
 unsigned char gRC2msCounter;
@@ -126,8 +127,8 @@ void RCServo2_Init(void)
 
 	CCP2CONbits.CCP2M = 0b1001;	// Set EECP2 as compare, clear output on match
 
-	// We start out with 7 slots because that is good for RC servos (3ms * 7 = 21ms)
-	gRC2Slots = 7;
+	// We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
+	gRC2Slots = INITAL_RC2_SLOTS;
 
 	// We start out with 3ms slot duration because it's good for RC servos
 	gRC2SlotMS = 3;
@@ -150,7 +151,7 @@ void RCServo2_Init(void)
 // Servo method 2 enable command
 // S2,0<CR> will turn off RC Servo method 2 support
 // S2,<channel>,<duration>,<output_pin>,<rate><CR> will set RC output <channel> for <duration> on output pin <output_pin>
-//	<channel> can be 0 through 7, with 0 meaning turn off.
+//	<channel> can be 0 through 7, with 0 meaning turn off all RCServo2 output
 //	<duration> can be 0 (output off) to 32,000 (3ms on time)
 //	<output_pin> is an RPx pin number (0 through 24)
 //  <rate> is the rate to change
@@ -198,23 +199,61 @@ void Process_S2(
 	unsigned int Rate
 )
 {
+    char i;
+
 	if (0 == Channel)
 	{
 		// Turn things off
 		gUseRCServo2 = FALSE;
+        // Also need to clear out all of the channels
+        // so that if we turn just one back on, all of the old
+        // ones don't come back from the dead.
+        for (i = 0; i < MAX_RC2_SERVOS; i++)
+        {
+            gRC2Rate[i] = 0;
+            gRC2Target[i] = 0;
+            gRC2Pin[i] = 0;
+            gRC2Value[i] = 0;
+            // Turn off the PPS routing to the pin
+            *(gRC2RPORPtr + i) = 0;
+        }
 	}
 	else
 	{
-		if (Channel <= MAX_RC2_SERVOS && Pin <= 24)
-		{
-			gUseRCServo2 = TRUE;
-			gRC2Rate[Channel - 1] = Rate;
-			gRC2Target[Channel - 1] = Duration;
-			gRC2Pin[Channel - 1] = Pin;
-			if (gRC2Value[Channel - 1] == 0)
-			{
-				gRC2Value[Channel - 1] = Duration;
-			}
-		}
+        // If the user is trying to turn off this channel's PWM output
+        if (0 == Duration)
+        {
+            // Turn off the PPS routing to the pin
+            *(gRC2RPORPtr + gRC2Pin[Channel - 1]) = 0;
+            gRC2Rate[Channel - 1] = 0;
+            gRC2Target[Channel - 1] = 0;
+            gRC2Pin[Channel - 1] = 0;
+            gRC2Value[Channel - 1] = 0;
+        }
+        else
+        {
+            if (Channel <= gRC2Slots && Pin <= 24)
+            {
+                // As a speical case, if the pin is the same as the pin
+                // used for the solenoid, then turn off the solenoid function
+                // so that we can output PWM on that pin
+                if (Pin == PEN_UP_DOWN_RPN)
+                {
+                    gUseSolenoid = FALSE;
+                }
+
+                // Make sure the pin is set as an output, or this won't do much good
+                SetPinTRISFromRPn(Pin, OUTPUT_PIN);
+
+                gUseRCServo2 = TRUE;
+                gRC2Rate[Channel - 1] = Rate;
+                gRC2Target[Channel - 1] = Duration;
+                gRC2Pin[Channel - 1] = Pin;
+                if (gRC2Value[Channel - 1] == 0)
+                {
+                    gRC2Value[Channel - 1] = Duration;
+                }
+            }
+        }
 	}
 }
