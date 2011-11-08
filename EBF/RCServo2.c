@@ -161,7 +161,7 @@ void RCServo2_S2_command (void)
 	unsigned char Channel = 0;
 	unsigned int Duration = 0;
 	unsigned char Pin = 0;
-	unsigned char Rate = 0;
+	unsigned int Rate = 0;
 
 	// Extract each of the values.
 	extract_number (kUCHAR, &Channel, kREQUIRED);

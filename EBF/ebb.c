@@ -52,7 +52,8 @@
 //                - Fixed bug with S2 command and solenoid command interaction - we now turn off solenoid
 //                      output on RB4 if user uses S2 command to use RB4 for RC servo output
 //                - Fixed bug with S2 command where a duration of 0 would not shut off the PWM channel
-//
+//                - Fixed bug in S2 command where <rate> variable was not being used correctly
+//                - Switched default number of S2 channels to 8 (from 7 before)
 //
 
 #include <p18cxxx.h>

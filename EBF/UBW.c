@@ -365,29 +365,40 @@ void low_ISR(void)
 					// we add (or subtract) gRC2Rate[] to try and get there.
 					if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
 					{
-						RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
-						if (RC2Difference > 0)
-						{
-							if (RC2Difference > gRC2Rate[gRC2Ptr])
-							{
-								gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
-							}
-							else
-							{
-								gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-							}
-						}
-						else
-						{
-							if (-RC2Difference > gRC2Rate[gRC2Ptr])
-							{
-								gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
-							}
-							else
-							{
-								gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-							}
-						}
+                        // If the rate is zero, then we always move instantly
+                        // to the target.
+                        if (gRC2Rate[gRC2Ptr] == 0)
+                        {
+                            gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+                        }
+                        else
+                        {
+                            // Otherwise, add gRC2Rate[] each time through until we
+                            // get to our desired pulse width.
+                            RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
+                            if (RC2Difference > 0)
+                            {
+                                if (RC2Difference > gRC2Rate[gRC2Ptr])
+                                {
+                                    gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
+                                }
+                                else
+                                {
+                                    gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+                                }
+                            }
+                            else
+                            {
+                                if (-RC2Difference > gRC2Rate[gRC2Ptr])
+                                {
+                                    gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
+                                }
+                                else
+                                {
+                                    gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+                                }
+                            }
+                        }
 					}
 
 					// Set up the PPS routing for the CCP2
