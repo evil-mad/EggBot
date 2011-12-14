@@ -56,6 +56,7 @@
 //                - Switched default number of S2 channels to 8 (from 7 before)
 // 2.1.3 12/12/11 - RB3 now defaults to digital I/O on boot, can still use SE command to do PWM later if you want
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
+// 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -766,7 +767,7 @@ void EBB_Init(void)
 	UseAltPause = TRUE;
 
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output
-	PORTBbits.RB3 = 1;          // And turn it on
+	PORTBbits.RB3 = 0;          // And turn it on
 }
 
 // Stepper (mode) Configure command
