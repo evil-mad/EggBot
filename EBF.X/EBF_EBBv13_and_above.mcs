@@ -2,7 +2,7 @@
 MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
 Version=1.0
 [File000]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\main.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\main.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -15,7 +15,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File001]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\ebb.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\ebb.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -28,7 +28,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File002]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\RCServo2.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\RCServo2.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -41,7 +41,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File003]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\UBW.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\UBW.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -54,7 +54,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File004]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\usb_descriptors.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\usb_descriptors.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -67,7 +67,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File005]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\usb_device.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\usb_device.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -80,7 +80,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File006]
-Location=D:\Projects\eggbotcode\EBF\EBB_V13_and_above\usb_function_cdc.o
+Location=D:\Projects\eggbotcode\EBF.X\EBB_V13_and_above\usb_function_cdc.o
 Folder=Intermediary
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -93,7 +93,7 @@ ToolArgsString=-DBOARD_EBB_V13_AND_ABOVE
 TraceCmdString=
 DebugOptions=
 [File007]
-Location=D:\Projects\eggbotcode\EBF\.\EBB_V13_and_above\EBF_EBBv13_and_above.cof
+Location=D:\Projects\eggbotcode\EBF.X\.\EBB_V13_and_above\EBF_EBBv13_and_above.cof
 Folder=Output
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -106,7 +106,7 @@ ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
 [File008]
-Location=D:\Projects\eggbotcode\EBF\.\EBB_V13_and_above\EBF_EBBv13_and_above.hex
+Location=D:\Projects\eggbotcode\EBF.X\.\EBB_V13_and_above\EBF_EBBv13_and_above.hex
 Folder=Output
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -119,7 +119,7 @@ ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
 [File009]
-Location=D:\Projects\eggbotcode\EBF\.\EBB_V13_and_above\EBF_EBBv13_and_above.cod
+Location=D:\Projects\eggbotcode\EBF.X\.\EBB_V13_and_above\EBF_EBBv13_and_above.cod
 Folder=Output
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -132,7 +132,7 @@ ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
 [File010]
-Location=D:\Projects\eggbotcode\EBF\.\EBB_V13_and_above\EBF_EBBv13_and_above.lst
+Location=D:\Projects\eggbotcode\EBF.X\.\EBB_V13_and_above\EBF_EBBv13_and_above.lst
 Folder=Output
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
@@ -145,7 +145,7 @@ ToolArgsString=/m"$(BINDIR_)$(TARGETBASE).map" /o"$(BINDIR_)$(TARGETBASE).cof"
 TraceCmdString=
 DebugOptions=
 [File011]
-Location=D:\Projects\eggbotcode\EBF\.\EBB_V13_and_above\EBF_EBBv13_and_above.map
+Location=D:\Projects\eggbotcode\EBF.X\.\EBB_V13_and_above\EBF_EBBv13_and_above.map
 Folder=Output
 DeviceName=PIC18F46J50
 LanguageToolSuiteID={5B7D72DD-9861-47BD-9F60-2BE967BF8416}

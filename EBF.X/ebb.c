@@ -54,7 +54,8 @@
 //                - Fixed bug with S2 command where a duration of 0 would not shut off the PWM channel
 //                - Fixed bug in S2 command where <rate> variable was not being used correctly
 //                - Switched default number of S2 channels to 8 (from 7 before)
-//
+// 2.1.3 12/12/11 - RB3 now defaults to digital I/O on boot, can still use SE command to do PWM later if you want
+//                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -188,15 +189,6 @@ static UINT StoredEngraverPower;
 BOOL gUseSolenoid;
 
 // ISR
-// PORTB is the step and direction port 
-// RB0 = Step4
-// RB1 = Dir4
-// RB2 = Step3
-// RB3 = Dir3
-// RB4 = Step2
-// RB5 = Dir2
-// RB6 = Step1
-// RB7 = Dir1
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
@@ -773,40 +765,8 @@ void EBB_Init(void)
 	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
 	UseAltPause = TRUE;
 
-	// Set up PWM for Engraver control
-	// We will use ECCP1 and Timer2 for the engraver PWM output on RB3
-	// Our PWM will operate at about 40Khz.
-	
-	// Set our reload value
-	PR2 = 0xFF;
-
-	// Set to %50 power on boot
-    StoredEngraverPower = 512;
-
-    // Set RB3 to StoredEngraverPower
-    CCPR1L = StoredEngraverPower >> 2;
-    CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-
-	// Initalize Timer2
-
-	// The prescaler will be at 1
-	T2CONbits.T2CKPS = 0b00;
-
-	// Do not generate an interrupt	
-    PIE1bits.TMR2IE = 0;
-
-	TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-	TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-
-	CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
-	CCP1CONbits.P1M = 0b00;		// Enhanged PWM mode: single ouptut
-	
-	// Set up output routing to go to RB3 (RP6)
-	RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
-
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output
-	
-	T2CONbits.TMR2ON = 1;		// Turn it on
+	PORTBbits.RB3 = 1;          // And turn it on
 }
 
 // Stepper (mode) Configure command
@@ -1662,7 +1622,36 @@ void parse_SE_packet(void)
 	if (Power <= 1023)
 	{
 		StoredEngraverPower = Power;
-	}
+        
+        // Set up PWM for Engraver control
+        // We will use ECCP1 and Timer2 for the engraver PWM output on RB3
+        // Our PWM will operate at about 40Khz.
+
+        // Set our reload value
+        PR2 = 0xFF;
+
+        // Set to %50 power on boot
+        StoredEngraverPower = 512;
+
+        // Initalize Timer2
+
+        // The prescaler will be at 1
+        T2CONbits.T2CKPS = 0b00;
+
+        // Do not generate an interrupt
+        PIE1bits.TMR2IE = 0;
+
+        TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+        TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+
+        CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
+        CCP1CONbits.P1M = 0b00;		// Enhanged PWM mode: single ouptut
+
+        // Set up output routing to go to RB3 (RP6)
+        RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
+
+    	T2CONbits.TMR2ON = 1;		// Turn it on
+    }
 
 	// Now act on the State
 	if (State)

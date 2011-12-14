@@ -5,20 +5,20 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>../Microchip/Include/USB/usb.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_ch9.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_common.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_device.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_function_cdc.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_hal.h</itemPath>
-        <itemPath>../Microchip/Include/USB/usb_hal_pic18.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_ch9.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_common.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_device.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_function_cdc.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_hal.h</itemPath>
+        <itemPath>Microchip/Include/USB/usb_hal_pic18.h</itemPath>
       </logicalFolder>
-      <itemPath>../HardwareProfile.h</itemPath>
-      <itemPath>../HardwareProfile_EBB_V13_and_above.h</itemPath>
-      <itemPath>../RCServo2.h</itemPath>
-      <itemPath>../UBW.h</itemPath>
-      <itemPath>../ebb.h</itemPath>
-      <itemPath>../usb_config.h</itemPath>
+      <itemPath>HardwareProfile.h</itemPath>
+      <itemPath>HardwareProfile_EBB_V13_and_above.h</itemPath>
+      <itemPath>RCServo2.h</itemPath>
+      <itemPath>UBW.h</itemPath>
+      <itemPath>ebb.h</itemPath>
+      <itemPath>usb_config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -27,7 +27,7 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>../rm18f46j50_g.lkr</itemPath>
+      <itemPath>rm18f46j50_g.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
@@ -37,14 +37,14 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>../Microchip/USB/usb_device.c</itemPath>
-        <itemPath>../Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+        <itemPath>Microchip/USB/usb_device.c</itemPath>
+        <itemPath>Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
       </logicalFolder>
-      <itemPath>../RCServo2.c</itemPath>
-      <itemPath>../UBW.c</itemPath>
-      <itemPath>../ebb.c</itemPath>
-      <itemPath>../main.c</itemPath>
-      <itemPath>../usb_descriptors.c</itemPath>
+      <itemPath>RCServo2.c</itemPath>
+      <itemPath>UBW.c</itemPath>
+      <itemPath>ebb.c</itemPath>
+      <itemPath>main.c</itemPath>
+      <itemPath>usb_descriptors.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -59,7 +59,7 @@
         <developmentServer>localhost</developmentServer>
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
-        <platformTool>PICkit2PlatformTool</platformTool>
+        <platformTool>Simulator</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.40</languageToolchainVersion>
         <platform>3</platform>
@@ -90,7 +90,7 @@
         <property key="code-model" value="mS"/>
         <property key="warning-level" value="2"/>
         <property key="extra-include-directories"
-                  value="/c/mcc18/h;../Microchip/Include;..;../Microchip/Include/USB;"/>
+                  value="/c/mcc18/h;Microchip/Include;../EBF;Microchip/Include/USB;.;.;.;.;.;.;"/>
         <property key="enable-ow" value="true"/>
         <property key="verbose" value="false"/>
         <property key="enable-ou" value="true"/>
@@ -109,8 +109,8 @@
       </C18>
       <C18-AS>
         <property key="default.radix" value="HEX"/>
-        <property key="enable.case.sensitivity" value="false"/>
         <property key="hex.output.format" value="INHX32"/>
+        <property key="enable.case.sensitivity" value="false"/>
         <property key="preprocessor.macros" value=""/>
         <property key="warning.level" value="0"/>
         <property key="cross.reference.file" value=""/>
@@ -124,18 +124,18 @@
       </C18-LD>
       <C18LanguageToolchain>
         <property key="stack-analysis-mplink" value="false"/>
-        <property key="extended-mode-mcc18" value="false"/>
-        <property key="stack-analysis" value="false"/>
         <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
         <property key="extended-mode" value="false"/>
         <property key="extended-mode-mpasm" value="false"/>
         <property key="extended-mode-mplink" value="false"/>
       </C18LanguageToolchain>
-      <PICkit2PlatformTool>
+      <Simulator>
         <property key="tracecontrol.select" value="0"/>
         <property key="tracecontrol.medium" value="0"/>
         <property key="tracecontrol.disablemacros" value="true"/>
-      </PICkit2PlatformTool>
+      </Simulator>
     </conf>
   </confs>
 </configurationDescriptor>

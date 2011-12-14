@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/EBF_EBBv13_and_above.X.${IMAGE_TYPE}.cof
-OUTPUT_BASENAME=EBF_EBBv13_and_above.X.${IMAGE_TYPE}.cof
-PACKAGE_TOP_DIR=ebfebbv13andabove.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof
+OUTPUT_BASENAME=EBF.X.${IMAGE_TYPE}.cof
+PACKAGE_TOP_DIR=ebf.x/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/ebfebbv13andabove.x/bin
+makeDirectory ${TMPDIR}/ebf.x/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/ebfebbv13andabove.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/ebf.x.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/ebfebbv13andabove.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/ebf.x.tar *
 checkReturnCode
 
 # Cleanup
