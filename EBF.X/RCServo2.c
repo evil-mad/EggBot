@@ -133,7 +133,7 @@ void RCServo2_Init(void)
 	// We start out with 3ms slot duration because it's good for RC servos
 	gRC2SlotMS = 3;
 
-	g_servo2_min = 12000;
+	g_servo2_min = 20000;
 	g_servo2_max = 16000;
 
 	g_servo2_RPpin = DEFAULT_EBB_SERVO_PORTB_PIN + 3;		// Always start out with RP4 as the output (just for this test version of code)
@@ -242,7 +242,7 @@ void Process_S2(
                 }
 
                 // Make sure the pin is set as an output, or this won't do much good
-                SetPinLATFromRPn(Pin, OUTPUT_PIN);
+                SetPinTRISFromRPn(Pin, OUTPUT_PIN);
                 
                 // For v2.1.5, found bug where if a pin is HIGH when we start doing
                 // RC output, the output is totally messed up. So make sure to set
