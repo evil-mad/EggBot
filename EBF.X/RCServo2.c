@@ -136,22 +136,21 @@ void RCServo2_Init(void)
 	g_servo2_min = 12000;
 	g_servo2_max = 16000;
 
-	g_servo2_RPpin = DEFAULT_EBB_SERVO_PORTB_PIN + 3;		// Always start out with RB12 as the output (just for this test version of code)
-	TRISBbits.TRISB2 = 0;
+	g_servo2_RPpin = DEFAULT_EBB_SERVO_PORTB_PIN + 3;		// Always start out with RP4 as the output (just for this test version of code)
 	
 	gUseRCServo1 = FALSE;
-	TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
+	TRISBbits.TRISB1 = OUTPUT_PIN; 	// RB1 needs to be an output
 	gUseRCServo2 = TRUE;
 	g_servo2_rate_up = 400;
 	g_servo2_rate_down = 400;
 //	Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
-//	process_SP(PEN_UP, 0);			// Start servo up 
+	process_SP(PEN_UP, 0);			// Start servo up
 }
 
 // Servo method 2 enable command
 // S2,0<CR> will turn off RC Servo method 2 support
 // S2,<channel>,<duration>,<output_pin>,<rate><CR> will set RC output <channel> for <duration> on output pin <output_pin>
-//	<channel> can be 0 through 7, with 0 meaning turn off all RCServo2 output
+//	<channel> can be 0 through 9, with 0 meaning turn off all RCServo2 output
 //	<duration> can be 0 (output off) to 32,000 (3ms on time)
 //	<output_pin> is an RPx pin number (0 through 24)
 //  <rate> is the rate to change
@@ -232,7 +231,7 @@ void Process_S2(
         }
         else
         {
-            if (Channel <= gRC2Slots && Pin <= 24)
+            if ((Channel - 1) < gRC2Slots && Pin <= 24)
             {
                 // As a speical case, if the pin is the same as the pin
                 // used for the solenoid, then turn off the solenoid function
@@ -243,7 +242,12 @@ void Process_S2(
                 }
 
                 // Make sure the pin is set as an output, or this won't do much good
-                SetPinTRISFromRPn(Pin, OUTPUT_PIN);
+                SetPinLATFromRPn(Pin, OUTPUT_PIN);
+                
+                // For v2.1.5, found bug where if a pin is HIGH when we start doing
+                // RC output, the output is totally messed up. So make sure to set
+                // the pin low first.
+                SetPinLATFromRPn(Pin, 0);
 
                 gUseRCServo2 = TRUE;
                 gRC2Rate[Channel - 1] = Rate;

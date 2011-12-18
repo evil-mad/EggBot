@@ -57,6 +57,8 @@
 // 2.1.3 12/12/11 - RB3 now defaults to digital I/O on boot, can still use SE command to do PWM later if you want
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 // 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
+// 2.1.5 12/15/11 - Fixed problem with pen servo (RB1) being inverted on boot
+//
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -766,8 +768,8 @@ void EBB_Init(void)
 	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
 	UseAltPause = TRUE;
 
-	TRISBbits.TRISB3 = 0;		// Make RB3 an output
-	PORTBbits.RB3 = 0;          // And turn it on
+	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
+	PORTBbits.RB3 = 0;          // And make sure it starts out off
 }
 
 // Stepper (mode) Configure command
@@ -1227,6 +1229,14 @@ void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
 		ToLoadCommand = COMMAND_PEN_DOWN;
 	}
 	ToLoadDelayCounter = CommandDuration * 25;
+
+    // For v2.1.5, found bug where if a pin is HIGH when we start doing
+    // RC output, the output is totally messed up. So make sure to set
+    // the pin low first.
+    // We actually should be doing this from the ISR, not here. However,
+    // we don't want a function call in the ISR, so we'll cheat a bit
+    // and take care of this before the command goes into effect in the ISR.
+    SetPinLATFromRPn(g_servo2_RPpin, 0);
 
 	NextReady = TRUE;	
 }

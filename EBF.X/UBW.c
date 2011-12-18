@@ -130,7 +130,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.4\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.5\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.1.1d\r\n"};
 #endif
@@ -3297,7 +3297,35 @@ volatile near unsigned char * RPnTRISPort[25] = {
     &TRISD,      // RP24
 };
 
-const char RPnTRISBit[25] = {
+volatile near unsigned char * RPnLATPort[25] = {
+    &LATA,      // RP0
+    &LATA,      // RP1
+    &LATA,      // RP2
+    &LATB,      // RP3
+    &LATB,      // RP4
+    &LATB,      // RP5
+    &LATB,      // RP6
+    &LATB,      // RP7
+    &LATB,      // RP8
+    &LATB,      // RP9
+    &LATB,      // RP10
+    &LATC,      // RP11
+    &LATC,      // RP12
+    &LATC,      // RP13
+    &LATC,      // RP14
+    &LATC,      // RP15
+    &LATC,      // RP16
+    &LATC,      // RP17
+    &LATC,      // RP18
+    &LATD,      // RP19
+    &LATD,      // RP20
+    &LATD,      // RP21
+    &LATD,      // RP22
+    &LATD,      // RP23
+    &LATD,      // RP24
+};
+
+const char RPnBit[25] = {
     0,          // RP0
     1,          // RP1
     5,          // RP2
@@ -3325,6 +3353,24 @@ const char RPnTRISBit[25] = {
     7,          // RP24
 };
 
+// From RPn (Pin) number, set LAT value for that pin
+void SetPinLATFromRPn(char Pin, char State)
+{
+    if (Pin > 25)
+    {
+        return;
+    }
+
+    if (State)
+    {
+        bitset (*RPnLATPort[Pin], RPnBit[Pin]);
+    }
+    else
+    {
+        bitclr (*RPnLATPort[Pin], RPnBit[Pin]);
+    }
+}
+
 // From RPn (Pin) number, set TRIS value for that pin
 void SetPinTRISFromRPn(char Pin, char State)
 {
@@ -3335,11 +3381,11 @@ void SetPinTRISFromRPn(char Pin, char State)
 
     if (OUTPUT_PIN == State)
     {
-        bitclr (*RPnTRISPort[Pin], RPnTRISBit[Pin]);
+        bitclr (*RPnTRISPort[Pin], RPnBit[Pin]);
     }
     else
     {
-        bitset (*RPnTRISPort[Pin], RPnTRISBit[Pin]);
+        bitset (*RPnTRISPort[Pin], RPnBit[Pin]);
     }
 }
 

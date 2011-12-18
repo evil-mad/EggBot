@@ -23,10 +23,14 @@ CP=cp
 CND_CONF=default
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof
+OUTPUT_SUFFIX=cof
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof
+OUTPUT_SUFFIX=hex
+DEBUGGABLE_SUFFIX=cof
+FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
 
 # Object Directory
@@ -36,10 +40,11 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED="${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" ${OBJECTDIR}/Microchip/USB/usb_device.o ${OBJECTDIR}/RCServo2.o ${OBJECTDIR}/UBW.o ${OBJECTDIR}/ebb.o ${OBJECTDIR}/main.o ${OBJECTDIR}/usb_descriptors.o
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/Microchip/USB/usb_device.o "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" ${OBJECTDIR}/RCServo2.o ${OBJECTDIR}/UBW.o ${OBJECTDIR}/ebb.o ${OBJECTDIR}/main.o ${OBJECTDIR}/usb_descriptors.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/Microchip/USB/usb_device.o.d "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o.d" ${OBJECTDIR}/RCServo2.o.d ${OBJECTDIR}/UBW.o.d ${OBJECTDIR}/ebb.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/usb_descriptors.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o ${OBJECTDIR}/Microchip/USB/usb_device.o ${OBJECTDIR}/RCServo2.o ${OBJECTDIR}/UBW.o ${OBJECTDIR}/ebb.o ${OBJECTDIR}/main.o ${OBJECTDIR}/usb_descriptors.o
+OBJECTFILES=${OBJECTDIR}/Microchip/USB/usb_device.o ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o ${OBJECTDIR}/RCServo2.o ${OBJECTDIR}/UBW.o ${OBJECTDIR}/ebb.o ${OBJECTDIR}/main.o ${OBJECTDIR}/usb_descriptors.o
 
 
 CFLAGS=
@@ -71,7 +76,7 @@ MP_AR_DIR="C:\Program Files\Microchip\mplabc18\v3.40\bin"
 # MP_BC_DIR is not defined
 
 .build-conf:  ${BUILD_SUBPROJECTS}
-	${MAKE}  -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof
+	${MAKE}  -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_PROCESSOR_OPTION=18F46J50
 MP_PROCESSOR_OPTION_LD=18f46j50
@@ -85,6 +90,24 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/Microchip/USB/usb_device.o: Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/Microchip/USB 
+	@${RM} ${OBJECTDIR}/Microchip/USB/usb_device.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/Microchip/USB/usb_device.o   Microchip/USB/usb_device.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/Microchip/USB/usb_device.o 
+	
+${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o: Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver 
+	@${RM} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o"   "Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	@${DEP_GEN} -d "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" 
+	
+${OBJECTDIR}/RCServo2.o: RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/RCServo2.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/RCServo2.o   RCServo2.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/RCServo2.o 
+	
 ${OBJECTDIR}/UBW.o: UBW.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/UBW.o.d 
@@ -97,37 +120,37 @@ ${OBJECTDIR}/ebb.o: ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/ebb.o   ebb.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/ebb.o 
 	
-${OBJECTDIR}/usb_descriptors.o: usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR} 
-	@${RM} ${OBJECTDIR}/usb_descriptors.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/usb_descriptors.o   usb_descriptors.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/usb_descriptors.o 
-	
-${OBJECTDIR}/RCServo2.o: RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR} 
-	@${RM} ${OBJECTDIR}/RCServo2.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/RCServo2.o   RCServo2.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/RCServo2.o 
-	
-${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o: Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver 
-	@${RM} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o"   "Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
-	@${DEP_GEN} -d "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" 
-	
 ${OBJECTDIR}/main.o: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/main.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/main.o   main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/main.o 
 	
+${OBJECTDIR}/usb_descriptors.o: usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/usb_descriptors.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/usb_descriptors.o   usb_descriptors.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/usb_descriptors.o 
+	
+else
 ${OBJECTDIR}/Microchip/USB/usb_device.o: Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/Microchip/USB 
 	@${RM} ${OBJECTDIR}/Microchip/USB/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/Microchip/USB/usb_device.o   Microchip/USB/usb_device.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/Microchip/USB/usb_device.o   Microchip/USB/usb_device.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/Microchip/USB/usb_device.o 
 	
-else
+${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o: Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver 
+	@${RM} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o"   "Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	@${DEP_GEN} -d "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" 
+	
+${OBJECTDIR}/RCServo2.o: RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/RCServo2.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/RCServo2.o   RCServo2.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/RCServo2.o 
+	
 ${OBJECTDIR}/UBW.o: UBW.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/UBW.o.d 
@@ -140,48 +163,30 @@ ${OBJECTDIR}/ebb.o: ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/ebb.o   ebb.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/ebb.o 
 	
-${OBJECTDIR}/usb_descriptors.o: usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR} 
-	@${RM} ${OBJECTDIR}/usb_descriptors.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/usb_descriptors.o   usb_descriptors.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/usb_descriptors.o 
-	
-${OBJECTDIR}/RCServo2.o: RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR} 
-	@${RM} ${OBJECTDIR}/RCServo2.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/RCServo2.o   RCServo2.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/RCServo2.o 
-	
-${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o: Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver 
-	@${RM} ${OBJECTDIR}/Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o"   "Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
-	@${DEP_GEN} -d "${OBJECTDIR}/Microchip/USB/CDC Device Driver/usb_function_cdc.o" 
-	
 ${OBJECTDIR}/main.o: main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR} 
 	@${RM} ${OBJECTDIR}/main.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/main.o   main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/main.o 
 	
-${OBJECTDIR}/Microchip/USB/usb_device.o: Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/Microchip/USB 
-	@${RM} ${OBJECTDIR}/Microchip/USB/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/Microchip/USB/usb_device.o   Microchip/USB/usb_device.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/Microchip/USB/usb_device.o 
+${OBJECTDIR}/usb_descriptors.o: usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/usb_descriptors.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"/c/mcc18/h" -I"Microchip/Include" -I"../EBF" -I"Microchip/Include/USB" -I"." -I"." -I"." -I"." -I"." -I"."  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/usb_descriptors.o   usb_descriptors.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/usb_descriptors.o 
 	
 endif
 
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) rm18f46j50_g.lkr  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -odist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
+dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) rm18f46j50_g.lkr  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -odist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.cof  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 endif
 
 
@@ -196,7 +201,7 @@ endif
 # Enable dependency checking
 .dep.inc: .depcheck-impl
 
-DEPFILES=$(wildcard $(addsuffix .d, ${OBJECTFILES}))
+DEPFILES=$(shell mplabwildcard ${POSSIBLE_DEPFILES})
 ifneq (${DEPFILES},)
 include ${DEPFILES}
 endif
