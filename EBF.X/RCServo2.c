@@ -55,10 +55,10 @@ unsigned char gRC2Ptr;
 unsigned char gRC2Slots;
 unsigned char gRC2SlotMS;
 far ram unsigned char * gRC2RPORPtr; 
-unsigned int g_servo2_max;
-unsigned int g_servo2_min;
-unsigned int g_servo2_rate_up;
-unsigned int g_servo2_rate_down;
+unsigned int g_servo2_max;          // Only applies to RB1 servo
+unsigned int g_servo2_min;          // Only applies to RB1 servo
+unsigned int g_servo2_rate_up;      // Only applies to RB1 servo
+unsigned int g_servo2_rate_down;    // Only applies to RB1 servo
 unsigned char g_servo2_RPpin;
 
 /*

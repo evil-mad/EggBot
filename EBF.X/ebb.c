@@ -58,7 +58,7 @@
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 // 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
 // 2.1.5 12/15/11 - Fixed problem with pen servo (RB1) being inverted on boot
-//
+// 
 
 #include <p18cxxx.h>
 #include <usart.h>
