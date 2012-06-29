@@ -63,6 +63,12 @@
 # Last updated 28 November 2010
 # 15 October 2010
 
+# Updated by Windell H. Oskay, 6/14/2012
+# Added tolerance parameter
+
+# Update by Daniel C. Newman, 6/20/2012
+# Add min span/gap width
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -210,7 +216,7 @@ def intersect( P1, P2, P3, P4 ):
 
 	return sa
 
-def interstices( P1, P2, paths, hatches ):
+def interstices( P1, P2, paths, hatches, minGap=0.00001 ):
 
 	'''
 	For the line L defined by the points P1 & P2, determine the segments
@@ -270,7 +276,7 @@ def interstices( P1, P2, paths, hatches ):
 	sa.sort()
 
 	# Remove duplicates intersections.  A common case where these arise
-	# in when the hatch line passes through a vertex where one line segment
+	# is when the hatch line passes through a vertex where one line segment
 	# ends and the next one begins.
 
 	# Having had sorted the data, it's trivial to just scan through
@@ -287,16 +293,64 @@ def interstices( P1, P2, paths, hatches ):
 	if len( sa ) < 2:
 		return
 
+	if minGap <= 0.00001:
+		minGap = 0.00001
+
 	# Now, entries with even valued indices into sa[] are where we start
 	# a hatch line and odd valued indices where we end the hatch line.
-	for i in range( 0, len( sa ) - 1, 2 ):
-		if not hatches.has_key( sa[i][1] ):
-			hatches[sa[i][1]] = []
-		x1 = P1[0] + sa[i][0] * ( P2[0] - P1[0] )
-		y1 = P1[1] + sa[i][0] * ( P2[1] - P1[1] )
-		x2 = P1[0] + sa[i+1][0] * ( P2[0] - P1[0] )
-		y2 = P1[1] + sa[i+1][0] * ( P2[1] - P1[1] )
-		hatches[sa[i][1]].append( [[x1, y1], [x2, y2]] )
+
+	last_sa = None
+	i = 0
+	while i < ( len( sa ) - 1 ):
+	#for i in range( 0, len( sa ) - 1, 2 ):
+
+		# Mind the gap
+		if abs( sa[i][0] - sa[i+1][0] ) > minGap:
+
+			# This segment has a (relative) length which exceeds minGap
+
+			if ( last_sa is None ) or ( abs( sa[i][0] - last_sa[1][0] ) > minGap ):
+
+				# And the gap between this segment and the prior segment
+				# exceeds a (relative) length of minGap
+
+				if not hatches.has_key( sa[i][1] ):
+					hatches[sa[i][1]] = []
+
+				x1 = P1[0] + sa[i][0] * ( P2[0] - P1[0] )
+				y1 = P1[1] + sa[i][0] * ( P2[1] - P1[1] )
+				x2 = P1[0] + sa[i+1][0] * ( P2[0] - P1[0] )
+				y2 = P1[1] + sa[i+1][0] * ( P2[1] - P1[1] )
+
+				hatches[sa[i][1]].append( [[x1, y1], [x2, y2]] )
+
+			# Note we should not need to do the has_key() test, but let's
+			# it anyway
+			elif hatches.has_key( last_sa[0][1] ):
+
+				# The gap between this segment of the hatch line and the prior
+				# segment is so small that we should join the two so as to
+				# prevent creating a gap of relative length <= minGap
+
+				# Replace the endpoint of the prior hatch line with the endpoint
+				# of this hatch line
+
+				x2 = P1[0] + sa[i+1][0] * ( P2[0] - P1[0] )
+				y2 = P1[1] + sa[i+1][0] * ( P2[1] - P1[1] )
+				hatches[last_sa[0][1]][-1][1] = [x2, y2]
+
+			# Remember the relative start and end of this hatch segment
+			last_sa = [ sa[i], sa[i+1] ]
+
+			i = i + 2
+
+		else:
+			i = i + 1
+		# Ignore cases where the prior segment was short, this segment was
+		# short, and the gap between them was short but we might just want
+		# to combine them into one long segment.  That's indeed a possible
+		# choice, but so may be the choice of dropping them silently in the
+		# hatch segment wastebasket.
 
 def inverseTransform ( tran ):
 	'''
@@ -428,6 +482,7 @@ class Eggbot_Hatch( inkex.Effect ):
 		self.grid = []
 		self.hatches = {}
 		self.transforms = {}
+		self.minGap = float( 0 )
 
 		# For handling an SVG viewbox attribute, we will need to know the
 		# values of the document's <svg> width and height attributes as well
@@ -448,6 +503,17 @@ class Eggbot_Hatch( inkex.Effect ):
 			"--hatchSpacing", action="store", type="float",
 			dest="hatchSpacing", default=10.0,
 			help="Spacing between hatch lines" )
+		self.OptionParser.add_option(
+			"--tolerance", action="store", type="float",
+			dest="tolerance", default=20.0,
+			help="Allowed deviation from original paths" )
+		self.OptionParser.add_option(
+			"--minGap", action="store", type="float",
+			dest="minGap", default=5.0,
+			help="Minimum length of hatch segments and gaps" )
+		self.OptionParser.add_option( "--tab",	#NOTE: value is not used.
+			action="store", type="string", dest="tab", default="splash",
+			help="The active tab when Apply was pressed" )
 
 	def getLength( self, name, default ):
 
@@ -546,7 +612,7 @@ class Eggbot_Hatch( inkex.Effect ):
 					# Keep the prior subpath: it appears to be a closed path
 					subpaths.append( subpath_vertices )
 			subpath_vertices = []
-			subdivideCubicPath( sp, float( 0.2 ) )
+			subdivideCubicPath( sp, float( self.options.tolerance / 100 ) )
 			for csp in sp:
 				# Add this vertex to the list of vetices
 				subpath_vertices.append( csp[1] )
@@ -894,7 +960,13 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		# Nice thing about rectangles is that the diameter of the circle
 		# encompassing them is the length the rectangle's diagonal...
-		r = math.sqrt ( w * w + h * h) / 2.0
+		r = math.sqrt ( w * w + h * h ) / 2.0
+
+		# Length of a hatch line will be 2r
+		# We wish to convert the number of pixels considered insignificant
+		# to a unitless, fractional length of a hatch line.  The length of
+		# a hatch line is 2r pixels.  So,
+		self.minGap = self.options.minGap / ( 2.0 * r )
 
 		# Now generate hatch lines within the square
 		# centered at (0, 0) and with side length at least d
@@ -957,7 +1029,7 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		# Now loop over our hatch lines looking for intersections
 		for h in self.grid:
-			interstices( (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches )
+			interstices( (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.minGap )
 
 		# Target stroke width will be (doc width + doc height) / 2 / 1000
 		# stroke_width_target = ( self.docHeight + self.docWidth ) / 2000
@@ -1002,6 +1074,8 @@ class Eggbot_Hatch( inkex.Effect ):
 				transform = None
 				stroke_width = float( 1.0 )
 			for segment in self.hatches[key]:
+				if len( segment ) < 2:
+					continue
 				pt1 = segment[0]
 				pt2 = segment[1]
 				# Okay, we're going to put these hatch lines into the same
