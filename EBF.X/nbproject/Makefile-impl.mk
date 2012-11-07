@@ -43,6 +43,18 @@ ALLCONFS=default
 .clean-impl: .clean-pre
 	${MAKE} -f nbproject/Makefile-${CONF}.mk SUBPROJECTS=${SUBPROJECTS} .clean-conf
 
+# clobber
+.clobber-impl: .clobber-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default clean
+
+
+
+# all
+.all-impl: .all-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default build
+
+
+
 # dependency checking support
 .depcheck-impl:
 #	@echo "# This code depends on make tool being used" >.dep.inc
