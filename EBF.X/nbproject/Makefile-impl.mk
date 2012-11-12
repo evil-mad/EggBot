@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=EBF.X
 
 # Active Configuration
-DEFAULTCONF=default
+DEFAULTCONF=EBBv13_with_bootloader
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=default 
+ALLCONFS=EBBv13_with_bootloader EBBv13_no_bootloader EBBv13_XC8_no_bootloader 
 
 
 # build
@@ -45,13 +45,17 @@ ALLCONFS=default
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_with_bootloader clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_no_bootloader clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_no_bootloader clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_with_bootloader build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_no_bootloader build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_no_bootloader build
 
 
 

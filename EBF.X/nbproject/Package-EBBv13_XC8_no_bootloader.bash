@@ -6,7 +6,7 @@
 
 # Macros
 TOP=`pwd`
-CND_CONF=default
+CND_CONF=EBBv13_XC8_no_bootloader
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging

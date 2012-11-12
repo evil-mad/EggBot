@@ -4,10 +4,24 @@
 # NOCDDL
 #
 CND_BASEDIR=`pwd`
-# default configuration
-CND_ARTIFACT_DIR_default=dist/default/production
-CND_ARTIFACT_NAME_default=EBF.X.production.hex
-CND_ARTIFACT_PATH_default=dist/default/production/EBF.X.production.hex
-CND_PACKAGE_DIR_default=${CND_DISTDIR}/default/package
-CND_PACKAGE_NAME_default=ebf.x.tar
-CND_PACKAGE_PATH_default=${CND_DISTDIR}/default/package/ebf.x.tar
+# EBBv13_with_bootloader configuration
+CND_ARTIFACT_DIR_EBBv13_with_bootloader=dist/EBBv13_with_bootloader/production
+CND_ARTIFACT_NAME_EBBv13_with_bootloader=EBF.X.production.hex
+CND_ARTIFACT_PATH_EBBv13_with_bootloader=dist/EBBv13_with_bootloader/production/EBF.X.production.hex
+CND_PACKAGE_DIR_EBBv13_with_bootloader=${CND_DISTDIR}/EBBv13_with_bootloader/package
+CND_PACKAGE_NAME_EBBv13_with_bootloader=ebf.x.tar
+CND_PACKAGE_PATH_EBBv13_with_bootloader=${CND_DISTDIR}/EBBv13_with_bootloader/package/ebf.x.tar
+# EBBv13_no_bootloader configuration
+CND_ARTIFACT_DIR_EBBv13_no_bootloader=dist/EBBv13_no_bootloader/production
+CND_ARTIFACT_NAME_EBBv13_no_bootloader=EBF.X.production.hex
+CND_ARTIFACT_PATH_EBBv13_no_bootloader=dist/EBBv13_no_bootloader/production/EBF.X.production.hex
+CND_PACKAGE_DIR_EBBv13_no_bootloader=${CND_DISTDIR}/EBBv13_no_bootloader/package
+CND_PACKAGE_NAME_EBBv13_no_bootloader=ebf.x.tar
+CND_PACKAGE_PATH_EBBv13_no_bootloader=${CND_DISTDIR}/EBBv13_no_bootloader/package/ebf.x.tar
+# EBBv13_XC8_no_bootloader configuration
+CND_ARTIFACT_DIR_EBBv13_XC8_no_bootloader=dist/EBBv13_XC8_no_bootloader/production
+CND_ARTIFACT_NAME_EBBv13_XC8_no_bootloader=EBF.X.production.hex
+CND_ARTIFACT_PATH_EBBv13_XC8_no_bootloader=dist/EBBv13_XC8_no_bootloader/production/EBF.X.production.hex
+CND_PACKAGE_DIR_EBBv13_XC8_no_bootloader=${CND_DISTDIR}/EBBv13_XC8_no_bootloader/package
+CND_PACKAGE_NAME_EBBv13_XC8_no_bootloader=ebf.x.tar
+CND_PACKAGE_PATH_EBBv13_XC8_no_bootloader=${CND_DISTDIR}/EBBv13_XC8_no_bootloader/package/ebf.x.tar

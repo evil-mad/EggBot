@@ -130,7 +130,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.1.1d\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.5\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.1.5a\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.1.1d\r\n"};
 #endif
@@ -185,7 +185,6 @@ unsigned char g_USART_TX_buf_out;
 
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet recepetion
 BOOL	g_ack_enable;
-unsigned char 	gUseRCServo1;
 
 // Set to TRUE to turn Pulse Mode on
 unsigned char gPulsesOn = FALSE;
@@ -242,9 +241,7 @@ int _user_putc (char c);		// Our UBS based stream character printer
 void low_ISR(void)
 {	
 	unsigned int i;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	signed int RC2Difference = 0;
-#endif
 
 	// Do we have a Timer4 interrupt? (1ms rate)
 	if (PIR3bits.TMR4IF)
@@ -252,176 +249,97 @@ void low_ISR(void)
 		// Clear the interrupt 
 		PIR3bits.TMR4IF = 0;
 		
-		// Only run this code if user has turned on RC method 1
-		if (gUseRCServo1) {
-			// The most time critical part of this interrupt service routine is the 
-			// handling of the RC command's servo output pulses.
-			// Each time we get this interrupt, we look to see if the next pin on the
-			// list has a value greater than zero. If so, we arm set it high and set
-			// it's state to PRIMED. Then we advance the pointers to the next pair.
-			if (kPRIMED == g_RC_state[g_RC_primed_ptr])
-			{
-				// This is easy, throw the value into the timer
-				TMR0H = g_RC_value[g_RC_primed_ptr] >> 8;
-				TMR0L = g_RC_value[g_RC_primed_ptr] & 0xFF;
-		
-				// Then make sure the timer's interrupt enable is set
-				INTCONbits.TMR0IE = 1;
-				// And be sure to clear the flag too
-				INTCONbits.TMR0IF = 0;
-				// Turn on Timer0
-				T0CONbits.TMR0ON = 1;
-		
-				// And set this pin's state to timing
-				g_RC_state[g_RC_primed_ptr] = kTIMING;
-				
-				// Remember which pin is now timing
-				g_RC_timing_ptr = g_RC_primed_ptr;
-			}
-	
-			if (kWAITING == g_RC_state[g_RC_next_ptr])
-			{
-				// If the value is zero, then shut this pin off
-				// otherwise, prime it for sending a pulse
-				if (0 == g_RC_value[g_RC_next_ptr])
-				{
-					g_RC_state[g_RC_next_ptr] = kOFF;
-				}
-				else
-				{
-					// Set the bit high
-					if (g_RC_next_ptr < 8)
-					{
-						bitset (LATA, g_RC_next_ptr & 0x7);
-					}
-					else if (g_RC_next_ptr < 16)
-					{
-						bitset (LATB, g_RC_next_ptr & 0x7);
-					}
-					else
-					{
-						bitset (LATC, g_RC_next_ptr & 0x7);
-					}
-					// Set the state to primed so we know to do next
-					g_RC_state[g_RC_next_ptr] = kPRIMED;
-					// And remember which pin is primed
-					g_RC_primed_ptr = g_RC_next_ptr;
-				}
-			}
-	
-			// And always advance the main pointer
-			// NOTE: we need to skip RA6, RA7, and RC3, RC4, and RC5
-			// (Because UBW doesn't bring those pins out to headers)
-			g_RC_next_ptr++;
-			if (6 == g_RC_next_ptr)
-			{
-				g_RC_next_ptr = 8;
-			}
-			else if (19 == g_RC_next_ptr)
-			{
-				g_RC_next_ptr = 22;
-			}
-			else if (kRC_DATA_SIZE == g_RC_next_ptr)
-			{
-				g_RC_next_ptr = 0;
-			}
-		}
+		// Handle RC servo pulse generation (for next pulse/channel)
+		// Always incriment the gRCServo2msCounter
+        gRC2msCounter++;
 
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-		// Only run this code if user has turned on RC method 2
-		else if (gUseRCServo2) 
-		{
-			// Always incriment the gRCServo2msCounter
-			gRC2msCounter++;
+        if (gRC2msCounter >= gRC2SlotMS)
+        {
+            // Clear the RC2 ms counter
+            gRC2msCounter = 0;
 
-			if (gRC2msCounter >= gRC2SlotMS)
-			{
-				// Clear the RC2 ms counter
-				gRC2msCounter = 0;
-	
-				// Turn off the PPS routing to the 'old' pin
-				*(gRC2RPORPtr + gRC2Pin[gRC2Ptr]) = 0;
+            // Turn off the PPS routing to the 'old' pin
+            *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 0;
 
-				// Turn off TIMER3 for now
-				T3CONbits.TMR3ON = 0;
+            // Turn off TIMER3 for now
+            T3CONbits.TMR3ON = 0;
 
-				// And clear TIMER3 to zero
-				TMR3H = 0;
-				TMR3L = 0;
-								
-				// And always advance the main pointer
-				gRC2Ptr++;
-				if (gRC2Ptr >= gRC2Slots)
-				{
-					gRC2Ptr = 0;
-				}
+            // And clear TIMER3 to zero
+            TMR3H = 0;
+            TMR3L = 0;
 
-				// If the value is zero, we do nothing to this pin
-				// otherwise, prime it for sending a pulse
-				if (gRC2Value[gRC2Ptr] != 0)
-				{
-					// Now, to move 'slowly', we update gRC2Value[] by
-					// seeing if we are at gRC2Target[] yet. If not, then
-					// we add (or subtract) gRC2Rate[] to try and get there.
-					if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
-					{
-                        // If the rate is zero, then we always move instantly
-                        // to the target.
-                        if (gRC2Rate[gRC2Ptr] == 0)
+            // And always advance the main pointer
+            gRC2Ptr++;
+            if (gRC2Ptr >= gRC2Slots)
+            {
+                gRC2Ptr = 0;
+            }
+
+            // If the value is zero, we do nothing to this pin
+            // otherwise, prime it for sending a pulse
+            if (gRC2Value[gRC2Ptr] != 0)
+            {
+                // Now, to move 'slowly', we update gRC2Value[] by
+                // seeing if we are at gRC2Target[] yet. If not, then
+                // we add (or subtract) gRC2Rate[] to try and get there.
+                if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
+                {
+                    // If the rate is zero, then we always move instantly
+                    // to the target.
+                    if (gRC2Rate[gRC2Ptr] == 0)
+                    {
+                        gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+                    }
+                    else
+                    {
+                        // Otherwise, add gRC2Rate[] each time through until we
+                        // get to our desired pulse width.
+                        RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
+                        if (RC2Difference > 0)
                         {
-                            gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                        }
-                        else
-                        {
-                            // Otherwise, add gRC2Rate[] each time through until we
-                            // get to our desired pulse width.
-                            RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
-                            if (RC2Difference > 0)
+                            if (RC2Difference > gRC2Rate[gRC2Ptr])
                             {
-                                if (RC2Difference > gRC2Rate[gRC2Ptr])
-                                {
-                                    gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
-                                }
-                                else
-                                {
-                                    gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                                }
+                                gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
                             }
                             else
                             {
-                                if (-RC2Difference > gRC2Rate[gRC2Ptr])
-                                {
-                                    gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
-                                }
-                                else
-                                {
-                                    gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                                }
+                                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
                             }
                         }
-					}
+                        else
+                        {
+                            if (-RC2Difference > gRC2Rate[gRC2Ptr])
+                            {
+                                gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
+                            }
+                            else
+                            {
+                                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+                            }
+                        }
+                    }
+                }
 
-					// Set up the PPS routing for the CCP2
-					*(gRC2RPORPtr + gRC2Pin[gRC2Ptr]) = 18;	// 18 = CCP2
+                // Set up the PPS routing for the CCP2
+                *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 18;	// 18 = CCP2
 
-					// Disable interrupts (high)
-					INTCONbits.GIEH = 0;
-					
-					// Load up the new compare time
-					CCPR2H = gRC2Value[gRC2Ptr] >> 8;
-					CCPR2L = gRC2Value[gRC2Ptr] & 0xFF;
-					CCP2CONbits.CCP2M = 0b0000;
-					CCP2CONbits.CCP2M = 0b1001;
+                // Disable interrupts (high)
+                INTCONbits.GIEH = 0;
 
-					// Turn TIMER3 back on
-					T3CONbits.TMR3ON = 1;
-					
-					// Renable interrupts
-					INTCONbits.GIEH = 1;
-				}
-			}
-		}
-#endif // end of #if defined(BOARD_EBB_V11)
+                // Load up the new compare time
+                CCPR2H = gRC2Value[gRC2Ptr] >> 8;
+                CCPR2L = gRC2Value[gRC2Ptr] & 0xFF;
+                CCP2CONbits.CCP2M = 0b0000;
+                CCP2CONbits.CCP2M = 0b1001;
+
+                // Turn TIMER3 back on
+                T3CONbits.TMR3ON = 1;
+
+                // Renable interrupts
+                INTCONbits.GIEH = 1;
+            }
+        }
+		
 				
 		// See if it's time to fire off an I packet
 		if (ISR_D_RepeatRate > 0)

@@ -58,6 +58,8 @@
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 // 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
 // 2.1.5 12/15/11 - Fixed problem with pen servo (RB1) being inverted on boot
+// 2.2.0 11/07/12 - Fixed problem with SP command not working properly with ports other than RB1 because we don't
+//                  properly use S2 commands for SP up/down within ISR.
 // 
 
 #include <p18cxxx.h>
@@ -73,10 +75,7 @@
 #include "ebb.h"
 #include "delays.h"
 #include "ebb_demo.h"
-/// TODO: Fix this based upon type of CPU
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-	#include "RCServo2.h"
-#endif
+#include "RCServo2.h"
 
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), devide by 4
@@ -92,50 +91,9 @@
 
 #define MAX_RC_DURATION 11890
 
-#if defined(BOARD_EBB_V10)
-	#define DIR1_BIT	(0x80)
-	#define STEP1_BIT	(0x40)
-	#define DIR2_BIT	(0x20)
-	#define STEP2_BIT	(0x10)
-	#define DIR3_BIT	(0x08)
-	#define STEP3_BIT	(0x04)
-	#define DIR4_BIT	(0x02)
-	#define STEP4_BIT	(0x01)
-#elif defined(BOARD_EBB_V11)
-	#define STEP1_BIT	(0x01)
-	#define DIR1_BIT	(0x02)
-	#define STEP2_BIT	(0x04)
-	#define DIR2_BIT	(0x08)
-#elif defined(BOARD_EBB_V12)
-	#define STEP1_BIT	(0x01)
-	#define DIR1_BIT	(0x02)
-	#define STEP2_BIT	(0x04)
-	#define DIR2_BIT	(0x08)
-#elif defined(BOARD_EBB_V13_AND_ABOVE) 
-/// TODO: Edit these
-	#define STEP1_BIT	(0x01)
-	#define DIR1_BIT	(0x02)
-	#define STEP2_BIT	(0x04)
-	#define DIR2_BIT	(0x08)
-#elif defined(BOARD_UBW)
-	#define DIR1_BIT	(0x02)
-	#define STEP1_BIT	(0x01)
-	#define DIR2_BIT	(0x08)
-	#define STEP2_BIT	(0x04)
-	#define DIR3_BIT	(0x20)
-	#define STEP3_BIT	(0x10)
-	#define DIR4_BIT	(0x80)
-	#define STEP4_BIT	(0x40)
-#endif
+// Maximum number of elements in the command FIFO
+#define COMMAND_FIFO_LENGTH     4
 
-typedef enum
-{
-	COMMAND_NONE = 0,
-	COMMAND_MOVE,
-	COMMAND_DELAY,
-	COMMAND_PEN_UP,
-	COMMAND_PEN_DOWN
-} CommandType;
 
 typedef enum
 {
@@ -148,48 +106,46 @@ typedef enum
 static void process_SM(
 	unsigned int Duration, 
 	signed int A1Stp, 
-	signed int A2Stp, 
-	signed int A3Stp, 
-	signed int A4Stp
+	signed int A2Stp
 );
 
 #pragma udata access fast_vars
 // Working registers
-static near unsigned int StepAcc[4];
-static near signed int StepAdd[4];
-static near unsigned int StepsCounter[4];
-static near unsigned char DirBits;
+static near MoveCommandType CurrentCommand;
+static near unsigned int StepAcc[NUMBER_OF_STEPPERS];
+//static near signed int StepAdd[NUMBER_OF_STEPPERS];
+//static near unsigned int StepsCounter[NUMBER_OF_STEPPERS];
+//static near unsigned char DirBits;
+//static unsigned short DelayCounter;
 static near unsigned char OutByte;
 static near unsigned char TookStep;
 static near unsigned char AllDone;
 static near unsigned char i;
-near unsigned char NextReady;
-static near CommandType Command;
+near BOOL FIFOEmpty;
+//static near CommandType Command;
 
 #pragma udata
-// ToLoad registers
-static signed int ToLoadStepAdd[4];
-static unsigned int ToLoadStepsCounter[4];
-static unsigned char ToLoadDirBits;
-static CommandType ToLoadCommand;
-static unsigned short ToLoadDelayCounter;
-static unsigned short DelayCounter;
+MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
+
 unsigned int DemoModeActive;
 unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
 static unsigned char UseBuiltInDrivers;
-static unsigned char UseServoForUpDown;
-static unsigned int g_servo_max;
-static unsigned int g_servo_min;
+
+// track the latest state of the pen
 static PenStateType PenState;
+
 static unsigned long NodeCount;
 static char Layer;
 static BOOL ButtonPushed;
 static BOOL UseAltPause;
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
+// Set TRUE to enable solenoid output for pen up/down
 BOOL gUseSolenoid;
+// Set TRUE to enable RC Servo output for pen up/down
+BOOL gUseRCPenServo;
 
 // ISR
 #pragma interrupt high_ISR
@@ -210,40 +166,29 @@ void high_ISR(void)
 		TMR1L = TIMER1_L_RELOAD;	// Set to 120 for 25KHz ISR fire
 		TMR1H = TIMER1_H_RELOAD;	//
 
-		OutByte = DirBits;
+		OutByte = CurrentCommand.DirBits;
 		TookStep = FALSE;
 		AllDone = TRUE;
 
-		if (Command == COMMAND_DELAY)
-		{
-			if (DelayCounter)
-			{
-				DelayCounter--;
-			}
-			if (DelayCounter)
-			{
-				AllDone = FALSE;
-			}
-		}
-		else if (Command == COMMAND_MOVE)
+        // Note, you don't even need a command to delay. Any command can have
+        // a delay associated with it, if DelayCounter is != 0.
+        if (CurrentCommand.DelayCounter)
+        {
+            CurrentCommand.DelayCounter--;
+        }
+        if (CurrentCommand.DelayCounter)
+        {
+            AllDone = FALSE;
+        }
+
+        else if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
 		{
 			// Only output DIR bits if we are actually doing something
-			if (StepsCounter[0] || StepsCounter[1] || StepsCounter[2] || StepsCounter[3])
-			{
-				// Always output direction bits early so they're ready when we step
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
+			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
+            {
 				if (UseBuiltInDrivers)
 				{
-					PORTB = DirBits;
-				}
-				else
-				{
-					PORTC = DirBits;
-				}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-				if (UseBuiltInDrivers)
-				{
-					if (DirBits & DIR1_BIT)
+					if (CurrentCommand.DirBits & DIR1_BIT)
 					{
 						Dir1IO = 1;
 					}
@@ -251,7 +196,7 @@ void high_ISR(void)
 					{
 						Dir1IO = 0;
 					}	
-					if (DirBits & DIR2_BIT)
+					if (CurrentCommand.DirBits & DIR2_BIT)
 					{
 						Dir2IO = 1;
 					}
@@ -262,7 +207,7 @@ void high_ISR(void)
 				}
 				else
 				{
-					if (DirBits & DIR1_BIT)
+					if (CurrentCommand.DirBits & DIR1_BIT)
 					{
 						Dir1AltIO = 1;
 					}
@@ -270,7 +215,7 @@ void high_ISR(void)
 					{
 						Dir1AltIO = 0;
 					}	
-					if (DirBits & DIR2_BIT)
+					if (CurrentCommand.DirBits & DIR2_BIT)
 					{
 						Dir2AltIO = 1;
 					}
@@ -279,72 +224,35 @@ void high_ISR(void)
 						Dir2AltIO = 0;
 					}	
 				}
-#endif
 
 				// Only do this if there are steps left to take
-				if (StepsCounter[0])
+				if (CurrentCommand.StepsCounter[0])
 				{
-					StepAcc[0] = StepAcc[0] + StepAdd[0];
+					StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
 					if (StepAcc[0] > 0x8000)
 					{
 						StepAcc[0] = StepAcc[0] - 0x8000;
 						OutByte = OutByte | STEP1_BIT;
 						TookStep = TRUE;
-						StepsCounter[0]--;
+						CurrentCommand.StepsCounter[0]--;
 					}
 					AllDone = FALSE;
 				}
-				if (StepsCounter[1])
+				if (CurrentCommand.StepsCounter[1])
 				{
-					StepAcc[1] = StepAcc[1] + StepAdd[1];
+					StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
 					if (StepAcc[1] > 0x8000)
 					{
 						StepAcc[1] = StepAcc[1] - 0x8000;
 						OutByte = OutByte | STEP2_BIT;
 						TookStep = TRUE;
-						StepsCounter[1]--;
+						CurrentCommand.StepsCounter[1]--;
 					}
 					AllDone = FALSE;
 				}
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-				if (StepsCounter[2])
-				{
-					StepAcc[2] = StepAcc[2] + StepAdd[2];
-					if (StepAcc[2] > 0x8000)
-					{
-						StepAcc[2] = StepAcc[2] - 0x8000;
-						OutByte = OutByte | STEP3_BIT;
-						TookStep = TRUE;
-						StepsCounter[2]--;
-					}
-					AllDone = FALSE;
-				}
-				if (StepsCounter[3])
-				{
-					StepAcc[3] = StepAcc[3] + StepAdd[3];
-					if (StepAcc[3] > 0x8000)
-					{
-						StepAcc[3] = StepAcc[3] - 0x8000;
-						OutByte = OutByte | STEP4_BIT;
-						TookStep = TRUE;
-						StepsCounter[3]--;
-					}
-					AllDone = FALSE;
-				}
-#endif	
 
 				if (TookStep)
 				{
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-					if (UseBuiltInDrivers)
-					{
-						PORTB = OutByte;
-					}
-					else
-					{
-						PORTC = OutByte;
-					}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 					if (UseBuiltInDrivers)
 					{
 						if (OutByte & STEP1_BIT)
@@ -367,7 +275,6 @@ void high_ISR(void)
 							Step2AltIO = 1;
 						}
 					}
-#endif
 					Delay1TCY();
 					Delay1TCY();
 					Delay1TCY();
@@ -395,16 +302,6 @@ void high_ISR(void)
 					Delay1TCY();
 					Delay1TCY();
 					Delay1TCY();
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-					if (UseBuiltInDrivers)
-					{
-						PORTB = DirBits;
-					}
-					else
-					{
-						PORTC = DirBits;
-					}
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 					if (UseBuiltInDrivers)
 					{
 						Step1IO = 0;
@@ -415,116 +312,93 @@ void high_ISR(void)
 						Step1AltIO = 0;
 						Step2AltIO = 0;
 					}
-#endif
 				}
 			}
 		}
-		// Check to see if we should change the state of the pen
-		else if (Command == COMMAND_PEN_UP)
+        // Check to see if we should change the state of the pen
+		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
 		{
-			if (gUseRCServo1)
-			{
-				g_RC_value[9] = g_servo_min;
-			}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			if (gUseRCServo2)
-			{
-				// This code below is the meat of the Process_S2() function
-				// We have to manually write it in here rather than calling
-				// the function because a real function inside the ISR 
-				// causes the compiler to generate enormous amounts of setup/teardown
-				// code and things run way too slowly.
-				// Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
-				gRC2Rate[0] = g_servo2_rate_up;
-				gRC2Target[0] = g_servo2_min;
-				gRC2Pin[0] = g_servo2_RPpin;
-				if (gRC2Value[0] == 0)
-				{
-					gRC2Value[0] = g_servo2_min;
-				}
-			}
-#endif
-            if (gUseSolenoid)
-			{
-				SolenoidState = SOLENOID_OFF;
-    			PenUpDownIO = 0;
-			}		
+            if (gUseRCPenServo)
+            {
+                // Precompute the channel, since we use it all over the place
+                UINT8 Channel = CurrentCommand.ServoChannel - 1;
 
-			if (DelayCounter)
-			{
-				DelayCounter--;
-			}
-			if (DelayCounter)
-			{
-				AllDone = FALSE;
-			}
-			PenState = PEN_UP;
-		}
-		else if (Command == COMMAND_PEN_DOWN)
-		{
-			if (gUseRCServo1)
-			{
-				g_RC_value[9] = g_servo_max;
-			}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			if (gUseRCServo2)
-			{
-				// This code below is the meat of the Process_S2() function
-				// We have to manually write it in here rather than calling
-				// the function because a real function inside the ISR 
-				// causes the compiler to generate enormous amounts of setup/teardown
-				// code and things run way too slowly.
-				// Process_S2(1, g_servo2_max, 4, g_servo2_rate_down);
-				gRC2Rate[0] = g_servo2_rate_down;
-				gRC2Target[0] = g_servo2_max;
-				gRC2Pin[0] = g_servo2_RPpin;
-				if (gRC2Value[0] == 0)
-				{
-					gRC2Value[0] = g_servo2_max;
-				}
-                gUseRCServo2 = TRUE;
-			}
-#endif
-			if (gUseSolenoid)
-			{
-				SolenoidState = SOLENOID_ON;
-    			PenUpDownIO = 1;
-			}
+                // This code below is the meat of the RCServo2_Move() function
+                // We have to manually write it in here rather than calling
+                // the function because a real function inside the ISR
+                // causes the compiler to generate enormous amounts of setup/teardown
+                // code and things run way too slowly.
 
-			if (DelayCounter)
-			{
-				DelayCounter--;
-			}
-			if (DelayCounter)
-			{
-				AllDone = FALSE;
-			}
-			PenState = PEN_DOWN;
-		}
-		else
-		{
-			
+                // If the user is trying to turn off this channel's RC servo output
+                if (0 == CurrentCommand.ServoPosition)
+                {
+                    // Turn off the PPS routing to the pin
+                    *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
+                    // Clear everything else out for this channel
+                    gRC2Rate[Channel] = 0;
+                    gRC2Target[Channel] = 0;
+                    gRC2RPn[Channel] = 0;
+                    gRC2Value[Channel] = 0;
+                }
+                else
+                {
+                    // Otherwise, set all of the values that start this RC servo moving
+                    gRC2Rate[Channel] = CurrentCommand.ServoRate;
+                    gRC2Target[Channel] = CurrentCommand.ServoPosition;
+                    gRC2RPn[Channel] = CurrentCommand.ServoRPn;
+                    if (gRC2Value[Channel] == 0)
+                    {
+                        gRC2Value[Channel] = CurrentCommand.ServoPosition;
+                    }
+                }
+            }
+            
+            // If this servo is the pen servo (on g_servo2_RPn)
+            if (CurrentCommand.ServoRPn == g_servo2_RPn)
+            {
+                // Then set its new state based on the new position
+                if (CurrentCommand.ServoPosition == g_servo2_min)
+                {
+                    PenState = PEN_UP;
+                    SolenoidState = SOLENOID_OFF;
+                    if (gUseSolenoid)
+                    {
+                        PenUpDownIO = 0;
+                    }
+                }
+                else
+                {
+                    PenState = PEN_DOWN;
+                    SolenoidState = SOLENOID_ON;
+                    if (gUseSolenoid)
+                    {
+                        PenUpDownIO = 1;
+                    }
+                }
+            }
 		}
 	
-		// Load the next move set in
+		// If we're done with our current command, load in the next one
 		if (AllDone)
 		{
-			Command = COMMAND_NONE;
-			if (NextReady)
+			CurrentCommand.Command = COMMAND_NONE;
+			if (!FIFOEmpty)
 			{
-				for (i=0; i<4; i++)
+                CurrentCommand = CommandFIFO[0];
+                /*
+				for (i = 0; i < NUMBER_OF_STEPPERS; i++)
 				{
-					StepAdd[i] = ToLoadStepAdd[i];
-					StepsCounter[i] = ToLoadStepsCounter[i];
+					StepAdd[i] = CommandFIFO[0].ToLoadStepAdd[i];
+					StepsCounter[i] = CommandFIFO[0].ToLoadStepsCounter[i];
 				}
-				DirBits = ToLoadDirBits;
-				Command = ToLoadCommand;
-				DelayCounter = ToLoadDelayCounter;
-				NextReady = FALSE;
+				DirBits = CommandFIFO[0].ToLoadDirBits;
+				Command = CommandFIFO[0].ToLoadCommand;
+				DelayCounter = CommandFIFO[0].ToLoadDelayCounter;
+                */
+				FIFOEmpty = TRUE;
 			}
 		}
 		
-
 		// Check for button being pushed
 		if (
 			(!swProgram)
@@ -532,11 +406,7 @@ void high_ISR(void)
 			(
 				UseAltPause
 				&&
-#if defined(BOARD_EBB_V11)
-				!PORTBbits.RB2		// For v1.1 hardware, use RB2 rather than RB0 for alt pause
-#else
 				!PORTBbits.RB0
-#endif
 			)
 		)
 		{
@@ -548,31 +418,15 @@ void high_ISR(void)
 // Init code
 void EBB_Init(void)
 {
-	StepAdd[0] = 1;
-	StepAdd[1] = 1;
-	StepAdd[2] = 1;
-	StepAdd[3] = 1;
-	StepsCounter[0] = 0;
-	StepsCounter[1] = 0;
-	StepsCounter[2] = 0;
-	StepsCounter[3] = 0;
-	NextReady = FALSE;
+    char i;
 
-#if defined(BOARD_EBB_V10)
-	// Allow access to our bits in T1CON
-	WDTCONbits.ADSHR = 0;
-#endif
+    for (i = 0; i < NUMBER_OF_STEPPERS; i++)
+    {
+        CurrentCommand.StepAdd[i] = 1;
+        CurrentCommand.StepsCounter[i] = 0;
+    }
+	FIFOEmpty = TRUE;
 
-#if defined(BOARD_EBB_V10) || defined(BOARD_UBW)
-	// Set up TMR1 for our 25KHz High ISR for stepping
-	T1CONbits.RD16 = 0; 	// Set 8 bit mode
-	T1CONbits.T1RUN = 0; 	// System clocked from other than T1
-	T1CONbits.T1CKPS1 = 1; 	// Use 1:4 Prescale value
-	T1CONbits.T1CKPS0 = 0;
-	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
-	T1CONbits.T1SYNC = 0;
-	T1CONbits.TMR1CS = 0; 	// Use Fosc/4 to clock timer
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	// Set up TMR1 for our 25KHz High ISR for stepping
 	T1CONbits.RD16 = 0; 	// Set 8 bit mode
 	T1CONbits.TMR1CS1 = 0; 	// System clocked from Fosc/4
@@ -581,7 +435,6 @@ void EBB_Init(void)
 	T1CONbits.T1CKPS0 = 0;
 	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
 	T1CONbits.T1SYNC = 0;
-#endif
 	TMR1L = TIMER1_L_RELOAD;	// Set to 120 for 25KHz ISR fire
 	TMR1H = TIMER1_H_RELOAD;	// 
 
@@ -592,78 +445,7 @@ void EBB_Init(void)
 	PIE1bits.TMR1IE = 1;	// Turn on the interrupt
 
 	// For debugging
-#if defined(BOARD_EBB_V10)
-	PORTA = 0;
-	TRISA = 0;
-	PORTB = 0;
-	TRISB = 0;
-	PORTC = 0;		// Start out low
-	TRISC = 0;		// Make portC
-	PORTD = 0;
-	TRISD = 0;
-	PORTE = 0x16;
-	TRISE = 0;
-	PORTF = 0xA4;
-	TRISF = 0x40;	// RF6 needs to be an input
-	PORTG = 0;
-	TRISG = 0;	
-	PORTH = 0;
-	TRISH = 0;
-	PORTJ = 0;
-	TRISJ = 0;
 
-	Enable1IO = ENABLE_MOTOR;
-	Enable1IO_TRIS = OUTPUT_PIN;
-	Enable2IO = ENABLE_MOTOR;
-	Enable2IO_TRIS = OUTPUT_PIN;
-	Enable3IO = ENABLE_MOTOR;
-	Enable3IO_TRIS = OUTPUT_PIN;
-	Enable4IO = ENABLE_MOTOR;
-	Enable4IO_TRIS = OUTPUT_PIN;
-
-	Sleep1IO = 1;
-	Sleep2IO = 1;
-	Sleep3IO = 1;
-	Sleep4IO = 1;
-
-	MS1_1IO = 1;
-	MS2_1IO = 1;
-	MS1_2IO = 1;
-	MS2_2IO = 1;
-	MS1_3IO = 1;
-	MS2_3IO = 1;
-	MS1_4IO = 1;
-	MS2_4IO = 1;
-
-#elif defined(BOARD_EBB_V11)
-	PORTA = 0;
-	TRISA = 0x81;	// Bit0 and Bit7 needs to be an input (RA0 is REF analog input)
-	PORTB = 0;
-	TRISB = 2;		// Bit1 is our StartDemo switch
-	INTCON2bits.RBPU = 0;	// Turn on weak-pull ups for port B
-	PORTC = 0;		// Start out low
-	TRISC = 0x80;	// Make portC output execpt for PortC bit 7, USB bus sense
-	PORTD = 0;
-	TRISD = 0;
-	PORTE = 0;
-	TRISE = 0;	
-	ANCON0 = 0xFE;	// Let AN0 (RA0) be an analog input
-	ANCON1 = 0x1F;	// Set all the rest to digital I/O
-
-	Enable1IO = ENABLE_MOTOR;
-	Enable2IO = ENABLE_MOTOR;
-	MS1_1IO = 1;
-	MS2_1IO = 1;
-	MS1_2IO	= 1;
-	MS2_2IO	= 1;
-	Sleep1IO = 1;	
-	Sleep2IO = 1;
-	Step1IO	= 0;
-	Dir1IO = 0;
-	Step2IO	= 0;	
-	Dir2IO = 0;	
-
-#elif defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 //	PORTA = 0;
 	RefRA0_IO_TRIS = INPUT_PIN;
 //	PORTB = 0;
@@ -698,22 +480,12 @@ void EBB_Init(void)
 	Dir2IO = 0;	
 	Dir2IO_TRIS = OUTPUT_PIN;
 
-#elif defined(BOARD_UBW)
-	PORTA = 0;
-	TRISA = 0;
-	PORTB = 0;
-	TRISB = 0;
-	PORTC = 0;		// Start out low
-	TRISC = 0;		// Make portC outputs
-#endif
-
 	// For bug in VUSB divider resistor, set RC7 as output and set high
 	// Wait a little while to charge up
 	// Then set back as an input
 	// The idea here is to get the schmidt trigger input RC7 high before
 	// we make it an input, thus getting it above the 2.65V ST threshold
 	// And allowing VUSB to keep the logic level on the pin high at 2.5V
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
     #if defined(USE_USB_BUS_SENSE_IO)
 	    tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
     	USB_BUS_SENSE = 1;
@@ -739,8 +511,8 @@ void EBB_Init(void)
 		tris_usb_bus_sense = INPUT_PIN;
 		USB_BUS_SENSE = 0;
 	#endif
-#endif
     gUseSolenoid = TRUE;
+    gUseRCPenServo = TRUE;
 
     // Set up pen up/down direction as output
     /// TODO: This should be different based upon the board type, right?
@@ -749,10 +521,6 @@ void EBB_Init(void)
 
 	SolenoidState = SOLENOID_ON;
 	UseBuiltInDrivers = TRUE;
-	gUseRCServo1 = FALSE;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-	gUseRCServo2 = TRUE;
-#endif
 	PenState = PEN_UP;
 	Layer = 0;
 	NodeCount = 0;
@@ -760,11 +528,7 @@ void EBB_Init(void)
 	// Default RB0 to be an input, with the pull-up enabled, for use as alternate
 	// PAUSE button (just like PRG)
 	// Except for v1.1 hardware, use RB2
-#if defined(BOARD_EBB_V11)
-	TRISBbits.TRISB2 = 1;
-#else
 	TRISBbits.TRISB0 = 1;
-#endif
 	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
 	UseAltPause = TRUE;
 
@@ -812,48 +576,31 @@ void parse_SC_packet (void)
 		return;
 	}
 
-	// Check for command to use servo rather than solenoid (we'll leave
-	// the solenoid on too)
+	// Check for command to select which (solenoid/servo) gets used for pen
 	if (Para1 == 1)
 	{
+        // Use just solenoid
 		if (Para2 == 0)
 		{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			gUseRCServo2 = FALSE;
-#endif
-			gUseRCServo1 = FALSE;
             gUseSolenoid = TRUE;
-			// Turn off RC Servo pulses on RB1
-			g_RC_value[9] = 0;
-		}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)					// NOTE: Only VBB V1.1 and above have this RC Servo option
+            gUseRCPenServo = FALSE;
+            // Turn off RC signal on Pen Servo output
+            RCServo2_Move(0, g_servo2_RPn, 0, 0);
+        }
+        // Use just RC servo
 		else if (Para2 == 1)
 		{
-			gUseRCServo1 = TRUE;
-			gUseRCServo2 = FALSE;
-			TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
-			
-			// We're going to do the work here of an 'RC' command, and set the RC servo to one
-			// of it limits.
-			// Store the new RC time value
-//			g_RC_value[9] = (65535 - (g_servo_min + 45));			
-			// Only set this state if we are off - if we are already running on 
-			// this pin, then the new value will be picked up next time around (19ms)
-			if (kOFF == g_RC_state[9])
-			{
-				g_RC_state[9] = kWAITING;
-			}
+            gUseSolenoid = FALSE;
+            gUseRCPenServo = TRUE;
 		}
+        // Use solenoid AND servo (default)
 		else
 		{
-			gUseRCServo1 = FALSE;
-			TRISBbits.TRISB1 = 0; 	// RB1 needs to be an output
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-			Process_S2(1, g_servo2_min, 4, g_servo2_rate_up);
-#endif
-			process_SP(PEN_UP, 0);			// Start servo up 
+            gUseSolenoid = TRUE;
+            gUseRCPenServo = TRUE;
 		}
-#endif
+        // Send a new command to set the state of the servo/solenoid
+		process_SP(PenState, 0);
 	}
 	// Check for command to switch between built-in drivers and external drivers
 	else if (Para1 == 2)
@@ -866,10 +613,8 @@ void parse_SC_packet (void)
 			Dir2AltIO_TRIS = 0;
 			Step1AltIO_TRIS = 0;
 			Step2AltIO_TRIS = 0;
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 			Enable1AltIO_TRIS = 0;
 			Enable2AltIO_TRIS = 0;
-#endif
 		}
 		else
 		{
@@ -879,78 +624,42 @@ void parse_SC_packet (void)
 	// Set <min_servo> for Servo2 method
 	else if (Para1 == 4)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_min = Para2;
-#endif
 	}
 	// Set <max_servo> for Servo2
 	else if (Para1 == 5)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_max = Para2;
-#endif
-	}
-	// Set <min_servo>
-	else if (Para1 == 6)
-	{
-		if (Para2 > MAX_RC_DURATION)
-		{
-			Para2 = MAX_RC_DURATION;
-		}
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-		g_servo_min = Para2;
-#endif
-	}
-	// Set <max_servo>
-	else if (Para1 == 7)
-	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-		if (Para2 > MAX_RC_DURATION)
-		{
-			Para2 = MAX_RC_DURATION;
-		}
-		g_servo_max = Para2;
-#endif
 	}
 	// Set <gRC2Slots>
 	else if (Para1 == 8)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		if (Para2 > MAX_RC2_SERVOS)
 		{
 			Para2 = MAX_RC2_SERVOS;
 		}
 		gRC2Slots = Para2;
-#endif
 	}
 	else if (Para1 == 9)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		if (Para2 > 6)
 		{
 			Para2 = 6;
 		}
 		gRC2SlotMS = Para2;
-#endif
 	}
 	else if (Para1 == 10)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_up = Para2;
 		g_servo2_rate_down = Para2;
-#endif
 	}
 	else if (Para1 == 11)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_up = Para2;
-#endif
 	}
 	else if (Para1 == 12)
 	{
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		g_servo2_rate_down = Para2;
-#endif
 	}
 	if (Para1 == 13)
 	{
@@ -963,29 +672,6 @@ void parse_SC_packet (void)
 			UseAltPause = FALSE;
 		}			
 	}
-    if (Para1 == 14)
-    {
-        if (Para2)
-        {
-            gUseSolenoid = TRUE;
-        }
-        else
-        {
-            gUseSolenoid = FALSE;
-        }
-
-        // Now set the state of the output pin to match pen state
-        if (PenState == PEN_UP)
-        {
-            SolenoidState = SOLENOID_OFF;
-            PenUpDownIO = 0;
-        }
-        else
-        {
-            SolenoidState = SOLENOID_ON;
-            PenUpDownIO = 1;
-        }
-    }
 	print_ack();
 }
 
@@ -1001,22 +687,18 @@ void parse_SC_packet (void)
 void parse_SM_packet (void)
 {
 	unsigned int Duration;
-	signed int A1Steps = 0, A2Steps = 0, A3Steps = 0, A4Steps = 0;
+	signed int A1Steps = 0, A2Steps = 0;
 
 	// Extract each of the values.
 	extract_number (kUINT, &Duration, kREQUIRED);
 	extract_number (kINT, &A1Steps, kREQUIRED);
 	extract_number (kINT, &A2Steps, kOPTIONAL);
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-	extract_number (kINT, &A3Steps, kOPTIONAL);
-	extract_number (kINT, &A4Steps, kOPTIONAL);
-#endif
 	// Bail if we got a conversion error
 	if (error_byte)
 	{
 		return;
 	}
-	process_SM(Duration, A1Steps, A2Steps, A3Steps, A4Steps);
+	process_SM(Duration, A1Steps, A2Steps);
 
 	print_ack();
 }
@@ -1024,114 +706,58 @@ void parse_SM_packet (void)
 static void process_SM(
 	unsigned int Duration, 
 	signed int A1Stp, 
-	signed int A2Stp, 
-	signed int A3Stp, 
-	signed int A4Stp
+	signed int A2Stp
 )
 {
 	// Trial: Spin here until there's space in the fifo
-	while(NextReady)
+	while(!FIFOEmpty)
 	;
 
 	// Check for delay
-	if (A1Stp == 0 && A2Stp == 0 && A3Stp == 0 && A4Stp == 0)
+	if (A1Stp == 0 && A2Stp == 0)
 	{
-		ToLoadCommand = COMMAND_DELAY;
-		ToLoadDelayCounter = 25 * Duration;
+		CommandFIFO[0].Command = COMMAND_DELAY;
+		CommandFIFO[0].DelayCounter = 25 * Duration;
 	}
 	else
 	{
-		ToLoadDelayCounter = 1;
-		ToLoadDirBits = 0;
+		CommandFIFO[0].DelayCounter = 1;
+		CommandFIFO[0].DirBits = 0;
 		
 		// Always enable both motors when we want to move them
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 		Enable1IO = ENABLE_MOTOR;
 		Enable2IO = ENABLE_MOTOR;
-#if defined(BOARD_EBB_V10)
-		Enable3IO = ENABLE_MOTOR;
-		Enable4IO = ENABLE_MOTOR;
-#endif
-#endif
 
 		// First, set the direction bits
 		if (A1Stp < 0)
 		{
-			ToLoadDirBits = ToLoadDirBits | DIR1_BIT;
+			CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR1_BIT;
 			A1Stp = -A1Stp;
 		}
 		if (A2Stp < 0)
 		{
-			ToLoadDirBits = ToLoadDirBits | DIR2_BIT;
+			CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
 			A2Stp = -A2Stp;
 		}
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-		if (A3Stp < 0)
-		{
-			ToLoadDirBits = ToLoadDirBits | DIR3_BIT;
-			A3Stp = -A3Stp;
-		}
-		if (A4Stp < 0)
-		{
-			ToLoadDirBits = ToLoadDirBits | DIR4_BIT;
-			A4Stp = -A4Stp;
-		}
-#endif	
-		// Range check Steps/Duration
-//		if (
-//			(A1Steps / Duration < 25)
-//			||
-//			(A2Steps / Duration < 25)
-//			||
-//			(A3Steps / Duration < 25)
-//			||
-//			(A4Steps / Duration < 25)
-//		)
-//		{
-//				bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
-//				return;			
-//		}	
-//		else
-//		{
-			// To compute StepAdd values from Duration,
-			ToLoadStepAdd[0] = (unsigned int)
-									(
-										((unsigned long)0x8000 * (unsigned long)A1Stp)
-										/
-										((unsigned long)25 * (unsigned long)Duration)
-									) + 1;
-			ToLoadStepsCounter[0] = A1Stp;
-			ToLoadStepAdd[1] = (unsigned int)
-									(
-										((unsigned long)0x8000 * (unsigned long)A2Stp)
-										/
-										((unsigned long)25 * (unsigned long)Duration)
-									) + 1;
-			ToLoadStepsCounter[1] = A2Stp;
-#if defined(BOARD_UBW) || defined(BOARD_EBB_V10)
-			ToLoadStepAdd[2] = (unsigned int)
-									(
-										((unsigned long)0x8000 * (unsigned long)A3Stp)
-										/
-										((unsigned long)25 * (unsigned long)Duration)
-									) + 1;
-			ToLoadStepsCounter[2] = A3Stp;
-			ToLoadStepAdd[3] = (unsigned int)
-									(
-										((unsigned long)0x8000 * (unsigned long)A4Stp)
-										/
-										((unsigned long)25 * (unsigned long)Duration)
-									) + 1;
-			ToLoadStepsCounter[3] = A4Stp;
-#endif
-			ToLoadCommand = COMMAND_MOVE;
-
-//printf("SA:%5d S:%4d SA:%5d S:%4d\n\r", ToLoadStepAdd[0], ToLoadStepsCounter[0], ToLoadStepAdd[1], ToLoadStepsCounter[1]);
-
-//		}
+        // To compute StepAdd values from Duration,
+        CommandFIFO[0].StepAdd[0] = (unsigned int)
+                                (
+                                    ((unsigned long)0x8000 * (unsigned long)A1Stp)
+                                    /
+                                    ((unsigned long)25 * (unsigned long)Duration)
+                                ) + 1;
+        CommandFIFO[0].StepsCounter[0] = A1Stp;
+        CommandFIFO[0].StepAdd[1] = (unsigned int)
+                                (
+                                    ((unsigned long)0x8000 * (unsigned long)A2Stp)
+                                    /
+                                    ((unsigned long)25 * (unsigned long)Duration)
+                                ) + 1;
+        CommandFIFO[0].StepsCounter[1] = A2Stp;
+        CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
 	}
 		
-	NextReady = TRUE;
+	FIFOEmpty = FALSE;
 
 }
 
@@ -1175,13 +801,30 @@ void parse_TP_packet(void)
 }
 
 // Set Pen
-// Usage: SP,<1,0>,<Duration>,<PortB_Pin><CR>
-// <PortB_Pin> is 0 to 7
+// Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
+// <State> is 0 (for down) or 1 (for up)
+// <Duration> is how long to wait (in milliseconds) before the next command
+//      in the motion control FIFO should start.
+// <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
+//      RC Servo output to different PortB pins.
+// This is a command that the user can send from the PC to set the pen state.
+// Note that there is only one pen RC servo output - if you use the <PortB_Pin>
+// parameter, then that new pin becomes the pen RC servo output. This command
+// does not allow for mulitple servo signals at the same time from port B pins.
+// Use the S2 command for that.
+//
+// This function will use the values for <serv_min>, <servo_max>,
+// <servo_rate_up> and <servo_rate_down> (SC,4 SC,5, SC,11, SC,10 commands)
+// when it schedules the servo command.
+// 
+// Internally, the parse_SP_packet() function makes a call to
+// process_SP() function to actually make the change in the servo output.
+//
 void parse_SP_packet(void)
 {
-	unsigned char State = 0;
-	unsigned short CommandDuration = 0;
-	unsigned char Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+	UINT8 State = 0;
+	UINT16 CommandDuration = 0;
+	UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
     ExtractReturnType Ret;
 
 	// Extract each of the values.
@@ -1195,50 +838,65 @@ void parse_SP_packet(void)
 		return;
 	}
 
+    // Error check
 	if (Pin > 7)
 	{
 		Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
 	}
+
+    if (State > 1)
+    {
+        State = 1;
+    }
+
     // Make sure that the selected pin we're going to use is an output
     // (This code only works for PortB - maybe expand it in the future for all ports.)
-    TRISB = TRISB & ~(1 << Pin);
-    // Add 3 to get from PORTB pin number to RPn number
-    g_servo2_RPpin = Pin + 3;
+//    TRISB = TRISB & ~(1 << Pin);
 
+    // Set the PRn of the Pen Servo output
+    // Add 3 to get from PORTB pin number to RPn number
+    if (g_servo2_RPn != (Pin + 3))
+    {
+        // if we are changing which pin the pen servo is on, we need to cancel
+        // the servo output on the old channel first
+        RCServo2_Move(0, g_servo2_RPn, 0, 0);
+        // Now record the new RPn
+        g_servo2_RPn = Pin + 3;
+    }
+
+    // Execute the servo state change
 	process_SP(State, CommandDuration);
 
 	print_ack();
 }
 
-void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
+// Interal use function -
+// Perform a state change on the pen RC servo output. Move it up or move it down
+// <NewState> is either PEN_UP or PEN_DOWN.
+// <CommandDuration> is the number of milliseconds to wait before executing the
+//      next command in the motion control FIFO
+//
+// This function uses the g_servo2_min, max, rate_up, rate_down variables
+// to schedule an RC Servo change with the RCServo2_Move() function.
+//
+void process_SP(PenStateType NewState, UINT16 CommandDuration)
 {	
-	// Trial: Spin here until there's space in the fifo
-	while(NextReady)
-	;
-
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-    gUseRCServo2 = TRUE;
-#endif
+    UINT16 Position;
+    UINT16 Rate;
 
 	if (NewState == PEN_UP)
 	{
-		ToLoadCommand = COMMAND_PEN_UP;
+        Position = g_servo2_max;
+        Rate = g_servo2_rate_up;
 	}
 	else
 	{
-		ToLoadCommand = COMMAND_PEN_DOWN;
+        Position = g_servo2_min;
+        Rate = g_servo2_rate_down;
 	}
-	ToLoadDelayCounter = CommandDuration * 25;
 
-    // For v2.1.5, found bug where if a pin is HIGH when we start doing
-    // RC output, the output is totally messed up. So make sure to set
-    // the pin low first.
-    // We actually should be doing this from the ISR, not here. However,
-    // we don't want a function call in the ISR, so we'll cheat a bit
-    // and take care of this before the command goes into effect in the ISR.
-    SetPinLATFromRPn(g_servo2_RPpin, 0);
-
-	NextReady = TRUE;	
+    // Now schedule the movement with the RCServo2 function
+    RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }
 
 // Enable Motor
@@ -1261,7 +919,6 @@ void process_SP(SolenoidStateType NewState, unsigned short CommandDuration)
 // driver chip)
 void parse_EM_packet(void)
 {
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	unsigned char EA1, EA2, EA3, EA4;
 	ExtractReturnType RetVal;
 
@@ -1279,7 +936,6 @@ void parse_EM_packet(void)
 			if (EA1 > 0)
 			{
 				Enable1IO = ENABLE_MOTOR;
-#if defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 				if (EA1 == 1)
 				{
 					MS1_IO = 1;
@@ -1310,28 +966,6 @@ void parse_EM_packet(void)
 					MS2_IO = 0;
 					MS3_IO = 0;
 				}				
-#else
-				if (EA1 == 1)
-				{
-					MS1_1IO = 1;
-					MS2_1IO = 1;
-				}
-				if (EA1 == 2)
-				{
-					MS1_1IO = 0;
-					MS2_1IO = 1;
-				}
-				if (EA1 == 3)
-				{
-					MS1_1IO = 1;
-					MS2_1IO = 0;
-				}
-				if (EA1 == 4)
-				{
-					MS1_1IO = 0;
-					MS2_1IO = 0;
-				}
-#endif
 			}
 			else
 			{
@@ -1364,29 +998,6 @@ void parse_EM_packet(void)
 			if (EA2 > 0)
 			{
 				Enable2IO = ENABLE_MOTOR;
-#if !(defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE))
-/// TODO: fix this based upon type of driver chip
-				if (EA2 == 1)
-				{
-					MS1_2IO = 1;
-					MS2_2IO = 1;
-				}
-				if (EA2 == 2)
-				{
-					MS1_2IO = 0;
-					MS2_2IO = 1;
-				}
-				if (EA2 == 3)
-				{
-					MS1_2IO = 1;
-					MS2_2IO = 0;
-				}
-				if (EA2 == 4)
-				{
-					MS1_2IO = 0;
-					MS2_2IO = 0;
-				}				
-#endif
 			}
 			else
 			{
@@ -1405,43 +1016,6 @@ void parse_EM_packet(void)
 			}
 		}
 	}
-#if defined(BOARD_EBB_V10)
-	RetVal = extract_number (kUCHAR, &EA3, kOPTIONAL);
-	if (kEXTRACT_OK == RetVal)
-	{
-		// Bail if we got a conversion error
-		if (error_byte)
-		{
-			return;
-		}
-		if (EA3 > 0)
-		{
-			Enable3IO = ENABLE_MOTOR;
-		}
-		else
-		{
-			Enable3IO = DISABLE_MOTOR;
-		}
-	}
-	RetVal = extract_number (kUCHAR, &EA4, kOPTIONAL);
-	if (kEXTRACT_OK == RetVal)
-	{
-		// Bail if we got a conversion error
-		if (error_byte)
-		{
-			return;
-		}
-		if (EA4 > 0)
-		{
-			Enable4IO = ENABLE_MOTOR;
-		}
-		else
-		{
-			Enable4IO = DISABLE_MOTOR;
-		}
-	}
-#endif
-#endif
 	print_ack();
 }
 
@@ -1616,8 +1190,8 @@ void parse_QC_packet(void)
 
 void parse_SE_packet(void)
 {
-	BYTE State = 0;
-	UINT Power = 1024;
+	UINT8 State = 0;
+	UINT16 Power = 1024;
 	
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
@@ -1698,5 +1272,5 @@ void parse_RM_packet(void)
 // and <MotorXStatus> is 0 (motor not executing a command) or 1 (motor executing a command)
 void parse_QM_packet(void)
 {
-	printf((far ROM char *)"QM,%i,%i,%i\n\r", NextReady, 0, 0);
+	printf((far ROM char *)"QM,%i,%i,%i\n\r", FIFOEmpty, 0, 0);
 }

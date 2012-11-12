@@ -23,15 +23,26 @@ LIBPATH .
 
 #FI
 
-#IFDEF _DEBUGCODESTART
-  CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
-  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		   PROTECTED
-  CODEPAGE   NAME=page       START=0x102A         END=_CODEEND
-  CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED
+#IFDEF USE_HID_BOOTLOADER
+    #IFDEF _DEBUGCODESTART
+      CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
+      CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		 PROTECTED
+      CODEPAGE   NAME=page       START=0x102A         END=_CODEEND
+      CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND       PROTECTED
+    #ELSE
+      CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
+      CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		 PROTECTED
+      CODEPAGE   NAME=page       START=0x102A         END=0xFFF7
+    #FI
 #ELSE
-  CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
-  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		   PROTECTED
-  CODEPAGE   NAME=page       START=0x102A               END=0xFFF7
+    #IFDEF _DEBUGCODESTART
+      CODEPAGE   NAME=vectors    START=0x0            END=0x29		     PROTECTED
+      CODEPAGE   NAME=page       START=0x2A           END=_CODEEND
+      CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND       PROTECTED
+    #ELSE
+      CODEPAGE   NAME=vectors    START=0x0            END=0x29		     PROTECTED
+      CODEPAGE   NAME=page       START=0x2A           END=0xFFF7
+    #FI
 #FI
 
 CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF         PROTECTED

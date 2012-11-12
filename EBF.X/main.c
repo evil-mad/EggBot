@@ -41,8 +41,10 @@
 #include "HardwareProfile.h"
 
 //****** REMOVE THESE LATER AFTER DEBUGGING IS DONE *****************
-#if 0
-   	 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
+#if defined (PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
+    #pragma config XINST = OFF          //Extended instruction set disabled
+#else
+     #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 2           //Divide by 2 (8 MHz internal oscillator)
      #pragma config STVREN = ON          //stack overflow/underflow reset enabled
      #pragma config XINST = OFF          //Extended instruction set disabled
@@ -71,7 +73,6 @@
 /** I N C L U D E S **********************************************************/
 
 #include "usb_config.h"
-
 #include "UBW.h"
 
 /** V A R I A B L E S ********************************************************/
@@ -79,12 +80,7 @@
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 static void InitializeSystem(void);
-//void ProcessIO(void);
 void USBDeviceTasks(void);
-//void YourHighPriorityISRCode();
-//void YourLowPriorityISRCode();
-//void BlinkUSBStatus(void);
-//void UserInit(void);
 
 
 /** VECTOR REMAPPING ***********************************************/
