@@ -188,18 +188,27 @@ dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFIL
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   rm18f46j50_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   rm18f46j50_g.lkr EBB_BL.X/dist/46J50/production/EBB_BL.X.production.hex
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"/C/MCC18/lib" -l"/C/Program Files/Microchip/mplabc18/v3.37.01/lib"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	@echo "Creating unified hex file"
+	@"C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/en_msgs.txt" dist/${CND_CONF}/${IMAGE_TYPE}/EBF.X.${IMAGE_TYPE}.hex EBB_BL.X/dist/46J50/production/EBB_BL.X.production.hex -odist/${CND_CONF}/production/EBF.X.production.unified.hex
+
 endif
 
 
 # Subprojects
 .build-subprojects:
+ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+	cd EBB_BL.X && ${MAKE} MAKE_OPTIONS=" -j 8" -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN
+else
+	cd EBB_BL.X && ${MAKE} MAKE_OPTIONS=" -j 8" -f Makefile CONF=46J50
+endif
 
 
 # Subprojects
 .clean-subprojects:
+	cd EBB_BL.X && rm -rf "build/46J50" "dist/46J50"
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}

@@ -1,0 +1,1223 @@
+MPLINK 4.34, Linker
+Linker Map File - Created Sat Feb 27 17:50:54 2010
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+               _entry_scn       code   0x000000    program   0x000024
+                   .cinit    romdata   0x00002a    program   0x000002
+  .code_Boot87J50Family.o       code   0x00002c    program   0x00037e
+       .code_usbctrltrf.o       code   0x0003aa    program   0x00037c
+             .code_usb9.o       code   0x000726    program   0x0002de
+           .code_usbdrv.o       code   0x000a04    program   0x00022a
+              .code_hid.o       code   0x000c2e    program   0x000208
+             .code_main.o       code   0x000e36    program   0x0000d6
+        .romdata_usbdsc.o    romdata   0x000f0c    program   0x0000c2
+                    .code       code   0x000fce    program   0x000020
+.romdata_Boot87J50Family.o    romdata   0x000fee    program   0x000000
+.idata_Boot87J50Family.o_i    romdata   0x000fee    program   0x000000
+          .code_usbmmap.o       code   0x000fee    program   0x000000
+       .romdata_usbmmap.o    romdata   0x000fee    program   0x000000
+       .idata_usbmmap.o_i    romdata   0x000fee    program   0x000000
+           .code_usbdsc.o       code   0x000fee    program   0x000000
+        .idata_usbdsc.o_i    romdata   0x000fee    program   0x000000
+        .romdata_usbdrv.o    romdata   0x000fee    program   0x000000
+        .idata_usbdrv.o_i    romdata   0x000fee    program   0x000000
+    .romdata_usbctrltrf.o    romdata   0x000fee    program   0x000000
+    .idata_usbctrltrf.o_i    romdata   0x000fee    program   0x000000
+          .romdata_usb9.o    romdata   0x000fee    program   0x000000
+          .idata_usb9.o_i    romdata   0x000fee    program   0x000000
+          .romdata_main.o    romdata   0x000fee    program   0x000000
+          .idata_main.o_i    romdata   0x000fee    program   0x000000
+           .romdata_hid.o    romdata   0x000fee    program   0x000000
+           .idata_hid.o_i    romdata   0x000fee    program   0x000000
+          user_app_vector       code   0x001000    program   0x000006
+     .config_1fff8_main.o    romdata   0x01fff8    program   0x000001
+     .config_1fff9_main.o    romdata   0x01fff9    program   0x000001
+     .config_1fffa_main.o    romdata   0x01fffa    program   0x000001
+     .config_1fffb_main.o    romdata   0x01fffb    program   0x000001
+     .config_1fffc_main.o    romdata   0x01fffc    program   0x000001
+     .config_1fffd_main.o    romdata   0x01fffd    program   0x000001
+                 .tmpdata      udata   0x000000       data   0x000003
+                MATH_DATA      udata   0x000003       data   0x000000
+ .udata_Boot87J50Family.o      udata   0x000100       data   0x0000ca
+      .udata_usbctrltrf.o      udata   0x0001ca       data   0x000009
+         .udata_usbmmap.o      udata   0x0001d3       data   0x000004
+            .udata_main.o      udata   0x0001d7       data   0x000004
+             .udata_hid.o      udata   0x0001db       data   0x000003
+          .udata_usbdrv.o      udata   0x0001de       data   0x000001
+ .idata_Boot87J50Family.o      idata   0x0001df       data   0x000000
+         .idata_usbmmap.o      idata   0x0001df       data   0x000000
+          .idata_usbdsc.o      idata   0x0001df       data   0x000000
+          .udata_usbdsc.o      udata   0x0001df       data   0x000000
+          .idata_usbdrv.o      idata   0x0001df       data   0x000000
+      .idata_usbctrltrf.o      idata   0x0001df       data   0x000000
+            .idata_usb9.o      idata   0x0001df       data   0x000000
+            .udata_usb9.o      udata   0x0001df       data   0x000000
+            .idata_main.o      idata   0x0001df       data   0x000000
+             .idata_hid.o      idata   0x0001df       data   0x000000
+                  usbram4      udata   0x000400       data   0x0000a0
+                   .stack      udata   0x000d00       data   0x000100
+              SFR_BANKED0      udata   0x000f40       data   0x000020
+            SFR_UNBANKED0      udata   0x000f60       data   0x0000a0
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000023      
+                            0x00002a    0x000fed      
+                            0x001000    0x001005      
+                            0x01fff8    0x01fffd      
+            4084 out of 131072 program addresses used, program memory utilization is 3%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+           BlinkUSBStatus   0x000ecc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+             BootAppStart   0x00001c    program     static                          
+         BootEntryIOCheck   0x00000c    program     static                          
+          ClassReqHandler   0x000fcc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+               ClearArray   0x000c04    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+               EraseFlash   0x0002ca    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+      HIDGetReportHandler   0x000d14    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                HIDInitEP   0x000d18    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              HIDRxReport   0x000db8    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+      HIDSetReportHandler   0x000d16    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              HIDTxReport   0x000d44    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+         InitializeSystem   0x000e5e    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                LongDelay   0x000378    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                     Main   0x000e36    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                ProcessIO   0x000048    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        USBCheckBusStatus   0x000a04    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+       USBCheckHIDRequest   0x000c2e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+       USBCheckStdRequest   0x000726    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+         USBCtrlEPService   0x0003aa    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+ USBCtrlEPServiceComplete   0x000692    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004e4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004aa    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfRxService   0x000618    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+   USBCtrlTrfSetupHandler   0x000438    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfTxService   0x00052e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+         USBDriverService   0x000a44    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+         USBModuleDisable   0x000a34    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+          USBModuleEnable   0x000a24    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+USBPrepareForNextSetupTrf   0x00071c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+  USBProtocolResetHandler   0x000b9c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+            USBSoftDetach   0x000a40    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+          USBStallHandler   0x000b78    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+  USBStdFeatureReqHandler   0x00096a    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+      USBStdGetDscHandler   0x0007dc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+   USBStdGetStatusHandler   0x0008d8    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+      USBStdSetCfgHandler   0x00088a    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+               USBSuspend   0x000ac4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+                 USBTasks   0x000ec4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+       USBWakeFromSuspend   0x000b68    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+               USB_CD_Ptr   0x000fc2    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+               USB_SD_Ptr   0x000fc6    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                 UserInit   0x00002c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+       WriteFlashSubBlock   0x0002f2    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+       ___case_2_lbl00008   0x0000be    program     static                          
+       ___case_3_lbl00011   0x000144    program     static                          
+       ___case_4_lbl00015   0x000176    program     static                          
+       ___case_5_lbl00022   0x00019a    program     static                          
+       ___case_6_lbl00023   0x000236    program     static                          
+       ___case_7_lbl00028   0x000246    program     static                          
+       ___case_8_lbl00029   0x0002b6    program     static                          
+         ___else_lbl00010   0x00015e    program     static                          
+         ___else_lbl00031   0x000096    program     static                          
+          ___for_lbl00002   0x000090    program     static                          
+          ___for_lbl00003   0x000094    program     static                          
+          ___for_lbl00004   0x00007c    program     static                          
+          ___for_lbl00012   0x00018e    program     static                          
+          ___for_lbl00013   0x000194    program     static                          
+          ___for_lbl00014   0x00017c    program     static                          
+          ___for_lbl00017   0x00022c    program     static                          
+          ___for_lbl00018   0x000230    program     static                          
+          ___for_lbl00020   0x0001de    program     static                          
+          ___for_lbl00024   0x000290    program     static                          
+          ___for_lbl00025   0x000294    program     static                          
+          ___for_lbl00026   0x00026e    program     static                          
+          ___for_lbl00037   0x00039c    program     static                          
+          ___for_lbl00038   0x0003a0    program     static                          
+          ___for_lbl00041   0x000384    program     static                          
+           ___if_lbl00005   0x000094    program     static                          
+           ___if_lbl00005   0x000e5a    program     static                          
+           ___if_lbl00007   0x000142    program     static                          
+           ___if_lbl00009   0x000e94    program     static                          
+           ___if_lbl00009   0x000170    program     static                          
+           ___if_lbl00016   0x0001ba    program     static                          
+           ___if_lbl00019   0x00022c    program     static                          
+           ___if_lbl00021   0x000230    program     static                          
+           ___if_lbl00027   0x0002b4    program     static                          
+           ___if_lbl00030   0x0002c0    program     static                          
+       ___return_lbl00000   0x000022    program     static                          
+       ___return_lbl00001   0x0002c0    program     static                          
+       ___return_lbl00001   0x000e5c    program     static                          
+       ___return_lbl00006   0x000ec2    program     static                          
+       ___return_lbl00016   0x001004    program     static                          
+       ___return_lbl00029   0x000b54    program     static                          
+       ___return_lbl00032   0x0002f0    program     static                          
+       ___return_lbl00033   0x00036e    program     static                          
+       ___return_lbl00036   0x0003a0    program     static                          
+       ___return_lbl00042   0x000c02    program     static                          
+       ___return_lbl00045   0x000c26    program     static                          
+   ___switchexit_lbl00006   0x0002c0    program     static                          
+        ___while_lbl00002   0x000e42    program     static                          
+        ___while_lbl00003   0x000e5c    program     static                          
+        ___while_lbl00007   0x000e6e    program     static                          
+        ___while_lbl00008   0x000e88    program     static                          
+        ___while_lbl00030   0x000b00    program     static                          
+        ___while_lbl00031   0x000b10    program     static                          
+        ___while_lbl00033   0x000b3a    program     static                          
+        ___while_lbl00034   0x000b54    program     static                          
+        ___while_lbl00034   0x0002fe    program     static                          
+        ___while_lbl00035   0x00036c    program     static                          
+        ___while_lbl00039   0x00038c    program     static                          
+        ___while_lbl00040   0x00039c    program     static                          
+        ___while_lbl00043   0x000bca    program     static                          
+        ___while_lbl00044   0x000bd8    program     static                          
+        ___while_lbl00046   0x000c18    program     static                          
+        ___while_lbl00047   0x000c26    program     static                          
+               __config_0   0x01fff8    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_1   0x01fff9    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_2   0x01fffa    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_3   0x01fffb    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_4   0x01fffc    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_5   0x01fffd    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __tmplbl_0   0x0001ac    program     static                          
+               __tmplbl_0   0x000e56    program     static                          
+               __tmplbl_1   0x000e50    program     static                          
+               __tmplbl_1   0x0001da    program     static                          
+              __tmplbl_10   0x000b0c    program     static                          
+              __tmplbl_11   0x000b06    program     static                          
+            __zero_memory   0x000fce    program     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   _entry   0x000000    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                    cfg01   0x000f1e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                compare_l   0x000fe4    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+               device_dsc   0x000f0c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                hid_rpt01   0x000fa5    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                   loop_h   0x000fdc    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   loop_l   0x000fe6    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    sd000   0x000f47    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    sd001   0x000f4b    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    sd002   0x000f7f    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                  userApp   0x001000    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               zero_block   0x000fdc    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ADCON1bits   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    ADRES   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADRESH   0x000fc4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADRESL   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ANCON0   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ANCON0bits   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ANCON1   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ANCON1bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  BAUDCON   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 BAUDCON1   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             BAUDCON1bits   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 BAUDCON2   0x000f7c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             BAUDCON2bits   0x000f7c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              BAUDCONbits   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      BSR   0x000fe0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                BootState   0x000184       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        BufferedDataIndex   0x0001c6       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                  CCP1CON   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP1CONbits   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP2CON   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP2CONbits   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP3CON   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP3CONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP4CON   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP4CONbits   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP5CON   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP5CONbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR1   0x000fbc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR1H   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR1L   0x000fbc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR2   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR2H   0x000fb8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR2L   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR3   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR3H   0x000fb3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR3L   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR4   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR4H   0x000f75       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR4L   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR5   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR5H   0x000f72       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR5L   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CM1CON   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CM1CON1   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CM1CON1bits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CM1CONbits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CM2CON   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CM2CON1   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CM2CON1bits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CM2CONbits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CMSTAT   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 CMSTATUS   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             CMSTATUSbits   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CMSTATbits   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CVRCON   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CVRCONbits   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CtrlTrfData   0x000418       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                     DDRA   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRAbits   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRB   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRBbits   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRC   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRCbits   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRD   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRDbits   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRE   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDREbits   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRF   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRFbits   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRG   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRGbits   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRH   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRHbits   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRJ   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRJbits   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP1AS   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP1ASbits   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP1CON   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP1CONbits   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP1DEL   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP1DELbits   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP2AS   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP2ASbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP2CON   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP2CONbits   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP2DEL   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP2DELbits   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP3AS   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP3ASbits   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP3CON   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP3CONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP3DEL   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP3DELbits   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   EECON1   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               EECON1bits   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   EECON2   0x000fa7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+         ErasePageTracker   0x000185       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                     FSR0   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR0H   0x000fea       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR0L   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     FSR1   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR1H   0x000fe2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR1L   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     FSR2   0x000fd9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR2H   0x000fda       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR2L   0x000fd9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF0   0x000fef       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF1   0x000fe7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF2   0x000fdf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   INTCON   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  INTCON2   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              INTCON2bits   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  INTCON3   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              INTCON3bits   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               INTCONbits   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR1   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR1bits   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR2   0x000fa2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR2bits   0x000fa2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR3   0x000fa5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR3bits   0x000fa5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATA   0x000f89       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATAbits   0x000f89       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATB   0x000f8a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATBbits   0x000f8a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATC   0x000f8b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATCbits   0x000f8b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATD   0x000f8c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATDbits   0x000f8c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATE   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATEbits   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATF   0x000f8e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATFbits   0x000f8e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATG   0x000f8f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATGbits   0x000f8f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATH   0x000f90       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATHbits   0x000f90       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATJ   0x000f91       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATJbits   0x000f91       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   MEMCON   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               MEMCONbits   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+           MaxPageToErase   0x000100       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                   ODCON1   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON1bits   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ODCON2   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON2bits   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ODCON3   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON3bits   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   OSCCON   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               OSCCONbits   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  OSCTUNE   0x000f9b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              OSCTUNEbits   0x000f9b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PADCFG1   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PADCFG1bits   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                       PC   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PCL   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PCLATH   0x000ffa       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PCLATU   0x000ffb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE1   0x000f9d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE1bits   0x000f9d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE2   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE2bits   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE3   0x000fa3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE3bits   0x000fa3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR1   0x000f9e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR1bits   0x000f9e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR2   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR2bits   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR3   0x000fa4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR3bits   0x000fa4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW0   0x000feb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW1   0x000fe3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW2   0x000fdb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMADDR   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMADDRH   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMADDRHbits   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMADDRL   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PMCON   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMCONH   0x000f4b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               PMCONHbits   0x000f4b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMCONL   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               PMCONLbits   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMDIN1   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN1H   0x000f67       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN1L   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMDIN2   0x000f44       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN2H   0x000f45       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN2L   0x000f44       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDOUT1   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT1H   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT1L   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDOUT2   0x000f46       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT2H   0x000f47       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT2L   0x000f46       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEH   0x000f43       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMEHbits   0x000f43       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEL   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMELbits   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEN   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMMODE   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMMODEH   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMMODEHbits   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMMODEL   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMMODELbits   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMSTAT   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMSTATH   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMSTATHbits   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMSTATL   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMSTATLbits   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTA   0x000f80       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTAbits   0x000f80       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTB   0x000f81       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTBbits   0x000f81       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTC   0x000f82       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTCbits   0x000f82       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTD   0x000f83       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTDbits   0x000f83       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTE   0x000f84       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTEbits   0x000f84       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTF   0x000f85       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTFbits   0x000f85       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTG   0x000f86       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTGbits   0x000f86       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTH   0x000f87       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTHbits   0x000f87       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTJ   0x000f88       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTJbits   0x000f88       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC0   0x000fed       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC1   0x000fe5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC2   0x000fdd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC0   0x000fee       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC1   0x000fe6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC2   0x000fde       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PR2   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PR4   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC0   0x000fec       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC1   0x000fe4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC2   0x000fdc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PROD   0x000ff3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PRODH   0x000ff4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PRODL   0x000ff3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             PacketFromPC   0x000104       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+               PacketToPC   0x000144       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+    ProgramMemStopAddress   0x000101       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        ProgrammedPointer   0x0001c7       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        ProgrammingBuffer   0x000186       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                     RCON   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 RCONbits   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    RCREG   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCREG1   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCREG2   0x000faa       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    RCSTA   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCSTA1   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               RCSTA1bits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCSTA2   0x000f9c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               RCSTA2bits   0x000f9c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                RCSTAbits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  REFOCON   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              REFOCONbits   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    SPBRG   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRG1   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRG2   0x000fab       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRGH   0x000f7f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SPBRGH1   0x000f7f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SPBRGH2   0x000f7d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1ADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1BUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1CON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1CON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1CON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1CON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1MSK   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1STAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1STATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2ADD   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2BUF   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2CON1   0x000f6c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2CON1bits   0x000f6c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2CON2   0x000f6b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2CON2bits   0x000f6b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2MSK   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSP2MSKbits   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2STAT   0x000f6d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2STATbits   0x000f6d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SSPADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SSPBUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPCON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPCON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPCON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPCON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPSTAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPSTATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   STATUS   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               STATUSbits   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   STKPTR   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               STKPTRbits   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SetupPkt   0x000410       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    T0CON   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T0CONbits   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T1CON   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T1CONbits   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T2CON   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T2CONbits   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T3CON   0x000f79       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T3CONbits   0x000f79       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T4CON   0x000f76       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T4CONbits   0x000f76       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TABLAT   0x000ff5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TBLPTR   0x000ff6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRH   0x000ff7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRL   0x000ff6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRU   0x000ff8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR0H   0x000fd7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR0L   0x000fd6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR1H   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR1L   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TMR2   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR3H   0x000f7b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR3L   0x000f7a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TMR4   0x000f78       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      TOS   0x000ffd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSH   0x000ffe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSL   0x000ffd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSU   0x000fff       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISA   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISAbits   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISB   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISBbits   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISC   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISCbits   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISD   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISDbits   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISE   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISEbits   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISF   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISFbits   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISG   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISGbits   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISH   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISHbits   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISJ   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISJbits   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TXREG   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXREG1   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXREG2   0x000fa9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TXSTA   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXSTA1   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               TXSTA1bits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXSTA2   0x000fa8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               TXSTA2bits   0x000fa8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TXSTAbits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UADDR   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UADDRbits   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UCFG   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UCFGbits   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UCON   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UCONbits   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEIE   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEIEbits   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEIR   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEIRbits   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP0   0x000f4c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP0bits   0x000f4c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP1   0x000f4d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP10   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP10bits   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP11   0x000f57       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP11bits   0x000f57       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP12   0x000f58       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP12bits   0x000f58       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP13   0x000f59       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP13bits   0x000f59       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP14   0x000f5a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP14bits   0x000f5a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP15   0x000f5b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP15bits   0x000f5b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP1bits   0x000f4d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP2   0x000f4e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP2bits   0x000f4e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP3   0x000f4f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP3bits   0x000f4f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP4   0x000f50       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP4bits   0x000f50       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP5   0x000f51       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP5bits   0x000f51       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP6   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP6bits   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP7   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP7bits   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP8   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP8bits   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP9   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP9bits   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UFRM   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UFRMH   0x000f61       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UFRMHbits   0x000f61       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UFRML   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UFRMLbits   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      UIE   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  UIEbits   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      UIR   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  UIRbits   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    USTAT   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                USTATbits   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   WDTCON   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               WDTCONbits   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     WREG   0x000fe8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+          active_protocol   0x0001dc       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              bTRNIFCount   0x0001de       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+   ctrl_trf_session_owner   0x0001cb       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+           ctrl_trf_state   0x0001ca       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+                    ep0Bi   0x000404       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep0Bo   0x000400       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep1Bi   0x00040c       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep1Bo   0x000408       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+            hid_report_in   0x000460       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+           hid_report_out   0x000420       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+           hid_rpt_rx_len   0x0001dd       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                idle_rate   0x0001db       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                led_count   0x0001d7       data     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                     pDst   0x0001ce       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+                     pSrc   0x0001cc       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      pll_startup_counter   0x0001d9       data     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+         short_pkt_status   0x0001d2       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+           usb_active_cfg   0x0001d5       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+             usb_alt_intf   0x0001d6       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+         usb_device_state   0x0001d3       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                 usb_stat   0x0001d4       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                   wCount   0x0001d0       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                   _entry   0x000000    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+         BootEntryIOCheck   0x00000c    program     static                          
+             BootAppStart   0x00001c    program     static                          
+       ___return_lbl00000   0x000022    program     static                          
+                 UserInit   0x00002c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                ProcessIO   0x000048    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+          ___for_lbl00004   0x00007c    program     static                          
+          ___for_lbl00002   0x000090    program     static                          
+           ___if_lbl00005   0x000094    program     static                          
+          ___for_lbl00003   0x000094    program     static                          
+         ___else_lbl00031   0x000096    program     static                          
+       ___case_2_lbl00008   0x0000be    program     static                          
+           ___if_lbl00007   0x000142    program     static                          
+       ___case_3_lbl00011   0x000144    program     static                          
+         ___else_lbl00010   0x00015e    program     static                          
+           ___if_lbl00009   0x000170    program     static                          
+       ___case_4_lbl00015   0x000176    program     static                          
+          ___for_lbl00014   0x00017c    program     static                          
+          ___for_lbl00012   0x00018e    program     static                          
+          ___for_lbl00013   0x000194    program     static                          
+       ___case_5_lbl00022   0x00019a    program     static                          
+               __tmplbl_0   0x0001ac    program     static                          
+           ___if_lbl00016   0x0001ba    program     static                          
+               __tmplbl_1   0x0001da    program     static                          
+          ___for_lbl00020   0x0001de    program     static                          
+          ___for_lbl00017   0x00022c    program     static                          
+           ___if_lbl00019   0x00022c    program     static                          
+          ___for_lbl00018   0x000230    program     static                          
+           ___if_lbl00021   0x000230    program     static                          
+       ___case_6_lbl00023   0x000236    program     static                          
+       ___case_7_lbl00028   0x000246    program     static                          
+          ___for_lbl00026   0x00026e    program     static                          
+          ___for_lbl00024   0x000290    program     static                          
+          ___for_lbl00025   0x000294    program     static                          
+           ___if_lbl00027   0x0002b4    program     static                          
+       ___case_8_lbl00029   0x0002b6    program     static                          
+       ___return_lbl00001   0x0002c0    program     static                          
+           ___if_lbl00030   0x0002c0    program     static                          
+   ___switchexit_lbl00006   0x0002c0    program     static                          
+               EraseFlash   0x0002ca    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+       ___return_lbl00032   0x0002f0    program     static                          
+       WriteFlashSubBlock   0x0002f2    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        ___while_lbl00034   0x0002fe    program     static                          
+        ___while_lbl00035   0x00036c    program     static                          
+       ___return_lbl00033   0x00036e    program     static                          
+                LongDelay   0x000378    program     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+          ___for_lbl00041   0x000384    program     static                          
+        ___while_lbl00039   0x00038c    program     static                          
+          ___for_lbl00037   0x00039c    program     static                          
+        ___while_lbl00040   0x00039c    program     static                          
+          ___for_lbl00038   0x0003a0    program     static                          
+       ___return_lbl00036   0x0003a0    program     static                          
+         USBCtrlEPService   0x0003aa    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+   USBCtrlTrfSetupHandler   0x000438    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004aa    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004e4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfTxService   0x00052e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+      USBCtrlTrfRxService   0x000618    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+ USBCtrlEPServiceComplete   0x000692    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+USBPrepareForNextSetupTrf   0x00071c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+       USBCheckStdRequest   0x000726    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+      USBStdGetDscHandler   0x0007dc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+      USBStdSetCfgHandler   0x00088a    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+   USBStdGetStatusHandler   0x0008d8    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+  USBStdFeatureReqHandler   0x00096a    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+        USBCheckBusStatus   0x000a04    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+          USBModuleEnable   0x000a24    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+         USBModuleDisable   0x000a34    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+            USBSoftDetach   0x000a40    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+         USBDriverService   0x000a44    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+               USBSuspend   0x000ac4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+        ___while_lbl00030   0x000b00    program     static                          
+              __tmplbl_11   0x000b06    program     static                          
+              __tmplbl_10   0x000b0c    program     static                          
+        ___while_lbl00031   0x000b10    program     static                          
+        ___while_lbl00033   0x000b3a    program     static                          
+        ___while_lbl00034   0x000b54    program     static                          
+       ___return_lbl00029   0x000b54    program     static                          
+       USBWakeFromSuspend   0x000b68    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+          USBStallHandler   0x000b78    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+  USBProtocolResetHandler   0x000b9c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+        ___while_lbl00043   0x000bca    program     static                          
+        ___while_lbl00044   0x000bd8    program     static                          
+       ___return_lbl00042   0x000c02    program     static                          
+               ClearArray   0x000c04    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+        ___while_lbl00046   0x000c18    program     static                          
+        ___while_lbl00047   0x000c26    program     static                          
+       ___return_lbl00045   0x000c26    program     static                          
+       USBCheckHIDRequest   0x000c2e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+      HIDGetReportHandler   0x000d14    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+      HIDSetReportHandler   0x000d16    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                HIDInitEP   0x000d18    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              HIDTxReport   0x000d44    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              HIDRxReport   0x000db8    program     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                     Main   0x000e36    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+        ___while_lbl00002   0x000e42    program     static                          
+               __tmplbl_1   0x000e50    program     static                          
+               __tmplbl_0   0x000e56    program     static                          
+           ___if_lbl00005   0x000e5a    program     static                          
+        ___while_lbl00003   0x000e5c    program     static                          
+       ___return_lbl00001   0x000e5c    program     static                          
+         InitializeSystem   0x000e5e    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+        ___while_lbl00007   0x000e6e    program     static                          
+        ___while_lbl00008   0x000e88    program     static                          
+           ___if_lbl00009   0x000e94    program     static                          
+       ___return_lbl00006   0x000ec2    program     static                          
+                 USBTasks   0x000ec4    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+           BlinkUSBStatus   0x000ecc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               device_dsc   0x000f0c    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    cfg01   0x000f1e    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    sd000   0x000f47    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    sd001   0x000f4b    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                    sd002   0x000f7f    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+                hid_rpt01   0x000fa5    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+               USB_CD_Ptr   0x000fc2    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+               USB_SD_Ptr   0x000fc6    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+          ClassReqHandler   0x000fcc    program     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdsc.c
+            __zero_memory   0x000fce    program     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               zero_block   0x000fdc    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   loop_h   0x000fdc    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                compare_l   0x000fe4    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   loop_l   0x000fe6    program     static C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  userApp   0x001000    program     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+       ___return_lbl00016   0x001004    program     static                          
+               __config_0   0x01fff8    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_1   0x01fff9    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_2   0x01fffa    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_3   0x01fffb    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_4   0x01fffc    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+               __config_5   0x01fffd    program     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usb9.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                  __tmp_0   0x000000       data     static D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+           MaxPageToErase   0x000100       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+    ProgramMemStopAddress   0x000101       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+             PacketFromPC   0x000104       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+               PacketToPC   0x000144       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+                BootState   0x000184       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+         ErasePageTracker   0x000185       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        ProgrammingBuffer   0x000186       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        BufferedDataIndex   0x0001c6       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+        ProgrammedPointer   0x0001c7       data     extern D:\Projects\EggBot\SE\EBBv11_BL\Boot87J50Family.c
+           ctrl_trf_state   0x0001ca       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+   ctrl_trf_session_owner   0x0001cb       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+                     pSrc   0x0001cc       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+                     pDst   0x0001ce       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+                   wCount   0x0001d0       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+         short_pkt_status   0x0001d2       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbctrltrf.c
+         usb_device_state   0x0001d3       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                 usb_stat   0x0001d4       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+           usb_active_cfg   0x0001d5       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+             usb_alt_intf   0x0001d6       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                led_count   0x0001d7       data     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+      pll_startup_counter   0x0001d9       data     extern D:\Projects\EggBot\SE\EBBv11_BL\main.c
+                idle_rate   0x0001db       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+          active_protocol   0x0001dc       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+           hid_rpt_rx_len   0x0001dd       data     extern D:\Projects\EggBot\SE\EBBv11_BL\hid.c
+              bTRNIFCount   0x0001de       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbdrv.c
+                    ep0Bo   0x000400       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep0Bi   0x000404       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep1Bo   0x000408       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                    ep1Bi   0x00040c       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                 SetupPkt   0x000410       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+              CtrlTrfData   0x000418       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+           hid_report_out   0x000420       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+            hid_report_in   0x000460       data     extern D:\Projects\EggBot\SE\EBBv11_BL\usbmmap.c
+                  PMSTATL   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMSTATLbits   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMSTAT   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMSTATHbits   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMSTATH   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEN   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMELbits   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEL   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PMEH   0x000f43       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMEHbits   0x000f43       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN2L   0x000f44       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMDIN2   0x000f44       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN2H   0x000f45       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT2L   0x000f46       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDOUT2   0x000f46       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT2H   0x000f47       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMMODEL   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMMODELbits   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMMODE   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMMODEHbits   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMMODEH   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               PMCONLbits   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMCONL   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PMCON   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMCONH   0x000f4b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               PMCONHbits   0x000f4b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP0bits   0x000f4c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP0   0x000f4c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP1bits   0x000f4d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP1   0x000f4d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP2bits   0x000f4e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP2   0x000f4e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP3bits   0x000f4f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP3   0x000f4f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP4bits   0x000f50       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP4   0x000f50       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP5bits   0x000f51       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP5   0x000f51       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP6bits   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP6   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP7bits   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP7   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP8   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP8bits   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEP9   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEP9bits   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP10   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP10bits   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP11   0x000f57       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP11bits   0x000f57       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP12   0x000f58       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP12bits   0x000f58       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP13   0x000f59       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP13bits   0x000f59       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP14   0x000f5a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP14bits   0x000f5a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UEP15bits   0x000f5b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UEP15   0x000f5b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      UIE   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  UIEbits   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEIEbits   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEIE   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UADDRbits   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UADDR   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UCFGbits   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UCFG   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UFRML   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UFRMLbits   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UFRM   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    UFRMH   0x000f61       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                UFRMHbits   0x000f61       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      UIR   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  UIRbits   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UEIRbits   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UEIR   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    USTAT   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                USTATbits   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     UCON   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 UCONbits   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN1L   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMDIN1   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDIN1H   0x000f67       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT1L   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMDOUT1   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PMADDR   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMADDRL   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PMDOUT1H   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PMADDRH   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PMADDRHbits   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CMSTAT   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 CMSTATUS   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             CMSTATUSbits   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CMSTATbits   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2CON2bits   0x000f6b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2CON2   0x000f6b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2CON1bits   0x000f6c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2CON1   0x000f6c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP2STATbits   0x000f6d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP2STAT   0x000f6d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2MSK   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2ADD   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSP2MSKbits   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP2BUF   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP5CONbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP5CON   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR5L   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR5   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR5H   0x000f72       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP4CONbits   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP4CON   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR4   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR4L   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR4H   0x000f75       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T4CON   0x000f76       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T4CONbits   0x000f76       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PR4   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CVRCON   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CVRCONbits   0x000f77       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TMR4   0x000f78       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T3CON   0x000f79       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T3CONbits   0x000f79       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR3L   0x000f7a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR3H   0x000f7b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 BAUDCON2   0x000f7c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             BAUDCON2bits   0x000f7c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SPBRGH2   0x000f7d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  BAUDCON   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 BAUDCON1   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             BAUDCON1bits   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              BAUDCONbits   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRGH   0x000f7f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SPBRGH1   0x000f7f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTAbits   0x000f80       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTA   0x000f80       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTBbits   0x000f81       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTB   0x000f81       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTCbits   0x000f82       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTC   0x000f82       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTDbits   0x000f83       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTD   0x000f83       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTE   0x000f84       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTEbits   0x000f84       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTF   0x000f85       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTFbits   0x000f85       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTGbits   0x000f86       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTG   0x000f86       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTHbits   0x000f87       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTH   0x000f87       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PORTJ   0x000f88       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                PORTJbits   0x000f88       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATA   0x000f89       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATAbits   0x000f89       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATBbits   0x000f8a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATB   0x000f8a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATCbits   0x000f8b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATC   0x000f8b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATD   0x000f8c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATDbits   0x000f8c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATEbits   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATE   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATF   0x000f8e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATFbits   0x000f8e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATG   0x000f8f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATGbits   0x000f8f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATH   0x000f90       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATHbits   0x000f90       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     LATJ   0x000f91       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 LATJbits   0x000f91       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISAbits   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISA   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRAbits   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRA   0x000f92       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISB   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISBbits   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRB   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRBbits   0x000f93       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISC   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISCbits   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRCbits   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRC   0x000f94       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISDbits   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISD   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRD   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRDbits   0x000f95       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRE   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISE   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISEbits   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDREbits   0x000f96       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRF   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRFbits   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISFbits   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISF   0x000f97       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRGbits   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRG   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISG   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISGbits   0x000f98       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRHbits   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRH   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISH   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISHbits   0x000f99       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 DDRJbits   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     DDRJ   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TRISJbits   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TRISJ   0x000f9a       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  OSCTUNE   0x000f9b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              OSCTUNEbits   0x000f9b       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               RCSTA2bits   0x000f9c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCSTA2   0x000f9c       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE1bits   0x000f9d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE1   0x000f9d       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR1bits   0x000f9e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR1   0x000f9e       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR1bits   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR1   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE2bits   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE2   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR2bits   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR2   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR2   0x000fa2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR2bits   0x000fa2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIE3bits   0x000fa3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIE3   0x000fa3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 PIR3bits   0x000fa4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PIR3   0x000fa4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     IPR3   0x000fa5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 IPR3bits   0x000fa5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               EECON1bits   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   EECON1   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   EECON2   0x000fa7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               TXSTA2bits   0x000fa8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXSTA2   0x000fa8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXREG2   0x000fa9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCREG2   0x000faa       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRG2   0x000fab       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                RCSTAbits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               RCSTA1bits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCSTA1   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    RCSTA   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXSTA1   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TXSTA   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               TXSTA1bits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                TXSTAbits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TXREG   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TXREG1   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   RCREG1   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    RCREG   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    SPBRG   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SPBRG1   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP3CONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP3CON   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP3CONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP3CON   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR3   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR3L   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR3H   0x000fb3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP3DELbits   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP3DEL   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP3ASbits   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP3AS   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP2CONbits   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP2CON   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP2CONbits   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP2CON   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR2L   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR2   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR2H   0x000fb8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP2DELbits   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP2DEL   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP2ASbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP2AS   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CCP1CON   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CCP1CONbits   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP1CONbits   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP1CON   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    CCPR1   0x000fbc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR1L   0x000fbc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CCPR1H   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 ECCP1DEL   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             ECCP1DELbits   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              ECCP1ASbits   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  ECCP1AS   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   WDTCON   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               WDTCONbits   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ADCON1bits   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ANCON0   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ANCON0bits   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ANCON1bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ANCON1   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    ADRES   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADRESL   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ADRESH   0x000fc4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPCON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPCON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1CON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1CON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPCON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPCON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1CON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1CON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSPSTAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+             SSP1STATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 SSP1STAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              SSPSTATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SSPADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1MSK   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1ADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  SSP1BUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   SSPBUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T2CON   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T2CONbits   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PR2   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               MEMCONbits   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   MEMCON   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              PADCFG1bits   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PADCFG1   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TMR2   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T1CON   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T1CONbits   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON3bits   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ODCON3   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ODCON2   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON2bits   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR1L   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   ODCON1   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               ODCON1bits   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR1H   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 RCONbits   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     RCON   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CM2CONbits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CM2CON1bits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CM2CON   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CM2CON1   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  CM1CON1   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   CM1CON   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              CM1CON1bits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               CM1CONbits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               OSCCONbits   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   OSCCON   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  REFOCON   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              REFOCONbits   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                T0CONbits   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    T0CON   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR0L   0x000fd6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    TMR0H   0x000fd7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   STATUS   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               STATUSbits   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     FSR2   0x000fd9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR2L   0x000fd9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR2H   0x000fda       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW2   0x000fdb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC2   0x000fdc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC2   0x000fdd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC2   0x000fde       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF2   0x000fdf       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      BSR   0x000fe0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     FSR1   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR1L   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR1H   0x000fe2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW1   0x000fe3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC1   0x000fe4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC1   0x000fe5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC1   0x000fe6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF1   0x000fe7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     WREG   0x000fe8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     FSR0   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR0L   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    FSR0H   0x000fea       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PLUSW0   0x000feb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  PREINC0   0x000fec       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTDEC0   0x000fed       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                 POSTINC0   0x000fee       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    INDF0   0x000fef       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  INTCON3   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              INTCON3bits   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  INTCON2   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+              INTCON2bits   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   INTCON   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               INTCONbits   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PRODL   0x000ff3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     PROD   0x000ff3       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                    PRODH   0x000ff4       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TABLAT   0x000ff5       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   TBLPTR   0x000ff6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRL   0x000ff6       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRH   0x000ff7       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                  TBLPTRU   0x000ff8       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      PCL   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                       PC   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PCLATH   0x000ffa       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   PCLATU   0x000ffb       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+               STKPTRbits   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                   STKPTR   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSL   0x000ffd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                      TOS   0x000ffd       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSH   0x000ffe       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+                     TOSU   0x000fff       data     extern C:\MCC18\src\traditional\proc\p18F87J50.asm
+
+

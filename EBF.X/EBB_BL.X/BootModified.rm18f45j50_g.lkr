@@ -1,5 +1,8 @@
-// File: 18f46j50_g.lkr
-// Generic linker script for the PIC18F46J50 processor
+// File: BootModified.rm18f45j50_g.lkr
+// Linker script for the PIC18F45J50 processor
+// when used with the HID USB Bootloader firmware
+// This file is modified from the default 18f45j50_g.lkr file
+// that comes with the MPLAB.
 
 #DEFINE _CODEEND _DEBUGCODESTART - 1
 #DEFINE _CEND _CODEEND + _DEBUGCODELEN
@@ -10,28 +13,30 @@ LIBPATH .
 
 #IFDEF _CRUNTIME
   #IFDEF _EXTENDEDMODE
-    FILES c018i_e.o
+//    FILES c018i_e.o		//Manually including a modified version of the contents of this file in the main.c file instead
     FILES clib_e.lib
-    FILES p18F46J50_e.lib
+    FILES p18f45j50_e.lib
 
   #ELSE
-    FILES c018i.o
+//    FILES c018i.o		//Manually including a modified version of the contents of this file in the main.c file instead
     FILES clib.lib
-    FILES p18F46J50.lib
+    FILES p18f45j50.lib
   #FI
 
 #FI
 
 #IFDEF _DEBUGCODESTART
-  CODEPAGE   NAME=vectors    START=0x0             END=0x29		      PROTECTED
-  CODEPAGE   NAME=page       START=0x2A            END=_CODEEND
-  CODEPAGE   NAME=debug      START=_DEBUGCODESTART END=_CEND          PROTECTED
+  CODEPAGE   NAME=vectors    START=0x0            END=0x2F           PROTECTED
+  CODEPAGE   NAME=BootPage   START=0x30           END=0x13FF						//Normally uses 0x2A - 0xFFF, but when using debug optimizations, may take more space
+  CODEPAGE   NAME=page       START=0x1400         END=_CODEEND        PROTECTED
+  CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED
 #ELSE
-  CODEPAGE   NAME=vectors    START=0x0             END=0x29		      PROTECTED
-  CODEPAGE   NAME=page       START=0x2A            END=0xFFF7
+  CODEPAGE   NAME=vectors    START=0x0            END=0x2F           PROTECTED
+  CODEPAGE   NAME=BootPage   START=0x30           END=0xFFF
+  CODEPAGE   NAME=page       START=0x1000               END=0x7FF7           PROTECTED
 #FI
 
-CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF         PROTECTED
+CODEPAGE   NAME=config     START=0x7FF8            END=0x7FFF         PROTECTED
 CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF       PROTECTED
 
 #IFDEF _EXTENDEDMODE

@@ -28,6 +28,7 @@
                    displayName="Linker Files"
                    projectFiles="true">
       <itemPath>rm18f46j50_g.lkr</itemPath>
+      <itemPath>BL_rm18f46j50_g.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
@@ -103,7 +104,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value="/c/mcc18/h;Microchip/Include;../EBF;Microchip/Include/USB;.;.;.;.;.;."/>
+                  value="Microchip/Include;../EBF;Microchip/Include/USB;."/>
         <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros"
                   value="BOARD_EBB_V13_AND_ABOVE;PROGRAMMABLE_WITH_USB_HID_BOOTLOADER"/>
@@ -123,9 +124,9 @@
       <C18-LD>
         <property key="cod-file" value="false"/>
         <property key="extra-lib-directories"
-                  value="/C/MCC18/lib;/C/Program Files/Microchip/mplabc18/v3.37.01/lib"/>
+                  value="/C/Program Files/Microchip/mplabc18/v3.37.01/lib"/>
         <property key="hex-output-format" value="INHX32"/>
-        <property key="map-file" value=""/>
+        <property key="map-file" value="&quot;${DISTDIR}/EBF.X.${IMAGE_TYPE}.map&quot;"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="extended-mode" value="false"/>
@@ -165,6 +166,8 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
+      <item path="rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
     </conf>
     <conf name="EBBv13_no_bootloader" type="2">
       <toolsSet>
@@ -196,6 +199,8 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <item path="BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
       <C18>
         <property key="code-model" value="ms"/>
         <property key="data-model" value="oa-"/>
@@ -307,57 +312,8 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <C18>
-        <property key="code-model" value="ms"/>
-        <property key="data-model" value="oa-"/>
-        <property key="default-char-unsigned" value="false"/>
-        <property key="enable-all-optimizations" value="false"/>
-        <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="false"/>
-        <property key="enable-ob" value="false"/>
-        <property key="enable-od" value="false"/>
-        <property key="enable-om" value="true"/>
-        <property key="enable-on" value="true"/>
-        <property key="enable-op" value="false"/>
-        <property key="enable-opa" value="false"/>
-        <property key="enable-or" value="false"/>
-        <property key="enable-os" value="true"/>
-        <property key="enable-ot" value="false"/>
-        <property key="enable-ou" value="false"/>
-        <property key="enable-ow" value="true"/>
-        <property key="extra-include-directories"
-                  value="/c/mcc18/h;Microchip/Include;../EBF;Microchip/Include/USB;.;.;.;.;.;."/>
-        <property key="optimization-master" value="Disable all"/>
-        <property key="preprocessor-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
-        <property key="procedural-abstraction-passes" value="0"/>
-        <property key="storage-class" value="sca"/>
-        <property key="verbose" value="false"/>
-        <property key="warning-level" value="2"/>
-      </C18>
-      <C18-AS>
-        <property key="cross.reference.file" value=""/>
-        <property key="default.radix" value="HEX"/>
-        <property key="enable.case.sensitivity" value="false"/>
-        <property key="hex.output.format" value="INHX32"/>
-        <property key="preprocessor.macros" value=""/>
-        <property key="warning.level" value="0"/>
-      </C18-AS>
-      <C18-LD>
-        <property key="cod-file" value="false"/>
-        <property key="extra-lib-directories"
-                  value="/C/MCC18/lib;/C/Program Files/Microchip/mplabc18/v3.37.01/lib"/>
-        <property key="hex-output-format" value="INHX32"/>
-        <property key="map-file" value=""/>
-      </C18-LD>
-      <C18LanguageToolchain>
-        <property key="extended-mode" value="false"/>
-        <property key="extended-mode-mcc18" value="false"/>
-        <property key="extended-mode-mpasm" value="false"/>
-        <property key="extended-mode-mplink" value="false"/>
-        <property key="stack-analysis" value="false"/>
-        <property key="stack-analysis-mcc18" value="false"/>
-        <property key="stack-analysis-mplink" value="false"/>
-      </C18LanguageToolchain>
+      <item path="BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
       <HI-TECH-COMP>
         <property key="define-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
         <property key="extra-include-directories"
@@ -410,6 +366,8 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
+      <XC8-config-global>
+      </XC8-config-global>
     </conf>
   </confs>
 </configurationDescriptor>
