@@ -4,19 +4,19 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>Boot46J50Family.h</itemPath>
-      <itemPath>hid.h</itemPath>
-      <itemPath>io_cfg.h</itemPath>
-      <itemPath>typedefs.h</itemPath>
-      <itemPath>usb.h</itemPath>
-      <itemPath>usb9.h</itemPath>
-      <itemPath>usbcfg.h</itemPath>
-      <itemPath>usbctrltrf.h</itemPath>
-      <itemPath>usbdefs_ep0_buff.h</itemPath>
-      <itemPath>usbdefs_std_dsc.h</itemPath>
-      <itemPath>usbdrv.h</itemPath>
-      <itemPath>usbdsc.h</itemPath>
-      <itemPath>usbmmap.h</itemPath>
+      <itemPath>source/Boot46J50Family.h</itemPath>
+      <itemPath>source/hid.h</itemPath>
+      <itemPath>source/io_cfg.h</itemPath>
+      <itemPath>source/typedefs.h</itemPath>
+      <itemPath>source/usb.h</itemPath>
+      <itemPath>source/usb9.h</itemPath>
+      <itemPath>source/usbcfg.h</itemPath>
+      <itemPath>source/usbctrltrf.h</itemPath>
+      <itemPath>source/usbdefs_ep0_buff.h</itemPath>
+      <itemPath>source/usbdefs_std_dsc.h</itemPath>
+      <itemPath>source/usbdrv.h</itemPath>
+      <itemPath>source/usbdsc.h</itemPath>
+      <itemPath>source/usbmmap.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -25,7 +25,8 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>BootModified.rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/BootModified.rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/BootModified.rm18f45j50_g.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
@@ -34,14 +35,14 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>Boot46J50Family.c</itemPath>
-      <itemPath>hid.c</itemPath>
-      <itemPath>main.c</itemPath>
-      <itemPath>usb9.c</itemPath>
-      <itemPath>usbctrltrf.c</itemPath>
-      <itemPath>usbdrv.c</itemPath>
-      <itemPath>usbdsc.c</itemPath>
-      <itemPath>usbmmap.c</itemPath>
+      <itemPath>source/Boot46J50Family.c</itemPath>
+      <itemPath>source/hid.c</itemPath>
+      <itemPath>source/main.c</itemPath>
+      <itemPath>source/usb9.c</itemPath>
+      <itemPath>source/usbctrltrf.c</itemPath>
+      <itemPath>source/usbdrv.c</itemPath>
+      <itemPath>source/usbdsc.c</itemPath>
+      <itemPath>source/usbmmap.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -133,6 +134,8 @@
       </C18LanguageToolchain>
       <ICD3PlatformTool>
       </ICD3PlatformTool>
+      <item path="source/BootModified.rm18f45j50_g.lkr" ex="true" overriding="false">
+      </item>
     </conf>
     <conf name="45J50" type="2">
       <toolsSet>
@@ -219,6 +222,8 @@
         <property key="tracecontrol.medium" value="0"/>
         <property key="tracecontrol.select" value="0"/>
       </Simulator>
+      <item path="source/BootModified.rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>
