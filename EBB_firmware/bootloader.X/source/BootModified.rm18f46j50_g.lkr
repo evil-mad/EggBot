@@ -15,12 +15,12 @@ LIBPATH .
   #IFDEF _EXTENDEDMODE
 //    FILES c018i_e.o		//Manually including a modified version of the contents of this file in the main.c file instead
     FILES clib_e.lib
-    FILES p18f46j50_e.lib
+    FILES p18F46J50_e.lib
 
   #ELSE
 //    FILES c018i.o			//Manually including a modified version of the contents of this file in the main.c file instead
     FILES clib.lib
-    FILES p18f46j50.lib
+    FILES p18F46J50.lib
   #FI
 
 #FI

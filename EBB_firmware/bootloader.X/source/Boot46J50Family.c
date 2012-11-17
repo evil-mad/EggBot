@@ -172,7 +172,6 @@ typedef union
 #pragma udata
 PacketToFromPC PacketFromPC;
 PacketToFromPC PacketToPC;
-
 #pragma udata access fast_vars
 near unsigned char MaxPageToErase;
 near unsigned short long ProgramMemStopAddress;

@@ -5,20 +5,20 @@
                    displayName="Header Files"
                    projectFiles="true">
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>Microchip/Include/USB/usb.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_ch9.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_common.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_device.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_function_cdc.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_hal.h</itemPath>
-        <itemPath>Microchip/Include/USB/usb_hal_pic18.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_ch9.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_common.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_device.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_function_cdc.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_hal.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_hal_pic18.h</itemPath>
       </logicalFolder>
-      <itemPath>HardwareProfile.h</itemPath>
-      <itemPath>HardwareProfile_EBB_V13_and_above.h</itemPath>
-      <itemPath>RCServo2.h</itemPath>
-      <itemPath>UBW.h</itemPath>
-      <itemPath>ebb.h</itemPath>
-      <itemPath>usb_config.h</itemPath>
+      <itemPath>source/ebb.h</itemPath>
+      <itemPath>source/HardwareProfile.h</itemPath>
+      <itemPath>source/HardwareProfile_EBB_V13_and_above.h</itemPath>
+      <itemPath>source/RCServo2.h</itemPath>
+      <itemPath>source/UBW.h</itemPath>
+      <itemPath>source/usb_config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -27,8 +27,8 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>rm18f46j50_g.lkr</itemPath>
-      <itemPath>BL_rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/BL_rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/rm18f46j50_g.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
@@ -38,14 +38,14 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
-        <itemPath>Microchip/USB/usb_device.c</itemPath>
-        <itemPath>Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+        <itemPath>../Microchip/USB/usb_device.c</itemPath>
+        <itemPath>../Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
       </logicalFolder>
-      <itemPath>RCServo2.c</itemPath>
-      <itemPath>UBW.c</itemPath>
-      <itemPath>ebb.c</itemPath>
-      <itemPath>main.c</itemPath>
-      <itemPath>usb_descriptors.c</itemPath>
+      <itemPath>source/ebb.c</itemPath>
+      <itemPath>source/main.c</itemPath>
+      <itemPath>source/RCServo2.c</itemPath>
+      <itemPath>source/UBW.c</itemPath>
+      <itemPath>source/usb_descriptors.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -72,6 +72,21 @@
           </linkerLibItems>
         </linkerTool>
         <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="true"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
@@ -104,7 +119,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value="Microchip/Include;../EBF;Microchip/Include/USB;."/>
+                  value="../Microchip/Include;../Microchip/Include/USB;.;./source"/>
         <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros"
                   value="BOARD_EBB_V13_AND_ABOVE;PROGRAMMABLE_WITH_USB_HID_BOOTLOADER"/>
@@ -123,8 +138,7 @@
       </C18-AS>
       <C18-LD>
         <property key="cod-file" value="false"/>
-        <property key="extra-lib-directories"
-                  value="/C/Program Files/Microchip/mplabc18/v3.37.01/lib"/>
+        <property key="extra-lib-directories" value="./source"/>
         <property key="hex-output-format" value="INHX32"/>
         <property key="map-file" value="&quot;${DISTDIR}/EBF.X.${IMAGE_TYPE}.map&quot;"/>
       </C18-LD>
@@ -166,7 +180,7 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
-      <item path="rm18f46j50_g.lkr" ex="true" overriding="false">
+      <item path="source/rm18f46j50_g.lkr" ex="true" overriding="false">
       </item>
     </conf>
     <conf name="EBBv13_no_bootloader" type="2">
@@ -186,6 +200,21 @@
           </linkerLibItems>
         </linkerTool>
         <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="true"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
@@ -199,8 +228,6 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="BL_rm18f46j50_g.lkr" ex="true" overriding="false">
-      </item>
       <C18>
         <property key="code-model" value="ms"/>
         <property key="data-model" value="oa-"/>
@@ -220,7 +247,7 @@
         <property key="enable-ou" value="false"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories"
-                  value="Microchip/Include;../EBF;Microchip/Include/USB"/>
+                  value="../Microchip/Include;../Microchip/Include/USB;.;./source"/>
         <property key="optimization-master" value="Disable all"/>
         <property key="preprocessor-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
         <property key="procedural-abstraction-passes" value="0"/>
@@ -238,8 +265,7 @@
       </C18-AS>
       <C18-LD>
         <property key="cod-file" value="false"/>
-        <property key="extra-lib-directories"
-                  value="/C/MCC18/lib;/C/Program Files/Microchip/mplabc18/v3.37.01/lib"/>
+        <property key="extra-lib-directories" value="./source"/>
         <property key="hex-output-format" value="INHX32"/>
         <property key="map-file" value=""/>
       </C18-LD>
@@ -281,6 +307,8 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
+      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
     </conf>
     <conf name="EBBv13_XC8_no_bootloader" type="2">
       <toolsSet>
@@ -299,6 +327,21 @@
           </linkerLibItems>
         </linkerTool>
         <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="true"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
@@ -312,12 +355,10 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
-      <item path="BL_rm18f46j50_g.lkr" ex="true" overriding="false">
-      </item>
       <HI-TECH-COMP>
         <property key="define-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
         <property key="extra-include-directories"
-                  value="Microchip/Include;Microchip/Include/USB;../EBF;."/>
+                  value="../Microchip/Include;../Microchip/Include/USB;/source"/>
         <property key="identifier-length" value="255"/>
         <property key="operation-mode" value="free"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
@@ -368,6 +409,8 @@
       </ICD3PlatformTool>
       <XC8-config-global>
       </XC8-config-global>
+      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>

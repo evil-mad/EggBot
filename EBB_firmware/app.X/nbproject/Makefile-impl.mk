@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=EBF.X
+PROJECTNAME=app.X
 
 # Active Configuration
 DEFAULTCONF=EBBv13_with_bootloader

@@ -42,7 +42,7 @@
 
 //****** REMOVE THESE LATER AFTER DEBUGGING IS DONE *****************
 #if defined (PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-    #pragma config XINST = OFF          //Extended instruction set disabled
+//    #pragma config XINST = OFF          //Extended instruction set disabled
 #else
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 2           //Divide by 2 (8 MHz internal oscillator)

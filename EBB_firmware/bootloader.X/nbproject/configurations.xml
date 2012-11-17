@@ -83,8 +83,8 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <C18>
-        <property key="code-model" value="mS"/>
-        <property key="data-model" value="Oa-"/>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
@@ -100,8 +100,7 @@
         <property key="enable-ot" value="true"/>
         <property key="enable-ou" value="true"/>
         <property key="enable-ow" value="true"/>
-        <property key="extra-include-directories"
-                  value="/C/MCC18/h;.;.;.;.;.;.;.;.;.;.;.;.;.;"/>
+        <property key="extra-include-directories" value="."/>
         <property key="optimization-master" value="Custom"/>
         <property key="preprocessor-macros" value="EBB_V11"/>
         <property key="procedural-abstraction-passes" value="0"/>
@@ -121,7 +120,7 @@
         <property key="cod-file" value="false"/>
         <property key="extra-lib-directories" value=""/>
         <property key="hex-output-format" value="INHX32"/>
-        <property key="map-file" value="EBBv11_BL_46J50.map"/>
+        <property key="map-file" value="&quot;${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map&quot;"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="extended-mode" value="false"/>
@@ -133,8 +132,43 @@
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
       <ICD3PlatformTool>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="false"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xfff7"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
       <item path="source/BootModified.rm18f45j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
     </conf>
     <conf name="45J50" type="2">
@@ -143,9 +177,9 @@
         <targetDevice>PIC18F45J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>Simulator</platformTool>
+        <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.40</languageToolchainVersion>
+        <languageToolchainVersion>3.43</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -168,8 +202,8 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <C18>
-        <property key="code-model" value="mS"/>
-        <property key="data-model" value="Oa-"/>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
@@ -185,8 +219,7 @@
         <property key="enable-ot" value="true"/>
         <property key="enable-ou" value="true"/>
         <property key="enable-ow" value="true"/>
-        <property key="extra-include-directories"
-                  value="/C/MCC18/h;.;.;.;.;.;.;.;.;.;.;.;.;.;"/>
+        <property key="extra-include-directories" value="."/>
         <property key="optimization-master" value="Custom"/>
         <property key="preprocessor-macros" value="EBB_V11"/>
         <property key="procedural-abstraction-passes" value="0"/>
@@ -204,9 +237,9 @@
       </C18-AS>
       <C18-LD>
         <property key="cod-file" value="false"/>
-        <property key="extra-lib-directories" value="/C/MCC18/lib;"/>
+        <property key="extra-lib-directories" value=""/>
         <property key="hex-output-format" value="INHX32"/>
-        <property key="map-file" value=""/>
+        <property key="map-file" value="&quot;${DISTDIR}/bootlaoder.X.${IMAGE_TYPE}.map&quot;"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="extended-mode" value="false"/>
@@ -217,12 +250,17 @@
         <property key="stack-analysis-mcc18" value="false"/>
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
-      <Simulator>
-        <property key="tracecontrol.disablemacros" value="true"/>
-        <property key="tracecontrol.medium" value="0"/>
-        <property key="tracecontrol.select" value="0"/>
-      </Simulator>
+      <ICD3PlatformTool>
+      </ICD3PlatformTool>
       <item path="source/BootModified.rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
     </conf>
   </confs>
