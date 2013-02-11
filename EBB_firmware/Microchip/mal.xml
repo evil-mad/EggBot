@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 2012 Microchip Technology Inc. -->
+
+<!-- XML Format Policy -->
+<!-- In VERSION tag, use MAJOR/MINOR/DOT OR STRING, not both at the same time -->
+
+<DISTRIBUTION>
+
+  <INFO>
+    <NAME>Microchip Application Libraries</NAME>
+    <SHORT_NAME>MAL</SHORT_NAME>
+    <VERSION>
+      <STRING>2012-10-15</STRING>
+    </VERSION>
+  </INFO>
+
+  <LIBRARIES>
+
+    <LIBRARY>
+      <NAME>Graphics Library</NAME>
+      <SHORT_NAME>GFX</SHORT_NAME>
+      <VERSION>
+        <MAJOR>3</MAJOR>
+        <MINOR>06</MINOR>
+        <DOT>02</DOT>
+      </VERSION>
+      <GDD_COMPATIBILITY>1</GDD_COMPATIBILITY>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Microchip Full Speed USB Library</NAME>
+      <SHORT_NAME>MCHPFSUSB</SHORT_NAME>
+      <VERSION>
+        <STRING>2.9h</STRING>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Memory Disk Drive Library</NAME>
+      <SHORT_NAME>MDD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>4</MINOR>
+        <DOT>2</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>TCPIP Stack</NAME>
+      <SHORT_NAME>TCPIP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>5</MAJOR>
+        <MINOR>42</MINOR>
+        <DOT>04</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>mTouchCap Library</NAME>
+      <SHORT_NAME>MTOUCHCAP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>42</MINOR>
+        <DOT>00</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Smart Card Library</NAME>
+      <SHORT_NAME>SMCARD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>02</MINOR>
+        <DOT>8</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>MiWi(TM) DE</NAME>
+      <SHORT_NAME>MIWI</SHORT_NAME>
+      <VERSION>
+        <MAJOR>4</MAJOR>
+        <MINOR>2</MINOR>
+        <DOT>6</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Android Accessory Framework</NAME>
+      <SHORT_NAME>Android</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>02</MINOR>
+        <DOT>00</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Cryptographics</NAME>
+      <SHORT_NAME>CRYPTO</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>00</MINOR>
+        <!-- Intentionally no DOT information. MAJOR/MINOR will increment when there's API/file location compatibility change. This serves as a marker if a crypto installer is compatible with this MLA version or not. -->
+      </VERSION>
+    <INSTALLED>NO</INSTALLED>
+    </LIBRARY>
+
+  </LIBRARIES>
+
+</DISTRIBUTION>
