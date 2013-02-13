@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <projectmakefile>Makefile</projectmakefile>
+  <defaultConf>1</defaultConf>
+  <confs>
+    <conf name="EBBv13_with_bootloader" type="2">
+      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT091597204:=x:=en</platformToolSN>
+      <languageToolchainDir>C:\Program Files (x86)\Microchip\mplabc18\v3.44\bin</languageToolchainDir>
+      <mdbdebugger version="1">
+        <placeholder1>place holder 1</placeholder1>
+        <placeholder2>place holder 2</placeholder2>
+      </mdbdebugger>
+      <runprofile version="6">
+        <args></args>
+        <rundir></rundir>
+        <buildfirst>true</buildfirst>
+        <console-type>0</console-type>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+    <conf name="EBBv13_no_bootloader" type="2">
+      <platformToolSN>:=MPLABCommUSB:=04D8:=900A:=0002:=Microchip Technology Inc.:=PICkit 3:=BUR101260159:=x:=en</platformToolSN>
+      <languageToolchainDir>C:\Program Files (x86)\Microchip\mplabc18\v3.44\bin</languageToolchainDir>
+      <mdbdebugger version="1">
+        <placeholder1>place holder 1</placeholder1>
+        <placeholder2>place holder 2</placeholder2>
+      </mdbdebugger>
+      <runprofile version="6">
+        <args></args>
+        <rundir></rundir>
+        <buildfirst>true</buildfirst>
+        <console-type>0</console-type>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+    <conf name="EBBv13_XC8_no_bootloader" type="2">
+      <platformToolSN>:=MPLABCommUSB:=04D8:=9009:=0100:=Microchip Technology, Inc. (www.microchip.com):=MPLAB ICD3 tm (www.microchip.com):=JIT091597204:=x:=en</platformToolSN>
+      <languageToolchainDir>C:\Program Files\Microchip\xc8\v1.11\bin</languageToolchainDir>
+      <mdbdebugger version="1">
+        <placeholder1>place holder 1</placeholder1>
+        <placeholder2>place holder 2</placeholder2>
+      </mdbdebugger>
+      <runprofile version="6">
+        <args></args>
+        <rundir></rundir>
+        <buildfirst>true</buildfirst>
+        <console-type>0</console-type>
+        <terminal-type>0</terminal-type>
+        <remove-instrumentation>0</remove-instrumentation>
+        <environment>
+        </environment>
+      </runprofile>
+    </conf>
+  </confs>
+</configurationDescriptor>
