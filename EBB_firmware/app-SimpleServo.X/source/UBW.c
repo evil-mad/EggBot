@@ -95,9 +95,13 @@
 #define SS_STATE_WAITING_FOR_PEN_EXIT 4
 
 
+#define SL_STATE_WAITING            0
+#define SL_STATE_ON                 1
+
+
 // Constants for servo motor speed
-#define SERVO_MOTOR_STOP            17600
-#define SERVO_MOTOR_RUN             20000
+#define SERVO_MOTOR_STOP            17625
+#define SERVO_MOTOR_RUN             22000
 
 // Constants for timed operations
 #define SS_TIMER_BOOTUP_WAIT        2000    // in milliseconds - from boot to first operation
@@ -213,8 +217,10 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 
 // SimpleSerial state variable
 unsigned char SimpleServoState = SS_STATE_WAITING;
+unsigned char SimpleLightState = SL_STATE_WAITING;
 
 volatile unsigned int SimpleServoTimer = 0;
+volatile unsigned int SimpleLightTimer = 0;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
@@ -276,7 +282,13 @@ void low_ISR(void)
             SimpleServoTimer--;
         }
 
-		// Handle RC servo pulse generation (for next pulse/channel)
+        // Count down SimpleLightTimer
+        if (SimpleLightTimer)
+        {
+            SimpleLightTimer--;
+        }
+
+        // Handle RC servo pulse generation (for next pulse/channel)
 		// Always incriment the gRCServo2msCounter
         gRC2msCounter++;
 
@@ -722,6 +734,10 @@ void UserInit(void)
 
     // Set up timer for bootup wait
     SimpleServoTimer = SS_TIMER_BOOTUP_WAIT;
+
+    // Set up PortB pin 3 as an output, and set low (turn light off)
+    TRISBbits.TRISB3 = OUTPUT_PIN;
+    PORTBbits.RB3 = 0;
     
 }//end UserInit
 
@@ -773,7 +789,7 @@ void ProcessIO(void)
         case SS_STATE_WAITING:
             if (SimpleServoTimer == 0)
             {
-                process_SM(2000, 0, -10000);
+                process_SM(2000, 0, -12000);
                 SimpleServoTimer = 3000;
                 SimpleServoState = SS_STATE_LIFT_RUNNING_DOWN;
             }
@@ -783,7 +799,7 @@ void ProcessIO(void)
             if (SimpleServoTimer == 0)
             {
                 RCServo2_Move(SERVO_MOTOR_RUN, 3, 0, 0);
-                SimpleServoTimer = 1000;
+                SimpleServoTimer = 100;
                 SimpleServoState = SS_STATE_RUNNING_MOTOR;
             }
             break;
@@ -806,13 +822,11 @@ void ProcessIO(void)
             break;
 
         case SS_STATE_WAITING_FOR_PEN_EXIT:
+            if (PORTBbits.RB2 == 1)
             {
-                if (PORTBbits.RB2 == 1)
-                {
-                    process_SM(2000, 0, -10000);
-                    SimpleServoTimer = 5000;
-                    SimpleServoState = SS_STATE_LIFT_RUNNING_DOWN;
-                }
+                process_SM(2000, 0, -10000);
+                SimpleServoTimer = 5000;
+                SimpleServoState = SS_STATE_LIFT_RUNNING_DOWN;
             }
             break;
 
@@ -820,7 +834,31 @@ void ProcessIO(void)
             break;
     }
 
-	// Check for any new I packets (from T command) ready to go out
+
+    switch (SimpleLightState)
+    {
+        case SL_STATE_WAITING:
+            if (SimpleServoState == SS_STATE_LIFT_RUNNING_DOWN)
+            {
+                PORTBbits.RB3 = 1;
+                SimpleLightTimer = 10000;
+                SimpleLightState = SL_STATE_ON;
+            }
+            break;
+
+        case SL_STATE_ON:
+            if (SimpleLightTimer == 0)
+            {
+                PORTBbits.RB3 = 0;
+                SimpleLightState = SL_STATE_WAITING;
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    // Check for any new I packets (from T command) ready to go out
 	while (ISR_D_FIFO_length > 0)
 	{
 		// Spit out an I packet first

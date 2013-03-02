@@ -192,7 +192,7 @@ dist/${CND_CONF}/${IMAGE_TYPE}/app-SimpleServo.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}:
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app-SimpleServo.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 	@echo "Creating unified hex file"
-	@"C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/en_msgs.txt" dist/${CND_CONF}/${IMAGE_TYPE}/app-SimpleServo.X.${IMAGE_TYPE}.hex  -odist/${CND_CONF}/production/app-SimpleServo.X.production.unified.hex
+	@"C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/en_msgs.txt" dist/${CND_CONF}/${IMAGE_TYPE}/app-SimpleServo.X.${IMAGE_TYPE}.hex  -odist/${CND_CONF}/production/app-SimpleServo.X.production.unified.hex
 
 endif
 
