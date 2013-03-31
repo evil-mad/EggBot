@@ -11,7 +11,7 @@
 Name "UBWDriverInstaller"
 
 ; The file to write
-OutFile "UBWDriverInstaller_v10.exe"
+OutFile "UBWDriverInstaller_v20.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\Inkscape\share\extensions\UBWDriverInstaller
