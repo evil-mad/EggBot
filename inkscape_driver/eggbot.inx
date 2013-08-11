@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Eggbot Control</_name>
-  <id>command.evilmadscience.plotd6.eggbot</id>
+  <id>command.evilmadscience.plotd7.eggbot</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -29,9 +29,7 @@ Eggbot: Basic Setup
 	     _gui-text="          Pen up position, 0-100%:">55</param>
       <param name="penDownPosition" type="int" min="0" max="100"
 	     _gui-text="          Pen down position, 0-100%:">50</param>
-      <_param name="instructions_setup2" type="description"
-	      xml:space="preserve">
-</_param>
+
       <param name="setupType" type="optiongroup" appearance=""
 	     _gui-text="          Action on 'Apply': ">
 	<_option value="toggle-pen"     >Toggle pen up/down</_option>
@@ -158,7 +156,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.2.1, dated 6/12/2011
+Release 2.2.3, dated 8/11/2013
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
