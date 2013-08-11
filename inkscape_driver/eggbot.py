@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # http://code.google.com/p/eggbotcode/
 #
-# Version 2.2.1, dated 6/12/2011
+# Version 2.3.4, dated 8/11/2013
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

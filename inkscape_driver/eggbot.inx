@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Eggbot Control</_name>
-  <id>command.evilmadscience.plotd7.eggbot</id>
+  <id>command.evilmadscientist.eggbot.rev234</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -156,7 +156,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.2.3, dated 8/11/2013
+Release 2.3.4, dated 8/11/2013
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
