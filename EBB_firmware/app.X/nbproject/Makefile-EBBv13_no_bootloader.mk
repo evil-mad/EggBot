@@ -44,12 +44,18 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 # Distribution Directory
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
+# Source Files Quoted if spaced
+SOURCEFILES_QUOTED_IF_SPACED=../Microchip/USB/usb_device.c "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c
+
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o ${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/source/ebb.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/RCServo2.o.d ${OBJECTDIR}/source/UBW.o.d ${OBJECTDIR}/source/usb_descriptors.o.d ${OBJECTDIR}/_ext/343710134/usb_device.o.d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/343710134/usb_device.o.d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d ${OBJECTDIR}/source/ebb.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/RCServo2.o.d ${OBJECTDIR}/source/UBW.o.d ${OBJECTDIR}/source/usb_descriptors.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o ${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o
+OBJECTFILES=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o
+
+# Source Files
+SOURCEFILES=../Microchip/USB/usb_device.c ../Microchip/USB/CDC Device Driver/usb_function_cdc.c source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c
 
 
 CFLAGS=
@@ -80,6 +86,20 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/343710134 
+	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/343710134/usb_device.o 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/343710134/usb_device.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
+${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/_ext/131024517 
+	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	@${DEP_GEN} -d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
+	@${FIXDEPS} "${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
 ${OBJECTDIR}/source/ebb.o: source/ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/ebb.o.d 
@@ -115,21 +135,21 @@ ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makef
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
+else
 ${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/343710134 
 	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/343710134/usb_device.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/343710134/usb_device.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/131024517 
 	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-else
 ${OBJECTDIR}/source/ebb.o: source/ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/ebb.o.d 
@@ -165,20 +185,6 @@ ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makef
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/343710134 
-	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/343710134/usb_device.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/343710134/usb_device.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
-	
-${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} ${OBJECTDIR}/_ext/131024517 
-	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
-	@${DEP_GEN} -d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
-	@${FIXDEPS} "${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
-	
 endif
 
 # ------------------------------------------------------------------------------------
@@ -188,9 +194,12 @@ dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFIL
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/rm18f46j50_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/rm18f46j50_g.lkr 
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	@echo "Creating unified hex file"
+	@"C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../dat/en_msgs.txt" dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.hex  -odist/${CND_CONF}/production/app.X.production.unified.hex
+
 endif
 
 

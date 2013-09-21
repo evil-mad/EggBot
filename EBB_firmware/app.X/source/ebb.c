@@ -58,8 +58,17 @@
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 // 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
 // 2.1.5 12/15/11 - Fixed problem with pen servo (RB1) being inverted on boot
+// TODO: Test this 2.2.0 code below
 // 2.2.0 11/07/12 - Fixed problem with SP command not working properly with ports other than RB1 because we don't
 //                  properly use S2 commands for SP up/down within ISR.
+// 2.2.1 09/19/13 - Expanded internal delay counter to 32 bits so we can have
+//                      delays longer than 2.1s. Now up to 64K ms.
+//                - Fixed bug with all <duration> parameters, SM, SP, TP
+//                      commands. Now in ms, defaults to 500ms, and actually
+//                      works up to 64Kms.
+//                - Fixed uninitzlied data bug with command FIFO. We were seeing
+//                      very long random delays first time SM,<delay>,0,0 was
+//                      used.
 // 
 
 #include <p18cxxx.h>
@@ -77,17 +86,9 @@
 #include "ebb_demo.h"
 #include "RCServo2.h"
 
-// Reload value for TIMER1
-// We need a 25KHz ISR to fire, so we take Fosc (48Mhz), devide by 4
-// (normal CPU instruction rate of Fosc/4), then use the TIMER1 prescaler
-// to divide by 4 again. Then we use a reload value of 120 to give us
-// a rate of 48MHz/4/4/120 = 25KHz.
-#define TIMER1_L_RELOAD (255 - 113)
-#define TIMER1_H_RELOAD (255)
-
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
-#define OVERFLOW_MUL	(0x8000 / 25)
+#define OVERFLOW_MUL	(0x8000 / HIGH_ISR_TICKS_PER_MS)
 
 #define MAX_RC_DURATION 11890
 
@@ -113,18 +114,13 @@ static void process_SM(
 // Working registers
 static near MoveCommandType CurrentCommand;
 static near unsigned int StepAcc[NUMBER_OF_STEPPERS];
-//static near signed int StepAdd[NUMBER_OF_STEPPERS];
-//static near unsigned int StepsCounter[NUMBER_OF_STEPPERS];
-//static near unsigned char DirBits;
-//static unsigned short DelayCounter;
-static near unsigned char OutByte;
-static near unsigned char TookStep;
-static near unsigned char AllDone;
-static near unsigned char i;
 near BOOL FIFOEmpty;
-//static near CommandType Command;
 
 #pragma udata
+static unsigned char OutByte;
+static unsigned char TookStep;
+static unsigned char AllDone;
+static unsigned char i;
 MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
 
 unsigned int DemoModeActive;
@@ -175,12 +171,16 @@ void high_ISR(void)
         if (CurrentCommand.DelayCounter)
         {
             CurrentCommand.DelayCounter--;
+            // Double check that things aren't way too big
+            if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+            {
+                CurrentCommand.DelayCounter = 0;
+            }
         }
         if (CurrentCommand.DelayCounter)
         {
             AllDone = FALSE;
         }
-
         else if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
 		{
 			// Only output DIR bits if we are actually doing something
@@ -385,16 +385,6 @@ void high_ISR(void)
 			if (!FIFOEmpty)
 			{
                 CurrentCommand = CommandFIFO[0];
-                /*
-				for (i = 0; i < NUMBER_OF_STEPPERS; i++)
-				{
-					StepAdd[i] = CommandFIFO[0].ToLoadStepAdd[i];
-					StepsCounter[i] = CommandFIFO[0].ToLoadStepsCounter[i];
-				}
-				DirBits = CommandFIFO[0].ToLoadDirBits;
-				Command = CommandFIFO[0].ToLoadCommand;
-				DelayCounter = CommandFIFO[0].ToLoadDelayCounter;
-                */
 				FIFOEmpty = TRUE;
 			}
 		}
@@ -420,12 +410,21 @@ void EBB_Init(void)
 {
     char i;
 
+    // Initalize all Current Command values
     for (i = 0; i < NUMBER_OF_STEPPERS; i++)
     {
         CurrentCommand.StepAdd[i] = 1;
         CurrentCommand.StepsCounter[i] = 0;
     }
-	FIFOEmpty = TRUE;
+    CurrentCommand.Command = COMMAND_NONE;
+    CurrentCommand.DirBits = 0;
+    CurrentCommand.DelayCounter = 0;
+    CurrentCommand.ServoPosition = 0;
+    CurrentCommand.ServoRPn = 0;
+    CurrentCommand.ServoChannel = 0;
+    CurrentCommand.ServoRate = 0;
+
+    FIFOEmpty = TRUE;
 
 	// Set up TMR1 for our 25KHz High ISR for stepping
 	T1CONbits.RD16 = 0; 	// Set 8 bit mode
@@ -717,11 +716,12 @@ static void process_SM(
 	if (A1Stp == 0 && A2Stp == 0)
 	{
 		CommandFIFO[0].Command = COMMAND_DELAY;
-		CommandFIFO[0].DelayCounter = 25 * Duration;
+        // Note: cast requred because integer promotion turned off (uses RAM)
+		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
 	}
 	else
 	{
-		CommandFIFO[0].DelayCounter = 1;
+		CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
 		CommandFIFO[0].DirBits = 0;
 		
 		// Always enable both motors when we want to move them
@@ -740,25 +740,24 @@ static void process_SM(
 			A2Stp = -A2Stp;
 		}
         // To compute StepAdd values from Duration,
-        CommandFIFO[0].StepAdd[0] = (unsigned int)
+        CommandFIFO[0].StepAdd[0] = (UINT16)
                                 (
-                                    ((unsigned long)0x8000 * (unsigned long)A1Stp)
+                                    ((UINT32)0x8000 * (UINT32)A1Stp)
                                     /
-                                    ((unsigned long)25 * (unsigned long)Duration)
+                                    (HIGH_ISR_TICKS_PER_MS * (UINT32)Duration)
                                 ) + 1;
         CommandFIFO[0].StepsCounter[0] = A1Stp;
-        CommandFIFO[0].StepAdd[1] = (unsigned int)
+        CommandFIFO[0].StepAdd[1] = (UINT16)
                                 (
-                                    ((unsigned long)0x8000 * (unsigned long)A2Stp)
+                                    ((UINT32)0x8000 * (UINT32)A2Stp)
                                     /
-                                    ((unsigned long)25 * (unsigned long)Duration)
+                                    (HIGH_ISR_TICKS_PER_MS * (UINT32)Duration)
                                 ) + 1;
         CommandFIFO[0].StepsCounter[1] = A2Stp;
         CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
 	}
 		
 	FIFOEmpty = FALSE;
-
 }
 
 // Query Pen
@@ -772,12 +771,13 @@ void parse_QP_packet(void)
 }
 
 // Toggle Pen
-// Usage: TP<CR>
+// Usage: TP,<duration><CR>
 // Returns: OK<CR>
-// Just toggles state of pen arm
+// Just toggles state of pen arm, then delays for the optional
+// <duration> milliseconds
 void parse_TP_packet(void)
 {
-	unsigned short CommandDuration = 500;
+	UINT16 CommandDuration = 500;
 
 	// Extract each of the values.
 	extract_number (kUINT, &CommandDuration, kOPTIONAL);
@@ -804,7 +804,7 @@ void parse_TP_packet(void)
 // Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
 // <State> is 0 (for down) or 1 (for up)
 // <Duration> is how long to wait (in milliseconds) before the next command
-//      in the motion control FIFO should start.
+//      in the motion control FIFO should start. (defaults to 500)
 // <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
 //      RC Servo output to different PortB pins.
 // This is a command that the user can send from the PC to set the pen state.
@@ -823,7 +823,7 @@ void parse_TP_packet(void)
 void parse_SP_packet(void)
 {
 	UINT8 State = 0;
-	UINT16 CommandDuration = 0;
+	UINT16 CommandDuration = 500;
 	UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
     ExtractReturnType Ret;
 

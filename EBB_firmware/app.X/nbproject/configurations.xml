@@ -63,7 +63,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <languageToolchainVersion>3.44</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -78,8 +78,8 @@
                         AC="true"
                         BL="true"
                         WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
                         CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
                         OP="dist/46J50/production/bootloader.X.production.hex"
                         DOP="dist/46J50/debug/bootloader.X.debug.cof"
@@ -181,6 +181,14 @@
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
       <item path="source/rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
     </conf>
     <conf name="EBBv13_no_bootloader" type="2">
@@ -191,7 +199,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.43</languageToolchainVersion>
+        <languageToolchainVersion>3.44</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -204,10 +212,10 @@
                         CT="1"
                         CN="46J50"
                         AC="true"
-                        BL="true"
+                        BL="false"
                         WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
                         CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
                         OP="dist/46J50/production/bootloader.X.production.hex"
                         DOP="dist/46J50/debug/bootloader.X.debug.cof"
@@ -308,6 +316,14 @@
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
       <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
     </conf>
     <conf name="EBBv13_XC8_no_bootloader" type="2">
@@ -317,8 +333,8 @@
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
-        <languageToolchain>XC8</languageToolchain>
-        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.44</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -333,8 +349,8 @@
                         AC="true"
                         BL="true"
                         WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot;&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
                         CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
                         OP="dist/46J50/production/bootloader.X.production.hex"
                         DOP="dist/46J50/debug/bootloader.X.debug.cof"
@@ -355,10 +371,17 @@
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
+      <C18>
+      </C18>
+      <C18-LD>
+      </C18-LD>
+      <C18LanguageToolchain>
+      </C18LanguageToolchain>
       <HI-TECH-COMP>
+        <property key="asmlist" value="true"/>
         <property key="define-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
         <property key="extra-include-directories"
-                  value="../Microchip/Include;../Microchip/Include/USB;/source"/>
+                  value="../Microchip/Include;../Microchip/Include/USB;./source;./"/>
         <property key="identifier-length" value="255"/>
         <property key="operation-mode" value="free"/>
         <property key="opt-xc8-compiler-strict_ansi" value="false"/>
@@ -408,8 +431,15 @@
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
       <XC8-config-global>
+        <property key="output-file-format" value="-mcof,+elf"/>
       </XC8-config-global>
       <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
       </item>
     </conf>
   </confs>

@@ -40,10 +40,7 @@
 
 #include "HardwareProfile.h"
 
-//****** REMOVE THESE LATER AFTER DEBUGGING IS DONE *****************
-#if defined (PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-//    #pragma config XINST = OFF          //Extended instruction set disabled
-#else
+#if !defined (PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
      #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 2           //Divide by 2 (8 MHz internal oscillator)
      #pragma config STVREN = ON          //stack overflow/underflow reset enabled
@@ -68,7 +65,6 @@
      #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
      #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
 #endif
-//**********************************************************************
 
 /** I N C L U D E S **********************************************************/
 
