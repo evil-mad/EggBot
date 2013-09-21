@@ -1,7 +1,8 @@
 // Versions:
 // 1.8 - 
 // 1.8.1 5/19/10 - Only change is to recompile with Microchip USB Stack v2.7
-// 1.8.2 5/31/10 - Only change is to change name in USB enumeration string to Ei Bot Board - using new PID for SchmalzHaus
+// 1.8.2 5/31/10 - Only change is to change name in USB enumeration string to Ei
+//                  Bot Board - using new PID for SchmalzHaus
 // 1.9   6/11/10 - Added two commands:
 //					SQ - Solenoid Query - returns 0 or 1 for down and up
 //					ST - Solenoid Toggle - toggles state of the servo/solenoid
@@ -14,53 +15,71 @@
 //					QN - Query node count
 //					QB - Query Button command
 // 1.9.3 6/16/10 - Replaced SN with CL (Clear Node) command
-// 1.9.4 6/22/10 - Node Count now incremented on pauses (SM with zero step size) as well
+// 1.9.4 6/22/10 - Node Count now incremented on pauses (SM with zero step size)
+//                  as well
 // 1.9.5 7/2/10 - Node count no longer incrimented at all except for NI command
 //					NI - Node count Incriment
 //					ND - Node count Decriment
 //					SN - Set Node count (with 8 byte variable)
 //					BL - With latest bootloader, will jumpt to Boot Load mode
-// 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX files 
+// 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX
+//                      files
 //					- use c018i_HID_BL.o now
 // 2.0.0 9/9/10 - Add in
 //					QC - Query Current - reads voltage of current adjustment pot
-//						NOTE: This is NOT done the 'right way'. Instead, we set up the pin for 
-//						analog input at boot, then when the QC comes in, we activate the ADC and
-//						take one reading and then shut it down. Eventually, we should re-write the
-//						'UBW' ADC routines to work with the much more flexible ADC in the 46J50 part
-//						and then just use that generic code for reading the value of the pot.
-//					SC,13,{0,1} - enables/disables RB0 as another PRG button for pause detection
-// 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause button.
+//						NOTE: This is NOT done the 'right way'. Instead, we set
+//                      up the pin for analog input at boot, then when the QC
+//                      comes in, we activate the ADC and take one reading and
+//                      then shut it down. Eventually, we should re-write the
+//                      'UBW' ADC routines to work with the much more flexible
+//                      ADC in the 46J50 part and then just use that generic
+//                      code for reading the value of the pot.
+//					SC,13,{0,1} - enables/disables RB0 as another PRG button for
+//                      pause detection
+// 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause
+//                      button.
 //					switched it to RB2 on v1.1 hardware
-// 2.0.2 10/3/10 - Bug fix - QC command not returning proper results - added cast and now works OK
+// 2.0.2 10/3/10 - Bug fix - QC command not returning proper results - added
+//                      cast and now works OK
 // 2.1.0 10/21/10- Added in
-//					SE - Set Engraver - turns engraver (on RB3) on or off, or set to PWM power level
-// 				   Added code in init to pre-charge RC7 (USB_SENSE_IO) high before running rest of code
+//					SE - Set Engraver - turns engraver (on RB3) on or off, or
+//                      set to PWM power level
+// 				   Added code in init to pre-charge RC7 (USB_SENSE_IO) high
+//                      before running rest of code
 //					to get around wrong resistor value on hardware.
-// 2.1.1 11/21/10- Removed Microchip USB stack v2.7, replaced it with v2.8 from MAL 2010_10_19,
-//					Also using generic Microchip folder now rather than re-named one (simpler to update)
-//				   Updated code in main.c (and others) to match updates from latest MAL CDC example
-// 2.1.1cTest1 01/17/11 - Added third paramter to SP command to use any PortB pin for servo output
+// 2.1.1 11/21/10- Removed Microchip USB stack v2.7, replaced it with v2.8 from 
+//                  MAL 2010_10_19.
+//					Also using generic Microchip folder now rather than re-named
+//                      one (simpler to update).
+//				   Updated code in main.c (and others) to match updates from 
+//                      latest MAL CDC example.
+// 2.1.1cTest1 01/17/11 - Added third paramter to SP command to use any PortB 
+//                      pin for servo output.
 //                 For this version only - used PortB2 as standard servo output
 // 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
-//                 - Updated check_and_send_TX_data() to allow unlimited data to go out without overrunning
-//                    the output buffer, same as UBW 1.4.7
+//                 - Updated check_and_send_TX_data() to allow unlimited data to
+//                      go out without overrunning the output buffer, same as
+//                      UBW 1.4.7.
 // 2.1.2 11/04/11 - Fixed PI command to return just a 0 or a 1
 //                - Updated to USB stack 2.9a
 //                - Created MPLAB X project for this firmware
 //                - Added SC,14,<state> to enable/disable solenoid output on RB4
-//                - Fixed bug with S2 command and solenoid command interaction - we now turn off solenoid
-//                      output on RB4 if user uses S2 command to use RB4 for RC servo output
-//                - Fixed bug with S2 command where a duration of 0 would not shut off the PWM channel
-//                - Fixed bug in S2 command where <rate> variable was not being used correctly
+//                - Fixed bug with S2 command and solenoid command interaction -
+//                      we now turn off solenoid output on RB4 if user uses S2
+//                      command to use RB4 for RC servo output.
+//                - Fixed bug with S2 command where a duration of 0 would not
+//                      shut off the PWM channel
+//                - Fixed bug in S2 command where <rate> variable was not being
+//                      used correctly
 //                - Switched default number of S2 channels to 8 (from 7 before)
-// 2.1.3 12/12/11 - RB3 now defaults to digital I/O on boot, can still use SE command to do PWM later if you want
+// 2.1.3 12/12/11 - RB3 now defaults to digital I/O on boot, can still use SE
+//                      command to do PWM later if you want
 //                - Compiled with latest UBW stack - 2.9b from MAL 2011-10-18
 // 2.1.4 12/14/11 - RB3 now defaults to OFF, rather than ON, at boot.
 // 2.1.5 12/15/11 - Fixed problem with pen servo (RB1) being inverted on boot
-// TODO: Test this 2.2.0 code below
-// 2.2.0 11/07/12 - Fixed problem with SP command not working properly with ports other than RB1 because we don't
-//                  properly use S2 commands for SP up/down within ISR.
+// 2.2.0 11/07/12 - Fixed problem with SP command not working properly with 
+//                      ports other than RB1 because we don't properly use S2
+//                      commands for SP up/down within ISR. Tested on all PortB.
 // 2.2.1 09/19/13 - Expanded internal delay counter to 32 bits so we can have
 //                      delays longer than 2.1s. Now up to 64K ms.
 //                - Fixed bug with all <duration> parameters, SM, SP, TP
@@ -177,11 +196,17 @@ void high_ISR(void)
                 CurrentCommand.DelayCounter = 0;
             }
         }
+
         if (CurrentCommand.DelayCounter)
         {
             AllDone = FALSE;
         }
-        else if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+        
+        // Note: by not making this an else-if, we have our DelayCounter
+        // counting done at the same time as our motor move or servo move.
+        // This allows the delay time to start counting at the beginning of the
+        // command execution.
+        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
 		{
 			// Only output DIR bits if we are actually doing something
 			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
@@ -848,10 +873,6 @@ void parse_SP_packet(void)
     {
         State = 1;
     }
-
-    // Make sure that the selected pin we're going to use is an output
-    // (This code only works for PortB - maybe expand it in the future for all ports.)
-//    TRISB = TRISB & ~(1 << Pin);
 
     // Set the PRn of the Pen Servo output
     // Add 3 to get from PORTB pin number to RPn number

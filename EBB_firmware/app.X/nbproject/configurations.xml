@@ -373,34 +373,12 @@
       </makeCustomizationType>
       <C18>
       </C18>
+      <C18-AS>
+      </C18-AS>
       <C18-LD>
       </C18-LD>
       <C18LanguageToolchain>
       </C18LanguageToolchain>
-      <HI-TECH-COMP>
-        <property key="asmlist" value="true"/>
-        <property key="define-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
-        <property key="extra-include-directories"
-                  value="../Microchip/Include;../Microchip/Include/USB;./source;./"/>
-        <property key="identifier-length" value="255"/>
-        <property key="operation-mode" value="free"/>
-        <property key="opt-xc8-compiler-strict_ansi" value="false"/>
-        <property key="optimization-assembler" value="true"/>
-        <property key="optimization-assembler-files" value="false"/>
-        <property key="optimization-debug" value="false"/>
-        <property key="optimization-global" value="true"/>
-        <property key="optimization-level" value="9"/>
-        <property key="optimization-set" value="default"/>
-        <property key="optimization-speed" value="true"/>
-        <property key="preprocess-assembler" value="true"/>
-        <property key="undefine-macros" value=""/>
-        <property key="use-cci" value="false"/>
-        <property key="verbose" value="false"/>
-        <property key="warning-level" value="0"/>
-        <property key="what-to-do" value="ignore"/>
-      </HI-TECH-COMP>
-      <HI-TECH-LINK>
-      </HI-TECH-LINK>
       <ICD3PlatformTool>
         <property key="AutoSelectMemRanges" value="auto"/>
         <property key="Freeze Peripherals" value="true"/>
@@ -430,16 +408,15 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </ICD3PlatformTool>
-      <XC8-config-global>
-        <property key="output-file-format" value="-mcof,+elf"/>
-      </XC8-config-global>
       <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
-        <HI-TECH-COMP>
-        </HI-TECH-COMP>
-        <HI-TECH-LINK>
-        </HI-TECH-LINK>
-        <XC8-config-global>
-        </XC8-config-global>
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
     </conf>
   </confs>
