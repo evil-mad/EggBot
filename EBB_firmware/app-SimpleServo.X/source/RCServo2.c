@@ -278,6 +278,9 @@ UINT8 RCServo2_Move(
     UINT8 i;
     UINT8 Channel;
 
+    INTCONbits.GIEL = 0;	// Turn low priority interrupts off
+
+
     // Get the channel that's already assigned to the RPn, or assign a new one
     // if possible. If this returns zero, then do nothing as we're out of
     // channels.
@@ -286,6 +289,7 @@ UINT8 RCServo2_Move(
     // Error out if there were no available channels left
     if (Channel == 0)
     {
+        INTCONbits.GIEL = 1;	// Turn low priority interrupts on
         return 0;
     }
 
@@ -340,5 +344,6 @@ UINT8 RCServo2_Move(
             FIFOEmpty = FALSE;
         }
 	}
+    INTCONbits.GIEL = 1;	// Turn low priority interrupts on
     return Channel;
 }

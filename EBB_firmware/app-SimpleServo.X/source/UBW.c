@@ -100,7 +100,8 @@
 
 
 // Constants for servo motor speed
-#define SERVO_MOTOR_STOP            17625
+//#define SERVO_MOTOR_STOP            17625
+#define SERVO_MOTOR_STOP            0
 #define SERVO_MOTOR_RUN             22000
 
 // Constants for timed operations
@@ -364,6 +365,11 @@ void low_ISR(void)
 
                 // Disable interrupts (high)
                 INTCONbits.GIEH = 0;
+
+                // For v2.1.5, found bug where if a pin is HIGH when we start doing
+                // RC output, the output is totally messed up. So make sure to set
+                // the pin low first.
+                SetPinLATFromRPn(gRC2RPn[gRC2Ptr], 0);
 
                 // Load up the new compare time
                 CCPR2H = gRC2Value[gRC2Ptr] >> 8;
