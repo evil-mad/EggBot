@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="62">
+  <logicalFolder name="root" displayName="root" projectFiles="true">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
+        <itemPath>../Microchip/Include/USB/usb.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_ch9.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_common.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_device.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_function_cdc.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_hal.h</itemPath>
+        <itemPath>../Microchip/Include/USB/usb_hal_pic18.h</itemPath>
+      </logicalFolder>
+      <itemPath>source/ebb.h</itemPath>
+      <itemPath>source/HardwareProfile.h</itemPath>
+      <itemPath>source/HardwareProfile_EBB_V13_and_above.h</itemPath>
+      <itemPath>source/RCServo2.h</itemPath>
+      <itemPath>source/UBW.h</itemPath>
+      <itemPath>source/usb_config.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LibraryFiles"
+                   displayName="Library Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="LinkerScript"
+                   displayName="Linker Files"
+                   projectFiles="true">
+      <itemPath>source/BL_rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/rm18f46j50_g.lkr</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ObjectFiles"
+                   displayName="Object Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="USB Stack" displayName="USB Stack" projectFiles="true">
+        <itemPath>../Microchip/USB/usb_device.c</itemPath>
+        <itemPath>../Microchip/USB/CDC Device Driver/usb_function_cdc.c</itemPath>
+      </logicalFolder>
+      <itemPath>source/ebb.c</itemPath>
+      <itemPath>source/main.c</itemPath>
+      <itemPath>source/RCServo2.c</itemPath>
+      <itemPath>source/UBW.c</itemPath>
+      <itemPath>source/usb_descriptors.c</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="EBBv13_with_bootloader" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F46J50</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.44</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="true"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <C18>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="false"/>
+        <property key="enable-od" value="false"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="false"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="false"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="false"/>
+        <property key="enable-ou" value="false"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../Microchip/Include;../Microchip/Include/USB;.;./source"/>
+        <property key="optimization-master" value="Disable all"/>
+        <property key="preprocessor-macros"
+                  value="BOARD_EBB_V13_AND_ABOVE;PROGRAMMABLE_WITH_USB_HID_BOOTLOADER"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="false"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value="./source"/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value="&quot;${DISTDIR}/EBF.X.${IMAGE_TYPE}.map&quot;"/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <ICD3PlatformTool>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="false"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xfff7"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="voltagevalue" value="3.25"/>
+      </ICD3PlatformTool>
+      <item path="source/rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+    </conf>
+    <conf name="EBBv13_no_bootloader" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F46J50</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>PICkit3PlatformTool</platformTool>
+        <languageToolchain>C18</languageToolchain>
+        <languageToolchainVersion>3.44</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="false"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <C18>
+        <property key="code-model" value="ms"/>
+        <property key="data-model" value="oa-"/>
+        <property key="default-char-unsigned" value="false"/>
+        <property key="enable-all-optimizations" value="false"/>
+        <property key="enable-int-promotion" value="false"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
+        <property key="enable-ob" value="false"/>
+        <property key="enable-od" value="false"/>
+        <property key="enable-om" value="true"/>
+        <property key="enable-on" value="true"/>
+        <property key="enable-op" value="false"/>
+        <property key="enable-opa" value="false"/>
+        <property key="enable-or" value="false"/>
+        <property key="enable-os" value="true"/>
+        <property key="enable-ot" value="false"/>
+        <property key="enable-ou" value="false"/>
+        <property key="enable-ow" value="true"/>
+        <property key="extra-include-directories"
+                  value="../Microchip/Include;../Microchip/Include/USB;.;./source"/>
+        <property key="optimization-master" value="Disable all"/>
+        <property key="preprocessor-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
+        <property key="procedural-abstraction-passes" value="0"/>
+        <property key="storage-class" value="sca"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="2"/>
+      </C18>
+      <C18-AS>
+        <property key="cross.reference.file" value=""/>
+        <property key="default.radix" value="HEX"/>
+        <property key="enable.case.sensitivity" value="false"/>
+        <property key="hex.output.format" value="INHX32"/>
+        <property key="preprocessor.macros" value=""/>
+        <property key="warning.level" value="0"/>
+      </C18-AS>
+      <C18-LD>
+        <property key="cod-file" value="false"/>
+        <property key="extra-lib-directories" value="./source"/>
+        <property key="hex-output-format" value="INHX32"/>
+        <property key="map-file" value=""/>
+      </C18-LD>
+      <C18LanguageToolchain>
+        <property key="extended-mode" value="false"/>
+        <property key="extended-mode-mcc18" value="false"/>
+        <property key="extended-mode-mpasm" value="false"/>
+        <property key="extended-mode-mplink" value="false"/>
+        <property key="stack-analysis" value="false"/>
+        <property key="stack-analysis-mcc18" value="false"/>
+        <property key="stack-analysis-mplink" value="false"/>
+      </C18LanguageToolchain>
+      <PICkit3PlatformTool>
+      </PICkit3PlatformTool>
+      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+    </conf>
+    <conf name="EBBv13_XC8_no_bootloader" type="2">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <targetDevice>PIC18F46J50</targetDevice>
+        <targetHeader></targetHeader>
+        <targetPluginBoard></targetPluginBoard>
+        <platformTool>ICD3PlatformTool</platformTool>
+        <languageToolchain>XC8</languageToolchain>
+        <languageToolchainVersion>1.11</languageToolchainVersion>
+        <platform>3</platform>
+      </toolsSet>
+      <compileType>
+        <linkerTool>
+          <linkerLibItems>
+          </linkerLibItems>
+        </linkerTool>
+        <loading>
+          <makeArtifact PL="../bootloader.X"
+                        CT="1"
+                        CN="46J50"
+                        AC="true"
+                        BL="true"
+                        WD="../bootloader.X"
+                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
+                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
+                        OP="dist/46J50/production/bootloader.X.production.hex"
+                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
+                        FL="dist/46J50/production/bootloader.X.production.hex"
+                        PD="dist/46J50/production/bootloader.X.production.cof"
+                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+          </makeArtifact>
+          <useAlternateLoadableFile>false</useAlternateLoadableFile>
+          <alternateLoadableFile></alternateLoadableFile>
+        </loading>
+      </compileType>
+      <makeCustomizationType>
+        <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
+        <makeCustomizationPreStep></makeCustomizationPreStep>
+        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
+        <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
+        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+      </makeCustomizationType>
+      <HI-TECH-COMP>
+        <property key="define-macros" value="BOARD_EBB_V13_AND_ABOVE"/>
+        <property key="extra-include-directories"
+                  value="../Microchip/Include;../Microchip/Include/USB;/source"/>
+        <property key="identifier-length" value="255"/>
+        <property key="operation-mode" value="free"/>
+        <property key="opt-xc8-compiler-strict_ansi" value="false"/>
+        <property key="optimization-assembler" value="true"/>
+        <property key="optimization-assembler-files" value="false"/>
+        <property key="optimization-debug" value="false"/>
+        <property key="optimization-global" value="true"/>
+        <property key="optimization-level" value="9"/>
+        <property key="optimization-set" value="default"/>
+        <property key="optimization-speed" value="true"/>
+        <property key="preprocess-assembler" value="true"/>
+        <property key="undefine-macros" value=""/>
+        <property key="use-cci" value="false"/>
+        <property key="verbose" value="false"/>
+        <property key="warning-level" value="0"/>
+        <property key="what-to-do" value="ignore"/>
+      </HI-TECH-COMP>
+      <HI-TECH-LINK>
+      </HI-TECH-LINK>
+      <ICD3PlatformTool>
+        <property key="AutoSelectMemRanges" value="auto"/>
+        <property key="Freeze Peripherals" value="true"/>
+        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
+        <property key="ToolFirmwareFilePath"
+                  value="Press to browse for a specific firmware version"/>
+        <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
+        <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="memories.aux" value="false"/>
+        <property key="memories.bootflash" value="false"/>
+        <property key="memories.configurationmemory" value="false"/>
+        <property key="memories.eeprom" value="true"/>
+        <property key="memories.flashdata" value="true"/>
+        <property key="memories.id" value="true"/>
+        <property key="memories.programmemory" value="true"/>
+        <property key="memories.programmemory.end" value="0xfff7"/>
+        <property key="memories.programmemory.start" value="0x0"/>
+        <property key="poweroptions.powerenable" value="false"/>
+        <property key="programoptions.eraseb4program" value="true"/>
+        <property key="programoptions.preserveeeprom" value="false"/>
+        <property key="programoptions.preserveprogramrange" value="false"/>
+        <property key="programoptions.preserveprogramrange.end" value="0xfff7"/>
+        <property key="programoptions.preserveprogramrange.start" value="0x0"/>
+        <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.usehighvoltageonmclr" value="false"/>
+        <property key="programoptions.uselvpprogramming" value="false"/>
+        <property key="voltagevalue" value="3.25"/>
+      </ICD3PlatformTool>
+      <XC8-config-global>
+      </XC8-config-global>
+      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+        <HI-TECH-COMP>
+        </HI-TECH-COMP>
+        <HI-TECH-LINK>
+        </HI-TECH-LINK>
+        <XC8-config-global>
+        </XC8-config-global>
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>

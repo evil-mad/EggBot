@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 2012 Microchip Technology Inc. -->
+
+<!-- XML Format Policy -->
+<!-- In VERSION tag, use MAJOR/MINOR/DOT OR STRING, not both at the same time -->
+
+<DISTRIBUTION>
+
+  <INFO>
+    <NAME>Microchip Libraries for Applications</NAME>
+    <SHORT_NAME>MLA</SHORT_NAME>
+    <VERSION>
+      <STRING>2013-06-15</STRING>
+    </VERSION>
+  </INFO>
+
+  <LIBRARIES>
+
+    <LIBRARY>
+      <NAME>Graphics Library</NAME>
+      <SHORT_NAME>GFX</SHORT_NAME>
+      <VERSION>
+        <MAJOR>3</MAJOR>
+        <MINOR>06</MINOR>
+        <DOT>04</DOT>
+      </VERSION>
+      <GDD_COMPATIBILITY>1</GDD_COMPATIBILITY>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Microchip Full Speed USB Library</NAME>
+      <SHORT_NAME>MCHPFSUSB</SHORT_NAME>
+      <VERSION>
+        <STRING>2.9j</STRING>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Memory Disk Drive Library</NAME>
+      <SHORT_NAME>MDD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>4</MINOR>
+        <DOT>4</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>TCPIP Stack</NAME>
+      <SHORT_NAME>TCPIP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>5</MAJOR>
+        <MINOR>42</MINOR>
+        <DOT>08</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>mTouchCap Library</NAME>
+      <SHORT_NAME>MTOUCHCAP</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>43</MINOR>
+        <DOT>00</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Smart Card Library</NAME>
+      <SHORT_NAME>SMCARD</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>03</MINOR>
+        <DOT>0</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>MiWi(TM) DE</NAME>
+      <SHORT_NAME>MIWI</SHORT_NAME>
+      <VERSION>
+        <MAJOR>4</MAJOR>
+        <MINOR>2</MINOR>
+        <DOT>6</DOT>
+      </VERSION>
+    </LIBRARY>
+
+    <LIBRARY>
+      <NAME>Android Accessory Framework</NAME>
+      <SHORT_NAME>Android</SHORT_NAME>
+      <VERSION>
+        <MAJOR>1</MAJOR>
+        <MINOR>02</MINOR>
+        <DOT>01</DOT>
+      </VERSION>
+    </LIBRARY>
+
+  </LIBRARIES>
+
+</DISTRIBUTION>
