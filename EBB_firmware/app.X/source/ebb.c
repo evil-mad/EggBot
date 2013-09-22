@@ -88,6 +88,9 @@
 //                - Fixed uninitzlied data bug with command FIFO. We were seeing
 //                      very long random delays first time SM,<delay>,0,0 was
 //                      used.
+//                - SP command was executing servo move at end of <duration>. It
+//                      now starts servo move and <duration> delay at same time.
+//                - Updated USB stack to Microchip MAL USB v2.9j
 // 
 
 #include <p18cxxx.h>
