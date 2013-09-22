@@ -16,7 +16,7 @@
 
     The software supplied herewith by Microchip Technology Incorporated
     (the "Company") for its PIC(R) Microcontroller is intended and
-    supplied to you, the Company’s customer, for use solely and
+    supplied to you, the Company's customer, for use solely and
     exclusively on Microchip PIC Microcontroller products. The
     software is owned by the Company and/or its supplier, and is
     protected under applicable copyright laws. All rights are reserved.
@@ -151,7 +151,7 @@
         #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
         #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
         #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
-#elif defined(_18F4450) || defined(_18F2450)
+    #elif defined(_18F4450) || defined(_18F2450)
         #define IN_DATA_BUFFER_ADDRESS 0x480
         #define OUT_DATA_BUFFER_ADDRESS (IN_DATA_BUFFER_ADDRESS + CDC_DATA_IN_EP_SIZE)
         #define LINE_CODING_ADDRESS (OUT_DATA_BUFFER_ADDRESS + CDC_DATA_OUT_EP_SIZE)
@@ -161,7 +161,7 @@
         #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
         #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
         #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
-    #elif defined(_16F1459)
+    #elif defined(_16F1459) || defined(_16LF1459) || defined(_16F1454) || defined(_16LF1454) || defined(_16F1455) || defined(_16LF1455)
         #define IN_DATA_BUFFER_ADDRESS 0x2140
         #define OUT_DATA_BUFFER_ADDRESS 0x2190
         #define LINE_CODING_ADDRESS 0x20A0
@@ -171,7 +171,7 @@
         #define OUT_DATA_BUFFER_ADDRESS_TAG @OUT_DATA_BUFFER_ADDRESS
         #define LINE_CODING_ADDRESS_TAG     @LINE_CODING_ADDRESS
         #define NOTICE_ADDRESS_TAG          @NOTICE_ADDRESS
-#else
+    #else
         #define IN_DATA_BUFFER_ADDRESS_TAG
         #define OUT_DATA_BUFFER_ADDRESS_TAG
         #define LINE_CODING_ADDRESS_TAG

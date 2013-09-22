@@ -155,7 +155,10 @@
    
    2.9f  Adding pragma for PIC18F97J94 Family BDT location.
 
-   2.9h   Updated to be able to support optional Microsoft OS Descriptors
+   2.9h  Updated to be able to support optional Microsoft OS Descriptors
+
+   2.9i  Updated to set UCON<SUSPND> bit on PIC16F USB devices during 
+         suspend, so as to save power.
    
 ********************************************************************/
 
@@ -2073,7 +2076,16 @@ static void USBCtrlTrfRxService(void)
 		//was non-NULL when USBEP0Receive() was called).
         if(outPipes[0].pFunc != NULL)
         {
-            outPipes[0].pFunc();
+            #if defined(__XC8)
+                //Special pragmas to suppress an expected/harmless warning
+                //message when building with the XC8 compiler
+                #pragma warning push
+                #pragma warning disable 1088
+                outPipes[0].pFunc();    //Call the user's callback function
+                #pragma warning pop
+            #else
+                outPipes[0].pFunc();    //Call the user's callback function
+            #endif
         }
         outPipes[0].info.bits.busy = 0;    
 
@@ -2411,7 +2423,7 @@ static void USBSuspend(void)
     USBActivityIE = 1;                     // Enable bus activity interrupt
     USBClearInterruptFlag(USBIdleIFReg,USBIdleIFBitNum);
 
-    #if defined(__18CXX)
+    #if defined(__18CXX) || defined(_PIC14E)
         U1CONbits.SUSPND = 1;                   // Put USB module in power conserve
                                                 // mode, SIE clock inactive
     #endif
@@ -2450,7 +2462,7 @@ static void USBWakeFromSuspend(void)
      */
     USB_WAKEUP_FROM_SUSPEND_HANDLER(EVENT_RESUME,0,0);
 
-    #if defined(__18CXX)
+    #if defined(__18CXX) || defined(_PIC14E)
         //To avoid improperly clocking the USB module, make sure the oscillator
         //settings are consistant with USB operation before clearing the SUSPND bit.
         //Make sure the correct oscillator settings are selected in the 
