@@ -215,7 +215,6 @@ UINT8 RCServo2_get_channel_from_RPn(UINT8 RPn)
 
 void RCServo2_S2_command (void)
 {
-	UINT8 Channel = 0;
 	UINT16 Duration = 0;
 	UINT8 Pin = 0;
 	UINT16 Rate = 0;
@@ -230,12 +229,6 @@ void RCServo2_S2_command (void)
 	// Bail if we got a conversion error
 	if (error_byte)
 	{
-		return;
-	}
-
-	if (Channel > MAX_RC2_SERVOS)
-	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
 	}
 

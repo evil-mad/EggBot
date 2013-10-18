@@ -89,49 +89,56 @@ ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 ${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/343710134 
 	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
+	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/343710134/usb_device.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/343710134/usb_device.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/131024517 
 	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
+	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/source/ebb.o: source/ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/ebb.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/ebb.o   source/ebb.c 
+	@${RM} ${OBJECTDIR}/source/ebb.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/ebb.o   source/ebb.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/ebb.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/ebb.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
+	@${RM} ${OBJECTDIR}/source/main.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/source/RCServo2.o: source/RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/RCServo2.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/RCServo2.o   source/RCServo2.c 
+	@${RM} ${OBJECTDIR}/source/RCServo2.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/RCServo2.o   source/RCServo2.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/RCServo2.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/RCServo2.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/source/UBW.o: source/UBW.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/UBW.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/UBW.o   source/UBW.c 
+	@${RM} ${OBJECTDIR}/source/UBW.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/UBW.o   source/UBW.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/UBW.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/UBW.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/usb_descriptors.o.d 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb_descriptors.o   source/usb_descriptors.c 
+	@${RM} ${OBJECTDIR}/source/usb_descriptors.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb_descriptors.o   source/usb_descriptors.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -139,6 +146,7 @@ else
 ${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/343710134 
 	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o.d 
+	@${RM} ${OBJECTDIR}/_ext/343710134/usb_device.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/343710134/usb_device.o   ../Microchip/USB/usb_device.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/343710134/usb_device.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/343710134/usb_device.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -146,6 +154,7 @@ ${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproje
 ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Driver/usb_function_cdc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/_ext/131024517 
 	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d 
+	@${RM} ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o   "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" 
 	@${DEP_GEN} -d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o 
 	@${FIXDEPS} "${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -153,6 +162,7 @@ ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o: ../Microchip/USB/CDC\ Device\ Dr
 ${OBJECTDIR}/source/ebb.o: source/ebb.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/ebb.o.d 
+	@${RM} ${OBJECTDIR}/source/ebb.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/ebb.o   source/ebb.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/ebb.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/ebb.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -160,6 +170,7 @@ ${OBJECTDIR}/source/ebb.o: source/ebb.c  nbproject/Makefile-${CND_CONF}.mk
 ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
+	@${RM} ${OBJECTDIR}/source/main.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -167,6 +178,7 @@ ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 ${OBJECTDIR}/source/RCServo2.o: source/RCServo2.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/RCServo2.o.d 
+	@${RM} ${OBJECTDIR}/source/RCServo2.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/RCServo2.o   source/RCServo2.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/RCServo2.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/RCServo2.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -174,6 +186,7 @@ ${OBJECTDIR}/source/RCServo2.o: source/RCServo2.c  nbproject/Makefile-${CND_CONF
 ${OBJECTDIR}/source/UBW.o: source/UBW.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/UBW.o.d 
+	@${RM} ${OBJECTDIR}/source/UBW.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/UBW.o   source/UBW.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/UBW.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/UBW.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -181,6 +194,7 @@ ${OBJECTDIR}/source/UBW.o: source/UBW.c  nbproject/Makefile-${CND_CONF}.mk
 ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/source 
 	@${RM} ${OBJECTDIR}/source/usb_descriptors.o.d 
+	@${RM} ${OBJECTDIR}/source/usb_descriptors.o 
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -o-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb_descriptors.o   source/usb_descriptors.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
@@ -192,13 +206,13 @@ endif
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    source/rm18f46j50_g.lkr
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_ICD3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 -z__MPLAB_DEBUGGER_PK3=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
 dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/rm18f46j50_g.lkr 
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "source\rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 	@echo "Creating unified hex file"
-	@"C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../dat/en_msgs.txt" dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.hex  -odist/${CND_CONF}/production/app.X.production.unified.hex
+	@"C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX/mplab_ide/mplab_ide/modules/../../dat/en_msgs.txt" -break=FFF8  dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.hex  -odist/${CND_CONF}/production/app.X.production.unified.hex
 
 endif
 

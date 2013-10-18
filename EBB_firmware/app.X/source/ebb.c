@@ -91,7 +91,19 @@
 //                - SP command was executing servo move at end of <duration>. It
 //                      now starts servo move and <duration> delay at same time.
 //                - Updated USB stack to Microchip MAL USB v2.9j
-// 
+// 2.2.2 10/15/13 - Fixed bug with SE command that was preventing anything other
+//                  than 50% duty cycle from working.
+//                - Updated SC,2,{0,1,2} to control PIC and drivers connection
+//                  0 = PIC controls built in drivers
+//                  1 = PIC controls external step/dir/en drives
+//                  2 = external step/dir/en controls built-in drivers
+//                - Also updated the pins that are used for driving external
+//                  step/dir/en drives. (See documentation)
+//                - Updated SC,1,{0,1,2} documentation to match code and removed
+//                  SC,14 which is not needed.
+//                - Updated logic for EM command to use state of SC,2,{0,1,2}
+//                  properly.
+//
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -125,12 +137,18 @@ typedef enum
 	SOLENOID_PWM
 } SolenoidStateType;
 
-// LOCAL FUNCTIONS
 static void process_SM(
 	unsigned int Duration, 
 	signed int A1Stp, 
 	signed int A2Stp
 );
+
+typedef enum
+{
+	PIC_CONTROLS_DRIVERS = 0,
+	PIC_CONTROLS_EXTERNAL,
+    EXTERNAL_CONTROLS_DRIVERS
+} DriverConfigurationType;
 
 #pragma udata access fast_vars
 // Working registers
@@ -149,7 +167,7 @@ unsigned int DemoModeActive;
 unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
-static unsigned char UseBuiltInDrivers;
+static DriverConfigurationType DriverConfiguration;
 
 // track the latest state of the pen
 static PenStateType PenState;
@@ -214,7 +232,7 @@ void high_ISR(void)
 			// Only output DIR bits if we are actually doing something
 			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
             {
-				if (UseBuiltInDrivers)
+				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 				{
 					if (CurrentCommand.DirBits & DIR1_BIT)
 					{
@@ -233,7 +251,7 @@ void high_ISR(void)
 						Dir2IO = 0;
 					}	
 				}
-				else
+                else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 				{
 					if (CurrentCommand.DirBits & DIR1_BIT)
 					{
@@ -281,7 +299,7 @@ void high_ISR(void)
 
 				if (TookStep)
 				{
-					if (UseBuiltInDrivers)
+					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 					{
 						if (OutByte & STEP1_BIT)
 						{
@@ -292,7 +310,7 @@ void high_ISR(void)
 							Step2IO = 1;
 						}
 					}
-					else
+                    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 					{
 						if (OutByte & STEP1_BIT)
 						{
@@ -330,12 +348,12 @@ void high_ISR(void)
 					Delay1TCY();
 					Delay1TCY();
 					Delay1TCY();
-					if (UseBuiltInDrivers)
+					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 					{
 						Step1IO = 0;
 						Step2IO = 0;
 					}
-					else
+                    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 					{
 						Step1AltIO = 0;
 						Step2AltIO = 0;
@@ -542,12 +560,11 @@ void EBB_Init(void)
     gUseRCPenServo = TRUE;
 
     // Set up pen up/down direction as output
-    /// TODO: This should be different based upon the board type, right?
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;
-	UseBuiltInDrivers = TRUE;
+	DriverConfiguration = PIC_CONTROLS_DRIVERS;
 	PenState = PEN_UP;
 	Layer = 0;
 	NodeCount = 0;
@@ -567,14 +584,15 @@ void EBB_Init(void)
 // SC,1,0<CR> will use just solenoid output for pen up/down
 // SC,1,1<CR> will use servo on RB1 for pen up/down
 // SC,1,2<CR> will use servo on RB1 for pen up/down, but with ECCP2 (PWM) in hardware (default)
-// SC,2,0<CR> will use built-in stepper driver chips (default)
-// SC,2,1<CR> will use the following pins for stepper driver outputs (EBB_V11)
-//		ENABLE1 = RA5
-//		ENABLE2 = RB5
-//		STEP1 = RD1
-//		DIR1 = RD0
-//		STEP2 = RC2
-//		DIR2 = RC0
+// SC,2,0<CR> will make PIC control drivers (default)
+// SC,2,1<CR> will make PIC control external drivers using these pins
+//		ENABLE1 = RD1
+//		ENABLE2 = RA1
+//		STEP1 = RC6
+//		DIR1 = RC2
+//		STEP2 = RA5
+//		DIR2 = RA2
+// SC,2,2<CR> will disconnect PIC from drivers and allow external step/dir source
 // SC,4,<servo2_min><CR> will set <servo2_min> as the minimum value for the servo (1 to 65535)
 // SC,5,<servo2_max><CR> will set <servo2_max> as the maximum value for the servo (1 to 65535)
 // SC,6,<servo_min><CR> will set <servo_min> as the minimum value for the servo (1 to 11890)
@@ -634,19 +652,58 @@ void parse_SC_packet (void)
 	{
 		if (Para2 == 0)
 		{
-			UseBuiltInDrivers = TRUE;
-			// Initalize the alternate driver I/O ports
-			Dir1AltIO_TRIS = 0;
-			Dir2AltIO_TRIS = 0;
-			Step1AltIO_TRIS = 0;
-			Step2AltIO_TRIS = 0;
-			Enable1AltIO_TRIS = 0;
-			Enable2AltIO_TRIS = 0;
+			DriverConfiguration = PIC_CONTROLS_DRIVERS;
+            // Connections to drivers become outputs
+            Enable1IO_TRIS = OUTPUT_PIN;
+            Enable2IO_TRIS = OUTPUT_PIN;
+            Step1IO_TRIS = OUTPUT_PIN;
+            Dir1IO_TRIS = OUTPUT_PIN;
+            Step2IO_TRIS = OUTPUT_PIN;
+            Dir2IO_TRIS = OUTPUT_PIN;
+			// Alternate I/O pins become inputs
+			Dir1AltIO_TRIS = INPUT_PIN;
+			Dir2AltIO_TRIS = INPUT_PIN;
+			Step1AltIO_TRIS = INPUT_PIN;
+			Step2AltIO_TRIS = INPUT_PIN;
+			Enable1AltIO_TRIS = INPUT_PIN;
+			Enable2AltIO_TRIS = INPUT_PIN;
 		}
-		else
+		else if (Para2 == 1)
 		{
-			UseBuiltInDrivers = FALSE;
+			DriverConfiguration = PIC_CONTROLS_EXTERNAL;
+            // Connections to drivers become inputs
+            Enable1IO_TRIS = INPUT_PIN;
+            Enable2IO_TRIS = INPUT_PIN;
+            Step1IO_TRIS = INPUT_PIN;
+            Dir1IO_TRIS = INPUT_PIN;
+            Step2IO_TRIS = INPUT_PIN;
+            Dir2IO_TRIS = INPUT_PIN;
+			// Alternate I/O pins become outputs
+			Dir1AltIO_TRIS = OUTPUT_PIN;
+			Dir2AltIO_TRIS = OUTPUT_PIN;
+			Step1AltIO_TRIS = OUTPUT_PIN;
+			Step2AltIO_TRIS = OUTPUT_PIN;
+			Enable1AltIO_TRIS = OUTPUT_PIN;
+			Enable2AltIO_TRIS = OUTPUT_PIN;
 		}
+        else if (Para2 == 2)
+        {
+            DriverConfiguration = EXTERNAL_CONTROLS_DRIVERS;
+            // Connections to drivers become inputs
+            Enable1IO_TRIS = INPUT_PIN;
+            Enable2IO_TRIS = INPUT_PIN;
+            Step1IO_TRIS = INPUT_PIN;
+            Dir1IO_TRIS = INPUT_PIN;
+            Step2IO_TRIS = INPUT_PIN;
+            Dir2IO_TRIS = INPUT_PIN;
+   			// Alternate I/O pins become inputs
+			Dir1AltIO_TRIS = INPUT_PIN;
+			Dir2AltIO_TRIS = INPUT_PIN;
+			Step1AltIO_TRIS = INPUT_PIN;
+			Step2AltIO_TRIS = INPUT_PIN;
+			Enable1AltIO_TRIS = INPUT_PIN;
+			Enable2AltIO_TRIS = INPUT_PIN;
+     }
 	}
 	// Set <min_servo> for Servo2 method
 	else if (Para1 == 4)
@@ -688,7 +745,7 @@ void parse_SC_packet (void)
 	{
 		g_servo2_rate_down = Para2;
 	}
-	if (Para1 == 13)
+    else if (Para1 == 13)
 	{
 		if (Para2)
 		{
@@ -924,16 +981,17 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 }
 
 // Enable Motor
-// Usage: EM,<EnableAxis1>,<EnableAxis2>,<EnableAxis3>,<EnableAxis4><CR>
+// Usage: EM,<EnableAxis1>,<EnableAxis2><CR>
 // Everything afer EnableAxis1 is optional
 // Each parameter can have a value of
 //		0 to disable that motor driver
-// FOR OLD DRIVER CHIP
+// FOR OLD DRIVER CHIP (A3967) - can do separate enables for each axis
 //		1 to enable the driver in 1/8th step mode
 //		2 to enable the driver in 1/4 step mode
 //		3 to enable the driver in 1/2 step mode
 //		4 to enable the driver in full step mode
-// FOR NEW DRIVER CHIP (only first parameter applies, and it applies to both drivers)
+// FOR NEW DRIVER CHIP (A4988/A4983)
+// (only first parameter applies, and it applies to both drivers)
 //		1 to enable the driver in 1/16th step mode
 //		2 to enable the driver in 1/8 step mode
 //		3 to enable the driver in 1/4 step mode
@@ -941,9 +999,14 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 //		5 to enable the driver in full step mode
 // If you disable a motor, it goes 'limp' (we clear the ENABLE pin on that motor's
 // driver chip)
+// Note that when using 0 or 1 for a paraemter, you can use both axis even
+// on a 'new' driver chip board. (i.e. EM,0,1 will disable motor 1 and enable 2)
+// Note that the MSx lines do not come to any headers, so even when an external
+// source is controlling the drivers, the PIC still needs to control the
+// MSx lines.
 void parse_EM_packet(void)
 {
-	unsigned char EA1, EA2, EA3, EA4;
+	unsigned char EA1, EA2;
 	ExtractReturnType RetVal;
 
 	// Extract each of the values.
@@ -955,11 +1018,18 @@ void parse_EM_packet(void)
 		{
 			return;
 		}
-		if (UseBuiltInDrivers)
+		if (
+            (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+            ||
+            (DriverConfiguration == EXTERNAL_CONTROLS_DRIVERS)
+        )
 		{
 			if (EA1 > 0)
 			{
-				Enable1IO = ENABLE_MOTOR;
+				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+                {
+                    Enable1IO = ENABLE_MOTOR;
+                }
 				if (EA1 == 1)
 				{
 					MS1_IO = 1;
@@ -993,10 +1063,13 @@ void parse_EM_packet(void)
 			}
 			else
 			{
-				Enable1IO = DISABLE_MOTOR;
+				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+                {
+    				Enable1IO = DISABLE_MOTOR;
+                }
 			}
 		}
-		else
+        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 		{
 			if (EA1 > 0)
 			{
@@ -1017,7 +1090,7 @@ void parse_EM_packet(void)
 		{
 			return;
 		}
-		if (UseBuiltInDrivers)
+		if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 		{
 			if (EA2 > 0)
 			{
@@ -1028,7 +1101,7 @@ void parse_EM_packet(void)
 				Enable2IO = DISABLE_MOTOR;
 			}
 		}
-		else
+        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 		{
 			if (EA2 > 0)
 			{
@@ -1040,7 +1113,8 @@ void parse_EM_packet(void)
 			}
 		}
 	}
-	print_ack();
+
+    print_ack();
 }
 
 // Node counter Incriment
@@ -1215,7 +1289,7 @@ void parse_QC_packet(void)
 void parse_SE_packet(void)
 {
 	UINT8 State = 0;
-	UINT16 Power = 1024;
+	UINT16 Power = 0;
 	
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
@@ -1228,19 +1302,34 @@ void parse_SE_packet(void)
 	}
 
 	// Limit check
-	if (Power <= 1023)
-	{
-		StoredEngraverPower = Power;
-        
+    if (Power > 1023)
+    {
+        Power = 1023;
+    }
+    if (State > 1)
+    {
+        State = 1;
+    }
+
+    // Set to %50 if no Power parameter specified, otherwise use parameter
+    if (Power == 0 && State == 1)
+    {
+        StoredEngraverPower = 512;
+    }
+    else
+    {
+        StoredEngraverPower = Power;
+    }
+    
+    // If we're not on, then turn us on
+    if (T2CONbits.TMR2ON != 1)
+    {
         // Set up PWM for Engraver control
         // We will use ECCP1 and Timer2 for the engraver PWM output on RB3
         // Our PWM will operate at about 40Khz.
 
         // Set our reload value
         PR2 = 0xFF;
-
-        // Set to %50 power on boot
-        StoredEngraverPower = 512;
 
         // Initalize Timer2
 
@@ -1259,7 +1348,7 @@ void parse_SE_packet(void)
         // Set up output routing to go to RB3 (RP6)
         RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
 
-    	T2CONbits.TMR2ON = 1;		// Turn it on
+        T2CONbits.TMR2ON = 1;		// Turn it on
     }
 
 	// Now act on the State

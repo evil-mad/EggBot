@@ -121,11 +121,11 @@
 	#define Enable1IO_TRIS		TRISEbits.TRISE0
 	#define Enable2IO			LATCbits.LATC1
 	#define Enable2IO_TRIS		TRISCbits.TRISC1
-/// TODO: Where should these go?
-	#define Enable1AltIO		LATEbits.LATE0
-	#define Enable1AltIO_TRIS	TRISEbits.TRISE0
-	#define Enable2AltIO		LATDbits.LATD6
-	#define Enable2AltIO_TRIS	TRISDbits.TRISD6
+    // Alternate enables for external drivers
+	#define Enable1AltIO		LATDbits.LATD1
+	#define Enable1AltIO_TRIS	TRISDbits.TRISD1
+	#define Enable2AltIO		LATAbits.LATA1
+	#define Enable2AltIO_TRIS	TRISAbits.TRISA1
 
 	/** D R I V E R   M I C R O S T E P ********************************/
 	#define MS1_IO				LATEbits.LATE2
@@ -144,15 +144,15 @@
 	#define Step2IO_TRIS		TRISDbits.TRISD4
 	#define Dir2IO				LATDbits.LATD5
 	#define Dir2IO_TRIS			TRISDbits.TRISD5
-/// TODO: What should these be?
-	#define Step1AltIO			LATCbits.LATC1
-	#define Step1AltIO_TRIS		TRISCbits.TRISC1
-	#define Dir1AltIO			LATDbits.LATD7
-	#define Dir1AltIO_TRIS		TRISDbits.TRISD7
-	#define Step2AltIO			LATDbits.LATD4
-	#define Step2AltIO_TRIS		TRISDbits.TRISD4
-	#define Dir2AltIO			LATDbits.LATD5
-	#define Dir2AltIO_TRIS		TRISDbits.TRISD5
+    // Alternat STEP/DIR for external drivers
+	#define Step1AltIO			LATCbits.LATC6
+	#define Step1AltIO_TRIS		TRISCbits.TRISC6
+	#define Dir1AltIO			LATCbits.LATC2
+	#define Dir1AltIO_TRIS		TRISCbits.TRISC2
+	#define Step2AltIO			LATAbits.LATA5
+	#define Step2AltIO_TRIS		TRISAbits.TRISA5
+	#define Dir2AltIO			LATAbits.LATA2
+	#define Dir2AltIO_TRIS		TRISAbits.TRISA2
     
 	/** G E N E R I C ***************************************************/
 	
