@@ -182,6 +182,8 @@ static UINT StoredEngraverPower;
 BOOL gUseSolenoid;
 // Set TRUE to enable RC Servo output for pen up/down
 BOOL gUseRCPenServo;
+// Set TRUE (default) to use 1/25Khz as <duration> units
+BOOL gUseOldDurationUnits;
 
 // ISR
 #pragma interrupt high_ISR
@@ -578,6 +580,7 @@ void EBB_Init(void)
 
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
 	PORTBbits.RB3 = 0;          // And make sure it starts out off
+    gUseOldDurationUnits = TRUE; // Set duration units to 1/25Khz
 }
 
 // Stepper (mode) Configure command
@@ -604,8 +607,9 @@ void EBB_Init(void)
 // SC,12,<servo2_rate><CR> sets the pen down speed
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
-// SC,14,1<CR> enables solenoid output on RB4
-// SC,14,0<CR> disables solenoid output on RB4
+// SC,14,1<CR> (default) Use 1/25Khz as units for <duration> parameter of SM, SP, and TP commands
+// SC,14,0<CR> Use 1ms as units for <duration> parameter of SM, SP and TP command
+
 void parse_SC_packet (void)
 {
 	unsigned char Para1 = 0;
@@ -756,18 +760,31 @@ void parse_SC_packet (void)
 			UseAltPause = FALSE;
 		}			
 	}
-	print_ack();
+    else if (Para1 == 14)
+	{
+		if (Para2)
+		{
+			gUseOldDurationUnits = TRUE;
+		}
+		else
+		{
+			gUseOldDurationUnits = FALSE;
+		}
+	}
+print_ack();
 }
 
 // The Stepper Motor command
-// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<axis3_steps>,<axis4_steps><CR>
-// <move_duration> is a number from 1 to 65535, indiciating the number of milliseconds this move should take
+// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
+// <move_duration> is a number from 1 to 65535, indiciating the number of milliseconds* this move should take
 // <axisX_steps> is a signed 16 bit number indicating how many steps (and what direction) the axis should take
-// NOTE1: <axis2_steps>, <axis3_steps> and <axis4_steps> are optional and can be left off
+// NOTE1: <axis2_steps> is optional and can be left off
 // If the EBB can not make the move in the speicified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axies, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
+// NOTE3: (*) The <move_duration> parameter, when used with step values of zero to produce a delay, has
+// units that are either 1/25Khz (default) or 1ms. Use SC,14 to switch the units for this parameter
 void parse_SM_packet (void)
 {
 	unsigned int Duration;
@@ -802,7 +819,14 @@ static void process_SM(
 	{
 		CommandFIFO[0].Command = COMMAND_DELAY;
         // Note: cast requred because integer promotion turned off (uses RAM)
-		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
+        if (gUseOldDurationUnits)
+        {
+    		CommandFIFO[0].DelayCounter = (UINT32)Duration;
+        }
+        else
+        {
+    		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
+        }
 	}
 	else
 	{
@@ -858,8 +882,9 @@ void parse_QP_packet(void)
 // Toggle Pen
 // Usage: TP,<duration><CR>
 // Returns: OK<CR>
-// Just toggles state of pen arm, then delays for the optional
-// <duration> milliseconds
+// Just toggles state of pen arm, then delays for the optional <duration>
+// Duration is in units of 1/25KHz (default) or units of 1ms, depending on
+// state of SC,14
 void parse_TP_packet(void)
 {
 	UINT16 CommandDuration = 500;
@@ -888,8 +913,10 @@ void parse_TP_packet(void)
 // Set Pen
 // Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
 // <State> is 0 (for down) or 1 (for up)
-// <Duration> is how long to wait (in milliseconds) before the next command
-//      in the motion control FIFO should start. (defaults to 500)
+// <Duration> is how long to wait before the next command in the motion control 
+//      FIFO should start. (defaults to 500)
+//      Note that the units of this parameter is either 1/25KHz (default) or
+//      1ms, depending on the state of SC,14
 // <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
 //      RC Servo output to different PortB pins.
 // This is a command that the user can send from the PC to set the pen state.
