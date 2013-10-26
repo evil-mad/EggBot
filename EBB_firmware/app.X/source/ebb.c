@@ -103,6 +103,8 @@
 //                  SC,14 which is not needed.
 //                - Updated logic for EM command to use state of SC,2,{0,1,2}
 //                  properly.
+//                - Added SC,14,{0,1} to switch between default of 1/25Khz units
+//                  for SP and TP command <duration> parameters, and 1ms units
 //
 
 #include <p18cxxx.h>
@@ -607,8 +609,8 @@ void EBB_Init(void)
 // SC,12,<servo2_rate><CR> sets the pen down speed
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
-// SC,14,1<CR> (default) Use 1/25Khz as units for <duration> parameter of SM, SP, and TP commands
-// SC,14,0<CR> Use 1ms as units for <duration> parameter of SM, SP and TP command
+// SC,14,1<CR> (default) Use 1/25Khz as units for <duration> parameter of SP, and TP commands
+// SC,14,0<CR> Use 1ms as units for <duration> parameter of SP and TP command
 
 void parse_SC_packet (void)
 {
@@ -776,15 +778,13 @@ print_ack();
 
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
-// <move_duration> is a number from 1 to 65535, indiciating the number of milliseconds* this move should take
+// <move_duration> is a number from 1 to 65535, indiciating the number of milliseconds this move should take
 // <axisX_steps> is a signed 16 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
 // If the EBB can not make the move in the speicified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axies, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
-// NOTE3: (*) The <move_duration> parameter, when used with step values of zero to produce a delay, has
-// units that are either 1/25Khz (default) or 1ms. Use SC,14 to switch the units for this parameter
 void parse_SM_packet (void)
 {
 	unsigned int Duration;
@@ -818,15 +818,7 @@ static void process_SM(
 	if (A1Stp == 0 && A2Stp == 0)
 	{
 		CommandFIFO[0].Command = COMMAND_DELAY;
-        // Note: cast requred because integer promotion turned off (uses RAM)
-        if (gUseOldDurationUnits)
-        {
-    		CommandFIFO[0].DelayCounter = (UINT32)Duration;
-        }
-        else
-        {
-    		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
-        }
+  		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
 	}
 	else
 	{
