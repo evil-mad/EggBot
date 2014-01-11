@@ -109,6 +109,7 @@ typedef enum {
 
 extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
+extern volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 
 extern near unsigned char error_byte;
 //extern unsigned char error_byte;
@@ -125,6 +126,6 @@ ExtractReturnType extract_number(ExtractType Type, void * ReturnValue, unsigned 
 void print_ack (void);
 void SetPinTRISFromRPn(char Pin, char State);
 void SetPinLATFromRPn(char Pin, char State);
-
+void AnalogConfigure(unsigned char Channel, unsigned char Enable);
 
 #endif //UBW_H

@@ -105,6 +105,8 @@
 //                  properly.
 //                - Added SC,14,{0,1} to switch between default of 1/25Khz units
 //                  for SP and TP command <duration> parameters, and 1ms units
+// 2.2.3 01/11/13 - Rewrote analog system so we don't have problems with QC
+//                  commands anymore. New command AC.
 //
 
 #include <p18cxxx.h>
@@ -504,9 +506,15 @@ void EBB_Init(void)
 //	PORTD = 0;
 //	TRISD = 0;
 //	PORTE = 0;
-//	TRISE = 0;	
-	ANCON0 = 0xFE;	// Let AN0 (RA0) be an analog input
-	ANCON1 = 0x17;	// Let AN11 (V+) also be an analog input
+//	TRISE = 0;
+
+    // And make sure to always use low priority for ADC
+    IPR1bits.ADIP = 0;
+    
+    // Turn on AN0 (RA0) as analog input
+    AnalogConfigure(0,1);
+    // Turn on AN11 (V+) as analog input
+    AnalogConfigure(11,1);
 
 	MS1_IO = 1;
 	MS1_IO_TRIS = OUTPUT_PIN;
@@ -1237,58 +1245,15 @@ void parse_QB_packet(void)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
 {
-	unsigned int  AN0 = 0;
-	unsigned int  AN11 = 0;
+    // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
+    // mainline code accessing at the same time, we will just wait for
+    // the cycle of ADC readings to finish before we spit out our value.
+    while (PIE1bits.ADIE);
 
-	// Set the channel to zero to start off with (AN0)
-	ADCON0 = 0;
-	// Set up right justified, 8Tad tim, Fosc/4
-	ADCON1 = 0b10100100;
-	
-	// Clear the interrupt
-	PIR1bits.ADIF = 0;
-
-	// And make sure to always use low priority.
-	IPR1bits.ADIP = 0;
-
-	// Make sure it's on!
-	ADCON0bits.ADON = 1;
-
-	// Wait for 10ms
-	QC_ms_timer = 10;
-	while (QC_ms_timer);
-
-	// And tell the A/D to GO!
-	ADCON0bits.GO_DONE = 1;
-	
-	// Now sit and wait until the conversion is done
-	while (ADCON0bits.GO_DONE)
-	;
-
-	// Now grab our result
-	AN0 = ((UINT)ADRESH << 8) + ADRESL;
-	
-	// Set the channel to AN11
-	ADCON0 = 0b00101101;
-	
-	// Wait for 10ms
-	QC_ms_timer = 10;
-	while (QC_ms_timer);
-
-	// And tell the A/D to GO!
-	ADCON0bits.GO_DONE = 1;
-	
-	// Now sit and wait until the conversion is done
-	while (ADCON0bits.GO_DONE)
-	;
-	
-	// Now grab our result
-	AN11 = ((UINT)ADRESH << 8) + ADRESL;
-	
 	// Print out our results
-	printf ((far rom char*)"%04i,%04i\r\n", AN0, AN11);
+	printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
 
-	print_ack();	
+	print_ack();
 }	
 
 // Set Engraver

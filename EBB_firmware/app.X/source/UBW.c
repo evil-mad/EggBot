@@ -87,6 +87,8 @@
 #define kCR						0x0D
 #define kLF						0x0A
 
+#define ANALOG_INITATE_MS_BETWEEN_STARTS 5     // Number of ms between analog converts (all enabled channels)
+
 /** V A R I A B L E S ********************************************************/
 #pragma udata access fast_vars
 
@@ -102,7 +104,6 @@ near volatile unsigned int ISR_A_RepeatRate;			// How many 1ms ticks between Ana
 near volatile unsigned char ISR_A_FIFO_in;				// In pointer
 near volatile unsigned char ISR_A_FIFO_out;				// Out pointer
 near volatile unsigned char ISR_A_FIFO_length;			// Current FIFO depth
-near volatile unsigned char AnalogEnable;				// Maximum ADC channel to convert
 
 // This byte has each of its bits used as a seperate error flag
 near unsigned char error_byte;
@@ -117,6 +118,9 @@ near unsigned char g_RC_timing_ptr;
 near unsigned int D_tick_counter;
 near unsigned int A_tick_counter;
 near unsigned char A_cur_channel;
+near unsigned char AnalogInitiate;
+near volatile unsigned int AnalogEnabledChannels;
+near volatile unsigned int ChannelBit;
 
 // ROM strings
 const rom char st_OK[] = {"OK\r\n"};
@@ -130,13 +134,13 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.2\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.3\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
-volatile unsigned int ISR_A_FIFO[12][kISR_FIFO_A_DEPTH];	// Stores the most recent analog conversions
+volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];	// FIFO of actual data
 volatile tRC_state g_RC_state[kRC_DATA_SIZE];				// Stores states for each pin for RC command
 volatile unsigned int g_RC_value[kRC_DATA_SIZE];			// Stores reload values for TMR0
@@ -231,6 +235,7 @@ void parse_PC_packet (void);	// PC Pulse Configure
 void parse_BL_packet (void);	// BL Boot Load command
 void parse_CK_packet (void);	// CK ChecK command
 void parse_MR_packet (void);	// MR Motors Run command
+void parse_AC_packet (void);     // AC Analog Configure
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -373,7 +378,7 @@ void low_ISR(void)
 		}
 		
 		// See if it's time to fire off an A packet
-		if ((ISR_A_RepeatRate > 0) && (AnalogEnable > 0))
+		if ((ISR_A_RepeatRate > 0) && (AnalogEnabledChannels > 0))
 		{
 			A_tick_counter++;
 			if (A_tick_counter >= ISR_A_RepeatRate)
@@ -399,28 +404,36 @@ void low_ISR(void)
 			}	
 		}
 
-		// See if it's time to start analog conversions
-		if (AnalogEnable > 0)
-		{
-			// Set the channel to zero to start off with
-			A_cur_channel = 0;
-			ADCON0 = (A_cur_channel << 2) + 1;
+		// Only start analog conversions if there are channels enabled
+        if (AnalogEnabledChannels)
+        {
+            // Only start every so many ms
+            if (AnalogInitiate >= ANALOG_INITATE_MS_BETWEEN_STARTS)
+            {
+                // Always start off with calibration
+                ADCON1bits.ADCAL = 1;
 
-			// Clear the interrupt
-			PIR1bits.ADIF = 0;
+                // Clear the interrupt
+                PIR1bits.ADIF = 0;
 
-			// And make sure to always use low priority.
-			IPR1bits.ADIP = 0;
+                // Set the interrupt enable
+                PIE1bits.ADIE = 1;
 
-			// Set the interrupt enable
-			PIE1bits.ADIE = 1;
+                // Make sure it's on!
+                ADCON0bits.ADON = 1;
 
-			// Make sure it's on!
-			ADCON0bits.ADON = 1;
+                // And tell the A/D to GO!
+                ADCON0bits.GO_DONE = 1;
 
-			// And tell the A/D to GO!
-			ADCON0bits.GO_DONE = 1;
-		}
+                // Reset AnalogInitiate counter
+                AnalogInitiate = 0;
+            }
+            // Otherwise, incriment each 1ms
+            else
+            {
+                AnalogInitiate++;
+            }
+        }
 
 		// Is Pulse Mode on?
 		if (gPulsesOn)
@@ -486,15 +499,43 @@ void low_ISR(void)
 		// Clear the interrupt
 		PIR1bits.ADIF = 0;
 
-		// Read out the value that we just converted, and store it.
-		ISR_A_FIFO[A_cur_channel][ISR_A_FIFO_in] = 
-			(unsigned int)ADRESL 
-			| 
-			((unsigned int)ADRESH << 8);
-	
-		// Incriment the channel and write the new one in 
-		A_cur_channel++;
-		if (A_cur_channel >= AnalogEnable)
+        // If we just had a calibration, means we just started, so clear things
+        // out and begin our sequence.
+        if (ADCON1bits.ADCAL)
+        {
+            ADCON1bits.ADCAL = 0;
+            ChannelBit = 0x0001;
+            A_cur_channel = 0;
+        }
+        else
+        {
+            // Read out the value that we just converted, and store it.
+            ISR_A_FIFO[A_cur_channel] =
+                (unsigned int)ADRESL
+                |
+                ((unsigned int)ADRESH << 8);
+
+            // Incriment the channel and mask bit
+            ChannelBit = ChannelBit << 1;
+            A_cur_channel++;
+        }
+
+        // Walk through the enabled channels until we find the next one
+        while (A_cur_channel < 16)
+        {
+            if (ChannelBit & AnalogEnabledChannels)
+            {
+                break;
+            }
+            else
+            {
+                // Incriment the channel and write the new one in
+                A_cur_channel++;
+                ChannelBit = ChannelBit << 1;
+            }
+        }
+
+		if (A_cur_channel >= 16)
 		{
 			// We're done, so just sit and wait
 			// Turn off our interrupts though.
@@ -556,7 +597,7 @@ void UserInit(void)
 	// Turn off the ADC
 //	ADCON0bits.ADON = 0;
 	// Turn off our own idea of how many analog channels to convert
-	AnalogEnable = 0;
+	AnalogEnabledChannels = 0;
 	// Make all of PORTB inputs
 	LATB = 0x00;
 	TRISB = 0xFF;
@@ -620,12 +661,9 @@ void UserInit(void)
 
 	// Set up the Analog to Digital converter
 	// Clear out the FIFO data
-	for (i = 0; i < 12; i++)
+	for (i = 0; i < 16; i++)
 	{
-		for (j = 0; j < kISR_FIFO_A_DEPTH; j++)
-		{
-			ISR_A_FIFO[i][j] = 0;
-		}
+    	ISR_A_FIFO[i] = 0;
 	}	
 
     // Inialize USB TX and RX buffer management
@@ -659,6 +697,16 @@ void UserInit(void)
 	INTCONbits.TMR0IF = 0;	// Clear the interrupt flag
 	INTCONbits.TMR0IE = 0;	// And clear the interrupt enable
 	INTCON2bits.TMR0IP = 0;	// Low priority
+
+    // Turn on band-gap
+    ANCON1bits.VBGEN = 1;
+
+    // Set up ADCON1 options
+    // A/D Result right justified
+    // Normal A/D (no calibration)
+    // Acq time = 20 Tad (?)
+    // Tad = Fosc/64
+    ADCON1 = 0b10111110;
 
     // Enable interrupt priorities
     RCONbits.IPEN = 1;
@@ -1332,6 +1380,12 @@ void parse_packet(void)
 			parse_QM_packet();
 			break;
 		}
+		case ('A' * 256) + 'C':
+		{
+			// AC for Analog Configure
+			parse_AC_packet();
+			break;
+		}
 		default:
 		{
 			if (0 == cmd2)
@@ -1486,53 +1540,19 @@ void parse_T_packet(void)
 	print_ack ();
 }
 
-
-// FORMAT: C,<portA_IO>,<portB_IO>,<portC_IO>,<analog_config><CR>
-// EXAMPLE: "C,255,0,4,0<CR>"
+// IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
+// UBW version. The analog config value is eleminated, replaced with the "AC"
+// command.
+// FORMAT: C,<portA_IO>,<portB_IO>,<portC_IO>,<portD_IO>,<portE_IO><CR>
+// EXAMPLE: "C,255,0,4,0,0,0<CR>"
 // <portX_IO> is the byte sent to the Data Direction (DDR) regsiter for
 // each port. A 1 in a bit location means input, a 0 means output.
-// <analog_config> is a value between 0 and 12. It tells the UBW
-// how many analog inputs to enable. If a zero is sent for this 
-// parameter, all analog inputs are disabled.
-// For the other values, see the following chart to know what pins are 
-// used for what:
-// 
-// Note that in the following chart, PortE is references. This port
-// only exists on the 40 and 44 pin versions of the UBW. For the 
-// 28 pin versions of the UBW, all PortE based analog pins will return
-// zero.
 //
-// <analog_config>	Analog Inputs Enabled	Pins Used For Analog Inputs
-// ---------------	---------------------	-------------------------------
-//	0				<none>					<none>
-//	1				AN0						A0
-//	2				AN0,AN1					A0,A1	
-//	3				AN0,AN1,AN2				A0,A1,A2	
-//	4				AN0,AN1,AN2,AN3			A0,A1,A2,A3	
-//	5				AN0,AN1,AN2,AN3,AN4		A0,A1,A2,A3,A5		
-//	6				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0
-//						AN5						
-//	7				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1
-//						AN5,AN6						
-//	8				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1,E2
-//						AN5,AN6,AN7						
-//	9				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1,E2,B2
-//						AN5,AN6,AN7,AN8						
-//	10				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1,E2,B2,B3
-//						AN5,AN6,AN7,AN8,
-//						AN9						
-//	11				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1,E2,B2,B3,B1
-//						AN5,AN6,AN7,AN8,
-//						AB9,AN10						
-//	12				AN0,AN1,AN2,AN3,AN4,	A0,A1,A2,A3,A5,E0,E1,E2,B2,B3,B1,B4
-//						AN5,AN6,AN7,AN8,
-//						AN9,AN10,AN11
 // NOTE: it is up to the user to tell the proper port direction bits to be
 // inputs for the analog channels they wish to use.
 void parse_C_packet(void)
 {
-	unsigned char PA, PB, PC, AA;
-	unsigned char PD, PE, PF, PG, PH, PJ;
+	unsigned char PA, PB, PC, PD, PE;
 
 	// Extract each of the four values.
 	extract_number (kUCHAR, &PA, kREQUIRED);
@@ -1540,12 +1560,7 @@ void parse_C_packet(void)
 	extract_number (kUCHAR, &PC, kREQUIRED);
 	extract_number (kUCHAR, &PD, kREQUIRED);
 	extract_number (kUCHAR, &PE, kREQUIRED);
-	extract_number (kUCHAR, &PF, kREQUIRED);
-	extract_number (kUCHAR, &PG, kREQUIRED);
-	extract_number (kUCHAR, &PH, kREQUIRED);
-	extract_number (kUCHAR, &PJ, kREQUIRED);
-	extract_number (kUCHAR, &AA, kREQUIRED);
-
+    
 	// Bail if we got a conversion error
 	if (error_byte)
 	{
@@ -1566,51 +1581,82 @@ void parse_C_packet(void)
 	TRISH = PH;
 	TRISJ = PJ;
 #endif	
-	// Handle the analog value.
-	// Maximum value of 12.
-	if (AA > 12)
-	{
-		AA = 12;
-	}
-	
-	// If we are turning off Analog inputs
-//	if (0 == AA)
-//	{
-//		// Turn all analog inputs into digital inputs
-//		ADCON1 = 0x0F;
-//		// Turn off the ADC
-//		ADCON0bits.ADON = 0;
-//		// Turn off our own idea of how many analog channels to convert
-//		AnalogEnable = 0;
-//	}
-//	else
-//	{
-//		// Some protection from ISR
-//		AnalogEnable = 0;
-	
-		// We're turning some on.
-		// Start by selecting channel zero		
-//		ADCON0 = 0;
-	
-		// Then enabling the proper number of channels
-//		ADCON1 = 15 - AA;
-	
-		// Set up ADCON2 options
-		// A/D Result right justified
-		// Acq time = 20 Tad (?)
-		// Tad = Fosc/64
-//		ADCON2 = 0b10111110;
-	
-		// Turn on the ADC
-//		ADCON0bits.ADON = 1;
-	
-		// Tell ourselves how many channels to convert, and turn on ISR conversions
-//		AnalogEnable = AA;
-	
-//		T4CONbits.TMR4ON = 1;
-//	}
 	
 	print_ack ();
+}
+
+// This function turns on or off an analog channel
+// It is called from other pieces of code, not the user
+void AnalogConfigure(unsigned char Channel, unsigned char Enable)
+{
+    if (Channel > 16)
+    {
+        Channel = 16;
+    }
+
+    if (Enable)
+    {
+        AnalogEnabledChannels |= ((unsigned int)0x0001 << Channel);
+        // Make sure to turn this analog input on
+        if (Channel < 8)
+        {
+            // Clear the right bit in ANCON0
+            ANCON0 &= ~(1 << Channel);
+        }
+        else
+        {
+            if (Channel <= 12)
+            {
+                // Clear the right bit in ANCON1
+                ANCON1 &= ~(1 << (Channel-8));
+            }
+        }
+    }
+    else
+    {
+        AnalogEnabledChannels &= ~((unsigned int)0x0001 << Channel);
+        // Make sure to turn this analog input off
+        if (Channel < 8)
+        {
+            // Set the right bit in ANCON0
+            ANCON0 |= (1 << Channel);
+        }
+        else
+        {
+            if (Channel <= 12)
+            {
+                // Set the right bit in ANCON1
+                ANCON1 |= (1 << (Channel-8));
+            }
+        }
+    }
+}
+
+// Analog Configure
+// "AC,<channel>,<enable><CR>"
+// <channel> is one of the 16 possible analog channels, from 0 through 15
+// <enable> is 0 to disable, or 1 to enable
+// To turn on a particular analog channel, use the AC command to enable it.
+// To turn off a partiuclar analog channel, use the AC command to disable it.
+// Once enabled, that channel will be converted at the normal ADC converstion
+// rate and will show up in A packets.
+void parse_AC_packet(void)
+{
+	unsigned char Channel, Enable;
+
+	// Extract each of the two values.
+	extract_number (kUCHAR, &Channel, kREQUIRED);
+	extract_number (kUCHAR, &Enable, kREQUIRED);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+    AnalogConfigure(Channel, Enable);
+    
+   	print_ack ();
 }
 
 // Outputs values to the ports pins that are set up as outputs.
@@ -1734,31 +1780,34 @@ void parse_V_packet(void)
 }
 
 // A is for read Analog inputs
-// Just print out the last analog values for each of the
-// enabled channels. The number of value returned in the
-// A packet depend upon the number of analog inputs enabled.
-// The user can enabled any number of analog inputs between 
-// 0 and 12. (none enabled, through all 12 analog inputs enabled).
-// Returned packet will look like "A,0,0,0,0,0,0<CR>" if
-// six analog inputs are enabled but they are all
-// grounded. Note that each one is a 10 bit
-// value, where 0 means the intput was at ground, and
-// 1024 means it was at +5 V. (Or whatever the USB +5 
-// pin is at.) 
+// Just print out the analog values for each of the
+// enabled channels.
+// Returned packet will look like 
+// "A,2:421,5:891,9:3921<CR>" if channels 2, 5 and 9
+// are enabled.
 void parse_A_packet(void)
 {
 	char channel = 0;
+    unsigned int ChannelBit = 0x0001;
 
-	// Put the beginning of the packet in place
+    // Put the beginning of the packet in place
 	printf ((far rom char *)"A");
-	
-	// Now add each analog value
-	for (channel = 0; channel < AnalogEnable; channel++)
+
+    // Sit and spin, waiting for one set of analog conversions to complete
+    while (PIE1bits.ADIE);
+
+	// Now print each analog value
+	for (channel = 0; channel < 16; channel++)
 	{
-		printf(
-			(far rom char *)",%04u" 
-			,ISR_A_FIFO[channel][ISR_A_FIFO_out]
-		);
+        if (ChannelBit & AnalogEnabledChannels)
+        {
+            printf(
+                (far rom char *)",%02u:%04u"
+                ,channel
+                ,ISR_A_FIFO[channel]
+            );
+        }
+        ChannelBit = ChannelBit << 1;
 	}
 	
 	// Add \r\n and terminating zero.
