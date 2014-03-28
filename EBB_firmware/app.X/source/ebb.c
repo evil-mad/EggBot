@@ -85,7 +85,7 @@
 //                - Fixed bug with all <duration> parameters, SM, SP, TP
 //                      commands. Now in ms, defaults to 500ms, and actually
 //                      works up to 64Kms.
-//                - Fixed uninitzlied data bug with command FIFO. We were seeing
+//                - Fixed uninitialized data bug with command FIFO. We were seeing
 //                      very long random delays first time SM,<delay>,0,0 was
 //                      used.
 //                - SP command was executing servo move at end of <duration>. It
@@ -1240,7 +1240,7 @@ void parse_QB_packet(void)
 // For the REF_RA0 (current adjustment pot) a value of 0V-ADC (0 counts) = 46mA
 // and a value of 2.58V-ADC (800 counts) = 1.35A
 // For the V+ net a value of 0V-ADC (0 counts) = 0V on V+
-// and a value of 3.36V-ADC (1023 counts) = 37V on V+
+// and a value of 2.79V-ADC (870 counts) = 31.4V on V+
 // REF_RA0 comes in on AN0 (RA0)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
