@@ -76,7 +76,7 @@ FIXDEPS=fixDeps
 
 MP_PROCESSOR_OPTION=18F46J50
 MP_PROCESSOR_OPTION_LD=18f46j50
-MP_LINKER_DEBUG_OPTION=
+MP_LINKER_DEBUG_OPTION=  -u_DEBUGSTACK
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
@@ -212,7 +212,7 @@ dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFIL
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
 	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BL_rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"${DISTDIR}/EBF.X.${IMAGE_TYPE}.map" -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 	@echo "Creating unified hex file"
-	@"C:/Program Files (x86)/Microchip/MPLABX_1_90/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX_1_90/mplab_ide/mplab_ide/modules/../../dat/en_msgs.txt" -break=FFF8  dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.hex ../bootloader.X/dist/46J50/production/bootloader.X.production.hex -odist/${CND_CONF}/production/app.X.production.unified.hex
+	@"C:/Program Files (x86)/Microchip/MPLABX_2_20/mplab_ide/mplab_ide/modules/../../bin/hexmate" --edf="C:/Program Files (x86)/Microchip/MPLABX_2_20/mplab_ide/mplab_ide/modules/../../dat/en_msgs.txt" -break=FFF8  dist/${CND_CONF}/${IMAGE_TYPE}/app.X.${IMAGE_TYPE}.hex ../bootloader.X/dist/46J50/production/bootloader.X.production.hex -odist/${CND_CONF}/production/app.X.production.unified.hex
 
 endif
 

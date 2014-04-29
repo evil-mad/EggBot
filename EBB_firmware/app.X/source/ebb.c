@@ -1,3 +1,52 @@
+/*********************************************************************
+ *
+ *                EiBotBoard Firmware
+ *
+ *********************************************************************
+ * FileName:        ebb.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Based on original files by Microchip Inc. in MAL USB example.
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 // Versions:
 // 1.8 - 
 // 1.8.1 5/19/10 - Only change is to recompile with Microchip USB Stack v2.7
@@ -82,7 +131,7 @@
 //                      commands for SP up/down within ISR. Tested on all PortB.
 // 2.2.1 09/19/13 - Expanded internal delay counter to 32 bits so we can have
 //                      delays longer than 2.1s. Now up to 64K ms.
-//                - Fixed bug with all <duration> parameters, SM, SP, TP
+//                - Fixed bug with all <duration> parameters, SP, TP
 //                      commands. Now in ms, defaults to 500ms, and actually
 //                      works up to 64Kms.
 //                - Fixed uninitialized data bug with command FIFO. We were seeing
@@ -105,9 +154,23 @@
 //                  properly.
 //                - Added SC,14,{0,1} to switch between default of 1/25Khz units
 //                  for SP and TP command <duration> parameters, and 1ms units
-// 2.2.3 01/11/13 - Rewrote analog system so we don't have problems with QC
+// 2.2.3 01/11/14 - Rewrote analog system so we don't have problems with QC
 //                  commands anymore. New command AC.
-//
+// 2.2.4 04/26/14 - Fixed bug where 0 for duration in SM would cause problems
+//                - Found bug where the <servo_min> and <servo_max> values were
+//                  reversed in the SP command. This has now been fixed so that
+//                  SP commands will operate the same as 2.0.1 version.
+//                - Set initial  'position' of main servo to be 1mS to mimic
+//                  behavior of v2.0.1 firmware.
+//                - Updated license to BSD 3-clause
+//                - Changed SP and TP commands so that if no <duration> parameter
+//                  is used, it does not default to 500mS delay, but rather 0mS.
+//                  This should now work exactly as 2.0.1 when no parameter is
+//                  used.
+//                - Tested 2.2.4 against 2.0.1 with Seleae Logic analyser. Looked
+//                  at several Inkscape plots. Confirmed that timing of steppers
+//                  and servo are the same. Confirmed that all RB0 through RB7
+//                  outputs are the same between the two versions.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -186,8 +249,6 @@ static UINT StoredEngraverPower;
 BOOL gUseSolenoid;
 // Set TRUE to enable RC Servo output for pen up/down
 BOOL gUseRCPenServo;
-// Set TRUE (default) to use 1/25Khz as <duration> units
-BOOL gUseOldDurationUnits;
 
 // ISR
 #pragma interrupt high_ISR
@@ -201,6 +262,7 @@ void high_ISR(void)
 		USBDeviceTasks();
 	#endif
 
+    // 25KHz ISR fire
 	if (PIR1bits.TMR1IF)
 	{
 		// Clear the interrupt 
@@ -216,26 +278,30 @@ void high_ISR(void)
         // a delay associated with it, if DelayCounter is != 0.
         if (CurrentCommand.DelayCounter)
         {
-            CurrentCommand.DelayCounter--;
             // Double check that things aren't way too big
             if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
             {
                 CurrentCommand.DelayCounter = 0;
             }
+            else {
+                CurrentCommand.DelayCounter--;
+            }            
         }
 
         if (CurrentCommand.DelayCounter)
         {
             AllDone = FALSE;
         }
-        
+
+        PORTDbits.RD1 = 0;
+
         // Note: by not making this an else-if, we have our DelayCounter
         // counting done at the same time as our motor move or servo move.
         // This allows the delay time to start counting at the beginning of the
         // command execution.
         if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
 		{
-			// Only output DIR bits if we are actually doing something
+            // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
             {
 				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -431,7 +497,7 @@ void high_ISR(void)
 		}
 	
 		// If we're done with our current command, load in the next one
-		if (AllDone)
+		if (AllDone && CurrentCommand.DelayCounter == 0)
 		{
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
@@ -439,6 +505,9 @@ void high_ISR(void)
                 CurrentCommand = CommandFIFO[0];
 				FIFOEmpty = TRUE;
 			}
+            else {
+                CurrentCommand.DelayCounter = 0;
+            }
 		}
 		
 		// Check for button being pushed
@@ -494,8 +563,6 @@ void EBB_Init(void)
 	IPR1bits.TMR1IP = 1;	// Use high priority interrupt
 	PIR1bits.TMR1IF = 0;	// Clear the interrupt
 	PIE1bits.TMR1IE = 1;	// Turn on the interrupt
-
-	// For debugging
 
 //	PORTA = 0;
 	RefRA0_IO_TRIS = INPUT_PIN;
@@ -590,7 +657,6 @@ void EBB_Init(void)
 
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
 	PORTBbits.RB3 = 0;          // And make sure it starts out off
-    gUseOldDurationUnits = TRUE; // Set duration units to 1/25Khz
 }
 
 // Stepper (mode) Configure command
@@ -617,8 +683,7 @@ void EBB_Init(void)
 // SC,12,<servo2_rate><CR> sets the pen down speed
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
-// SC,14,1<CR> (default) Use 1/25Khz as units for <duration> parameter of SP, and TP commands
-// SC,14,0<CR> Use 1ms as units for <duration> parameter of SP and TP command
+
 
 void parse_SC_packet (void)
 {
@@ -770,18 +835,7 @@ void parse_SC_packet (void)
 			UseAltPause = FALSE;
 		}			
 	}
-    else if (Para1 == 14)
-	{
-		if (Para2)
-		{
-			gUseOldDurationUnits = TRUE;
-		}
-		else
-		{
-			gUseOldDurationUnits = FALSE;
-		}
-	}
-print_ack();
+    print_ack();
 }
 
 // The Stepper Motor command
@@ -802,12 +856,40 @@ void parse_SM_packet (void)
 	extract_number (kUINT, &Duration, kREQUIRED);
 	extract_number (kINT, &A1Steps, kREQUIRED);
 	extract_number (kINT, &A2Steps, kOPTIONAL);
-	// Bail if we got a conversion error
+	
+    // Check for invalid durataion
+    if (Duration == 0) {
+    	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+
+    // Check for too-fast step request (>25KHz)
+    if (A1Steps > 0) {
+        if ((((UINT32)A1Steps * 1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
+            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+        }
+    } 
+    else {
+        if ((((UINT32)A1Steps * -1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
+            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+        }
+    }
+    if (A2Steps > 0) {
+        if ((((UINT32)A2Steps * 1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
+            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+        }
+    }
+    else {
+        if ((((UINT32)A2Steps * -1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
+            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+        }
+    }
+
+    // Bail if we got a conversion error
 	if (error_byte)
 	{
 		return;
 	}
-	process_SM(Duration, A1Steps, A2Steps);
+  	process_SM(Duration, A1Steps, A2Steps);
 
 	print_ack();
 }
@@ -882,12 +964,12 @@ void parse_QP_packet(void)
 // Toggle Pen
 // Usage: TP,<duration><CR>
 // Returns: OK<CR>
+// <duration> is optional, and defaults to 0mS
 // Just toggles state of pen arm, then delays for the optional <duration>
-// Duration is in units of 1/25KHz (default) or units of 1ms, depending on
-// state of SC,14
+// Duration is in units of 1ms
 void parse_TP_packet(void)
 {
-	UINT16 CommandDuration = 500;
+	UINT16 CommandDuration = 0;
 
 	// Extract each of the values.
 	extract_number (kUINT, &CommandDuration, kOPTIONAL);
@@ -912,11 +994,10 @@ void parse_TP_packet(void)
 
 // Set Pen
 // Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
-// <State> is 0 (for down) or 1 (for up)
+// <State> is 0 (for goto servo_max) or 1 (for goto servo_min)
 // <Duration> is how long to wait before the next command in the motion control 
-//      FIFO should start. (defaults to 500)
-//      Note that the units of this parameter is either 1/25KHz (default) or
-//      1ms, depending on the state of SC,14
+//      FIFO should start. (defaults to 0mS)
+//      Note that the units of this parameter is either 1ms
 // <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
 //      RC Servo output to different PortB pins.
 // This is a command that the user can send from the PC to set the pen state.
@@ -935,7 +1016,7 @@ void parse_TP_packet(void)
 void parse_SP_packet(void)
 {
 	UINT8 State = 0;
-	UINT16 CommandDuration = 500;
+	UINT16 CommandDuration = 0;
 	UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
     ExtractReturnType Ret;
 
@@ -994,12 +1075,12 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 
 	if (NewState == PEN_UP)
 	{
-        Position = g_servo2_max;
+        Position = g_servo2_min;
         Rate = g_servo2_rate_up;
 	}
 	else
 	{
-        Position = g_servo2_min;
+        Position = g_servo2_max;
         Rate = g_servo2_rate_down;
 	}
 

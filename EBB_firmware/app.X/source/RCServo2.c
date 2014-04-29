@@ -1,10 +1,60 @@
+/*********************************************************************
+ *
+ *                EiBotBoard Firmware
+ *
+ *********************************************************************
+ * FileName:        RCServo2.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Based on original files by Microchip Inc. in MAL USB example.
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
 /*
  * This module implements the RC Servo outputs, method 2
  * 
  * Started by Brian Schmalz (www.schmalzhaus.com) on 8/22/09
  * For the Egg Bot Firmware
  *
- * There are several parts of this file. It is written in a modular
+ * There are several paarts of this file. It is written in a modular
  * way to ease incorporation into different UBW (www.schmalzhaus.com/UBW) 
  * hardware builds. Because we don't want to have any function calls in the ISR,
  * the part of the ISR that this module contributes is implemented as a big
@@ -159,8 +209,8 @@ void RCServo2_Init(void)
 	gRC2SlotMS = 3;
 
     // Start with some reasonable default values for min and max
-	g_servo2_min = 20000;
-	g_servo2_max = 16000;
+	g_servo2_max = 16000;           // max = down
+	g_servo2_min = 12000;           // min = up, 1ms, inital value
 
 	g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;		// Always start out with RP4 as the output (just for this test version of code)
 	
@@ -324,14 +374,7 @@ UINT8 RCServo2_Move(
 
             // Now copy the values over into the FIFO element
             CommandFIFO[0].Command = COMMAND_SERVO_MOVE;
-            if (gUseOldDurationUnits)
-            {
-                CommandFIFO[0].DelayCounter = (UINT32)Delay;
-            }
-            else
-            {
-                CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-            }
+            CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
             CommandFIFO[0].ServoChannel = Channel;
             CommandFIFO[0].ServoRPn = RPn;
             CommandFIFO[0].ServoPosition = Position;

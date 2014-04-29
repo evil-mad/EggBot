@@ -31,7 +31,7 @@ DEFAULTCONF=EBBv13_with_bootloader
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=EBBv13_with_bootloader EBBv13_no_bootloader EBBv13_XC8_no_bootloader 
+ALLCONFS=EBBv13_with_bootloader EBBv13_no_bootloader EBBv13_XC8_no_bootloader EBBv13_XC8_with_bootloader 
 
 
 # build
@@ -48,6 +48,7 @@ ALLCONFS=EBBv13_with_bootloader EBBv13_no_bootloader EBBv13_XC8_no_bootloader
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_with_bootloader clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_no_bootloader clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_no_bootloader clean
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_with_bootloader clean
 
 
 
@@ -56,6 +57,7 @@ ALLCONFS=EBBv13_with_bootloader EBBv13_no_bootloader EBBv13_XC8_no_bootloader
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_with_bootloader build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_no_bootloader build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_no_bootloader build
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=EBBv13_XC8_with_bootloader build
 
 
 
