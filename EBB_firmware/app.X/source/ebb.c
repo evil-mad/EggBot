@@ -171,6 +171,8 @@
 //                  at several Inkscape plots. Confirmed that timing of steppers
 //                  and servo are the same. Confirmed that all RB0 through RB7
 //                  outputs are the same between the two versions.
+// 2.2.5 04/29/14 - Added 'long' arguments to SM for <move_duration> and <axis1>
+//                  and <axis2>. All can be 3 bytes now.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -205,9 +207,9 @@ typedef enum
 } SolenoidStateType;
 
 static void process_SM(
-	unsigned int Duration, 
-	signed int A1Stp, 
-	signed int A2Stp
+	UINT32 Duration,
+	INT32 A1Stp,
+	INT32 A2Stp
 );
 
 typedef enum
@@ -254,6 +256,8 @@ BOOL gUseRCPenServo;
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
+    TRISCbits.TRISC2 = 0;
+    PORTCbits.RC2 = 1;
 	//Check which interrupt flag caused the interrupt.
 	//Service the interrupt
 	//Clear the interrupt flag
@@ -524,6 +528,7 @@ void high_ISR(void)
 			ButtonPushed = TRUE;
 		}
 	}
+    PORTCbits.RC2 = 0;
 }
 
 // Init code
@@ -849,39 +854,48 @@ void parse_SC_packet (void)
 // pauses before raising or lowering the pen, for example.
 void parse_SM_packet (void)
 {
-	unsigned int Duration;
-	signed int A1Steps = 0, A2Steps = 0;
+	UINT32 Duration = 0;
+	INT32 A1Steps = 0, A2Steps = 0;
+    INT32 Steps = 0;
 
 	// Extract each of the values.
-	extract_number (kUINT, &Duration, kREQUIRED);
-	extract_number (kINT, &A1Steps, kREQUIRED);
-	extract_number (kINT, &A2Steps, kOPTIONAL);
-	
+	extract_number (kULONG, &Duration, kREQUIRED);
+	extract_number (kLONG, &A1Steps, kREQUIRED);
+	extract_number (kLONG, &A2Steps, kOPTIONAL);
+
     // Check for invalid durataion
     if (Duration == 0) {
     	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
 
     // Check for too-fast step request (>25KHz)
+    // First get absolute value of steps, then check if it's askign for >25KHz
     if (A1Steps > 0) {
-        if ((((UINT32)A1Steps * 1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
-            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
-        }
-    } 
-    else {
-        if ((((UINT32)A1Steps * -1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
-            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
-        }
+        Steps = A1Steps;
     }
+    else {
+        Steps = -A1Steps;
+    }
+    // Check for too fast
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+        bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+    }
+    // And check for too slow
+    if ((Duration/1330) > Steps && Steps != 0) {
+        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+
     if (A2Steps > 0) {
-        if ((((UINT32)A2Steps * 1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
-            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
-        }
+        Steps = A2Steps;
     }
     else {
-        if ((((UINT32)A2Steps * -1000)/Duration) > (HIGH_ISR_TICKS_PER_MS * 1000)) {
-            bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
-        }
+        Steps = -A2Steps;
+    }    
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+        bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+    }
+    if ((Duration/1330) > Steps && Steps != 0) {
+        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
 
     // Bail if we got a conversion error
@@ -889,17 +903,33 @@ void parse_SM_packet (void)
 	{
 		return;
 	}
+
+    // If we get here, we know that step rate for both A1 and A2 is
+    // between 25KHz and 0.75Hz which are the limits of what EBB can do.
   	process_SM(Duration, A1Steps, A2Steps);
 
 	print_ack();
 }
 
+// Main stepper move function. This is the reason EBB exists.
+// <Duration> is a 3 byte unsigned int, the number of mS that the move should take
+// <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
+//  <Duration> mS, as 3 byte signed values, where the sign determines the motor
+//  direction.
+// This function waits until there is room in the 1-deep FIFO before placing
+// the data in the FIFO. The ISR then sees this data when it is done with its
+// current move, and starts this new move.
+//
+// In the future, making the FIFO more elements deep may be cool.
+// 
 static void process_SM(
-	unsigned int Duration, 
-	signed int A1Stp, 
-	signed int A2Stp
+	UINT32 Duration,
+	INT32 A1Stp,
+	INT32 A2Stp
 )
 {
+    UINT32 temp = 0;
+
 	// Trial: Spin here until there's space in the fifo
 	while(!FIFOEmpty)
 	;
@@ -908,7 +938,9 @@ static void process_SM(
 	if (A1Stp == 0 && A2Stp == 0)
 	{
 		CommandFIFO[0].Command = COMMAND_DELAY;
-  		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Duration;
+        // This is OK because we only need to multiply the 3 byte Duration by
+        // 25, so it fits in 4 bytes OK.
+  		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
 	}
 	else
 	{
@@ -931,19 +963,38 @@ static void process_SM(
 			A2Stp = -A2Stp;
 		}
         // To compute StepAdd values from Duration,
-        CommandFIFO[0].StepAdd[0] = (UINT16)
-                                (
-                                    ((UINT32)0x8000 * (UINT32)A1Stp)
-                                    /
-                                    (HIGH_ISR_TICKS_PER_MS * (UINT32)Duration)
-                                ) + 1;
+        if (A1Stp < 0x1FFFF) {
+            temp = (((0x8000 * A1Stp)/HIGH_ISR_TICKS_PER_MS)/Duration);
+        }
+        else {
+            temp = (((A1Stp/Duration) * 0x8000)/HIGH_ISR_TICKS_PER_MS);
+        }
+        if (temp > 0x8000) {
+            printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+            temp = 0x8000;
+        }
+        if (temp == 0 && A1Stp != 0) {
+            printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
+            temp = 1;
+        }
+        CommandFIFO[0].StepAdd[0] = temp;
         CommandFIFO[0].StepsCounter[0] = A1Stp;
-        CommandFIFO[0].StepAdd[1] = (UINT16)
-                                (
-                                    ((UINT32)0x8000 * (UINT32)A2Stp)
-                                    /
-                                    (HIGH_ISR_TICKS_PER_MS * (UINT32)Duration)
-                                ) + 1;
+
+        if (A2Stp < 0x1FFFF) {
+            temp = (((0x8000 * A2Stp)/HIGH_ISR_TICKS_PER_MS)/Duration);
+        }
+        else {
+            temp = (((A2Stp/Duration) * 0x8000)/HIGH_ISR_TICKS_PER_MS);
+        }
+        if (temp > 0x8000) {
+            printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+            temp = 0x8000;
+        }
+        if (temp == 0 && A2Stp != 0) {
+            printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
+            temp = 1;
+        }
+        CommandFIFO[0].StepAdd[1] = temp;
         CommandFIFO[0].StepsCounter[1] = A2Stp;
         CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
 	}

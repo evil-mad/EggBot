@@ -78,7 +78,7 @@ typedef struct
 {
     CommandType     Command;
     INT16           StepAdd[NUMBER_OF_STEPPERS];
-    UINT16          StepsCounter[NUMBER_OF_STEPPERS];
+    UINT32          StepsCounter[NUMBER_OF_STEPPERS];
     UINT8           DirBits;
     UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
     UINT16          ServoPosition;

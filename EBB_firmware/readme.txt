@@ -1,4 +1,4 @@
-The files in this directory (EBB_firmware) are the firmwre files for the EiBotBoard,
+The files in this directory (EBB_firmware) are the firmware files for the EiBotBoard,
 (http://www.schmalzhaus.com/EBB/) which is used primarily in the Egg-Bot (http://www.egg-bot.com/)
 made by EMSL (http://evilmadscience.com/productsmenu/tinykitlist/171-egg-bot).
 

@@ -80,14 +80,14 @@
 
 // Enum for extract_num() function parameter
 typedef enum {
-	 kCHAR
-	,kUCHAR
-	,kINT
-	,kUINT
-	,kASCII_CHAR
-	,kUCASE_ASCII_CHAR
-	,kLONG
-	,kULONG
+	 kCHAR          // One byte, signed
+	,kUCHAR         // One byte, unsigned
+	,kINT           // Two bytes, signed
+	,kUINT          // Two bytes, unsigned
+	,kASCII_CHAR    // ASCII character, read in as byte
+	,kUCASE_ASCII_CHAR  // ASCII character, must be uppercase
+	,kLONG          // Four bytes, signed
+	,kULONG         // Four bytes, unsigned
 } ExtractType;
 
 typedef enum {
