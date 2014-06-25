@@ -1450,7 +1450,7 @@ void parse_packet(void)
 	g_RX_buf_out = g_RX_buf_in;
 }
 
-// Print out the positive acknoledgement that the packet was received
+// Print out the positive acknowledgement that the packet was received
 // if we have acks turned on.
 void print_ack(void)
 {
@@ -1467,7 +1467,7 @@ void parse_R_packet(void)
 	print_ack ();
 }
 
-// CU is "Configure UBW" and controls system-wide configruation values
+// CU is "Configure UBW" and controls system-wide configuration values
 // "CU,<parameter_number>,<paramter_value><CR>"
 // <paramter_number>	<parameter_value>
 // 1					{1|0} turns on or off the 'ack' ("OK" at end of packets)
@@ -1536,7 +1536,7 @@ void parse_T_packet(void)
 		{
 			T4CONbits.TMR4ON = 1;    
 		
-			// Eventually gaurd this section from interrupts
+			// Eventually guard this section from interrupts
 			ISR_D_RepeatRate = time_between_updates;
 		}
 	}	
@@ -1551,7 +1551,7 @@ void parse_T_packet(void)
 		{
 			T4CONbits.TMR4ON = 1;    
 		
-			// Eventually gaurd this section from interrupts
+			// Eventually guard this section from interrupts
 			ISR_A_RepeatRate = time_between_updates;
 		}
 	}
@@ -1560,11 +1560,11 @@ void parse_T_packet(void)
 }
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
-// UBW version. The analog config value is eleminated, replaced with the "AC"
+// UBW version. The analog config value is eliminated, replaced with the "AC"
 // command.
 // FORMAT: C,<portA_IO>,<portB_IO>,<portC_IO>,<portD_IO>,<portE_IO><CR>
 // EXAMPLE: "C,255,0,4,0,0,0<CR>"
-// <portX_IO> is the byte sent to the Data Direction (DDR) regsiter for
+// <portX_IO> is the byte sent to the Data Direction (DDR) register for
 // each port. A 1 in a bit location means input, a 0 means output.
 //
 // NOTE: it is up to the user to tell the proper port direction bits to be
@@ -1656,8 +1656,8 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
 // <channel> is one of the 16 possible analog channels, from 0 through 15
 // <enable> is 0 to disable, or 1 to enable
 // To turn on a particular analog channel, use the AC command to enable it.
-// To turn off a partiuclar analog channel, use the AC command to disable it.
-// Once enabled, that channel will be converted at the normal ADC converstion
+// To turn off a particular analog channel, use the AC command to disable it.
+// Once enabled, that channel will be converted at the normal ADC conversion
 // rate and will show up in A packets.
 void parse_AC_packet(void)
 {
