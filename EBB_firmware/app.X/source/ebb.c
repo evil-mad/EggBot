@@ -167,12 +167,14 @@
 //                  is used, it does not default to 500mS delay, but rather 0mS.
 //                  This should now work exactly as 2.0.1 when no parameter is
 //                  used.
-//                - Tested 2.2.4 against 2.0.1 with Seleae Logic analyser. Looked
+//                - Tested 2.2.4 against 2.0.1 with Seleae Logic analyzer. Looked
 //                  at several Inkscape plots. Confirmed that timing of steppers
 //                  and servo are the same. Confirmed that all RB0 through RB7
 //                  outputs are the same between the two versions.
 // 2.2.5 04/29/14 - Added 'long' arguments to SM for <move_duration> and <axis1>
-//                  and <axis2>. All can be 3 bytes now.
+//                  and <axis2>. All can be 3 bytes now. Also added checks in
+//                  SM command to make sure that arguments don't result in a
+//                  step speed that's too low (<0.76Hz).
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -256,8 +258,6 @@ BOOL gUseRCPenServo;
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
-    TRISCbits.TRISC2 = 0;
-    PORTCbits.RC2 = 1;
 	//Check which interrupt flag caused the interrupt.
 	//Service the interrupt
 	//Clear the interrupt flag
@@ -528,7 +528,6 @@ void high_ISR(void)
 			ButtonPushed = TRUE;
 		}
 	}
-    PORTCbits.RC2 = 0;
 }
 
 // Init code
