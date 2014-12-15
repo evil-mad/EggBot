@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://web.resource.org/cc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd" id="svg2" height="160cm" sodipodi:version="0.32" width="220cm" sodipodi:docname="ilflag-official.svg" sodipodi:docbase="F:\Documents and Settings\Brian Hinkle\Desktop">
+ <sodipodi:namedview id="base" bordercolor="#666666" gridoriginy="0.00000000cm" gridspacingy="0.028222222cm" gridspacingx="0.028200000cm" pagecolor="#ffffff" showgrid="true" borderopacity="1.0" gridoriginx="0.00000000cm"/>
+ <g id="layer1">
+  <g id="g16521" stroke="#003ad1" stroke-width="173.99" transform="matrix(1.151 0 0 1.151 -585.92 -427.99)" fill="none">
+   <path id="path13485" sodipodi:type="star" d="m2631.5 2810.9h-1556.1l778.1-1347.6 778 1347.6z" sodipodi:r1="898.41217" sodipodi:r2="449.20609" sodipodi:arg1="0.52359878" sodipodi:arg2="1.5707963" transform="matrix(1.0815 0 0 1.0655 1894.5 353.12)" sodipodi:cy="2361.6633" sodipodi:cx="1853.4637" sodipodi:sides="3"/>
+   <path id="path15003" sodipodi:type="star" d="m2631.5 2810.9h-1556.1l778.1-1347.6 778 1347.6z" sodipodi:r1="898.41217" sodipodi:r2="449.20609" sodipodi:arg1="0.52359878" sodipodi:arg2="1.5707963" transform="matrix(1.0815 0 0 -1.0667 1887.3 5317.9)" sodipodi:cy="2361.6633" sodipodi:cx="1853.4637" sodipodi:sides="3"/>
+  </g>
+  <rect id="rect1291" fill-rule="evenodd" height="885.23" width="7794.1" stroke="#000" y="4252.2" x=".38748" stroke-width=".77496px" fill="#003bd1"/>
+  <rect id="rect1293" fill-rule="evenodd" height="885.23" width="7794.1" stroke="#000" y="531.71" x=".38748" stroke-width=".77" fill="#003bd1"/>
+ </g>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+    <dc:publisher>
+     <cc:Agent rdf:about="http://openclipart.org/">
+      <dc:title>Openclipart</dc:title>
+     </cc:Agent>
+    </dc:publisher>
+   </cc:Work>
+   <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+   </cc:License>
+  </rdf:RDF>
+ </metadata>
+</svg>
