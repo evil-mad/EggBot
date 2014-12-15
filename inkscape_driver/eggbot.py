@@ -529,7 +529,7 @@ class EggBot( inkex.Effect ):
 		viewbox = self.svg.get( 'viewBox' )
 		if viewbox:
 			vinfo = viewbox.strip().replace( ',', ' ' ).split( ' ' )
-			if ( vinfo[2] != 0 ) and ( vinfo[3] != 0 ):
+			if ( float(vinfo[2]) != 0 ) and ( float(vinfo[3]) != 0 ):
 				sx = self.svgWidth / float( vinfo[2] )
 				sy = self.svgHeight / float( vinfo[3] )
 				self.svgTransform = parseTransform( 'scale(%f,%f) translate(%f,%f)' % (sx, sy, -float( vinfo[0] ), -float( vinfo[1] ) ) )
