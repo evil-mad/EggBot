@@ -10,6 +10,8 @@ Code here includes the extensions for Inkscape, firmware for the EiBotBoard (AKA
 The release version of the code is labeled version 2.4.0. We are presently bundling new installers for Mac and Windows. Please see the detailed instructions for installing the software.
 
 
+----
+
 This repository has been migrated from: https://code.google.com/p/eggbotcode/
 
 Extended documentation available at: http://wiki.evilmadscientist.com/eggbot
