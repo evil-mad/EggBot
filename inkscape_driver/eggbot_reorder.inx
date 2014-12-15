@@ -15,7 +15,7 @@
  
  Solving for optimal plot order is a difficult
  problem, known in computer science as the
- "travelling salesman problem," or just "TSP."  
+ "traveling salesman problem," or just "TSP."  
  
  This routine does not look for the best possible
  solution; that can be slow. Instead it tries a
@@ -28,13 +28,14 @@
  your document before running this routine.
             </_param>
 
+  <!--
   <param name="reverse" type="boolean" _gui-text="Allow paths to be reversed*">false</param>
   <param name="wrap" type="boolean" _gui-text="Allow wrap-around egg axis*">false</param>
 
 	  <_param name="nyet" type="description" xml:space="preserve">
   *Option not yet implemented.
             </_param>
-
+-->
   <effect needs-live-preview="false" needs-document="no">
     <object-type>all</object-type>
     <effects-menu>

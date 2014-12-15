@@ -1,8 +1,8 @@
-# Egg-Bot Path Ordering extension
+# EggBot Path Ordering extension
 # This extension tries to re-order the document's paths to improve
 # the plotting time by plotting nearby paths consecutively.
 #
-# Written by Matthew Beckler for the Egg-Bot project.
+# Written by Matthew Beckler for the EggBot project.
 # Email questions and comments to matthew at mbeckler dot org
 #
 # This program is free software; you can redistribute it and/or modify
@@ -97,10 +97,10 @@ def conv( x, y, trans_matrix=None ):
 class EggBotReorderPaths( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
-		self.OptionParser.add_option( '-r', '--reverse', action='store', type="inkbool",
-			dest="reverse", default=True, help="Enable 'reverse path direction' optimizations" )
-		self.OptionParser.add_option( '-w', '--wrap', action='store', type="inkbool",
-				dest="wrap", default=True, help="Enable 'wrap egg axis' optimizations" )
+# 		self.OptionParser.add_option( '-r', '--reverse', action='store', type="inkbool",
+# 			dest="reverse", default=True, help="Enable 'reverse path direction' optimizations" )
+# 		self.OptionParser.add_option( '-w', '--wrap', action='store', type="inkbool",
+# 				dest="wrap", default=True, help="Enable 'wrap egg axis' optimizations" )
 
 	def get_start_end( self, node, transform ):
 		"""Given a node, return the start and end points"""
@@ -161,9 +161,9 @@ class EggBotReorderPaths( inkex.Effect ):
 
 			if air_distance_default > 0 :  #don't divide by zero. :P
 				improvement_pct = 100 * ( ( air_distance_default - air_distance_ordered ) / ( air_distance_default ) )
-				inkex.errormsg( gettext.gettext( "Okay, selected paths have been reordered and optimized for quicker Eggbot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % ( air_distance_default, air_distance_ordered, improvement_pct ) ) )
+				inkex.errormsg( gettext.gettext( "Selected paths have been reordered and optimized for quicker EggBot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % ( air_distance_default, air_distance_ordered, improvement_pct ) ) )
 			else:
-				inkex.errormsg( gettext.gettext( "doh-- need to have multiple distinct paths selected!" ) )
+				inkex.errormsg( gettext.gettext( "Unable to start. Please select multiple distinct paths. :)" ) )
 
 
 e = EggBotReorderPaths()
