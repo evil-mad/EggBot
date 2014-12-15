@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Eggbot Control</_name>
-  <id>command.evilmadscientist.eggbot.rev234</id>
+  <_name>EggBot Control</_name>
+  <id>command.evilmadscientist.eggbot.rev240</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -9,7 +9,7 @@
   
     <page name="splash" _gui-text="Plot">
       <_param name="splashpage" type="description" xml:space="preserve">
-Welcome to the Egg-Bot interface!
+Welcome to the EggBot interface!
 
 Press 'Apply' to begin plotting.
 
@@ -23,7 +23,7 @@ Need help? Visit http://egg-bot.com/
     <page name='setup' _gui-text='Setup'>
 
       <_param name="instructions_setup" type="description" xml:space="preserve">
-Eggbot: Basic Setup
+EggBot: Basic Setup
 </_param>
       <param name="penUpPosition" type="int" min="0" max="100"
 	     _gui-text="          Pen up position, 0-100%:">55</param>
@@ -41,7 +41,7 @@ Eggbot: Basic Setup
   pen-up and pen-down positions.
 
 - Raise pen and turn off stepper motors
-  for aligning objects in the Egg-Bot.
+  for aligning objects in the EggBot.
 </_param>
     </page>
 
@@ -49,7 +49,7 @@ Eggbot: Basic Setup
       <param name="penDownSpeed" type="int" min="1" max="10000"
 	   _gui-text="          Speed when pen is down (steps/s):">300</param>	
       <param name="penUpSpeed" type="int" min="1" max="10000"
-	   _gui-text="          Speed when pen is up (step/s):">500</param>
+	   _gui-text="          Speed when pen is up (step/s):">400</param>
       <param name="ServoUpSpeed" type="int" min="1" max="1600"
 	   _gui-text="          Pen raising speed (%/s):">50</param>
       <param name="penUpDelay" type="int" min="1" max="5000"
@@ -86,10 +86,10 @@ Note: Pressing 'Apply' will apply settings, but not plot.
     <page name="manual" _gui-text="Manual">
       <_param name="instructions_manual" type="description"
 	      xml:space="preserve">
-Eggbot Manual Control
+EggBot Manual Control
 
 You can use this frame to send "manual" commands
-to the Eggbot: Walk the stepper motors, raise or
+to the EggBot: Walk the stepper motors, raise or
 lower the pen, enable or disable the motors, or 
 check the circuit board (EBB) firmware version.
 </_param>
@@ -123,7 +123,7 @@ Press 'Apply' to execute the command.
 	      xml:space="preserve">
 To pause a plot in progress, press the "PRG" 
 button on the circuit board. After pausing, you
-can change the Eggbot settings or perform any
+can change the EggBot settings or perform any
 manual adjustments that are needed.
 
 To resume plotting-- or to cancel and return
@@ -156,14 +156,16 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.3.4, dated 8/11/2013
+Release 2.4.0, dated 12/15/2014
 
 *EBB Firmware 1.96 or newer required for certain
  functions. Version 2.0.2 or newer recommended.
 
 Known issues:
 * "Cancel" function does not work while plotting.
-  (This is due to a known bug in Inkscape.)
+  (This is due to a known bug in Inkscape; the
+   "cancel" button does not work to pause any
+   Inkscape extension, this one included.)
 </_param>
     </page>
   </param>

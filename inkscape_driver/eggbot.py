@@ -249,8 +249,8 @@ class EggBot( inkex.Effect ):
 		self.svgTotalDeltaX = int( 0 )
 		self.svgTotalDeltaY = int( 0 )
 
-		self.nDeltaX = 0
-		self.nDeltaY = 0
+		nDeltaX = 0
+		nDeltaY = 0
 
 		self.svgWidth = float( N_PAGE_WIDTH )
 		self.svgHeight = float( N_PAGE_HEIGHT )
@@ -461,11 +461,11 @@ class EggBot( inkex.Effect ):
 
 		else:  # self.options.manualType is "walk-egg-motor" or "walk-pen-motor":
 			if self.options.manualType == "walk-egg-motor":
-				self.nDeltaX = self.options.WalkDistance
-				self.nDeltaY = 0
+				nDeltaX = self.options.WalkDistance
+				nDeltaY = 0
 			elif self.options.manualType == "walk-pen-motor":
-				self.nDeltaY = self.options.WalkDistance
-				self.nDeltaX = 0
+				nDeltaY = self.options.WalkDistance
+				nDeltaX = 0
 			else:
 				return
 
@@ -479,11 +479,14 @@ class EggBot( inkex.Effect ):
 				self.fSpeed = self.options.penUpSpeed
 
 			if ( self.options.revPenMotor ):
-				self.nDeltaY = -1 * self.nDeltaY
+				nDeltaY = -1 * nDeltaY
 			if ( self.options.revEggMotor ):
-				self.nDeltaX = -1 * self.nDeltaX
-			self.nTime = int( round( 1000.0 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
-			strOutput = ','.join( ['SM', str( self.nTime ), str( self.nDeltaY ), str( self.nDeltaX )] ) + '\r'
+				nDeltaX = -1 * nDeltaX
+			
+			nTime = 10000.00 / self.fSpeed * distance( nDeltaX, nDeltaY )
+			nTime = int( math.ceil(nTime / 10.0))
+			
+			strOutput = ','.join( ['SM', str( nTime ), str( nDeltaY ), str( nDeltaX )] ) + '\r'
 			self.doCommand( strOutput )
 
 
@@ -1214,25 +1217,25 @@ class EggBot( inkex.Effect ):
 		if ( self.fPrevX is None ):
 			return
 
-		self.nDeltaX = int( self.fX ) - int( self.fPrevX )
-		self.nDeltaY = int( self.fY ) - int( self.fPrevY )
+		nDeltaX = int( self.fX ) - int( self.fPrevX )
+		nDeltaY = int( self.fY ) - int( self.fPrevY )
 
 		if self.bPenIsUp:
 			self.fSpeed = self.options.penUpSpeed
 
 			if ( self.options.wraparound ):
-				if ( self.nDeltaX > 1600 / self.step_scaling_factor ):
-					while ( self.nDeltaX > 1600 / self.step_scaling_factor ):
-						self.nDeltaX -= 3200 / self.step_scaling_factor
-				elif ( self.nDeltaX < -1600 / self.step_scaling_factor ):
-					while ( self.nDeltaX < -1600 / self.step_scaling_factor ):
-						self.nDeltaX += 3200 / self.step_scaling_factor
+				if ( nDeltaX > 1600 / self.step_scaling_factor ):
+					while ( nDeltaX > 1600 / self.step_scaling_factor ):
+						nDeltaX -= 3200 / self.step_scaling_factor
+				elif ( nDeltaX < -1600 / self.step_scaling_factor ):
+					while ( nDeltaX < -1600 / self.step_scaling_factor ):
+						nDeltaX += 3200 / self.step_scaling_factor
 
 		else:
 			self.fSpeed = self.options.penDownSpeed
 
 
-		if ( distance( self.nDeltaX, self.nDeltaY ) > 0 ):
+		if ( distance( nDeltaX, nDeltaY ) > 0 ):
 			self.nodeCount += 1
 
 			if self.resumeMode:
@@ -1243,16 +1246,16 @@ class EggBot( inkex.Effect ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
 
-			nTime = int( math.ceil( 1000 / self.fSpeed * distance( self.nDeltaX, self.nDeltaY ) ) )
+			nTime = int( math.ceil( 1000 / self.fSpeed * distance( nDeltaX, nDeltaY ) ) )
 
-			while ( ( abs( self.nDeltaX ) > 0 ) or ( abs( self.nDeltaY ) > 0 ) ):
+			while ( ( abs( nDeltaX ) > 0 ) or ( abs( nDeltaY ) > 0 ) ):
 				if ( nTime > 750 ):
-					xd = int( round( ( 750.0 * self.nDeltaX ) / nTime ) )
-					yd = int( round( ( 750.0 * self.nDeltaY ) / nTime ) )
+					xd = int( round( ( 750.0 * nDeltaX ) / nTime ) )
+					yd = int( round( ( 750.0 * nDeltaY ) / nTime ) )
 					td = int( 750 )
 				else:
-					xd = self.nDeltaX
-					yd = self.nDeltaY
+					xd = nDeltaX
+					yd = nDeltaY
 					td = nTime
 					if ( td < 1 ):
 						td = 1		# don't allow zero-time moves.
@@ -1272,8 +1275,8 @@ class EggBot( inkex.Effect ):
 					self.svgTotalDeltaY += yd
 					self.doCommand( strOutput )
 
-				self.nDeltaX -= xd
-				self.nDeltaY -= yd
+				nDeltaX -= xd
+				nDeltaY -= yd
 				nTime -= td
 
 			#self.doCommand('NI\r')  #Increment node counter on EBB
