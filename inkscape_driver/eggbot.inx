@@ -65,9 +65,9 @@ Note: Pressing 'Apply' will apply settings, but not plot.
 
     <page name='options' _gui-text='Options'>
       <param name="revPenMotor" type="boolean"
-           _gui-text="          Reverse motion of Motor 1 (pen):">false</param>	
+           _gui-text="          Reverse motion of Motor 1 (pen):">true</param>	
       <param name="revEggMotor" type="boolean"
-           _gui-text="          Reverse motion of Motor 2 (egg):">false</param> 
+           _gui-text="          Reverse motion of Motor 2 (egg):">true</param> 
       <param name="wraparound" type="boolean"
            _gui-text="          Egg (x) axis wraps around:">true</param>
       <param name="startCentered" type="boolean"
@@ -108,7 +108,7 @@ check the circuit board (EBB) firmware version.
 	<_option value="version-check"  >Check EBB Version</_option>
       </param>
 
-      <param name="WalkDistance" type="int" min="-3200" max="3200" 
+      <param name="WalkDistance" type="int" min="-32000" max="32000" 
              _gui-text="               Walk distance (steps):">5</param>
       <_param name="instructions_manual2" type="description"
 	      xml:space="preserve">
