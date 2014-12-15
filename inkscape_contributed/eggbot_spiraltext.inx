@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Spiral Wrapped Text</_name>
-  <id>command.eggbot.contributed.eggbot_spiraltext1</id>
+  <id>command.eggbot.contributed.eggbot_spiraltext101</id>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
   <dependency type="executable" location="extensions">simplestyle.py</dependency>
   <dependency type="executable" location="extensions">eggbot_spiraltext.py</dependency>
@@ -20,10 +20,9 @@ as to have the length (number of times to wrap) x 3200 pixels.
       <param name="wrap" type="float" min="1" max="100" _gui-text="Number of times to wrap ">8.5</param>
       <param name="stretch" type="boolean" _gui-text="Stretch the text horizontally to account for the egg's geometry? ">true</param>
       <param name="flip" type="boolean" _gui-text="Plot with the egg's bottom at the egg motor? ">false</param>
-      <param name="text" type="string" _gui-text="Text ">How do you drop an egg 2 meters without it breaking? Drop it from 3 meters: it won't break for the first 2!  *   If a rooster laid an egg at the peak of a roof, which side would it roll down? Neither side: roosters don't lay eggs!  *  What's the best day to eat eggs? Fry day  *  What happens when you tickle eggs? They crack up!  *  What sport are eggs good at? Running!  * What kind of jokes do eggs tell? Egg yolks  *  What's an egg's favorite robot? The Egg-Bot!</param>
+      <param name="text" type="string" _gui-text="Text ">How do you drop an egg 2 meters without it breaking? Drop it from 3 meters: it won't break for the first 2!  *   If a rooster laid an egg at the peak of a roof, which side would it roll down? Neither side: roosters don't lay eggs!  *  What's the best day to eat eggs? Fry day  *  What happens when you tickle eggs? They crack up!  *  What sport are eggs good at? Running!  * What kind of jokes do eggs tell? Egg yolks  *  What's an egg's favorite robot? The EggBot!</param>
 <!-- OMELET (2 servings): For a firm omelet, beat 2 eggs with a fork until blended.  Beat in 2 tablespoons cream or milk, 1/4 teaspoon salt, and a pinch of white pepper or paprika.  In a non-stick skillet, melt 3/4 tablespoons butter.  When hot, add the egg mixture and cook over low heat.  With a spatula, lift the edges and, by tilting the skillet, allow the uncooked custard to run underneath the omelet.  When the omelet is cooked to an even consistency, fold over and serve.  <times><i&>Bon appetit!</i></times> -->
-      <param name="fontfamily" type="optiongroup" appearance="minimal"
-	     _gui-text="Starting font ">
+      <param name="fontfamily" type="optiongroup" appearance="minimal" _gui-text="Starting font ">
 	<_option value="sans">Sans</_option>
 	<_option value="times">Times</_option>
 	<_option value="script">Script</_option>
@@ -101,14 +100,12 @@ derived from NBS SP-424 1976-04, "A contribution to computer
 typesetting techniques: Tables of Coordinates for Hershey's
 Repertory of Occidental Type Fonts and Graphic Symbols."
 
-To generte tables of the Herhsey Fonts, see the "Hershey Text"
+To generate tables of the Hershey Fonts, see the "Hershey Text"
 extension under the "Render" category of Extensions.
 
 For additional information, please visit:
 
   www.evilmadscientist.com/go/hershey
-</_param>
-      <_param name="emptyspace3" type="description" xml:space="preserve"> 
 </_param>
 </page>
 </param>
