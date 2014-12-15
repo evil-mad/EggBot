@@ -1,9 +1,9 @@
 EggBot
 ======
 
-_Software for the Original EggBot Kit_
+*_Software for the Original EggBot_*
 
-This is a repository for software to drive The Original EggBot kit, by Evil Mad Scientist Laboratories. More information at http://www.egg-bot.com/
+This is a repository for software to drive The Original EggBot, by Evil Mad Scientist Laboratories. More information at http://www.egg-bot.com/
 
 Code here includes the extensions for Inkscape, firmware for the EiBotBoard (AKA "EBB", or EggBotBoard), example plot files. All code is designed to work on Mac, Windows and Linux.
 
