@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <_name>Sine and Lace</_name>
+  <id>command.experiment.sineandlace</id>
+  <dependency type="executable" location="extensions">eggbot_sineandlace.py</dependency>
+  <dependency type="executable" location="extensions">inkex.py</dependency>
+
+<param name="tab" type="notebook">
+  <page name="splash" _gui-text="Sine and Lace">
+    <param name="nWidth" type="int" min="1" max="10000"
+	 _gui-text="Width (pixels)">3200</param>
+
+    <param name="nHeight" type="int" min="1" max="10000"
+	 _gui-text="Height (pixels)">100</param>
+
+    <param name="fCycles" type="float" min="0.0001" max="10000" precision="5"
+	 _gui-text="Number of cycles (periods)">10</param>
+
+    <param name="nrN" type="int" min="-100" max="100"
+	 _gui-text="Start angle at 2 pi ( n / m ); n = ">0</param>
+
+    <param name="nrM" type="int" min="-100" max="100"
+	 _gui-text="Start angle at 2 pi ( n / m ); m = ">0</param>
+
+    <param name="fRecess" type="float" min="0" max="100" precision="5"
+	 _gui-text="Recede from envelope by percentage">2</param>
+
+    <param name="nSamples" type="int" min="2" max="100000"
+	 _gui-text="Number of sample points">1000</param>
+
+    <param name="nOffsetX" type="int" min="-10000" max="10000"
+	 _gui-text="Starting x coordinate (pixels)">0</param>
+
+    <param name="nOffsetY" type="int" min="-10000" max="10000"
+	 _gui-text="Starting y coordinate (pixels)">500</param>
+
+    <param name="bLace" type="boolean" _gui-text="Lace">true</param>
+
+    <param name="bSpline" type="boolean" _gui-text="Spline">false</param>
+  </page>
+  <page name="info" _gui-text="About...">
+    <_param name="aboutpage" type="description" xml:space="preserve">
+This extension renders sinusoidal and "lace"
+patterns whose period is a specified multiple
+of the document width or any specified width.
+By selecting two previously drawn patterns,
+a third pattern may be inscribed within them.
+Patterns may not be inscribed within an inscribed
+pattern, however.
+
+This extension may be found at Thingiverse as
+Thing #24594.
+
+Sine and Lace v0.9
+Dan Newman (dan newman @ mtbaldy us)
+12 June 2012
+</_param>
+  </page>
+</param>
+
+  <effect>
+    <effects-menu>
+      <submenu _name="EggBot Contributed"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command reldir="extensions" interpreter="python">eggbot_sineandlace.py</command>
+  </script>
+</inkscape-extension>
