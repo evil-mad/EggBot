@@ -1,0 +1,20 @@
+How to quickly stipple in Gimp
+25 September 2010
+
+1. Load your image into Gimp
+2. Convert to grayscale: Image > Mode > Grayscale
+3. Wash out the image
+   a. Colors > Levels...
+   b. Set the "All Channels" under "Output Levels" to 180 - 245
+4. Dither the image
+   a. Image > Mode > Indexed...
+   b. Select "Use black and white (1-bit palette) under "Colormap"
+   c. Select "Floyd-Steinberg (normal) under "Color dithering"
+   d. Click "Convert" button
+5. Save the file as a PBM format file; choose "raw" when asked
+
+If step 4 produces too many points, then start over (edit undo) until
+your back to the grayscale image.  Then try scaling the image down to 50%,
+25%, or more with Image > Scale Image....
+
+-- finit --     
