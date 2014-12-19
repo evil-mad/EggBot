@@ -1,0 +1,18 @@
+; Eggbot Device definitions for EAGLE version 5.x
+;
+; Add this to eagle.def  (.../EAGLE/bin/eagle.def)
+
+[EggBot]
+
+Type     = PenPlotter
+Long     = "EggBot Plotting Device"
+Init     = ""
+Reset    = "M0,0\n"
+Width    = 3.2
+Height   = 0.8
+ResX     = 1000
+ResY     = 1000
+PenSelect  = "C%u\n"  ;; Pens numbered 0..n-1
+Move       = "M%d,%d\n"
+Draw       = "D%d,%d\n"
+
