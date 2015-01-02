@@ -175,6 +175,8 @@
 //                  and <axis2>. All can be 3 bytes now. Also added checks in
 //                  SM command to make sure that arguments don't result in a
 //                  step speed that's too low (<0.76Hz).
+// 2.2.6 01/01/15 - Added 'QM' command - Query Motor, tells PC what is moving.
+//
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1492,13 +1494,46 @@ void parse_RM_packet(void)
 }
 
 // QM command
-// For Query Motor - returns the curent status of each motor
-// QM takes no parameters, so useage is just QM<CR>
+// For Query Motor - returns the current status of each motor
+// QM takes no parameters, so usage is just QM<CR>
 // QM returns:
-// QM,<SyncFIFOSatus>,<Motor1Satus>,<Motor2Status><CR>
-// where <SyncFIFOStatus> is 0 (no command executing) or 1 (command executing)
-// and <MotorXStatus> is 0 (motor not executing a command) or 1 (motor executing a command)
+// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status><CR>
+// where:
+//   <CommandExecutingStatus>: 0 if no 'motion command' is excuting, > 0 if some 'motion command' is executing
+//   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
+//   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
 void parse_QM_packet(void)
 {
-	printf((far ROM char *)"QM,%i,%i,%i\n\r", FIFOEmpty, 0, 0);
+    UINT8 CommandExecuting = 0;
+    UINT8 Motor1Running = 0;
+    UINT8 Motor2Running = 0;
+    MoveCommandType LocalCommand;
+
+    // Need to turn off high priorioty interrupts breifly here to read out value that ISR uses
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+
+    // Make a local copy of the things we care about
+    LocalCommand = CurrentCommand;
+
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+
+    // Create our output values to print back to the PC
+    if (LocalCommand.DelayCounter != 0) {
+        CommandExecuting = 1;
+    }
+    if (LocalCommand.Command != COMMAND_NONE) {
+        CommandExecuting = 1;
+    }
+    if (FIFOEmpty == FALSE) {
+        CommandExecuting = 1;
+    }
+    if (CommandExecuting && LocalCommand.StepsCounter[0] != 0) {
+        Motor1Running = 1;
+    }
+    if (CommandExecuting && LocalCommand.StepsCounter[1] != 0) {
+        Motor2Running = 1;
+    }
+
+	printf((far ROM char *)"QM,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running);
 }
