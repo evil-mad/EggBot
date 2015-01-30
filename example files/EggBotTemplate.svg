@@ -13,8 +13,8 @@
    height="800"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.0 r9654"
-   sodipodi:docname="New document 1">
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="EggBotTemplate.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -43,12 +43,12 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
+     inkscape:label="1-default"
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-252.36218)" />
