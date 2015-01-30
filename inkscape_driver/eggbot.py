@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # http://code.google.com/p/eggbotcode/
 #
-# Version 2.3.4, dated 8/11/2013
+# Version 2.5.0, dated 2015-01-30
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -358,7 +358,9 @@ class EggBot( inkex.Effect ):
 
 					try:
 						self.svgLastPath = int( node.get( 'lastpath' ) )
+# 						inkex.errormsg('lastpath: ' + str(self.svgLastPath))
 						self.svgLastPathNC = int( node.get( 'lastpathnc' ) )
+# 						inkex.errormsg('lastpathnc: ' + str(self.svgLastPathNC))
 						self.svgTotalDeltaX = int( node.get( 'totaldeltax' ) )
 						self.svgTotalDeltaY = int( node.get( 'totaldeltay' ) )
 						self.svgDataRead = True
@@ -423,17 +425,9 @@ class EggBot( inkex.Effect ):
 		if self.serialPort is None:
 			return
 
-##		self.ServoSetup()
-		#walks are done at pen-down speed.
-
 		if self.options.manualType == "raise-pen":
 			self.ServoSetupWrapper()
 			self.penUp()
-
-		elif self.options.manualType == "align-mode":
-			self.ServoSetupWrapper()
-			self.penUp()
-			self.sendDisableMotors()
 
 		elif self.options.manualType == "lower-pen":
 			self.ServoSetupWrapper()
@@ -651,18 +645,23 @@ class EggBot( inkex.Effect ):
 
 			elif node.tag == inkex.addNS( 'path', 'svg' ):
 
-				self.pathcount += 1
-
 				# if we're in resume mode AND self.pathcount < self.svgLastPath,
 				#    then skip over this path.
 				# if we're in resume mode and self.pathcount = self.svgLastPath,
 				#    then start here, and set
 				# self.nodeCount equal to self.svgLastPathNC
-				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-					self.nodeCount = self.svgLastPathNC
-				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-					pass
+
+				doWePlotThisPath = False 
+				if (self.resumeMode):
+					if ( self.pathcount < self.svgLastPath ):
+						self.pathcount += 1
+					elif ( self.pathcount == self.svgLastPath ):
+						self.nodeCount = self.svgLastPathNC
+						doWePlotThisPath = True 
 				else:
+					doWePlotThisPath = True
+				if (doWePlotThisPath):
+					self.pathcount += 1
 					self.plotPath( node, matNew )
 					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 						self.svgLastPath += 1
@@ -681,18 +680,17 @@ class EggBot( inkex.Effect ):
 				# I.e., explicitly draw three sides of the rectangle and the
 				# fourth side implicitly
 
-				self.pathcount += 1
-				# if we're in resume mode AND self.pathcount < self.svgLastPath,
-				#    then skip over this path.
-				# if we're in resume mode and self.pathcount = self.svgLastPath,
-				#    then start here, and set
-				# self.nodeCount equal to self.svgLastPathNC
-				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-					self.nodeCount = self.svgLastPathNC
-				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-					pass
+				doWePlotThisPath = False 
+				if (self.resumeMode):
+					if ( self.pathcount < self.svgLastPath ):
+						self.pathcount += 1
+					elif ( self.pathcount == self.svgLastPath ):
+						self.nodeCount = self.svgLastPathNC
+						doWePlotThisPath = True 
 				else:
-					# Create a path with the outline of the rectangle
+					doWePlotThisPath = True
+				if (doWePlotThisPath):
+					self.pathcount += 1
 					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
 					x = float( node.get( 'x' ) )
 					y = float( node.get( 'y' ) )
@@ -712,6 +710,9 @@ class EggBot( inkex.Effect ):
 					a.append( [' Z', []] )
 					newpath.set( 'd', simplepath.formatPath( a ) )
 					self.plotPath( newpath, matNew )
+					if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
+						self.svgLastPath += 1
+						self.svgLastPathNC = self.nodeCount
 
 			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
 
@@ -723,19 +724,18 @@ class EggBot( inkex.Effect ):
 				#
 				#   <path d="MX1,Y1 LX2,Y2"/>
 
-				self.pathcount += 1
-				# if we're in resume mode AND self.pathcount < self.svgLastPath,
-				#    then skip over this path.
-				# if we're in resume mode and self.pathcount = self.svgLastPath,
-				#    then start here, and set
-				# self.nodeCount equal to self.svgLastPathNC
 
-				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-					self.nodeCount = self.svgLastPathNC
-				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-					pass
+				doWePlotThisPath = False 
+				if (self.resumeMode):
+					if ( self.pathcount < self.svgLastPath ):
+						self.pathcount += 1
+					elif ( self.pathcount == self.svgLastPath ):
+						self.nodeCount = self.svgLastPathNC
+						doWePlotThisPath = True 
 				else:
-					# Create a path to contain the line
+					doWePlotThisPath = True
+				if (doWePlotThisPath):
+					self.pathcount += 1
 					newpath = inkex.etree.Element( inkex.addNS( 'path', 'svg' ) )
 					x1 = float( node.get( 'x1' ) )
 					y1 = float( node.get( 'y1' ) )
@@ -756,6 +756,7 @@ class EggBot( inkex.Effect ):
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
+
 			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
 
 				# Convert
@@ -772,18 +773,17 @@ class EggBot( inkex.Effect ):
 				if pl == '':
 					pass
 
-				self.pathcount += 1
-				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
-				# self.nodeCount equal to self.svgLastPathNC
-
-				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-					self.nodeCount = self.svgLastPathNC
-
-				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-					pass
-
+				doWePlotThisPath = False 
+				if (self.resumeMode):
+					if ( self.pathcount < self.svgLastPath ):
+						self.pathcount += 1
+					elif ( self.pathcount == self.svgLastPath ):
+						self.nodeCount = self.svgLastPathNC
+						doWePlotThisPath = True 
 				else:
+					doWePlotThisPath = True
+				if (doWePlotThisPath):
+					self.pathcount += 1
 					pa = pl.split()
 					if not len( pa ):
 						pass
@@ -807,34 +807,31 @@ class EggBot( inkex.Effect ):
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
+
+
 			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 
 				# Convert
-				#
-				#  <polygon points="x1,y1 x2,y2 x3,y3 [...]"/>
-				#
+				#    <polygon points="x1,y1 x2,y2 x3,y3 [...]"/>
 				# to
-				#
-				#   <path d="Mx1,y1 Lx2,y2 Lx3,y3 [...] Z"/>
-				#
+				#    <path d="Mx1,y1 Lx2,y2 Lx3,y3 [...] Z"/>
 				# Note: we ignore polygons with no points
 
 				pl = node.get( 'points', '' ).strip()
 				if pl == '':
 					pass
 
-				self.pathcount += 1
-				#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-				#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
-				# self.nodeCount equal to self.svgLastPathNC
-
-				if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-					self.nodeCount = self.svgLastPathNC
-
-				if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-					pass
-
+				doWePlotThisPath = False 
+				if (self.resumeMode):
+					if ( self.pathcount < self.svgLastPath ):
+						self.pathcount += 1
+					elif ( self.pathcount == self.svgLastPath ):
+						self.nodeCount = self.svgLastPathNC
+						doWePlotThisPath = True 
 				else:
+					doWePlotThisPath = True
+				if (doWePlotThisPath):
+					self.pathcount += 1
 					pa = pl.split()
 					if not len( pa ):
 						pass
@@ -859,6 +856,8 @@ class EggBot( inkex.Effect ):
 						self.svgLastPath += 1
 						self.svgLastPathNC = self.nodeCount
 
+
+
 			elif node.tag == inkex.addNS( 'ellipse', 'svg' ) or \
 				node.tag == 'ellipse' or \
 				node.tag == inkex.addNS( 'circle', 'svg' ) or \
@@ -879,7 +878,7 @@ class EggBot( inkex.Effect ):
 					#   X2 = CX + RX
 					#
 					# Note: ellipses or circles with a radius attribute of value 0 are ignored
-
+					
 					if node.tag == inkex.addNS( 'ellipse', 'svg' ) or node.tag == 'ellipse':
 						rx = float( node.get( 'rx', '0' ) )
 						ry = float( node.get( 'ry', '0' ) )
@@ -888,19 +887,18 @@ class EggBot( inkex.Effect ):
 						ry = rx
 					if rx == 0 or ry == 0:
 						pass
-
-					self.pathcount += 1
-					#if we're in resume mode AND self.pathcount < self.svgLastPath, then skip over this path.
-					#if we're in resume mode and self.pathcount = self.svgLastPath, then start here, and set
-					# self.nodeCount equal to self.svgLastPathNC
-
-					if self.resumeMode and ( self.pathcount == self.svgLastPath ):
-						self.nodeCount = self.svgLastPathNC
-
-					if self.resumeMode and ( self.pathcount < self.svgLastPath ):
-						pass
-
+	
+					doWePlotThisPath = False 
+					if (self.resumeMode):
+						if ( self.pathcount < self.svgLastPath ):
+							self.pathcount += 1
+						elif ( self.pathcount == self.svgLastPath ):
+							self.nodeCount = self.svgLastPathNC
+							doWePlotThisPath = True 
 					else:
+						doWePlotThisPath = True
+					if (doWePlotThisPath):
+						self.pathcount += 1
 						cx = float( node.get( 'cx', '0' ) )
 						cy = float( node.get( 'cy', '0' ) )
 						x1 = cx - rx
@@ -922,6 +920,7 @@ class EggBot( inkex.Effect ):
 						if ( not self.bStopped ):	#an "index" for resuming plots quickly-- record last complete path
 							self.svgLastPath += 1
 							self.svgLastPathNC = self.nodeCount
+							
 			elif node.tag == inkex.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
 				pass
 			elif node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs':
@@ -1241,7 +1240,6 @@ class EggBot( inkex.Effect ):
 			if self.resumeMode:
 				if ( self.nodeCount > self.nodeTarget ):
 					self.resumeMode = False
-					#inkex.errormsg('First node plotted will be number: ' + str(self.nodeCount))
 					if ( not self.virtualPenIsUp ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
@@ -1285,7 +1283,7 @@ class EggBot( inkex.Effect ):
 				pass #button not pressed
 			else:
 				self.svgNodeCount = self.nodeCount;
-				inkex.errormsg( 'Plot paused by button press after segment number ' + str( self.nodeCount ) + '.' )
+				inkex.errormsg( 'Plot paused by button press after node number ' + str( self.nodeCount ) + '.' )
 				inkex.errormsg( 'Use the "resume" feature to continue.' )
 				#self.penUp()  # Should be redundant...
 				self.engraverOff()
