@@ -383,7 +383,7 @@ class SpiralText( inkex.Effect ):
 
 		# And the angular tilt will be arcsine( height / (3200 * fWrap) )
 		svg = self.document.getroot()
-		height = float( inkex.unittouu( svg.attrib['height'] ) ) - h * scale_y
+		height = float( self.unittouu( svg.attrib['height'] ) ) - h * scale_y
 		angle = ( float( 180 ) / math.pi ) * \
 			math.asin( height / float( 3200 * self.options.wrap ) )
 
