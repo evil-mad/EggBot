@@ -512,10 +512,12 @@ class EggBot( inkex.Effect ):
 		if self.options.startCentered and ( not self.getDocProps() ):
 			# Cannot handle the document's dimensions!!!
 			inkex.errormsg( gettext.gettext(
-			'The document to be plotted has invalid dimensions. ' +
-			'The dimensions must be unitless or have units of pixels (px) or ' +
-			'percentages (%). Document dimensions may be set in Inkscape with ' +
-			'File > Document Properties' ) )
+			'This document does not have valid dimensions.\r\r' +
+			'Consider starting with the EggBot template, or ' +
+			'setting the document size to 3200 px (wide) x 800 px (tall).\r\r' +
+			'Document dimensions may be set in Inkscape with ' +
+			'File > Document Properties.\r\rThe document dimensions must be unitless or have ' +
+			'units of pixels (px) or percentages (%).   '	) )
 			return
 
 		# Viewbox handling
