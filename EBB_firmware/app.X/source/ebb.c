@@ -176,6 +176,7 @@
 //                  SM command to make sure that arguments don't result in a
 //                  step speed that's too low (<0.76Hz).
 // 2.2.6 01/01/15 - Added 'QM' command - Query Motor, tells PC what is moving.
+// 2.2.7 02/28/15 - Added new microsecond mode for SM <duration> parameter.
 //
 
 #include <p18cxxx.h>
