@@ -207,10 +207,10 @@ class AcrosticText( inkex.Effect ):
 		h = line_count * MAX_H + ( line_count - 1 ) * LINE_SKIP
 
 		svg = self.document.getroot()
-		doc_height = inkex.unittouu( svg.attrib['height'] )
+		doc_height = self.unittouu( svg.attrib['height'] )
 		if doc_height <= 0:
 			doc_height = HEIGHT
-		doc_width = inkex.unittouu( svg.attrib['width'] )
+		doc_width = self.unittouu( svg.attrib['width'] )
 		if doc_width <= 0:
 			doc_width = WIDTH
 
