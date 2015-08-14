@@ -102,7 +102,7 @@
 //                      one (simpler to update).
 //				   Updated code in main.c (and others) to match updates from 
 //                      latest MAL CDC example.
-// 2.1.1cTest1 01/17/11 - Added third paramter to SP command to use any PortB 
+// 2.1.1cTest1 01/17/11 - Added third parameter to SP command to use any PortB 
 //                      pin for servo output.
 //                 For this version only - used PortB2 as standard servo output
 // 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
@@ -176,7 +176,10 @@
 //                  SM command to make sure that arguments don't result in a
 //                  step speed that's too low (<0.76Hz).
 // 2.2.6 01/01/15 - Added 'QM' command - Query Motor, tells PC what is moving.
-// 2.2.7 02/28/15 - Added new microsecond mode for SM <duration> parameter.
+// 2.2.7 08/13/15 - Added 'ES' command, which will immediately abort any SM command
+//                  but leave the motors energized. (E-stop) It returns "1" if
+//                  it aborted a move in progress, "0" otherwise. It will also 
+//                  delete any pending SM command in the FIFO.
 //
 
 #include <p18cxxx.h>
@@ -847,12 +850,12 @@ void parse_SC_packet (void)
 
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
-// <move_duration> is a number from 1 to 65535, indiciating the number of milliseconds this move should take
+// <move_duration> is a number from 1 to 65535, indicating the number of milliseconds this move should take
 // <axisX_steps> is a signed 16 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
-// If the EBB can not make the move in the speicified time, it will take as long as it needs to at max speed
+// If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
-// NOTE2: If you specify zero steps for the axies, then you effectively create a delay. Use for small
+// NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
 void parse_SM_packet (void)
 {
@@ -865,13 +868,13 @@ void parse_SM_packet (void)
 	extract_number (kLONG, &A1Steps, kREQUIRED);
 	extract_number (kLONG, &A2Steps, kOPTIONAL);
 
-    // Check for invalid durataion
+    // Check for invalid duration
     if (Duration == 0) {
     	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
 
     // Check for too-fast step request (>25KHz)
-    // First get absolute value of steps, then check if it's askign for >25KHz
+    // First get absolute value of steps, then check if it's asking for >25KHz
     if (A1Steps > 0) {
         Steps = A1Steps;
     }
@@ -1002,6 +1005,53 @@ static void process_SM(
 	}
 		
 	FIFOEmpty = FALSE;
+}
+
+// E-Stop
+// Usage: ES<CR>
+// Returns: 0 if SM command was not interrupted, 1 if it was, then OK<CR>
+// This command will abort any in-progress motor move (SM) command.
+// It will also clear out any pending command(s) in the FIFO.
+// It will return with a 1 if an SM command was aborted or if an SM command 
+// was waiting in the FIFO and had to be discarded. This 1 indicates that some
+// position information may be lost, since one or more SM commands was not
+// finished.
+// It will return a 0 if no SM command was executing at the time, and no SM
+// command was 
+void parse_ES_packet(void)
+{
+    UINT8 retval = 0;
+
+    // If there is a command waiting in the FIFO and it is a move command
+    // or the current command is a move command, then remember that for later.
+    if (
+        (!FIFOEmpty && CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+        || 
+        CurrentCommand.Command == COMMAND_MOTOR_MOVE
+    )
+    {
+        retval = 1;
+    }
+    
+    // If the FIFO has a move command in it, remove it.
+    if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+    {
+        CommandFIFO[0].Command = COMMAND_NONE;
+        CommandFIFO[0].StepsCounter[0] = 0;
+        CommandFIFO[0].StepsCounter[1] = 0;
+        FIFOEmpty = TRUE;
+    }
+
+    // If the current command is a move command, then stop the move.
+    if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+    {
+    	CurrentCommand.Command = COMMAND_NONE;
+        CurrentCommand.StepsCounter[0] = 0;
+        CurrentCommand.StepsCounter[1] = 0;
+    }
+                
+    printf((far rom char *)"%d\n\r", retval);
+	print_ack();
 }
 
 // Query Pen

@@ -60,7 +60,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -183,7 +183,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>
@@ -257,8 +257,6 @@
         <property key="stack-analysis-mcc18" value="false"/>
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
-      <ICD3PlatformTool>
-      </ICD3PlatformTool>
       <item path="source/BootModified.rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
         </C18>

@@ -50,7 +50,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
- * Brian Schmalz		03/15/06	Added user code to impliment
+ * Brian Schmalz		03/15/06	Added user code to implement
  *									firmware version D v1.0 for UBW
  *									project. See www.greta.dhs.org/UBW
  * Brian Schmalz		05/04/06	Starting version 1.1, which will 
@@ -64,7 +64,7 @@
  * BPS					08/16/06	v1.3 - Fixed bug with USB startup
  * BPS					09/09/06	v1.4 - Starting 1.4
  * - Fixed Microchip bug with early silicon - UCONbits.PKTDIS = 0;
- * - Adding BO and BC commands for parallel output to graphics pannels
+ * - Adding BO and BC commands for parallel output to graphics panels
  * BPS					12/06/06	v1.4 - More work on 1.4
  * - Re-wrote all I/O buffering code for increased speed and functionality
  * - Re-wrote error handling code
@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.6\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.7\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -1345,13 +1345,13 @@ void parse_packet(void)
 		}
 		case ('N' * 256) + 'I':
 		{
-			// NI for Node count Incriment
+			// NI for Node count Increment
 			parse_NI_packet();
 			break;
 		}
 		case ('N' * 256) + 'D':
 		{
-			// ND Node count Decriment
+			// ND Node count Decrement
 			parse_ND_packet();
 			break;
 		}
@@ -1403,6 +1403,12 @@ void parse_packet(void)
 		{
 			// AC for Analog Configure
 			parse_AC_packet();
+			break;
+		}
+		case ('E' * 256) + 'S':
+		{
+			// ES for E-Stop
+			parse_ES_packet();
 			break;
 		}
 		default:

@@ -129,6 +129,7 @@ void parse_QC_packet(void);
 void parse_SE_packet(void);
 void parse_RM_packet(void);
 void parse_QM_packet(void);
+void parse_ES_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 #endif
