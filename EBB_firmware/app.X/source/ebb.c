@@ -180,6 +180,9 @@
 //                  but leave the motors energized. (E-stop) It returns "1" if
 //                  it aborted a move in progress, "0" otherwise. It will also 
 //                  delete any pending SM command in the FIFO.
+// 2.2.8 08/14/15 - Corrected error checking in SM command to accurately reflect
+//                  too fast and too slow requests. (>25K or <1.31 steps per
+//                  second)
 //
 
 #include <p18cxxx.h>
@@ -873,6 +876,7 @@ void parse_SM_packet (void)
     	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
 
+
     // Check for too-fast step request (>25KHz)
     // First get absolute value of steps, then check if it's asking for >25KHz
     if (A1Steps > 0) {
@@ -881,13 +885,24 @@ void parse_SM_packet (void)
     else {
         Steps = -A1Steps;
     }
+    // Limit each parameter to just 3 bytes
+    if (Duration > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+       return;
+    }
+    if (Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+       return;
+    }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-        bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+       printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+       return;
     }
     // And check for too slow
-    if ((Duration/1330) > Steps && Steps != 0) {
-        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    if ((Duration/1311) >= Steps && Steps != 0) {
+       printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+       return;
     }
 
     if (A2Steps > 0) {
@@ -896,11 +911,17 @@ void parse_SM_packet (void)
     else {
         Steps = -A2Steps;
     }    
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-        bitset (error_byte, kERROR_BYTE_STEPS_TO_FAST);
+    if (Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+       return;
     }
-    if ((Duration/1330) > Steps && Steps != 0) {
-        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+       printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+       return;
+    }
+    if ((Duration/1311) >= Steps && Steps != 0) {
+       printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+       return;
     }
 
     // Bail if we got a conversion error
@@ -910,7 +931,7 @@ void parse_SM_packet (void)
 	}
 
     // If we get here, we know that step rate for both A1 and A2 is
-    // between 25KHz and 0.75Hz which are the limits of what EBB can do.
+    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   	process_SM(Duration, A1Steps, A2Steps);
 
 	print_ack();
@@ -967,7 +988,26 @@ static void process_SM(
 			CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
 			A2Stp = -A2Stp;
 		}
-        // To compute StepAdd values from Duration,
+        // To compute StepAdd values from Duration.
+        // A1Stp is from 0x000001 to 0xFFFFFF.
+        // HIGH_ISR_TICKS_PER_MS = 25
+        // Duration is from 0x000001 to 0xFFFFFF.
+        // temp needs to be from 0x0001 to 0x7FFF.
+        // Temp is added to accumulator every 25KHz. So slowest step rate
+        // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+        // Fastest step rate is obviously 25KHz.
+        // If A1Stp is 1, then duration must be 763 or less.
+        // If A1Stp is 2, then duration must be 763 * 2 or less.
+        // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+        
+        // First check for duration to large.
+//        if (A1Stp < (0xFFFFFF/763)) {
+//            if (duration > (A1Stp * 763)) {
+//                printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
+//                temp = 0;
+//                A1Stp = 0;
+//            }
+//        }
         if (A1Stp < 0x1FFFF) {
             temp = (((0x8000 * A1Stp)/HIGH_ISR_TICKS_PER_MS)/Duration);
         }

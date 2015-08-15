@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.7\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.8\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -790,6 +790,17 @@ void ProcessIO(void)
 
 	BlinkUSBStatus();
 
+#if defined(BUILD_WITH_DEMO)    
+    /* Demo code, for playing back array of points so we can run without PC.*/
+    
+    // Check for start of playback
+    if (!swProgram)
+    {
+        
+        
+    }
+
+#endif    
 	// Check for any new I packets (from T command) ready to go out
 	while (ISR_D_FIFO_length > 0)
 	{

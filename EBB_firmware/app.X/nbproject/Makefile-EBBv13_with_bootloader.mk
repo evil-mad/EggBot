@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=../Microchip/USB/usb_device.c "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c
+SOURCEFILES_QUOTED_IF_SPACED=../Microchip/USB/usb_device.c "../Microchip/USB/CDC Device Driver/usb_function_cdc.c" source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c source/ebb_demo.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/343710134/usb_device.o.d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d ${OBJECTDIR}/source/ebb.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/RCServo2.o.d ${OBJECTDIR}/source/UBW.o.d ${OBJECTDIR}/source/usb_descriptors.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o ${OBJECTDIR}/source/ebb_demo.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/343710134/usb_device.o.d ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o.d ${OBJECTDIR}/source/ebb.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/RCServo2.o.d ${OBJECTDIR}/source/UBW.o.d ${OBJECTDIR}/source/usb_descriptors.o.d ${OBJECTDIR}/source/ebb_demo.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o
+OBJECTFILES=${OBJECTDIR}/_ext/343710134/usb_device.o ${OBJECTDIR}/_ext/131024517/usb_function_cdc.o ${OBJECTDIR}/source/ebb.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/RCServo2.o ${OBJECTDIR}/source/UBW.o ${OBJECTDIR}/source/usb_descriptors.o ${OBJECTDIR}/source/ebb_demo.o
 
 # Source Files
-SOURCEFILES=../Microchip/USB/usb_device.c ../Microchip/USB/CDC Device Driver/usb_function_cdc.c source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c
+SOURCEFILES=../Microchip/USB/usb_device.c ../Microchip/USB/CDC Device Driver/usb_function_cdc.c source/ebb.c source/main.c source/RCServo2.c source/UBW.c source/usb_descriptors.c source/ebb_demo.c
 
 
 CFLAGS=
@@ -145,6 +145,14 @@ ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makef
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
+${OBJECTDIR}/source/ebb_demo.o: source/ebb_demo.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/ebb_demo.o.d 
+	@${RM} ${OBJECTDIR}/source/ebb_demo.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -DPROGRAMMABLE_WITH_USB_HID_BOOTLOADER -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -Ls  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/ebb_demo.o   source/ebb_demo.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/source/ebb_demo.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/ebb_demo.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
 else
 ${OBJECTDIR}/_ext/343710134/usb_device.o: ../Microchip/USB/usb_device.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/343710134" 
@@ -201,6 +209,14 @@ ${OBJECTDIR}/source/usb_descriptors.o: source/usb_descriptors.c  nbproject/Makef
 	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -DPROGRAMMABLE_WITH_USB_HID_BOOTLOADER -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -Ls  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb_descriptors.o   source/usb_descriptors.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb_descriptors.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb_descriptors.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
+	
+${OBJECTDIR}/source/ebb_demo.o: source/ebb_demo.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/ebb_demo.o.d 
+	@${RM} ${OBJECTDIR}/source/ebb_demo.o 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DBOARD_EBB_V13_AND_ABOVE -DPROGRAMMABLE_WITH_USB_HID_BOOTLOADER -I"../Microchip/Include" -I"../Microchip/Include/USB" -I"." -I"./source" -ms -oa- -Ls  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/ebb_demo.o   source/ebb_demo.c 
+	@${DEP_GEN} -d ${OBJECTDIR}/source/ebb_demo.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/ebb_demo.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 endif
 
