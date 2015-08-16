@@ -182,7 +182,8 @@
 //                  delete any pending SM command in the FIFO.
 // 2.2.8 08/14/15 - Corrected error checking in SM command to accurately reflect
 //                  too fast and too slow requests. (>25K or <1.31 steps per
-//                  second)
+//                  second). Also added type cast that now allows for full range
+//                  of step values to work properly.
 //
 
 #include <p18cxxx.h>
@@ -1009,10 +1010,10 @@ static void process_SM(
 //            }
 //        }
         if (A1Stp < 0x1FFFF) {
-            temp = (((0x8000 * A1Stp)/HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp = ((((UINT32)0x8000 * A1Stp)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
         }
         else {
-            temp = (((A1Stp/Duration) * 0x8000)/HIGH_ISR_TICKS_PER_MS);
+            temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         }
         if (temp > 0x8000) {
             printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
@@ -1026,10 +1027,10 @@ static void process_SM(
         CommandFIFO[0].StepsCounter[0] = A1Stp;
 
         if (A2Stp < 0x1FFFF) {
-            temp = (((0x8000 * A2Stp)/HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp = ((((UINT32)0x8000 * A2Stp)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
         }
         else {
-            temp = (((A2Stp/Duration) * 0x8000)/HIGH_ISR_TICKS_PER_MS);
+            temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         }
         if (temp > 0x8000) {
             printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
