@@ -5,12 +5,14 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/UBW.c</file>
+            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/BL_rm18f46j50_g.lkr</file>
             <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/ebb_demo.h</file>
-            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/main.c</file>
-            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/ebb_demo.c</file>
             <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/ebb.h</file>
+            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/ebb_demo.c</file>
+            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/main.c</file>
             <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/UBW.h</file>
             <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/ebb.c</file>
+            <file>file:/D:/Projects/EggBot_GitHub/EBB_firmware/app.X/source/HardwareProfile_EBB_V13_and_above.h</file>
         </group>
     </open-files>
 </project-private>

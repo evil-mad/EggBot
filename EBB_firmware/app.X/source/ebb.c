@@ -184,6 +184,8 @@
 //                  too fast and too slow requests. (>25K or <1.31 steps per
 //                  second). Also added type cast that now allows for full range
 //                  of step values to work properly.
+// 2.2.9 08/18/15 - Added extra values to output of ES command to indicate how 
+//                  many steps were aborted.
 //
 
 #include <p18cxxx.h>
@@ -517,6 +519,18 @@ void high_ISR(void)
 			if (!FIFOEmpty)
 			{
                 CurrentCommand = CommandFIFO[0];
+                // Zero out command in FIFO
+                CommandFIFO[0].Command = COMMAND_NONE;
+                CommandFIFO[0].StepAdd[0] = 0;
+                CommandFIFO[0].StepAdd[1] = 0;
+                CommandFIFO[0].StepsCounter[0] = 0;
+                CommandFIFO[0].StepsCounter[1] = 0;
+                CommandFIFO[0].DirBits = 0;
+                CommandFIFO[0].DelayCounter = 0;
+                CommandFIFO[0].ServoPosition = 0;
+                CommandFIFO[0].ServoRPn = 0;
+                CommandFIFO[0].ServoChannel = 0;
+                CommandFIFO[0].ServoRate = 0;
 				FIFOEmpty = TRUE;
 			}
             else {
@@ -1050,19 +1064,27 @@ static void process_SM(
 
 // E-Stop
 // Usage: ES<CR>
-// Returns: 0 if SM command was not interrupted, 1 if it was, then OK<CR>
+// Returns: <command_interrupted>,<fifo_steps1>,<fifo_steps2>,<steps_remaining1>,<steps_remaining2><CR>OK<CR>
 // This command will abort any in-progress motor move (SM) command.
 // It will also clear out any pending command(s) in the FIFO.
-// It will return with a 1 if an SM command was aborted or if an SM command 
-// was waiting in the FIFO and had to be discarded. This 1 indicates that some
-// position information may be lost, since one or more SM commands was not
-// finished.
-// It will return a 0 if no SM command was executing at the time, and no SM
-// command was 
+// <command_interrupted> = 0 if no FIFO or in-progress move commands were interrupted,
+//                         1 if a motor move command was in progress or in the FIFO
+// <fifo_steps1> and <fifo_steps1> = 24 bit unsigned integers with the number of steps
+//                         in any SM command sitting in the fifo for axis1 and axis2.
+// <steps_remaining1> and <steps_remaining2> = 24 bit unsigned integers with the number of
+//                         steps left in the currently executing SM command (if any) for
+//                         axis1 and axis2.
+// It will return 0,0,00,0 if no SM command was executing at the time, and no SM
+// command was in the FIFO.
 void parse_ES_packet(void)
 {
-    UINT8 retval = 0;
-
+    UINT8 command_interrupted = 0;
+    UINT32 remaining_steps1 = 0;
+    UINT32 remaining_steps2 = 0;
+    UINT32 fifo_steps1 = 0;
+    UINT32 fifo_steps2 = 0;
+   
+    
     // If there is a command waiting in the FIFO and it is a move command
     // or the current command is a move command, then remember that for later.
     if (
@@ -1071,13 +1093,15 @@ void parse_ES_packet(void)
         CurrentCommand.Command == COMMAND_MOTOR_MOVE
     )
     {
-        retval = 1;
+        command_interrupted = 1;
     }
     
     // If the FIFO has a move command in it, remove it.
     if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
     {
         CommandFIFO[0].Command = COMMAND_NONE;
+        fifo_steps1 = CommandFIFO[0].StepsCounter[0];
+        fifo_steps2 = CommandFIFO[0].StepsCounter[1];
         CommandFIFO[0].StepsCounter[0] = 0;
         CommandFIFO[0].StepsCounter[1] = 0;
         FIFOEmpty = TRUE;
@@ -1087,11 +1111,19 @@ void parse_ES_packet(void)
     if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
     {
     	CurrentCommand.Command = COMMAND_NONE;
+        remaining_steps1 = CurrentCommand.StepsCounter[0];
+        remaining_steps2 = CurrentCommand.StepsCounter[1];
         CurrentCommand.StepsCounter[0] = 0;
         CurrentCommand.StepsCounter[1] = 0;
     }
                 
-    printf((far rom char *)"%d\n\r", retval);
+    printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
+            command_interrupted,
+            fifo_steps1,
+            fifo_steps2,
+            remaining_steps1,
+            remaining_steps2
+        );
 	print_ack();
 }
 
