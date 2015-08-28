@@ -186,7 +186,8 @@
 //                  of step values to work properly.
 // 2.2.9 08/18/15 - Added extra values to output of ES command to indicate how 
 //                  many steps were aborted.
-//
+// 2.3.0 08/28/15 - Added new XM command as per issue #29 for driving mixed-axis
+//                  geometry machines.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -868,8 +869,8 @@ void parse_SC_packet (void)
 
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
-// <move_duration> is a number from 1 to 65535, indicating the number of milliseconds this move should take
-// <axisX_steps> is a signed 16 bit number indicating how many steps (and what direction) the axis should take
+// <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
+// <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
 // If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
@@ -892,6 +893,94 @@ void parse_SM_packet (void)
     }
 
 
+    // Check for too-fast step request (>25KHz)
+    // First get absolute value of steps, then check if it's asking for >25KHz
+    if (A1Steps > 0) {
+        Steps = A1Steps;
+    }
+    else {
+        Steps = -A1Steps;
+    }
+    // Limit each parameter to just 3 bytes
+    if (Duration > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+       return;
+    }
+    if (Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+       return;
+    }
+    // Check for too fast
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+       printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+       return;
+    }
+    // And check for too slow
+    if ((Duration/1311) >= Steps && Steps != 0) {
+       printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+       return;
+    }
+
+    if (A2Steps > 0) {
+        Steps = A2Steps;
+    }
+    else {
+        Steps = -A2Steps;
+    }    
+    if (Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+       return;
+    }
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+       printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+       return;
+    }
+    if ((Duration/1311) >= Steps && Steps != 0) {
+       printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+       return;
+    }
+
+    // Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+    // If we get here, we know that step rate for both A1 and A2 is
+    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  	process_SM(Duration, A1Steps, A2Steps);
+
+	print_ack();
+}
+
+// The X Stepper Motor command
+// Usage: XM,<move_duration>,<axisA_steps>,<axisB_steps><CR>
+// <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
+// <axisA_steps> and <axisB_stetsp> are signed 24 bit numbers.
+// This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
+// machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
+// Axis2 = <axisA_steps> - <axisB_steps>.
+void parse_XM_packet (void)
+{
+	UINT32 Duration = 0;
+	INT32 A1Steps = 0, A2Steps = 0;
+    INT32 ASteps = 0, BSteps = 0;
+    INT32 Steps = 0;
+
+	// Extract each of the values.
+	extract_number (kULONG, &Duration, kREQUIRED);
+	extract_number (kLONG, &ASteps, kREQUIRED);
+	extract_number (kLONG, &BSteps, kREQUIRED);
+
+    // Check for invalid duration
+    if (Duration == 0) {
+    	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+
+    // Do the math to convert to Axis1 and Axis2
+    A1Steps = ASteps + BSteps;
+    A2Steps = ASteps - BSteps;
+    
     // Check for too-fast step request (>25KHz)
     // First get absolute value of steps, then check if it's asking for >25KHz
     if (A1Steps > 0) {
@@ -1074,7 +1163,7 @@ static void process_SM(
 // <steps_remaining1> and <steps_remaining2> = 24 bit unsigned integers with the number of
 //                         steps left in the currently executing SM command (if any) for
 //                         axis1 and axis2.
-// It will return 0,0,00,0 if no SM command was executing at the time, and no SM
+// It will return 0,0,0,0,0 if no SM command was executing at the time, and no SM
 // command was in the FIFO.
 void parse_ES_packet(void)
 {

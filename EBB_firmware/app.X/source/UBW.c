@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.2.9\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.3.0\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -253,7 +253,7 @@ void parse_PC_packet (void);	// PC Pulse Configure
 void parse_BL_packet (void);	// BL Boot Load command
 void parse_CK_packet (void);	// CK ChecK command
 void parse_MR_packet (void);	// MR Motors Run command
-void parse_AC_packet (void);     // AC Analog Configure
+void parse_AC_packet (void);    // AC Analog Configure
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -1420,6 +1420,12 @@ void parse_packet(void)
 		{
 			// ES for E-Stop
 			parse_ES_packet();
+			break;
+		}
+		case ('X' * 256) + 'M':
+		{
+			// XM for X motor move
+			parse_XM_packet();
 			break;
 		}
 		default:
