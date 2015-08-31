@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>EggBot Control</_name>
-  <id>command.evilmadscientist.eggbot.rev250</id>
+  <id>command.evilmadscientist.eggbot.rev260b3</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -65,15 +65,15 @@ Note: Pressing 'Apply' will apply settings, but not plot.
 
     <page name='options' _gui-text='Options'>
       <param name="revPenMotor" type="boolean"
-           _gui-text="          Reverse motion of Motor 1 (pen):">true</param>	
+           _gui-text="          Reverse motion of Motor 1 (pen)">true</param>	
       <param name="revEggMotor" type="boolean"
-           _gui-text="          Reverse motion of Motor 2 (egg):">true</param> 
+           _gui-text="          Reverse motion of Motor 2 (egg)">true</param> 
       <param name="wraparound" type="boolean"
-           _gui-text="          Egg (x) axis wraps around:">true</param>
+           _gui-text="          Egg (x) axis wraps around">true</param>
       <param name="startCentered" type="boolean"
-           _gui-text="          Start with pen centered:">true</param>	
+           _gui-text="          Start with pen centered">true</param>	
       <param name="returnToHome" type="boolean"
-           _gui-text="          Return home when done:">true</param> 
+           _gui-text="          Return home when done">true</param> 
       <param name="engraving" type="boolean"
            _gui-text="          Enable engraver, if attached">false</param>	
       <param name="smoothness" type="float"
@@ -134,7 +134,7 @@ if you need to quit inkscape and resume later,
 be sure to save the document first.
 </_param>
       <param name="cancelOnly" type="boolean"
-	     _gui-text="Cancel and return home only:">false</param> 
+	     _gui-text="Cancel and return home only">false</param> 
     </page>		
 
     <page name="layers" _gui-text="Layers">
@@ -156,7 +156,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.5.0, dated 2015-01-30
+Release 2.6.0, dated 2015-08-31
 
 *EBB Firmware 1.96 or newer required for certain
  functions. 

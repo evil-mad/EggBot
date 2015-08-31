@@ -2,7 +2,8 @@
 # Part of the Eggbot driver for Inkscape
 # http://code.google.com/p/eggbotcode/
 #
-# Version 2.5.0, dated 2015-01-30
+# Version 2.6.0, dated 2015-08-31
+# REQUIRES: Pyserial version 2.7.0
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,12 +33,13 @@ import string
 import sys
 import time
 import eggbot_scan
+import eggbot_conf       
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
 N_PEN_UP_DELAY = 400      # delay (ms) for the pen to up down before the next move
-N_PAGE_HEIGHT = 800       # Default page height (each unit equiv. to one step)
-N_PAGE_WIDTH = 3200       # Default page width (each unit equiv. to one step)
+# N_PAGE_HEIGHT = 800       # Default page height (each unit equiv. to one step) - MOVED TO eggbot_conf.py
+# N_PAGE_WIDTH = 3200       # Default page width (each unit equiv. to one step) - MOVED TO eggbot_conf.py
 
 N_PEN_UP_POS = 50      # Default pen-up position
 N_PEN_DOWN_POS = 40      # Default pen-down position
@@ -64,15 +66,6 @@ DEBUG_OUTPUT_FILE = os.path.join( HOME, 'test.hpgl' )
 DRY_RUN_OUTPUT_FILE = os.path.join( HOME, 'dry_run.txt' )
 MISC_OUTPUT_FILE = os.path.join( HOME, 'misc.txt' )
 
-##    if platform == 'darwin':
-##	''' There's no good value for OS X '''
-##	STR_DEFAULT_COM_PORT = '/dev/cu.usbmodem1a21'
-##    elif platform == 'sunos':
-##	''' Untested: YMMV '''
-##	STR_DEFAULT_COM_PORT = '/dev/term/0'
-##    else:
-##	''' Works fine on Ubuntu; YMMV '''
-##	STR_DEFAULT_COM_PORT = '/dev/ttyACM0'
 
 def parseLengthWithUnits( str ):
 	'''
@@ -139,10 +132,6 @@ class EggBot( inkex.Effect ):
 			action="store", type="float",
 			dest="smoothness", default=.2,
 			help="Smoothness of curves" )
-##		self.OptionParser.add_option( "--comPort",
-##			action="store", type="string",
-##			dest="comport", default=STR_DEFAULT_COM_PORT,
-##			help="USB COM port to connect eggbot.")
 		self.OptionParser.add_option( "--startCentered",
 			action="store", type="inkbool",
 			dest="startCentered", default=True,
@@ -252,8 +241,8 @@ class EggBot( inkex.Effect ):
 		nDeltaX = 0
 		nDeltaY = 0
 
-		self.svgWidth = float( N_PAGE_WIDTH )
-		self.svgHeight = float( N_PAGE_HEIGHT )
+		self.svgWidth = float( eggbot_conf.N_PAGE_WIDTH )
+		self.svgHeight = float( eggbot_conf.N_PAGE_HEIGHT )
 		self.svgTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
 		# So that we only generate a warning once for each
@@ -261,13 +250,14 @@ class EggBot( inkex.Effect ):
 		# which elements have received a warning
 		self.warnings = {}
 
-		# Hack for mismatched EBB/motors,
-		# which have half resolution
-		try:
-			import motor1600
-			self.step_scaling_factor = 2
-		except ImportError:
-			self.step_scaling_factor = 1
+		# "Normal" value: self.step_scaling_factor = 2, for 3200 steps/revolution.
+
+		self.step_scaling_factor = eggbot_conf.STEP_SCALE 
+		
+		self.wrapSteps = 6400 / self.step_scaling_factor
+		self.halfWrapSteps = self.wrapSteps / 2
+		
+		
 
 	def effect( self ):
 		'''Main entry point: check to see which tab is selected, and act accordingly.'''
@@ -318,15 +308,6 @@ class EggBot( inkex.Effect ):
 			self.EggbotOpenSerial()
 			self.manualCommand()
 
-##		elif self.options.tab == '"timing"':
-##			self.EggbotOpenSerial()
-##			if self.serialPort is not None:
-##				self.ServoSetupWrapper()
-##
-##		elif self.options.tab == '"options"':
-##			self.EggbotOpenSerial()
-##			if self.serialPort is not None:
-##
 		self.svgDataRead = False
 		self.UpdateSVGEggbotData( self.svg )
 		self.EggbotCloseSerial()
@@ -1047,8 +1028,8 @@ class EggBot( inkex.Effect ):
 		Use a default value in case the property is not present or is
 		expressed in units of percentages.
 		'''
-		self.svgHeight = self.getLength( 'height', N_PAGE_HEIGHT )
-		self.svgWidth = self.getLength( 'width', N_PAGE_WIDTH )
+		self.svgHeight = self.getLength( 'height', eggbot_conf.N_PAGE_HEIGHT )
+		self.svgWidth = self.getLength( 'width', eggbot_conf.N_PAGE_WIDTH )
 		if ( self.svgHeight == None ) or ( self.svgWidth == None ):
 			return False
 		else:
@@ -1093,16 +1074,16 @@ class EggBot( inkex.Effect ):
 
 				nIndex += 1
 
-				self.fX = float( csp[1][0] ) / self.step_scaling_factor
-				self.fY = float( csp[1][1] ) / self.step_scaling_factor
+				self.fX = 2 * float( csp[1][0] ) / self.step_scaling_factor
+				self.fY = 2 * float( csp[1][1] ) / self.step_scaling_factor
 
 				# store home
 				if self.ptFirst is None:
 
 					# if we should start at center, then the first line segment should draw from there
 					if self.options.startCentered:
-						self.fPrevX = self.svgWidth / ( 2 * self.step_scaling_factor )
-						self.fPrevY = self.svgHeight / ( 2 * self.step_scaling_factor )
+						self.fPrevX = self.svgWidth / ( self.step_scaling_factor )
+						self.fPrevY = self.svgHeight / ( self.step_scaling_factor )
 
 						self.ptFirst = ( self.fPrevX, self.fPrevY )
 					else:
@@ -1223,14 +1204,14 @@ class EggBot( inkex.Effect ):
 
 		if self.bPenIsUp:
 			self.fSpeed = self.options.penUpSpeed
-
+			
 			if ( self.options.wraparound ):
-				if ( nDeltaX > 1600 / self.step_scaling_factor ):
-					while ( nDeltaX > 1600 / self.step_scaling_factor ):
-						nDeltaX -= 3200 / self.step_scaling_factor
-				elif ( nDeltaX < -1600 / self.step_scaling_factor ):
-					while ( nDeltaX < -1600 / self.step_scaling_factor ):
-						nDeltaX += 3200 / self.step_scaling_factor
+				if ( nDeltaX > self.halfWrapSteps ):
+					while ( nDeltaX > self.halfWrapSteps ):
+						nDeltaX -= self.wrapSteps
+				elif ( nDeltaX < -1 * self.halfWrapSteps ):
+					while ( nDeltaX < -1 * self.halfWrapSteps  ):
+						nDeltaX += self.wrapSteps
 
 		else:
 			self.fSpeed = self.options.penDownSpeed
@@ -1348,9 +1329,9 @@ class EggBot( inkex.Effect ):
 		# Before searching, first check to see if the last known
 		# serial port is still good.
 
-		serialPort = self.testSerialPort( self.svgSerialPort )
-		if serialPort:
-			return serialPort
+# 		serialPort = self.testSerialPort( self.svgSerialPort )
+# 		if serialPort:
+# 			return serialPort
 
 		# Try any devices which seem to have EBB boards attached
 		for strComPort in eggbot_scan.findEiBotBoards():
