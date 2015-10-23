@@ -1298,7 +1298,7 @@ class EggBot( inkex.Effect ):
 	def testSerialPort( self, strComPort ):
 		'''
 		look at COM1 to COM20 and return a SerialPort object
-		for the first port with an EBB (eggbot board).
+		for the first port with an EBB (EggBot controller board).
 
 		YOU are responsible for closing this serial port!
 		'''
@@ -1316,6 +1316,13 @@ class EggBot( inkex.Effect ):
 			serialPort.write( 'v\r' )
 			strVersion = serialPort.readline()
 
+			if strVersion and strVersion.startswith( 'EBB' ):
+				# do version control here to check the firmware...
+				return serialPort
+
+			serialPort.write( 'v\r' )
+			strVersion = serialPort.readline()		#Try a second query for El Capitan
+			
 			if strVersion and strVersion.startswith( 'EBB' ):
 				# do version control here to check the firmware...
 				return serialPort
