@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # http://code.google.com/p/eggbotcode/
 #
-# Version 2.6.0, dated 2015-08-31
+# Version 2.6.1, dated 2015-10-25
 # REQUIRES: Pyserial version 2.7.0
 #
 # This program is free software; you can redistribute it and/or modify
