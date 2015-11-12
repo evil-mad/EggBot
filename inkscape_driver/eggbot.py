@@ -1,9 +1,9 @@
 # eggbot.py
 # Part of the Eggbot driver for Inkscape
-# http://code.google.com/p/eggbotcode/
+# https://github.com/evil-mad/EggBot
 #
-# Version 2.6.1, dated 2015-10-25
-# REQUIRES: Pyserial version 2.7.0
+# Version 2.6.3, dated 2015-11-12
+# Tested with pyserial v 2.5.0 and v 2.7.0
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -479,7 +479,7 @@ class EggBot( inkex.Effect ):
 			self.sendDisableMotors()
 
 		elif self.options.setupType == "toggle-pen":
-			self.doCommand( 'TP\r' )		#Toggle pen
+			self.doRequest( 'TP\r' )		#Toggle pen
 
 
 
@@ -1287,7 +1287,7 @@ class EggBot( inkex.Effect ):
 	def EggbotCloseSerial( self ):
 		try:
 			if self.serialPort:
-				self.serialPort.flush()
+				self.doRequest( 'v\r' ) # Final read to leave port in good state
 				self.serialPort.close()
 			if bDebug:
 				self.debugOut.close()
@@ -1297,31 +1297,21 @@ class EggBot( inkex.Effect ):
 
 	def testSerialPort( self, strComPort ):
 		'''
-		look at COM1 to COM20 and return a SerialPort object
+		Return a SerialPort object
 		for the first port with an EBB (EggBot controller board).
 
 		YOU are responsible for closing this serial port!
 		'''
 
 		try:
-			serialPort = serial.Serial( strComPort, timeout=1 ) # 1 second timeout!
-
-			serialPort.setRTS()  # ??? remove
-			serialPort.setDTR()  # ??? remove
+			serialPort = serial.Serial( strComPort, timeout=1.0 ) # 1 second timeout!
 			serialPort.flushInput()
-			serialPort.flushOutput()
-
-			time.sleep( 0.1 )
-
 			serialPort.write( 'v\r' )
 			strVersion = serialPort.readline()
 
-			if strVersion and strVersion.startswith( 'EBB' ):
-				# do version control here to check the firmware...
-				return serialPort
-
 			serialPort.write( 'v\r' )
-			strVersion = serialPort.readline()		#Try a second query for El Capitan
+# 			time.sleep( 0.1 )
+			strVersion = serialPort.readline()		#Second query for El Capitan
 			
 			if strVersion and strVersion.startswith( 'EBB' ):
 				# do version control here to check the firmware...
@@ -1332,28 +1322,18 @@ class EggBot( inkex.Effect ):
 		return None
 
 	def getSerialPort( self ):
-
-		# Before searching, first check to see if the last known
-		# serial port is still good.
-
-# 		serialPort = self.testSerialPort( self.svgSerialPort )
-# 		if serialPort:
-# 			return serialPort
-
 		# Try any devices which seem to have EBB boards attached
 		for strComPort in eggbot_scan.findEiBotBoards():
 			serialPort = self.testSerialPort( strComPort )
 			if serialPort:
 				self.svgSerialPort = strComPort
 				return serialPort
-
 		# Try any likely ports
 		for strComPort in eggbot_scan.findPorts():
 			serialPort = self.testSerialPort( strComPort )
 			if serialPort:
 				self.svgSerialPort = strComPort
 				return serialPort
-
 		return None
 
 	def doCommand( self, cmd ):
@@ -1390,5 +1370,4 @@ def distance( x, y ):
 	return sqrt( x * x + y * y )
 
 e = EggBot()
-#e.affect(output=False)
 e.affect()
