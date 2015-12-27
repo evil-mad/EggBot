@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.6.3, dated 2015-11-12
+# Version 2.6.4, dated 2015-11-12
 # Tested with pyserial v 2.5.0 and v 2.7.0
 #
 # This program is free software; you can redistribute it and/or modify
