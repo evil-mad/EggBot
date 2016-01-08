@@ -69,6 +69,11 @@
 # Update by Daniel C. Newman, 6/20/2012
 # Add min span/gap width
 
+# Updated by Windell H. Oskay, 1/8/2016
+# Added live preview and correct issue with nonzero min gap 
+# https://github.com/evil-mad/EggBot/issues/32
+
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -345,7 +350,9 @@ def interstices( P1, P2, paths, hatches, minGap=0.00001 ):
 			i = i + 2
 
 		else:
-			i = i + 1
+			i = i + 2 	# Skip this hatch segment, but note that we must skip the segment entirely,
+						# not just skip its beginning point
+			
 		# Ignore cases where the prior segment was short, this segment was
 		# short, and the gap between them was short but we might just want
 		# to combine them into one long segment.  That's indeed a possible

@@ -60,7 +60,7 @@ increase precision.
   
   </page>
   </param>
-  <effect needs-live-preview="false">
+  <effect needs-live-preview="true">
     <object-type>all</object-type>
     <effects-menu>
       <submenu _name="EggBot Contributed"/>
