@@ -2,8 +2,8 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.6.4, dated 2015-11-12
-# Tested with pyserial v 2.5.0 and v 2.7.0
+# Version 2.7.0, dated January 8, 2016. 
+# Tested with pyserial v 3.0.0 
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,108 +21,34 @@
 
 # TODO: Add and honor advisory locking around device open/close for non Win32
 
-from bezmisc import *
+# from bezmisc import *
 from math import sqrt
 from simpletransform import *
+
 import gettext
+import inkex
 import simplepath
-import cspsubdiv
+# import cspsubdiv
 import os
-import serial
 import string
 import sys
 import time
-import eggbot_scan
-import eggbot_conf       
+import ebb_serial		# https://github.com/evil-mad/plotink
+import plot_utils		# https://github.com/evil-mad/plotink
+import ebb_motion		# https://github.com/evil-mad/plotink
+
+import eggbot_conf		#Some settings can be changed here.
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
 N_PEN_UP_DELAY = 400      # delay (ms) for the pen to up down before the next move
-# N_PAGE_HEIGHT = 800       # Default page height (each unit equiv. to one step) - MOVED TO eggbot_conf.py
-# N_PAGE_WIDTH = 3200       # Default page width (each unit equiv. to one step) - MOVED TO eggbot_conf.py
 
 N_PEN_UP_POS = 50      # Default pen-up position
 N_PEN_DOWN_POS = 40      # Default pen-down position
 N_SERVOSPEED = 50			# Default pen-lift speed
 N_WALK_DEFAULT = 10		# Default steps for walking stepper motors
 N_DEFAULT_LAYER = 1			# Default inkscape layer
-
-# if bDebug = True, create an HPGL file to show what is being plotted.
-# Pen up moves are shown in a different color if bDrawPenUpLines = True.
-# Try viewing the .hpgl file in a shareware program or create a simple viewer.
-
-bDebug = False
-miscDebug = False
-bDrawPenUpLines = False
-bDryRun = False # write the commands to a text file instead of the serial port
-
-platform = sys.platform.lower()
-
-HOME = os.getenv( 'HOME' )
-if platform == 'win32':
-	HOME = os.path.realpath( "C:/" )  # Arguably, this should be %APPDATA% or %TEMP%
-
-DEBUG_OUTPUT_FILE = os.path.join( HOME, 'test.hpgl' )
-DRY_RUN_OUTPUT_FILE = os.path.join( HOME, 'dry_run.txt' )
-MISC_OUTPUT_FILE = os.path.join( HOME, 'misc.txt' )
-
-
-def parseLengthWithUnits( str ):
-	'''
-	Parse an SVG value which may or may not have units attached
-	This version is greatly simplified in that it only allows: no units,
-	units of px, and units of %.  Everything else, it returns None for.
-	There is a more general routine to consider in scour.py if more
-	generality is ever needed.
-	'''
-	u = 'px'
-	s = str.strip()
-	if s[-2:] == 'px':
-		s = s[:-2]
-	elif s[-1:] == '%':
-		u = '%'
-		s = s[:-1]
-
-	try:
-		v = float( s )
-	except:
-		return None, None
-
-	return v, u
-
-def subdivideCubicPath( sp, flat, i=1 ):
-	"""
-	Break up a bezier curve into smaller curves, each of which
-	is approximately a straight line within a given tolerance
-	(the "smoothness" defined by [flat]).
-
-	This is a modified version of cspsubdiv.cspsubdiv(). I rewrote the recursive
-	call because it caused recursion-depth errors on complicated line segments.
-	"""
-
-	while True:
-		while True:
-			if i >= len( sp ):
-				return
-
-			p0 = sp[i - 1][1]
-			p1 = sp[i - 1][2]
-			p2 = sp[i][0]
-			p3 = sp[i][1]
-
-			b = ( p0, p1, p2, p3 )
-
-			if cspsubdiv.maxdist( b ) > flat:
-				break
-
-			i += 1
-
-		one, two = beziersplitatt( b, 0.5 )
-		sp[i - 1][2] = one[1]
-		sp[i][0] = two[2]
-		p = [one[2], one[3], two[1]]
-		sp[i:1] = [p]
-
+		
 class EggBot( inkex.Effect ):
 
 	def __init__( self ):
@@ -229,7 +155,6 @@ class EggBot( inkex.Effect ):
 		self.nodeTarget = int( 0 )
 		self.pathcount = int( 0 )
 		self.LayersPlotted = 0
-		self.svgSerialPort = ''
 		self.svgLayer = int( 0 )
 		self.svgNodeCount = int( 0 )
 		self.svgDataRead = False
@@ -237,7 +162,8 @@ class EggBot( inkex.Effect ):
 		self.svgLastPathNC = int( 0 )
 		self.svgTotalDeltaX = int( 0 )
 		self.svgTotalDeltaY = int( 0 )
-
+		self.serialPort = None
+		
 		nDeltaX = 0
 		nDeltaY = 0
 
@@ -257,69 +183,67 @@ class EggBot( inkex.Effect ):
 		self.wrapSteps = 6400 / self.step_scaling_factor
 		self.halfWrapSteps = self.wrapSteps / 2
 		
-		
-
 	def effect( self ):
 		'''Main entry point: check to see which tab is selected, and act accordingly.'''
 
 		self.svg = self.document.getroot()
 		self.CheckSVGforEggbotData()
 
-		if self.options.tab == '"splash"':
-			self.allLayers = True
-			self.plotCurrentLayer = True
-			self.EggbotOpenSerial()
-			self.svgNodeCount = 0
-			self.svgLastPath = 0
-			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
-			self.svgLayer = 12345;  # indicate that we are plotting all layers.
-			self.plotToEggBot()
+ 		if ((self.options.tab == '"Help"') or (self.options.tab == '"options"')  or (self.options.tab == '"timing"')):
+ 			pass
+ 		else:
+ 			self.serialPort = ebb_serial.openPort()
+ 			if self.serialPort is None:
+				inkex.errormsg( gettext.gettext( "EggBot Connection not yet established. :(" ) )
 
-
-		elif self.options.tab == '"resume"':
-			self.EggbotOpenSerial()
-			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
-			self.resumePlotSetup()
-			if self.resumeMode:
+			if self.options.tab == '"splash"':
+				self.allLayers = True
+				self.plotCurrentLayer = True
+				self.svgNodeCount = 0
+				self.svgLastPath = 0
+				unused_button = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
+				self.svgLayer = 12345;  # indicate that we are plotting all layers.
 				self.plotToEggBot()
-			elif ( self.options.cancelOnly ):
-				pass
-			else:
-				inkex.errormsg( gettext.gettext( "Truly sorry, there does not seem to be any in-progress plot to resume." ) )
-
-		elif self.options.tab == '"layers"':
-			self.allLayers = False
-			self.plotCurrentLayer = False
-			self.LayersPlotted = 0
-			self.svgLastPath = 0
-			self.EggbotOpenSerial()
-			unused_button = self.doRequest( 'QB\r' ) #Query if button pressed
-			self.svgNodeCount = 0;
-			self.svgLayer = self.options.layernumber
-			self.plotToEggBot()
-			if ( self.LayersPlotted == 0 ):
-				inkex.errormsg( gettext.gettext( "Truly sorry, but I did not find any numbered layers to plot." ) )
-
-		elif self.options.tab == '"setup"':
-			self.EggbotOpenSerial()
-			self.setupCommand()
-
-		elif self.options.tab == '"manual"':
-			self.EggbotOpenSerial()
-			self.manualCommand()
-
+	
+			elif self.options.tab == '"resume"':
+				unused_button = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
+				self.resumePlotSetup()
+				if self.resumeMode:
+					self.plotToEggBot()
+				elif ( self.options.cancelOnly ):
+					pass
+				else:
+					inkex.errormsg( gettext.gettext( "Truly sorry, there does not seem to be any in-progress plot to resume." ) )
+	
+			elif self.options.tab == '"layers"':
+				self.allLayers = False
+				self.plotCurrentLayer = False
+				self.LayersPlotted = 0
+				self.svgLastPath = 0
+				unused_button = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
+				self.svgNodeCount = 0;
+				self.svgLayer = self.options.layernumber
+				self.plotToEggBot()
+				if ( self.LayersPlotted == 0 ):
+					inkex.errormsg( gettext.gettext( "Truly sorry, but I did not find any numbered layers to plot." ) )
+					
+			elif self.options.tab == '"setup"':
+				self.setupCommand()	
+			elif self.options.tab == '"manual"':
+				self.manualCommand()
+				
+			if (self.serialPort):
+				ebb_serial.closePort(self.serialPort)	
+				
 		self.svgDataRead = False
 		self.UpdateSVGEggbotData( self.svg )
-		self.EggbotCloseSerial()
 		return
-
 
 	def CheckSVGforEggbotData( self ):
 		self.svgDataRead = False
 		self.recursiveEggbotDataScan( self.svg )
 		if ( not self.svgDataRead ):    #if there is no eggbot data, add some:
 			eggbotlayer = inkex.etree.SubElement( self.svg, 'eggbot' )
-			eggbotlayer.set( 'serialport', '' )
 			eggbotlayer.set( 'layer', str( 0 ) )
 			eggbotlayer.set( 'node', str( 0 ) )
 			eggbotlayer.set( 'lastpath', str( 0 ) )
@@ -333,7 +257,6 @@ class EggBot( inkex.Effect ):
 				if node.tag == 'svg':
 					self.recursiveEggbotDataScan( node )
 				elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
-					self.svgSerialPort = node.get( 'serialport' )
 					self.svgLayer = int( node.get( 'layer' ) )
 					self.svgNodeCount = int( node.get( 'node' ) )
 
@@ -358,7 +281,6 @@ class EggBot( inkex.Effect ):
 				if node.tag == 'svg':
 					self.UpdateSVGEggbotData( node )
 				elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
-					node.set( 'serialport', self.svgSerialPort )
 					node.set( 'layer', str( self.svgLayer ) )
 					node.set( 'node', str( self.svgNodeCount ) )
 					node.set( 'lastpath', str( self.svgLastPath ) )
@@ -402,10 +324,10 @@ class EggBot( inkex.Effect ):
 
 		if self.options.manualType == "none":
 			return
-
+			
 		if self.serialPort is None:
 			return
-
+			
 		if self.options.manualType == "raise-pen":
 			self.ServoSetupWrapper()
 			self.penUp()
@@ -415,13 +337,13 @@ class EggBot( inkex.Effect ):
 			self.penDown()
 
 		elif self.options.manualType == "enable-motors":
-			self.sendEnableMotors()
+			ebb_motion.sendEnableMotors(self.serialPort)
 
 		elif self.options.manualType == "disable-motors":
 			self.sendDisableMotors()
 
 		elif self.options.manualType == "version-check":
-			strVersion = self.doRequest( 'v\r' )
+			strVersion = ebb_serial.query( self.serialPort, 'v\r' )
 			inkex.errormsg( 'I asked the EBB for its version info, and it replied:\n ' + strVersion )
 
 		elif self.options.manualType == "enable-engraver":
@@ -445,7 +367,8 @@ class EggBot( inkex.Effect ):
 				return
 
 			#Query pen position: 1 up, 0 down (followed by OK)
-			strVersion = self.doRequest( 'QP\r' )
+			strVersion = ebb_serial.query( self.serialPort, 'QP\r' )
+			
 			if strVersion[0] == '0':
 				#inkex.errormsg('Pen is down' )
 				self.fSpeed = self.options.penDownSpeed
@@ -458,13 +381,12 @@ class EggBot( inkex.Effect ):
 			if ( self.options.revEggMotor ):
 				nDeltaX = -1 * nDeltaX
 			
-			nTime = 10000.00 / self.fSpeed * distance( nDeltaX, nDeltaY )
+			nTime = 10000.00 / self.fSpeed * plot_utils.distance( nDeltaX, nDeltaY )
 			nTime = int( math.ceil(nTime / 10.0))
 			
 			strOutput = ','.join( ['SM', str( nTime ), str( nDeltaY ), str( nDeltaX )] ) + '\r'
-			self.doCommand( strOutput )
-
-
+			ebb_serial.command( self.serialPort, strOutput )		
+				
 
 	def setupCommand( self ):
 		"""Execute commands from the "setup" tab"""
@@ -479,8 +401,7 @@ class EggBot( inkex.Effect ):
 			self.sendDisableMotors()
 
 		elif self.options.setupType == "toggle-pen":
-			self.doRequest( 'TP\r' )		#Toggle pen
-
+			ebb_serial.command( self.serialPort, 'TP\r' )		
 
 
 	def plotToEggBot( self ):
@@ -518,12 +439,6 @@ class EggBot( inkex.Effect ):
 		if self.options.engraving:
 			self.engraverOff()
 
-		if bDebug:
-			self.debugOut = open( DEBUG_OUTPUT_FILE, 'w' )
-			if bDrawPenUpLines:
-				self.debugOut.write( 'IN;SP1;' )
-			else:
-				self.debugOut.write( 'IN;PD;' )
 
 		try:
 			# wrap everything in a try so we can for sure close the serial port
@@ -706,7 +621,6 @@ class EggBot( inkex.Effect ):
 				# to
 				#
 				#   <path d="MX1,Y1 LX2,Y2"/>
-
 
 				doWePlotThisPath = False 
 				if (self.resumeMode):
@@ -999,28 +913,6 @@ class EggBot( inkex.Effect ):
 				self.LayersPlotted += 1
 		#Note: this function is only called if we are NOT plotting all layers.
 
-	def getLength( self, name, default ):
-		'''
-		Get the <svg> attribute with name "name" and default value "default"
-		Parse the attribute into a value and associated units.  Then, accept
-		no units (''), units of pixels ('px'), and units of percentage ('%').
-		'''
-		str = self.svg.get( name )
-		if str:
-			v, u = parseLengthWithUnits( str )
-			if not v:
-				# Couldn't parse the value
-				return None
-			elif ( u == '' ) or ( u == 'px' ):
-				return v
-			elif u == '%':
-				return float( default ) * v / 100.0
-			else:
-				# Unsupported units
-				return None
-		else:
-			# No width specified; assume the default value
-			return float( default )
 
 	def getDocProps( self ):
 		'''
@@ -1028,12 +920,13 @@ class EggBot( inkex.Effect ):
 		Use a default value in case the property is not present or is
 		expressed in units of percentages.
 		'''
-		self.svgHeight = self.getLength( 'height', eggbot_conf.N_PAGE_HEIGHT )
-		self.svgWidth = self.getLength( 'width', eggbot_conf.N_PAGE_WIDTH )
+		self.svgHeight = plot_utils.getLength( self, 'height', eggbot_conf.N_PAGE_HEIGHT )
+		self.svgWidth = plot_utils.getLength( self, 'width', eggbot_conf.N_PAGE_WIDTH )
 		if ( self.svgHeight == None ) or ( self.svgWidth == None ):
 			return False
 		else:
 			return True
+
 
 	def plotPath( self, path, matTransform ):
 		'''
@@ -1056,7 +949,7 @@ class EggBot( inkex.Effect ):
 		# where the start-point is the last point in the previous segment.
 		for sp in p:
 
-			subdivideCubicPath( sp, self.options.smoothness )
+			plot_utils.subdivideCubicPath( sp, self.options.smoothness )
 			nIndex = 0
 
 			for csp in sp:
@@ -1094,32 +987,20 @@ class EggBot( inkex.Effect ):
 					self.fPrevX = self.fX
 					self.fPrevY = self.fY
 
-	def sendEnableMotors( self ):
-		self.doCommand( 'EM,1,1\r' )
 
 	def sendDisableMotors( self ):
 		# Insist on turning the engraver off.  Otherwise, if it is on
 		# and the pen is down, then the engraver's vibration may cause
 		# the loose pen arm to start moving or the egg to start turning.
 		self.engraverOffManual()
-		self.doCommand( 'EM,0,0\r' )
+		ebb_motion.sendDisableMotors(self.serialPort)	
 
-	def doTimedPause( self, nPause ):
-		while ( nPause > 0 ):
-			if ( nPause > 750 ):
-				td = int( 750 )
-			else:
-				td = nPause
-				if ( td < 1 ):
-					td = int( 1 ) # don't allow zero-time moves
-			if ( not self.resumeMode ):
-				self.doCommand( 'SM,' + str( td ) + ',0,0\r' )
-			nPause -= td
 
 	def penUp( self ):
 		if ( ( not self.resumeMode ) or ( not self.virtualPenIsUp ) ):
-			self.doCommand( 'SP,1\r' )
-			self.doTimedPause( self.options.penUpDelay ) # pause for pen to go up
+			ebb_serial.command( self.serialPort, 'SP,1\r')		
+			if ( not self.resumeMode ):
+				ebb_motion.doTimedPause(self.serialPort, self.options.penUpDelay ) # pause for pen to go up
 			self.bPenIsUp = True
 		self.virtualPenIsUp = True
 
@@ -1128,37 +1009,38 @@ class EggBot( inkex.Effect ):
 		if ( not self.resumeMode ):
 			if self.penDownActivatesEngraver:
 					self.engraverOn() # will check self.enableEngraver
-			self.doCommand( 'SP,0\r' )
-			self.doTimedPause( self.options.penDownDelay ) # pause for pen to go down
+			ebb_serial.command( self.serialPort, 'SP,0\r')		
+			if ( not self.resumeMode ):
+				ebb_motion.doTimedPause(self.serialPort, self.options.penDownDelay ) # pause for pen to go down
 			self.bPenIsUp = False
 
 	def engraverOff( self ):
 		# Note: we don't bother checking self.engraverIsOn -- turn it off regardless
 		# Reason being that we may not know the true hardware state
 		if self.options.engraving:
-			self.doCommand( 'PO,B,3,0\r' )
+			ebb_serial.command( self.serialPort, 'PO,B,3,0\r')		
 			self.engraverIsOn = False
 			
 	def engraverOffManual( self ):
 		# Turn off engraver, whether or not the engraver is enabled. 
 		# This is only called by manual commands like "engraver off" and "motors off."
-		self.doCommand( 'PO,B,3,0\r' )
+		ebb_serial.command( self.serialPort, 'PO,B,3,0\r')		
 		self.engraverIsOn = False			
 			
 	def engraverOn( self ):
 		if self.options.engraving and ( not self.engraverIsOn ):
 			self.engraverIsOn = True
-			self.doCommand( 'PD,B,3,0\r' )	#Added 6/6/2011, necessary.
-			self.doCommand( 'PO,B,3,1\r' )
+			ebb_serial.command( self.serialPort,  'PD,B,3,0\r')		#Added 6/6/2011, necessary.
+			ebb_serial.command( self.serialPort,  'PO,B,3,1\r' )		
 
 	def ServoSetupWrapper( self ):
 		self.ServoSetup()
-		strVersion = self.doRequest( 'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
+		strVersion = ebb_serial.query( self.serialPort,  'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
 		if strVersion[0] == '0':
 			#inkex.errormsg('Pen is down' )
-			self.doCommand( 'SP,0\r' ) #Lower Pen
+			ebb_serial.command( self.serialPort,  'SP,0\r' )	
 		else:
-			self.doCommand( 'SP,1\r' ) #Raise pen
+			ebb_serial.command( self.serialPort,  'SP,1\r'  )	
 
 	def ServoSetup( self ):
 		# Pen position units range from 0% to 100%, which correspond to
@@ -1166,9 +1048,10 @@ class EggBot( inkex.Effect ):
 		# 1% corresponds to 20 us, or 240 units of 1/(12 MHz).
 
 		intTemp = 240 * ( self.options.penUpPosition + 25 )
-		self.doCommand( 'SC,4,' + str( intTemp ) + '\r' )
+		ebb_serial.command( self.serialPort,  'SC,4,' + str( intTemp ) + '\r' )	
+		
 		intTemp = 240 * ( self.options.penDownPosition + 25 )
-		self.doCommand( 'SC,5,' + str( intTemp ) + '\r' )
+		ebb_serial.command( self.serialPort,  'SC,5,' + str( intTemp ) + '\r'  )	
 
 		# Servo speed units are in units of %/second, referring to the
 		# percentages above.  The EBB takes speeds in units of 1/(12 MHz) steps
@@ -1177,13 +1060,10 @@ class EggBot( inkex.Effect ):
 		# to 5.04 steps/21 ms.  Rounding this to 5 steps/21 ms is correct
 		# to within 1 %.
 
-##		intTemp = 5 * self.options.ServoSpeed
-##		self.doCommand( 'SC,10,' + str( intTemp ) + '\r' )
-		#inkex.errormsg('Setting up Servo Motors!')
 		intTemp = 5 * self.options.ServoUpSpeed
-		self.doCommand( 'SC,11,' + str( intTemp ) + '\r' )
+		ebb_serial.command( self.serialPort,  'SC,11,' + str( intTemp ) + '\r' )	
 		intTemp = 5 * self.options.ServoDownSpeed
-		self.doCommand( 'SC,12,' + str( intTemp ) + '\r' )
+		ebb_serial.command( self.serialPort,  'SC,12,' + str( intTemp ) + '\r' )	
 
 	def stop( self ):
 		self.bStopped = True
@@ -1217,7 +1097,7 @@ class EggBot( inkex.Effect ):
 			self.fSpeed = self.options.penDownSpeed
 
 
-		if ( distance( nDeltaX, nDeltaY ) > 0 ):
+		if ( plot_utils.distance( nDeltaX, nDeltaY ) > 0 ):
 			self.nodeCount += 1
 
 			if self.resumeMode:
@@ -1227,7 +1107,7 @@ class EggBot( inkex.Effect ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
 
-			nTime = int( math.ceil( 1000 / self.fSpeed * distance( nDeltaX, nDeltaY ) ) )
+			nTime = int( math.ceil( 1000 / self.fSpeed * plot_utils.distance( nDeltaX, nDeltaY ) ) )
 
 			while ( ( abs( nDeltaX ) > 0 ) or ( abs( nDeltaY ) > 0 ) ):
 				if ( nTime > 750 ):
@@ -1254,14 +1134,15 @@ class EggBot( inkex.Effect ):
 					strOutput = ','.join( ['SM', str( td ), str( yd2 ), str( xd2 )] ) + '\r'
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
-					self.doCommand( strOutput )
+					ebb_serial.command( self.serialPort,  strOutput )	
 
 				nDeltaX -= xd
 				nDeltaY -= yd
 				nTime -= td
 
 			#self.doCommand('NI\r')  #Increment node counter on EBB
-			strButton = self.doRequest( 'QB\r' ) #Query if button pressed
+			strButton = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
+			
 			if strButton[0] == '0':
 				pass #button not pressed
 			else:
@@ -1272,102 +1153,6 @@ class EggBot( inkex.Effect ):
 				self.engraverOff()
 				self.bStopped = True
 				return
-
-	# note: the pen-motor is first, and it corresponds to the y-axis on-screen
-
-	def EggbotOpenSerial( self ):
-		if not bDryRun:
-			self.serialPort = self.getSerialPort()
-		else:
-			self.serialPort = open( DRY_RUN_OUTPUT_FILE, 'w' )
-
-		if self.serialPort is None:
-			inkex.errormsg( gettext.gettext( "Unable to find an Eggbot on any serial port. :(" ) )
-
-	def EggbotCloseSerial( self ):
-		try:
-			if self.serialPort:
-				self.doRequest( 'v\r' ) # Final read to leave port in good state
-				self.serialPort.close()
-			if bDebug:
-				self.debugOut.close()
-		finally:
-			self.serialPort = None
-			return
-
-	def testSerialPort( self, strComPort ):
-		'''
-		Return a SerialPort object
-		for the first port with an EBB (EggBot controller board).
-
-		YOU are responsible for closing this serial port!
-		'''
-
-		try:
-			serialPort = serial.Serial( strComPort, timeout=1.0 ) # 1 second timeout!
-			serialPort.flushInput()
-			serialPort.write( 'v\r' )
-			strVersion = serialPort.readline()
-
-			serialPort.write( 'v\r' )
-# 			time.sleep( 0.1 )
-			strVersion = serialPort.readline()		#Second query for El Capitan
-			
-			if strVersion and strVersion.startswith( 'EBB' ):
-				# do version control here to check the firmware...
-				return serialPort
-			serialPort.close()
-		except serial.SerialException:
-			pass
-		return None
-
-	def getSerialPort( self ):
-		# Try any devices which seem to have EBB boards attached
-		for strComPort in eggbot_scan.findEiBotBoards():
-			serialPort = self.testSerialPort( strComPort )
-			if serialPort:
-				self.svgSerialPort = strComPort
-				return serialPort
-		# Try any likely ports
-		for strComPort in eggbot_scan.findPorts():
-			serialPort = self.testSerialPort( strComPort )
-			if serialPort:
-				self.svgSerialPort = strComPort
-				return serialPort
-		return None
-
-	def doCommand( self, cmd ):
-		try:
-			self.serialPort.write( cmd )
-			response = self.serialPort.readline()
-			if ( response != 'OK\r\n' ):
-				if ( response != '' ):
-					inkex.errormsg( 'After command ' + cmd + ',' )
-					inkex.errormsg( 'Received bad response from EBB: ' + str( response ) + '.' )
-					#inkex.errormsg('BTW:: Node number is ' + str(self.nodeCount) + '.')
-
-				else:
-					inkex.errormsg( 'EBB Serial Timeout.' )
-
-		except:
-			pass
-
-	def doRequest( self, cmd ):
-		response = ''
-		try:
-			self.serialPort.write( cmd )
-			response = self.serialPort.readline()
-			unused_response = self.serialPort.readline() #read in extra blank/OK line
-		except:
-			inkex.errormsg( gettext.gettext( "Error reading serial data." ) )
-
-		return response
-
-def distance( x, y ):
-	'''
-	Pythagorean theorem!
-	'''
-	return sqrt( x * x + y * y )
 
 e = EggBot()
 e.affect()
