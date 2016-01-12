@@ -2,8 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.0, dated January 8, 2016. 
-# Tested with pyserial v 3.0.0 
+# Version 2.7.1, dated January 11, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,21 +20,16 @@
 
 # TODO: Add and honor advisory locking around device open/close for non Win32
 
-# from bezmisc import *
-from math import sqrt
 from simpletransform import *
 
 import gettext
 import inkex
 import simplepath
-# import cspsubdiv
-import os
 import string
-import sys
 import time
 import ebb_serial		# https://github.com/evil-mad/plotink
 import plot_utils		# https://github.com/evil-mad/plotink
-import ebb_motion		# https://github.com/evil-mad/plotink
+import ebb_motion		# https://github.com/evil-mad/plotink	Requires version 0.2 or newer.
 
 import eggbot_conf		#Some settings can be changed here.
 
@@ -194,7 +188,7 @@ class EggBot( inkex.Effect ):
  		else:
  			self.serialPort = ebb_serial.openPort()
  			if self.serialPort is None:
-				inkex.errormsg( gettext.gettext( "EggBot Connection not yet established. :(" ) )
+				inkex.errormsg( gettext.gettext( "Failed to connect to EggBot. :(" ) )
 
 			if self.options.tab == '"splash"':
 				self.allLayers = True
@@ -370,10 +364,8 @@ class EggBot( inkex.Effect ):
 			strVersion = ebb_serial.query( self.serialPort, 'QP\r' )
 			
 			if strVersion[0] == '0':
-				#inkex.errormsg('Pen is down' )
 				self.fSpeed = self.options.penDownSpeed
 			if strVersion[0] == '1':
-				#inkex.errormsg('Pen is up' )
 				self.fSpeed = self.options.penUpSpeed
 
 			if ( self.options.revPenMotor ):
@@ -385,25 +377,23 @@ class EggBot( inkex.Effect ):
 			nTime = int( math.ceil(nTime / 10.0))
 			
 			strOutput = ','.join( ['SM', str( nTime ), str( nDeltaY ), str( nDeltaX )] ) + '\r'
+
 			ebb_serial.command( self.serialPort, strOutput )		
-				
 
 	def setupCommand( self ):
 		"""Execute commands from the "setup" tab"""
 
 		if self.serialPort is None:
 			return
-
 		self.ServoSetupWrapper()
-
 		if self.options.setupType == "align-mode":
 			self.penUp()
 			self.sendDisableMotors()
-
-		elif self.options.setupType == "toggle-pen":
-			ebb_serial.command( self.serialPort, 'TP\r' )		
-
-
+		else:
+			ebb_motion.TogglePen(self.serialPort)
+			ebb_motion.doTimedPause(self.serialPort, 100) 
+			#give previous command a chance to execute before the port is closed.
+			
 	def plotToEggBot( self ):
 		'''Perform the actual plotting, if selected in the interface:'''
 		#parse the svg data as a series of line segments and send each segment to be plotted
@@ -826,6 +816,8 @@ class EggBot( inkex.Effect ):
 				pass
 			elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
 				pass
+			elif node.tag == inkex.addNS( 'WCB', 'svg' ) or node.tag == 'WCB':
+				pass
 			elif node.tag == inkex.addNS( 'title', 'svg' ) or node.tag == 'title':
 				pass
 			elif node.tag == inkex.addNS( 'desc', 'svg' ) or node.tag == 'desc':
@@ -997,21 +989,17 @@ class EggBot( inkex.Effect ):
 
 
 	def penUp( self ):
-		if ( ( not self.resumeMode ) or ( not self.virtualPenIsUp ) ):
-			ebb_serial.command( self.serialPort, 'SP,1\r')		
-			if ( not self.resumeMode ):
-				ebb_motion.doTimedPause(self.serialPort, self.options.penUpDelay ) # pause for pen to go up
+		self.virtualPenIsUp = True  # Virtual pen keeps track of state for resuming plotting.
+		if ( not self.resumeMode):
+			ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
 			self.bPenIsUp = True
-		self.virtualPenIsUp = True
 
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
 		if ( not self.resumeMode ):
 			if self.penDownActivatesEngraver:
 					self.engraverOn() # will check self.enableEngraver
-			ebb_serial.command( self.serialPort, 'SP,0\r')		
-			if ( not self.resumeMode ):
-				ebb_motion.doTimedPause(self.serialPort, self.options.penDownDelay ) # pause for pen to go down
+			ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )						
 			self.bPenIsUp = False
 
 	def engraverOff( self ):
@@ -1037,10 +1025,12 @@ class EggBot( inkex.Effect ):
 		self.ServoSetup()
 		strVersion = ebb_serial.query( self.serialPort,  'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
 		if strVersion[0] == '0':
-			#inkex.errormsg('Pen is down' )
-			ebb_serial.command( self.serialPort,  'SP,0\r' )	
+# 			ebb_serial.command( self.serialPort,  'SP,0\r' )	
+			ebb_motion.sendPenDown(self.serialPort, 0)				
 		else:
-			ebb_serial.command( self.serialPort,  'SP,1\r'  )	
+# 			ebb_serial.command( self.serialPort,  'SP,1\r'  )	
+			ebb_motion.sendPenUp(self.serialPort, 0)				
+
 
 	def ServoSetup( self ):
 		# Pen position units range from 0% to 100%, which correspond to
