@@ -226,7 +226,8 @@ class EggBot( inkex.Effect ):
 			elif self.options.tab == '"manual"':
 				self.manualCommand()
 				
-			if (self.serialPort):
+			if self.serialPort is not None:
+				ebb_motion.doTimedPause(self.serialPort, 10) #Pause a moment for underway commands to finish...
 				ebb_serial.closePort(self.serialPort)	
 				
 		self.svgDataRead = False
@@ -331,7 +332,7 @@ class EggBot( inkex.Effect ):
 			self.penDown()
 
 		elif self.options.manualType == "enable-motors":
-			ebb_motion.sendEnableMotors(self.serialPort)
+			ebb_motion.sendEnableMotors(self.serialPort, 1) # 16X microstepping
 
 		elif self.options.manualType == "disable-motors":
 			self.sendDisableMotors()
@@ -359,7 +360,9 @@ class EggBot( inkex.Effect ):
 				nDeltaX = 0
 			else:
 				return
-
+				
+			ebb_motion.sendEnableMotors(self.serialPort, 1) # 16X microstepping
+			
 			#Query pen position: 1 up, 0 down (followed by OK)
 			strVersion = ebb_serial.query( self.serialPort, 'QP\r' )
 			
@@ -377,8 +380,9 @@ class EggBot( inkex.Effect ):
 			nTime = int( math.ceil(nTime / 10.0))
 			
 			strOutput = ','.join( ['SM', str( nTime ), str( nDeltaY ), str( nDeltaX )] ) + '\r'
+			#inkex.errormsg( 'strOutput:  ' + strOutput )
 
-			ebb_serial.command( self.serialPort, strOutput )		
+			ebb_serial.command( self.serialPort, strOutput )
 
 	def setupCommand( self ):
 		"""Execute commands from the "setup" tab"""
@@ -391,8 +395,6 @@ class EggBot( inkex.Effect ):
 			self.sendDisableMotors()
 		else:
 			ebb_motion.TogglePen(self.serialPort)
-			ebb_motion.doTimedPause(self.serialPort, 100) 
-			#give previous command a chance to execute before the port is closed.
 			
 	def plotToEggBot( self ):
 		'''Perform the actual plotting, if selected in the interface:'''
@@ -423,7 +425,8 @@ class EggBot( inkex.Effect ):
 				self.svgTransform = parseTransform( 'scale(%f,%f) translate(%f,%f)' % (sx, sy, -float( vinfo[0] ), -float( vinfo[1] ) ) )
 
 		self.ServoSetup()
-
+		ebb_motion.sendEnableMotors(self.serialPort, 1) # 16X microstepping
+		
 		# Ensure that the engraver is turned off for the time being
 		# It will be turned back on when the first non-virtual pen-down occurs
 		if self.options.engraving:
@@ -990,17 +993,20 @@ class EggBot( inkex.Effect ):
 
 	def penUp( self ):
 		self.virtualPenIsUp = True  # Virtual pen keeps track of state for resuming plotting.
-		if ( not self.resumeMode):
+		if ( not self.resumeMode) and (not self.bPenIsUp):	# skip if pen is already up, or if we're resuming.
 			ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
 			self.bPenIsUp = True
 
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-		if ( not self.resumeMode ):
-			if self.penDownActivatesEngraver:
-					self.engraverOn() # will check self.enableEngraver
-			ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )						
-			self.bPenIsUp = False
+		if (self.bPenIsUp):  # skip if pen is already down
+			if ( not self.resumeMode ) and (not self.bStopped):  # skip if we're resuming or stopped
+				self.bPenIsUp = False
+				if self.penDownActivatesEngraver:
+						self.engraverOn() # will check self.enableEngraver
+				ebb_motion.sendPenDown(self.serialPort, self.options.penUpDelay )						
+		ebb_motion.doTimedPause(self.serialPort, 10) #Pause a moment for underway commands to finish...
+		
 
 	def engraverOff( self ):
 		# Note: we don't bother checking self.engraverIsOn -- turn it off regardless
