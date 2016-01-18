@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.1, dated January 11, 2016.
+# Version 2.7.2, dated January 11, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -133,7 +133,7 @@ class EggBot( inkex.Effect ):
 			dest="revEggMotor", default=False,
 			help="Reverse motion of egg motor." )
 
-		self.bPenIsUp = True
+		self.bPenIsUp = None  #Initial state of pen is neither up nor down, but _unknown_.
 		self.virtualPenIsUp = False  #Keeps track of pen postion when stepping through plot before resuming
 		self.engraverIsOn = False
 		self.penDownActivatesEngraver = False
@@ -257,9 +257,7 @@ class EggBot( inkex.Effect ):
 
 					try:
 						self.svgLastPath = int( node.get( 'lastpath' ) )
-# 						inkex.errormsg('lastpath: ' + str(self.svgLastPath))
 						self.svgLastPathNC = int( node.get( 'lastpathnc' ) )
-# 						inkex.errormsg('lastpathnc: ' + str(self.svgLastPathNC))
 						self.svgTotalDeltaX = int( node.get( 'totaldeltax' ) )
 						self.svgTotalDeltaY = int( node.get( 'totaldeltay' ) )
 						self.svgDataRead = True
@@ -993,19 +991,19 @@ class EggBot( inkex.Effect ):
 
 	def penUp( self ):
 		self.virtualPenIsUp = True  # Virtual pen keeps track of state for resuming plotting.
-		if ( not self.resumeMode) and (not self.bPenIsUp):	# skip if pen is already up, or if we're resuming.
-			ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
-			self.bPenIsUp = True
+		if (self.bPenIsUp != True): # Continue only if pen state is down (or unknown)
+			if ( not self.resumeMode): # or if we're resuming.
+				ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
+				self.bPenIsUp = True
 
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-		if (self.bPenIsUp):  # skip if pen is already down
+		if (self.bPenIsUp != False):  # Continue only if pen state is up (or unknown)
 			if ( not self.resumeMode ) and (not self.bStopped):  # skip if we're resuming or stopped
 				self.bPenIsUp = False
 				if self.penDownActivatesEngraver:
 						self.engraverOn() # will check self.enableEngraver
 				ebb_motion.sendPenDown(self.serialPort, self.options.penUpDelay )						
-		ebb_motion.doTimedPause(self.serialPort, 10) #Pause a moment for underway commands to finish...
 		
 
 	def engraverOff( self ):
@@ -1031,10 +1029,8 @@ class EggBot( inkex.Effect ):
 		self.ServoSetup()
 		strVersion = ebb_serial.query( self.serialPort,  'QP\r' ) #Query pen position: 1 up, 0 down (followed by OK)
 		if strVersion[0] == '0':
-# 			ebb_serial.command( self.serialPort,  'SP,0\r' )	
 			ebb_motion.sendPenDown(self.serialPort, 0)				
 		else:
-# 			ebb_serial.command( self.serialPort,  'SP,1\r'  )	
 			ebb_motion.sendPenUp(self.serialPort, 0)				
 
 
