@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.2, dated January 11, 2016.
+# Version 2.7.3, dated January 31, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1088,7 +1088,6 @@ class EggBot( inkex.Effect ):
 		else:
 			self.fSpeed = self.options.penDownSpeed
 
-
 		if ( plot_utils.distance( nDeltaX, nDeltaY ) > 0 ):
 			self.nodeCount += 1
 
@@ -1102,17 +1101,17 @@ class EggBot( inkex.Effect ):
 			nTime = int( math.ceil( 1000 / self.fSpeed * plot_utils.distance( nDeltaX, nDeltaY ) ) )
 
 			while ( ( abs( nDeltaX ) > 0 ) or ( abs( nDeltaY ) > 0 ) ):
-				if ( nTime > 750 ):
-					xd = int( round( ( 750.0 * nDeltaX ) / nTime ) )
-					yd = int( round( ( 750.0 * nDeltaY ) / nTime ) )
-					td = int( 750 )
-				else:
-					xd = nDeltaX
-					yd = nDeltaY
-					td = nTime
-					if ( td < 1 ):
-						td = 1		# don't allow zero-time moves.
-
+				xd = nDeltaX
+				yd = nDeltaY
+				td = nTime
+				if ( td < 1 ):
+					td = 1		# don't allow zero-time moves.
+					
+				if (abs((float(xd) / float(td))) < 0.002):	
+					xd = 0	#don't allow too-slow movements of this axis
+				if (abs((float(yd) / float(td))) < 0.002):	
+					yd = 0	#don't allow too-slow movements of this axis
+						
 				if ( not self.resumeMode ):
 					if ( self.options.revPenMotor ):
 						yd2 = yd
@@ -1123,21 +1122,17 @@ class EggBot( inkex.Effect ):
 					else:
 						xd2 = xd
 
-					strOutput = ','.join( ['SM', str( td ), str( yd2 ), str( xd2 )] ) + '\r'
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
-					ebb_serial.command( self.serialPort,  strOutput )	
+					ebb_motion.doXYMove( self.serialPort, xd2, yd2, td )			
+					time.sleep(float(td - 1)/1000.0)  #pause before issuing next command
 
 				nDeltaX -= xd
 				nDeltaY -= yd
 				nTime -= td
 
-			#self.doCommand('NI\r')  #Increment node counter on EBB
 			strButton = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
-			
-			if strButton[0] == '0':
-				pass #button not pressed
-			else:
+			if strButton[0] == '1': #button pressed
 				self.svgNodeCount = self.nodeCount;
 				inkex.errormsg( 'Plot paused by button press after node number ' + str( self.nodeCount ) + '.' )
 				inkex.errormsg( 'Use the "resume" feature to continue.' )
