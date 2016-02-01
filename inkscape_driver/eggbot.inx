@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>EggBot Control</_name>
-  <id>command.evilmadscientist.eggbot.rev273b1</id>
+  <id>command.evilmadscientist.eggbot.rev273b2</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>

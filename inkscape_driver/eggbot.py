@@ -1125,8 +1125,9 @@ class EggBot( inkex.Effect ):
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
 					ebb_motion.doXYMove( self.serialPort, xd2, yd2, td )			
-					time.sleep(float(td - 1)/1000.0)  #pause before issuing next command
-
+					if (td > 50):
+						time.sleep(float(td - 50)/1000.0)  #pause before issuing next command
+					
 				nDeltaX -= xd
 				nDeltaY -= yd
 				nTime -= td
