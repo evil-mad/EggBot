@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hatch fill</_name>
-  <id>command.eggbot.contributed.eggbot_hatch.revb2</id>
+  <id>command.eggbot.eggbot_hatch.revb5</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot_hatch.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -11,59 +11,64 @@
   <dependency type="executable" location="extensions">cubicsuperpath.py</dependency>
   <dependency type="executable" location="extensions">cspsubdiv.py</dependency>
   <dependency type="executable" location="extensions">bezmisc.py</dependency>
+  <dependency type="executable" location="extensions">plot_utils.py</dependency>
 
 <param name="tab" type="notebook">
-  <page name="splash" _gui-text="Eggbot Hatch">
+  <page name="splash" _gui-text="Hatch Fill">
   <_param name="Header" type="description" xml:space="preserve">
-This extension fills each closed
-figure in your drawing with straight
-back and forth hatch lines. If one
-or more figures are selected, then
-only those figures will be filled.
-Hatched figures will be grouped with
-their fills.
+This extension fills each closed figure in your drawing
+with a path consisting of back and forth drawn "hatch" lines.
+If any objects are selected, then only those selected objects
+will be filled. 
 
+Hatched figures will be grouped with their fills.
   </_param>
-
-  <param name="hatchAngle" type="float" min="-360" max="360" _gui-text="   Hatch angle (degrees)">90</param>
-  <param name="hatchSpacing" type="float" min="0" max="1000" _gui-text="   Hatch spacing (steps)">6.0</param>
-  <param name="minGap" type="float" min="0" max="1000" _gui-text="   Minimum hatch and gap length (pixels)">0</param>
-  <param name="tolerance" type="float" min="0.1" max="100" _gui-text="   Tolerance (default: 20)">20.0</param>
+  <param name="hatchSpacing" type="float" min="0" max="1000" _gui-text="   Hatch spacing (px)">5.0</param>
+  <param name="hatchAngle" type="float" min="-360" max="360" _gui-text="   Hatch angle (degrees)">45</param>
   <param name="crossHatch" type="boolean" _gui-text="   Crosshatch?">false</param>
+
+  <param name="reducePenLifts" type="boolean" _gui-text="   Connect nearby ends?">true</param>
+  <param name="hatchScope" type="float" min="1.1" max="5.0" _gui-text="   Range of end connections (default: 3)">3.0</param>
+  <param name="holdBackHatchFromEdges" type="boolean" _gui-text="   Inset fill from edges?">true</param>
+  <param name="holdBackSteps" type="float" min="0.1" max="10.0" _gui-text="   Inset distance (px) (default: 1)">1.0</param>
+  <param name="tolerance" type="float" min="0.1" max="100" _gui-text="   Tolerance (default: 20)">20.0</param>
 
   </page>
   <page name="info" _gui-text="More info...">
   <_param name="aboutpage" type="description" xml:space="preserve">
-For smoothly flowing, continuous line fills,
-use the Path Effect Editor's "Hatches (rough)"
-effect and the EggBot extension "Preset hatch
-for fills...". (This extension is not
-controlled by the "Preset hatch for fills..."
-extension.)
+Hatch spacing is the distance between hatch lines, 
+measured in units of screen pixels (px). Angles are in
+degrees from horizontal; for example 90 is vertical.
 
-Hatch line angles are measured from
-horizontal: 0 is horizontal and 90 is
-vertical.
+The Crosshatch option will apply a second set of
+hatches, perpendicular to the first.
 
-Hatch spacing is the distance between hatch
-lines measured in units of motor steps.
+The "Connect nearby ends" option will attempt to connect
+nearby line ends with a smoothly flowing curve, to improve
+the smoothness of plotting.
 
-Use the hatch and gap length to prevent
-generation of very short hatch lines or short
-gaps in hatch lines.
+The Range parameter sets the distance (in hatch widths)
+over which that option searches for segments to join. 
+Large values may result in hatches where you don't want
+them. Consider using a value in the range of 2-4. 
+
+The Inset option allows you to hold back the edges of the
+fill somewhat from the edge of your original object.
+This can improve performance, as it allows you to more
+reliably "color inside the lines" when using pens.
+
+The hatches will be the same color and width
+as the original object.
 
 The Tolerance parameter affects how precisely
-the hatches try to fill  the input paths. It can
-be adjusted as low as 0.1, where lower values
-increase precision.
-  </_param>
-  
+the hatches try to fill the input paths.</_param>
+ 
   </page>
   </param>
   <effect needs-live-preview="true">
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="EggBot Contributed"/>
+      <submenu _name="EggBot"/>
     </effects-menu>
   </effect>
   <script>
