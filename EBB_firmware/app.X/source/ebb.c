@@ -188,12 +188,18 @@
 //                  many steps were aborted.
 // 2.3.0 08/28/15 - Added new XM command as per issue #29 for driving mixed-axis
 //                  geometry machines.
+// 2.4.0 03/14/15 - Added new AM command as per issue #<TBD> for using accelerated
+//                  stepper motion. Includes going to 32 bit accumulators in ISR
+//                  to achieve necessary resolution, which includes changes to
+//                  SM command as well. Also added "CU,2,0" to turn of SM command
+//                  parameter checking for speed.
 
 #include <p18cxxx.h>
 #include <usart.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <delays.h>
+#include <math.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
 #include "usb_config.h"
@@ -212,7 +218,6 @@
 
 // Maximum number of elements in the command FIFO
 #define COMMAND_FIFO_LENGTH     4
-
 
 typedef enum
 {
@@ -234,11 +239,11 @@ typedef enum
     EXTERNAL_CONTROLS_DRIVERS
 } DriverConfigurationType;
 
-#pragma udata access fast_vars
 // Working registers
-static near MoveCommandType CurrentCommand;
-static near unsigned int StepAcc[NUMBER_OF_STEPPERS];
-near BOOL FIFOEmpty;
+static MoveCommandType CurrentCommand;
+//#pragma udata access fast_vars
+static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
+BOOL FIFOEmpty;
 
 #pragma udata
 static unsigned char OutByte;
@@ -266,6 +271,8 @@ static UINT StoredEngraverPower;
 BOOL gUseSolenoid;
 // Set TRUE to enable RC Servo output for pen up/down
 BOOL gUseRCPenServo;
+// When FALSE, we skip parameter checks for motor move commands so they can run faster
+BOOL gLimitChecks = TRUE;
 
 // ISR
 #pragma interrupt high_ISR
@@ -364,25 +371,29 @@ void high_ISR(void)
 				if (CurrentCommand.StepsCounter[0])
 				{
 					StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
-					if (StepAcc[0] > 0x8000)
+					if (StepAcc[0] > 0x80000000)
 					{
-						StepAcc[0] = StepAcc[0] - 0x8000;
+						StepAcc[0] = StepAcc[0] - 0x80000000;
 						OutByte = OutByte | STEP1_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[0]--;
 					}
+                    // For acceleration, we now add a bit to StepAdd each time through as well
+                    CurrentCommand.StepAdd[0] += CurrentCommand.StepAddInc[0];
 					AllDone = FALSE;
 				}
 				if (CurrentCommand.StepsCounter[1])
 				{
 					StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
-					if (StepAcc[1] > 0x8000)
+					if (StepAcc[1] > 0x80000000)
 					{
-						StepAcc[1] = StepAcc[1] - 0x8000;
+						StepAcc[1] = StepAcc[1] - 0x80000000;
 						OutByte = OutByte | STEP2_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[1]--;
 					}
+                    // For acceleration, we now add a bit to StepAdd each time through as well
+                    CurrentCommand.StepAdd[1] += CurrentCommand.StepAddInc[1];
 					AllDone = FALSE;
 				}
 
@@ -560,11 +571,12 @@ void EBB_Init(void)
 {
     char i;
 
-    // Initalize all Current Command values
+    // Initialize all Current Command values
     for (i = 0; i < NUMBER_OF_STEPPERS; i++)
     {
         CurrentCommand.StepAdd[i] = 1;
         CurrentCommand.StepsCounter[i] = 0;
+        CurrentCommand.StepAddInc[i] = 0;
     }
     CurrentCommand.Command = COMMAND_NONE;
     CurrentCommand.DirBits = 0;
@@ -867,6 +879,241 @@ void parse_SC_packet (void)
     print_ack();
 }
 
+#if 0
+void fprint(float f)
+{
+    float pf = 0;
+    
+    if (f > 2147483648.0)
+    {
+        printf((far rom char *)"f too big\n\r");
+    }
+    else
+    {
+        if (f < -2147483648.0)
+        {
+            printf((far rom char *)"f too small\n\r");
+        }
+        else
+        {
+            if (f < 0.0)
+            {
+                pf = 0.0 - f;
+            }
+            else
+            {
+                pf = f;
+            }
+            printf((far rom char *)"%ld.%04lu\n\r", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
+        }
+    }
+}
+#endif
+
+// The Accelerated Motion command
+// Usage: SM,<inital_velocity>,<final_velocity>,<axis1_steps>,<axis2_steps><CR>
+// <inital_velocity> is a number from 1 to 10000 in steps/second indicating the initial velocity
+// <final_velocity> is a number from 1 to 10000 in steps/second indicating the final velocity
+// <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
+// Note that the two velocities are of the combined move - i.e. the tip of the pen, not the individual
+// axies velocities.
+void parse_AM_packet (void)
+{
+    UINT32 temp = 0;
+	UINT16 VelocityInital = 0;
+	UINT16 VelocityFinal = 0;
+	INT32 A1Steps = 0, A2Steps = 0;
+    UINT32 Duration = 0;
+    UINT32 Distance;
+    float distance_temp;
+    float accel_temp;
+
+	// Extract each of the values.
+	extract_number (kULONG, &VelocityInital, kREQUIRED);
+	extract_number (kULONG, &VelocityFinal, kREQUIRED);
+	extract_number (kLONG, &A1Steps, kREQUIRED);
+	extract_number (kLONG, &A2Steps, kREQUIRED);
+
+    // Check for too-fast step request (>25KHz)
+    if (VelocityInital > 25000)
+    {
+       printf((far rom char *)"!0 Err: <velocity_initial> larger than 25000.\n\r");
+       return;
+    }
+    if (VelocityFinal > 25000)
+    {
+       printf((far rom char *)"!0 Err: <velocity_final> larger than 25000.\n\r");
+       return;
+    }
+    if (VelocityInital < 4)
+    {
+       printf((far rom char *)"!0 Err: <velocity_initial> less than 4.\n\r");
+       return;
+    }
+    if (VelocityFinal < 4)
+    {
+       printf((far rom char *)"!0 Err: <velocity_final> less than 4.\n\r");
+       return;
+    }
+    
+    // Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+    
+    // Compute total pen distance
+//    fprint(ftemp);
+    Distance = (UINT32)(sqrt((float)((A1Steps * A1Steps) + (A2Steps * A2Steps))));
+    
+// For debug
+//printf((far rom char *)"Distance= %lu\n\r", Distance);
+    
+    while(!FIFOEmpty);
+
+	CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
+	CommandFIFO[0].DirBits = 0;
+		
+    // Always enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+
+    // First, set the direction bits
+    if (A1Steps < 0)
+    {
+        CommandFIFO[0].DirBits = DIR1_BIT;
+        A1Steps = -A1Steps;
+    }
+    if (A2Steps < 0)
+    {
+        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+        A2Steps = -A2Steps;
+    }
+
+    if (A1Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+       return;
+    }
+    if (A2Steps > 0xFFFFFF) {
+       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+       return;
+    }
+
+    // To compute StepAdd values from Duration.
+    // A1Stp is from 0x000001 to 0xFFFFFF.
+    // HIGH_ISR_TICKS_PER_MS = 25
+    // Duration is from 0x000001 to 0xFFFFFF.
+    // temp needs to be from 0x0001 to 0x7FFF.
+    // Temp is added to accumulator every 25KHz. So slowest step rate
+    // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+    // Fastest step rate is obviously 25KHz.
+    // If A1Stp is 1, then duration must be 763 or less.
+    // If A1Stp is 2, then duration must be 763 * 2 or less.
+    // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+
+//    Duration = 2000;
+//    Distance = 600;
+//    Acceleration = 200;
+//    VelocityInital = 100;
+//    VelocityFinal = 500;
+    
+    /* Compute StepAdd Axis 1 Initial */
+//    temp = ((UINT32)A1Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
+//printf((far rom char *)"VelocityInital = %d\n\r", VelocityInital);
+//printf((far rom char *)"Distance = %ld\n\r", Distance);
+//    temp = (UINT32)((float)A1Steps*(((float)VelocityInital * (float)0x80000000UL)/(float)25000)/(float)Distance);
+    distance_temp = ((float)VelocityInital * 85899.34592)/Distance;
+//printf((far rom char *)"distance_temp =");
+//fprint(distance_temp);
+//    ftemp = distance_temp * A1Steps;
+//    fprint(ftemp);
+//    temp = (UINT32)ftemp;
+
+
+    /* Amount to add to accumulator each 25KHz */
+    CommandFIFO[0].StepAdd[0] = (UINT32)(distance_temp * (float)A1Steps);
+
+// For debug
+//printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
+
+    /* Total number of steps for this axis for this move */
+    CommandFIFO[0].StepsCounter[0] = A1Steps;
+
+//    ftemp = (float)VelocityFinal * 2147483648.0;
+//    fprint(ftemp);
+//    ftemp = ftemp / 25000;
+//    fprint(ftemp);
+//    ftemp = ftemp / Distance;
+//    fprint(ftemp);
+//    ftemp = ftemp * A1Steps;
+//    fprint(ftemp);
+//    temp = (UINT32)ftemp;
+
+// For debug
+//printf((far rom char *)"SAxf = %lu\n\r", temp);
+    
+    /* Compute StepAddInc for axis 1 */
+    accel_temp = (((float)VelocityFinal * (float)VelocityFinal) - ((float)VelocityInital * (float)VelocityInital))/((float)Distance * (float)Distance * 2);
+//    Accel1 = ((float)A1Steps * accel_temp);
+//printf((far rom char *)"accel_temp : ");
+//fprint(accel_temp);
+//    stemp = (INT32)((Accel1 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
+//    stemp = (INT32)(Accel1 * 343.59738);
+    //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
+
+    /* Amount to add to StepAdd each 25KHz */
+    CommandFIFO[0].StepAddInc[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
+
+    /* Compute StepAdd Axis 2 Initial */
+//    temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
+//    temp = (UINT32)((float)A2Steps*(((float)VelocityInital * (float)0x80000000)/(float)25000)/(float)Distance);
+
+//printf((far rom char *)"VelocityInital = %d\n\r", VelocityInital);
+//printf((far rom char *)"Distance = %ld\n\r", Distance);
+//    temp = (UINT32)((float)A1Steps*(((float)VelocityInital * (float)0x80000000UL)/(float)25000)/(float)Distance);
+//    ftemp = (float)VelocityInital * 2147483648.0;
+//    fprint(ftemp);
+//    ftemp = ftemp / 25000;
+//    fprint(ftemp);
+//    ftemp = ftemp / Distance;
+//    fprint(ftemp);
+//    ftemp = ftemp * A2Steps;
+//    fprint(ftemp);
+//    temp = (UINT32)ftemp;
+    
+// For debug
+//printf((far rom char *)"SAyi = %lu\n\r", temp);
+
+    CommandFIFO[0].StepAdd[1] = (UINT32)(distance_temp * A2Steps);
+    CommandFIFO[0].StepsCounter[1] = A2Steps;
+    
+    /* Compute StepAddInc for axis 2 */
+//    Accel2 = ((float)A2Steps * accel_temp);
+//printf((far rom char *)"Accel2 : ");
+//fprint(Accel2);
+//    stemp = (INT32)((Accel2 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
+//    stemp = (INT32)(((float)A2Steps * accel_temp) * 343.59738);
+    
+    CommandFIFO[0].StepAddInc[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
+
+    if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[0] == 0 && CommandFIFO[0].StepsCounter[0] > 0)
+    {
+       printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
+       return;
+    }
+    if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[1] == 0 && CommandFIFO[0].StepsCounter[1] > 0)
+    {
+       printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
+       return;
+    }
+
+    CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+    
+	FIFOEmpty = FALSE;
+    
+	print_ack();
+}
+
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
@@ -887,12 +1134,6 @@ void parse_SM_packet (void)
 	extract_number (kLONG, &A1Steps, kREQUIRED);
 	extract_number (kLONG, &A2Steps, kOPTIONAL);
 
-    // Check for invalid duration
-    if (Duration == 0) {
-    	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-
-
     // Check for too-fast step request (>25KHz)
     // First get absolute value of steps, then check if it's asking for >25KHz
     if (A1Steps > 0) {
@@ -901,56 +1142,65 @@ void parse_SM_packet (void)
     else {
         Steps = -A1Steps;
     }
-    // Limit each parameter to just 3 bytes
-    if (Duration > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
-       return;
-    }
-    if (Steps > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
-       return;
-    }
-    // Check for too fast
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-       printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
-       return;
-    }
-    // And check for too slow
-    if ((Duration/1311) >= Steps && Steps != 0) {
-       printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
-       return;
-    }
-
     if (A2Steps > 0) {
         Steps = A2Steps;
     }
     else {
         Steps = -A2Steps;
     }    
-    if (Steps > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-       return;
-    }
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-       printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
-       return;
-    }
-    if ((Duration/1311) >= Steps && Steps != 0) {
-       printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
-       return;
-    }
 
-    // Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+    if (gLimitChecks)
+    {
+        // Check for invalid duration
+        if (Duration == 0) {
+            bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        }
+        // Bail if we got a conversion error
+        if (error_byte)
+        {
+            return;
+        }
+        // Limit each parameter to just 3 bytes
+        if (Duration > 0xFFFFFF) {
+           printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+           return;
+        }
+        if (Steps > 0xFFFFFF) {
+           printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+           return;
+        }
+        // Check for too fast
+        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+           printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+           return;
+        }
+        // And check for too slow
+        if ((Duration/1311) >= Steps && Steps != 0) {
+           printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+           return;
+        }
+        if (Steps > 0xFFFFFF) {
+           printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+           return;
+        }
+        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+           printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+           return;
+        }
+        if ((Duration/1311) >= Steps && Steps != 0) {
+           printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+           return;
+        }
+    }
 
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   	process_SM(Duration, A1Steps, A2Steps);
 
-	print_ack();
+    if (g_ack_enable)
+    {
+    	print_ack();
+    }
 }
 
 // The X Stepper Motor command
@@ -1112,8 +1362,9 @@ static void process_SM(
 //                A1Stp = 0;
 //            }
 //        }
+        
         if (A1Stp < 0x1FFFF) {
-            temp = ((((UINT32)0x8000 * A1Stp)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp = (((A1Stp << 15)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
         }
         else {
             temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
@@ -1126,11 +1377,14 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
             temp = 1;
         }
+        temp = temp << 16;
+
         CommandFIFO[0].StepAdd[0] = temp;
         CommandFIFO[0].StepsCounter[0] = A1Stp;
-
+        CommandFIFO[0].StepAddInc[0] = 0;
+        
         if (A2Stp < 0x1FFFF) {
-            temp = ((((UINT32)0x8000 * A2Stp)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp = (((A2Stp << 15)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
         }
         else {
             temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
@@ -1143,8 +1397,11 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
             temp = 1;
         }
+        temp = temp << 16;
+        
         CommandFIFO[0].StepAdd[1] = temp;
         CommandFIFO[0].StepsCounter[1] = A2Stp;
+        CommandFIFO[0].StepAddInc[1] = 0;
         CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
 	}
 		
@@ -1193,6 +1450,8 @@ void parse_ES_packet(void)
         fifo_steps2 = CommandFIFO[0].StepsCounter[1];
         CommandFIFO[0].StepsCounter[0] = 0;
         CommandFIFO[0].StepsCounter[1] = 0;
+        CommandFIFO[0].StepAddInc[0] = 0;
+        CommandFIFO[0].StepAddInc[1] = 0;
         FIFOEmpty = TRUE;
     }
 
@@ -1204,6 +1463,8 @@ void parse_ES_packet(void)
         remaining_steps2 = CurrentCommand.StepsCounter[1];
         CurrentCommand.StepsCounter[0] = 0;
         CurrentCommand.StepsCounter[1] = 0;
+        CurrentCommand.StepAddInc[0] = 0;
+        CurrentCommand.StepAddInc[1] = 0;
     }
                 
     printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 

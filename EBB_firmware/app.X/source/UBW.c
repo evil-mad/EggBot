@@ -108,37 +108,37 @@
 #define ANALOG_INITATE_MS_BETWEEN_STARTS 5     // Number of ms between analog converts (all enabled channels)
 
 /** V A R I A B L E S ********************************************************/
-#pragma udata access fast_vars
+//#pragma udata access fast_vars
 
 // Rate variable - how fast does interrupt fire to capture inputs?
-near unsigned int time_between_updates;
+unsigned int time_between_updates;
 
-near volatile unsigned int ISR_D_RepeatRate;			// How many 1ms ticks between Digital updates
-near volatile unsigned char ISR_D_FIFO_in;				// In pointer
-near volatile unsigned char ISR_D_FIFO_out;				// Out pointer
-near volatile unsigned char ISR_D_FIFO_length;			// Current FIFO depth
+volatile unsigned int ISR_D_RepeatRate;			// How many 1ms ticks between Digital updates
+volatile unsigned char ISR_D_FIFO_in;				// In pointer
+volatile unsigned char ISR_D_FIFO_out;				// Out pointer
+volatile unsigned char ISR_D_FIFO_length;			// Current FIFO depth
 
-near volatile unsigned int ISR_A_RepeatRate;			// How many 1ms ticks between Analog updates
-near volatile unsigned char ISR_A_FIFO_in;				// In pointer
-near volatile unsigned char ISR_A_FIFO_out;				// Out pointer
-near volatile unsigned char ISR_A_FIFO_length;			// Current FIFO depth
+volatile unsigned int ISR_A_RepeatRate;			// How many 1ms ticks between Analog updates
+volatile unsigned char ISR_A_FIFO_in;				// In pointer
+volatile unsigned char ISR_A_FIFO_out;				// Out pointer
+volatile unsigned char ISR_A_FIFO_length;			// Current FIFO depth
 
-// This byte has each of its bits used as a seperate error flag
-near unsigned char error_byte;
+// This byte has each of its bits used as a separate error flag
+unsigned char error_byte;
 
 // RC servo variables
 // First the main array of data for each servo
-near unsigned char g_RC_primed_ptr;
-near unsigned char g_RC_next_ptr;
-near unsigned char g_RC_timing_ptr;
+unsigned char g_RC_primed_ptr;
+unsigned char g_RC_next_ptr;
+unsigned char g_RC_timing_ptr;
 
 // Used only in LowISR
-near unsigned int D_tick_counter;
-near unsigned int A_tick_counter;
-near unsigned char A_cur_channel;
-near unsigned char AnalogInitiate;
-near volatile unsigned int AnalogEnabledChannels;
-near volatile unsigned int ChannelBit;
+unsigned int D_tick_counter;
+unsigned int A_tick_counter;
+unsigned char A_cur_channel;
+unsigned char AnalogInitiate;
+volatile unsigned int AnalogEnabledChannels;
+volatile unsigned int ChannelBit;
 
 // ROM strings
 const rom char st_OK[] = {"OK\r\n"};
@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.3.0\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.4.0\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -1294,6 +1294,12 @@ void parse_packet(void)
 			parse_SM_packet ();
 			break;
 		}
+		case ('A' * 256) + 'M':
+		{
+			// AM for Accelerated Motion
+			parse_AM_packet ();
+			break;
+		}
 		case ('S' * 256) + 'P':
 		{
 			// SP for set pen
@@ -1519,6 +1525,17 @@ void parse_CU_packet(void)
 			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		}
 	}
+    if (2 == parameter_number)
+    {
+        if (0 == paramater_value || 1 == paramater_value)
+        {
+            gLimitChecks = paramater_value;
+        }
+		else
+		{
+			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+		}
+    }
 	print_ack();
 }
 

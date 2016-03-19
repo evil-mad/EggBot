@@ -4,7 +4,7 @@
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="EBBv13_with_bootloader" type="2">
-      <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>04D8:=&lt;pid>900A:=&lt;rev>0002:=&lt;man>Microchip Technology Inc.:=&lt;prod>PICkit 3:=&lt;sn>BUR101260159:=&lt;drv>x:=&lt;xpt>h:=end</platformToolSN>
+      <platformToolSN></platformToolSN>
       <languageToolchainDir>C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
@@ -41,7 +41,7 @@
     </conf>
     <conf name="EBBv13_XC8_no_bootloader" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files (x86)\Microchip\xc8\v1.34\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files (x86)\Microchip\xc8\v1.33\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>
@@ -59,7 +59,7 @@
     </conf>
     <conf name="EBBv13_XC8_with_bootloader" type="2">
       <platformToolSN></platformToolSN>
-      <languageToolchainDir>C:\Program Files (x86)\Microchip\xc8\v1.34\bin</languageToolchainDir>
+      <languageToolchainDir>C:\Program Files (x86)\Microchip\xc8\v1.33\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
         <placeholder2>place holder 2</placeholder2>

@@ -77,7 +77,8 @@ typedef enum
 typedef struct
 {
     CommandType     Command;
-    INT16           StepAdd[NUMBER_OF_STEPPERS];
+    INT32           StepAdd[NUMBER_OF_STEPPERS];
+    INT16           StepAddInc[NUMBER_OF_STEPPERS];
     UINT32          StepsCounter[NUMBER_OF_STEPPERS];
     UINT8           DirBits;
     UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
@@ -107,12 +108,15 @@ typedef struct
 
 extern MoveCommandType CommandFIFO[];
 extern unsigned int DemoModeActive;
-extern near BOOL FIFOEmpty;
+extern BOOL FIFOEmpty;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
+extern BOOL gLimitChecks;
+
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
 void parse_SM_packet(void);
+void parse_AM_packet(void);
 void parse_SC_packet(void);
 void parse_SP_packet(void);
 void parse_TP_packet(void);

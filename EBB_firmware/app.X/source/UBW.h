@@ -125,8 +125,9 @@ extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
 extern volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 
-extern near unsigned char error_byte;
+extern unsigned char error_byte;
 //extern unsigned char error_byte;
+extern BOOL	g_ack_enable;
 
 extern volatile unsigned int g_RC_value[kRC_DATA_SIZE];			// Stores reload values for TMR0
 extern volatile tRC_state g_RC_state[kRC_DATA_SIZE];
