@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>EggBot Control</_name>
-  <id>command.evilmadscientist.eggbot.rev260b3</id>
+  <id>command.evilmadscientist.eggbot.rev273b2</id>
   <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
   <dependency type="executable" location="extensions">eggbot.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -156,7 +156,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.6.1, dated 2015-10-25
+Release 2.7.3, dated 2016-01-31
 
 *EBB Firmware 1.96 or newer required for certain
  functions. 
@@ -164,7 +164,7 @@ Release 2.6.1, dated 2015-10-25
 Known issues:
 * "Cancel" function does not work while plotting.
   (This is due to a known bug in Inkscape; the
-   "cancel" button does not work to pause any
+   "cancel" button does not work with any
    Inkscape extension, this one included.)
 </_param>
     </page>
