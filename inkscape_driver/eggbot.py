@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.3, dated January 31, 2016.
+# Version 2.7.4, dated April 2, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -884,8 +884,8 @@ class EggBot( inkex.Effect ):
 
 		TempNumString = 'x'
 		stringPos = 1
-		CurrentLayerName = string.lstrip( strLayerName ) #remove leading whitespace
-
+		CurrentLayerName = string.lstrip( strLayerName.encode( 'ascii', 'ignore' ) ) #remove leading whitespace
+		
 		# Look at layer name.  Sample first character, then first two, and
 		# so on, until the string ends or the string no longer consists of
 		# digit characters only.
