@@ -213,7 +213,7 @@ def processMarkup( text, family='sans' ):
 			j = text.find( ';', i+1 )
 			if ( j != -1 ):
 				eref = text[i:j+1]
-				if entity_refs.has_key[eref]:
+				if entity_refs.has_key(eref):
 					outstr += entity_refs[eref]
 					i = j + 1
 				else:
