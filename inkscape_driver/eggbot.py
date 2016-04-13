@@ -1003,7 +1003,7 @@ class EggBot( inkex.Effect ):
 				self.bPenIsUp = False
 				if self.penDownActivatesEngraver:
 						self.engraverOn() # will check self.enableEngraver
-				ebb_motion.sendPenDown(self.serialPort, self.options.penUpDelay )						
+				ebb_motion.sendPenDown(self.serialPort, self.options.penDownDelay )						
 		
 
 	def engraverOff( self ):
