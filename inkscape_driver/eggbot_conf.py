@@ -1,6 +1,6 @@
 # eggbot-conf.py
 # Part of the EggBot driver for Inkscape
-# Version 2.6.0, dated August 31, 2015.
+# Version 2.7.5, dated May 1, 2016.
 #
 # https://github.com/evil-mad/EggBot/
 #
@@ -36,3 +36,5 @@ Other _integer_ scaling values can be used as well, with similar scaling.
 '''
 
 STEP_SCALE = 2
+
+MIN_GAP = 1.0			#Minimum pen-up movement that results in an actual pen lift.

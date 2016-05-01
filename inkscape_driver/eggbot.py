@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.4, dated April 2, 2016.
+# Version 2.7.5, dated May 1, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -34,15 +34,15 @@ import ebb_motion		# https://github.com/evil-mad/plotink	Requires version 0.2 or
 import eggbot_conf		#Some settings can be changed here.
 
 F_DEFAULT_SPEED = 1
-N_PEN_DOWN_DELAY = 400    # delay (ms) for the pen to go down before the next move
-N_PEN_UP_DELAY = 400      # delay (ms) for the pen to up down before the next move
+N_PEN_DOWN_DELAY = 400	# delay (ms) for the pen to go down before the next move
+N_PEN_UP_DELAY = 400	# delay (ms) for the pen to up down before the next move
 
-N_PEN_UP_POS = 50      # Default pen-up position
-N_PEN_DOWN_POS = 40      # Default pen-down position
-N_SERVOSPEED = 50			# Default pen-lift speed
+N_PEN_UP_POS = 50		# Default pen-up position
+N_PEN_DOWN_POS = 40		# Default pen-down position
+N_SERVOSPEED = 50		# Default pen-lift speed
 N_WALK_DEFAULT = 10		# Default steps for walking stepper motors
-N_DEFAULT_LAYER = 1			# Default inkscape layer
-		
+N_DEFAULT_LAYER = 1		# Default inkscape layer
+
 class EggBot( inkex.Effect ):
 
 	def __init__( self ):
@@ -950,16 +950,6 @@ class EggBot( inkex.Effect ):
 				if self.bStopped:
 					return
 
-				if self.plotCurrentLayer:
-					if nIndex == 0:
-						self.penUp()
-						self.virtualPenIsUp = True
-					elif nIndex == 1:
-						self.penDown()
-						self.virtualPenIsUp = False
-
-				nIndex += 1
-
 				self.fX = 2 * float( csp[1][0] ) / self.step_scaling_factor
 				self.fY = 2 * float( csp[1][1] ) / self.step_scaling_factor
 
@@ -974,6 +964,18 @@ class EggBot( inkex.Effect ):
 						self.ptFirst = ( self.fPrevX, self.fPrevY )
 					else:
 						self.ptFirst = ( self.fX, self.fY )
+						
+				if self.plotCurrentLayer:
+					if nIndex == 0:
+						if (plot_utils.distance(self.fX - self.fPrevX,self.fY - self.fPrevY) > eggbot_conf.MIN_GAP):
+							# Only raise pen between two points if there is at least a 1 step gap between them.
+							self.penUp()
+							self.virtualPenIsUp = True
+					elif nIndex == 1:
+						self.penDown()
+						self.virtualPenIsUp = False
+
+				nIndex += 1
 
 				if self.plotCurrentLayer:
 					self.plotLineAndTime()
