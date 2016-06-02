@@ -1100,7 +1100,7 @@ class EggBot( inkex.Effect ):
 						self.penDown()
 						self.fSpeed = self.options.penDownSpeed
 
-			nTime = int( math.ceil( 1000 / self.fSpeed * plot_utils.distance( nDeltaX, nDeltaY ) ) )
+			nTime = int( math.ceil( 1000.0 / self.fSpeed * plot_utils.distance( nDeltaX, nDeltaY ) ) )
 
 			while ( ( abs( nDeltaX ) > 0 ) or ( abs( nDeltaY ) > 0 ) ):
 				xd = nDeltaX
