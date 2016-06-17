@@ -5,6 +5,11 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 #
+# Modified by Sheldon B. Michaels to allow increased precision in placement
+#	of characters, and to allow user to create a line of text for a viewing
+#	comparison in each and every font.  May 2016
+#	shel at shel dot net
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -14,28 +19,37 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import hersheydata			#data file w/ Hershey font data
+import hersheydata          #data file w/ Hershey font data
 import inkex
 import simplestyle
 
+
 Debug = False
+FONT_GROUP_V_SPACING = 45   # all the fonts are nearly identical in height, so a constant
+							# spacing is adequate, and is arbitrary - just so it looks good
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
-	style = { 'stroke': '#000000', 'fill': 'none' }
+	style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
+		# Apply rounding to ends so that user gets best impression of final printed text appearance.
 	pathString = face[char]
 	splitString = pathString.split()  
-	midpoint = offset - int(splitString[0]) 
+	midpoint = offset - float(splitString[0])
 	pathString = pathString[pathString.find("M"):] #portion after first move
 	trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
 	text_attribs = {'style':simplestyle.formatStyle(style), 'd':pathString, 'transform':trans}
 	inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs) 
-	return midpoint + int(splitString[1]) 	#new offset value
+	return midpoint + float(splitString[1]) #new offset value
 
+def svg_text_width(char, face, offset):
+	pathString = face[char]
+	splitString = pathString.split()  
+	midpoint = offset - float(splitString[0])
+	return midpoint + float(splitString[1]) #new offset value
 
 class Hershey( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
-		self.OptionParser.add_option( "--tab",	#NOTE: value is not used.
+		self.OptionParser.add_option( "--tab",  #NOTE: value is not used.
 			action="store", type="string",
 			dest="tab", default="splash",
 			help="The active tab when Apply was pressed" )
@@ -73,6 +87,10 @@ class Hershey( inkex.Effect ):
 					w += 2*spacing
 				else:
 					w = draw_svg_text(q, font, w, 0, g)
+		elif self.options.action == 'sample':
+			t = self.show_all_in_font_group( 'group_allfonts', g, spacing, clearfont )
+			g.set( 'transform',t)
+
 		else:
 			#Generate glyph table
 			wmax = 0;
@@ -90,14 +108,60 @@ class Hershey( inkex.Effect ):
 				if w > wmax:
 					wmax = w
 			w = wmax
+			#  Translate group to center of view, approximately
+			t = 'translate(' + str( self.view_center[0] - w/2) + ',' + str( self.view_center[1] ) + ')'
+			g.set( 'transform',t)
+		# if self.options.action == "render": elif: else:
+
+	def show_all_in_font_group( self, fontgroupname, parent, spacing, clearfont ):
+		v = 0
+		wmax = 0
+		wmin = 0
+		fontgroup = eval( 'hersheydata.' + fontgroupname )
+		
+		# print font name
+		nFontIndex = 0
+		for f in fontgroup:
+			w = 0
+			letterVals = [ord(q) - 32 for q in f[1]]
+			# we want to right-justify the clear text, so need to know its width
+			for q in letterVals:
+				w = svg_text_width(q, clearfont, w)
+				
+			w = -w                      # move the name text start left by its width
+			if w < wmin:
+				wmin = w
+			# print the font name
+			for q in letterVals:
+				w = draw_svg_text(q, clearfont, w, v, parent)
+			v += FONT_GROUP_V_SPACING
+			if w > wmax:
+				wmax = w
 			
-		#  Translate group to center of view, approximately
-		t = 'translate(' + str( self.view_center[0] - w/2) + ',' + str( self.view_center[1] ) + ')'
-		g.set( 'transform',t)
-
-
+		# now print user's text in the current font of the user's desired font group
+		v = 0                   # back to top line
+		wmaxname = wmax + 8     # single space width
+		for f in fontgroup:
+			w = wmaxname
+			font = eval('hersheydata.' + f[0])
+			#evaluate text string
+			letterVals = [ord(q) - 32 for q in self.options.text] 
+			for q in letterVals:
+				if (q < 0) or (q > 95):
+					w += 2*spacing
+				else:
+					w = draw_svg_text(q, font, w, v, parent)
+			v += FONT_GROUP_V_SPACING
+			if w > wmax:
+				wmax = w
+				
+		w = wmax - wmin
+		#  return string that translates group to center of view, approximately
+		t = 'translate(' + str( self.view_center[0] - w/2 - wmin) + ',' + str( self.view_center[1] - ( v - FONT_GROUP_V_SPACING )/2 ) + ')'
+		return t
+	# def show_all_in_font_group( self, fontgroupname, parent, spacing, clearfont ):
 
 if __name__ == '__main__':
-    e = Hershey()
-    e.affect()
+	e = Hershey()
+	e.affect()
 
