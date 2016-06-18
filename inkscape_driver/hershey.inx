@@ -8,12 +8,17 @@
 
   <param name="tab" type="notebook">
     <page name="splash" _gui-text="Render Text">
-      <param name="text" type="string" _gui-text="Text:">Hershey Text for Inkscape</param>
+
+<_param indent="1" name="splashpage" type="description" appearance="header">
+Hershey Text: Engraving Fonts for Inkscape
+
+</_param>
+      <param name="text" type="string" _gui-text="Text:">The Quick Brown Fox Jumps Over a Lazy Dog</param>
 
       <param name="action" type="enum" _gui-text="Action: ">
         <_item value="render">Typeset that text</_item>
-        <_item value="table" >Write glyph table</_item> 
-        <_item value="sample" >Generate font samples from that text</_item> 
+        <_item value="sample" >Generate a table of font samples</_item> 
+        <_item value="table"  >Generate glyph table in selected font</_item> 
       </param>
 
       <param name="fontface" type="enum" _gui-text="Font face: ">
@@ -29,6 +34,10 @@
         <_item value="cursive">Script 1-stroke (alt)</_item>
         <_item value="scriptc">Script medium</_item>
 
+        <_item value="gothiceng">Gothic English</_item>
+        <_item value="gothicger">Gothic German</_item>
+        <_item value="gothicita">Gothic Italian</_item>	   
+        
         <!-- Block below this are loosely adapted from fonts licensed under SIL Open Font License -->
 		<_item value="EMSAllure">EMS Allure</_item>
 		<_item value="EMSBird">EMS Bird</_item>
@@ -54,10 +63,6 @@
 		<_item value="EMSSwiss">EMS Swiss</_item>
         <_item value="EMSTech">EMS Tech</_item> 
         <!-- Block above this are loosely adapted from fonts licensed under SIL Open Font License -->
-				        
-        <_item value="gothiceng">Gothic English</_item>
-        <_item value="gothicger">Gothic German</_item>
-        <_item value="gothicita">Gothic Italian</_item>	   
 
         <_item value="greek">Greek 1-stroke</_item>
         <_item value="timesg">Greek medium</_item>
@@ -74,35 +79,48 @@
 
       </param>
       <_param name="emptyspace" type="description" xml:space="preserve"> 
-
-
-
 </_param>
 
     </page>
-    <page name="info" _gui-text="About...">
+    <page name="info" _gui-text="About Hershey Text">
       <_param name="aboutpage" type="description" xml:space="preserve">
-This extension renders a line of text using
-"Hershey" fonts for plotters, derived from 
-NBS SP-424 1976-04, "A contribution to 
-computer typesetting techniques: Tables of
-Coordinates for Hershey's Repertory of
-Occidental Type Fonts and Graphic Symbols."
+This extension renders a line of text using specialized
+"stroke" or "engraving" fonts designed for plotters. 
 
-These are not traditional "outline" fonts, 
-but are instead "single-stroke" fonts, or
-"engraving" fonts where the character is
-formed by the stroke (and not the fill).
+Whereas regular "outline" fonts (e.g., truetype) work
+by filling in the region inside an invisible outline,
+engraving fonts are composed only of individual lines
+or strokes; much like human handwriting.
 
-Additional "EMS" fonts using this data
-storage structure were interpreted from
-fonts licensed under SIL Open Font License,
-and are mostly single-stroke.
+Engraving fonts are used for creating text paths that
+computer controlled drawing and cutting machines (from
+pen plotters to CNC routers) can efficiently follow. 
 
-For additional information, please visit:
+For a full introduction, please visit:
   www.evilmadscientist.com/go/hershey</_param>
-    </page>
-  </param>
+</page>
+
+<page name="info" _gui-text="Credits">
+<_param name="aboutpage" type="description" xml:space="preserve">
+The classic fonts included -- those without the "EMS"
+prefix -- are derived from work by Dr. A. V. Hershey,
+distributed by the US National Bureau of Standards
+(now NIST) in NBS SP-424 1976-04, "A contribution to 
+computer typesetting techniques: Tables of Coordinates
+for Hershey's Repertory of Occidental Type Fonts and
+Graphic Symbols."
+
+Additional modern "EMS" fonts in this distribution are
+derivatives created from fonts licensed under the SIL
+Open Font License.
+
+For full credits and license information, please see
+the "hersheydata.py" file included with this
+distribution or visit:
+   wiki.evilmadscientist.com/hershey
+</_param>
+</page>
+</param>
 
   <effect needs-live-preview="true" needs-document="true">
     <object-type>all</object-type>

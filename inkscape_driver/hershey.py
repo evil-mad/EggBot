@@ -123,12 +123,12 @@ class Hershey( inkex.Effect ):
 		nFontIndex = 0
 		for f in fontgroup:
 			w = 0
-			letterVals = [ord(q) - 32 for q in f[1]]
+			letterVals = [ord(q) - 32 for q in (f[1] + ' -> ')]
 			# we want to right-justify the clear text, so need to know its width
 			for q in letterVals:
 				w = svg_text_width(q, clearfont, w)
 				
-			w = -w                      # move the name text start left by its width
+			w = -w                      # move the name text left by its width
 			if w < wmin:
 				wmin = w
 			# print the font name
