@@ -1,4 +1,4 @@
-# Copyright 2011, Windell H. Oskay, www.evilmadscientist.com
+# Copyright 2011-2016, Windell H. Oskay, www.evilmadscientist.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -67,8 +67,7 @@ class Hershey( inkex.Effect ):
 			help="The selected font face when Apply was pressed" )
 
 	def effect( self ):
-
-		# Embed text in group to make manipulation easier:
+		# Group generated paths together, to make the rendered letters easier to manipulate in Inkscape.
 		g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
 		g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
@@ -80,7 +79,7 @@ class Hershey( inkex.Effect ):
 		spacing = 3  # spacing between letters
 
 		if self.options.action == "render":
-			#evaluate text string
+			#evaluate text string and render in the chosen font
 			letterVals = [ord(q) - 32 for q in self.options.text] 
 			for q in letterVals:
 				if (q < 0) or (q > 95):
@@ -88,11 +87,11 @@ class Hershey( inkex.Effect ):
 				else:
 					w = draw_svg_text(q, font, w, 0, g)
 		elif self.options.action == 'sample':
-			t = self.show_all_in_font_group( 'group_allfonts', g, spacing, clearfont )
+			t = self.render_table_of_all_fonts( 'group_allfonts', g, spacing, clearfont )
 			g.set( 'transform',t)
 
 		else:
-			#Generate glyph table
+			#Generate glyph table for a single font
 			wmax = 0;
 			for p in range(0,10):
 				w = 0
@@ -113,7 +112,7 @@ class Hershey( inkex.Effect ):
 			g.set( 'transform',t)
 		# if self.options.action == "render": elif: else:
 
-	def show_all_in_font_group( self, fontgroupname, parent, spacing, clearfont ):
+	def render_table_of_all_fonts( self, fontgroupname, parent, spacing, clearfont ):
 		v = 0
 		wmax = 0
 		wmin = 0
@@ -159,7 +158,6 @@ class Hershey( inkex.Effect ):
 		#  return string that translates group to center of view, approximately
 		t = 'translate(' + str( self.view_center[0] - w/2 - wmin) + ',' + str( self.view_center[1] - ( v - FONT_GROUP_V_SPACING )/2 ) + ')'
 		return t
-	# def show_all_in_font_group( self, fontgroupname, parent, spacing, clearfont ):
 
 if __name__ == '__main__':
 	e = Hershey()

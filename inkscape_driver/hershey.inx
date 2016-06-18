@@ -13,15 +13,15 @@
 Hershey Text: Engraving Fonts for Inkscape
 
 </_param>
-      <param name="text" type="string" _gui-text="Text:">The Quick Brown Fox Jumps Over a Lazy Dog</param>
+      <param indent="2" name="text" type="string" _gui-text="Text:">The Quick Brown Fox Jumps Over a Lazy Dog</param>
 
-      <param name="action" type="enum" _gui-text="Action: ">
+      <param indent="2" name="action" type="enum" _gui-text="Action: ">
         <_item value="render">Typeset that text</_item>
         <_item value="sample" >Generate a table of font samples</_item> 
         <_item value="table"  >Generate glyph table in selected font</_item> 
       </param>
 
-      <param name="fontface" type="enum" _gui-text="Font face: ">
+      <param indent="2" name="fontface" type="enum" _gui-text="Font face: ">
         <_item value="futural">Sans 1-stroke</_item>
         <_item value="futuram">Sans bold</_item> 
 
@@ -87,7 +87,7 @@ Hershey Text: Engraving Fonts for Inkscape
 This extension renders a line of text using specialized
 "stroke" or "engraving" fonts designed for plotters. 
 
-Whereas regular "outline" fonts (e.g., truetype) work
+Whereas regular "outline" fonts (e.g., TrueType) work
 by filling in the region inside an invisible outline,
 engraving fonts are composed only of individual lines
 or strokes; much like human handwriting.
