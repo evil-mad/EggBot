@@ -112,13 +112,17 @@ class Hershey( inkex.Effect ):
 			g.set( 'transform',t)
 		# if self.options.action == "render": elif: else:
 
+	def getDocHeight( self):
+		doc_height = self.unittouu(self.document.getroot().get('height'))
+		return doc_height
+
 	def render_table_of_all_fonts( self, fontgroupname, parent, spacing, clearfont ):
 		v = 0
 		wmax = 0
 		wmin = 0
 		fontgroup = eval( 'hersheydata.' + fontgroupname )
 		
-		# print font name
+		# Render list of font names in a vertical column:
 		nFontIndex = 0
 		for f in fontgroup:
 			w = 0
@@ -137,7 +141,7 @@ class Hershey( inkex.Effect ):
 			if w > wmax:
 				wmax = w
 			
-		# now print user's text in the current font of the user's desired font group
+		# Next, we render a second column. The user's text, in each of the different fonts:
 		v = 0                   # back to top line
 		wmaxname = wmax + 8     # single space width
 		for f in fontgroup:
@@ -153,10 +157,12 @@ class Hershey( inkex.Effect ):
 			v += FONT_GROUP_V_SPACING
 			if w > wmax:
 				wmax = w
-				
-		w = wmax - wmin
-		#  return string that translates group to center of view, approximately
-		t = 'translate(' + str( self.view_center[0] - w/2 - wmin) + ',' + str( self.view_center[1] - ( v - FONT_GROUP_V_SPACING )/2 ) + ')'
+
+		heightAsFractionOfPageSize = 0.95	#Scale to somewhat less than full document height
+		scaleFactor = (heightAsFractionOfPageSize * self.getDocHeight() / v)
+		#  return string that scales group to document height, and translates group to center of view, approximately
+		t = 'translate(' + str(self.view_center[0]) + ',' + str(self.view_center[1] - scaleFactor * v / 2 ) + ')'
+		t += 'scale(' + str( scaleFactor) + ')'
 		return t
 
 if __name__ == '__main__':

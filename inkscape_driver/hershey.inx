@@ -83,8 +83,8 @@ Hershey Text: Engraving Fonts for Inkscape
 
     </page>
     <page name="info" _gui-text="About Hershey Text">
-      <_param name="aboutpage" type="description" xml:space="preserve">
-This extension renders a line of text using specialized
+<_param indent="1" name="aboutTitle" type="description" appearance="header">Hershey Text 2.0</_param>
+<_param name="aboutpage" type="description" xml:space="preserve">This tool renders a line of text using specialized
 "stroke" or "engraving" fonts designed for plotters. 
 
 Whereas regular "outline" fonts (e.g., TrueType) work
