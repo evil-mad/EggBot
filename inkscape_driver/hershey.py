@@ -23,7 +23,6 @@ import hersheydata          #data file w/ Hershey font data
 import inkex
 import simplestyle
 
-
 Debug = False
 FONT_GROUP_V_SPACING = 45   # all the fonts are nearly identical in height, so a constant
 							# spacing is adequate, and is arbitrary - just so it looks good
@@ -86,6 +85,8 @@ class Hershey( inkex.Effect ):
 					w += 2*spacing
 				else:
 					w = draw_svg_text(q, font, w, 0, g)
+			t = 'translate(' + str(self.view_center[0] - w/2) + ',' + str(self.view_center[1]) + ')'
+			g.set( 'transform',t)					
 		elif self.options.action == 'sample':
 			t = self.render_table_of_all_fonts( 'group_allfonts', g, spacing, clearfont )
 			g.set( 'transform',t)
