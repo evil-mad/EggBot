@@ -183,11 +183,11 @@ class EggBot( inkex.Effect ):
 		self.svg = self.document.getroot()
 		self.CheckSVGforEggbotData()
 
- 		if ((self.options.tab == '"Help"') or (self.options.tab == '"options"')  or (self.options.tab == '"timing"')):
- 			pass
- 		else:
- 			self.serialPort = ebb_serial.openPort()
- 			if self.serialPort is None:
+		if ((self.options.tab == '"Help"') or (self.options.tab == '"options"')  or (self.options.tab == '"timing"')):
+			pass
+		else:
+			self.serialPort = ebb_serial.openPort()
+			if self.serialPort is None:
 				inkex.errormsg( gettext.gettext( "Failed to connect to EggBot. :(" ) )
 
 			if self.options.tab == '"splash"':
@@ -492,9 +492,9 @@ class EggBot( inkex.Effect ):
 
 				self.penUp()
 				if ( node.get( inkex.addNS( 'groupmode', 'inkscape' ) ) == 'layer' ):
+					self.sCurrentLayerName = node.get( inkex.addNS( 'label', 'inkscape' ) )
 					if not self.allLayers:
-						#inkex.errormsg('Plotting layer named: ' + node.get(inkex.addNS('label', 'inkscape')))
-						self.DoWePlotLayer( node.get( inkex.addNS( 'label', 'inkscape' ) ) )
+						self.DoWePlotLayer( self.sCurrentLayerName )
 				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
 
 			elif node.tag == inkex.addNS( 'use', 'svg' ) or node.tag == 'use':
@@ -823,20 +823,23 @@ class EggBot( inkex.Effect ):
 				pass
 			elif node.tag == inkex.addNS( 'desc', 'svg' ) or node.tag == 'desc':
 				pass
-			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
+			elif (node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text' or
+				node.tag == inkex.addNS( 'flowRoot', 'svg' ) or node.tag == 'flowRoot'):
 				if not self.warnings.has_key( 'text' ):
-					inkex.errormsg( gettext.gettext( 'Warning: unable to draw text; ' +
-						'please convert it to a path first.  Consider using the ' +
-						'Hershey Text extension which is located under the '+
-						'"Render" category of extensions.' ) )
+					inkex.errormsg( gettext.gettext( 'Warning: in layer "' + 
+					self.sCurrentLayerName + '" unable to draw text; ' +
+					'please convert it to a path first.  Consider using the ' +
+					'Hershey Text extension which is located under the '+
+					'"Render" category of extensions.' ) )
 					self.warnings['text'] = 1
 				pass
 			elif node.tag == inkex.addNS( 'image', 'svg' ) or node.tag == 'image':
 				if not self.warnings.has_key( 'image' ):
-					inkex.errormsg( gettext.gettext( 'Warning: unable to draw bitmap images; ' +
-						'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
-						'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
-						'cause cut-and-paste operations to paste in bitmap copies.' ) )
+					inkex.errormsg( gettext.gettext( 'Warning: in layer "' + 
+					self.sCurrentLayerName + '" unable to draw bitmap images; ' +
+					'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
+					'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
+					'cause cut-and-paste operations to paste in bitmap copies.' ) )
 					self.warnings['image'] = 1
 				pass
 			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
