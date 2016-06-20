@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.5, dated May 1, 2016.
+# Version 2.7.6, dated June 19, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -827,19 +827,19 @@ class EggBot( inkex.Effect ):
 				node.tag == inkex.addNS( 'flowRoot', 'svg' ) or node.tag == 'flowRoot'):
 				if not self.warnings.has_key( 'text' ):
 					inkex.errormsg( gettext.gettext( 'Warning: in layer "' + 
-					self.sCurrentLayerName + '" unable to draw text; ' +
-					'please convert it to a path first.  Consider using the ' +
-					'Hershey Text extension which is located under the '+
-					'"Render" category of extensions.' ) )
+						self.sCurrentLayerName + '" unable to draw text; ' +
+						'please convert it to a path first.  Consider using the ' +
+						'Hershey Text extension which is located under the '+
+						'"Render" category of extensions.' ) )
 					self.warnings['text'] = 1
 				pass
 			elif node.tag == inkex.addNS( 'image', 'svg' ) or node.tag == 'image':
 				if not self.warnings.has_key( 'image' ):
 					inkex.errormsg( gettext.gettext( 'Warning: in layer "' + 
-					self.sCurrentLayerName + '" unable to draw bitmap images; ' +
-					'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
-					'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
-					'cause cut-and-paste operations to paste in bitmap copies.' ) )
+						self.sCurrentLayerName + '" unable to draw bitmap images; ' +
+						'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
+						'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
+						'cause cut-and-paste operations to paste in bitmap copies.' ) )
 					self.warnings['image'] = 1
 				pass
 			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
@@ -869,7 +869,8 @@ class EggBot( inkex.Effect ):
 			else:
 				if not self.warnings.has_key( str( node.tag ) ):
 					t = str( node.tag ).split( '}' )
-					inkex.errormsg( gettext.gettext( 'Warning: unable to draw <' + str( t[-1] ) +
+					inkex.errormsg( gettext.gettext( 'Warning: in layer "' + 
+						self.sCurrentLayerName + '" unable to draw <' + str( t[-1] ) +
 						'> object, please convert it to a path first.' ) )
 					self.warnings[str( node.tag )] = 1
 				pass
@@ -1129,7 +1130,7 @@ class EggBot( inkex.Effect ):
 
 					self.svgTotalDeltaX += xd
 					self.svgTotalDeltaY += yd
-					ebb_motion.doXYMove( self.serialPort, xd2, yd2, td )			
+					ebb_motion.doXYMove( self.serialPort, xd2, yd2, td )
 					if (td > 50):
 						time.sleep(float(td - 50)/1000.0)  #pause before issuing next command
 					
@@ -1137,15 +1138,24 @@ class EggBot( inkex.Effect ):
 				nDeltaY -= yd
 				nTime -= td
 
-			strButton = ebb_motion.QueryPRGButton(self.serialPort)	#Query if button pressed
-			if strButton[0] == '1': #button pressed
+			strButton = ebb_motion.QueryPRGButton(self.serialPort)	# Query if button pressed
+			if strButton == "":
+				# Can't get a response from EBB, so
+				# attempt to shut down in a way which allows user to continue.
+				bNoResponseFromEbb = True
+				strButton = '1'			# simulate pushed button for pause
+			else:
+				bNoResponseFromEbb = False
+				
+			if strButton[0] == '1': #button pressed, or simulated pressed because of communication error to allow resume
 				self.svgNodeCount = self.nodeCount;
-				inkex.errormsg( 'Plot paused by button press after node number ' + str( self.nodeCount ) + '.' )
+				if bNoResponseFromEbb:
+					inkex.errormsg( 'Plot halted by communication error after node number ' + str( self.nodeCount ) + '.' )
+				else:
+					inkex.errormsg( 'Plot paused by button press after node number ' + str( self.nodeCount ) + '.' )
 				inkex.errormsg( 'Use the "resume" feature to continue.' )
-				#self.penUp()  # Should be redundant...
 				self.engraverOff()
 				self.bStopped = True
 				return
-
 e = EggBot()
 e.affect()

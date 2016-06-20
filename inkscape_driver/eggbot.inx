@@ -173,7 +173,7 @@ selected number, which can be up to 100.
       <_param name="instructions_general" type="description"
 	      xml:space="preserve">
 EggBot Control Inkscape extension 
-Release 2.7.5, dated 2016-05-01
+Release 2.7.6, dated 2016-06-19
 
 *EBB Firmware 1.96 or newer required for certain
  functions. 
@@ -183,6 +183,11 @@ Known issues:
   (This is due to a known bug in Inkscape; the
    "cancel" button does not work with any
    Inkscape extension, including this one.)
+   
+Latest version and issue tracker available at:
+https://github.com/evil-mad/EggBot/
+
+
 </_param>
     </page>
   </param>
