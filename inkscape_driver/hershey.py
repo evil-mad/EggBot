@@ -28,14 +28,12 @@ FONT_GROUP_V_SPACING = 45   # all the fonts are nearly identical in height, so a
 							# spacing is adequate, and is arbitrary - just so it looks good
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
-	style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
-		# Apply rounding to ends so that user gets best impression of final printed text appearance.
 	pathString = face[char]
 	splitString = pathString.split()  
 	midpoint = offset - float(splitString[0])
 	pathString = pathString[pathString.find("M"):] #portion after first move
 	trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
-	text_attribs = {'style':simplestyle.formatStyle(style), 'd':pathString, 'transform':trans}
+	text_attribs = {'d':pathString, 'transform':trans}
 	inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs) 
 	return midpoint + float(splitString[1]) #new offset value
 
@@ -66,9 +64,16 @@ class Hershey( inkex.Effect ):
 			help="The selected font face when Apply was pressed" )
 
 	def effect( self ):
+
+		OutputGenerated = False
+
 		# Group generated paths together, to make the rendered letters easier to manipulate in Inkscape.
 		g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
 		g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+
+		style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
+		# Apply rounding to ends so that user gets best impression of final printed text appearance.
+		g.set( 'style',simplestyle.formatStyle(style))	
 
 		font = eval('hersheydata.' + str(self.options.fontface))
 		clearfont = hersheydata.futural  
@@ -81,16 +86,17 @@ class Hershey( inkex.Effect ):
 			#evaluate text string and render in the chosen font
 			letterVals = [ord(q) - 32 for q in self.options.text] 
 			for q in letterVals:
-				if (q < 0) or (q > 95):
+				if (q <= 0) or (q > 95):
 					w += 2*spacing
 				else:
 					w = draw_svg_text(q, font, w, 0, g)
+					OutputGenerated = True
 			t = 'translate(' + str(self.view_center[0] - w/2) + ',' + str(self.view_center[1]) + ')'
 			g.set( 'transform',t)					
 		elif self.options.action == 'sample':
 			t = self.render_table_of_all_fonts( 'group_allfonts', g, spacing, clearfont )
 			g.set( 'transform',t)
-
+			OutputGenerated = True
 		else:
 			#Generate glyph table for a single font
 			wmax = 0;
@@ -111,7 +117,10 @@ class Hershey( inkex.Effect ):
 			#  Translate group to center of view, approximately
 			t = 'translate(' + str( self.view_center[0] - w/2) + ',' + str( self.view_center[1] ) + ')'
 			g.set( 'transform',t)
-		# if self.options.action == "render": elif: else:
+			OutputGenerated = True
+
+		if not OutputGenerated:
+			self.current_layer.remove(g)	#remove empty group, if no SVG was generated.
 
 	def getDocHeight( self):
 		doc_height = self.unittouu(self.document.getroot().get('height'))
