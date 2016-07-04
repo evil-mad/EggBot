@@ -188,11 +188,16 @@
 //                  many steps were aborted.
 // 2.3.0 08/28/15 - Added new XM command as per issue #29 for driving mixed-axis
 //                  geometry machines.
-// 2.4.0 03/14/15 - Added new AM command as per issue #<TBD> for using accelerated
+// 2.4.0 03/14/15 - Added new AM command for using accelerated
 //                  stepper motion. Includes going to 32 bit accumulators in ISR
 //                  to achieve necessary resolution, which includes changes to
 //                  SM command as well. Also added "CU,2,0" to turn of SM command
-//                  parameter checking for speed.
+//                  parameter checking for speed. 
+//                  NOTE: AM command may not be quite 'right' yet. Although it 
+//                  has passed simple tests, it could not be made to reliably
+//                  work from the Inkscape plugin, so it is not currently being
+//                  used. It may have to change in future versions of this
+//                  firmware.
 
 #include <p18cxxx.h>
 #include <usart.h>
