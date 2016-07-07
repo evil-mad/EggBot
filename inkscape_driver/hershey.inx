@@ -2,6 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
   <id>org.evilmad.render.hershe</id>
+  <!-- Version 2.0.1 July 7, 2016 -->
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -45,6 +46,7 @@ Hershey Text: Engraving Fonts for Inkscape
 		<_item value="EMSBrush">EMS Brush</_item>
 		<_item value="EMSCapitol">EMS Capitol</_item>
 		<_item value="EMSCasualHand">EMS Casual Hand</_item>
+		<_item value="EMSDecorousScript">EMS Decorous Script</_item>
 		<_item value="EMSDelight">EMS Delight</_item>
 		<_item value="EMSDelightSwashCaps">EMS Delight Swash Caps</_item>
 		<_item value="EMSElfin">EMS Elfin</_item>
@@ -59,6 +61,8 @@ Hershey Text: Engraving Fonts for Inkscape
 		<_item value="EMSPancakes">EMS Pancakes</_item>
 		<_item value="EMSPepita">EMS Pepita</_item>
 		<_item value="EMSQwandry">EMS Qwandry</_item>
+		<_item value="EMSReadability">EMS Readability</_item>
+		<_item value="EMSReadabilityItalic">EMS Readability Italic</_item>
 		<_item value="EMSSociety">EMS Society</_item>
 		<_item value="EMSSwiss">EMS Swiss</_item>
         <_item value="EMSTech">EMS Tech</_item> 

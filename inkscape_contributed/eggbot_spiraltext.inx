@@ -64,6 +64,8 @@ type faces are available.  For these faces, use of the &lt;b&gt;, &lt;em&gt; and
 &lt;timesi&gt;, &lt;timesib&gt; -- Serif medium italic, bold italic
 &lt;timesr&gt;, &lt;timesrb&gt; -- Serif medium, bold
 
+Either &lt;EMS Allure&gt; or &lt;EMSAllure&gt; refers to the EMS Allure single-stroke font.
+For a complete list of EMS fonts, refer to the "Font face" list in the Render/Hershey text extension.
 
 
 

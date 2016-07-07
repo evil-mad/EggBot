@@ -50,6 +50,11 @@
 # Significant portions of this code were written by Windell H. Oskay and are
 # Copyright 2011, Windell H. Oskay, www.evilmadscientist.com
 #
+# Small portions of this code were changed by Sheldon B. Michaels 2016,
+# in order to accomodate the addition of several new faces
+# (the "EMS" series) to hersheydata.py.  Additionally, changes were made
+# to the default text rendering style.
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -69,6 +74,7 @@ import hersheydata			#data file w/ Hershey font data
 import inkex
 import simplestyle
 import math
+import string
 
 # Mapping table to map the names used here to the corresponding
 # names used in hersheydata.py.  This helps prevent end users from
@@ -105,17 +111,18 @@ map_our_names_to_hersheydata = {
 # Copyright 2011, Windell H. Oskay, www.evilmadscientist.com
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
-	style = { 'stroke': '#000000', 'fill': 'none' }
+	style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
+		# Apply rounding to ends so that user gets best impression of final printed text appearance.
 	pathString = face[char]
 	splitString = pathString.split()
-	midpoint = offset - int(splitString[0])
+	midpoint = offset - float(splitString[0])
 	i = pathString.find("M")
 	if i >= 0:
 		pathString = pathString[i:] #portion after first move
 		trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
 		text_attribs = {'style':simplestyle.formatStyle(style), 'd':pathString, 'transform':trans}
 		inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
-	return midpoint + int(splitString[1]) 	#new offset value
+	return midpoint + float(splitString[1]) 	#new offset value
 
 def renderText( parent, markup ):
 	# Embed text in group to make manipulation easier:
@@ -149,6 +156,29 @@ emphasis_is_bold = { 'sans' : True, 'times' : False, 'script' : True }
 
 # Short list of entity references
 entity_refs = { '&lt;' : '<', '&gt;' : '>', '&amp;' : '&', '&quot;' : '"', '&apos' : "'", '&nbsp;' : ' ' }
+
+def normalize_possible_EMS_string( tag ):
+	# Normalizes tag name by removing any spaces
+	sNormalizedTag = string.replace( tag, ' ', '')
+	return sNormalizedTag
+
+def is_valid_EMS_name( tag ):
+	# returns true if family is one of the "EMS" faces in hersheydata.py
+	# else false
+	sNormalizedTag = normalize_possible_EMS_string( tag )
+	bRetVal = False		# default assumption
+	try:
+		fontgroup = hersheydata.group_allfonts
+	except:
+		# User probably has old version of hersheydata.py
+		pass
+	else:
+		for f in fontgroup:
+			if f[0] == sNormalizedTag:
+				bRetVal = True
+				break
+			
+	return bRetVal
 
 def pickFace( family, bold=False, italics=False, emphasis=False ):
 
@@ -288,8 +318,14 @@ def processMarkup( text, family='sans' ):
 						face = pickFace( family, bold, italic, emphasis )
 
 				else:
-					if ( tag not in generic_families ) and \
-						    ( not map_our_names_to_hersheydata.has_key( tag ) ):
+					bValidEMSName = is_valid_EMS_name( tag )
+					if bValidEMSName:
+						tag = normalize_possible_EMS_string( tag )
+					if (
+							( tag not in generic_families )
+							and ( not map_our_names_to_hersheydata.has_key( tag ) )
+							and ( not bValidEMSName )
+						):
 						if close:
 							inkex.errormsg( 'Ignoring the unrecognized tag </%s>.' % tag )
 						else:
