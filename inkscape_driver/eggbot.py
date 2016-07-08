@@ -299,12 +299,12 @@ class EggBot( inkex.Effect ):
 				self.resumeMode = True
 				if ( self.options.cancelOnly ):
 					self.resumeMode = False
+					self.penUp()   #Preemptively raise pen, before returning home.
 					self.fPrevX = self.svgTotalDeltaX
 					self.fPrevY = self.svgTotalDeltaY
 					self.fX = 0
 					self.fY = 0
 					self.plotLineAndTime()
-					self.penUp()   #Always end with pen-up
 					self.svgLayer = 0
 					self.svgNodeCount = 0
 					self.svgLastPath = 0
