@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
   <id>org.evilmad.render.hershe</id>
-  <!-- Version 2.0.1 July 7, 2016 -->
+  <!-- Version 2.0.2 July 31, 2016 -->
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -57,6 +57,8 @@ Hershey Text: Engraving Fonts for Inkscape
 		<_item value="EMSLittlePrincess">EMS Little Princess</_item>
 		<_item value="EMSMistyNight">EMS Misty Night</_item>
 		<_item value="EMSNeato">EMS Neato</_item>
+		<_item value="EMSNixish">EMS Nixish</_item>
+		<_item value="EMSNixishItalic">EMS Nixish Italic</_item>
 		<_item value="EMSOsmotron">EMS Osmotron</_item>
 		<_item value="EMSPancakes">EMS Pancakes</_item>
 		<_item value="EMSPepita">EMS Pepita</_item>
