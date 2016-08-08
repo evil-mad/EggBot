@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.7.7, dated July 6, 2016.
+# Version 2.8.0, dated August 7, 2016.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -223,8 +223,19 @@ class EggBot( inkex.Effect ):
 					
 			elif self.options.tab == '"setup"':
 				self.setupCommand()	
+
 			elif self.options.tab == '"manual"':
-				self.manualCommand()
+				if self.options.manualType == "strip-data":
+					for node in self.svg.xpath( '//svg:WCB', namespaces=inkex.NSS ):
+						self.svg.remove( node )
+					for node in self.svg.xpath( '//svg:eggbot', namespaces=inkex.NSS ):
+						self.svg.remove( node )
+					inkex.errormsg( gettext.gettext( "I've removed all EggBot data from this SVG file. Have a great day!" ) )
+					return	
+				else:
+					self.manualCommand()
+
+
 				
 			if self.serialPort is not None:
 				ebb_motion.doTimedPause(self.serialPort, 10) #Pause a moment for underway commands to finish...
