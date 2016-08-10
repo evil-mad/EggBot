@@ -28,30 +28,1129 @@
         <h1>
 <a id="eggbot" class="anchor" href="#eggbot" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>EggBot</h1>
 
-<p><em><em>Software for the Original EggBot</em></em></p>
+<p><em><em>EBB (EiBotBoard) Command Set</em></em></p>
 
-<p>This is a repository for software to drive The Original EggBot, by Evil Mad Scientist Laboratories. More information at <a href="http://www.egg-bot.com/">http://www.egg-bot.com/</a></p>
 
-<p>This repository includes the extensions for Inkscape, firmware for the EiBotBoard (AKA "EBB", or EggBotBoard), and example plot files. All code is designed to work on Mac, Windows and Linux.</p>
+    <h2><span style="font-weight: bold;">Introduction</span></h2>
+    The EBB firmware is based on the <a href="../UBW/index.html">UBW</a>
+    firmware. The same basic command processing framework is used, so
+    the same type of commands are used, and the same type of errors are
+    returned. See the <a
+      href="../UBW/Doc/FirmwareDDocumentation_v145.html">UBW command
+      documentation</a> for an introduction to these topics.<br>
+    <br>
+    This command reference applies to EiBotBoard Firmware v1.8.0 and
+    above. (Any differences between firmware versions are noted below
+    and in release notes.)<br>
+    <h2>Other Resources</h2>
+    <ul>
+      <li><a href="EBBCommandFAQ.html">EBB Command FAQ</a></li>
+      <li><a href="EBBConfig.html">Boot up configuration information</a></li>
+      <li><a href="EBBReleaseNotes.html">Release notes for v2.0.1 to
+          latest</a></li>
+    </ul>
+    <h2><a name="Differences_between_standard_EggBot"></a>Differences
+      between 'standard' EggBot firmware version (2.0.1) and latest
+      version (2.3.0)</h2>
+    There have been many changes in the code between the version that is
+    currently (April 27th, 2014) shipping with EggBot (v2.0.1) and the
+    latest version (v2.3.0). However, care has been taken to make the
+    actual performance of the commands used by the EggBot Inkscape
+    extension (and Water Color Bot) exactly the same as version 2.0.1
+    for compatibility's sake. At least until somebody discovers an
+    incompatibility, and then we will fix it! (please send us e-mail or
+    file an issue on GitHub : <a
+      href="https://github.com/evil-mad/EggBot/issues">https://github.com/evil-mad/EggBot/issues</a><br>
+    <br>
+    All of the changes made between versions 2.0.1 and 2.3.0 (or above)
+    should not affect EggBot or WaterColorBot operation in any way. The
+    changes are there to support other uses of the EBB (lots of other
+    folks use it as well for many different things). So if you are just
+    using EggBot or WaterColorBot, there isn't a good reason to update
+    your firmware to the latest.<br>
+    <br>
+    <h2><a name="EBB_Command_Reference"></a>EBB Command Reference<br>
+    </h2>
+    <h4><span style="font-weight: bold;"><a name="XM"></a>The "XM"
+        Command (stepper motor move for mixed-axis geometries) - Added
+        in version 2.3.0<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "XM,&lt;move_duration&gt;,&lt;axisA&gt;,&lt;axisB&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;move_duration&gt; is a value from 1 to 16777215 and is
+          in milliseconds. It represents the total length of time you
+          want this move to take.</li>
+        <li>&lt;axisA&gt; and &lt;axisB&gt; are step values from
+          -1677215 to 1677215 (see below)<br>
+        </li>
+        <li>If both &lt;axisA&gt; and &lt;axisB&gt; are zero, then a
+          delay of &lt;move_duration&gt; ms is executed.</li>
+        <li>The sign of &lt;axisA&gt; and &lt;axisB&gt; represent the
+          direction you want the motors to move.<br>
+        </li>
+      </ul>
+      <li>This command takes the &lt;axisA&gt; and &lt;axisB&gt; values,
+        and creates a call to the SM command with the SM command's
+        &lt;Axis1&gt; value as &lt;AxisA&gt; + &lt;AxisB&gt;, and
+        &lt;Axis2&gt; as &lt;AxisA&gt; - &lt;AxisB&gt;.</li>
+      <li>This command is designed to allow cleaner operation of
+        machines like the <a
+          href="http://www.multimechatronics.com/build_a_h-bot.php">H-Bot</a>
+        and <a
+          href="http://www.multimechatronics.com/build_a_h-bot.php">CoreXY</a>
+        systems.<br>
+      </li>
+      <li>The minimum speed at which the EBB can generate steps for each
+        motor is 1.31 steps/second. The maximum speed is
+        25Ksteps/second. If the XM command finds that this speed range
+        will be violated on either axis, it will output an error message
+        declaring such and it will not complete the move. Note that the
+        range is checked on Axis1 and Axis2, NOT on AxisA and AxisB.
+        (I.e. post-math ops)<br>
+      </li>
+      <li>Note that internally the EBB generates an ISR at the 25KHz
+        rate. Each time the ISR fires, the EBB determines if a step
+        needs to be taken for a given axis or not. The practical result
+        of this is that all steps will be 'quantized' to the 25KHz
+        (40uS) time intervals, and thus as the step rate gets close to
+        25Khz the 'correct' time between steps will not be generated,
+        but instead each step will land on a 40uS tick in time. In
+        almost all cases normally used by the EBB, this doesn't make any
+        difference because the overall proper length for the entire move
+        will be correct.<br>
+      </li>
+      <li>A value of 0 for &lt;move_duration&gt; is invalid and will be
+        rejected. </li>
+    </ul>
+    <ul>
+      <li><span style="font-weight: bold;">Example:</span>
+        "XM,1000,550,-1234"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <h4><span style="font-weight: bold;"><a name="QC"></a>The "QC"
+        Command (Query Current) - Added in v2.0, broken up to v2.2.2.
+        Works properly in v2.2.3 and above.<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QC&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "QC"</li>
+      <li>Returns:
+        "&lt;REF_RA0_VOLTAGE&gt;,&lt;V+_NET_VOLTAGE&gt;&lt;CR&gt;"</li>
+      <li>&lt;REF_RA0_VOLTAGE&gt; is the voltage on the REF_RA0 net, as
+        expressed as a 10 bit number where 0 = 0.0V and 1023 = 3.3V</li>
+      <li>&lt;V+_NET_VOLTAGE&gt; is the voltage on the V+ net scaled by
+        the resistor divider R13 and R18</li>
+      <li>This command reads two analog voltages and returns their raw
+        10 bit values. You can use this to figure out what the user has
+        set the current adjustment pot to, and to read the voltage
+        coming into the board.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "0421,0021&lt;CR&gt;OK&lt;CR&gt;"</li>
+    </ul>
+    &nbsp;&nbsp;&nbsp; This command only works properly on EBB hardware
+    v1.3 and above. (The white boards from EMSL are v2.0, and all boards
+    from SparkFun are v2.0 and above) The first value returned is the
+    raw 10 bit analog level on the REF_RA0 input to the stepper driver
+    chip. This voltage level sets the max current that the driver chips
+    allow into the motor coils. The second value returned is the raw 10
+    bit analog level on the V+ input (i.e. the power coming into the
+    board, but after the first diode), and is scaled so that the input
+    voltage doesn't go above the 3.3V max analog input level for the
+    MCU.<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; For a v1.5 EBB, the following values were
+    measured for the second returned parameter of the QC command:<br>
+    <pre>Input (V+)    QC second parameter<br>0.0           449<br>5.0           513<br>9.0           574<br>12.0          604<br>24.0          775<br></pre>
+    <span style="font-weight: bold;"></span> &nbsp;&nbsp;&nbsp; So one
+    can use these two returned values to check for proper stepper motor
+    driver current and proper power supply input voltage. You could also
+    disable the motors, read the power input voltage, then enable the
+    motors and check it again, giving an approximate reading of the
+    level of voltage droop on the power supply when the motors are
+    loading it down. Note that V+ is not measured directly, but rather
+    after a diode and through a resistor divider. The diode will drop
+    some voltage (dependent upon current) and there will be some
+    tolerance in the voltage divider. Thus you can't rely upon the raw
+    ADC value alone to give a precise measurement.<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; Version History: This command was introduced in
+    v2.0.0, but it had a bug where the upper byte of the result was no
+    being displayed. Version 2.0.2 fixed this bug and the command now
+    works properly. But then other problems were discovered. The whole
+    analog sampling code was re-written for version 2.2.3 and this
+    command now works.<br>
+    <br>
+    <span style="font-weight: bold;"><a name="ES"></a>The "ES" Command
+      (E Stop) - Added in v2.2.7, updated in 2.2.9<br>
+    </span>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "ES&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "ES"</li>
+      <li>Use this command to abort any in-progress motor move (SM)
+        command. This command will also delete any motor move command
+        (SM) from the FIFO. It will immediately stop the motors, but
+        leave them energized. <br>
+      </li>
+      <li>This command will return a "1" if it had to stop an
+        in-progress move command, or if it had to delete a move command
+        from the FIFO. This would indicate that some steps might be
+        lost, since the host application thinks the moves have already
+        completed, when in fact they were aborted partway through. This
+        command will return a "0" if no motor move commands were deleted
+        or aborted.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span></li>
+      <ul>
+        <li><span style="font-weight: bold;"></span>"1&lt;CR&gt;" or
+          "0&lt;CR", then <br>
+        </li>
+        <li>"OK&lt;CR&gt;"</li>
+      </ul>
+      <li><b>Version Notes: </b>In 2.2.9 and above, there are extra
+        values in the reply to this command:</li>
+      <ul>
+        <li>&nbsp;Returns:
+&lt;command_interrupted&gt;,&lt;fifo_steps1&gt;,&lt;fifo_steps2&gt;,&lt;steps_remaining1&gt;,&lt;steps_remaining2&gt;&lt;CR&gt;OK&lt;CR&gt;<br>
+          &lt;command_interrupted&gt; = 0 if no FIFO or in-progress move
+          commands were interrupted,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+          1 if a motor move command was in progress or in the FIFO<br>
+          &lt;fifo_steps1&gt; and &lt;fifo_steps1&gt; = 24 bit unsigned
+          integers with the number of steps<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+          in any SM command sitting in the fifo for axis1 and axis2.<br>
+          &lt;steps_remaining1&gt; and &lt;steps_remaining2&gt; = 24 bit
+          unsigned integers with the number of<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+          steps left in the currently executing SM command (if any) for<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+          axis1 and axis2.<br>
+          It will return 0,0,0,0,0 if no SM command was executing at the
+          time, and no SM command was in the FIFO.<br>
+          <br>
+        </li>
+      </ul>
+      <ul>
+      </ul>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="SE"></a>The "SE"
+        Command (Set Engraver) - Added in v2.1.0, updated in v2.4.1<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SE,&lt;state&gt;,&lt;power&gt;&lt;CR&gt;" (pre v2.4.1)</li><li><b>Format</b>: "SE,&lt;state&gt;,&lt;power&gt;,&lt;use_motion_queue&gt;&lt;CR&gt;" (v2.4.1 and on)<br></li>
+      <li><span style="font-weight: bold;">Example:</span> "SE,1,1023"</li>
+      <li>&lt;state&gt; is 0 for disable, and 1 for enable. You must
+        include this parameter.</li>
+      <li>&lt;power&gt; is a value from 0 to 1023 and represents the
+        relative power (% duty cycle of the PWM signal), where 0 is off
+        and 1023 is full on. This parameter is optional.</li><li>&lt;use_motion_queue&gt; is optional, and can be a 0 or a 1. If 1, then this SE command will be put on the motion queue just like SM and SP commands, thus it will be executed when the previous motion commands have finished. Note that if you need to use this parameter, the &lt;power&gt; parameter is not optional. (You must have 3 parameters if you use this parameter.)<br></li>
+      <li>This command is used to enable and disable the engraver PWM
+        output on RB3 (called B3 on the board), and also set its output
+        power. Use SE,0 to disable this feature.</li>
+      <li>If &lt;power&gt; is not included, 50% PWM will be used.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+      <li><b>Version Notes:</b> Firmware versions prior to v2.2.2 do not
+        have working PWM from this command. Instead, they always
+        defaulted to 50% PWM. Version 2.2.2 fixes this problem.<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="NI"></a>The "NI"
+        Command (Node count Increment) - Added in v1.9.5<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "NI&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "NI"</li>
+      <li>This command increments the 32 bit Node Counter by 1.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="ND"></a>The "ND"
+        Command (Node count Decrement) - Added in v1.9.5<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "ND&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "ND"</li>
+      <li>This command decrements the 32 bit Node Counter by 1.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="BL"></a>The "BL"
+        Command (BootLoad) - Added in v1.9.5<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "BL&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "BL"</li>
+      <li>This command turns off interrupts and jumps into the
+        bootloader. The EBB will enter bootloader mode without having to
+        push any buttons. Note that this command will ONLY work if you
+        have a EBB bootloader version later than 7/3/2010 (the version
+        released on 7/3/2010 has a distinct LED blink mode - the USB LED
+        stays on 3 times longer than the USR LED). With a previous
+        version of the bootloader code, this command may cause the EBB
+        to be come unresponsive.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="SN"></a>The "SN"
+        Command (Set Node count) - Brought back in v1.9.5<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SN,&lt;value&gt;&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span>
+        "SN,123456789"</li>
+      <li>This command sets the Node Counter to &lt;value&gt;.
+        &lt;value&gt; is a 32 bit unsigned int.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="CN"></a>The "CN"
+        Command (Clear Node count) - Added in v1.9.3, removed in 1.9.5
+        and above<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "CN&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "CN"</li>
+      <li>This command clears the value of the Node Counter (see QN
+        command).<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="SL"></a>The "SL"
+        Command (Set Layer) - Added in v1.9.2<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SL,&lt;NewLayerValue&gt;&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "SL,4"</li>
+      <li>This command set the value of the Layer variable (see QL
+        command).<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>"OK&lt;CR&gt;"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="QL"></a>The "QL"
+        Command (Query Layer) - Added in v1.9.2<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QL&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "QL"</li>
+      <li>This command asks the EBB to report back the current value of
+        the Layer variable. This variable is set with the SL command, as
+        is a single unsigned byte.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span>
+        "&lt;CurrentLayerValue&gt;&lt;CR&gt;" then "OK&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "4" then "OK"<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span><span style="font-weight:
+      bold;"><a name="QN"></a>The "QN" Command (Query Node count) -
+      Added in v1.9.2<br>
+    </span>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QN&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "QN"</li>
+      <li>This command asks the EBB what the current value of the Node
+        Counter is. The Node Counter is an unsigned long int (8 bytes)
+        value that gets incremented each time an SM command is finished
+        executing.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns: </span>"&lt;NodeCount&gt;&lt;CR&gt;OK&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "1234567890"
+        then "OK"<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="QB"></a>The "QB"
+        Command (Query Button) - Added in v1.9.2<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QB&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "QB"</li>
+      <li>This command simply asks the EBB if the PRG button has been
+        pressed since the last QB command or not.<br>
+      </li>
+      <li><span style="font-weight: bold;">Returns:</span> "1" if the
+        PRG button has been pressed since the last QB command, "0" if it
+        has not, then "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="QP"></a>The "QP"
+        Command (Query Pen) - Added in v1.9<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QP&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Example:</span> "QP"</li>
+      <li>This command simply asks the EBB what state the pen is in. It
+        will return 1 if the pen is up and 0 if the pen is down. If a
+        pen up/down command is pending in the FIFO, it will only report
+        the new state of the pen after the pen move has been started.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "1" if
+        the pen is&nbsp; UP, "0" if the pen is DOWN, then "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="TP"></a>The "TP"
+        Command (Toggle Pen) - Added in v1.9<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "TP,&lt;duration&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;duration&gt; (optional parameter - if no value then 0 is
+          used internally) is a value from 1 to 65,535 and is in
+          milliseconds. It represents the total length of time between
+          when the pen move is started, and when the next command will
+          be executed. Note that this does not have anything to do with
+          how fast the pen moves (which is set with the SC command). The
+          &lt;duration&gt; parameter is to force the EBB not to execute
+          the next command (normally an SM) for some length of time,
+          which gives the system time to allow the pen move to complete
+          and then some extra time before moving the motors (if you set
+          up the pen speed and this duration parameter properly).</li>
+      </ul>
+      <li><b>Version Notes</b>: In versions prior to 2.2.1, the
+        &lt;duration&gt; parameter had a bug and was in units of 40uS
+        rather than 1ms. Versions from 2.2.1 and on have this bug fixed.<br>
+      </li>
+      <ul>
+      </ul>
+      <li>
+        <p>This command toggles the state of the pen (up-&gt;down and
+          down-&gt;up). EBB firmware boots up with pen in 'up'
+          (&lt;servo_min&gt;) state.<br>
+        </p>
+      </li>
+      <li><span style="font-weight: bold;">Example:</span> "TP"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="SM"></a>The "SM"
+        Command (stepper motor move)<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SM,&lt;move_duration&gt;,&lt;axis1&gt;,&lt;axis2&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;move_duration&gt; is a value from 1 to 65,535 (for
+          version 2.2.5 and above, this value can be up to 1677215) and
+          is in milliseconds. It represents the total length of time you
+          want this move to take.</li>
+        <li>&lt;axis1&gt; and &lt;axis2&gt; are values from -32,767 to
+          +32,767 (for version 2.2.5 and above, these values can be from
+          -1677215 to 1677215) and represent the number of steps for
+          each motor to take in &lt;move_duration&gt; milliseconds.</li>
+        <li>If both &lt;axis1&gt; and &lt;axis2&gt; are zero, then a
+          delay of &lt;move_duration&gt; ms is executed. &lt;axis2&gt;
+          is an optional value, and if it is not included in the
+          command, zero steps are assumed for axis 2.</li>
+        <li>The sign of &lt;axis1&gt; and &lt;axis2&gt; represent the
+          direction you want each motor to turn.<br>
+        </li>
+      </ul>
+    </ul>
+    <ul>
+      <li>Use this command to make the motors draw a straight line at
+        constant velocity.</li>
+      <li>The minimum speed at which the EBB can generate steps for each
+        motor is 1.31 steps/second. The maximum speed is
+        25Ksteps/second. If the XM command finds that this speed range
+        will be violated on either axis, it will output an error message
+        declaring such and it will not complete the move. Note that the
+        range is checked on Axis1 and Axis2, NOT on AxisA and AxisB.
+        (I.e. post-math ops)</li>
+      <li>Note that internally the EBB generates an ISR at the 25KHz
+        rate. Each time the ISR fires, the EBB determines if a step
+        needs to be taken for a given axis or not. The practical result
+        of this is that all steps will be 'quantized' to the 25KHz
+        (40uS) time intervals, and thus as the step rate gets close to
+        25Khz the 'correct' time between steps will not be generated,
+        but instead each step will land on a 40uS tick in time. In
+        almost all cases normally used by the EBB, this doesn't make any
+        difference because the overall proper length for the entire move
+        will be correct.</li>
+      <li> A value of 0 for &lt;move_duration&gt; is invalid and will be
+        rejected. </li>
+    </ul>
+    <ul>
+      <li><span style="font-weight: bold;">Example:</span>
+        "SM,1000,250,-766"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+      <li>Version notes: <br>
+      </li>
+      <ul>
+        <li>In versions prior to 2.2.1, the &lt;move_duration&gt;
+          parameter had a bug where values over 2621 would produce
+          incorrect delays (when &lt;axis1&gt; and &lt;axis2&gt; are 0).
+          This has been fixed for 2.2.1 and above, and now values up to
+          65,535 will work properly.<br>
+          As of version 2.2.5, the &lt;move_duration&gt;, &lt;axis1&gt;,
+          and &lt;axis2&gt; parameters for this command are full 24 bit
+          numbers. &lt;move_duration&gt; is an unsigned 24-bit value,
+          while &lt;axis1&gt; and &lt;axis2&gt; are signed. This allows
+          for some _very_ long stepper moves.</li>
+        <li>As of version 2.2.8, the error messages for this command
+          have been corrected. If an input parameter is too large
+          (&gt;1677215) or a step rate is too fast (&gt;25K steps/s) or
+          too slow (&lt;1.31 steps/s) a proper error will be printed
+          back to the host. <br>
+        </li>
+      </ul>
+    </ul>
+    <span style="font-weight: bold;"></span>
+    <h4><span style="font-weight: bold;"><a name="SP"></a>The "SP"
+        Command (set pen state)<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SP,&lt;value&gt;,&lt;duration&gt;,&lt;portBpin&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;value&gt; is 0 or 1<br>
+        </li>
+        <li>&lt;duration&gt; (optional parameter - if no value then 0 is
+          used internally) is a value from 1 to 65,535 and is in
+          milliseconds. It represents the total length of time between
+          when the pen move is started, and when the next command will
+          be executed. Note that this does not have anything to do with
+          how fast the pen moves (which is set with the SC command). The
+          &lt;duration&gt; parameter is to force the EBB not to execute
+          the next command (normally an SM) for some length of time,
+          which gives the system time to allow the pen move to complete
+          and then some extra time before moving the motors (if you set
+          up the pen speed and this duration parameter properly).</li>
+        <li>&lt;portBpin&gt; (optional - if not present, then 1 is used)
+          Which port B pin you want this output to come out of (values
+          from 0 through 7 are valid) (Note: this parameter is new for
+          EBF 2.1.1 and above)</li>
+      </ul>
+      <li>When a &lt;value&gt; of 1 is used, the servo will be moved to
+        the &lt;servo_min&gt; value (as set by the "SC,4" command
+        below).</li>
+      <li>When a &lt;value&gt; of 0 is used, the servo will be moved to
+        the &lt;servo_max&gt; value (as set by the "SC,5" command
+        below).</li>
+      <li>Note that the EggBot Inkscape extension uses the
+        &lt;servo_min&gt; ("SC,4") value as the 'Pen up position', and
+        the &lt;servo_max&gt; ("SC,5") value as the 'Pen down position'.<br>
+      </li>
+      <li>This command will make the pen go up or down. On EBB versions
+        1.1, 1.2 and 1.3 this will make the solenoid output turn on and
+        off. On all EBB versions it will also make the RC servo output
+        on RB1 move to the up or down position. Also, by default, it
+        will turn on RB4 or turn off RB4 as a simple digital output, so
+        that you could use this to trigger a laser for example.</li>
+      <li>The default position for the RC servo output (RB1) on boot is
+        the 'Pen up position' (&lt;servo_min&gt;), and at boot
+        &lt;servo_min&gt; is set to 12000 which results in a pulse width
+        of 1.0mS on boot. &lt;servo_max&gt; is set to 16000 on boot, so
+        the down position will be 1.3mS unless changed with the "SC,5"
+        command.<br>
+      </li>
+      <li><b>Version Notes</b>:In versions prior to 2.2.4, the
+        &lt;duration&gt; parameter had two bugs. One was that the units
+        for &lt;duration&gt; were 40uS (instead of the correct 1ms). The
+        second was that the change of state of the servo would happen
+        AFTER the delay had elapsed. Both of these bugs have been
+        corrected in v2.2.4 and above. The servo move and the
+        &lt;duration&gt; delay are both started simultaneously now. <br>
+      </li>
+    </ul>
+    <ul>
+      <li><span style="font-weight: bold;">Example:</span> "SP,1"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <h4><span style="font-weight: bold;">The "EM" Command (enable
+        motors) for EBB v1.1<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "EM,&lt;EnableAxis1&gt;,&lt;EnableAxis2&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>Everything after &lt;EnableAxis1&gt; is optional<br>
+        </li>
+        <li>For each axis:</li>
+        <ul>
+          <li>0 will disable that axis (the driver will stop sending
+            current to the motor, so the motor will freewheel)</li>
+          <li>1 will enable that axis in 1/8th step mode (default)</li>
+          <li>2 will enable that axis in 1/4 step mode</li>
+          <li>3 will enable that axis in 1/2 step mode</li>
+          <li>4 will enable that axis in full step mode<br>
+          </li>
+        </ul>
+      </ul>
+      <li><span style="font-weight: bold;">Example:</span> "EM,1,0"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <h4><span style="font-weight: bold;"><a name="EM"></a>The "EM"
+        Command (enable motors) for EBB v1.2 and above<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "EM,&lt;Enable1&gt;,&lt;Enable2&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>To enable a motor driver, set its &lt;Enable&gt; parameter
+          to 1. <br>
+        </li>
+        <li>To disable a motor driver, set its &lt;Enable&gt; parameter
+          to 0.</li>
+        <li>For example, "EM,1,0" will enable motor 1 and disable motor
+          2.</li>
+        <li>To set the microstep mode of BOTH motor drivers (the same
+          signals go to both drivers, so you can't set them separately)
+          use a value of 1,2,3,4 or 5 for &lt;Enable1&gt;.</li>
+        <li>When setting microstep values with &lt;Enable1&gt;:<br>
+        </li>
+        <ul>
+          <li>1 will enable both axis in 1/16th step mode (default on
+            boot)</li>
+          <li>2 will enable both axis in 1/8th step mode<br>
+          </li>
+          <li>3 will enable both axis in 1/4 step mode</li>
+          <li>4 will enable both axis in 1/2 step mode</li>
+          <li>5 will enable both axis in full step mode</li>
+        </ul>
+        <li>Note that any time an SM command is executed, both motors
+          become 'enabled' before the move starts. Thus it is almost
+          never necessary to issue a "EM,1,1" command to enable both
+          motors.<br>
+        </li>
+      </ul>
+      <li><span style="font-weight: bold;">Example:</span> "EM,2" - this
+        command will set both motors in 1/8th step mode</li>
+      <li><span style="font-weight: bold;">Example: </span>"EM,0,0" -
+        this command will disable both motors (they will then freewheel)</li>
+      <li><span style="font-weight: bold;">Example:</span> "EM,1,1" -
+        this command will enable both motors and set them to 1/16th
+        microstep mode.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"> </span>
+    <h4><span style="font-weight: bold;"><a name="SC"></a>The "SC"
+        Command (stepper mode configure)<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "SC,&lt;value1&gt;,&lt;value2&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;value1&gt; is a number from 0 to 255 - it's meaning is
+          defined below<br>
+        </li>
+        <li>&lt;value2&gt; is a number from 0 to 65535 - it's meaning
+          depends upon &lt;value1&gt;<br>
+        </li>
+      </ul>
+      <li>
+        <p>This command allows you to set different parameters that
+          effect the operation of the EBB.</p>
+      </li>
+      <ul>
+        <li>SC,1,0 - uses just the solenoid output (RB4) for pen up/down
+          (no RC servo outputs)</li>
+        <li>SC,1,1 - uses just the RC pen lift servo on RB1 for pen
+          up/down (no solenoid output on RB4)<br>
+        </li>
+        <li>SC,1,2 - uses solenoid (RB4) and RC servo (RB1) output for
+          pen up/down, hardware RC output (default)</li>
+        <li>SC,2,0 - Set PIC to control built-in stepper driver chips
+          (default)</li>
+        <li>SC,2,1 - Set PIC to control external step/direction drivers
+          based on these pins.<br>
+        </li>
+        <ul>
+          <li>ENABLE1 = RD1</li>
+          <li>ENABLE2 = RA1</li>
+          <li>STEP1 = RC6</li>
+          <li>DIR1 = RC2</li>
+          <li>STEP2 = RA5</li>
+          <li>DIR2 = RA2<br>
+          </li>
+          <li>Note that SC,2,1 will also disconnect the PIC from the
+            built-in motor drivers, so you can drive the
+            step/direction/enable lines of the built-in drivers from the
+            pins of J5 and J4 (they all come out there - see schematic)
+            This command allows you to use the PIC as a step and
+            direction generator for external step/dir drives.<br>
+          </li>
+        </ul>
+        <li>SC,2,2 - PIC is disconnected from built-in motor drivers and
+          external pins - all step/dir/enable pins on the PIC are set to
+          inputs. This allows you to completely control the built-in
+          stepper motor driver chips externally with your own
+          step/dir/enable signals. Use the pins listed in the schematic
+          from J5 and J4. (new in 2.2.2)<br>
+        </li>
+        <ul>
+        </ul>
+        <li>SC,4,&lt;servo_min&gt; - sets the minimum value for the
+          servo (1 to 65535, in units of 83nS ). This is the 'Pen up
+          position', and defaults to 12000 (1.0mS) on boot.<br>
+        </li>
+        <li>SC,5,&lt;servo_max&gt; - sets the maximum value for the
+          servo (1 to 65535, in units of 83nS). This is the 'Pen down
+          position', and it defaults to 16000 (1.3mS) on boot.<br>
+        </li>
+        <li>SC,8,&lt;maximum_S2_channels&gt; - sets the number of
+          channels, each of &lt;S2_channel_duration_ms&gt; before
+          cycling back to channel 1 for S2 command. Values from 1 to 24
+          are valid. Defaults to 8 on bootup. (new for EBB 2.1.1)<br>
+        </li>
+        <li>SC,9,&lt;S2_channel_duration_ms&gt; - sets the number of
+          milliseconds before firing the next enabled channel for the S2
+          command. Defaults to 3ms. (new for EBB 2.1.1) <br>
+        </li>
+        <li>SC,10,&lt;servo_rate&gt; - sets both going up and going down
+          rates of change for the servo. (Same as &lt;rate&gt; parameter
+          in S2 command below)<br>
+        </li>
+        <li>SC,11,&lt;servo_rate_up&gt; - sets the rate of change of the
+          servo when going up (new in v1.9.2) (Same as &lt;rate&gt;
+          parameter in S2 command below) </li>
+        <li>SC,12,&lt;servo_rate_down&gt; - sets the rate of change of
+          the servo when going down (new in v1.9.2) (Same as
+          &lt;rate&gt; parameter in S2 command below)</li>
+        <li>SC,13,&lt;use_alt_pause&gt; - turns on (1) or off (0)
+          alternate pause button function on RB0. On by default. For
+          v1.1 boards, it uses RB2 instead. (new in v2.0)</li>
+        <br>
+      </ul>
+      <li><span style="font-weight: bold;">Example:</span> "SC,4,8000"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <h4><span style="font-weight: bold;">The "S2" Command (general RC
+        servo output) - for versions prior to 2.2.0<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+"S2,&lt;channel&gt;,&lt;position&gt;,&lt;output_pin&gt;,&lt;rate&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;channel&gt; is a number from 0 to 8 (with 0 as a special
+          value which shuts off all S2 outputs)<br>
+        </li>
+        <li>&lt;position&gt; is a number from 0 to 32,000, and
+          represents the 'on' time in 1/12,000,000ths of a second (0 =
+          channel off, 1=83us, 32,000 = 3ms)<br>
+        </li>
+        <li>&lt;output_pin&gt; is a number from 0 to 24, and is the RPx
+          pin number you want this channel to come out on- see schematic
+          for RPx numbers<br>
+        </li>
+        <li>&lt;rate&gt; is the rate at which to change from the current
+          value to the new value. Use 0 to have changes instant. See
+          below for the units of this value. Values from 0 to 65535 are
+          valid. Optional parameter.<br>
+        </li>
+      </ul>
+      <li>This command is a generic RC servo output command. It allows
+        you to control the RC servo output system on the EBB. Many I/O
+        pins have RPx numbers (see the schematic) - and you can output
+        RC servo pulses on up to 8 of these RPx pins. Any of them that
+        you want - it doesn't matter to the software. There are seven RC
+        servo 'channels', which have no physical meaning other than we
+        can (by default) only output up to 8 separate signals at once.
+        But you can assign any RPx pin to any channel - that's up to you
+        to manage. The RC servo system will cycle through each of the 8
+        channels. Each gets 3m of 'time'. (Thus giving a 24ms repeat
+        rate for the whole RC system.) If the current channel is
+        enabled, then at the beginning of its 3ms time slot, it's RPx
+        pin is set high. Then, &lt;position&gt; time later, the RPx pin
+        is set low. This time is controlled purely by hardware (the
+        ECCP2 in the CPU) so there is no jitter for the pulse durations.
+        &lt;position&gt; is in units of 1/12,000 of a second, so 32,000
+        for &lt;position&gt; would be exactly 3ms.</li>
+      <li>The number of available channels is normally (by default) 8.
+        This can be changed with the SC,8 command (see above). The S2 RC
+        servo output command cycles from channel 1 through channel
+        &lt;maximum_S2_channels&gt; (normally 8), outputting any enabled
+        channel's pulse from 0ms to 3ms. For a given channel, the
+        repetition rate is determined by &lt;maximum_S2_channels&gt; *
+        &lt;S2_channel_duration_ms&gt; which is normally 8 * 3 or 24ms.
+        Thus, each channel's output pulse will be repeated every 24ms.
+        Note that channel 0 is not a real channel - the &lt;channel&gt;
+        = 0 value is used to disable all S2 functionality. If you change
+        the &lt;maximum_S2_channels&gt; you will change the repetition
+        rate of the pulses.<br>
+      </li>
+      <li>The &lt;rate&gt; parameter is used to indicate how quickly to
+        move from the current pulse width (servo position) to the new
+        pulse width. If &lt;rate&gt; is zero, then the move is made on
+        the next PWM cycle (i.e. the next time the pin is pulsed). If
+        &lt;rate&gt; is not zero, then &lt;rate&gt; is added to (or
+        subtracted from) the current pulse width each time the pulse is
+        generated until the new target is reached. This means that the
+        units of &lt;rate&gt; are 1/12,000ths of a second per
+        &lt;maximum_S2_channels&gt; * &lt;S2_channel_duration_ms&gt; or
+        1/12,000ths of a second per 24ms.</li>
+      <li>The normal pen up/down servo control (SP and TP commands) use
+        S2 channel 1. So if you want to use SP and TP, then leave
+        channel 1 alone and start with channel 2. If you don't care to
+        use SP and TP anymore, then you can use channels 1 through
+        &lt;maximum_S2_channels&gt;.</li>
+      <li>The S2 command will always make &lt;output_pin&gt; an output
+        before it starts outputting pulses to that pin.<br>
+      </li>
+      <li>For example, to use RP6 as a RC servo output, and to set it's
+        on-time to 2ms, and using channel 3 of the RC system, you would
+        send the command (note &lt;rate&gt; is optional)<br>
+      </li>
+      <ul>
+        <li>S2,3,24000,6&lt;CR&gt;</li>
+      </ul>
+      <li>S2,0 - will turn off all RC servo support (freeing up CPU
+        time, if that's important to you)</li>
+      <li>S2,3,0 - will turn off the output on whatever pin channel 3
+        was assigned to.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"></span><br>
+    <h4><span style="font-weight: bold;"><a name="S2"></a>The "S2"
+        Command (general RC servo output) - for versions 2.2.0 and above<br>
+      </span></h4>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+"S2,&lt;position&gt;,&lt;output_pin&gt;,&lt;rate&gt;,&lt;delay&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;position&gt; is a number from 0 to 32,000, and
+          represents the 'on' time in 1/12,000,000ths of a second (0 =
+          off, 1=83us, 32,000 = 3ms)<br>
+        </li>
+        <li>&lt;output_pin&gt; is a number from 0 to 24, and is the RPx
+          pin number you want this channel to come out on- see schematic
+          for RPx numbers<br>
+        </li>
+        <li>&lt;rate&gt; is the rate at which to change from the current
+          value to the new value. Use 0 to have changes instant. See
+          below for the units of this value. Values from 0 to 65535 are
+          valid. Optional parameter.</li>
+        <li>&lt;delay&gt; is the number of milliseconds to delay the
+          start of the next command (optional, defaults to 0 = instant)<br>
+        </li>
+      </ul>
+      <li>This command is a generic RC servo output command. It allows
+        you to control the RC servo output system on the EBB. Many I/O
+        pins have RPx numbers (see the schematic) - and you can output
+        RC servo pulses on up to 8 of these RPx pins. Any of them that
+        you want - it doesn't matter to the software. There are seven RC
+        servo 'channels', which have no physical meaning other than we
+        can (by default) only output up to 8 separate signals at once.
+        But you can assign any RPx pin to any channel - that's up to you
+        to manage. The RC servo system will cycle through each of the 8
+        channels. Each gets 3m of 'time'. (Thus giving a 24ms repeat
+        rate for the whole RC system.) If the current channel is
+        enabled, then at the beginning of its 3ms time slot, it's RPx
+        pin is set high. Then, &lt;position&gt; time later, the RPx pin
+        is set low. This time is controlled purely by hardware (the
+        ECCP2 in the CPU) so there is no jitter for the pulse durations.
+        &lt;position&gt; is in units of 1/12,000 of a second, so 32,000
+        for &lt;duration&gt; would be exactly 3ms.</li>
+      <li>The &lt;rate&gt; parameter is used to indicate how quickly to
+        move from the current pulse width (servo position) to the new
+        pulse width. If &lt;rate&gt; is zero, then the move is made on
+        the next PWM cycle (i.e. the next time the pin is pulsed). If
+        &lt;rate&gt; is not zero, then &lt;rate&gt; is added to (or
+        subtracted from) the current pulse width each time the pulse is
+        generated until the new target is reached. This means that the
+        units of &lt;rate&gt; are 1/12,000ths of a second per
+        &lt;maximum_S2_channels&gt; * &lt;S2_channel_duration_ms&gt; or
+        1/12,000ths of a second per 24ms.</li>
+      <li>The S2 command will always make &lt;output_pin&gt; an output
+        before it starts outputting pulses to that pin.<br>
+      </li>
+      <li>For example, to use RP6 (which is pin RB3) as a RC servo
+        output, and to set it's on-time to 2ms,you would send the
+        command (note &lt;rate&gt; and &lt;delay&gt; are optional)<br>
+      </li>
+      <ul>
+        <li>S2,24000,6&lt;CR&gt;</li>
+      </ul>
+      <li>S2,0 - will turn off all RC servo support (freeing up CPU
+        time, if that's important to you)</li>
+      <li>S2,0,5 - will turn off the output on RP5 (which is pin RB2) so
+        it stops sending any pulses.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+      <li>More examples:</li>
+      <ul>
+        <li>Say you want to control a servo on RB2. (RB2 = RP5 as per
+          schematic). You could send</li>
+        <li>"S2,10000,5" to send a 1ms pulse out pin RB2. (This made my
+          servo go full clockwise)</li>
+        <li>"S2,27500,5" to send a 2.3ms pulse out pin RB2. (This made
+          my servo go full counter-clockwise)</li>
+        <li>You&nbsp; have to experiment to see what &lt;position&gt;
+          value makes your servo go all the way CW and all the way CCW.
+          Each servo model is slightly different. Also it is common that
+          servos will refuse to move at all if the pulse is outside
+          their normal 'accepted' range (whatever that is for that model
+          servo). So if you send a very short pulse (like 0.1mS) the
+          servo may just completely ignore it rather than going all the
+          way in one direction.</li>
+      </ul>
+      <li>RPn vs pin number table:<br>
+        <table border="1" cellpadding="2" cellspacing="2" width="100%">
+          <tbody>
+            <tr>
+              <td valign="top"><b>RPn</b><b><br>
+                </b></td>
+              <td valign="top">RP0<br>
+              </td>
+              <td valign="top">RP1<br>
+              </td>
+              <td valign="top">RP2<br>
+              </td>
+              <td valign="top">RP3<br>
+              </td>
+              <td valign="top">RP4<br>
+              </td>
+              <td valign="top">RP5<br>
+              </td>
+              <td valign="top">RP6<br>
+              </td>
+              <td valign="top">RP7<br>
+              </td>
+              <td valign="top">RP8<br>
+              </td>
+              <td valign="top">RP9<br>
+              </td>
+              <td valign="top">RP10<br>
+              </td>
+              <td valign="top">RP11<br>
+              </td>
+              <td valign="top">RP13<br>
+              </td>
+              <td valign="top">RP17<br>
+              </td>
+              <td valign="top">RP18<br>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top"><b>Pin</b><b><br>
+                </b></td>
+              <td valign="top">REF_RA0<br>
+              </td>
+              <td valign="top">RA1<br>
+              </td>
+              <td valign="top">RA5<br>
+              </td>
+              <td valign="top">RB0<br>
+              </td>
+              <td valign="top">RB1<br>
+              </td>
+              <td valign="top">RB2<br>
+              </td>
+              <td valign="top">RB3<br>
+              </td>
+              <td valign="top">RB4<br>
+              </td>
+              <td valign="top">RB5<br>
+              </td>
+              <td valign="top">RB6<br>
+              </td>
+              <td valign="top">RB7<br>
+              </td>
+              <td valign="top">RC0<br>
+              </td>
+              <td valign="top">RC2<br>
+              </td>
+              <td valign="top">RC6<br>
+              </td>
+              <td valign="top">RC7<br>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span><b><a name="A"></a>The "A"
+      Command (Analog value get) - for versions </b><b>2.2.3 and above</b><br>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "A&lt;CR&gt;"</li>
+      <li>When any analog channels are enabled (see "AC" command below),
+        the "A" command will cause the EBB to return a list of all
+        enabled channels and their associated 10 bit values. Note that
+        this is a different format from the "A" command that is in pre
+        v2.2.3 versions. Before version 2.2.3, the "A" command format is
+        the same as the normal UBW "A" command. (See UBW documentation
+        for details.) Once the analog commands were re-written in
+        v2.2.3, the AC command was added and the A command modified to
+        return a list that includes the channel number as well as the
+        ADC value for each channel.</li>
+      <li>Format of return packet:
+        "A,&lt;channel&gt;:&lt;value&gt;,&lt;channel&gt;:&lt;value&gt;.
+        . . &lt;CR&gt;"</li>
+      <li>The &lt;value&gt; returned for each enabled channel will range
+        from 0 (for 0.0V on the input) to 1023 (for 3.3V on the input).<br>
+      </li>
+      <li>The list of channels and their data will always be in sorted
+        order from least (channel) to greatest. Only enabled channels
+        will be present in the list.</li>
+      <li>The channel number and ADC value are both padded to 2 and 4
+        characters respectively in the A response.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span>
+        "A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;" if channels 0, 2,
+        5 and 9 are enabled.&nbsp;</li>
+      <li>NOTE: Analog inputs can ONLY take up to 3.3V inputs. They are
+        not able to take voltages more than 3.3V. Be careful not to put
+        5V on them or you may damage the pin.</li>
+      <li>Also, if you connect an ADC pin to GND (0.0V) it will likely
+        not read exactly 0. It will be a bit higher than that. (I got
+        0023 in my testing) This is because of the way that the analog
+        input reference voltages are supplied to the PIC.<br>
+      </li>
+    </ul>
+    <span style="font-weight: bold;"></span><br>
+    <b><a name="AC"></a>The "AC" Command (Analog Configure) - for
+      versions </b><b>2.2.3 and above</b><br>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span>
+        "AC,&lt;channel&gt;,&lt;enable&gt;&lt;CR&gt;"</li>
+      <ul>
+        <li>&lt;channel&gt; is a number from 0 15, and represents the
+          PIC's analog channel number (ANx on the schematic and
+          datasheet) you wish to enable/disable.<br>
+        </li>
+        <li>&lt;enable&gt; is either 1 to enable, or 0 to disable
+          &lt;channel&gt;.<br>
+        </li>
+      </ul>
+      <li>Use this command to turn on or turn off individual analog
+        channels. Once a channel is turned on, it will begin converting
+        analog values to digital values and the results of the
+        conversions will be displayed in the returned value of the "A"
+        command. See "A" command above. You can turn on and off any of
+        the 16 analog channels individually on this microcontroller.
+        Once a channel is turned off, it will no longer show up in the
+        "A" packet returned value list.</li>
+      <li>You can find the pins that are analog inputs by looking at the
+        EBB schematic, and looking at the pins on the PIC
+        microcontroller. They will show ANx as one of their functions.
+        For example, pin 11 of the PIC, which is labeled RB2 and comes
+        out as the RB2 pin on the servo header, has the text
+        "RB2/AN8/CTEDG1/PMA3/VMO/REFO/RP5" next to it on the CPU symbol.
+        This means that this pin is connected to Analog Channel 8 inside
+        the PIC. Check out chapter 21 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/39931d.pdf">PIC18F46J50
+
+
+
+
+
+
+
+
+
+
+          datasheet</a> to read more about the ADC converter.<br>
+      </li>
+      <li><span style="font-weight: bold;">Return Packet:</span> "OK"</li>
+    </ul>
+    <span style="font-weight: bold;"></span><br>
+    <b><a name="QM"></a>The "QM" Command (Query Motor) - for versions </b><b>2.2.6
+      and above</b><br>
+    <ul>
+      <li><span style="font-weight: bold;">Format:</span> "QM&lt;CR&gt;"</li>
+      <li><span style="font-weight: bold;">Return Packet:</span>
+"QM,&lt;CommandExecutingStatus&gt;,&lt;Motor1Status&gt;,&lt;Motor2Status&gt;"</li>
+      <ul>
+        <li>&lt;CommandExecutingStatus&gt; will be 0 if there are no
+          currently executing 'motion commands', and will be non-zero if
+          there are any currently executing 'motion commands'.<br>
+        </li>
+        <li>&lt;Motor1Status&gt; will be 0 if motor 1 is idle, and will
+          be 1 if motor 1 is currently running</li>
+        <li>&lt;Motor2Status&gt; will be 0 if motor 2 is idle, and will
+          be 1 if motor 2 is currently running<span style="font-weight:
+            bold;"></span></li>
+      </ul>
+      <li>This command takes no parameters.</li>
+      <li>Use this command to see what the EBB is currently doing. It
+        will return the current state of the 'motion system' and each
+        motor's current state.</li>
+      <li>The definition of a 'motion command' is any command that has a
+        time associated with it. For example, all SM commands. Also, any
+        command (like S2, SP, or TP) that uses a &lt;delay&gt; or
+        &lt;duration&gt; parameter. All of these commands cause the
+        motion processor to 'do something' for some length of time,
+        which then prevents later motion commands from running until
+        they have finished.<br>
+      </li>
+      <li>It is very important to realize that with the existing EBB
+        firmware (all versions), there are a limited number of&nbsp;
+        'motion commands' that can be executing or queued up at a time.
+        In fact, there can only be three. One (the first one) will be
+        actually executing. Another one (the second) will be stored in
+        the 1-deep FIFO that sits between the USB command processor and
+        the motion engine that executes motion commands. Then the last
+        one (the third) will be stuck in the USB command buffer, waiting
+        for the 1-deep FIFO to be emptied before it can be processed.
+        Once there are these three motion commands, the whole USB
+        command processor will block (i.e. lock up) until the FIFO is
+        cleared, and the third motion command can be processed and put
+        into the FIFO. This means that NO USB commands can be processed
+        by the EBB once the third motion command gets 'stuck' in the USB
+        command processor. Using the QM command can help prevent this
+        situation by allowing the PC to know when there are no more
+        motion commands to be executed, and so can send the next one on.<br>
+      </li>
+    </ul>
+    <br>
+    <div style="text-align: center;">Questions? E-mail me at
+      brian@schmalzhaus.com<br>
+    </div>
+    <br>
+    <div style="text-align: center;"><a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" src="Images/88x31.png" style="border: 0px solid ; width: 88px; height: 31px;"></a><br>
+      <span xmlns:dc="http://purl.org/dc/elements/1.1/" property="dc:title">EggBotBoard</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.schmalzhaus.com/EBB" property="cc:attributionName" rel="cc:attributionURL">Brian
+        Schmalz</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">Creative
+        Commons Attribution 3.0 United States License</a>.<br>
+      Based on a work at <a xmlns:dc="http://purl.org/dc/elements/1.1/" href="http:///www.schmalzhaus.com/EBB" rel="dc:source">www.schmalzhaus.com/EBB</a>.<br>
+      Permissions beyond the scope of this license may be available at <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.schmalzhaus.com/EBB" rel="cc:morePermissions">www.schmalzhaus.com/EBB</a>.<br>
+    </div>
 
 <p />
 <hr>
 <p />
 
-<p>For download and installation instructions, please start at <a href="http://wiki.evilmadscientist.com/Installing_software">our main documentation wiki</a>.
-</p>
-
-<p />
-<hr>
-<p />
 
 
-
-<p>Extended documentation available at: <a href="http://wiki.evilmadscientist.com/eggbot">http://wiki.evilmadscientist.com/eggbot</a></p>
+<p>Extended EggBot documentation available at: <a href="http://wiki.evilmadscientist.com/eggbot">http://wiki.evilmadscientist.com/eggbot</a></p>
       </section>
     </div>
     <footer>
-      <p>Project maintained by <a href="https://github.com/evil-mad">evil-mad</a></p>
+      <p>Project maintained by <a href="https://github.com/evil-mad">Evil Mad Scientist Laboratories</a></p>
       <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
     </footer>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
