@@ -188,7 +188,7 @@
 //                  many steps were aborted.
 // 2.3.0 08/28/15 - Added new XM command as per issue #29 for driving mixed-axis
 //                  geometry machines.
-// 2.4.0 03/14/15 - Added new AM command for using accelerated
+// 2.4.0 03/14/16 - Added new AM command for using accelerated
 //                  stepper motion. Includes going to 32 bit accumulators in ISR
 //                  to achieve necessary resolution, which includes changes to
 //                  SM command as well. Also added "CU,2,0" to turn of SM command
@@ -198,6 +198,9 @@
 //                  work from the Inkscape plugin, so it is not currently being
 //                  used. It may have to change in future versions of this
 //                  firmware.
+// 2.4.1 08/08/16 - Added new form of SE command, with optional parameter that
+//                  puts SE in motion queue.
+//                  Fixed issue #52 (bug in parameter check in parse_SM_packet())
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -322,7 +325,8 @@ void high_ISR(void)
             AllDone = FALSE;
         }
 
-        PORTDbits.RD1 = 0;
+        // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
+        //PORTDbits.RD1 = 0;
 
         // Note: by not making this an else-if, we have our DelayCounter
         // counting done at the same time as our motor move or servo move.
@@ -528,7 +532,25 @@ void high_ISR(void)
                 }
             }
 		}
-	
+        // Check to see if we should start or stop the engraver
+		else if (CurrentCommand.Command == COMMAND_SE)
+		{
+            // Now act on the State of the SE command
+            if (CurrentCommand.SEState)
+            {
+                // Set RB3 to StoredEngraverPower
+                CCPR1L = StoredEngraverPower >> 2;
+                CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+            }
+            else
+            {
+                // Set RB3 to low by setting PWM duty cycle to zero
+                CCPR1L = 0;
+                CCP1CON = (CCP1CON & 0b11001111);
+            }
+            AllDone = TRUE;
+        }
+        
 		// If we're done with our current command, load in the next one
 		if (AllDone && CurrentCommand.DelayCounter == 0)
 		{
@@ -548,6 +570,7 @@ void high_ISR(void)
                 CommandFIFO[0].ServoRPn = 0;
                 CommandFIFO[0].ServoChannel = 0;
                 CommandFIFO[0].ServoRate = 0;
+                CommandFIFO[0].SEState = 0;
 				FIFOEmpty = TRUE;
 			}
             else {
@@ -1139,21 +1162,6 @@ void parse_SM_packet (void)
 	extract_number (kLONG, &A1Steps, kREQUIRED);
 	extract_number (kLONG, &A2Steps, kOPTIONAL);
 
-    // Check for too-fast step request (>25KHz)
-    // First get absolute value of steps, then check if it's asking for >25KHz
-    if (A1Steps > 0) {
-        Steps = A1Steps;
-    }
-    else {
-        Steps = -A1Steps;
-    }
-    if (A2Steps > 0) {
-        Steps = A2Steps;
-    }
-    else {
-        Steps = -A2Steps;
-    }    
-
     if (gLimitChecks)
     {
         // Check for invalid duration
@@ -1170,6 +1178,14 @@ void parse_SM_packet (void)
            printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
            return;
         }
+        // Check for too-fast step request (>25KHz)
+        // First get absolute value of steps, then check if it's asking for >25KHz
+        if (A1Steps > 0) {
+            Steps = A1Steps;
+        }
+        else {
+            Steps = -A1Steps;
+        }
         if (Steps > 0xFFFFFF) {
            printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
            return;
@@ -1184,6 +1200,14 @@ void parse_SM_packet (void)
            printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
            return;
         }
+                
+        if (A2Steps > 0) {
+            Steps = A2Steps;
+        }
+        else {
+            Steps = -A2Steps;
+        }    
+
         if (Steps > 0xFFFFFF) {
            printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
            return;
@@ -1590,7 +1614,7 @@ void parse_SP_packet(void)
 	print_ack();
 }
 
-// Interal use function -
+// Internal use function -
 // Perform a state change on the pen RC servo output. Move it up or move it down
 // <NewState> is either PEN_UP or PEN_DOWN.
 // <CommandDuration> is the number of milliseconds to wait before executing the
@@ -1638,7 +1662,7 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 //		5 to enable the driver in full step mode
 // If you disable a motor, it goes 'limp' (we clear the ENABLE pin on that motor's
 // driver chip)
-// Note that when using 0 or 1 for a paraemter, you can use both axis even
+// Note that when using 0 or 1 for a parameter, you can use both axis even
 // on a 'new' driver chip board. (i.e. EM,0,1 will disable motor 1 and enable 2)
 // Note that the MSx lines do not come to any headers, so even when an external
 // source is controlling the drivers, the PIC still needs to control the
@@ -1869,9 +1893,10 @@ void parse_QC_packet(void)
 }	
 
 // Set Engraver
-// Usage: SE,<state>,<power><CR>
+// Usage: SE,<state>,<power>,<use_motion_queue><CR>
 // <state> is 0 for off and 1 for on (required)
 // <power> is 10 bit PWM power level (optional)
+// <use_motion_queue> if 1 then put this command in motion queue (optional))
 // We boot up with <power> at 1023 (full on)
 // The engraver motor is always assumed to be on RB3
 // So our init routine will map ECCP1
@@ -1886,10 +1911,12 @@ void parse_SE_packet(void)
 {
 	UINT8 State = 0;
 	UINT16 Power = 0;
+    UINT8 SEUseMotionQueue = FALSE;
 	
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
 	extract_number (kUINT, &Power, kOPTIONAL);
+    extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
 	// Bail if we got a conversion error
 	if (error_byte)
@@ -1905,6 +1932,10 @@ void parse_SE_packet(void)
     if (State > 1)
     {
         State = 1;
+    }
+    if (SEUseMotionQueue > 1)
+    {
+        SEUseMotionQueue = 1;
     }
 
     // Set to %50 if no Power parameter specified, otherwise use parameter
@@ -1927,7 +1958,7 @@ void parse_SE_packet(void)
         // Set our reload value
         PR2 = 0xFF;
 
-        // Initalize Timer2
+        // Initialize Timer2
 
         // The prescaler will be at 1
         T2CONbits.T2CKPS = 0b00;
@@ -1939,7 +1970,7 @@ void parse_SE_packet(void)
         TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
 
         CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
-        CCP1CONbits.P1M = 0b00;		// Enhanged PWM mode: single ouptut
+        CCP1CONbits.P1M = 0b00;		// Enhanced PWM mode: single output
 
         // Set up output routing to go to RB3 (RP6)
         RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
@@ -1947,25 +1978,42 @@ void parse_SE_packet(void)
         T2CONbits.TMR2ON = 1;		// Turn it on
     }
 
-	// Now act on the State
-	if (State)
-	{
-		// Set RB3 to StoredEngraverPower
-		CCPR1L = StoredEngraverPower >> 2;
-		CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-	}
-	else
-	{
-		// Set RB3 to low by setting PWM duty cycle to zero
-		CCPR1L = 0;
-		CCP1CON = (CCP1CON & 0b11001111);
-	}		
-
+    // Acting on the state is only done if the SE command is not put on the motion queue
+    if (!SEUseMotionQueue)
+    {
+        // Now act on the State
+        if (State)
+        {
+            // Set RB3 to StoredEngraverPower
+            CCPR1L = StoredEngraverPower >> 2;
+            CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+        }
+        else
+        {
+            // Set RB3 to low by setting PWM duty cycle to zero
+            CCPR1L = 0;
+            CCP1CON = (CCP1CON & 0b11001111);
+        }		
+    }
+    else
+    {
+        // Trial: Spin here until there's space in the fifo
+    	while(!FIFOEmpty)
+        ;
+        
+        // Set up the motion queue command
+    	CommandFIFO[0].DelayCounter = 0;
+        CommandFIFO[0].SEState = State;
+        CommandFIFO[0].Command = COMMAND_SE;
+        	
+        FIFOEmpty = FALSE;
+    }
+    
 	print_ack();
 }
 
 // RM command
-// For Run Motor - allows completely independant running of the two stepper motors
+// For Run Motor - allows completely independent running of the two stepper motors
 void parse_RM_packet(void)
 {
 	
@@ -1978,7 +2026,7 @@ void parse_RM_packet(void)
 // QM returns:
 // QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status><CR>
 // where:
-//   <CommandExecutingStatus>: 0 if no 'motion command' is excuting, > 0 if some 'motion command' is executing
+//   <CommandExecutingStatus>: 0 if no 'motion command' is executing, > 0 if some 'motion command' is executing
 //   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
 //   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
 void parse_QM_packet(void)
@@ -1988,7 +2036,7 @@ void parse_QM_packet(void)
     UINT8 Motor2Running = 0;
     MoveCommandType LocalCommand;
 
-    // Need to turn off high priorioty interrupts breifly here to read out value that ISR uses
+    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
     // Make a local copy of the things we care about

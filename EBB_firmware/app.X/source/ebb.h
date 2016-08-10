@@ -64,12 +64,14 @@ typedef enum
 	PEN_UP
 } PenStateType;
 
+/* Enum that lists each type of command that can be put in the motion control FIFO */
 typedef enum
 {
 	COMMAND_NONE = 0,
 	COMMAND_MOTOR_MOVE,
 	COMMAND_DELAY,
-	COMMAND_SERVO_MOVE
+	COMMAND_SERVO_MOVE,
+    COMMAND_SE
 } CommandType;
 
 // This structure defines the elements of the move commands in the FIFO that
@@ -86,6 +88,7 @@ typedef struct
     UINT8           ServoRPn;
     UINT8           ServoChannel;
     UINT16          ServoRate;
+    UINT8           SEState;
 } MoveCommandType;
 
 // Define global things that depend on the board type
