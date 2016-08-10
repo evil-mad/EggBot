@@ -1,0 +1,6 @@
+{
+  "name": "Eggbot",
+  "tagline": "Software for the Original EggBot Kit",
+  "body": "EggBot\r\n======\r\n\r\n*_Software for the Original EggBot_*\r\n\r\nThis is a repository for software to drive The Original EggBot, by Evil Mad Scientist Laboratories. More information at http://www.egg-bot.com/\r\n\r\nCode here includes the extensions for Inkscape, firmware for the EiBotBoard (AKA \"EBB\", or EggBotBoard), and example plot files. All code is designed to work on Mac, Windows and Linux.\r\n\r\nThe release version of the code is labeled version 2.5.0. New Mac and Windows installers have been released. Manual install is available for Linux (as well as Mac or Windows).\r\n\r\n\r\n----\r\n\r\nThis repository has been migrated from: https://code.google.com/p/eggbotcode/\r\n\r\nExtended documentation available at: http://wiki.evilmadscientist.com/eggbot\r\n\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
