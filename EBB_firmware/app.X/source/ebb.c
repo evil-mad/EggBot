@@ -199,7 +199,7 @@
 //                  used. It may have to change in future versions of this
 //                  firmware.
 // 2.4.1 08/08/16 - Added new form of SE command, with optional parameter that
-//                  puts SE in motion queue.
+//                  puts SE in motion queue. (issue #51)
 //                  Fixed issue #52 (bug in parameter check in parse_SM_packet())
 
 #include <p18cxxx.h>
