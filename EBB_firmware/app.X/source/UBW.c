@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.4.1\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.4.2\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -2922,10 +2922,9 @@ void parse_CK_packet()
 // Look at the string pointed to by ptr
 // There should be a comma where ptr points to upon entry.
 // If not, throw a comma error.
-// If so, then look for up to three bytes after the
+// If so, then look for up to like a ton of bytes after the
 // comma for numbers, and put them all into one
-// byte (0-255). If the number is greater than 255, then
-// thow a range error.
+// unsigned long accumulator. 
 // Advance the pointer to the byte after the last number
 // and return.
 ExtractReturnType extract_number(

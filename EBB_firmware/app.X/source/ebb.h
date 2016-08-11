@@ -89,6 +89,7 @@ typedef struct
     UINT8           ServoChannel;
     UINT16          ServoRate;
     UINT8           SEState;
+    UINT16          SEPower;
 } MoveCommandType;
 
 // Define global things that depend on the board type

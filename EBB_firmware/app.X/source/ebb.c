@@ -201,6 +201,9 @@
 // 2.4.1 08/08/16 - Added new form of SE command, with optional parameter that
 //                  puts SE in motion queue. (issue #51)
 //                  Fixed issue #52 (bug in parameter check in parse_SM_packet())
+// 2.4.2 08/10/16 - Fixed bug in SE command that would set engraver to 50% if
+//                  SE,1,0 was used. Also added engraver power to FIFO structure
+//                  for when third SE parameter is 1.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -539,7 +542,7 @@ void high_ISR(void)
             if (CurrentCommand.SEState)
             {
                 // Set RB3 to StoredEngraverPower
-                CCPR1L = StoredEngraverPower >> 2;
+                CCPR1L = CurrentCommand.SEPower >> 2;
                 CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
             }
             else
@@ -571,6 +574,7 @@ void high_ISR(void)
                 CommandFIFO[0].ServoChannel = 0;
                 CommandFIFO[0].ServoRate = 0;
                 CommandFIFO[0].SEState = 0;
+                CommandFIFO[0].SEPower = 0;
 				FIFOEmpty = TRUE;
 			}
             else {
@@ -1895,9 +1899,9 @@ void parse_QC_packet(void)
 // Set Engraver
 // Usage: SE,<state>,<power>,<use_motion_queue><CR>
 // <state> is 0 for off and 1 for on (required)
-// <power> is 10 bit PWM power level (optional)
+// <power> is 10 bit PWM power level (optional). 0 = 0%, 1023 = 100%
 // <use_motion_queue> if 1 then put this command in motion queue (optional))
-// We boot up with <power> at 1023 (full on)
+// We boot up with <power> at 0
 // The engraver motor is always assumed to be on RB3
 // So our init routine will map ECCP1
 //
@@ -1912,10 +1916,11 @@ void parse_SE_packet(void)
 	UINT8 State = 0;
 	UINT16 Power = 0;
     UINT8 SEUseMotionQueue = FALSE;
+    ExtractReturnType PowerExtract;
 	
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
-	extract_number (kUINT, &Power, kOPTIONAL);
+	PowerExtract = extract_number (kUINT, &Power, kOPTIONAL);
     extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
 	// Bail if we got a conversion error
@@ -1937,9 +1942,9 @@ void parse_SE_packet(void)
     {
         SEUseMotionQueue = 1;
     }
-
+    
     // Set to %50 if no Power parameter specified, otherwise use parameter
-    if (Power == 0 && State == 1)
+    if (State == 1 && PowerExtract == kEXTRACT_MISSING_PARAMETER)
     {
         StoredEngraverPower = 512;
     }
@@ -2002,6 +2007,7 @@ void parse_SE_packet(void)
         ;
         
         // Set up the motion queue command
+        CommandFIFO[0].SEPower = StoredEngraverPower;
     	CommandFIFO[0].DelayCounter = 0;
         CommandFIFO[0].SEState = State;
         CommandFIFO[0].Command = COMMAND_SE;
