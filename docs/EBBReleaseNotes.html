@@ -1,0 +1,269 @@
+<!doctype html>
+<html>
+  <head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>Eggbot Software by Evil Mad Scientist Laboratories</title><link rel="stylesheet" href="stylesheets/styles.css">
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+
+
+<script src="javascripts/scale.fix.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+  </head>
+  <body>
+<div class="wrapper">
+  <header>
+<h1>Eggbot</h1>
+<p>Software for the Original EggBot Kit</p>
+<p class="view"><a href="https://github.com/evil-mad/EggBot">View the Project on GitHub <small>evil-mad/EggBot</small></a></p>
+<ul>
+  <li><a href="https://github.com/evil-mad/EggBot">View On <strong>GitHub</strong></a></li>
+</ul>
+  </header>
+  <section>
+<h1>
+<a id="eggbot" class="anchor" href="#eggbot" aria-hidden="true">
+	<span aria-hidden="true" class="octicon octicon-link"></span></a>EBB Release Notes</h1>This document details the version history of the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard). 
+<p />
+<hr />
+<p />
+<p />
+
+<H4>v2.0.1 &mdash; 9/13/10</H4>
+<p>Bug fix - on v1.1 EBB hardware, need to
+disable RB0 alt pause
+button. Switched it to RB2 on v1.1
+hardware
+
+<p /><H4>v2.0.2  &mdash; 10/3/10</H4>
+<p>Bug fix - QC command not returning proper
+results - added
+cast and now works OK
+
+<p /><H4>v2.1.0  &mdash; 10/21/10</H4>
+<p>
+<ul><li>Added in SE - Set Engraver - turns
+engraver (on RB3) on or off, or
+set to PWM power level</li>
+
+<li>Added code in init to pre-charge RC7
+(USB_SENSE_IO) high before running rest of code to get around wrong resistor
+value on hardware.</li>
+</ul>
+
+<p /><H4>v2.1.1  &mdash; 11/21/10</H4>
+<p>
+	<ul><li>Removed Microchip USB stack v2.7, replaced it
+with v2.8 from 
+MAL 2010_10_19.</li>
+  
+<li>  Also using generic Microchip
+folder now rather than re-named
+one (simpler to update).</li>
+  
+<li>Updated code in main.c (and others)
+to match updates from 
+latest MAL CDC example.</li></ul>
+
+<p /><H4>v2.1.1cTest1  &mdash; 01/17/11</H4>
+<p>
+	Added third parameter to SP command to
+use any PortB 
+pin for servo output.
+( For this version only - used PortB2 as standard servo output)
+
+<p /><H4>v2.1.1d  &mdash; 02/11/11</H4>
+<p> 
+	<ul><li>Reverted back to RB1 for servo output</li>
+<li>Updated check_and_send_TX_data() to allow unlimited data to
+go out without overrunning the output buffer, same as
+UBW 1.4.7.</li></ul>
+
+<p /><H4>v2.1.2  &mdash; 11/04/11</H4>
+<p>
+	
+<ul><li> Fixed PI command to return just a 0 or a 1</li>
+<li>  Updated to USB stack 2.9a</li>
+<li> Created MPLAB X project for this firmware</li>
+<li> Added SC,14,&lt;state&gt; to enable/disable solenoid output on RB4</li>
+<li> Fixed bug with S2 command and solenoid command interaction -
+we now turn off solenoid output on RB4 if user uses S2
+command to use RB4 for RC servo output.</li>
+<li>Fixed bug with S2 command where a duration of 0 would not
+shut off the PWM channel</li>
+<li>Fixed bug in S2 command where &lt;rate&gt; variable was not being
+used correctly</li>
+<li>Switched default number of S2 channels to 8 (from 7 before)</li>
+</ul>
+
+<p /><H4>v2.1.3  &mdash; 12/12/11</H4>
+<p>
+	<ul><li> RB3 now defaults to digital I/O on boot, can
+still use SE
+command to do PWM later if you want</li>
+<li>Compiled with latest UBW stack - 2.9b from MAL 2011-10-18</li></ul>
+
+<p /><H4>v2.1.4  &mdash; 12/14/11</H4>
+<p>RB3 now defaults to OFF, rather than ON, at
+boot.
+
+<p /><H4>v2.1.5  &mdash; 12/15/11</H4>
+<p>  Fixed problem with pen servo (RB1) being
+inverted on boot
+
+<p /><H4>v2.2.0  &mdash; 11/07/12</H4>
+<p>Fixed problem with SP command not working
+properly with 
+ports other than RB1 because we don't properly use S2
+commands for SP up/down within ISR. Tested on all PortB.
+
+<p /><H4>v2.2.1  &mdash; 09/19/13</H4>
+<p>
+<ul><li> Expanded internal delay counter to 32 bits so
+we can have
+delays longer than 2.1s. Now up to 64K ms.</li>
+<li>Fixed bug with all &lt;duration&gt; parameters, SM, SP, TP
+commands. Now in ms, defaults to 500ms, and actually
+works up to 64Kms.</li>
+<li>Fixed uninitialized data bug with command FIFO. We were seeing
+very long random delays first time SM,&lt;delay&gt;,0,0 was
+used.</li>
+<li>SP command was executing servo move at end of &lt;duration&gt;. It now starts servo move and &lt;duration&gt; delay at same time.
+</li>
+<li>Updated USB stack to Microchip MAL USB v2.9j</li></ul>
+
+<p /><H4>v2.2.2  &mdash; 10/15/13</H4>
+<p>
+<ul>
+	<li>Fixed bug with SE command that was preventing anything other
+than 50% duty cycle from working.</li>
+<li>Updated SC,2,{0,1,2} to control PIC and drivers connection
+ <ul>
+<li>0 = PIC controls built in drivers</li>
+<li>1 = PIC controls external step/dir/en drives</li>
+<li>2 = external step/dir/en controls built-in drivers</li></ul></li>
+<li>Also updated the pins that are used for driving external step/dir/en drives. (See documentation)</li>
+<li>Updated SC,1,{0,1,2} documentation to match code and removed
+SC,14 which is not needed.</li>
+<li>Updated logic for EM command to use state of SC,2,{0,1,2}
+properly.</li>
+<li>Added SC,14,{0,1} to switch between default of 1/25Khz units
+for SP and TP command &lt;duration&gt; parameters, and 1ms units</li>
+</ul>
+
+<p /><H4>v2.2.3  &mdash; 01/11/14</H4>
+<p>Rewrote analog system so we don't have problems
+with QC
+ 
+commands anymore. New command AC.
+
+<p /><H4>v2.2.4  &mdash; 04/28/14</H4>
+<p>
+<ul>
+	<li>Fixed bug where 0 for duration in SM would cause
+problems</li>
+<li>Found bug where the &lt;servo_min&gt; and &lt;servo_max&gt; values
+were reversed in the SP command. This has now been fixed so that
+SP commands will operate the same as v2.0.1 version.</li>
+<li>Set initial 'position' of main servo to be 1mS to mimic
+behavior of v2.0.1 firmware.</li>
+<li>Updated license to BSD 3-clause</li>
+<li>Changed SP and TP commands so that if no &lt;duration&gt;
+parameter is used, it does not default to 500mS delay, but rather 0mS.
+This should now work exactly as v2.0.1 when no parameter is
+used.</li>
+<li>Tested v2.2.4 against v2.0.1 with Seleae Logic analyzer. Looked
+at several Inkscape plots. Confirmed that timing of steppers
+and servo are the same. Confirmed that all RB0 through RB7
+outputs are the same between the two versions.</li></ul>
+
+<p /><H4>v2.2.5  &mdash; 04/29/14</H4>
+<p>
+	<ul>
+	<li>Added 'long' arguments to SM for
+&lt;move_duration&gt; and &lt;axis1&gt;
+and &lt;axis2&gt;. All can be 3 bytes now. </li>
+<li>dded checks in
+SM command to make sure that arguments don't result in a
+step speed that's too low (&lt;0.76Hz).</li></ul>
+
+<p /><H4>v2.2.6  &mdash; 01/01/15</H4>
+<p>Added 'QM' command - Query Motor, tells PC what is
+moving.
+
+<p /><H4>v2.2.7  &mdash; 08/13/15</H4>
+<p> 
+	Added 'ES' command, which will immediately abort
+any SM command
+but leave the motors energized. (E-stop) It returns "1" if
+it aborted a move in progress, "0" otherwise. It will also 
+delete any pending SM command in the FIFO.
+
+<p /><H4>v2.2.8  &mdash; 08/14/15</H4>
+<p>Corrected error checking in SM command to
+accurately reflect
+too fast and too slow requests. (&gt;25K or &lt;1.31 steps per
+second)
+
+<p /><H4>v2.2.9  &mdash; 08/18/15</H4>
+<p>
+	Added extra values to output of ES command to
+indicate how  many steps were aborted.
+
+<p /><H4>v2.3.0  &mdash; 08/28/15</H4>
+<p>Added new XM command as per issue #29 for driving
+mixed-axis geometry machines.
+
+<p /><H4>v2.4.0  &mdash; 03/14/16</H4>
+<p> Added new AM command for using accelerated
+stepper motion. Includes going to 32 bit accumulators in ISR
+to achieve necessary resolution, which includes changes to
+SM command as well. Also added "CU,2,0" to turn of SM command
+parameter checking for speed. 
+<p />
+NOTE: AM command may not be quite 'right' yet. Although it 
+has passed simple tests, it could not be made to reliably
+work from the Inkscape plugin, so it is not currently being
+used. It may have to change in future versions of this
+firmware.
+
+<p /><H4>v2.4.1  &mdash; 08/08/16</H4>
+<p><ul>
+	<li> Added new form of SE command, with optional
+parameter that puts SE in motion queue. (issue #51)</li><li>
+Fixed issue #52 (bug in parameter check in parse_SM_packet())
+</li></ul>
+ 
+ <p />
+<hr />
+<p />
+
+ 
+ 
+<div style="text-align: center;">
+	<a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/"><img alt="Creative Commons License" src="images/88x31.png" style="border: 0px solid ; width: 88px; height: 31px;"></a><p />
+	</div>
+
+  <span xmlns:dc="http://purl.org/dc/elements/1.1/" property="dc:title">EiBotBoard</span> by <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.schmalzhaus.com/EBB" property="cc:attributionName" rel="cc:attributionURL">Brian
+Schmalz</a> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/us/">Creative
+Commons Attribution 3.0 United States License</a>.
+  Based on a work at <a xmlns:dc="http://purl.org/dc/elements/1.1/" href="http:///www.schmalzhaus.com/EBB" rel="dc:source">www.schmalzhaus.com/EBB</a>.
+  Permissions beyond the scope of this license may be available at <a xmlns:cc="http://creativecommons.org/ns#" href="http://www.schmalzhaus.com/EBB" rel="cc:morePermissions">www.schmalzhaus.com/EBB</a>.
+<p />
+<hr>
+<p /><p>Extended EggBot documentation available at: <a href="http://wiki.evilmadscientist.com/eggbot">http://wiki.evilmadscientist.com/eggbot</a></p>
+
+  </section>
+</div>
+
+
+<footer>
+  <p>Project maintained by <a href="https://github.com/evil-mad">Evil Mad Scientist Laboratories</a></p>
+  <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+</footer>
+<!--[if !IE]><script>fixScale(document);</script><![endif]-->  </body>
+</html>

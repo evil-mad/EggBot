@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Lato:300italic,700italic,300,700);
+@import 'https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700|Ubuntu+Mono:400,400i';
 html {
   background: #6C7989;
   background: #6c7989 -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #6c7989), color-stop(100%, #434b55)) fixed;
@@ -12,14 +12,15 @@ html {
 body {
   padding: 50px 0;
   margin: 0;
-  font: 14px/1.5 Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font: 14px/1.5 'Open Sans', sans-serif;
   color: #555;
-  font-weight: 300;
+  font-weight: 400;
   background: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAeCAYAAABNChwpAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAAAUdEVYdENyZWF0aW9uIFRpbWUAMy82LzEygrTcTAAAAFRJREFUSIljfPDggZRf5RIGGNjUHsNATz6jXmSL1Kb2GLiAX+USBnrymRgGGDCORgFmoNAXjEbBaBSMRsFoFIxGwWgUjEbBaBSMRsFoFIxGwWgUAABYNujumib3wAAAAABJRU5ErkJggg==') fixed;
 }
 
+
 .wrapper {
-  width: 640px;
+  width: 800px;
   margin: 0 auto;
   background: #DEDEDE;
   -webkit-border-radius: 8px;
@@ -43,8 +44,9 @@ a {
 
 p {
   margin: 0 0 20px;
-  padding: 0;
+  padding-left: 20px;
 }
+
 
 strong {
   color: #222;
@@ -178,12 +180,7 @@ section {
   padding: 15px 20px;
   font-size: 15px;
   border-top: 1px solid #fff;
-  background: -webkit-gradient(linear, 50% 0%, 50% 700, color-stop(0%, #fafafa), color-stop(100%, #dedede));
-  background: -webkit-linear-gradient(#fafafa, #dedede 700px);
-  background: -moz-linear-gradient(#fafafa, #dedede 700px);
-  background: -o-linear-gradient(#fafafa, #dedede 700px);
-  background: -ms-linear-gradient(#fafafa, #dedede 700px);
-  background: linear-gradient(#fafafa, #dedede 700px);
+  background: #fafafa;
   -webkit-border-radius: 0 0 8px 8px;
   -moz-border-radius: 0 0 8px 8px;
   -ms-border-radius: 0 0 8px 8px;
@@ -191,6 +188,8 @@ section {
   border-radius: 0 0 8px 8px;
   position: relative;
 }
+
+
 
 h1, h2, h3, h4, h5, h6 {
   color: #222;
@@ -203,6 +202,24 @@ p, ul, ol, table, pre, dl {
   margin: 0 0 20px;
 }
 
+li p {
+  margin: 0 0 10px;
+  }
+
+
+ul ul {
+  margin: 0px;
+}
+
+ol ul {
+  margin: 0px;
+}
+
+ol ol {
+  margin: 0px;
+  list-style: lower-roman;
+}
+
 h1, h2, h3 {
   line-height: 1.1;
 }
@@ -213,7 +230,18 @@ h1 {
 
 h2 {
   color: #393939;
+  font-size: 24px;
 }
+
+h3 {
+  font-size: 20px;
+}
+
+
+h4 {
+  font-size: 18px;
+}
+
 
 h3, h4, h5, h6 {
   color: #494949;
@@ -232,11 +260,19 @@ img {
   max-width: 100%;
 }
 
-code, pre {
-  font-family: Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
+code, pre {  
+  font-family: 'Ubuntu Mono', monospace;
   color: #333;
-  font-size: 12px;
+/*   font-size: 12px; */
   overflow-x: auto;
+  background-color: rgba(0, 0, 0, 0.05);
+   border-radius: 3px;
+    font-size: 110%;
+    margin: 0;
+    padding: 0.01em 0.25em;
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 0.55px;
 }
 
 pre {
@@ -284,6 +320,41 @@ hr {
   margin: 0 0 20px;
 }
 
+
+.short { 
+	background-image: -webkit-linear-gradient(left, rgba(255, 255, 255, 1), rgba(255,255,255,0.15), rgba(255,255,255,1)); 
+	background-image: -moz-linear-gradient(left, rgba(255, 255, 255, 1), rgba(255,255,255,0.15), rgba(255,255,255,1)); 
+	background-image: -ms-linear-gradient(left, rgba(255, 255, 255, 1), rgba(255,255,255,0.15), rgba(255,255,255,1)); 
+	background-image: -o-linear-gradient(left, rgba(255, 255, 255, 1), rgba(255,255,255,0.15), rgba(255,255,255,1)); 
+	}
+
+.ss1, .ss2, .ss3
+{
+  padding:  10px;
+  margin:10px;
+  border: 0.55px solid #c3c3c3;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+  border-radius: 8px;
+}
+
+.ss1
+{
+  background: #f3f3ff;
+}
+
+.ss2
+{
+  background: #faf3ff;
+}
+
+.ss3
+{
+  background: #fff3f3;
+}
+
 footer {
   width: 640px;
   margin: 0 auto;
@@ -300,6 +371,17 @@ footer p {
 }
 footer p + p {
   float: right;
+}
+
+
+h4 {
+  margin: 0px 0px 10px 0px;
+  padding-left: 10px;
+}
+
+h5, h6 {
+  margin: 0px 0px 20px 0px;
+  padding-left: 20px;
 }
 
 @media print, screen and (max-width: 740px) {
@@ -354,3 +436,5 @@ footer p + p {
     content: 'at https://github.com/';
   }
 }
+
+
