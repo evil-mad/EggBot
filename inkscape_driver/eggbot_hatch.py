@@ -70,7 +70,7 @@
 # Add min span/gap width
 
 # Updated by Windell H. Oskay, 1/8/2016
-# Added live preview and correct issue with nonzero min gap 
+# Added live preview and correct issue with nonzero min gap
 # https://github.com/evil-mad/EggBot/issues/32
 
 # Updated by Sheldon B. Michaels, 1/11/2016 thru 3/15/2016
@@ -79,7 +79,7 @@
 # Added feature: Option to join hatch segments that are "nearby", to minimize pen lifts
 # The joins are made using cubic Bezier segments.
 # https://github.com/evil-mad/EggBot/issues/36
-#  
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -319,7 +319,7 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 						else:	# if (fSinOfJoinAngle != 0.0):
 							bUnconditionallyExciseHatch = True
 						# if (fAbsSinOfJoinAngle != 0.0): else:
-						
+
 						if ( not bUnconditionallyExciseHatch):
 							# if ( fPreliminaryLengthToBeRemovedFromPt > ( distance from intersection to relevant end + fHoldbackSteps ) ):
 							#	  fFinalLengthToBeRemovedFromPt = ( distance from intersection to relevant end + fHoldbackSteps )
@@ -355,19 +355,19 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 							# we have so far been considering the polygon segment as a line of infinite extent.
 							# Thus, we may be holding back at a point where no holdback is required, when
 							# calculated holdback is well beyond the position of the segment end.
-							
+
 							# To make matters worse, we do not currently know whether we're
 							# starting a hatch or terminating a hatch, because the duplicates have
 							# yet to be removed.  All we can do then, is calculate the required
 							# line shortening for both possibilities - and then choose the correct
 							# one after duplicate-removal, when actually finalizing the hatches.
-							
+
 							# Let's see if either end, or perhaps both ends, has a case of excessive holdback
-							
+
 							# First, default assumption is that neither end has excessive holdback
 							fFinalLengthToBeRemovedFromPtWhenStartingHatch = fPreliminaryLengthToBeRemovedFromPt
 							fFinalLengthToBeRemovedFromPtWhenEndingHatch = fPreliminaryLengthToBeRemovedFromPt
-							
+
 							# Now check each of the two ends
 							if ( fPreliminaryLengthToBeRemovedFromPt > ( fDistanceFromIntersectionToRelevantEnd + fHoldBackSteps ) ):
 								# Yes, would be excessive holdback approaching from this direction
@@ -386,7 +386,7 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 					else:	# if bHoldBackHatches:
 						dAndA.append( ( s, path, 0, 0 ) )			# zero length to be removed from hatch
 					# if bHoldBackHatches: else:
-				# if ( s >= 0.0 ) and ( s <= 1.0 ):	
+				# if ( s >= 0.0 ) and ( s <= 1.0 ):
 				P3 = P4
 			# for P4 in subpath[1:]:
 		# for subpath in paths[path]:
@@ -397,14 +397,14 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 		return None
 
 	dAndA.sort()
-	
+
 	# Remove duplicate intersections.  A common case where these arise
 	# is when the hatch line passes through a vertex where one line segment
 	# ends and the next one begins.
 
 	# Having sorted the data, it's trivial to just scan through
 	# removing duplicates as we go and then truncating the array
-	
+
 	n = len( dAndA )
 	ilast = i = 1
 	last = dAndA[0]
@@ -431,7 +431,7 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 		y1 = P1[1] + dAndA[i][0] * ( P2[1] - P1[1] )
 		x2 = P1[0] + dAndA[i+1][0] * ( P2[0] - P1[0] )
 		y2 = P1[1] + dAndA[i+1][0] * ( P2[1] - P1[1] )
-		
+
 		# These are the hatch ends if we are _not_ holding off from the boundary.
 		if not bHoldBackHatches:
 			hatches[dAndA[i][1]].append( [[x1, y1], [x2, y2]] )
@@ -441,16 +441,16 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 			# The amount by which to trim back depends on the angle between the
 			# intersecting hatch line with the intersecting polygon segment, and
 			# may well be different at the two different ends of the hatch line.
-			
+
 			# To visualize this, imagine a hatch intersecting a segment that is
 			# close to parallel with it.  The length of the hatch would have to be
 			# drastically reduced in order that its closest approach to the
 			# segment be reduced to the desired distance.
-			
+
 			# Imagine a Cartesian coordinate system, with the X axis representing the
 			# polygon segment, and a line running through the origin with a small
 			# positive slope being the intersecting hatch line.
-			
+
 			# We see that we want a Y value of the specified hatch width, and that
 			# at that Y, the distance from the origin to that point is the
 			# hypotenuse of the triangle.
@@ -462,7 +462,7 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 			# its own angle.  If the resultant diminished hatch is too short,
 			# remove it from consideration by marking it as already drawn - a
 			# fiction, but is much quicker than actually removing the hatch from the list.
-			
+
 			fMinAllowedHatchLength = self.options.hatchSpacing * MIN_HATCH_LENGTH_AS_FRACTION_OF_HATCH_SPACING
 			fInitialHatchLength = math.hypot( x2 - x1, y2 - y1 )
 			# We did as much as possible of the inset operation back when we were finding intersections.
@@ -470,7 +470,7 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 			# Now we don't know where the ends of the segments are, so we can't address issue 22 here.
 			fLengthToBeRemovedFromPt1 = dAndA[i][3]
 			fLengthToBeRemovedFromPt2 = dAndA[i+1][2]
-			
+
 			if ( ( fInitialHatchLength - ( fLengthToBeRemovedFromPt1 + fLengthToBeRemovedFromPt2 ) )		\
 					<=																						\
 					fMinAllowedHatchLength ):
@@ -488,13 +488,13 @@ def interstices( self, P1, P2, paths, hatches, bHoldBackHatches, fHoldBackSteps 
 
 			# if (...too short...): else:
 		# if not bHoldBackHatches: else:
-		
+
 		# Remember the relative start and end of this hatch segment
 		last_dAndA = [ dAndA[i], dAndA[i+1] ]
 
 		i = i + 2
 	# while i < ( len( dAndA ) - 1 ):
-	
+
 def inverseTransform ( tran ):
 	'''
 	An SVG transform matrix looks like
@@ -628,13 +628,37 @@ class Eggbot_Hatch( inkex.Effect ):
 			type="inkbool", default=False,
 			help="Generate a cross hatch pattern" )
 		self.OptionParser.add_option(
+			"--removeOriginal", action="store", dest="removeOriginal",
+			type="inkbool", default=False,
+			help="Remove the original object" )
+		self.OptionParser.add_option(
+			"--useRange", action="store", dest="useRange",
+			type="inkbool", default=False,
+			help="Use a range of values instead of fixed values" )
+		self.OptionParser.add_option(
 			"--hatchAngle", action="store", type="float",
 			dest="hatchAngle", default=90.0,
 			help="Angle of inclination for hatch lines" )
 		self.OptionParser.add_option(
+			"--minHatchAngle", action="store", type="float",
+			dest="minHatchAngle", default=90.0,
+			help="Minimum angle of inclination for hatch lines" )
+		self.OptionParser.add_option(
+			"--maxHatchAngle", action="store", type="float",
+			dest="maxHatchAngle", default=90.0,
+			help="Maximum angle of inclination for hatch lines" )
+		self.OptionParser.add_option(
 			"--hatchSpacing", action="store", type="float",
 			dest="hatchSpacing", default=10.0,
 			help="Spacing between hatch lines" )
+		self.OptionParser.add_option(
+			"--minHatchSpacing", action="store", type="float",
+			dest="minHatchSpacing", default=10.0,
+			help="Minimum spacing between hatch lines" )
+		self.OptionParser.add_option(
+			"--maxHatchSpacing", action="store", type="float",
+			dest="maxHatchSpacing", default=10.0,
+			help="Maximum spacing between hatch lines" )
 		self.OptionParser.add_option(
 			"--tolerance", action="store", type="float",
 			dest="tolerance", default=20.0,
@@ -653,7 +677,7 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		self.docHeight = plot_utils.getLength( self, 'height', N_PAGE_HEIGHT )
 		self.docWidth = plot_utils.getLength( self, 'width', N_PAGE_WIDTH )
-		
+
 		if ( self.docHeight == None ) or ( self.docWidth == None ):
 			return False
 		else:
@@ -790,7 +814,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			# first apply the current matrix transform to this node's tranform
 			matNew = simpletransform.composeTransform( matCurrent,
 				simpletransform.parseTransform( node.get( "transform" ) ) )
-				
+
 			if node.tag == inkex.addNS( 'g', 'svg' ) or node.tag == 'g':
 				self.recursivelyTraverseSvg( node, matNew, parent_visibility=v )
 
@@ -998,7 +1022,7 @@ class Eggbot_Hatch( inkex.Effect ):
 				pass
 		# for node in aNodeList:
 	# def recursivelyTraverseSvg( self, aNodeList,...
-	
+
 	def joinFillsWithNode ( self, node, stroke_width, path ):
 
 		'''
@@ -1024,7 +1048,7 @@ class Eggbot_Hatch( inkex.Effect ):
 		# of the new <g> element
 		stroke_color = '#000000'		# default assumption
 		stroke_width = '1.0'		# default value
-		
+
 		try:
 			style = node.get('style')
 			if style != None:
@@ -1048,6 +1072,9 @@ class Eggbot_Hatch( inkex.Effect ):
 			if ( tran != None ) and ( tran != '' ):
 				line_attribs['transform'] = tran
 			inkex.etree.SubElement( g, inkex.addNS( 'path', 'svg' ), line_attribs )
+
+			if self.options.removeOriginal == True:
+				node.getparent().remove(node)
 
 	def makeHatchGrid( self, angle, spacing, init=True ):	# returns True if succeeds in making grid, else False
 
@@ -1073,12 +1100,12 @@ class Eggbot_Hatch( inkex.Effect ):
 		if init:
 			self.getBoundingBox()
 			self.grid = []
-			
+
 		# Determine the width and height of the bounding box containing
 		# all the polygons to be hatched
 		w = self.xmax - self.xmin
 		h = self.ymax - self.ymin
-		
+
 		bBoundingBoxExists = ( ( w != ( EXTREME_NEGATIVE_NUMBER - EXTREME_POSITIVE_NUMBER ) ) and ( h != ( EXTREME_NEGATIVE_NUMBER - EXTREME_POSITIVE_NUMBER ) ) )
 		retValue = bBoundingBoxExists
 
@@ -1129,360 +1156,414 @@ class Eggbot_Hatch( inkex.Effect ):
 		# if bBoundingBoxExists:
 		return retValue
 	# def makeHatchGrid( self, angle, spacing, init=True ):
-	
+
+	def map( self, value, inMin, inMax, outMin, outMax ):
+		# Map in range to 0.0 - 1.0 range
+		scaledValue = (float(value) - float(inMin)) / (float(inMax) - float(inMin))
+		# Map 0.0 - 1.0 to the requested range
+		return outMin + (scaledValue * (float(outMax) - float(outMin)))
+
 	def effect( self ):
-	
+
 		global referenceCount
 		global ptLastPositionAbsolute
 		# Viewbox handling
 		self.handleViewBox()
-		
+
 		referenceCount = 0
 		ptLastPositionAbsolute = [0,0]
 
-		# Build a list of the vertices for the document's graphical elements
-		if self.options.ids:
-			# Traverse the selected objects
-			for id in self.options.ids:
-				self.recursivelyTraverseSvg( [self.selected[id]], self.docTransform )
+		if self.options.useRange and not self.options.ids:
+			inkex.debug("At the moment the range function only works on selections. Using fixed values instead.")
+			self.options.useRange = False
+
+		brightnessGroups = {} # Used to store groups of elements with the same brightness
+		if not self.options.useRange: # If we're not using the range setting...
+			brightnessGroups["1.0"] = [] # ...still add an empty group so we can use the for...in loop below
 		else:
-			# Traverse the entire document
-			self.recursivelyTraverseSvg( self.document.getroot(), self.docTransform )
+			# Build a list of the vertices for the document's graphical elements
+			if self.options.ids:
+				for id in self.options.ids:
+					try:
+						fill = simplestyle.parseStyle(self.selected[id].get("style"))['fill'].strip('#')
+						if fill.lower() == "none": # to make sure
+							fill = "000000"
+					except: # If no fill, go for black
+						fill  = "000000"
 
-		# Build a grid of possible hatch lines
-		bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),
-				float( self.options.hatchSpacing ), True )
-			# makeHatchGrid returns false if could not make grid - probably because bounding box is non-existent
-		if bHaveGrid:
-			if self.options.crossHatch:
-				self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),
-					float( self.options.hatchSpacing ), False )
-			# if self.options.crossHatch:
-			
-			# Now loop over our hatch lines looking for intersections
-			for h in self.grid:
-				interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-				
-			# Target stroke width will be (doc width + doc height) / 2 / 1000
-			# stroke_width_target = ( self.docHeight + self.docWidth ) / 2000
-			# stroke_width_target = 1
-			stroke_width_target = 1
-			# Each hatch line stroke will be within an SVG object which may
-			# be subject to transforms.  So, on an object by object basis,
-			# we need to transform our target width to a width suitable
-			# for that object (so that after the object and its hatches are
-			# transformed, the result has the desired width).
+					# Calculate brightness
+					brightness = ((int(fill[:2], 16) + int(fill[2:4], 16) + int(fill[4:], 16) ) / 3.0) / 255.0
+					if brightness in brightnessGroups: # we already have a group for this brightness
+						brightnessGroups[brightness].append(id)
+					else: # create a new group for this brightness
+						brightnessGroups[brightness] = [id]
+			else:
+				inkex.debug("Using range with no selection has not been implemented")
+				# Traverse the entire document
+				# self.recursivelyTraverseSvg( self.document.getroot(), self.docTransform )
 
-			# To aid in the process, we use a diagonal line segment of length
-			# stroke_width_target.  We then run this segment through an object's
-			# inverse transform and see what the resulting length of the inversely
-			# transformed segment is.  We could, alternatively, look at the
-			# x and y scaling factors in the transform and average them.
-			s = stroke_width_target / math.sqrt( 2 )
+		for level in brightnessGroups: # Loop all of the groups we made based on brightness
 
-			# Now, dump the hatch fills sorted by which document element
-			# they correspond to.  This is made easy by the fact that we
-			# saved the information and used each element's lxml.etree node
-			# pointer as the dictionary key under which to save the hatch
-			# fills for that node.
-			
-			absoluteLineSegments = {}
-			nAbsoluteLineSegmentTotal = 0
-			nPenLifts = 0
-			# To implement
-			for key in self.hatches:
-				direction = True
-				if self.transforms.has_key( key ):
-					transform = inverseTransform( self.transforms[key] )
-					# Determine the scaled stroke width for a hatch line
-					# We produce a line segment of unit length, transform
-					# its endpoints and then determine the length of the
-					# resulting line segment.
-					pt1 = [0, 0]
-					pt2 = [s, s]
-					simpletransform.applyTransformToPoint( transform, pt1 )
-					simpletransform.applyTransformToPoint( transform, pt2 )
-					dx = pt2[0] - pt1[0]
-					dy = pt2[1] - pt1[1]
-					stroke_width = math.sqrt( dx * dx + dy * dy )
+			if not self.options.useRange: # If we don't use ranges, get the objects like before
+				# Build a list of the vertices for the document's graphical elements
+				if self.options.ids:
+					# Traverse the selected objects
+					for id in self.options.ids:
+						self.recursivelyTraverseSvg( [self.selected[id]], self.docTransform )
 				else:
-					transform = None
-					stroke_width = float( 1.0 )
+					# Traverse the entire document
+					self.recursivelyTraverseSvg( self.document.getroot(), self.docTransform )
 
-				# The transform also applies to the hatch spacing we use when searching for end connections
-				transformedHatchSpacing = stroke_width * self.options.hatchSpacing
-				
-				path = ''								# regardless of whether or not we're reducing pen lifts
-				ptLastPositionAbsolute = [ 0,0 ]
-				ptLastPositionAbsolute[0] = 0
-				ptLastPositionAbsolute[1] = 0
-				fDistanceMovedWithPenUp = 0
-				if not self.options.reducePenLifts:
-					for segment in self.hatches[key]:
-						if len( segment ) < 2:
-							continue
-						pt1 = segment[0]
-						pt2 = segment[1]
-						# Okay, we're going to put these hatch lines into the same
-						# group as the element they hatch.  That element is down
-						# some chain of SVG elements, some of which may have
-						# transforms attached.  But, our hatch lines have been
-						# computed assuming that those transforms have already
-						# been applied (since we had to apply them so as to know
-						# where this element is on the page relative to other
-						# elements and their transforms).  So, we need to invert
-						# the transforms for this element and then either apply
-						# that inverse transform here and now or set it in a
-						# transform attribute of the <path> element.  Having it
-						# set in the path element seems a bit counterintuitive
-						# after the fact (i.e., what's this tranform here for?).
-						# So, we compute the inverse transform and apply it here.
-						if transform != None:
-							simpletransform.applyTransformToPoint( transform, pt1 )
-							simpletransform.applyTransformToPoint( transform, pt2 )
-						# Now generate the path data for the <path>
-						if direction:
-							# Go this direction
-							path += ( 'M %f,%f l %f,%f ' %
-								( pt1[0], pt1[1], pt2[0] - pt1[0], pt2[1] - pt1[1] ) )
-						else:
-							# Or go this direction
-							path += ( 'M %f,%f l %f,%f ' %
-								( pt2[0], pt2[1], pt1[0] - pt2[0], pt1[1] - pt2[1] ) )
-								
-						direction = not direction
-					# for segment in self.hatches[key]:
-					self.joinFillsWithNode( key, stroke_width, path[:-1] )
+			else: # use ranges
+				# Set the right hatchAngle and hatchSpacing for this brightness group
+				self.options.hatchAngle = self.map( float(level), 0.0, 1.0, self.options.minHatchAngle, self.options.maxHatchAngle )
+				self.options.hatchSpacing = self.map( float(level), 0.0, 1.0, self.options.minHatchSpacing, self.options.maxHatchSpacing )
+				# Reset these values for each group
+				self.xmin, self.ymin = ( float( 0 ), float( 0 ) )
+				self.xmax, self.ymax = ( float( 0 ), float( 0 ) )
+				self.paths = {}
+				self.grid = []
+				self.hatches = {}
+				self.transforms = {}
+				self.minGap = float( 0 )
 
-				else:		# if not self.options.reducePenLifts:
-					for segment in self.hatches[key]:
-						if len( segment ) < 2:			# Copied from original, no idea why this is needed [sbm]
-							continue
-						if ( direction ):
+				for id in brightnessGroups[level]:
+					self.recursivelyTraverseSvg( [self.selected[id]], self.docTransform )
+
+			# Build a grid of possible hatch lines
+			bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),
+					float( self.options.hatchSpacing ), True )
+				# makeHatchGrid returns false if could not make grid - probably because bounding box is non-existent
+			if bHaveGrid:
+				if self.options.crossHatch:
+					self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),
+						float( self.options.hatchSpacing ), False )
+				# if self.options.crossHatch:
+
+				# Now loop over our hatch lines looking for intersections
+				for h in self.grid:
+					interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+
+				# Target stroke width will be (doc width + doc height) / 2 / 1000
+				# stroke_width_target = ( self.docHeight + self.docWidth ) / 2000
+				# stroke_width_target = 1
+				stroke_width_target = 1
+				# Each hatch line stroke will be within an SVG object which may
+				# be subject to transforms.  So, on an object by object basis,
+				# we need to transform our target width to a width suitable
+				# for that object (so that after the object and its hatches are
+				# transformed, the result has the desired width).
+
+				# To aid in the process, we use a diagonal line segment of length
+				# stroke_width_target.  We then run this segment through an object's
+				# inverse transform and see what the resulting length of the inversely
+				# transformed segment is.  We could, alternatively, look at the
+				# x and y scaling factors in the transform and average them.
+				s = stroke_width_target / math.sqrt( 2 )
+
+				# Now, dump the hatch fills sorted by which document element
+				# they correspond to.  This is made easy by the fact that we
+				# saved the information and used each element's lxml.etree node
+				# pointer as the dictionary key under which to save the hatch
+				# fills for that node.
+
+				absoluteLineSegments = {}
+				nAbsoluteLineSegmentTotal = 0
+				nPenLifts = 0
+				# To implement
+				for key in self.hatches:
+					direction = True
+					if self.transforms.has_key( key ):
+						transform = inverseTransform( self.transforms[key] )
+						# Determine the scaled stroke width for a hatch line
+						# We produce a line segment of unit length, transform
+						# its endpoints and then determine the length of the
+						# resulting line segment.
+						pt1 = [0, 0]
+						pt2 = [s, s]
+						simpletransform.applyTransformToPoint( transform, pt1 )
+						simpletransform.applyTransformToPoint( transform, pt2 )
+						dx = pt2[0] - pt1[0]
+						dy = pt2[1] - pt1[1]
+						stroke_width = math.sqrt( dx * dx + dy * dy )
+					else:
+						transform = None
+						stroke_width = float( 1.0 )
+
+					# The transform also applies to the hatch spacing we use when searching for end connections
+					transformedHatchSpacing = stroke_width * self.options.hatchSpacing
+
+					path = ''								# regardless of whether or not we're reducing pen lifts
+					ptLastPositionAbsolute = [ 0,0 ]
+					ptLastPositionAbsolute[0] = 0
+					ptLastPositionAbsolute[1] = 0
+					fDistanceMovedWithPenUp = 0
+					if not self.options.reducePenLifts:
+						for segment in self.hatches[key]:
+							if len( segment ) < 2:
+								continue
 							pt1 = segment[0]
 							pt2 = segment[1]
-						else:
-							pt1 = segment[1]
-							pt2 = segment[0]
-						# Okay, we're going to put these hatch lines into the same
-						# group as the element they hatch.  That element is down
-						# some chain of SVG elements, some of which may have
-						# transforms attached.  But, our hatch lines have been
-						# computed assuming that those transforms have already
-						# been applied (since we had to apply them so as to know
-						# where this element is on the page relative to other
-						# elements and their transforms).  So, we need to invert
-						# the transforms for this element and then either apply
-						# that inverse transform here and now or set it in a
-						# transform attribute of the <path> element.  Having it
-						# set in the path element seems a bit counterintuitive
-						# after the fact (i.e., what's this tranform here for?).
-						# So, we compute the inverse transform and apply it here.
-						if transform != None:
-							simpletransform.applyTransformToPoint( transform, pt1 )
-							simpletransform.applyTransformToPoint( transform, pt2 )
-
-						# Now generate the path data for the <path> 
-						# BUT we want to combine as many paths as possible to reduce pen lifts.
-						# In order to combine paths, we need to know all of the path segments.
-						# The solution to this conundrum is to generate all path segments,
-						# but instead of drawing them into the path right away, we put them in
-						# an array where they'll be available for random access
-						# by our anti-pen-lift algorithm
-						absoluteLineSegments[ nAbsoluteLineSegmentTotal ] = [ pt1, pt2, False ]		# False indicates that segment has not yet been drawn
-						nAbsoluteLineSegmentTotal += 1
-						direction = not direction
-					# for segment in self.hatches[key]:
-					
-					# Now have a nice juicy buffer full of line segments with absolute coordinates
-					fProposedNeighborhoodRadiusSquared = self.ProposeNeighborhoodRadiusSquared( transformedHatchSpacing )	# Just fixed and simple for now - may make function of neighborhood later
-					for referenceCount in range( nAbsoluteLineSegmentTotal ):	# This is the entire range of segments,
-						# Sets global referenceCount to segment which has an end closest to current pen position.
-						# Doesn't need to select which end is closest, as that will happen below, with nReferenceEndIndex.
-						# When we have gone thru this whole range, we will be completely done.
-						# We only get here again, after all _connected_ segments have been "drawn".
-						if ( not absoluteLineSegments[referenceCount][2] ):		# Test whether this segment has been drawn
-							# Has not been drawn yet
-							
-							# Before we do any irrevocable changes to path, let's see if we are going to be able to append any segments.
-							# The below solution is inelegant, but has the virtue of being relatively simple to implement.
-							# Pre-qualify this segment on the issue of whether it has any connecting segments.
-							# If it does not, then just add the path for this one segment, and go on to the next.
-							# If it does have connecting segments, we need to go through the recursive logic.
-							# Lazily, again, select the desired direction of line ahead of time.
-							
-							bFoundSegmentToAdd = False							# default assumption
-							nReferenceEndIndexAtClosest = 0
-							nInnerCountAtClosest = -1
-							fClosestDistanceSquared = 123456				# just a random large number
-							for nReferenceEndIndex in range( 2 ):
-								ptReference = absoluteLineSegments[referenceCount][nReferenceEndIndex]
-								ptReferenceOtherEnd = absoluteLineSegments[referenceCount][not nReferenceEndIndex]
-								fReferenceDirectionRadians = math.atan2( ptReferenceOtherEnd[1] - ptReference[1], ptReferenceOtherEnd[0] - ptReference[0] )		# from other end to this end
-								# The following is just a simple copy from the routine in recursivelyAppendNearbySegmentIfAny procedure
-								# Look through all possibilities to choose the closest that fulfills all requirements e.g. direction and colinearity
-								for innerCount in range( nAbsoluteLineSegmentTotal ):	# investigate all segments
-									if ( not absoluteLineSegments[innerCount][2] ):
-										# This segment currently undrawn, so it is a candidate for a path extension
-										# Need to check both ends of each and every proposed segment so we can find the most appropriate one
-										# Define pt2 in the reference as the end which we want to extend
-										for nNewSegmentInitialEndIndex in range( 2 ):
-											# First try initial end of test segment (aka pt1) vs final end (aka pt2) of reference segment
-											if ( innerCount != referenceCount ):	# don't investigate self ends
-												deltaX = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex][0] - ptReference[0]		# proposed initial pt1 X minus existing final pt1 X
-												deltaY = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex][1] - ptReference[1]		# proposed initial pt1 Y minus existing final pt1 Y
-												if 	( ( deltaX * deltaX + deltaY * deltaY ) < fProposedNeighborhoodRadiusSquared ):
-													fThisDistanceSquared = deltaX * deltaX + deltaY * deltaY
-													ptNewSegmentThisEnd = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex]
-													ptNewSegmentOtherEnd = absoluteLineSegments[innerCount][not nNewSegmentInitialEndIndex]
-													fNewSegmentDirectionRadians = math.atan2( ptNewSegmentThisEnd[1] - ptNewSegmentOtherEnd[1], ptNewSegmentThisEnd[0] - ptNewSegmentOtherEnd[0] )		# from other end to this end
-													# If this end would cause an alternating direction,
-													# then exclude it
-													if ( not self.WouldBeAnAlternatingDirection( fReferenceDirectionRadians, fNewSegmentDirectionRadians ) ):
-														pass
-	#													break		# out of for nNewSegmentInitialEndIndex in range( 2 ):
-													# if ( not self.WouldBeAnAlternatingDirection( fReferenceDirectionRadians, fNewSegmentDirectionRadians ) ):
-													elif ( fThisDistanceSquared < fClosestDistanceSquared ):
-														# One other thing could rule out choosing this segment end:
-														# Want to screen and remove two segments that, while close enough,
-														# should be disqualified because they are colinear.  The reason for this is that
-														# if they are colinear, they arose from the same global grid line, which means
-														# that the gap between them arises from intersections with the boundary.
-														# The idea here is that, all things being more-or-less equal,
-														# we would like to give preference to connecting to a segment
-														# which is the reverse of our current direction.  This makes for better
-														# bezier curve join.
-														# The criterion for being colinear is that the reference segment angle is effectively
-														# the same as the line connecting the reference segment to the end of the new segment.
-														fJoinerDirectionRadians = math.atan2( ptNewSegmentThisEnd[1] - ptReference[1], ptNewSegmentThisEnd[0] - ptReference[0] )
-														if ( not self.AreCoLinear( fReferenceDirectionRadians, fJoinerDirectionRadians) ):
-															# not colinear
-															fClosestDistanceSquared = fThisDistanceSquared
-															bFoundSegmentToAdd = True
-															nReferenceEndIndexAtClosest = nReferenceEndIndex
-															nInnerCountAtClosest = innerCount
-															deltaXAtClosest = deltaX
-															deltaYAtClosest = deltaY
-														# if ( not self.AreCoLinear( fReferenceDirectionRadians, fJoinerDirectionRadians) ):
-													# if ( fThisDistanceSquared < fClosestDistanceSquared ):
-												# if ( ( deltaX * deltaX + deltaY * deltaY ) < fProposedNeighborhoodRadiusSquared ):
-											# if ( innerCount != referenceCount ):
-										# for nNewSegmentInitialEndIndex in range( 2 ):
-									# if ( not absoluteLineSegments[2] ):
-								# for innerCount in range( nAbsoluteLineSegmentTotal ):
-							# for nReferenceEndIndex in range( 2 ):
-							
-							# At last we've looked at all the candidate segment ends, as related to all the reference ends
-							if ( not bFoundSegmentToAdd ):
-								# This segment is solitary.
-								# Must start a new line, not joined to any previous paths
-								deltaX = absoluteLineSegments[referenceCount][1][0] - absoluteLineSegments[referenceCount][0][0]	# end minus start, in original direction
-								deltaY = absoluteLineSegments[referenceCount][1][1] - absoluteLineSegments[referenceCount][0][1]	# end minus start, in original direction
+							# Okay, we're going to put these hatch lines into the same
+							# group as the element they hatch.  That element is down
+							# some chain of SVG elements, some of which may have
+							# transforms attached.  But, our hatch lines have been
+							# computed assuming that those transforms have already
+							# been applied (since we had to apply them so as to know
+							# where this element is on the page relative to other
+							# elements and their transforms).  So, we need to invert
+							# the transforms for this element and then either apply
+							# that inverse transform here and now or set it in a
+							# transform attribute of the <path> element.  Having it
+							# set in the path element seems a bit counterintuitive
+							# after the fact (i.e., what's this tranform here for?).
+							# So, we compute the inverse transform and apply it here.
+							if transform != None:
+								simpletransform.applyTransformToPoint( transform, pt1 )
+								simpletransform.applyTransformToPoint( transform, pt2 )
+							# Now generate the path data for the <path>
+							if direction:
+								# Go this direction
 								path += ( 'M %f,%f l %f,%f ' %
-									( absoluteLineSegments[referenceCount][0][0], absoluteLineSegments[referenceCount][0][1],
-									deltaX, deltaY ) )	# delta is from initial point
-								fDistanceMovedWithPenUp += math.hypot(
-									absoluteLineSegments[referenceCount][0][0] - ptLastPositionAbsolute[0],
-									absoluteLineSegments[referenceCount][0][1] - ptLastPositionAbsolute[1] )
-								ptLastPositionAbsolute[0] = absoluteLineSegments[referenceCount][0][0] + deltaX
-								ptLastPositionAbsolute[1] = absoluteLineSegments[referenceCount][0][1] + deltaY
-								absoluteLineSegments[ referenceCount ][2] = True			# True flags that this line segment has been
-																							# added to the path to be drawn, so should
-																							# no longer be a candidate for any kind of move.
-								nPenLifts += 1
-							else:						# if ( not bFoundSegmentToAdd ):
-								# Found segment to add, and we must get to it in absolute terms
-								deltaX = ( absoluteLineSegments[referenceCount][nReferenceEndIndexAtClosest][0] -
-										absoluteLineSegments[referenceCount][not nReferenceEndIndexAtClosest][0] )
-								# final point (which was closer to the closest continuation segment) minus initial point = deltaX
+									( pt1[0], pt1[1], pt2[0] - pt1[0], pt2[1] - pt1[1] ) )
+							else:
+								# Or go this direction
+								path += ( 'M %f,%f l %f,%f ' %
+									( pt2[0], pt2[1], pt1[0] - pt2[0], pt1[1] - pt2[1] ) )
 
-								deltaY = ( absoluteLineSegments[referenceCount][nReferenceEndIndexAtClosest][1] -
-										absoluteLineSegments[referenceCount][not nReferenceEndIndexAtClosest][1] )
-								# final point (which was closer to the closest continuation segment) minus initial point = deltaY
-								
-								path += ( 'M %f,%f l ' % (
-									absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0],
-									absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1] ) )
-								fDistanceMovedWithPenUp += math.hypot(
-									absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0] - ptLastPositionAbsolute[0],
-									absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1] - ptLastPositionAbsolute[1] )
-								ptLastPositionAbsolute[0] = absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0]
-								ptLastPositionAbsolute[1] = absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1]
-								# Note that this does not complete the line, as the completion (the deltaX, deltaY part) is being held in abeyance
-								
-								# We are coming up on a problem:
-								# If we add a curve to the end of the line, we have made the curve extend beyond the end of the line,
-								# and thus beyond the boundaries we should be respecting.
-								# The solution is to hold in abeyance the actual plotting of the line,
-								# holding it available for shrinking if a curve is to be added.
-								# That is 
-								relativePositionOfLastPlottedLineWasHeldInAbeyance = {}
-								relativePositionOfLastPlottedLineWasHeldInAbeyance[0] = deltaX			# delta is from initial point
-								relativePositionOfLastPlottedLineWasHeldInAbeyance[1] = deltaY			# Will be printed after we know if it must be modified
-																										# to keep the ending join within bounds
-								ptLastPositionAbsolute[0] += deltaX
-								ptLastPositionAbsolute[1] += deltaY
-																			
-								absoluteLineSegments[ referenceCount ][2] = True			# True flags that this line segment has been
-																							# added to the path to be drawn, so should
-																							# no longer be a candidate for any kind of move.
-								nPenLifts += 1
-								# Now comes the speedup logic:
-								# We've just drawn a segment starting at an absolute, not relative, position.
-								# It was drawn from pt1 to pt2.
-								# Look for an as-yet-not-drawn segment which has a beginning or ending
-								# point "near" the end point of this absolute draw, and leave the pen down
-								# while moving to and then drawing this found line.
-								# Do this recursively, marking each segment True to show that
-								# it has been "drawn" already.
-								# pt2 is the reference point, ie. the point from which the next segment will start
-								path = self.recursivelyAppendNearbySegmentIfAny(
-								transformedHatchSpacing,
-								0,
-								referenceCount,
-								nReferenceEndIndexAtClosest,
-								nAbsoluteLineSegmentTotal,
-								absoluteLineSegments,
-								path,
-								relativePositionOfLastPlottedLineWasHeldInAbeyance )
-							# if ( not bFoundSegmentToAdd ): else:
-						# if ( not absoluteLineSegments[referenceCount][2] ):	
-					# while ( self.IndexOfNearestSegmentToLastPosition() ):
-					self.joinFillsWithNode( key, stroke_width, path[:-1] )
-				# if not self.options.reducePenLifts: else:
-			# for key in self.hatches:
+							direction = not direction
+						# for segment in self.hatches[key]:
+						self.joinFillsWithNode( key, stroke_width, path[:-1] )
 
-			'''
-			if self.options.reducePenLifts:
-				if ( nAbsoluteLineSegmentTotal != 0 ):
-					inkex.errormsg( ' Saved %i%% of %i pen lifts.' % ( 100 * ( nAbsoluteLineSegmentTotal - nPenLifts ) / nAbsoluteLineSegmentTotal, nAbsoluteLineSegmentTotal ) )
-					inkex.errormsg( ' pen lifts=%i, line segments=%i' % ( nPenLifts, nAbsoluteLineSegmentTotal ) )
-				else:
-					inkex.errormsg( ' No lines were plotted' )
-					
-				inkex.errormsg( ' Press OK' )
-			# if self.options.reducePenLifts:
-			#inkex.errormsg("Elapsed CPU time was %f" % (time.clock()-self.t0))
-			'''
-		else:	# if bHaveGrid:
-			inkex.errormsg( ' Nothing to plot' )
-		# if bHaveGrid: else:
-	# def effect( self ):
-	
-	def recursivelyAppendNearbySegmentIfAny( 
+					else:		# if not self.options.reducePenLifts:
+						for segment in self.hatches[key]:
+							if len( segment ) < 2:			# Copied from original, no idea why this is needed [sbm]
+								continue
+							if ( direction ):
+								pt1 = segment[0]
+								pt2 = segment[1]
+							else:
+								pt1 = segment[1]
+								pt2 = segment[0]
+							# Okay, we're going to put these hatch lines into the same
+							# group as the element they hatch.  That element is down
+							# some chain of SVG elements, some of which may have
+							# transforms attached.  But, our hatch lines have been
+							# computed assuming that those transforms have already
+							# been applied (since we had to apply them so as to know
+							# where this element is on the page relative to other
+							# elements and their transforms).  So, we need to invert
+							# the transforms for this element and then either apply
+							# that inverse transform here and now or set it in a
+							# transform attribute of the <path> element.  Having it
+							# set in the path element seems a bit counterintuitive
+							# after the fact (i.e., what's this tranform here for?).
+							# So, we compute the inverse transform and apply it here.
+							if transform != None:
+								simpletransform.applyTransformToPoint( transform, pt1 )
+								simpletransform.applyTransformToPoint( transform, pt2 )
+
+							# Now generate the path data for the <path>
+							# BUT we want to combine as many paths as possible to reduce pen lifts.
+							# In order to combine paths, we need to know all of the path segments.
+							# The solution to this conundrum is to generate all path segments,
+							# but instead of drawing them into the path right away, we put them in
+							# an array where they'll be available for random access
+							# by our anti-pen-lift algorithm
+							absoluteLineSegments[ nAbsoluteLineSegmentTotal ] = [ pt1, pt2, False ]		# False indicates that segment has not yet been drawn
+							nAbsoluteLineSegmentTotal += 1
+							direction = not direction
+						# for segment in self.hatches[key]:
+
+						# Now have a nice juicy buffer full of line segments with absolute coordinates
+						fProposedNeighborhoodRadiusSquared = self.ProposeNeighborhoodRadiusSquared( transformedHatchSpacing )	# Just fixed and simple for now - may make function of neighborhood later
+						for referenceCount in range( nAbsoluteLineSegmentTotal ):	# This is the entire range of segments,
+							# Sets global referenceCount to segment which has an end closest to current pen position.
+							# Doesn't need to select which end is closest, as that will happen below, with nReferenceEndIndex.
+							# When we have gone thru this whole range, we will be completely done.
+							# We only get here again, after all _connected_ segments have been "drawn".
+							if ( not absoluteLineSegments[referenceCount][2] ):		# Test whether this segment has been drawn
+								# Has not been drawn yet
+
+								# Before we do any irrevocable changes to path, let's see if we are going to be able to append any segments.
+								# The below solution is inelegant, but has the virtue of being relatively simple to implement.
+								# Pre-qualify this segment on the issue of whether it has any connecting segments.
+								# If it does not, then just add the path for this one segment, and go on to the next.
+								# If it does have connecting segments, we need to go through the recursive logic.
+								# Lazily, again, select the desired direction of line ahead of time.
+
+								bFoundSegmentToAdd = False							# default assumption
+								nReferenceEndIndexAtClosest = 0
+								nInnerCountAtClosest = -1
+								fClosestDistanceSquared = 123456				# just a random large number
+								for nReferenceEndIndex in range( 2 ):
+									ptReference = absoluteLineSegments[referenceCount][nReferenceEndIndex]
+									ptReferenceOtherEnd = absoluteLineSegments[referenceCount][not nReferenceEndIndex]
+									fReferenceDirectionRadians = math.atan2( ptReferenceOtherEnd[1] - ptReference[1], ptReferenceOtherEnd[0] - ptReference[0] )		# from other end to this end
+									# The following is just a simple copy from the routine in recursivelyAppendNearbySegmentIfAny procedure
+									# Look through all possibilities to choose the closest that fulfills all requirements e.g. direction and colinearity
+									for innerCount in range( nAbsoluteLineSegmentTotal ):	# investigate all segments
+										if ( not absoluteLineSegments[innerCount][2] ):
+											# This segment currently undrawn, so it is a candidate for a path extension
+											# Need to check both ends of each and every proposed segment so we can find the most appropriate one
+											# Define pt2 in the reference as the end which we want to extend
+											for nNewSegmentInitialEndIndex in range( 2 ):
+												# First try initial end of test segment (aka pt1) vs final end (aka pt2) of reference segment
+												if ( innerCount != referenceCount ):	# don't investigate self ends
+													deltaX = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex][0] - ptReference[0]		# proposed initial pt1 X minus existing final pt1 X
+													deltaY = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex][1] - ptReference[1]		# proposed initial pt1 Y minus existing final pt1 Y
+													if 	( ( deltaX * deltaX + deltaY * deltaY ) < fProposedNeighborhoodRadiusSquared ):
+														fThisDistanceSquared = deltaX * deltaX + deltaY * deltaY
+														ptNewSegmentThisEnd = absoluteLineSegments[innerCount][nNewSegmentInitialEndIndex]
+														ptNewSegmentOtherEnd = absoluteLineSegments[innerCount][not nNewSegmentInitialEndIndex]
+														fNewSegmentDirectionRadians = math.atan2( ptNewSegmentThisEnd[1] - ptNewSegmentOtherEnd[1], ptNewSegmentThisEnd[0] - ptNewSegmentOtherEnd[0] )		# from other end to this end
+														# If this end would cause an alternating direction,
+														# then exclude it
+														if ( not self.WouldBeAnAlternatingDirection( fReferenceDirectionRadians, fNewSegmentDirectionRadians ) ):
+															pass
+		#													break		# out of for nNewSegmentInitialEndIndex in range( 2 ):
+														# if ( not self.WouldBeAnAlternatingDirection( fReferenceDirectionRadians, fNewSegmentDirectionRadians ) ):
+														elif ( fThisDistanceSquared < fClosestDistanceSquared ):
+															# One other thing could rule out choosing this segment end:
+															# Want to screen and remove two segments that, while close enough,
+															# should be disqualified because they are colinear.  The reason for this is that
+															# if they are colinear, they arose from the same global grid line, which means
+															# that the gap between them arises from intersections with the boundary.
+															# The idea here is that, all things being more-or-less equal,
+															# we would like to give preference to connecting to a segment
+															# which is the reverse of our current direction.  This makes for better
+															# bezier curve join.
+															# The criterion for being colinear is that the reference segment angle is effectively
+															# the same as the line connecting the reference segment to the end of the new segment.
+															fJoinerDirectionRadians = math.atan2( ptNewSegmentThisEnd[1] - ptReference[1], ptNewSegmentThisEnd[0] - ptReference[0] )
+															if ( not self.AreCoLinear( fReferenceDirectionRadians, fJoinerDirectionRadians) ):
+																# not colinear
+																fClosestDistanceSquared = fThisDistanceSquared
+																bFoundSegmentToAdd = True
+																nReferenceEndIndexAtClosest = nReferenceEndIndex
+																nInnerCountAtClosest = innerCount
+																deltaXAtClosest = deltaX
+																deltaYAtClosest = deltaY
+															# if ( not self.AreCoLinear( fReferenceDirectionRadians, fJoinerDirectionRadians) ):
+														# if ( fThisDistanceSquared < fClosestDistanceSquared ):
+													# if ( ( deltaX * deltaX + deltaY * deltaY ) < fProposedNeighborhoodRadiusSquared ):
+												# if ( innerCount != referenceCount ):
+											# for nNewSegmentInitialEndIndex in range( 2 ):
+										# if ( not absoluteLineSegments[2] ):
+									# for innerCount in range( nAbsoluteLineSegmentTotal ):
+								# for nReferenceEndIndex in range( 2 ):
+
+								# At last we've looked at all the candidate segment ends, as related to all the reference ends
+								if ( not bFoundSegmentToAdd ):
+									# This segment is solitary.
+									# Must start a new line, not joined to any previous paths
+									deltaX = absoluteLineSegments[referenceCount][1][0] - absoluteLineSegments[referenceCount][0][0]	# end minus start, in original direction
+									deltaY = absoluteLineSegments[referenceCount][1][1] - absoluteLineSegments[referenceCount][0][1]	# end minus start, in original direction
+									path += ( 'M %f,%f l %f,%f ' %
+										( absoluteLineSegments[referenceCount][0][0], absoluteLineSegments[referenceCount][0][1],
+										deltaX, deltaY ) )	# delta is from initial point
+									fDistanceMovedWithPenUp += math.hypot(
+										absoluteLineSegments[referenceCount][0][0] - ptLastPositionAbsolute[0],
+										absoluteLineSegments[referenceCount][0][1] - ptLastPositionAbsolute[1] )
+									ptLastPositionAbsolute[0] = absoluteLineSegments[referenceCount][0][0] + deltaX
+									ptLastPositionAbsolute[1] = absoluteLineSegments[referenceCount][0][1] + deltaY
+									absoluteLineSegments[ referenceCount ][2] = True			# True flags that this line segment has been
+																								# added to the path to be drawn, so should
+																								# no longer be a candidate for any kind of move.
+									nPenLifts += 1
+								else:						# if ( not bFoundSegmentToAdd ):
+									# Found segment to add, and we must get to it in absolute terms
+									deltaX = ( absoluteLineSegments[referenceCount][nReferenceEndIndexAtClosest][0] -
+											absoluteLineSegments[referenceCount][not nReferenceEndIndexAtClosest][0] )
+									# final point (which was closer to the closest continuation segment) minus initial point = deltaX
+
+									deltaY = ( absoluteLineSegments[referenceCount][nReferenceEndIndexAtClosest][1] -
+											absoluteLineSegments[referenceCount][not nReferenceEndIndexAtClosest][1] )
+									# final point (which was closer to the closest continuation segment) minus initial point = deltaY
+
+									path += ( 'M %f,%f l ' % (
+										absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0],
+										absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1] ) )
+									fDistanceMovedWithPenUp += math.hypot(
+										absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0] - ptLastPositionAbsolute[0],
+										absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1] - ptLastPositionAbsolute[1] )
+									ptLastPositionAbsolute[0] = absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][0]
+									ptLastPositionAbsolute[1] = absoluteLineSegments[referenceCount][ not nReferenceEndIndexAtClosest][1]
+									# Note that this does not complete the line, as the completion (the deltaX, deltaY part) is being held in abeyance
+
+									# We are coming up on a problem:
+									# If we add a curve to the end of the line, we have made the curve extend beyond the end of the line,
+									# and thus beyond the boundaries we should be respecting.
+									# The solution is to hold in abeyance the actual plotting of the line,
+									# holding it available for shrinking if a curve is to be added.
+									# That is
+									relativePositionOfLastPlottedLineWasHeldInAbeyance = {}
+									relativePositionOfLastPlottedLineWasHeldInAbeyance[0] = deltaX			# delta is from initial point
+									relativePositionOfLastPlottedLineWasHeldInAbeyance[1] = deltaY			# Will be printed after we know if it must be modified
+																											# to keep the ending join within bounds
+									ptLastPositionAbsolute[0] += deltaX
+									ptLastPositionAbsolute[1] += deltaY
+
+									absoluteLineSegments[ referenceCount ][2] = True			# True flags that this line segment has been
+																								# added to the path to be drawn, so should
+																								# no longer be a candidate for any kind of move.
+									nPenLifts += 1
+									# Now comes the speedup logic:
+									# We've just drawn a segment starting at an absolute, not relative, position.
+									# It was drawn from pt1 to pt2.
+									# Look for an as-yet-not-drawn segment which has a beginning or ending
+									# point "near" the end point of this absolute draw, and leave the pen down
+									# while moving to and then drawing this found line.
+									# Do this recursively, marking each segment True to show that
+									# it has been "drawn" already.
+									# pt2 is the reference point, ie. the point from which the next segment will start
+									path = self.recursivelyAppendNearbySegmentIfAny(
+									transformedHatchSpacing,
+									0,
+									referenceCount,
+									nReferenceEndIndexAtClosest,
+									nAbsoluteLineSegmentTotal,
+									absoluteLineSegments,
+									path,
+									relativePositionOfLastPlottedLineWasHeldInAbeyance )
+								# if ( not bFoundSegmentToAdd ): else:
+							# if ( not absoluteLineSegments[referenceCount][2] ):
+						# while ( self.IndexOfNearestSegmentToLastPosition() ):
+						self.joinFillsWithNode( key, stroke_width, path[:-1] )
+					# if not self.options.reducePenLifts: else:
+				# for key in self.hatches:
+
+				'''
+				if self.options.reducePenLifts:
+					if ( nAbsoluteLineSegmentTotal != 0 ):
+						inkex.errormsg( ' Saved %i%% of %i pen lifts.' % ( 100 * ( nAbsoluteLineSegmentTotal - nPenLifts ) / nAbsoluteLineSegmentTotal, nAbsoluteLineSegmentTotal ) )
+						inkex.errormsg( ' pen lifts=%i, line segments=%i' % ( nPenLifts, nAbsoluteLineSegmentTotal ) )
+					else:
+						inkex.errormsg( ' No lines were plotted' )
+
+					inkex.errormsg( ' Press OK' )
+				# if self.options.reducePenLifts:
+				#inkex.errormsg("Elapsed CPU time was %f" % (time.clock()-self.t0))
+				'''
+			else:	# if bHaveGrid:
+				inkex.errormsg( ' Nothing to plot' )
+			# if bHaveGrid: else:
+		# def effect( self ):
+
+	def recursivelyAppendNearbySegmentIfAny(
 		self,
 		transformedHatchSpacing,
 		nRecursionCount,
-		nReferenceSegmentCount, 
-		nReferenceEndIndex, 
-		nAbsoluteLineSegmentTotal, 
-		absoluteLineSegments, 
-		cumulativePath, 
+		nReferenceSegmentCount,
+		nReferenceEndIndex,
+		nAbsoluteLineSegmentTotal,
+		absoluteLineSegments,
+		cumulativePath,
 		relativePositionOfLastPlottedLineWasHeldInAbeyance ):
-	
+
 		global ptLastPositionAbsolute
 		fProposedNeighborhoodRadiusSquared = self.ProposeNeighborhoodRadiusSquared( transformedHatchSpacing )
-			
+
 		# Look through all possibilities to choose the closest
 		bFoundSegmentToAdd = False										# default assumption
 		nNewSegmentInitialEndIndexAtClosest = 0
@@ -1498,10 +1579,10 @@ class Eggbot_Hatch( inkex.Effect ):
 		for outerCount in range( nAbsoluteLineSegmentTotal ):	# investigate all segments
 			if ( not absoluteLineSegments[outerCount][2] ):
 				# This segment currently undrawn, so it is a candidate for a path extension
-				
+
 				# Need to check both ends of each and every proposed segment until we find one in the neighborhood
 				# Defines pt2 in the reference as the end which we want to extend
-				
+
 				for nNewSegmentInitialEndIndex in range( 2 ):
 					# First try initial end of test segment (aka pt1) vs final end (aka pt2) of reference segment
 					if ( outerCount != nReferenceSegmentCount ):	# don't investigate self ends
@@ -1519,7 +1600,7 @@ class Eggbot_Hatch( inkex.Effect ):
 								# then exclude it regardless of how close it is
 								pass
 								# if ( not self.WouldBeAnAlternatingDirection( fReferenceDirectionRadians, fNewSegmentDirectionRadians ) ):
-								
+
 							elif ( fThisDistanceSquared < fClosestDistanceSquared ):
 								# One other thing could rule out choosing this segment end:
 								# Want to screen and remove two segments that, while close enough,
@@ -1561,14 +1642,14 @@ class Eggbot_Hatch( inkex.Effect ):
 		else:	# if ( not bFoundSegmentToAdd ):
 			nNewSegmentInitialEndIndex = nNewSegmentInitialEndIndexAtClosest
 			nNewSegmentFinalEndIndex = not nNewSegmentInitialEndIndex
-			# nNewSegmentInitialEndIndex is 0 for connecting to pt1, 
+			# nNewSegmentInitialEndIndex is 0 for connecting to pt1,
 			# and is 1 for connecting to pt2
 			count = nOuterCountAtClosest			# count is the index of the segment to be appended.
 			deltaX = deltaXAtClosest				# delta from final end of incoming segment to initial end of outgoing segment
 			deltaY = deltaYAtClosest
-			
+
 			# First, move pen to initial end (may be either its pt1 or its pt2) of new segment
-			
+
 			# Insert a bezier curve for this transition element
 			# To accomplish this, we need information on the incoming and outgoing segments.
 			# Specifically, we need to know the lengths and angles of the segments in
@@ -1578,19 +1659,19 @@ class Eggbot_Hatch( inkex.Effect ):
 			# The outgoing deltas are based on the reverse direction of the segment, i.e. the segment pointing back to the joiner bezier curve
 			fOutgoingDeltaX = absoluteLineSegments[count][nNewSegmentInitialEndIndex][0] - absoluteLineSegments[count][nNewSegmentFinalEndIndex][0]		# index is [count][start point = 0, final point = 1][0=x, 1=y]
 			fOutgoingDeltaY = absoluteLineSegments[count][nNewSegmentInitialEndIndex][1] - absoluteLineSegments[count][nNewSegmentFinalEndIndex][1]
-			
+
 			lengthOfIncoming = math.hypot( fIncomingDeltaX, fIncomingDeltaY )
 			lengthOfOutgoing = math.hypot( fOutgoingDeltaX, fOutgoingDeltaY )
-			
+
 			# We are going to trim-up the ends of the incoming and outgoing segments,
 			# in order to get a curve which reliably does not extend beyond the boundary.
 			# Crude readings from inkscape on bezier curve overshoot, using control points extended hatch-spacing distance parallel to segment:
 			# when end points are in line, overshoot 12/16 in direction of segment
 			#		   when at 45 degrees, overshoot 12/16 in direction of segment
 			#		   when at 60 degrees, overshoot 12/16 in direction of segment
-			# Conclusion, at any angle, remove 0.75 * hatch spacing from the length of both lines, 
+			# Conclusion, at any angle, remove 0.75 * hatch spacing from the length of both lines,
 			# where 0.75 is, by no coincidence, BEZIER_OVERSHOOT_MULTIPLIER
-			
+
 			# If hatches are getting quite short, we can use a smaller Bezier loop at
 			# the end to squeeze into smaller spaces.  We'll use a normal nice smooth
 			# curve for non-short hatches
@@ -1616,9 +1697,9 @@ class Eggbot_Hatch( inkex.Effect ):
 				# Note that this will be subtracted from the _point held in abeyance_.
 			relativePositionOfLastPlottedLineWasHeldInAbeyance[0] -= ptDeltaToSubtractFromIncomingEnd[0]
 			relativePositionOfLastPlottedLineWasHeldInAbeyance[1] -= ptDeltaToSubtractFromIncomingEnd[1]
-			
+
 			ptDeltaToAddToOutgoingStart = self.RelativeControlPointPosition( fDesiredShorten, fOutgoingDeltaX, fOutgoingDeltaY, 0, 0 )
-			
+
 			# We know that when we tack on a curve, we must chop some off the end of the incoming segment,
 			# and also chop some off the start of the outgoing segment.
 			# Now, we know we want the control points to be on a projection of each segment,
@@ -1636,7 +1717,7 @@ class Eggbot_Hatch( inkex.Effect ):
 												fOutgoingDeltaY,
 												deltaX,
 												deltaY)
-												
+
 			cumulativePath += '%f,%f ' % ( relativePositionOfLastPlottedLineWasHeldInAbeyance[0], relativePositionOfLastPlottedLineWasHeldInAbeyance[1] )	# close out this segment, which has been modified
 			ptLastPositionAbsolute[0] += relativePositionOfLastPlottedLineWasHeldInAbeyance[0]
 			ptLastPositionAbsolute[1] += relativePositionOfLastPlottedLineWasHeldInAbeyance[1]
@@ -1657,7 +1738,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			deltaY = absoluteLineSegments[count][nNewSegmentFinalEndIndex][1] - absoluteLineSegments[count][nNewSegmentInitialEndIndex][1] + ptDeltaToAddToOutgoingStart[1]
 			relativePositionOfLastPlottedLineWasHeldInAbeyance[0] = deltaX			# delta is from initial point
 			relativePositionOfLastPlottedLineWasHeldInAbeyance[1] = deltaY			# Will be printed after we know if it must be modified
-			
+
 			# Mark this segment as drawn
 			absoluteLineSegments[count][2] = True
 
@@ -1665,17 +1746,17 @@ class Eggbot_Hatch( inkex.Effect ):
 			return cumulativePath
 		# if ( not bFoundSegmentToAdd ): else:
 	# def recursivelyAppendNearbySegmentIfAny( ... ):
-			
+
 	def ProposeNeighborhoodRadiusSquared( self, transformedHatchSpacing ):
 		return transformedHatchSpacing * transformedHatchSpacing * self.options.hatchScope * self.options.hatchScope
 			# The multiplier of x generates a radius of x^0.5 times the hatch spacing.
-			
+
 	def RelativeControlPointPosition( self, distance, fDeltaX, fDeltaY, deltaX, deltaY ):
-	
+
 		# returns the point, relative to 0, 0 offset by deltaX, deltaY,
 		# which extends a distance of "distance" at a slope defined by fDeltaX and fDeltaY
 		ptReturn = [0, 0]
-		
+
 		if ( fDeltaX == 0 ):
 			ptReturn[0] = deltaX
 			ptReturn[1] = math.copysign( distance, fDeltaY ) + deltaY
@@ -1700,9 +1781,9 @@ class Eggbot_Hatch( inkex.Effect ):
 		fDirectionDifferenceRadians -= math.pi		# flip opposite direction to coincide with same direction
 		# Of course they may not be _exactly_ pi different due to osmosis, so allow a tolerance
 		bRetVal = ( abs(fDirectionDifferenceRadians) < RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION )
-		
+
 		return	bRetVal
-		
+
 	def AreCoLinear( self, fDirection1Radians, fDirection2Radians ):
 		# allow slight difference in angles, for floating-point indeterminacy
 		fAbsDeltaRadians = abs( fDirection1Radians - fDirection2Radians )
