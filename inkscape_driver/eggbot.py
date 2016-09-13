@@ -33,13 +33,13 @@ import ebb_motion		# https://github.com/evil-mad/plotink	Requires version 0.2 or
 
 import eggbot_conf		#Some settings can be changed here.
 
-F_DEFAULT_SPEED = 1
-N_PEN_DOWN_DELAY = 400	# delay (ms) for the pen to go down before the next move
-N_PEN_UP_DELAY = 400	# delay (ms) for the pen to up down before the next move
+F_DEFAULT_SPEED = 360
+N_PEN_DOWN_DELAY = 100	# delay (ms) for the pen to go down before the next move
+N_PEN_UP_DELAY = 100	# delay (ms) for the pen to up down before the next move
 
 N_PEN_UP_POS = 50		# Default pen-up position
 N_PEN_DOWN_POS = 40		# Default pen-down position
-N_SERVOSPEED = 50		# Default pen-lift speed
+N_SERVOSPEED = 100		# Default pen-lift speed
 N_WALK_DEFAULT = 10		# Default steps for walking stepper motors
 N_DEFAULT_LAYER = 1		# Default inkscape layer
 
@@ -400,7 +400,7 @@ class EggBot( inkex.Effect ):
 			return
 		self.ServoSetupWrapper()
 		if self.options.setupType == "align-mode":
-			self.penUp()
+			self.penUpHigh()
 			self.sendDisableMotors()
 		else:
 			ebb_motion.TogglePen(self.serialPort)
@@ -474,6 +474,9 @@ class EggBot( inkex.Effect ):
 			self.penDownActivatesEngraver = False
 			if ( not ( self.serialPort is None ) ) and ( self.options.engraving ):
 				self.engraverOff()
+
+			self.penUpHigh()
+			self.sendDisableMotors()
 
 	def recursivelyTraverseSvg( self, aNodeList,
 			matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
@@ -1008,6 +1011,20 @@ class EggBot( inkex.Effect ):
 			if ( not self.resumeMode): # or if we're resuming.
 				ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
 				self.bPenIsUp = True
+
+	def penUpHigh( self ):
+		if ( ( not self.resumeMode ) or ( not self.virtualPenIsUp ) ):
+			penHighPosition = 70
+			intTemp = 240 * ( penHighPosition + 25 )
+			self.doCommand( 'SC,4,' + str(intTemp) + '\r' )
+			self.doCommand( 'SP,1\r' )
+			self.doTimedPause( self.options.penUpDelay ) # pause for pen to go up
+			intTemp = 240 * ( self.options.penUpPosition + 25 )
+			self.doCommand( 'SC,4,' + str(intTemp) + '\r' )
+
+
+			self.bPenIsUp = True
+		self.virtualPenIsUp = True
 
 	def penDown( self ):
 		self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
