@@ -61,7 +61,7 @@ This document details the serial command protocol used by the <a href="http://ww
 
 <p>The serial protocol described in this document can be used directly, for example from a serial terminal, in order to carry out simple tasks. 
 	
-	It can also be accessed from within any program or programming environment that is capable of communicating to a USB serial device. Using this protocol from within high high-level computer languages allows one to construct and execute complex motion. Essentially all EBB applications and interfaces use this serial protocol, at their lowest levels, in order to manage the motion control. 
+	It can also be accessed from within any program or programming environment that is capable of communicating with a USB serial device. Using this protocol from within high-level computer languages allows one to construct and execute complex motion. All EBB applications and interfaces use this serial protocol, at their lowest levels, in order to manage the motion control. 
 </p>
 <p>
 	The serial protocol specifies the fundamental primitives of how the machine operates&mdash; for example moving from position (<i>a1</i>,<i>b1</i>) to position (<i>a2</i>,<i>b2</i>) in duration &Delta;<i>t</i>, with the pen-lift servo motor at position <i>z</i>. By contrast, higher level programs may perform tasks such as opening up SVG files and converting their into a set of robotic movements that can be carried out through the serial protocol.</p>
@@ -71,7 +71,7 @@ Here are some possible starting points for building higher level applications:
 <UL>
 <LI>The Inkscape-based drivers <a href="https://github.com/evil-mad/EggBot">for the EggBot</a>, 
 <a href="https://github.com/evil-mad/wcb-ink">for the WaterColorBot</a>, and <a href="https://githukhb.com/evil-mad/axidraw">for AxiDraw</a> are written
-in python, and work through use this serial protocol. The codebases from those projects are excellent resources for getting started.
+in python, and use this serial protocol. The codebases from those projects are excellent resources for getting started.
 </LI>
 <LI>
 The <a href="http://processing.org">Processing</a>-based program <a href="https://github.com/evil-mad/robopaint-rt">RoboPaint RT</a> is designed to control the 
@@ -80,7 +80,7 @@ WaterColorBot through a real-time interface. This program is written in Processi
 <LI>
 <a href="https://github.com/evil-mad/robopaint">RoboPaint</a> is a stand-alone cross-platform program to drive the WaterColorBot (as well as EggBot and AxiDraw). RoboPaint is written in javascript and (while running) provides several APIs that can be used to control machines based on the EBB:
 <ul>
-	<li>RoboPaint, under the hood, uses the <a href="https://github.com/techninja/cncserver/">cncserver</a> and its RESTful API to operate. It is a relatively low level interface, with similar functionality to the serial protocol, plus with a few helpful utilities. </li>
+	<li>RoboPaint, under the hood, uses the <a href="https://github.com/techninja/cncserver/">cncserver</a> and its RESTful API to operate. It is a relatively low level interface, with similar functionality to the serial protocol, plus a few helpful utilities. </li>
 	<li>The higher-level <a href="https://github.com/evil-mad/robopaint-mode-remote/blob/master/API.md">RoboPaint remote print API</a> allows local or remote "printing" of SVG files to EBB based machines, when attached to a computer running RoboPaint.</li>
 	 <li>The simplified ("GET only") <a href="https://github.com/techninja/cncserver/blob/master/scratch/SCRATCH.API.md">Scratch API</a> provides a method of controlling EBB based machines from the address bar of a web browser, or from simple programming languages that can retrieve data from an URL.</li>
 	</ul></li>
@@ -118,8 +118,8 @@ WaterColorBot through a real-time interface. This program is written in Processi
 
     <H2><a name="version_differences"></a>Differences between firmware versions</H2>
 <p>
-Although the EBB firmware is a continuously evolving code base, we have since version 2.0.1 taken care to avoid compatibility changes
-    that would affect the most common machines using the EBB: The EggBot, WaterColorBot and (more recently,) the AxiDraw). 
+Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes
+    that would affect the most common machines using the EBB: The EggBot, WaterColorBot and (more recently,) the AxiDraw. 
     If you are using one of these machines, there is generally no particular benefit or
     compelling reason for you to update your firmware to a newer version.
     (Older machines with older firmware will continue to work just fine with that older firmware.)
@@ -207,26 +207,26 @@ Although the EBB firmware is a continuously evolving code base, we have since ve
 <ul>    
 <li><a href="#A">A</a> &mdash; Analog value get
 <li><a href="#AC">AC</a> &mdash; Analog Configure
-<li><a href="#BL">BL</a> &mdash; Enter Bootloader
-<li><a href="#CN">CN</a> &mdash; Clear node count
+<li><a href="#BL">BL</a> &mdash; enter BootLoader
+<li><a href="#CN">CN</a> &mdash; Clear Node count
 <li><a href="#EM">EM</a> &mdash; Enable Motors
 <li><a href="#ES">ES</a> &mdash; E Stop
-<li><a href="#ND">ND</a> &mdash; Node Count Decrement
-<li><a href="#NI">NI</a> &mdash; Node Count Increment
+<li><a href="#ND">ND</a> &mdash; Node count Decrement
+<li><a href="#NI">NI</a> &mdash; Node count Increment
 
 <li><a href="#QB">QB</a> &mdash; Query Button
 <li><a href="#QC">QC</a> &mdash; Query Current
 <li><a href="#QL">QL</a> &mdash; Query Layer
 <li><a href="#QM">QM</a> &mdash; Query Motor
-<li><a href="#QN">QN</a> &mdash; Query node count
+<li><a href="#QN">QN</a> &mdash; Query Node count
 <li><a href="#QP">QP</a> &mdash; Query Pen
 
 <li><a href="#S2">S2</a> &mdash; General RC Servo Output
-<li><a href="#SC">SC</a> &mdash; Stepper and Servo Mode Configure
+<li><a href="#SC">SC</a> &mdash; Stepper and servo mode Configure
 <li><a href="#SE">SE</a> &mdash; Set Engraver
 <li><a href="#SL">SL</a> &mdash; Set Layer
 <li><a href="#SM">SM</a> &mdash; Stepper Move
-<li><a href="#SN">SN</a> &mdash; Set node count 
+<li><a href="#SN">SN</a> &mdash; Set Node count
 <li><a href="#SP">SP</a> &mdash; Set Pen State
 <li><a href="#TP">TP</a> &mdash; Toggle Pen 
 
@@ -335,6 +335,12 @@ Use this command to turn on or turn off individual analog
 This command turns off interrupts and jumps into the
         bootloader, so that new firmware may be uploaded. This particular method of entering
         bootloader mode is unique in that no physical button presses are required.
+        </p>	
+  <p>
+Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port
+method that the normal firmware commands use. A speical bootloader PC application (that uses
+USB HID to communicate with the bootloader on the EBB) must be run in order to upload new
+firmware HEX files to the EBB.
         </p></li>
 	<li><span style="font-weight: bold;">Version History:</span>  
 		Added in v1.9.5. <p>
@@ -343,7 +349,7 @@ This command turns off interrupts and jumps into the
         released on 7/3/2010 has a distinct LED blink mode - the USB LED
         stays on 3 times longer than the USR LED). With a previous
         version of the bootloader code, this command may cause the EBB
-        to be come unresponsive.</p></li>
+        to become unresponsive.</p></li>
 	</ul>
 
 <hr class="short" />    
@@ -368,7 +374,7 @@ See the "QN" command for a description of the node counter and its operations.
   
  <hr class="short" />    
      
-    <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB v1.1)</h4>
+    <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.1)</h4>
  
   	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
@@ -396,13 +402,13 @@ See the "QN" command for a description of the node counter and its operations.
 	Note that this version of the command is only for EBB hardware v1.1. </p>
 	</li>
       <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8th step mode, and disable Axis 2</li>
-      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable both axes in 1/4th step mode ?</li> (Brian-- please check.)
+      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axes 1 in 1/4th step mode, disable Axis 2</li>
     </ul>
          
       
 <hr class="short" />    
 
-    <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB v1.2 and newer)</h4>
+    <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.2 and newer)</h4>
  
   	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>[,<i>Enable2</i>]&lt;CR&gt;</code></li>
@@ -712,7 +718,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 
 	<li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer</li>
 	<li><span style="font-weight: bold;">Description:</span> 
-		<p>This command queries the EBB what state the pen is in. It
+		<p>This command queries the EBB for the current pen state. It
         will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a
         pen up/down command is pending in the FIFO, it will only report
         the new state of the pen after the pen move has been started.</p>
@@ -761,7 +767,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	        <li><code>SC,2,0</code> Use microcontroller to control on-board stepper driver chips
 	          (default)</li>
 	        <li><code>SC,2,1</code>  Disconnect microcontroller from the
-	        on-board stepper motor drivers, to drive external step/direction motor drives. In this mode, you can use the
+	        on-board stepper motor drivers and drive external step/direction motor drivers instead. In this mode, you can use the
 	        microcontroller to control external step/direction drivers
 	          based on the following pin assignments:
 	        <ul>
@@ -771,8 +777,8 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 		          <li>DIR1: RC2</li>
 		          <li>STEP2: RA5</li>
 		          <li>DIR2: RA2</li>
-	        </ul>Note also that in this mode, you can drive the
-			step/direction/enable lines of the on board stepper motor drivers from the
+	        </ul>Note also that in this mode, you can independenatly drive the
+			step/direction/enable lines of the on board stepper motor drivers externally from the
 			pins of J5 and J4 (all are broken out; see schematic).</li>
 
 			
@@ -794,9 +800,9 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
         <li><code>SC,5,<i>servo_max</i></code> Set the maximum value for the
           RC servo output position. <i>servo_max</i> may be in the range 1 to 65535, in units of 83 ns intervals. 
           This sets the "Pen Down" position. 
-          <br />Default: 16000 (1.3 ms) on reset.</li>          
+          <br />Default: 16000 (1.33 ms) on reset.</li>          
           
-         <li><code>SC,8,<i>maximum_S2_channels</i></code> Sets the number of
+         <li><code>SC,8,<i>maximum_S2_channels</i></code> Sets the number of RC servo PWM
           channels, each of <i>S2_channel_duration_ms</i> before
           cycling back to channel 1 for S2 command. Values from 1 to 24
           are valid for <i>maximum_S2_channels</i>.
@@ -804,19 +810,19 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
         </li>
         <li><code>SC,9,<i>S2_channel_duration_ms</i></code> Set the number of
           milliseconds before firing the next enabled channel for the S2
-          command. [Brian: what values are allowed?]
+          command. Values from 1 to 6 are valid for <i>S2_channel_duration_ms</i>. 
           <br />Default: 3 ms on reset.
         </li>
         <li><code>SC,10,<i>servo_rate</i></code> Set rate of change of the servo position, 
         for both raising and lowering movements.
         
-        Same as <i>rate</i> parameter in S2 command.
+        Same units as <i>rate</i> parameter in S2 command.
         </li>
         <li><code>SC,11,<i>servo_rate_up</i></code> Set the rate of change of the
-          servo when going up. Same as <i>rate</i>
+          servo when going up. Same units as <i>rate</i>
           parameter in S2 command. </li>
         <li><code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of
-          the servo when going down. Same as
+          the servo when going down. Same units as
           <i>rate</i> parameter in S2 command.</li>
         <li><code>SC,13,<i>use_alt_pause</i></code> - turns on (1) or off (0)
           alternate pause button function on RB0. On by default. For
@@ -852,7 +858,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
       <ul>
         <li><i>state</i> may be either 0 to disable or 1 to enable the engraver output.</li>
         <li><i>power</i> is an optional argument, with allowed values of integers in the range 0 to 1023.</li>
-        <li><i>use_motion_queue</i> is an optional argument, with allowed values of 0 or 1.</li>
+        <li><i>use_motion_queue</i> is an optional argument, with allowed values of 0 (immediate) or 1 (use motion queue).</li>
         
       </ul>
  	<li><span style="font-weight: bold;">Description:</span>
@@ -861,11 +867,11 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
         power. Use SE,0 to disable this feature.</p>
         <p>
 The <i>power</i> argument represents the
-        relative power (percent duty cycle of the PWM signal), where 0 is off
-        and 1023 is full on. If this optional argument is not included, then the power will be set at 50&percnt; duty cycle.
+        power (duty cycle of the PWM signal), where 0 is always off
+        and 1023 is always on. If this optional argument is not included, then the power will be set at 512 (50&percnt;) duty cycle.
 	       </p>
         <p> 
-         If <i>use_motion_queue</i> has the value of 1, then this SE command will be added to the motion queue just like SM and SP commands, and thus will be executed when the previous motion commands have finished. Note that if you need to use this argument, the <i>power</i> argument is not optional. If <i>use_motion_queue</i> has value 0 (or if it is omitted) the command is executed immediately, and is not added to the queue.
+         If the <i>use_motion_queue</i> parameter has the value of 1, then this SE command will be added to the motion queue just like SM and SP commands, and thus will be executed when the previous motion commands have finished. Note that if you need to use this argument, the <i>power</i> argument is not optional. If <i>use_motion_queue</i> has value 0 (or if it is omitted) the command is executed immediately, and is not added to the queue.
         </p>
  	<p>
  	</p>
@@ -873,7 +879,7 @@ The <i>power</i> argument represents the
 	 	
 	 	      <li><span style="font-weight: bold;">Example:</span> <code>SE,1,1023\r</code> Turns on the engraver output with maximum power</li>
 	 	      <li><span style="font-weight: bold;">Example:</span> <code>SE,0\r</code> Turns off the engraver output</li>
-	 	      <li><span style="font-weight: bold;">Example:</span> <code>SE,0,0,1\r</code> Adds a command to the motion queue, that (when executed) turns off the engraver output. [Brian, please double check]</li>
+	 	      <li><span style="font-weight: bold;">Example:</span> <code>SE,0,0,1\r</code> Adds a command to the motion queue, that (when executed) turns off the engraver output.</li>
 
 	 	
 	  	<li><span style="font-weight: bold;">Version History:</span>  
@@ -930,8 +936,8 @@ The <i>power</i> argument represents the
 	<li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-        <li><i>duration</i> is an integer in the range from 1 to 1677215, giving time in milliseconds.</li>
-        <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -1677215 to 1677215, giving movement distance in steps.</li>
+        <li><i>duration</i> is an integer in the range from 1 to 16,777,215, giving time in milliseconds.</li>
+        <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16,777,215 to 16,777,215, giving movement distance in steps.</li>
       </ul>
 
 	<li><span style="font-weight: bold;">Description:</span> 
@@ -948,12 +954,11 @@ The <i>power</i> argument represents the
           		</p> <p>
 			The minimum speed at which the EBB can generate steps for each
         motor is 1.31 steps/second. The maximum speed is
-        25,000 steps/second. If the XM command finds that this speed range
+        25,000 steps/second. If the SM command finds that this speed range
         will be violated on either axis, it will output an error message
-        declaring such and it will not complete the move. Note that the
-        range is checked on Axis1 and Axis2, NOT on AxisA and AxisB.
+        declaring such and it will not complete the move. 
         </p> <p>
-	        Note that internally the EBB generates an ISR at the 25 kHz
+	        Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz
         rate. Each time the ISR fires, the EBB determines if a step
         needs to be taken for a given axis or not. The practical result
         of this is that all steps will be 'quantized' to the 25 kHz
@@ -1010,7 +1015,7 @@ The <i>power</i> argument represents the
 	<li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-        <li><i>value</i> is an unsigned long integer.</li>
+        <li><i>value</i> is an unsigned long (four byte) integer.</li>
       </ul>
 
 	<li><span style="font-weight: bold;">Description:</span> 
@@ -1031,7 +1036,6 @@ See the "QN" command for a description of the node counter and its operations.
       
  	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>
-	-- Brian: Please check that this interpretation of which commands are optional is correct.
 	
 	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
 
@@ -1082,11 +1086,11 @@ See the "QN" command for a description of the node counter and its operations.
         the 'Pen up position' (<i>servo_min</i>), and at boot
         <i>servo_min</i> is set to 12000 which results in a pulse width
         of 1.0 ms on boot. <i>servo_max</i> is set to 16000 on boot, so
-        the down position will be 1.3 ms unless changed with the "SC,5" Command.
+        the down position will be 1.33 ms unless changed with the "SC,5" Command.
 </p><p>	
 		<b>Digital outputs:</b> On older EBB hardware versions 1.1, 1.2 and 1.3, this command
 		will make the solenoid output turn on and
-        off. On all EBB versions it will also make the RC servo output
+        off. On all EBB versions it will make the RC servo output
         on RB1 move to the up or down position. Also, by default, it
         will turn on RB4 or turn off RB4 as a simple digital output, so
         that you could use this to trigger a laser for example.
@@ -1187,7 +1191,7 @@ See the "QN" command for a description of the node counter and its operations.
         is set low. This time is controlled by hardware (the
         ECCP2 in the CPU) so there is very little jitter in the pulse durations.
         <i>position</i> is in units of 1/12,000 of a second, so 32,000
-        for <i>position</i> would be about 2.666 ms. [Brian: Corrected-- was "exactly 3ms"] A value of 0 will produce zero output only, without no pulse created.
+        for <i>position</i> would be 2.666 ms. A value of 0 will produce zero length, without any pulse.
 	</p><p>
 		The number of available channels is normally (by default) 8.
         This can be reduced with the SC,8 command. The S2 RC
@@ -1258,25 +1262,25 @@ See the "QN" command for a description of the node counter and its operations.
 	
 	
 	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
-	<li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-		<li><i>position</i>, a number in the range 0 to 32,000. 
+		<li><i>position</i>, a number in the range 0 to 65,535. 
 		<p />The "on time" of the signal, in units of
 		1/12,000,000th of a second (about 83 &mu;s).
 		</li>
 		<li><i>output_pin</i>, a number in the range 0 to 24.
 		<p />
-		The physical RPx pin number to assign this channel to.<br>
+		The physical RPx pin number to use for generating the servo pulses.<br>
 		
 		</li>
 		<li>
-			<i>rate</i> (optional), a number in the range 0 to 65535.
+			<i>rate</i> (optional), a number in the range 0 to 65,535.
 			<p />
 			The rate at which to change to the new setting.
 		</li>
 		<li>
-			<i>delay</i> (optional), a number in the range 0 to 65535.
+			<i>delay</i> (optional), a number in the range 0 to 65,535.
 			<p />
 			Delay before next command, milliseconds.
 		</li>
@@ -1286,22 +1290,22 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Description:</span> 
 	<p>
 		This command allows
-        you to control the RC servo output system on the EBB, to configures a generic RC servo output.
+        you to control the RC servo output system on the EBB, to configure generic RC servo outputs.
          
   	</p><p>   
 	  	<b>Servo channels and time slices:</b> 
  
-        Including the pen-lift servo, there are eight 
+        Including the pen-lift servo, there are (by default) eight 
         software-defined RC
         servo 'channels', which have no physical meaning other than we
         can output up to 8 separate signals at once. 
         These channels are internally assigned as you use the S2 command
-        to create additional servo outputs, up to a maximum of 8.
+        to create additional servo outputs, up to a maximum of 8 (this maximum can be changed with the SC,8,X command).
         
   	</p><p>   
         Many I/O
         pins on the MCU have RPx numbers (please refer to the schematic), and you can output
-        RC servo pulses on up to 8 of these RPx pins.
+        RC servo pulses on up to 8 of these RPx pins at once.
           	</p><p>   
         The RC servo system will cycle through each of the 8
         channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat
@@ -1315,13 +1319,13 @@ See the "QN" command for a description of the node counter and its operations.
         is set low. This time is controlled by hardware (the
         ECCP2 in the CPU) so there is very little jitter in the pulse durations.
         <i>position</i> is in units of 1/12,000 of a second, so 32,000
-        for <i>position</i> would be about 2.666 ms. [Brian: Corrected-- was "exactly 3ms"]. A value of 0 will produce zero output only, with no pulse created.
+        for <i>position</i> would be about 2.666 ms. A value of 0 will produce zero output only, with no pulse created.
+        If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms)
+        then the smaller of the two values will be used to generate the pulse.
 	</p><p>
 		
-		[ BRIAN: Added this paragraph back in, since it still appears to apply. Please check.]
-		
 		The number of available channels is normally (by default) 8.
-        This can be reduced with the SC,8 command. The S2 RC
+        This can be changed with the SC,8 command. The S2 RC
         servo output command cycles from channel 1 through channel
         <i>maximum_S2_channels</i> (normally 8), outputting any enabled
         channel's pulse from 0 ms to 3 ms. For a given channel, the
@@ -1330,14 +1334,18 @@ See the "QN" command for a description of the node counter and its operations.
         Thus, each channel's output pulse will be repeated every 24 ms.
         However, if you change
         the <i>maximum_S2_channels</i> you will change the repetition
-        rate of the pulses.   The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the 
+        rate of the pulses. The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the 
         SC,9 command.
   
 	</p><p>        
-    	<b>Delay:</b> The <i>delay</i> argument gives the number of milliseconds to delay the start of the next command. This is an optional argument that defaults to 0, giving no added delay.
-    	[Brian: Does this mean that this command is added to the motion queue?]
+    	<b>Delay:</b> The <i>delay</i> argument gives the number of milliseconds to delay the start of the next command in the
+      motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next
+      motion command to begin immediately after the S2 command has started. 
         
-        
+	</p>
+  <p>        
+    	<b>Motion Queue:</b> All S2 commands are added to the motion queue, even if their <i>delay</i> parameters
+         are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands.      
 	</p><p>        
     	<b>Slew rate:</b> 
 
@@ -1350,7 +1358,8 @@ See the "QN" command for a description of the node counter and its operations.
         generated until the new target is reached. This means that the
         units of <i>rate</i> are 1/12,000th of a second per
         <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or
-        1/12,000th of a second per 24 ms.
+        1/12,000th of a second per 24 ms. The slew rate is completely independent of
+        the <i>delay</i>.
  	</p><p>        
     	<b>Collisions with SP and TP:</b> 
    	 	The normal pen up/down servo control (SP and TP) commands
@@ -1455,15 +1464,14 @@ See the "QN" command for a description of the node counter and its operations.
       </li>
 
    	<li><span style="font-weight: bold;">Example:</span>  <code>S2,24000,6\r</code>
-   	Use RP6 as a RC servo output, and set its on-time to 2 ms, including a <i>rate</i> argument of 6. (Recall that <i>rate</i> and <i>delay</i> are optional.)
+   	Use RP6 as a RC servo output, and set its on-time to 2 ms.
    	<li><span style="font-weight: bold;">Example:</span>  <code>S2,0\r</code>
    	Turn off all RC servo support.
    	
    	<li><span style="font-weight: bold;">Example:</span>  <code>S2,0,5\r</code> Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
  
-    	<li><span style="font-weight: bold;">Example:</span>  <code>S2,10000,5\r</code> Send a 0.83 ms pulse out pin RB2. [ Brian- Corrected; please check.]
-     	<li><span style="font-weight: bold;">Example:</span>  <code>S2,27500,5\r</code> Send a 2.3 ms pulse out pin RB2. 
- 
+    	<li><span style="font-weight: bold;">Example:</span>  <code>S2,10000,5,100\r</code> Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
+     	<li><span style="font-weight: bold;">Example:</span>  <code>S2,27500,5,10,50\r</code> Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
    	
 	<li><span style="font-weight: bold;">Version History:</span> This version of the S2 command is only for firmware versions v2.2.0 and newer
 	</li>
@@ -1538,7 +1546,7 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
 	<p>
 	This command asks the EBB what the current value of the Node
-        Counter is. The Node Counter is an unsigned long int (8 bytes)
+        Counter is. The Node Counter is an unsigned long int (4 bytes)
         value that gets incremented each time an "SM" command finishes
         executing. The Node Counter can be used to keep track of progress during
         various operations as needed.
@@ -1571,8 +1579,8 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-        <li><i>duration</i> is an integer in the range from 1 to 1677215, giving time in milliseconds.</li>
-        <li><i>axisA</i> and <i>axisB</i> are integers, each in the range from -1677215 to 1677215, giving movement distances in steps.</li>
+        <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
+        <li><i>axisA</i> and <i>axisB</i> are integers, each in the range from -16777215 to 16777215, giving movement distances in steps.</li>
       </ul>
 
 	<li><span style="font-weight: bold;">Description:</span> 
@@ -1668,7 +1676,7 @@ Note that internally the EBB generates an ISR at the 25 kHz
 	 <p />     
 	        
 	        Now, when you're using the SP,0 and SP,1 commands,
-        the servo_min (defaults to 16000, or 1.3 ms) and servo_max
+        the servo_min (defaults to 16000, or 1.33 ms) and servo_max
         (defaults to 20000, or 1.6 ms) get used as the positions. And the
         servo_rate_up and servo_rate_down get used as the rates.
 	        
