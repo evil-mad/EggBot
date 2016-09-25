@@ -385,7 +385,7 @@ See the "QN" command for a description of the node counter and its operations.
  	<li><span style="font-weight: bold;">Arguments:</span> For each stepper motor (<i>EnableAxis1</i> or <i>EnableAxis2</i>), an integer in the range of 0 through 4, inclusive. The allowed values and their effects are as follows:
         <ul>
           <li>0: Disable that axis </li>
-          <li>1: Enable in 1/8th step mode (default)</li>
+          <li>1: Enable in 1/8 step mode (default)</li>
           <li>2: Enable in 1/4 step mode</li>
           <li>3: Enable in 1/2 step mode</li>
           <li>4: Enable in full step mode<br>
@@ -401,8 +401,8 @@ See the "QN" command for a description of the node counter and its operations.
 	<p>
 	Note that this version of the command is only for EBB hardware v1.1. </p>
 	</li>
-      <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8th step mode, and disable Axis 2</li>
-      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axes 1 in 1/4th step mode, disable Axis 2</li>
+      <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8 step mode, and disable Axis 2</li>
+      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axis 1 in 1/4 step mode, disable Axis 2</li>
     </ul>
          
       
@@ -423,8 +423,8 @@ See the "QN" command for a description of the node counter and its operations.
   	The allowed values of <i>Enable1</i> are as follows:</p>
         <ul>
           <li>0: Disable motor 1 </li>
-          <li>1: Enable motor 1, set both motors to 1/16th step mode (default resolution upon reset)</li>
-          <li>2: Enable motor 1, set both motors to  1/8th step mode</li>
+          <li>1: Enable motor 1, set both motors to 1/16 step mode (default resolution upon reset)</li>
+          <li>2: Enable motor 1, set both motors to  1/8 step mode</li>
           <li>3: Enable motor 1, set both motors to  1/4 step mode</li>
           <li>4: Enable motor 1, set both motors to  1/2 step mode</li>
           <li>5: Enable motor 1, set both motors to  full step mode<br>
@@ -449,7 +449,7 @@ See the "QN" command for a description of the node counter and its operations.
 	Note that this version of the command is only for EBB hardware v1.2 and newer.</p>
 	</li>
       <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, and disable motor 2</li>
-      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set both axes to 1/8th step mode and enable motor 1.</li>
+      <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set both axes to 1/8 step mode and enable motor 1.</li>
       <li><span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set both axes to 1/4 step mode and enable both motors.</li>
       <li><span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, and disable motor 1.</li>
     <li><span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (which will freewheel)</li>
@@ -777,9 +777,9 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 		          <li>DIR1: RC2</li>
 		          <li>STEP2: RA5</li>
 		          <li>DIR2: RA2</li>
-	        </ul>Note also that in this mode, you can independenatly drive the
-			step/direction/enable lines of the on board stepper motor drivers externally from the
-			pins of J5 and J4 (all are broken out; see schematic).</li>
+	        </ul>Note also that in this mode, you can externally drive the
+			step/direction/enable lines of the on board stepper motor drivers from the
+			pins of J4 and J5. (Please refer to the schematic for where these pins are broken out.)</li>
 
 			
 	        <li><code>SC,2,2</code> Disconnect microcontroller from both the
@@ -936,8 +936,8 @@ The <i>power</i> argument represents the
 	<li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-        <li><i>duration</i> is an integer in the range from 1 to 16,777,215, giving time in milliseconds.</li>
-        <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16,777,215 to 16,777,215, giving movement distance in steps.</li>
+        <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
+        <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16777215 to 16777215, giving movement distance in steps.</li>
       </ul>
 
 	<li><span style="font-weight: bold;">Description:</span> 
@@ -982,8 +982,8 @@ The <i>power</i> argument represents the
 	parameter had a issue where values over 2621 would produce
 	incorrect delays (when <i>axis1</i> and <i>axis2</i> are 0).
 	</li>		
-	<li>For versions prior to v2.2.5, <i>duration</i> must be a value in the range of 1 to 65,535, and the 
-	<i>axis1</i> and <i>axis2</i> values must be in the range -32,767 to +32,767.
+	<li>For versions prior to v2.2.5, <i>duration</i> must be a value in the range of 1 to 65535, and the 
+	<i>axis1</i> and <i>axis2</i> values must be in the range -32767 to +32767.
 	</li>
 	<li>
 	As of version 2.2.5, the <i>duration</i>, <i>axis1</i>,
@@ -993,7 +993,7 @@ The <i>power</i> argument represents the
 	for very long stepper moves.</li>
 	<li>As of version 2.2.8, the error messages for this command
 	have been corrected. If an input parameter is too large
-	(&gt;1677215) or a step rate is too fast (&gt;25 k steps/s) or
+	(&gt;16777215) or a step rate is too fast (&gt;25 k steps/s) or
 	too slow (&lt;1.31 steps/s) a proper error will be printed
 	back to the host. 
 	</li>
@@ -1140,7 +1140,7 @@ See the "QN" command for a description of the node counter and its operations.
         <p />A value of 0 disables all S2 outputs.
         
         </li>
-		<li><i>position</i>, a number in the range 0 to 32,000. 
+		<li><i>position</i>, a number in the range 0 to 32000. 
 		<p />The "on time" of the signal, in units of
 		1/12,000,000th of a second (about 83 &mu;s).
 		</li>
@@ -1190,7 +1190,7 @@ See the "QN" command for a description of the node counter and its operations.
         pin is set high. Then, <i>position</i> time later, the RPx pin
         is set low. This time is controlled by hardware (the
         ECCP2 in the CPU) so there is very little jitter in the pulse durations.
-        <i>position</i> is in units of 1/12,000 of a second, so 32,000
+        <i>position</i> is in units of 1/12,000 of a second, so 32000
         for <i>position</i> would be 2.666 ms. A value of 0 will produce zero length, without any pulse.
 	</p><p>
 		The number of available channels is normally (by default) 8.
@@ -1265,7 +1265,7 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
-		<li><i>position</i>, a number in the range 0 to 65,535. 
+		<li><i>position</i>, a number in the range 0 to 65535. 
 		<p />The "on time" of the signal, in units of
 		1/12,000,000th of a second (about 83 &mu;s).
 		</li>
@@ -1275,12 +1275,12 @@ See the "QN" command for a description of the node counter and its operations.
 		
 		</li>
 		<li>
-			<i>rate</i> (optional), a number in the range 0 to 65,535.
+			<i>rate</i> (optional), a number in the range 0 to 65535.
 			<p />
 			The rate at which to change to the new setting.
 		</li>
 		<li>
-			<i>delay</i> (optional), a number in the range 0 to 65,535.
+			<i>delay</i> (optional), a number in the range 0 to 65535.
 			<p />
 			Delay before next command, milliseconds.
 		</li>
@@ -1318,7 +1318,7 @@ See the "QN" command for a description of the node counter and its operations.
         pin is set high. Then, <i>position</i> time later, the RPx pin
         is set low. This time is controlled by hardware (the
         ECCP2 in the CPU) so there is very little jitter in the pulse durations.
-        <i>position</i> is in units of 1/12,000 of a second, so 32,000
+        <i>position</i> is in units of 1/12,000 of a second, so 32000
         for <i>position</i> would be about 2.666 ms. A value of 0 will produce zero output only, with no pulse created.
         If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms)
         then the smaller of the two values will be used to generate the pulse.
