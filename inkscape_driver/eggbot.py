@@ -235,8 +235,6 @@ class EggBot( inkex.Effect ):
 				else:
 					self.manualCommand()
 
-
-				
 			if self.serialPort is not None:
 				ebb_motion.doTimedPause(self.serialPort, 10) #Pause a moment for underway commands to finish...
 				ebb_serial.closePort(self.serialPort)	
@@ -917,7 +915,6 @@ class EggBot( inkex.Effect ):
 				self.LayersPlotted += 1
 		#Note: this function is only called if we are NOT plotting all layers.
 
-
 	def getDocProps( self ):
 		'''
 		Get the document's height and width attributes from the <svg> tag.
@@ -930,7 +927,6 @@ class EggBot( inkex.Effect ):
 			return False
 		else:
 			return True
-
 
 	def plotPath( self, path, matTransform ):
 		'''
@@ -993,7 +989,6 @@ class EggBot( inkex.Effect ):
 					self.fPrevX = self.fX
 					self.fPrevY = self.fY
 
-
 	def sendDisableMotors( self ):
 		# Insist on turning the engraver off.  Otherwise, if it is on
 		# and the pen is down, then the engraver's vibration may cause
@@ -1001,12 +996,14 @@ class EggBot( inkex.Effect ):
 		self.engraverOffManual()
 		ebb_motion.sendDisableMotors(self.serialPort)	
 
-
 	def penUp( self ):
 		self.virtualPenIsUp = True  # Virtual pen keeps track of state for resuming plotting.
 		if (self.bPenIsUp != True): # Continue only if pen state is down (or unknown)
 			if ( not self.resumeMode): # or if we're resuming.
 				ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay )				
+				if (self.options.penUpDelay  > 15):
+					if self.options.tab != '"manual"':
+						time.sleep(float(self.options.penUpDelay - 10)/1000.0)  #pause before issuing next command
 				self.bPenIsUp = True
 
 	def penDown( self ):
@@ -1017,7 +1014,9 @@ class EggBot( inkex.Effect ):
 				if self.penDownActivatesEngraver:
 						self.engraverOn() # will check self.enableEngraver
 				ebb_motion.sendPenDown(self.serialPort, self.options.penDownDelay )						
-		
+				if (self.options.penUpDelay  > 15):
+					if self.options.tab != '"manual"':
+						time.sleep(float(self.options.penDownDelay - 10)/1000.0)  #pause before issuing next command
 
 	def engraverOff( self ):
 		# Note: we don't bother checking self.engraverIsOn -- turn it off regardless
