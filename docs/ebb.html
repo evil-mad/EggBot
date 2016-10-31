@@ -207,6 +207,9 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <ul>    
 <li><a href="#A">A</a> &mdash; Analog value get
 <li><a href="#AC">AC</a> &mdash; Analog Configure
+<!--
+<li><a href="#AM">AM</a> &mdash; Accelerated stepper Move
+-->
 <li><a href="#BL">BL</a> &mdash; enter BootLoader
 <li><a href="#CN">CN</a> &mdash; Clear Node count
 <li><a href="#EM">EM</a> &mdash; Enable Motors
@@ -251,7 +254,7 @@ R, CU, T, O, I, V, MR, MW, PO, PI, PD, PC, PG.
 	<li><span style="font-weight: bold;">Description:</span> 
 	<p>Read all analog (ADC) input values.</p>
 
-	<p>When one or more analog channels are enabled (see "AC" command below),
+	<p>When one or more analog channels are enabled (see <a href="#AC">"AC"</a> command below),
         the "A" command will cause the EBB to return a list of all
         enabled channels and their associated 10 bit values.  </p>
       <p>The list of channels and their data will always be in sorted
@@ -319,6 +322,75 @@ Use this command to turn on or turn off individual analog
         This means that this pin is internally connected to Analog Channel 8.
         See chapter 21 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/39931d.pdf">PIC18F46J50
           datasheet</a> to read more about the ADC converter.</p></li></ul>
+
+
+
+
+
+<!--
+	<hr class="short" />    
+
+    <h4><a name="AM"></a> "AM" &mdash; Accelerated stepper Move</h4>
+
+<B>Important note:</B> Documentation for this command is preliminary and should not be relied upon.
+
+  	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>AM,<i>initial_velocity</i>,<i>final_velocity</i>,<i>axis1</i>,<i>axis2</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+
+	<li><span style="font-weight: bold;">Firmware versions:</span>  v2.4.0 and newer</li>
+	<li><span style="font-weight: bold;">Arguments:</span> 
+      <ul>
+        <li><i>initial_velocity</i> is an integer in the range from 2 to 35355, giving initial velocity in steps per second. (See additional notes below.)</li>
+        <li><i>final_velocity</i> is an integer in the range from 2 to 35355, giving final velocity in steps per second. (See additional notes below.)</li>
+        <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16777215 to 16777215, giving movement distance in steps.</li>
+      </ul>
+
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>
+			Within certain bounds, this command can be used to draw a straight line
+			between two points, while accelerating or decelerating. 
+		</p><p>
+			Please be advised that velocity values below 200 steps per second are not recommended. 
+			Also, note that the maximum speed of either motor is 25,000 steps/second.
+        </p> <p>
+			The input values of the initial and final velocity are speeds of a 
+			vector pointing between the initial position and the final position, distance
+			(<i>axis1</i>, <i>axis2</i>) away.
+        </p> <p>The sign of <i>axis1</i> and <i>axis2</i> represent the
+          direction each motor should turn.
+          		</p> <p>
+			The minimum speed at which the EBB can generate steps for each
+        motor is 1.31 steps/second. The maximum speed is
+        25,000 steps/second. Since the velocity input parameters for this function
+        are velocity along the direction of motion (rather than per motor), it is up
+        to the user to ensure that these maximum and minimum values will be respected 
+        both at the initial and final velocities. 
+        
+                </p> <p>
+	    As described in the <a href="#SM">"SM"</a> command documentation below, all EBB
+	    motion is 'quantized' to the 25 kHz
+        (40 &mu;s) time intervals, and thus as the step rate gets close to
+        25 kHz the 'correct' time between steps will not be generated. For particularly slow moves &mdash;
+        where the initial or final velocity on either axis is below 100 steps per second, 
+        the total time of the move may be noticeably different than expected. 
+        In extreme cases (e.g., <code>AM,1000,1000,10000,10\r</code>)
+        one axis may completely finish its movement well before the other, giving a final velocity that
+        is not in the correct direction.  
+        </p> <p>
+	       This function may not accept (without producing an error) some values as parameter inputs that
+	       do not produce results as expected. Ensure that
+	       all parameter inputs are within the recommended values above. </p>
+		
+	</li>
+
+	<li><span style="font-weight: bold;">Example:</span>  <code>AM,400,4000,250,-500\r</code> Move axis1 by 250 steps and axis2 by -500 steps, starting at a velocity of 400 steps per second, and ending at a velocity of 4000 steps per second.</li>
+
+   <li><span style="font-weight: bold;">Version History:</span>  
+		Added in v2.4.0	</li>
+
+	</ul>	
+-->
     
 <hr class="short" />
     
