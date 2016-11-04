@@ -208,18 +208,18 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <li><a href="#A">A</a> &mdash; Analog value get
 <li><a href="#AC">AC</a> &mdash; Analog Configure
 <li><a href="#BL">BL</a> &mdash; enter BootLoader
-<li><a href="#C">C</a> &mdash; Configure -
+<li><a href="#C">C</a> &mdash; Configure
 <li><a href="#CN">CN</a> &mdash; Clear Node count
 <li><a href="#CK">CK</a> &mdash; Check Input -
 <li><a href="#CU">CU</a> &mdash; Configure -
 <li><a href="#EM">EM</a> &mdash; Enable Motors
 <li><a href="#ES">ES</a> &mdash; E Stop
-<li><a href="#I">I</a> &mdash; Input -
+<li><a href="#I">I</a> &mdash; Input
 <li><a href="#MR">MR</a> &mdash; Memory Read
 <li><a href="#MW">MW</a> &mdash; Memory Write
 <li><a href="#ND">ND</a> &mdash; Node count Decrement
 <li><a href="#NI">NI</a> &mdash; Node count Increment
-<li><a href="#O">O</a> &mdash; Output -
+<li><a href="#O">O</a> &mdash; Output
 <li><a href="#PC">PC</a> &mdash; Pulse Configure
 <li><a href="#PD">PD</a> &mdash; Pin Direction 
 <li><a href="#PG">PG</a> &mdash; Pulse Go
@@ -364,6 +364,31 @@ firmware HEX files to the EBB.
         to become unresponsive.</p></li>
 	</ul>
 
+<hr class="short" />
+
+  <h4><a name="C"></a>"C" &mdash; Configure (pin directions)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>PortA_IO</i>: An integer from 0 to 255. Value written to TRISA register.</li>
+			<li><i>PortB_IO</i>: An integer from 0 to 255. Value written to TRISB register.</li>
+			<li><i>PortC_IO</i>: An integer from 0 to 255. Value written to TRISC register.</li>
+			<li><i>PortD_IO</i>: An integer from 0 to 255. Value written to TRISD register.</li>
+			<li><i>PortE_IO</i>: An integer from 0 to 255. Value written to TRISE register.</li>
+    </ul>
+	</li>	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command takes five bytes worth of paramters, one for each TRISx register in the processor, and writes those
+		  values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and 
+			it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be
+			an output, and a 1 sets it to be an input.</p>
+		<p>This command is useful if you want to set up the pin directions for each and every pin on the procesor at once.
+		  If you just one to set one pin at a time, use the <code>PC</code> command.</p>
+	</li>
+	</ul>
+  
 <hr class="short" />    
 
        <h4><a name="CN"></a>"CN" &mdash; Clear node count [obsolete]</h4>
@@ -383,8 +408,7 @@ See the "QN" command for a description of the node counter and its operations.
 		Added in v1.9.3, removed in v1.9.5</p></li>
 	</ul>
      
-  
- <hr class="short" />    
+<hr class="short" />    
      
     <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.1)</h4>
  
@@ -521,6 +545,30 @@ See the "QN" command for a description of the node counter and its operations.
 		
 <hr class="short" />
 
+  <h4><a name="I"></a>"I" &mdash; Input (digital)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command reads every PORTx register (where x is A through E) and prints out each byte-wide reigster value as a three
+			digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints 
+			them out. If you need the value of a particular pin, you can extract it from the value printed for that port by
+			looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would
+			look at the 5th bit (0x10) of the PortB byte in the return packet.</p>
+		<p>For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this command
+			will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the
+			processor datasheet) and return all of their values.</p>
+	</li>
+  <li><span style="font-weight: bold;">Example:</span><code>I\r</code>
+	</li>
+  <li><span style="font-weight: bold;">Example Return Packet:</span>
+		<code>I,128,255,130,000,007&lt;CR&gt;</code>
+	</li>
+	</ul>
+
+<hr class="short" />
+
   <h4><a name="MR"></a>"MR" &mdash; Memory Read</h4>
  	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
@@ -596,6 +644,29 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
      
 <hr class="short"/>
 
+	<h4><a name="O"></a>"O" &mdash; Output (digital)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>PortA</i>: An integer from 0 to 255. Represents the new value to write to the LATA register.</li>
+			<li><i>PortB</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATB register.</li>
+			<li><i>PortC</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATC register.</li>
+			<li><i>PortD</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATD register.</li>
+			<li><i>PortE</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATE register.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command simply takes its arguments and write them to the LATx registers. This allows you to output digital
+		  values to any or all of the pins of the microcontroller. The pins must be configured as digital outputs before
+			this command can have an effect on the actual voltage level on a pin.</p>
+  </li>
+	</ul>
+
+<hr class="short"/>
+
 	<h4><a name="PC"></a>"PC" &mdash; Pulse Configure</h4>
  	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>PC,<i>RB0_Lenth</i>,<i>RB0_Rate</i>[,<i>RB1_Lenth</i>,<i>RB1_Rate,<i>RB2_Lenth</i>,<i>RB2_Rate</i>,<i>RB3_Lenth</i>,<i>RB3_Rate</i>]</i>&lt;CR&gt;</code></li>
@@ -603,12 +674,12 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>RB0_Length</i> An integer from 0 to 65535. Represents the number of milliseconds RB0 will go high for.</li>
-      <li><i>RB0_Rate</i> An integer from <i>RB0_Length</i> to 65535. Represents the number of milliseconds between rising 
+			<li><i>RB0_Length</i>: An integer from 0 to 65535. Represents the number of milliseconds RB0 will go high for.</li>
+      <li><i>RB0_Rate</i>: An integer from <i>RB0_Length</i> to 65535. Represents the number of milliseconds between rising 
 				edges on RB0.</li> 
-			<li><i>RBx_Length</i> (optional) An integer from 0 to 65535. Represents the number of milliseconds RBx will go high for. 
+			<li><i>RBx_Length</i>: (optional) An integer from 0 to 65535. Represents the number of milliseconds RBx will go high for. 
 				'x' is 1, 2, and 3</li>
-      <li><i>RBx_Rate</i> (optional) An integer from <i>RBx_Length</i> to 65535. Represents the number of milliseconds between 
+      <li><i>RBx_Rate</i>: (optional) An integer from <i>RBx_Length</i> to 65535. Represents the number of milliseconds between 
 				rising edges on RBx. 'x' is 1, 2, and 3</li> 
     </ul>
 	</li>
@@ -635,9 +706,9 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>Port</i> is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
-      <li><i>Pin</i> is an integer in the range from 0 through 7. It specifies the pin to be used.</li> 
-      <li><i>Direction</i> is either 0 (output) or 1 (input) </li> 
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used.</li> 
+      <li><i>Direction</i>: is either 0 (output) or 1 (input) </li> 
     </ul>
 	</li>
 	<li><span style="font-weight: bold;">Description:</span>
@@ -659,7 +730,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>Value</i> is either 0 or 1. </li>
+			<li><i>Value</i>: is either 0 or 1. A value of 0 will stop the pulses, a value of 1 will start the pulses.</li>
     </ul>
 	</li>
 	<li><span style="font-weight: bold;">Description:</span>
@@ -684,9 +755,9 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>Port</i> is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
-      <li><i>Pin</i> is an integer in the range from 0 through 7. It specifies the pin to be used.</li>
-      <li><i>Value</i> is a 0 or 1. It reflets the state of the pin when read as a digital input.</li>
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used.</li>
+      <li><i>Value</i>: is a 0 or 1. It reflets the state of the pin when read as a digital input.</li>
     </ul>
 	</li>
 	<li><span style="font-weight: bold;">Description:</span>
@@ -709,9 +780,9 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>Port</i> is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used for the output.</li>
-      <li><i>Pin</i> is an integer in the range from 0 through 7. It specifies the pin to be used for the output.</li> 
-      <li><i>Value</i> is either 0 or 1. It specifies the logical value to be output on the pin.</li> 
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used for the output.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used for the output.</li> 
+      <li><i>Value</i>: is either 0 or 1. It specifies the logical value to be output on the pin.</li> 
     </ul>
 	</li>
 	<li><span style="font-weight: bold;">Description:</span>
