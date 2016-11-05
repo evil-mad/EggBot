@@ -211,19 +211,30 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <li><a href="#AM">AM</a> &mdash; Accelerated stepper Move
 -->
 <li><a href="#BL">BL</a> &mdash; enter BootLoader
+<li><a href="#C">C</a> &mdash; Configure
 <li><a href="#CN">CN</a> &mdash; Clear Node count
+<li><a href="#CK">CK</a> &mdash; Check Input
+<li><a href="#CU">CU</a> &mdash; Configure User Options
 <li><a href="#EM">EM</a> &mdash; Enable Motors
 <li><a href="#ES">ES</a> &mdash; E Stop
+<li><a href="#I">I</a> &mdash; Input
+<li><a href="#MR">MR</a> &mdash; Memory Read
+<li><a href="#MW">MW</a> &mdash; Memory Write
 <li><a href="#ND">ND</a> &mdash; Node count Decrement
 <li><a href="#NI">NI</a> &mdash; Node count Increment
-
+<li><a href="#O">O</a> &mdash; Output
+<li><a href="#PC">PC</a> &mdash; Pulse Configure
+<li><a href="#PD">PD</a> &mdash; Pin Direction 
+<li><a href="#PG">PG</a> &mdash; Pulse Go
+<li><a href="#PI">PI</a> &mdash; Pin Input 
+<li><a href="#PO">PO</a> &mdash; Pin Output
 <li><a href="#QB">QB</a> &mdash; Query Button
 <li><a href="#QC">QC</a> &mdash; Query Current
 <li><a href="#QL">QL</a> &mdash; Query Layer
 <li><a href="#QM">QM</a> &mdash; Query Motor
 <li><a href="#QN">QN</a> &mdash; Query Node count
 <li><a href="#QP">QP</a> &mdash; Query Pen
-
+<li><a href="#R">R</a> &mdash; Reset
 <li><a href="#S2">S2</a> &mdash; General RC Servo Output
 <li><a href="#SC">SC</a> &mdash; Stepper and servo mode Configure
 <li><a href="#SE">SE</a> &mdash; Set Engraver
@@ -231,8 +242,9 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <li><a href="#SM">SM</a> &mdash; Stepper Move
 <li><a href="#SN">SN</a> &mdash; Set Node count
 <li><a href="#SP">SP</a> &mdash; Set Pen State
-<li><a href="#TP">TP</a> &mdash; Toggle Pen 
-
+<li><a href="#T">T</a> &mdash; Timed Digital/Analog Read
+<li><a href="#TP">TP</a> &mdash; Toggle Pen
+<li><a href="#V">V</a> &mdash; Version Query
 <li><a href="#XM">XM</a> &mdash; Stepper Move, for Mixed-axis Geometries
 </ul>
   
@@ -424,6 +436,35 @@ firmware HEX files to the EBB.
         to become unresponsive.</p></li>
 	</ul>
 
+<hr class="short" />
+
+  <h4><a name="C"></a>"C" &mdash; Configure (pin directions)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,
+		<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
+	</li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>PortA_IO</i>: An integer from 0 to 255. Value written to TRISA register.</li>
+			<li><i>PortB_IO</i>: An integer from 0 to 255. Value written to TRISB register.</li>
+			<li><i>PortC_IO</i>: An integer from 0 to 255. Value written to TRISC register.</li>
+			<li><i>PortD_IO</i>: An integer from 0 to 255. Value written to TRISD register.</li>
+			<li><i>PortE_IO</i>: An integer from 0 to 255. Value written to TRISE register.</li>
+    </ul>
+	</li>	
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command takes five bytes worth of paramters, one for each TRISx register in the processor, and writes those
+		  values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and 
+			it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be
+			an output, and a 1 sets it to be an input.</p>
+		<p>This command is useful if you want to set up the pin directions for each and every pin on the procesor at once.
+		  If you just one to set one pin at a time, use the <code>PC</code> command.</p>
+		<p>This command does not need to be used to configure analog inputs. The <code>AC</code> command is used for that.</p>
+	</li>
+	</ul>
+  
 <hr class="short" />    
 
        <h4><a name="CN"></a>"CN" &mdash; Clear node count [obsolete]</h4>
@@ -443,8 +484,76 @@ See the "QN" command for a description of the node counter and its operations.
 		Added in v1.9.3, removed in v1.9.5</p></li>
 	</ul>
      
-  
- <hr class="short" />    
+<hr class="short" />
+     
+  <h4><a name="CK"></a>"CK" &mdash; Check Input</h4> 
+	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>CK,<i>Param1_value</i>,<i>Param2_value</i>,
+		<i>Param3_value</i>,<i>Param4_value</i>,<i>Param5_value</i>,<i>Param6_value</i>,<i>Param7_value</i>,
+		<i>Param8_value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span>
+		<p><code>Param1=</code><i>Param1_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param2=</code><i>Param2_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param3=</code><i>Param3_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param4=</code><i>Param4_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param5=</code><i>Param5_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param6=</code><i>Param6_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param7=</code><i>Param7_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param8=</code><i>Param8_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>OK&lt;CR&gt;</code></p>
+	</li>
+	<li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Param1_value</i> An unsigned one byte integer from 0 to 255.</li>
+			<li><i>Param2_value</i> A signed one byte integer from -128 to 127.</li>
+			<li><i>Param3_value</i> An unsigend two byte integer from 0 to 65535.</li>
+			<li><i>Param4_value</i> A signed two byte integer from -32768 to 32767.</li>
+			<li><i>Param5_value</i> An unsigned four byte integer from 0 to 4294967295.</li>
+			<li><i>Param6_value</i> A signed four byte integer from -2147483648 to 2147483647.</li>
+			<li><i>Param7_value</i> An case sensitive character.</li>
+			<li><i>Param8_value</i> An case forecd upper case character.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command is used to test out the various parameter parsing routines in the EBB. Each parameter is
+		  a different data type. The command simply prints out the values it parsed to allow the developer to 
+			confirm that the parsing code is working properly.</p>
+		<p>For <i>Param7_value</i>, any typeable character is accpeted.</p>
+		<p>FOr <i>Param8_value</i>, any typeable character is accpeted, and then converted to upper case before printing.</p>
+	</li>
+  </ul>
+
+<hr class="short" />
+     
+  <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4> 
+	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>CU,<i>Prameter_Number</i>,<i>Parameter_Value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Prameter_Number</i> The value 1 or 2. Speficies what <i>Parameter_Value</i> means.</li>
+      <li><i>Parameter_Value</i> An integer from -32768 to 32767. Meaning an acceptable values depend on value of <i>Parameter_Number</i></li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command allows for configuring some run time options. The configuration options chosen wiht this command do 
+			not survive a reboot, and they will return to their default values on a reset or boot.</p>
+		<p>
+		<ul>
+			<li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
+			<li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
+			<p>Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
+			<li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
+			<li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
+			<p>Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back
+				to the PC, which may make processing of the data returned from the EBB easier.</p>
+		</ul>
+	</li>
+  </ul>
+
+<hr class="short" />
      
     <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.1)</h4>
  
@@ -579,9 +688,78 @@ See the "QN" command for a description of the node counter and its operations.
    	</li>
 </ul>
 		
-		
-	
- <hr class="short" />    
+<hr class="short" />
+
+  <h4><a name="I"></a>"I" &mdash; Input (digital)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command reads every PORTx register (where x is A through E) and prints out each byte-wide reigster value as a three
+			digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints 
+			them out. If you need the value of a particular pin, you can extract it from the value printed for that port by
+			looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would
+			look at the 5th bit (0x10) of the PortB byte in the return packet.</p>
+		<p>For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this command
+			will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the
+			processor datasheet) and return all of their values.</p>
+	</li>
+  <li><span style="font-weight: bold;">Example:</span><code>I\r</code>
+	</li>
+  <li><span style="font-weight: bold;">Example Return Packet:</span>
+		<code>I,128,255,130,000,007&lt;CR&gt;</code>
+	</li>
+	</ul>
+
+<hr class="short" />
+
+  <h4><a name="MR"></a>"MR" &mdash; Memory Read</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM to read.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command reads one byte from RAM and prints it out. The <i>Data</i> is always printed 
+			as a three digit decimal number.</p>
+	</li>
+  <li><span style="font-weight: bold;">Example:</span><code>MR,422\r</code>
+		<p>This command would read 
+		from memory address 422 and print out its current value.</p>
+	</li>
+  <li><span style="font-weight: bold;">Example Return Packet:</span>
+		<code>MR,071&lt;CR&gt;</code>
+	</li>
+	</ul>
+     		
+<hr class="short" />
+
+  <h4><a name="MW"></a>"MW" &mdash; Memory Write</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>MW,<i>Address</i>,<i>Data</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM that <i>Data</i> will be written to.</li>
+      <li><i>Length</i>: An integer from 0 to 255. Represents the byte of data to write to <i>Address</i>.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command writes one byte to RAM. In order for this command to be useful, you will need to know
+		  what addresses in RAM are useful to you. This would normally be available by reading the source
+			code for the EBB firmware and looking at the .map file for a particular version build to see
+			where certain variables are located in RAM.</p>
+		<p>Writing to areas in RAM that are currently in use by the firmware may result in unplanned crashes.</p>
+	</li>
+	</ul>
+
+<hr class="short" />    
 
        <h4><a name="ND"></a>"ND" &mdash; Node Count Decrement</h4>
       
@@ -597,14 +775,10 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
         </p></li>
 	<li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
 	</ul>
-     
-     	
-		
+     		
 <hr class="short" />    
  
- 
-       <h4><a name="NI"></a>"NI" &mdash; Node Count Increment</h4>
-      
+  <h4><a name="NI"></a>"NI" &mdash; Node Count Increment</h4>      
  	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>NI&lt;CR&gt;</code></li>
 	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
@@ -618,27 +792,175 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
 	<li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
 	</ul>
      
- 
- 
- 
+<hr class="short"/>
 
- 
- <hr class="short" />    
+	<h4><a name="O"></a>"O" &mdash; Output (digital)</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>PortA</i>: An integer from 0 to 255. Represents the new value to write to the LATA register.</li>
+			<li><i>PortB</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATB register.</li>
+			<li><i>PortC</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATC register.</li>
+			<li><i>PortD</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATD register.</li>
+			<li><i>PortE</i>: (optional) An integer from 0 to 255. Represents the new value to write to the LATE register.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command simply takes its arguments and write them to the LATx registers. This allows you to output digital
+		  values to any or all of the pins of the microcontroller. The pins must be configured as digital outputs before
+			this command can have an effect on the actual voltage level on a pin.</p>
+  </li>
+	</ul>
 
-       <h4><a name="QB"></a>"QB" &mdash; Query Button</h4>
-      
+<hr class="short"/>
+
+	<h4><a name="PC"></a>"PC" &mdash; Pulse Configure</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>PC,<i>RB0_Lenth</i>,<i>RB0_Rate</i>[,<i>RB1_Lenth</i>,<i>RB1_Rate,<i>RB2_Lenth</i>,<i>RB2_Rate</i>,<i>RB3_Lenth</i>,<i>RB3_Rate</i>]</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>RB0_Length</i>: An integer from 0 to 65535. Represents the number of milliseconds RB0 will go high for.</li>
+      <li><i>RB0_Rate</i>: An integer from <i>RB0_Length</i> to 65535. Represents the number of milliseconds between rising 
+				edges on RB0.</li> 
+			<li><i>RBx_Length</i>: (optional) An integer from 0 to 65535. Represents the number of milliseconds RBx will go high for. 
+				'x' is 1, 2, and 3</li>
+      <li><i>RBx_Rate</i>: (optional) An integer from <i>RBx_Length</i> to 65535. Represents the number of milliseconds between 
+				rising edges on RBx. 'x' is 1, 2, and 3</li> 
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command sets up the internal parameters for the <code>PG</code> command. The parameters come in pairs, and 
+		the first number in the pair represents the number of milliseconds that a pin (one of RB0, RB1, RB2 and RB3) goes 
+		high for, and the second number represents the number of milliseconds between rising edges for that pin. The first
+		pair, for RB0, is required. The other three pairs (for RB1, RB2 and RB3) are optional.</p>
+		<p>When the <code>PG,1</code> command is sent, any pairs from the <code>PC</code> command where neither value is zero
+		and the Rate is greater than the Length will create pulses on that pin.</p>
+		<p>While the pulses are going, new <code>PC</code> commands can be sent, updating the pulse durations and repitition
+		rates.</p>
+		<p>This command is only available for pins RB0, RB1, RB2 and RB3. If you wish to leave a pin alone (i.e. not create
+		pulses on it) just set it's Length and Rate values to zero.</p>
+  </li>
+	</ul>
+
+<hr class="short"/>
+
+	<h4><a name="PD"></a>"PD" &mdash; Pin Direction</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>PD,<i>Port</i>,<i>Pin</i>,<i>Direction</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used.</li> 
+      <li><i>Direction</i>: is either 0 (output) or 1 (input) </li> 
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command sets one of the processor pins to be an input or an output, depending on the <i>Direction</i> parameter.</p>
+    <p>This command is a very low-level I/O command. Higher level commands (like SM, S2, etc.) will 
+		not change the direction of pins that they need after boot, so if this command gets used to change the pin direction,
+		be sure to change it back before expecting the higher level commands that need the pin to work properly.</p>
+  </li>
+  <li><span style="font-weight: bold;">Example:</span> <code>PD,C,3,0\r</code> This command would set pin PC3 (or Port C, pin 3) as
+		a digital output.</li>
+	</ul>
+
+<hr class="short"/>
+
+	<h4><a name="PG"></a>"PG" &mdash; Pulse Go</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Value</i>: is either 0 or 1. A value of 0 will stop the pulses, a value of 1 will start the pulses.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 
+			(and optionally on RB1, RB2 and RB3). It uses the parameters from the <code>PC</code> command to control
+			the pulse width and repitition rate on each pin.</p>
+	  <p>This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that
+			already have S2 RC Servo outputs or other outputps on them, be sure to turn those other outputs off yourself
+			before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
+			desire.</p>
+  </li>
+  <li><span style="font-weight: bold;">Example:</span> <code>PD,C,3,0\r</code> This command would set pin PC3 (or Port C, pin 3) as
+		a digital output.</li>
+	</ul>
+
+<hr class="short"/>
+
+	<h4><a name="PI"></a>"PI" &mdash; Pin Input</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>PI,<i>Port</i>,<i>Pin</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>PI,<i>Value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used.</li>
+      <li><i>Value</i>: is a 0 or 1. It reflets the state of the pin when read as a digital input.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command reads the given port and pin as a digital input. No matter what direction the pin is set to,
+		or even if the pin is being used as an analog input, the pin can still be read as a digital input. 
+  </li>
+  <li><span style="font-weight: bold;">Example:</span> <code>PI,D,2\r</code> This command would read pin RD2 (or Port D, pin 2) as
+		a digital input and return the pin's value.</li>
+  <li><span style="font-weight: bold;">Example Return Packet:</span>
+		<code>PI,1&lt;CR&gt;</code>
+	</li>
+	</ul>
+
+<hr class="short"/>
+
+	<h4><a name="PO"></a>"PO" &mdash; Pin Output</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used for the output.</li>
+      <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used for the output.</li> 
+      <li><i>Value</i>: is either 0 or 1. It specifies the logical value to be output on the pin.</li> 
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span>
+		<p>This command outputs a digital value of a 0 (0V) or 1 (3.3V) on one of the pins on the processor, 
+		as specified by <i>Port</i> and <i>Pin</i>.</p>
+    <p>This command will not change a pin's direction to output first, so you must set the pin's direction to be 
+		an output using the <code>PD</code> command first if you want anything to come out of the pin.</p>
+    <p>This command is a very low-level I/O command. Many other higher level commands (like SM, S2, etc.) will 
+		over-write the output state of pins that they need. This commands allows you low-level access to every pin 
+		on the processor.</p>
+    </li>
+  <li><span style="font-weight: bold;">Example:</span> <code>PO,C,7,1\r</code> This command would set the pin RC7 (or Port C, pin 7) to 
+	a high value.</li>
+	</ul>
+
+<hr class="short"/>
+
+  <h4><a name="QB"></a>"QB" &mdash; Query Button</h4>
  	<ul>
 	<li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
 	<li><span style="font-weight: bold;">Response:</span> <code><i>state</i>&lt;CR&gt;OK&lt;CR&gt;</code></li>
-
 	<li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
 	<li><span style="font-weight: bold;">Description:</span> 
-	<p>This command asks the EBB if the PRG button has been
+		<p>This command asks the EBB if the PRG button has been
         pressed since the last QB query or not.</p>
         <p> The returned value <i>state</i> is 1 if the
         PRG button has been pressed since the last QB query, and 0 otherwise.</p>
-        
-        </li>
+    </li>
 	<li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
 	</ul>
      
@@ -802,6 +1124,21 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
    	<li><span style="font-weight: bold;">Version History:</span> Added in v1.9
     </ul>
 
+ <hr class="short" />    
+        
+   	<h4><a name="R"></a>"R" &mdash; Reset</h4>
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command reinitalizes the EBB to its power on state. This includes setting all I/O pins in their
+		power on states, stopping any ongoing timers or servo outputs, etc.
+		</p>
+    </li>
+	<li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code>
+	<li><span style="font-weight: bold;">Example Return Packet:</span> <code>OK&lt;CR&gt;</code>
+    </ul>
 
 <hr class="short" />    
     <h4><a name="SC"></a> "SC" &mdash; Stepper and Servo Mode Configure</h4>
@@ -1169,7 +1506,7 @@ See the "QN" command for a description of the node counter and its operations.
 	</p>
 </li>
         
-    	<li><span style="font-weight: bold;">Example:</span>  <code>SP,1\r</code> Move pen-lift servo motor to <i>servo_min</i> position.</li>    
+    	<li><span style="font-weight: bold;">Example:</span>  <code>SP,1&lt;CR&gt;</code> Move pen-lift servo motor to <i>servo_min</i> position.</li>    
         
 	<li><span style="font-weight: bold;">Version History:</span>
 	<ul>
@@ -1191,11 +1528,74 @@ See the "QN" command for a description of the node counter and its operations.
 	</li>
 	</ul>    
    
-  
-  <hr class="short" />    
+<hr class="short" />       
+  <h4><a name="T"></a>"T" &mdash; Timed Analog/Digial Read</h4>
+      
+ 	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>	
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+	<li><span style="font-weight: bold;">Arguments:</span> 
+	<ul>
+		<li><i>duration</i> is from 1 to 65535 and represends the delay, in milliseconds, between reads for a given mode.</li>
+		<li><i>mode</i> is 0 for digital or 1 for analog. </li>
+  </ul>
 
+	<li><span style="font-weight: bold;">Description:</span> 
+	<p>
+	This command turns on (or off) the timed digital (I packet) or analog (A packet) reading of pins. Using the T command
+	you can set up a repeated reading of input pins, and the generation of an I or A packet back to the PC. Each of the 
+	two modes (analog/digital) is independent of the other and can have a different duration time.
+	</p>	
+	<p>
+	For example, to turn the digital reading of all pins on, with a time of 250ms between reasds, use "T,250,0". Then, 
+	every 250ms, the EBB will read all of the pins, and send an I response packet to the PC. This I response packet is 
+	exactly the same as the response to an "I" command, and simply contains the binary values of each pin of each port.
+	To turn on the analog reading of any enabled analog inputs every 400ms, use "T,400,1". This will cause the EBB to
+	read all enabled analog inputs every 400ms and send back an A packet (exactly the same as the reply to the "A" command)
+	repeatedly. Note that while digital mode will read every pin, analog mode will only read (and report) the pins that
+	are current configured as analog inputs. Pins do not have to be set to be digital inputs to be read by this command -
+	no matter what the pin is set to, the "I" response packet will read the pin's digital state.
+	</p>
+	<p>
+	To turn off a mode, use 0 for the duration paramter. Thus "T,0,0" will turn off digital mode, and "T,0,1" will turn
+	off analog mode.
+	</p>
+	<p>
+	The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the 
+	T command. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 
+	'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin 
+	values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital
+	mode. For analog mode the inputs are sampled every 1ms. Each time the "A" timer times out, the latest set of analog 
+	values is used to create a new "A" packet and that is then sent out.
+	</p>
+	<p>
+	Just because the EBB can kick out I and A packets every 1ms (at its fastest) doesn't mean that your PC app can read 
+	them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and 
+	what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the 
+	EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a 
+	time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the 
+	data coming in. (Realizing that the last packet may not be complete.)
+	</p>
+	<p>
+	It has been discovered that if an attempt is made to have all 13 channels of analog be reported any faster than every 
+	4ms, then an internal EBB buffer overflow occurs. Be careful with the speed you choose for A packets. The maximum speed 
+	is based upon how many analog channels are being sent back.
+	</p>
+	</li>
+ 	<li><span style="font-weight: bold;">Example:</span><code>T,250,0&lt;CR&gt;</code> Turn on digital reading of pins and
+	generation of I packet every 250ms.</li>  
+ 	<li><span style="font-weight: bold;">Note:</span>If the "I" or "A" packet responses stop coming back after you've done 
+	a "T" command, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal 
+	buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means 
+	that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic 
+	(from other devices) or increase the time between packet responses.
+	</li>
+	</ul>
+	</li>
+	</ul>    
   
-  
+<hr class="short" />
     <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output (versions prior to v2.2.0)</h4>
  
   	<ul>
@@ -1447,7 +1847,7 @@ See the "QN" command for a description of the node counter and its operations.
  	</p>    
  	  </li>
  	  
-  <li>RPx vs pin number table:<br>
+  <li>RPx vs pin number (and label on the board) table:<br>
         <table border="1" cellpadding="2" cellspacing="2">
           <tbody>
             <tr>
@@ -1490,6 +1890,26 @@ See the "QN" command for a description of the node counter and its operations.
               <td valign="top">RB4<br>
               </td>
             </tr>
+            <tr>
+              <td valign="top"><b>Label</b><b><br>
+                </b></td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top">B0<br>
+              </td>
+              <td valign="top">B1<br>
+              </td>
+              <td valign="top">B2<br>
+              </td>
+              <td valign="top">B3<br>
+              </td>
+              <td valign="top">B4<br>
+              </td>
+            </tr>
           </tbody>
         </table>
         <table border="1" cellpadding="2" cellspacing="2" >
@@ -1528,6 +1948,24 @@ See the "QN" command for a description of the node counter and its operations.
               <td valign="top">RC6<br>
               </td>
               <td valign="top">RC7<br>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top"><b>Label</b><b><br>
+                </b></td>
+              <td valign="top">B5<br>
+              </td>
+              <td valign="top">B6<br>
+              </td>
+              <td valign="top">B7<br>
+              </td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top"><br>
+              </td>
+              <td valign="top"><br>
               </td>
             </tr>
           </tbody>
@@ -1638,7 +2076,19 @@ See the "QN" command for a description of the node counter and its operations.
 		Added in v1.9.2</p></li>
 	</ul>
      
+<hr class="short" />    
+    <h4><a name="V"></a> "V" &mdash; Version query</h4>
 
+  	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command prints out the version string of the firmware currently running on the EBB.
+		The actual version string returned may be different from the example above.
+		</p><p>				
+    </li>			        
+	</ul>
 
 <hr class="short" />    
 
@@ -1700,16 +2150,9 @@ Note that internally the EBB generates an ISR at the 25 kHz
 	<li><span style="font-weight: bold;">Version History:</span>  
 		Added in v2.3.0</p></li>
 	</ul>
-
-
-
-
 <p />
 <br />
 <p />
-
-
-
 <p />
 <hr>
 <p />
