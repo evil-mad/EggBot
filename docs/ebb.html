@@ -210,8 +210,8 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <li><a href="#BL">BL</a> &mdash; enter BootLoader
 <li><a href="#C">C</a> &mdash; Configure
 <li><a href="#CN">CN</a> &mdash; Clear Node count
-<li><a href="#CK">CK</a> &mdash; Check Input -
-<li><a href="#CU">CU</a> &mdash; Configure -
+<li><a href="#CK">CK</a> &mdash; Check Input
+<li><a href="#CU">CU</a> &mdash; Configure User Options
 <li><a href="#EM">EM</a> &mdash; Enable Motors
 <li><a href="#ES">ES</a> &mdash; E Stop
 <li><a href="#I">I</a> &mdash; Input
@@ -368,7 +368,9 @@ firmware HEX files to the EBB.
 
   <h4><a name="C"></a>"C" &mdash; Configure (pin directions)</h4>
  	<ul>
-	<li><span style="font-weight: bold;">Command:</span> <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Command:</span> <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,
+		<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
+	</li>
 	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
 	<li><span style="font-weight: bold;">Arguments:</span> 
@@ -379,13 +381,15 @@ firmware HEX files to the EBB.
 			<li><i>PortD_IO</i>: An integer from 0 to 255. Value written to TRISD register.</li>
 			<li><i>PortE_IO</i>: An integer from 0 to 255. Value written to TRISE register.</li>
     </ul>
-	</li>	<li><span style="font-weight: bold;">Description:</span>
+	</li>	
+	<li><span style="font-weight: bold;">Description:</span>
 		<p>This command takes five bytes worth of paramters, one for each TRISx register in the processor, and writes those
 		  values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and 
 			it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be
 			an output, and a 1 sets it to be an input.</p>
 		<p>This command is useful if you want to set up the pin directions for each and every pin on the procesor at once.
 		  If you just one to set one pin at a time, use the <code>PC</code> command.</p>
+		<p>This command does not need to be used to configure analog inputs. The <code>AC</code> command is used for that.</p>
 	</li>
 	</ul>
   
@@ -408,7 +412,76 @@ See the "QN" command for a description of the node counter and its operations.
 		Added in v1.9.3, removed in v1.9.5</p></li>
 	</ul>
      
-<hr class="short" />    
+<hr class="short" />
+     
+  <h4><a name="CK"></a>"CK" &mdash; Check Input</h4> 
+	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>CK,<i>Param1_value</i>,<i>Param2_value</i>,
+		<i>Param3_value</i>,<i>Param4_value</i>,<i>Param5_value</i>,<i>Param6_value</i>,<i>Param7_value</i>,
+		<i>Param8_value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span>
+		<p><code>Param1=</code><i>Param1_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param2=</code><i>Param2_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param3=</code><i>Param3_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param4=</code><i>Param4_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param5=</code><i>Param5_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param6=</code><i>Param6_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param7=</code><i>Param7_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>Param8=</code><i>Param8_value</i><code>&lt;CR&gt;</code></p>
+		<p><code>OK&lt;CR&gt;</code></p>
+	</li>
+	<li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Param1_value</i> An unsigned one byte integer from 0 to 255.</li>
+			<li><i>Param2_value</i> A signed one byte integer from -128 to 127.</li>
+			<li><i>Param3_value</i> An unsigend two byte integer from 0 to 65535.</li>
+			<li><i>Param4_value</i> A signed two byte integer from -32768 to 32767.</li>
+			<li><i>Param5_value</i> An unsigned four byte integer from 0 to 4294967295.</li>
+			<li><i>Param6_value</i> A signed four byte integer from -2147483648 to 2147483647.</li>
+			<li><i>Param7_value</i> An case sensitive character.</li>
+			<li><i>Param8_value</i> An case forecd upper case character.</li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command is used to test out the various parameter parsing routines in the EBB. Each parameter is
+		  a different data type. The command simply prints out the values it parsed to allow the developer to 
+			confirm that the parsing code is working properly.</p>
+		<p>For <i>Param7_value</i>, any typeable character is accpeted.</p>
+		<p>FOr <i>Param8_value</i>, any typeable character is accpeted, and then converted to upper case before printing.</p>
+	</li>
+  </ul>
+
+<hr class="short" />
+     
+  <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4> 
+	<ul>
+	<li><span style="font-weight: bold;">Command:</span> <code>CU,<i>Prameter_Number</i>,<i>Parameter_Value</i>&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+	<li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Prameter_Number</i> The value 1 or 2. Speficies what <i>Parameter_Value</i> means.</li>
+      <li><i>Parameter_Value</i> An integer from -32768 to 32767. Meaning an acceptable values depend on value of <i>Parameter_Number</i></li>
+    </ul>
+	</li>
+	<li><span style="font-weight: bold;">Description:</span> 
+		<p>This command allows for configuring some run time options. The configuration options chosen wiht this command do 
+			not survive a reboot, and they will return to their default values on a reset or boot.</p>
+		<p>
+		<ul>
+			<li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
+			<li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
+			<p>Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
+			<li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
+			<li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
+			<p>Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back
+				to the PC, which may make processing of the data returned from the EBB easier.</p>
+		</ul>
+	</li>
+  </ul>
+
+<hr class="short" />
      
     <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.1)</h4>
  
@@ -574,6 +647,11 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
 	<li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;CR&gt;</code></li>
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+ 	<li><span style="font-weight: bold;">Arguments:</span> 
+		<ul>
+			<li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM to read.</li>
+    </ul>
+	</li>
 	<li><span style="font-weight: bold;">Description:</span> 
 		<p>This command reads one byte from RAM and prints it out. The <i>Data</i> is always printed 
 			as a three digit decimal number.</p>
@@ -596,8 +674,8 @@ See the "QN" command for a description of the node counter and its operations.
 	<li><span style="font-weight: bold;">Firmware versions:</span> All</li>
  	<li><span style="font-weight: bold;">Arguments:</span> 
 		<ul>
-			<li><i>Address</i> An integer from 0 to 4095. Represents the address in RAM that <i>Data</i> will be written to.</li>
-      <li><i>Length</i> An integer from 0 to 255. Represents the byte of data to write to <i>Address</i>.</li>
+			<li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM that <i>Data</i> will be written to.</li>
+      <li><i>Length</i>: An integer from 0 to 255. Represents the byte of data to write to <i>Address</i>.</li>
     </ul>
 	</li>
 	<li><span style="font-weight: bold;">Description:</span> 
