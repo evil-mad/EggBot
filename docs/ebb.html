@@ -212,6 +212,7 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 -->
 <li><a href="#BL">BL</a> &mdash; enter BootLoader
 <li><a href="#CN">CN</a> &mdash; Clear Node count
+<li><a href="#CS">CS</a> &mdash; Clear Step position
 <li><a href="#EM">EM</a> &mdash; Enable Motors
 <li><a href="#ES">ES</a> &mdash; E Stop
 <li><a href="#ND">ND</a> &mdash; Node count Decrement
@@ -223,6 +224,7 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
 <li><a href="#QM">QM</a> &mdash; Query Motor
 <li><a href="#QN">QN</a> &mdash; Query Node count
 <li><a href="#QP">QP</a> &mdash; Query Pen
+<li><a href="#QS">QS</a> &mdash; Query Step position
 
 <li><a href="#S2">S2</a> &mdash; General RC Servo Output
 <li><a href="#SC">SC</a> &mdash; Stepper and servo mode Configure
@@ -327,7 +329,7 @@ Use this command to turn on or turn off individual analog
 
 
 
-<!--
+
 	<hr class="short" />    
 
     <h4><a name="AM"></a> "AM" &mdash; Accelerated stepper Move</h4>
@@ -390,7 +392,7 @@ Use this command to turn on or turn off individual analog
 		Added in v2.4.0	</li>
 
 	</ul>	
--->
+
     
 <hr class="short" />
     
@@ -443,7 +445,21 @@ See the "QN" command for a description of the node counter and its operations.
 		Added in v1.9.3, removed in v1.9.5</p></li>
 	</ul>
      
-  
+<hr class="short" />
+    <h4><a name="CS"></a>"CS" &mdash; Clear Step position</h4>      
+    <ul>
+    <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
+    <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;</code></li>
+    <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3 </li>
+    <li><span style="font-weight: bold;">Description:</span> 
+        <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
+        <p>See the <code>QS</code> command for a description of the global step positions.</p>
+    </li>
+    <li><span style="font-weight: bold;">Version History:</span>  
+        <p>Added in v2.4.3</p>
+    </li>
+    </ul>
+
  <hr class="short" />    
      
     <h4><a name="EM"></a> "EM"  &mdash; Enable Motors (for EBB hardware v1.1)</h4>
@@ -802,6 +818,26 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
    	<li><span style="font-weight: bold;">Version History:</span> Added in v1.9
     </ul>
 
+<hr class="short" />
+    <h4><a name="QS"></a>"QS" &mdash; Query Step position</h4>      
+    <ul>
+    <li><span style="font-weight: bold;">Command:</span><code>QS&lt;CR&gt;</code></li>
+    <li><span style="font-weight: bold;">Response:</span><code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;CR&gt;OK&lt;CR&gt;</code></li>
+    <li><span style="font-weight: bold;">Firmware versions:</span>Added in v2.4.3</li>
+    <li><span style="font-weight: bold;">Description:</span>
+        <p>This command prints out the current Motor 1 and Motor 2 global step positions. Each of these positions is a 32 bit signed integer, that keeps
+            track of the positions of each axis. The <code>CS</code> command can be used to set these positions to zero.</p>
+        <p>Every time a step is taken, the appropriate global step position is incremented or decrimented depnding on the direction of that step.</p>
+        <p>The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the command is
+            executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is
+            complete (you can use the <code>QM</code> command to check if the motors have stopped moving) before checking the current positions.</p>
+    </li>
+    <li><span style="font-weight: bold;">Example:</span> <code>QS\r</code>
+    <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1421,-429&lt;CR&gt;OK&lt;CR&gt;</code>
+    <li><span style="font-weight: bold;">Version History:</span>
+        <p>Added in v2.4.3</p>
+    </li>
+    </ul>
 
 <hr class="short" />    
     <h4><a name="SC"></a> "SC" &mdash; Stepper and Servo Mode Configure</h4>
