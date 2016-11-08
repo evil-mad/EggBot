@@ -231,16 +231,31 @@ work from the Inkscape plugin, so it is not currently being
 used. It may have to change in future versions of this
 firmware.
 
-<p /><H4>v2.4.1  &mdash; 08/08/16</H4>
-<p><ul>
-	<li> Added new form of SE command, with optional
-parameter that puts SE in motion queue. (issue #51)</li><li>
-Fixed issue #52 (bug in parameter check in parse_SM_packet())
-</li></ul>
+<p/>
+
+<H4>v2.4.1 &mdash; 08/08/16</H4>
+<p>
+<ul>
+    <li> Added new form of SE command, with optional parameter that puts SE in motion queue. (issue #51)</li>
+    <li> Fixed issue #52 (bug in parameter check in parse_SM_packet())</li>
+</ul>
+
+<H4>2.4.2 &mdash; 08/10/16</H4>
+<p>
+<ul>
+    <li>Fixed bug in SE command that would set engraver to 50% if SE,1,0 was used. Also added engraver 
+        power to FIFO structure for when third SE parameter is 1.</li>
+</ul>
+
+<H4>2.4.3 &mdash; 11/07/16</H4>
+<p>
+<ul>
+    <li>Added QS (Query Step position) and CS (Clear Step position) commands.</li>
+</ul>
  
- <p />
-<hr />
-<p />
+<p/>
+<hr/>
+<p/>
 
  
  
