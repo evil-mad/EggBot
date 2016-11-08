@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.4.2\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.4.3\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -244,7 +244,6 @@ void parse_BS_packet (void);	// BS sends binary data to fast parallel output
 void parse_CU_packet (void);	// CU configures UBW (system wide parameters)
 void parse_SS_packet (void);	// SS Send SPI
 void parse_RS_packet (void);	// RS Receive SPI
-void parse_CS_packet (void);	// CS Configure SPI
 void parse_SI_packet (void);	// SI Send I2C
 void parse_RI_packet (void);	// RI Receive I2C
 void parse_CI_packet (void);	// CI Configure I2C
@@ -1252,12 +1251,6 @@ void parse_packet(void)
 			parse_RS_packet ();
 			break;
 		}
-		case ('C' * 256) + 'S':
-		{
-			// CS for Configure SPI
-			parse_CS_packet ();
-			break;
-		}
 		case ('S' * 256) + 'I':
 		{
 			// SI for Send I2C
@@ -1432,6 +1425,18 @@ void parse_packet(void)
 		{
 			// XM for X motor move
 			parse_XM_packet();
+			break;
+		}
+		case ('Q' * 256) + 'S':
+		{
+			// QP for Query Step position
+			parse_QS_packet();
+			break;
+		}
+		case ('C' * 256) + 'S':
+		{
+			// CS for Clear Step position
+			parse_CS_packet();
 			break;
 		}
 		default:
@@ -2737,13 +2742,6 @@ void parse_SS_packet (void)
 
 // RS Receive SPI
 void parse_RS_packet (void)
-{
-	print_ack ();
-
-}	
-
-// CS Configure SPI
-void parse_CS_packet (void)
 {
 	print_ack ();
 
