@@ -204,6 +204,8 @@
 // 2.4.2 08/10/16 - Fixed bug in SE command that would set engraver to 50% if
 //                  SE,1,0 was used. Also added engraver power to FIFO structure
 //                  for when third SE parameter is 1.
+// 2.4.3 11/07/16 - Added QS (Query Step position) and CS (Clear Step position)
+//                  commands.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -257,6 +259,10 @@ static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 BOOL FIFOEmpty;
 
 #pragma udata
+/* These values hold the global step position of each axis */
+volatile static INT32 globalStepCounter1;
+volatile static INT32 globalStepCounter2;
+
 static unsigned char OutByte;
 static unsigned char TookStep;
 static unsigned char AllDone;
@@ -389,6 +395,14 @@ void high_ISR(void)
 						OutByte = OutByte | STEP1_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[0]--;
+                        if (CurrentCommand.DirBits & DIR1_BIT)
+                        {
+                            globalStepCounter1--;
+                        }
+                        else
+                        {
+                            globalStepCounter1++;
+                        }	
 					}
                     // For acceleration, we now add a bit to StepAdd each time through as well
                     CurrentCommand.StepAdd[0] += CurrentCommand.StepAddInc[0];
@@ -403,7 +417,15 @@ void high_ISR(void)
 						OutByte = OutByte | STEP2_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[1]--;
-					}
+                        if (CurrentCommand.DirBits & DIR2_BIT)
+                        {
+                            globalStepCounter2--;
+                        }
+                        else
+                        {
+                            globalStepCounter2++;
+                        }
+                    }
                     // For acceleration, we now add a bit to StepAdd each time through as well
                     CurrentCommand.StepAdd[1] += CurrentCommand.StepAddInc[1];
 					AllDone = FALSE;
@@ -730,6 +752,9 @@ void EBB_Init(void)
 
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
 	PORTBbits.RB3 = 0;          // And make sure it starts out off
+    
+    // Clear out global stepper positions
+    parse_CS_packet();
 }
 
 // Stepper (mode) Configure command
@@ -2069,4 +2094,50 @@ void parse_QM_packet(void)
     }
 
 	printf((far ROM char *)"QM,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running);
+}
+
+// QS command
+// For Query Step position - returns the current x and y global step positions
+// QS takes no parameters, so usage is just CS<CR>
+// QS returns:
+// QS,<global_step1_position>,<global_step2_position><CR>
+// where:
+//   <global_step1_position>: signed 32 bit value, current global motor 1 step position
+//   <global_step2_position>: signed 32 bit value, current global motor 2 step position
+void parse_QS_packet(void)
+{
+    INT32 step1, step2;
+
+    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+
+    // Make a local copy of the things we care about
+    step1 = globalStepCounter1;
+    step2 = globalStepCounter2;
+    
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+
+	printf((far ROM char *)"%li,%li\n\r", step1, step2);
+	print_ack();
+}
+
+// CS command
+// For Clear Stepper position - zeros out both step1 and step2 global positions
+// CS takes no parameters, so usage is just CS<CR>
+// QS returns:
+// OK<CR>
+void parse_CS_packet(void)
+{
+    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+
+    // Make a local copy of the things we care about
+    globalStepCounter1 = 0;
+    globalStepCounter2 = 0;
+    
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+
+	print_ack();
 }
