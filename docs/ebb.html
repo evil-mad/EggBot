@@ -257,6 +257,7 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
   <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> .
   . . <code>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer </li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>Read all analog (ADC) input values.</p>
 
@@ -301,7 +302,7 @@ Although the EBB firmware is a continuously evolving code base, we have, since v
   <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer  </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span>
   <ul>
         <li><i>channel</i>: An integer in the range of 0 to 15 (inclusive). The analog input channel number that you wish to enable or disable. </li>
@@ -345,6 +346,7 @@ Use this command to turn on or turn off individual analog
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span>  v2.4.0 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>initial_velocity</i> is an integer in the range from 2 to 35355, giving initial velocity in steps per second. (See additional notes below.)</li>
@@ -407,6 +409,7 @@ Use this command to turn on or turn off individual analog
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer (with changes)</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>Enter bootloader mode.</p>
   <p>
@@ -439,6 +442,7 @@ firmware HEX files to the EBB.
   </li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
    <ul>
       <li><i>PortA_IO</i>: An integer from 0 to 255. Value written to TRISA register.</li>
@@ -468,6 +472,7 @@ firmware HEX files to the EBB.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> Removed, as of v1.9.5 </li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>Clear the value of the Node Counter.</p>
   <p>
@@ -485,6 +490,7 @@ See the "QN" command for a description of the node counter and its operations.
     <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
     <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
     <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3 </li>
+    <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
     <li><span style="font-weight: bold;">Description:</span> 
         <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
         <p>See the <code>QS</code> command for a description of the global step positions.</p>
@@ -514,6 +520,7 @@ See the "QN" command for a description of the node counter and its operations.
     <p><code>OK&lt;NL&gt;&lt;CR&gt;</code></p>
   </li>
   <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Param1_value</i> An unsigned one byte integer from 0 to 255.</li>
@@ -542,6 +549,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>CU,<i>Prameter_Number</i>,<i>Parameter_Value</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Prameter_Number</i> The value 1 or 2. Speficies what <i>Parameter_Value</i> means.</li>
@@ -573,7 +581,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> All </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> For each stepper motor (<i>EnableAxis1</i> or <i>EnableAxis2</i>), an integer in the range of 0 through 4, inclusive. The allowed values and their effects are as follows:
         <ul>
           <li>0: Disable that axis </li>
@@ -607,7 +615,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> All </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
   <p>For each stepper motor (<i>Enable1</i> or <i>Enable2</i>), an integer in the range of 0 through 5, inclusive. 
   An <i>Enable</i> value of 0 will disable the motor, while a nonzero value will enable the motor.</p>
@@ -659,6 +667,7 @@ See the "QN" command for a description of the node counter and its operations.
   <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>
 </li>
 <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span>
     <p> Use this command to abort any in-progress motor move (SM) Command. This command will also delete any motor move command
           (SM) from the FIFO. It will immediately stop the motors, but
@@ -706,6 +715,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>This command reads every PORTx register (where x is A through E) and prints out each byte-wide reigster value as a three
       digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints 
@@ -730,6 +740,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM to read.</li>
@@ -755,6 +766,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>MW,<i>Address</i>,<i>Data</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM that <i>Data</i> will be written to.</li>
@@ -779,6 +791,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>This command decrements the 32 bit Node Counter by 1.</p>
   <p>
@@ -795,6 +808,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>This command increments the 32 bit Node Counter by 1.</p>
   <p>
@@ -810,6 +824,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>PortA</i>: An integer from 0 to 255. Represents the new value to write to the LATA register.</li>
@@ -833,6 +848,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>PC,<i>RB0_Lenth</i>,<i>RB0_Rate</i>[,<i>RB1_Lenth</i>,<i>RB1_Rate,<i>RB2_Lenth</i>,<i>RB2_Rate</i>,<i>RB3_Lenth</i>,<i>RB3_Rate</i>]</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>RB0_Length</i>: An integer from 0 to 65535. Represents the number of milliseconds RB0 will go high for.</li>
@@ -865,6 +881,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>PD,<i>Port</i>,<i>Pin</i>,<i>Direction</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
@@ -889,6 +906,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Value</i>: is either 0 or 1. A value of 0 will stop the pulses, a value of 1 will start the pulses.</li>
@@ -914,6 +932,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>PI,<i>Port</i>,<i>Pin</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>PI,<i>Value</i>&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
@@ -939,6 +958,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
     <ul>
       <li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used for the output.</li>
@@ -966,6 +986,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code><i>state</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>This command asks the EBB if the PRG button has been
         pressed since the last QB query or not.</p>
@@ -984,6 +1005,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p> This command reads two analog voltages and returns their raw
         10 bit values. You can use this to read the current setpoint for the stepper motor, 
@@ -1052,6 +1074,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code><i>CurrentLayerValue</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
   <p>This command asks the EBB to report back the current value of
         the Layer variable. This variable is set with the <a href="#SL">SL</a> command, as
@@ -1076,6 +1099,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>Use this command to see what the EBB is currently doing. It
         will return the current state of the 'motion system' and each
@@ -1122,6 +1146,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>This command queries the EBB for the current pen state. It
         will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a
@@ -1141,6 +1166,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
     <li><span style="font-weight: bold;">Command:</span><code>QS&lt;CR&gt;</code></li>
     <li><span style="font-weight: bold;">Response:</span><code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
     <li><span style="font-weight: bold;">Firmware versions:</span>Added in v2.4.3</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
     <li><span style="font-weight: bold;">Description:</span>
         <p>This command prints out the current Motor 1 and Motor 2 global step positions. Each of these positions is a 32 bit signed integer, that keeps
             track of the positions of each axis. The <code>CS</code> command can be used to set these positions to zero.</p>
@@ -1162,6 +1188,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>This command reinitalizes the EBB to its power on state. This includes setting all I/O pins in their
     power on states, stopping any ongoing timers or servo outputs, etc.
@@ -1179,7 +1206,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> All </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>value1</i> is an integer in the range from 0 to 255, which specifies the parameter that you are adjusting.</li>
@@ -1293,7 +1320,7 @@ See the "<a href="#QN">QN</a>" command for a description of the node counter and
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> while(!FIFOEmpty) </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>state</i> may be either 0 to disable or 1 to enable the engraver output.</li>
@@ -1345,6 +1372,7 @@ The <i>power</i> argument represents the
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>NewLayerValue</i> is an integer between 0 and 127.</li>
@@ -1374,6 +1402,7 @@ The <i>power</i> argument represents the
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
+  <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
@@ -1453,6 +1482,7 @@ The <i>power</i> argument represents the
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>value</i> is an unsigned long (four byte) integer.</li>
@@ -1480,6 +1510,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
+  <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>value</i> is either 0 or 1, indicating to raise or lower the pen.</li>
@@ -1566,6 +1597,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
   <ul>
     <li><i>duration</i> is from 1 to 65535 and represends the delay, in milliseconds, between reads for a given mode.</li>
@@ -1635,6 +1667,7 @@ See the "QN" command for a description of the node counter and its operations.
   S2,0&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>channel</i>, a number in the range 0 to 8.
@@ -1766,6 +1799,7 @@ See the "QN" command for a description of the node counter and its operations.
   
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
     <li><i>position</i>, a number in the range 0 to 65535. 
@@ -2029,7 +2063,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
-
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Arguments:</span>
   <ul>
         <li><i>duration</i>: (Optional) an integer in the range of 1 to 65535, giving an delay in milliseconds.
@@ -2084,6 +2118,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer </li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
   <p>
   This command asks the EBB what the current value of the Node
@@ -2114,6 +2149,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;&lt;CR&gt;</code></li>
   <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+  <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
   <li><span style="font-weight: bold;">Description:</span> 
     <p>This command prints out the version string of the firmware currently running on the EBB.
     The actual version string returned may be different from the example above.
@@ -2130,6 +2166,7 @@ See the "QN" command for a description of the node counter and its operations.
   <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
 
   <li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
+  <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
   <li><span style="font-weight: bold;">Arguments:</span> 
       <ul>
         <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
