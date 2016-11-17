@@ -1,5 +1,5 @@
 Uses "UI"
-'Uses "CONSOLE"
+Uses "CONSOLE"
 Uses "COMM"
 Uses "WMI"
 Uses "OS"
@@ -29,16 +29,18 @@ Global CountATI        As Long
 Global sHexFilename    As String
 Global sFirmwareNumber As String
 Global bConsole        As Boolean
-Global bUpdaterConsole As Boolean
+Global bUpdaterConsole As Boolean   
+Global sCommandLine    As String
                                   
 ' Replace the filename in the next two lines to change which HEX file gets programmed
-#BUNDLE File "HEX", ".\EBF_243.hex", "", ReplaceExisting=1
-sFirmwareNumber = "2.4.3"                    
+#BUNDLE File "HEX", ".\EBF_v244.hex", "", ReplaceExisting=1
+sFirmwareNumber = "2.4.4"                    
                                  
-bConsole = FALSE  ' for normal printfs
+bConsole = TRUE  ' for normal printfs
 bUpdaterConsole = TRUE ' for mphidflash                                 
-sHexFilename = "EBF_" & Replace$(sFirmwareNumber, ".", "") & ".hex"
+sHexFilename = "EBF_v" & Replace$(sFirmwareNumber, ".", "") & ".hex"
 #BUNDLE File "app", ".\mphidflash-1.6-win-32.exe", "", ReplaceExisting=1
+#BUNDLE Icon "WhiteEBBv20.ico"
 
 '------------------------------------------------------------------------------
 ' Program start point
@@ -178,30 +180,37 @@ CallBack Function cbButton() As Long
                   sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
                   If LEFT$(sBuffer, 3) = "EBB" Then                                                           
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
-                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Updating to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting update to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
                     COMM_Print(hComm, "BL" & Chr$(13))
                     Sleep 100
                     COMM_Close(hComm)
-                    Sleep 2000
+                    Sleep 2000        
+                    sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename   
+                    If (bConsole) Then Console_WriteLine sCommandLine
                     If (bUpdaterConsole) Then
-                      pID = OS_Shell("mphidflash-1.6-win-32.exe -r -w " & sHexFilename , %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
+                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
                     Else
-                      pID = OS_Shell("mphidflash-1.6-win-32.exe -r -w " & sHexFilename , %OS_WNDSTYLE_HIDE, %OS_SHELL_SYNC)   
+                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_HIDE, %OS_SHELL_SYNC)   
                     EndIf
-                    Sleep 1000 
+                    Sleep 2000 
                     If (bConsole) Then Console_WriteLine("pID = " & pID)
                     If pID = 0 Then
                       COMM_Open("\\.\" & Ports(Counter), hComm)
                       If Err = 0 Then
                         COMM_Print(hComm, "V" & Chr$(13))          
-                        Sleep 100
+                        Sleep 200
+                        nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                        COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                        Sleep 200
+                        COMM_Print(hComm, "V" & Chr$(13))          
+                        Sleep 200
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
                         sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
                         If (RIGHT$(sBuffer,5) = sFirmwareNumber) Then
                           Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Updated to version " & RIGHT$(sBuffer,5) & " successfully" + Chr$(13) + Chr$(10)
                         Else
-                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version of " & RIGHT$(sBuffer,5) & " detected. Updated failed." + Chr$(13) + Chr$(10)
+                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB= " & RIGHT$(sBuffer,5) & " File= " & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
                         EndIf
                         COMM_Close(hComm)
                       EndIf
