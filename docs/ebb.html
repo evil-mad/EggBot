@@ -1093,7 +1093,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 and newer</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 to v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
@@ -1107,25 +1107,38 @@
             <p>
               The definition of a "motion command" is any command that has a time associated with it. For example, all SM commands. Also, any Command (like S2, SP, or TP) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
-            <p>It is important to note that with all existing EBB
-              firmware versions, only a very limited number of 
-              "motion commands" can be executing or queued simultaneously.
-              In fact, there can only be three. One (the first one) will be
-              actually executing. Another one (the second) will be stored in
-              the 1-deep FIFO buffer that sits between the USB command processor and
-              the motion engine that executes motion commands. Then the last
-              one (the third) will be stuck in the USB command buffer, waiting
-              for the 1-deep FIFO to be emptied before it can be processed.
-              Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is
-              cleared, and the third motion command can be processed and put
-              into the FIFO. This means that no USB commands can be processed
-              by the EBB once the third motion command gets "stuck" in the USB Command processor. 
-              Using the QM command can help prevent this
-              situation by allowing the PC to know when there are no more
-              motion commands to be executed, and so can send the next one on.
+            <p>
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
+        </ul>
+
+        <h4><a name="QM"></a>"QM" &mdash; Query Motor</h4>
+        
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.4.4 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Description:</span>
+            <p>
+              Use this command to see what the EBB is currently doing. It will return the current state of the 'motion system', each motor's current state, and the state of the FIFO.
+            </p>
+            <ul>
+              <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
+              <li><i>Motor1Status</i> is 1 if motor 1 is currently moving, and 0 if it is idle.</li>
+              <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>
+              <li><i>FIFOStatus</i> is non zero if the FIFO is not empty, and 0 if the FIFO is empty.</li>
+            </ul>
+            <p>
+              The definition of a "motion command" is any command that has a time associated with it. For example, all SM commands. Also, any Command (like S2, SP, or TP) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
+            </p>
+            <p>
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+            </p>
+          </li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
         </ul>
 
         <hr class="short" />    
@@ -1901,7 +1914,7 @@
 
         <hr class="short" />    
 
-        <h4><a name="QN"></a>"QN"  &mdash; Query node count</h4>
+        <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
@@ -1911,15 +1924,15 @@
           <li>
             <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
             <p>
-              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented each time an "SM" command finishes executing. The Node Counter can be used to keep track of progress during various operations as needed.
+              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decrimented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
             </p>
             <p>
               The value of the node counter can also be manipulated with the following commands:
               <ul>
-                <li>"SN"  &mdash; Set Node count</li>
-                <li>"NI"  &mdash; Node count Increment</li>
-                <li>"ND"  &mdash; Node count Decrement</li>
-                <li>"CN"  &mdash; Clear node count [obsolete]</li>
+                <li><code>SN</code> &mdash; Set Node count</li>
+                <li><code>NI</code> &mdash; Node count Increment</li>
+                <li><code>ND</code> &mdash; Node count Decrement</li>
+                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
               </ul>
             </p>
           </li>
