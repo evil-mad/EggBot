@@ -206,6 +206,7 @@
 //                  for when third SE parameter is 1.
 // 2.4.3 11/07/16 - Added QS (Query Step position) and CS (Clear Step position)
 //                  commands.
+// 2.4.4 11/16/16 - Added extra value to QM command to show status of FIFO
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -2060,11 +2061,16 @@ void parse_RM_packet(void)
 //   <CommandExecutingStatus>: 0 if no 'motion command' is executing, > 0 if some 'motion command' is executing
 //   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
 //   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
+//
+// As of version 2.4.4, there is now a fourth parameter at the end of the reply packet.
+// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status>,<FIFOStatus><CR>
+// Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
 void parse_QM_packet(void)
 {
     UINT8 CommandExecuting = 0;
     UINT8 Motor1Running = 0;
     UINT8 Motor2Running = 0;
+    UINT8 FIFOStatus = 0;
     MoveCommandType LocalCommand;
 
     // Need to turn off high priority interrupts breifly here to read out value that ISR uses
@@ -2085,6 +2091,7 @@ void parse_QM_packet(void)
     }
     if (FIFOEmpty == FALSE) {
         CommandExecuting = 1;
+        FIFOStatus = 1;
     }
     if (CommandExecuting && LocalCommand.StepsCounter[0] != 0) {
         Motor1Running = 1;
@@ -2093,7 +2100,7 @@ void parse_QM_packet(void)
         Motor2Running = 1;
     }
 
-	printf((far ROM char *)"QM,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running);
+	printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
 }
 
 // QS command
