@@ -1412,7 +1412,6 @@
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
-            <p>If you are trying to drive a mixed-axis machine (like the AxiDraw), consider using the XM command instead of SM, as it will handle the math for you.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
@@ -1984,7 +1983,7 @@
                 This command takes the <i>axisA</i> and <i>axisB</i> values, and creates a call to the <a href="#SM">SM</a> command with the SM command's <i>axis1</i> value as <i>axisA</i> + <i>axisB</i>, and <i>axis2</i> as <i>axisA</i> - <i>axisB</i>.
               </p>
               <p>
-                This command is designed to allow cleaner operation of machines like the <a href="http://www.multimechatronics.com/build_a_h-bot.php">H-Bot</a> and <a href="http://corexy.com">CoreXY</a> systems.
+                This command is designed to allow cleaner operation of machines with mixed-axis geometry, including CoreXY, H-Bot gantry machines, and current AxiDraw models.
               </p>
               <p>
                 If both <i>axisA</i> and <i>axisB</i> are zero, then a delay of <i>duration</i> ms is executed.
