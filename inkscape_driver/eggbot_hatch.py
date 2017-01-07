@@ -964,37 +964,24 @@ class Eggbot_Hatch( inkex.Effect ):
 					self.addPathVertices( d, node, matNew )
 
 			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
-
 				pass
-
 			elif node.tag == inkex.addNS( 'metadata', 'svg' ) or node.tag == 'metadata':
-
 				pass
-
 			elif node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs':
 				pass
-
 			elif node.tag == inkex.addNS( 'namedview', 'sodipodi' ) or node.tag == 'namedview':
-
 				pass
-
 			elif node.tag == inkex.addNS( 'eggbot', 'svg' ) or node.tag == 'eggbot':
-
 				pass
-
+			elif node.tag == inkex.addNS( 'WCB', 'svg' ) or node.tag == 'WCB':
+				pass
 			elif node.tag == inkex.addNS( 'text', 'svg' ) or node.tag == 'text':
-
 				inkex.errormsg( 'Warning: unable to draw text, please convert it to a path first.' )
-
 				pass
-
 			elif not isinstance( node.tag, basestring ):
-
 				pass
-
 			else:
-
-				inkex.errormsg( 'Warning: unable to draw object <%s>, please convert it to a path first.' % node.tag )
+				inkex.errormsg( 'Warning: unable to hatch object <%s>, please convert it to a path first.' % node.tag )
 				pass
 		# for node in aNodeList:
 	# def recursivelyTraverseSvg( self, aNodeList,...
