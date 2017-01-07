@@ -101,11 +101,12 @@ typedef struct
 #define NUMBER_OF_STEPPERS  2
 
 // Reload value for TIMER1
-// We need a 25KHz ISR to fire, so we take Fosc (48Mhz), devide by 4
+// We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
 // (normal CPU instruction rate of Fosc/4), then use the TIMER1 prescaler
 // to divide by 4 again. Then we use a reload value of 120 to give us
 // a rate of 48MHz/4/4/120 = 25KHz.
-#define TIMER1_L_RELOAD (255 - 113)
+// Note Timer1 is used in 8 bit mode, so H_RELOAD value is not used
+#define TIMER1_L_RELOAD (255 - 113) // Note, the 113 is based on tiral and error
 #define TIMER1_H_RELOAD (255)
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 

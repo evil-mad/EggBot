@@ -207,6 +207,7 @@
 // 2.4.3 11/07/16 - Added QS (Query Step position) and CS (Clear Step position)
 //                  commands.
 // 2.4.4 11/16/16 - Added extra value to QM command to show status of FIFO
+// 2.4.5 01/07/17 - Fixed math error in SM/XM commands (see issue #71)
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -652,7 +653,7 @@ void EBB_Init(void)
 	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
 	T1CONbits.T1SYNC = 0;
 	TMR1L = TIMER1_L_RELOAD;	// Set to 120 for 25KHz ISR fire
-	TMR1H = TIMER1_H_RELOAD;	// 
+	TMR1H = TIMER1_H_RELOAD;	// (note, unused in 16-bit mode)
 
 	T1CONbits.TMR1ON = 1; // Turn the timer on
 
@@ -1368,6 +1369,9 @@ static void process_SM(
 )
 {
     UINT32 temp = 0;
+    UINT32 temp1 = 0;
+    UINT32 temp2 = 0;
+    UINT32 remainder = 0;
 
 	// Trial: Spin here until there's space in the fifo
 	while(!FIFOEmpty)
@@ -1423,10 +1427,14 @@ static void process_SM(
 //        }
         
         if (A1Stp < 0x1FFFF) {
-            temp = (((A1Stp << 15)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
+            temp = (A1Stp << 15)/temp1;
+            temp2 = (A1Stp << 15) % temp1;
+            remainder = (temp2 << 16) / temp1;
         }
         else {
             temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+            remainder = 0;
         }
         if (temp > 0x8000) {
             printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
@@ -1436,17 +1444,20 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
             temp = 1;
         }
-        temp = temp << 16;
+        temp = (temp << 16) + 1 + remainder;
 
         CommandFIFO[0].StepAdd[0] = temp;
         CommandFIFO[0].StepsCounter[0] = A1Stp;
         CommandFIFO[0].StepAddInc[0] = 0;
         
         if (A2Stp < 0x1FFFF) {
-            temp = (((A2Stp << 15)/(UINT32)HIGH_ISR_TICKS_PER_MS)/Duration);
+            temp = (A2Stp << 15)/temp1;
+            temp2 = (A2Stp << 15) % temp1; 
+            remainder = (temp2 << 16) / temp1;
         }
         else {
             temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+            remainder = 0;
         }
         if (temp > 0x8000) {
             printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
@@ -1456,12 +1467,22 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
             temp = 1;
         }
-        temp = temp << 16;
+        temp = (temp << 16) + 1 + remainder;
         
         CommandFIFO[0].StepAdd[1] = temp;
         CommandFIFO[0].StepsCounter[1] = A2Stp;
         CommandFIFO[0].StepAddInc[1] = 0;
         CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+        
+        /* For debugging step motion , uncomment the next line */
+        /*
+         * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+                CommandFIFO[0].StepAdd[0],
+                CommandFIFO[0].StepsCounter[0],
+                CommandFIFO[0].StepAdd[1],
+                CommandFIFO[0].StepsCounter[1]
+            );
+         */
 	}
 		
 	FIFOEmpty = FALSE;
