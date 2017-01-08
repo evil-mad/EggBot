@@ -1412,6 +1412,9 @@
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
+						<p>
+						  After sending a move (SM or XM) less than 15ms long (less than 20ms for v2.4.5 and above), if the next command is another move command, that second move command may have a short gap in time before it starts moving the motors. This is because it takes about 15ms for the EBB to process a new move command (20ms for v2.4.5 and above) and send it to the motion control FIFO. So if the previous command took less than 15ms to execute, it will be finished before the next move is finished processing, and there may be a gap between the two move's sets of step pulses to the motor drivers. For example, if you send several 1ms long SM commands, expect there to be roughly 14ms of dead time between the moves.
+						</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
