@@ -208,6 +208,9 @@
 //                  commands.
 // 2.4.4 11/16/16 - Added extra value to QM command to show status of FIFO
 // 2.4.5 01/07/17 - Fixed math error in SM/XM commands (see issue #71)
+// 2.4.6 01/08/17 - Added special case code for moves less than 30ms long (this
+//                  special case just un-does the change for issue #71 for these
+//                  short moves)
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1372,23 +1375,21 @@ static void process_SM(
     UINT32 temp1 = 0;
     UINT32 temp2 = 0;
     UINT32 remainder = 0;
+    MoveCommandType move;
 
-	// Trial: Spin here until there's space in the fifo
-	while(!FIFOEmpty)
-	;
 
 	// Check for delay
 	if (A1Stp == 0 && A2Stp == 0)
 	{
-		CommandFIFO[0].Command = COMMAND_DELAY;
+		move.Command = COMMAND_DELAY;
         // This is OK because we only need to multiply the 3 byte Duration by
         // 25, so it fits in 4 bytes OK.
-  		CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+  		move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
 	}
 	else
 	{
-		CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
-		CommandFIFO[0].DirBits = 0;
+		move.DelayCounter = 0; // No delay for motor moves
+		move.DirBits = 0;
 		
 		// Always enable both motors when we want to move them
 		Enable1IO = ENABLE_MOTOR;
@@ -1397,12 +1398,12 @@ static void process_SM(
 		// First, set the direction bits
 		if (A1Stp < 0)
 		{
-			CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR1_BIT;
+			move.DirBits = move.DirBits | DIR1_BIT;
 			A1Stp = -A1Stp;
 		}
 		if (A2Stp < 0)
 		{
-			CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+			move.DirBits = move.DirBits | DIR2_BIT;
 			A2Stp = -A2Stp;
 		}
         // To compute StepAdd values from Duration.
@@ -1430,7 +1431,17 @@ static void process_SM(
             temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
             temp = (A1Stp << 15)/temp1;
             temp2 = (A1Stp << 15) % temp1;
-            remainder = (temp2 << 16) / temp1;
+            /* Because it takes us about 5ms extra time to do this division,
+             * we only perform this extra step if our move is long enough to
+             * warrant it. That way, for really short moves (where the extra
+             * precision isn't necessary) we don't take up extra time. Without
+             * this optimization, our minimum move time is 20ms. With it, it
+             * drops down to about 15ms.
+             */
+            if (Duration > 30)
+            {
+                remainder = (temp2 << 16) / temp1;
+            }
         }
         else {
             temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
@@ -1444,16 +1455,26 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
             temp = 1;
         }
-        temp = (temp << 16) + 1 + remainder;
+        if (Duration > 30)
+        {
+            temp = (temp << 16) + remainder;
+        }
+        else
+        {
+            temp = (temp << 16);
+        }
 
-        CommandFIFO[0].StepAdd[0] = temp;
-        CommandFIFO[0].StepsCounter[0] = A1Stp;
-        CommandFIFO[0].StepAddInc[0] = 0;
+        move.StepAdd[0] = temp;
+        move.StepsCounter[0] = A1Stp;
+        move.StepAddInc[0] = 0;
         
         if (A2Stp < 0x1FFFF) {
             temp = (A2Stp << 15)/temp1;
             temp2 = (A2Stp << 15) % temp1; 
-            remainder = (temp2 << 16) / temp1;
+            if (Duration > 30)
+            {
+                remainder = (temp2 << 16) / temp1;
+            }
         }
         else {
             temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
@@ -1467,12 +1488,19 @@ static void process_SM(
             printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
             temp = 1;
         }
-        temp = (temp << 16) + 1 + remainder;
+        if (Duration > 30)
+        {
+            temp = (temp << 16) + remainder;
+        }
+        else
+        {
+            temp = (temp << 16);
+        }
         
-        CommandFIFO[0].StepAdd[1] = temp;
-        CommandFIFO[0].StepsCounter[1] = A2Stp;
-        CommandFIFO[0].StepAddInc[1] = 0;
-        CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+        move.StepAdd[1] = temp;
+        move.StepsCounter[1] = A2Stp;
+        move.StepAddInc[1] = 0;
+        move.Command = COMMAND_MOTOR_MOVE;
         
         /* For debugging step motion , uncomment the next line */
         /*
@@ -1485,6 +1513,13 @@ static void process_SM(
          */
 	}
 		
+	// Spin here until there's space in the fifo
+	while(!FIFOEmpty)
+	;
+
+    // Now, quick copy over the computed command data to the command fifo
+    CommandFIFO[0] = move;
+    
 	FIFOEmpty = FALSE;
 }
 
