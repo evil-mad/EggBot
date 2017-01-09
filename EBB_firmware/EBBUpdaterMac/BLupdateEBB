@@ -1,0 +1,64 @@
+#!/bin/bash
+
+#cd /dev
+#echo ` ls cu.usb*`
+#echo  `ls /dev | grep cu.usbmodem`
+
+base='/dev/'
+result=`ls /dev | grep -m 1 usbmodem`
+portName=$base$result
+
+#echo "$portName"
+if [ "$result" ]
+then
+  echo "USB device found at $portName"
+  echo "Entering bootloader."
+  echo -e "BL" > $portName
+  sleep 2s
+  echo "Calling mphidflash to update firmware 2.4.6"
+  ./mphidflash -w app.X.production.hex -r
+  echo "Firmware burn complete. Preparing to test."
+  sleep 1s
+  echo "Querying EBB version"
+  echo -e "V" > $portName
+  result2=`head -n 1 < $portName`
+  echo "$result2"
+
+  if [[ $result2 == *"2.4.6"* ]]
+  then
+    echo "Firmware updated successfully.";
+  else
+    echo "Firmware update may not have succeeded.";
+  fi
+
+else
+  echo "No EBB found via standard method...."
+  echo "Checking to see if we have a device in bootloader mode."
+  ./mphidflash -w app.X.production.hex -r
+  sleep 2s
+  base='/dev/'
+  result=`ls /dev | grep -m 1 usbmodem`
+  portName=$base$result
+
+if [ "$result" ]
+ then
+  echo "Firmware burn complete. Preparing to test."
+  sleep 1s
+  echo "Querying EBB version"
+  echo -e "V" > $portName
+  result2=`head -n 1 < $portName`
+  echo "$result2"
+
+  if [[ $result2 == *"2.4.6"* ]]
+  then
+    echo "Firmware updated successfully.";
+  else
+    echo "Firmware update may not have succeeded.";
+  fi
+
+else
+  echo "Firmware update appears to have failed.";
+fi
+
+fi
+
