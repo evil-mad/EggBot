@@ -211,6 +211,7 @@
 // 2.4.6 01/08/17 - Added special case code for moves less than 30ms long (this
 //                  special case just un-does the change for issue #71 for these
 //                  short moves)
+// 2.5.0 01/09/17 - Added LM (low level move) command to allow PC to do all math
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -499,7 +500,7 @@ void high_ISR(void)
 					}
 				}
 			}
-		}
+        }
         // Check to see if we should change the state of the pen
 		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
 		{
@@ -1174,6 +1175,76 @@ void parse_AM_packet (void)
 	FIFOEmpty = FALSE;
     
 	print_ack();
+}
+
+// Low Level Move command
+// Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2><CR>
+void parse_LM_packet (void)
+{
+	UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
+    INT32 StepsCounter1, StepsCounter2 = 0;
+
+    // Extract each of the values.
+	extract_number (kULONG, &StepAdd1, kREQUIRED);
+	extract_number (kLONG,  &StepsCounter1, kREQUIRED);
+	extract_number (kULONG, &StepAddInc1, kREQUIRED);
+	extract_number (kULONG, &StepAdd2, kREQUIRED);
+	extract_number (kLONG,  &StepsCounter2, kREQUIRED);
+	extract_number (kULONG, &StepAddInc2, kREQUIRED);
+
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+        return;
+    }
+
+    CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
+    CommandFIFO[0].DirBits = 0;
+
+    // Always enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+
+    // First, set the direction bits
+    if (StepsCounter1 < 0)
+    {
+        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR1_BIT;
+        StepsCounter1 = -StepsCounter1;
+    }
+    if (StepsCounter2 < 0)
+    {
+        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+        StepsCounter2 = -StepsCounter2;
+    }
+
+	// Spin here until there's space in the fifo
+	while(!FIFOEmpty)
+	;
+
+    CommandFIFO[0].StepAdd[0] = StepAdd1;
+    CommandFIFO[0].StepsCounter[0] = StepsCounter1;
+    CommandFIFO[0].StepAddInc[0] = StepAddInc1;
+    CommandFIFO[0].StepAdd[1] = StepAdd2;
+    CommandFIFO[0].StepsCounter[1] = StepsCounter2;
+    CommandFIFO[0].StepAddInc[1] = StepAddInc2;
+    CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+
+    /* For debugging step motion , uncomment the next line */
+    /*
+     * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+            CommandFIFO[0].StepAdd[0],
+            CommandFIFO[0].StepsCounter[0],
+            CommandFIFO[0].StepAdd[1],
+            CommandFIFO[0].StepsCounter[1]
+        );
+     */
+		
+	FIFOEmpty = FALSE;
+    
+    if (g_ack_enable)
+    {
+    	print_ack();
+    }
 }
 
 // The Stepper Motor command
