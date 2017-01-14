@@ -207,6 +207,7 @@
           <li><a href="#EM">EM</a> &mdash; Enable Motors</li>
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
           <li><a href="#I">I</a> &mdash; Input</li>
+          <li><a href="#LM">LM</a> &mdash; Low level Move</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
           <li><a href="#MW">MW</a> &mdash; Memory Write</li>
           <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
@@ -703,6 +704,52 @@
           </li>
         </ul>
 
+        <hr class="short" />
+
+        <h4><a name="LM"></a> "LM" &mdash; Low level Move</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> 
+            <code>
+              LM,<i>StepAdd1</i>,<i>StepsCounter1</i>,<i>StepAddInc1</i>,<i>StepAdd2</i>,<i>StepsCounter2</i>,<i>StepAddInc2</i>&lt;CR&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.0 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li><i>StepAdd1</i> and <i>StepAdd2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They get added to step accumulator every 40nS.</li>
+            <li><i>StepsCounter1</i> and <i>StepsCounter2</i> are signed 24 bit integers in the range from -8388607 to 8388607, giving movement distance in steps.</li>
+            <li><i>StepsAddInc1</i> and <i>StepsAddInc2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. This value is added to StepsAdd every 40nS.</li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+              Use this command to make the motors move. Acceleration and deceleration can be performed, and because the parameters are passed directly into motion control system of the EBB, no time is lost doing any math operations or limit checking, so maximum command throughput can be achieved.
+            </p>
+            <p>
+              There is a 32 bit accumulator for each axis. At the beginning of each move, the accumulator is zeroed. Every 40 &mu;S (25 KHz) the <i>StepAdd</i> value is added to the accumulator. Whenever the accumulator is greater than 0x80000000, a step is taken on that axis, and 0x8000000 is subtracted from the accumulator. If the <i>StepAdd</i> value is 2147483648, then a step is taken every 40 &mu;S. If the <i>StepAdd</i> value is 1, then a step is taken every 85899 seconds. If the <i>StepAdd</i> value is 0, then no steps are taken on that axis. (Make sure that at least one axis has non-zero StepAdd and StepsCounter values, or the move will never finish.) Each time a step is taken, the StepsCounter for that axis is decremented. Once both move counters reach zero after a step, the move is considered complete.
+            </p>
+            <p>
+              The sign of <i>StepsAddCounter</i> represents the direction that an axis should turn. The value represents the number of steps that an axis should take for this move.
+            </p>
+            <p>
+              The <i>StepsAddInc</i> value is added to <i>StepsAdd</i> every 40 &mu;S. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
+            </p>
+            <p>
+              This command is a low level version of the <code>SM</code> and <code>XM</code> commands. The EBB firmware does no limit checking on the parameters, it simply parses them (converts them from human readable ASCII to binary) and then pushes them into the motion FIFO. See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information.
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
+            This example will cause a 10ms long move, where axis 1 takes a step every 1ms, and axis 2 takes a step every 5ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. No accel or decel on either axis.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
+            This example will step both axis at a 1ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - you normally want both axis to be stepping for the whole length of the move. No accel or decel on either axis.
+          </li>
+        </ul>
+      
         <hr class="short" />
 
         <h4><a name="MR"></a>"MR" &mdash; Memory Read</h4>
@@ -1412,9 +1459,9 @@
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
-						<p>
-						  After sending a move (SM or XM) less than 15ms long (less than 20ms for v2.4.5 and above), if the next command is another move command, that second move command may have a short gap in time before it starts moving the motors. This is because it takes about 15ms for the EBB to process a new move command (20ms for v2.4.5 and above) and send it to the motion control FIFO. So if the previous command took less than 15ms to execute, it will be finished before the next move is finished processing, and there may be a gap between the two move's sets of step pulses to the motor drivers. For example, if you send several 1ms long SM commands, expect there to be roughly 14ms of dead time between the moves.
-						</p>
+            <p>
+              The EBB firmware can sustain moves of 3ms of more continuously without any inter-move gaps in time.
+            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
