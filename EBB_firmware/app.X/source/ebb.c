@@ -212,6 +212,8 @@
 //                  special case just un-does the change for issue #71 for these
 //                  short moves)
 // 2.5.0 01/09/17 - Added LM (low level move) command to allow PC to do all math
+// 2.5.1 01/18/17 - Fixed LM command to take negative and positive StepAddIncs
+//                  Fixed 25KHz ISR to be much closer to 25KHz
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -314,8 +316,8 @@ void high_ISR(void)
 	{
 		// Clear the interrupt 
 		PIR1bits.TMR1IF = 0;
-		TMR1L = TIMER1_L_RELOAD;	// Set to 120 for 25KHz ISR fire
 		TMR1H = TIMER1_H_RELOAD;	//
+		TMR1L = TIMER1_L_RELOAD;	// Reload for 25KHz ISR fire
 
 		OutByte = CurrentCommand.DirBits;
 		TookStep = FALSE;
@@ -395,9 +397,9 @@ void high_ISR(void)
 				if (CurrentCommand.StepsCounter[0])
 				{
 					StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
-					if (StepAcc[0] > 0x80000000)
+					if (StepAcc[0] & 0x80000000)
 					{
-						StepAcc[0] = StepAcc[0] - 0x80000000;
+						StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
 						OutByte = OutByte | STEP1_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[0]--;
@@ -417,9 +419,9 @@ void high_ISR(void)
 				if (CurrentCommand.StepsCounter[1])
 				{
 					StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
-					if (StepAcc[1] > 0x80000000)
+					if (StepAcc[1] & 0x80000000)
 					{
-						StepAcc[1] = StepAcc[1] - 0x80000000;
+						StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
 						OutByte = OutByte | STEP2_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[1]--;
@@ -649,15 +651,15 @@ void EBB_Init(void)
     FIFOEmpty = TRUE;
 
 	// Set up TMR1 for our 25KHz High ISR for stepping
-	T1CONbits.RD16 = 0; 	// Set 8 bit mode
+	T1CONbits.RD16 = 1; 	// Set 16 bit mode
 	T1CONbits.TMR1CS1 = 0; 	// System clocked from Fosc/4
 	T1CONbits.TMR1CS0 = 0;
-	T1CONbits.T1CKPS1 = 1; 	// Use 1:4 Prescale value
+	T1CONbits.T1CKPS1 = 0; 	// Use 1:1 Prescale value
 	T1CONbits.T1CKPS0 = 0;
 	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
 	T1CONbits.T1SYNC = 0;
-	TMR1L = TIMER1_L_RELOAD;	// Set to 120 for 25KHz ISR fire
-	TMR1H = TIMER1_H_RELOAD;	// (note, unused in 16-bit mode)
+	TMR1H = TIMER1_H_RELOAD;	//
+	TMR1L = TIMER1_L_RELOAD;	// Reload for 25Khz ISR fire
 
 	T1CONbits.TMR1ON = 1; // Turn the timer on
 
@@ -1187,10 +1189,10 @@ void parse_LM_packet (void)
     // Extract each of the values.
 	extract_number (kULONG, &StepAdd1, kREQUIRED);
 	extract_number (kLONG,  &StepsCounter1, kREQUIRED);
-	extract_number (kULONG, &StepAddInc1, kREQUIRED);
+	extract_number (kLONG, &StepAddInc1, kREQUIRED);
 	extract_number (kULONG, &StepAdd2, kREQUIRED);
 	extract_number (kLONG,  &StepsCounter2, kREQUIRED);
-	extract_number (kULONG, &StepAddInc2, kREQUIRED);
+	extract_number (kLONG, &StepAddInc2, kREQUIRED);
 
     // Bail if we got a conversion error
     if (error_byte)

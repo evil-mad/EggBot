@@ -718,9 +718,9 @@
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>StepAdd1</i> and <i>StepAdd2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They get added to step accumulator every 40nS.</li>
-            <li><i>StepsCounter1</i> and <i>StepsCounter2</i> are signed 24 bit integers in the range from -8388607 to 8388607, giving movement distance in steps.</li>
-            <li><i>StepsAddInc1</i> and <i>StepsAddInc2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. This value is added to StepsAdd every 40nS.</li>
+            <li><i>StepAdd1</i> and <i>StepAdd2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and get added to each axis' step accumulator every 40nS to determine when steps are taken.</li>
+            <li><i>StepsCounter1</i> and <i>StepsCounter2</i> are signed 24 bit integers in the range from -8388607 to 8388607, giving movement distance in steps for axis 1 and axis 2.</li>
+            <li><i>StepsAddInc1</i> and <i>StepsAddInc2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. These values are added to their respective StepAdd every 40nS and control acceleration or deceleration during a move.</li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
@@ -728,17 +728,57 @@
               Use this command to make the motors move. Acceleration and deceleration can be performed, and because the parameters are passed directly into motion control system of the EBB, no time is lost doing any math operations or limit checking, so maximum command throughput can be achieved.
             </p>
             <p>
-              There is a 32 bit accumulator for each axis. At the beginning of each move, the accumulator is zeroed. Every 40 &mu;S (25 KHz) the <i>StepAdd</i> value is added to the accumulator. Whenever the accumulator is greater than 0x80000000, a step is taken on that axis, and 0x8000000 is subtracted from the accumulator. If the <i>StepAdd</i> value is 2147483648, then a step is taken every 40 &mu;S. If the <i>StepAdd</i> value is 1, then a step is taken every 85899 seconds. If the <i>StepAdd</i> value is 0, then no steps are taken on that axis. (Make sure that at least one axis has non-zero StepAdd and StepsCounter values, or the move will never finish.) Each time a step is taken, the StepsCounter for that axis is decremented. Once both move counters reach zero after a step, the move is considered complete.
+              There is a 32 bit accumulator for each axis. At the beginning of each move, the accumulator is zeroed. Every 40 &mu;S (25 KHz) the <i>StepAdd</i> value is added to the accumulator. Whenever the accumulator is greater than 0x80000000, a step is taken on that axis, and 0x8000000 is subtracted from the accumulator. For example, if the <i>StepAdd</i> value is 2147483648, then a step is taken every 40 &mu;S. If the <i>StepAdd</i> value is 1, then a step is taken every 85899 seconds. If the <i>StepAdd</i> value is 0, then no steps are taken on that axis. (Make sure that at least one axis has non-zero StepAdd and StepsCounter values, or the move will never finish.) Each time a step is taken, the StepsCounter for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete.
             </p>
             <p>
-              The sign of <i>StepsAddCounter</i> represents the direction that an axis should turn. The value represents the number of steps that an axis should take for this move.
+              The sign of <i>StepCounter</i> represents the direction that an axis should turn. The value represents the number of steps that an axis should take for this move.
             </p>
             <p>
-              The <i>StepsAddInc</i> value is added to <i>StepsAdd</i> every 40 &mu;S. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
+              Note that because you independently specify a step rate and a number of steps for each axis, it is easy to have the two axes finish stepping at different times. Because the move doesn't end until both step counters are zero, this means that at the end of the move, one axis may not be stepping at all. If you don't want this to happen, be careful to compute your parameters correctly so that both axes step continuously throughout the whole move.
+            </p>
+            <p>
+              The equation for computing StepAdd given a number of steps (StepCounter) and a duration is as follows (where Duration is the length of the move in milliseconds):
+            </p>
+            <p>
+              StepAdd = (StepCounter << 31)/(25 * Duration)
+            </p>
+            <p>
+              This division should be performed as a floating point operation, or at least as a 64 bit divide, since StepCounter shifted left by 31 bits may take up to 63 bits.
+            </p>
+            <p>
+              The equation for computing StepAdd given a step rate (StepRate) in Hz is:
+            </p>
+            <p>
+              StepAdd = (2^31 * StepRate)/(25000)
+            </p>
+            <p>
+              The <i>StepsAddInc</i> value is added to <i>StepAdd</i> every 40 &mu;S. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
+            </p>
+            <p>
+              To compute the StepAddInc values, calculate the desired starting and ending step speed using the above StepAdd formula, then divide the difference up by the number of 25 kHz ISRs that will happen during the move. See the Move Time formula below to get the amount of time the move will take.
+            </p>
+            <p>
+              To compute the total time of a move involving acceleration/deceleration (where StepsAddInc is non-zero), use the average step rate. For example, if we have a starting step rate (in Hz) of SR1 and an ending step rate of SR2, and the move is Steps steps long:
+            </p>
+            <p>
+              Move Time = Steps/((SR1 + SR2)/2)
+            </p>
+            <p>
+              Example: Let's say we wanted to start moving an axis at 45 steps/second, and end at 250 steps/second, and go for a total of 60 steps. By the above formulas, we know that our starting StepAdd is 3865470, our ending StepAdd is 21474836, and our Move Time is 60/((45 + 250)/2) = 0.4068 seconds. So we want to get from a StepAdd of 3865470 at the beginning of the move to a StepAdd of 21474836 at the end, so we need to add a total of (21474836 - 3865470) = 17609366 to our initial StepAdd over the course of the move. Because the move takes 0.4068 seconds, and we will be adding StepsAddInc to StepAdd 25000 times/second, we divide 17609366 by the total number of adds (0.4068 * 25000) to get 17609366/(0.4068 * 25000) = 1732. So if we use a StepsAddInc of 1732, then we will get from 45 steps/second to 250 steps/second in 0.4068 seconds and 60 steps. You would then use the following LM command:
+            </p>
+            <p>
+              <code>LM,3865470,60,1732,0,0,0</code>
+            </p>
+            <p>
+              Notice that we're only using axis 1 in this example. You can of course use both axes at the same time, but you need to be careful that the times for each axis match up or you won't be drawing a straight line (since one axis would then finish before the other).
             </p>
             <p>
               This command is a low level version of the <code>SM</code> and <code>XM</code> commands. The EBB firmware does no limit checking on the parameters, it simply parses them (converts them from human readable ASCII to binary) and then pushes them into the motion FIFO. See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information.
             </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,3865481,1000,0,0,0,0\r</code> 
+            This simple example will move axis 1 at a constant speed of 45 steps/second for 1000 steps. Axis 2 does not move.
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
@@ -747,6 +787,28 @@
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
             This example will step both axis at a 1ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - you normally want both axis to be stepping for the whole length of the move. No accel or decel on either axis.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
+            This example will create a 30ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. No accel or decel on either axis.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,42949573,50,25769804,0,0,0\r</code> 
+            This example will start with axis 1 stepping at 500 steps/second, end with axis 1 stepping at 800 steps/second, and will take 50 steps. Axis 2 will not move. The move will take 77ms to complete. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>LM,17179869,75,-687,8589934,75,687\r</code> 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (note this is deceleration) and 200 steps/second for axis 2. The move will take 500ms. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.5.0
+            <p>
+              In v2.5.0, this command had a bug in where it would not accept negative StepAddInc. This meant no deceleration was possible.
+            </p>
+            <p>
+              In v2.5.1 and beyond, StepAddInc can be negative or positive and will properly decelerate or accelerate the axis.
+            </p>
           </li>
         </ul>
       
