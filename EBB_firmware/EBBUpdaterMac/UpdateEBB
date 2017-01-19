@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#cd /dev
-#echo ` ls cu.usb*`
-#echo  `ls /dev | grep cu.usbmodem`
-
 base='/dev/'
 result=`ls /dev | grep -m 1 usbmodem`
 portName=$base$result
@@ -15,7 +11,7 @@ then
   echo "Entering bootloader."
   echo -e "BL" > $portName
   sleep 2s
-  echo "Calling mphidflash to update firmware 2.4.6"
+  echo "Calling mphidflash to update firmware 2.5.1"
   ./mphidflash -w app.X.production.hex -r
   echo "Firmware burn complete. Preparing to test."
   sleep 1s
@@ -24,7 +20,7 @@ then
   result2=`head -n 1 < $portName`
   echo "$result2"
 
-  if [[ $result2 == *"2.4.6"* ]]
+  if [[ $result2 == *"2.5.1"* ]]
   then
     echo "Firmware updated successfully.";
   else
@@ -49,7 +45,7 @@ if [ "$result" ]
   result2=`head -n 1 < $portName`
   echo "$result2"
 
-  if [[ $result2 == *"2.4.6"* ]]
+  if [[ $result2 == *"2.5.1"* ]]
   then
     echo "Firmware updated successfully.";
   else
