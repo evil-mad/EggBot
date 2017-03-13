@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
   <id>org.evilmad.render.hershe</id>
-  <!-- Version 2.0.2 July 31, 2016 -->
+  <!-- Version 2.1.0 March 11, 2017 -->
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
