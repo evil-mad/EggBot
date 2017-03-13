@@ -86,6 +86,7 @@ class Hershey( inkex.Effect ):
         #Baseline: modernized roman simplex from JHF distribution.
         
         w = 0  #Initial spacing offset
+        v = 0  #Initial vertical offset
         spacing = 3  # spacing between letters
 
         if self.options.action == "render":
