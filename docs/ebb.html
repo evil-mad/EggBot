@@ -254,7 +254,7 @@
               Read all analog (ADC) input values.
             </p>
             <p>
-              When one or more analog channels are enabled (see <a href="#AC">"AC"</a> command below), the "A" command will cause the EBB to return a list of all enabled channels and their associated 10 bit values.
+              When one or more analog channels are enabled (see <code><a href="#AC">AC</a></code> command below), the "A" command will cause the EBB to return a list of all enabled channels and their associated 10 bit values.
             </p>
             <p>
               The list of channels and their data will always be in sorted order from least (channel) to greatest. Only enabled channels will be present in the list.
@@ -345,7 +345,7 @@
                 The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. Since the velocity input parameters for this function are velocity along the direction of motion (rather than per motor), it is up to the user to ensure that these maximum and minimum values will be respected both at the initial and final velocities.
               </p>
               <p>
-                As described in the <a href="#SM">"SM"</a> command documentation below, all EBB motion is 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated. For particularly slow moves &mdash; where the initial or final velocity on either axis is below 100 steps per second, the total time of the move may be noticeably different than expected. In extreme cases (e.g., <code>AM,1000,1000,10000,10\r</code>)
+                As described in the <code><a href="#SM">SM</a></code> command documentation below, all EBB motion is 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated. For particularly slow moves &mdash; where the initial or final velocity on either axis is below 100 steps per second, the total time of the move may be noticeably different than expected. In extreme cases (e.g., <code>AM,1000,1000,10000,10\r</code>)
                   one axis may completely finish its movement well before the other, giving a final velocity that is not in the correct direction.
               </p>
               <p>
@@ -434,7 +434,7 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span> 
             <p>Clear the value of the Node Counter.</p>
-            <p>See the "<a href="#QN">QN</a>" command for a description of the node counter and its operations.</p>
+            <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Obsolete.
             <p>Added in v1.9.3, removed in v1.9.5</p>
@@ -453,7 +453,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
-            <p>See the "<a href="#QS">QS</a>" command for a description of the global step positions.</p>
+            <p>See the <code><a href="#QS">QS</a></code> command for a description of the global step positions.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
@@ -876,7 +876,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This command decrements the 32 bit Node Counter by 1.</p>
-            <p>See the "<a href="#QN">QN</a>" command for a description of the node counter and its operations.</p>
+            <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
         </ul>
@@ -893,7 +893,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This command increments the 32 bit Node Counter by 1.</p>
-            <p>See the "<a href="#QN">QN</a>" command for a description of the node counter and its operations.</p>
+            <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
         </ul>
@@ -1182,7 +1182,7 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This command asks the EBB to report back the current value of the Layer variable. This variable is set with the <a href="#SL">SL</a> command, as a single unsigned byte.
+              This command asks the EBB to report back the current value of the Layer variable. This variable is set with the <code><a href="#SL">SL</a></code> command, as a single unsigned byte.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL\r</code></li>
@@ -1478,7 +1478,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command sets the value of the Layer variable, which can be read by the <a href="#QL">QL</a> query.
+              This command sets the value of the Layer variable, which can be read by the <code><a href="#QL">QL</a></code> query.
               This variable is a single unsigned byte, and is available for the user to store a single variable as needed.
             </p>
           </li>
@@ -1563,7 +1563,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>This command sets the Node Counter to <i>value</i>.</p>
-            <p>See the "<a href="#QN">QN</a>" command for a description of the node counter and its operations.</p>
+            <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Example:</span>  <code>SN,123456789\r</code> Set node counter to 123456789.</li>                    
           <li><span style="font-weight: bold;">Version History:</span>  Added in v1.9.5</li>
@@ -1597,7 +1597,7 @@
               Note that conventionally, we have used the <i>servo_min</i> ("SC,4") value as the 'Pen up position', and the <i>servo_max</i> ("SC,5") value as the 'Pen down position'.
             </p>
             <p>
-              The <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <a href="#SC">SC</a> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <a href="#SM">SM</a>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
+              The <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
             </p>
             <p>If no <i>duration</i> argument is specified, a value of 0 milliseconds is used internally.</p>
             <p>
@@ -2002,7 +2002,7 @@
               Note that conventionally, we have used the <i>servo_min</i> ("SC,4") value as the 'Pen up position', and the <i>servo_max</i> ("SC,5") value as the 'Pen down position'.
             </p>
             <p>
-              The optional <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <a href="#SC">SC</a> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <a href="#SM">SM</a>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
+              The optional <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
             </p>
             <p>
               If no <i>duration</i> argument is specified, a value of 0 milliseconds is used internally.
@@ -2089,7 +2089,7 @@
             <li>
               <span style="font-weight: bold;">Description:</span> 
               <p>
-                This command takes the <i>axisA</i> and <i>axisB</i> values, and creates a call to the <a href="#SM">SM</a> command with the SM command's <i>axis1</i> value as <i>axisA</i> + <i>axisB</i>, and <i>axis2</i> as <i>axisA</i> - <i>axisB</i>.
+                This command takes the <i>axisA</i> and <i>axisB</i> values, and creates a call to the <code><a href="#SM">SM</a></code> command with the SM command's <i>axis1</i> value as <i>axisA</i> + <i>axisB</i>, and <i>axis2</i> as <i>axisA</i> - <i>axisB</i>.
               </p>
               <p>
                 This command is designed to allow cleaner operation of machines with mixed-axis geometry, including CoreXY, H-Bot gantry machines, and current AxiDraw models.
