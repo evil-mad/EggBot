@@ -119,12 +119,10 @@
           Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The EggBot, WaterColorBot and (more recently,) the AxiDraw. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
         </p>
         <p>
-          That said, there have been many smaller changes in the code between the versions that ship preloaded on the EBB (which may be a low as v2.0.1) and the
-          latest versions (2.4.x). Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications.  
-          If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+          That said, there have been many smaller changes in the code between the versions that ship preloaded on the EBB (which may be a low as v2.0.1) and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
         <p>
-          Be aware that this documentation refers not only to different versions of the EBB firmware, but also to different versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
+          Be aware that this documentation refers not only to different versions of the EBB firmware, but also in some cases to different versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
         </p>
 
         <p />
@@ -207,7 +205,7 @@
           <li><a href="#EM">EM</a> &mdash; Enable Motors</li>
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
           <li><a href="#I">I</a> &mdash; Input</li>
-          <li><a href="#LM">LM</a> &mdash; Low level Move</li>
+          <li><a href="#LM">LM</a> &mdash; Low-level Move</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
           <li><a href="#MW">MW</a> &mdash; Memory Write</li>
           <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
@@ -377,7 +375,7 @@
               This command turns off interrupts and jumps into the bootloader, so that new firmware may be uploaded. This particular method of entering bootloader mode is unique in that no physical button presses are required.
             </p>  
             <p>
-              Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A speical bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
+              Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A special bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
             </p>
           </li>
           <li>
@@ -414,10 +412,10 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command takes five bytes worth of paramters, one for each TRISx register in the processor, and writes those values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be an output, and a 1 sets it to be an input.
+              This command takes five bytes worth of parameters, one for each TRISx register in the processor, and writes those values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be an output, and a 1 sets it to be an input.
             </p>
             <p>
-              This command is useful if you want to set up the pin directions for each and every pin on the procesor at once. If you just one to set one pin at a time, use the <code>PC</code> command.
+              This command is useful if you want to set up the pin directions for each and every pin on the processor at once. If you just one to set one pin at a time, use the <code>PC</code> command.
             </p>
             <p>
               This command does not need to be used to configure analog inputs. The <code>AC</code> command is used for that.
@@ -469,32 +467,32 @@
         
         <ul>
           <li>
-            <span style="font-weight: bold;">Command:</span> <code>CK,<i>Param1_value</i>,<i>Param2_value</i>,<i>Param3_value</i>,<i>Param4_value</i>,<i>Param5_value</i>,<i>Param6_value</i>,<i>Param7_value</i>,<i>Param8_value</i>&lt;CR&gt;</code>
+            <span style="font-weight: bold;">Command:</span> <code>CK,<i>pVal_1</i>,<i>pVal_2</i>,<i>pVal_3</i>,<i>pVal_4</i>,<i>pVal_5</i>,<i>pVal_6</i>,<i>pVal_7</i>,<i>pVal_8</i>&lt;CR&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Response:</span>
-            <p><code>Param1=</code><i>Param1_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param2=</code><i>Param2_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param3=</code><i>Param3_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param4=</code><i>Param4_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param5=</code><i>Param5_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param6=</code><i>Param6_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param7=</code><i>Param7_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param8=</code><i>Param8_value</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
             <p><code>OK&lt;NL&gt;&lt;CR&gt;</code></p>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>Param1_value</i> An unsigned one byte integer from 0 to 255.</li>
-              <li><i>Param2_value</i> A signed one byte integer from -128 to 127.</li>
-              <li><i>Param3_value</i> An unsigend two byte integer from 0 to 65535.</li>
-              <li><i>Param4_value</i> A signed two byte integer from -32768 to 32767.</li>
-              <li><i>Param5_value</i> An unsigned four byte integer from 0 to 4294967295.</li>
-              <li><i>Param6_value</i> A signed four byte integer from -2147483648 to 2147483647.</li>
-              <li><i>Param7_value</i> An case sensitive character.</li>
-              <li><i>Param8_value</i> An case forecd upper case character.</li>
+              <li><i>pVal_1</i> An unsigned one byte integer from 0 to 255.</li>
+              <li><i>pVal_2</i> A signed one byte integer from -128 to 127.</li>
+              <li><i>pVal_3</i> An unsigned two byte integer from 0 to 65535.</li>
+              <li><i>pVal_4</i> A signed two byte integer from -32768 to 32767.</li>
+              <li><i>pVal_5</i> An unsigned four byte integer from 0 to 4294967295.</li>
+              <li><i>pVal_6</i> A signed four byte integer from -2147483648 to 2147483647.</li>
+              <li><i>pVal_7</i> A case sensitive character.</li>
+              <li><i>pVal_8</i> A case forced upper case character.</li>
             </ul>
           </li>
           <li>
@@ -502,8 +500,8 @@
             <p>
               This command is used to test out the various parameter parsing routines in the EBB. Each parameter is a different data type. The command simply prints out the values it parsed to allow the developer to confirm that the parsing code is working properly.
             </p>
-            <p>For <i>Param7_value</i>, any typeable character is accpeted.</p>
-            <p>FOr <i>Param8_value</i>, any typeable character is accpeted, and then converted to upper case before printing.</p>
+            <p>For <i>pVal_7</i>, any type-able character is accepted as input.</p>
+            <p>For <i>pVal_8</i>, any type-able character is accepted, and converted to upper case before printing.</p>
           </li>
         </ul>
 
@@ -512,29 +510,29 @@
         <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4> 
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>CU,<i>Prameter_Number</i>,<i>Parameter_Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Command: </span><code>CU,<i>Param_Number</i>,<i>Param_Value</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response: </span><code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions: </span>All</li>
+          <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>Prameter_Number</i> The value 1 or 2. Speficies what <i>Parameter_Value</i> means.</li>
-              <li><i>Parameter_Value</i> An integer from -32768 to 32767. Meaning an acceptable values depend on value of <i>Parameter_Number</i></li>
+              <li><i>Param_Number</i> The value 1 or 2. Specifies what <i>Param_Value</i> means.</li>
+              <li><i>Param_Value</i> An integer from -32768 to 32767. Acceptable values depend on value of <i>Param_Number</i></li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command allows for configuring some run time options. The configuration options chosen wiht this command do not survive a reboot, and they will return to their default values on a reset or boot.
+              This command allows for configuring some run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.
             </p>
             <p>
               <ul>
-                <li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
-                <li>When <i>Parameter_Number</i> = 1 : If <i>Parameter_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
+                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
+                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
                 <p>Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
-                <li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
-                <li>When <i>Parameter_Number</i> = 2 : If <i>Parameter_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
+                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
+                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
                 <p>
                   Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier.
                 </p>
@@ -691,7 +689,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command reads every PORTx register (where x is A through E) and prints out each byte-wide reigster value as a three digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
+              This command reads every PORTx register (where x is A through E) and prints out each byte-wide register value as a three digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
             </p>
             <p>
               For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this command will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the processor datasheet) and return all of their values.
@@ -706,7 +704,7 @@
 
         <hr class="short" />
 
-        <h4><a name="LM"></a> "LM" &mdash; Low level Move</h4>
+        <h4><a name="LM"></a>"LM" &mdash; Low-level Move</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> 
@@ -728,7 +726,7 @@
               Use this command to make the motors move. Acceleration and deceleration can be performed, and because the parameters are passed directly into motion control system of the EBB, no time is lost doing any math operations or limit checking, so maximum command throughput can be achieved.
             </p>
             <p>
-              There is a 32 bit accumulator for each axis. At the beginning of each move, the accumulator is zeroed. Every 40 &mu;S (25 KHz) the <i>StepAdd</i> value is added to the accumulator. Whenever the accumulator is greater than 0x80000000, a step is taken on that axis, and 0x8000000 is subtracted from the accumulator. For example, if the <i>StepAdd</i> value is 2147483648, then a step is taken every 40 &mu;S. If the <i>StepAdd</i> value is 1, then a step is taken every 85899 seconds. If the <i>StepAdd</i> value is 0, then no steps are taken on that axis. (Make sure that at least one axis has non-zero StepAdd and StepsCounter values, or the move will never finish.) Each time a step is taken, the StepsCounter for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete.
+              There is a 32 bit accumulator for each axis. At the beginning of each move, the accumulator is zeroed. Every 40 &mu;s (25 kHz) the <i>StepAdd</i> value is added to the accumulator. Whenever the accumulator is greater than 0x80000000, a step is taken on that axis, and 0x8000000 is subtracted from the accumulator. For example, if the <i>StepAdd</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>StepAdd</i> value is 1, then a step is taken every 85899 seconds. If the <i>StepAdd</i> value is 0, then no steps are taken on that axis. (Make sure that at least one axis has non-zero StepAdd and StepsCounter values, or the move will never finish.) Each time a step is taken, the StepsCounter for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete.
             </p>
             <p>
               The sign of <i>StepCounter</i> represents the direction that an axis should turn. The value represents the number of steps that an axis should take for this move.
@@ -752,7 +750,7 @@
               StepAdd = (2^31 * StepRate)/(25000)
             </p>
             <p>
-              The <i>StepsAddInc</i> value is added to <i>StepAdd</i> every 40 &mu;S. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
+              The <i>StepsAddInc</i> value is added to <i>StepAdd</i> every 40 &mu;s. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
             </p>
             <p>
               To compute the StepAddInc values, calculate the desired starting and ending step speed using the above StepAdd formula, then divide the difference up by the number of 25 kHz ISRs that will happen during the move. See the Move Time formula below to get the amount of time the move will take.
@@ -782,29 +780,29 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
-            This example will cause a 10ms long move, where axis 1 takes a step every 1ms, and axis 2 takes a step every 5ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. No accel or decel on either axis.
+            This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
-            This example will step both axis at a 1ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - you normally want both axis to be stepping for the whole length of the move. No accel or decel on either axis.
+            This example will step both axis at a 1 ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - one normally prefers to have both axes stepping for the whole length of the move. This is a (poor, jerky) "constant-rate" move without acceleration or deceleration on either axis.
+
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
-            This example will create a 30ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. No accel or decel on either axis.
-          </li>
+            This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,42949573,50,25769804,0,0,0\r</code> 
-            This example will start with axis 1 stepping at 500 steps/second, end with axis 1 stepping at 800 steps/second, and will take 50 steps. Axis 2 will not move. The move will take 77ms to complete. 
+            This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>LM,17179869,75,-687,8589934,75,687\r</code> 
-            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (note this is deceleration) and 200 steps/second for axis 2. The move will take 500ms. 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             Added in v2.5.0
             <p>
-              In v2.5.0, this command had a bug in where it would not accept negative StepAddInc. This meant no deceleration was possible.
+              In v2.5.0, this command would not accept negative values of StepAddInc, so no deceleration was possible.
             </p>
             <p>
               In v2.5.1 and beyond, StepAddInc can be negative or positive and will properly decelerate or accelerate the axis.
@@ -933,7 +931,7 @@
         <ul>
           <li>
             <span style="font-weight: bold;">Command:</span>
-            <code>PC,<i>RB0_Lenth</i>,<i>RB0_Rate</i>[,<i>RB1_Lenth</i>,<i>RB1_Rate,<i>RB2_Lenth</i>,<i>RB2_Rate</i>,<i>RB3_Lenth</i>,<i>RB3_Rate</i>]</i>&lt;CR&gt;</code>
+            <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1,<i>Length2</i>,<i>Period2</i>,<i>Length3</i>,<i>Period3</i>]</i>&lt;CR&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
@@ -942,16 +940,16 @@
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li>
-                <i>RB0_Length</i>: An integer from 0 to 65535. Represents the number of milliseconds RB0 will go high for.
+                <i>Length0</i>: An integer from 0 to 65535. This length represents the number of milliseconds RB0 will go high for.
               </li>
               <li>
-                <i>RB0_Rate</i>: An integer from <i>RB0_Length</i> to 65535. Represents the number of milliseconds between rising edges on RB0.
+                <i>Period0</i>: An integer from <i>Length0</i> to 65535. Represents the number of milliseconds between rising edges on RB0.
               </li> 
               <li>
-                <i>RBx_Length</i>: (optional) An integer from 0 to 65535. Represents the number of milliseconds RBx will go high for. 'x' is 1, 2, and 3
+                <i>Length1</i>, <i>Length2</i>, <i>Length3</i>: (optional) Each is an integer from 0 to 65535, that represents the number of milliseconds RB<i>x</i> will go high for, where the value of <i>x</i> is 1, 2, or 3
               </li>
               <li>
-                <i>RBx_Rate</i>: (optional) An integer from <i>RBx_Length</i> to 65535. Represents the number of milliseconds between rising edges on RBx. 'x' is 1, 2, and 3
+                <i>Period1</i>, <i>Period2</i>, <i>Period3</i>: (optional) Each is integer from <i>RBx_Len</i> to 65535, that represents the number of milliseconds between rising edges on RB<i>x</i>, where the value of <i>x</i> is 1, 2, or 3
               </li>
             </ul>
           </li>
@@ -964,10 +962,10 @@
               When the <code>PG,1</code> command is sent, any pairs from the <code>PC</code> command where neither value is zero and the Rate is greater than the Length will create pulses on that pin.
             </p>
             <p>
-              While the pulses are going, new <code>PC</code> commands can be sent, updating the pulse durations and repitition rates.
+              While the pulses are going, new <code>PC</code> commands can be sent, updating the pulse durations and repetition rates.
             </p>
             <p>
-              This command is only available for pins RB0, RB1, RB2 and RB3. If you wish to leave a pin alone (i.e. not create pulses on it) just set it's Length and Rate values to zero.
+              This command is only available for pins RB0, RB1, RB2 and RB3. If you wish to leave a pin alone (i.e. not create pulses on it) just set its Length and Period values to zero.
             </p>
           </li>
         </ul>
@@ -1018,10 +1016,10 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 (and optionally on RB1, RB2 and RB3). It uses the parameters from the <code>PC</code> command to control the pulse width and repitition rate on each pin.
+              This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 (and optionally on RB1, RB2 and RB3). It uses the parameters from the <code>PC</code> command to control the pulse width and repetition rate on each pin.
             </p>
             <p>
-              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have S2 RC Servo outputs or other outputps on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
+              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have S2 RC Servo outputs or other outputs on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
               desire.
             </p>
           </li>
@@ -1288,7 +1286,7 @@
               This command prints out the current Motor 1 and Motor 2 global step positions. Each of these positions is a 32 bit signed integer, that keeps track of the positions of each axis. The <code>CS</code> command can be used to set these positions to zero.
             </p>
             <p>
-              Every time a step is taken, the appropriate global step position is incremented or decrimented depnding on the direction of that step.
+              Every time a step is taken, the appropriate global step position is incremented or decremented depending on the direction of that step.
             </p>
             <p>
               The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the command is executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is complete (you can use the <code>QM</code> command to check if the motors have stopped moving) before checking the current positions.
@@ -1309,12 +1307,12 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reinitalizes the EBB to its power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc.
+              This command reinitializes the EBB to its power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
@@ -1496,7 +1494,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>duration</i>,<i>axis1</i>[,<i>axis2</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
@@ -1522,7 +1520,7 @@
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
             <p>
-              The EBB firmware can sustain moves of 3ms of more continuously without any inter-move gaps in time.
+              The EBB firmware can sustain moves of 3 ms of more continuously without any inter-move gaps in time.
             </p>
           </li>
           <li>
@@ -1578,7 +1576,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>          
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> all (with changes)</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
@@ -1631,16 +1629,16 @@
    
         <hr class="short" />       
         
-        <h4><a name="T"></a>"T" &mdash; Timed Analog/Digial Read</h4>
+        <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Read</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>duration</i> is from 1 to 65535 and represends the delay, in milliseconds, between reads for a given mode.</li>
+            <li><i>duration</i> is from 1 to 65535 and represents the delay, in milliseconds, between reads for a given mode.</li>
             <li><i>mode</i> is 0 for digital or 1 for analog.</li>
           </ul>
           <li>
@@ -1649,24 +1647,24 @@
               This command turns on (or off) the timed digital (I packet) or analog (A packet) reading of pins. Using the T command you can set up a repeated reading of input pins, and the generation of an I or A packet back to the PC. Each of the two modes (analog/digital) is independent of the other and can have a different duration time.
             </p>
             <p>
-              For example, to turn the digital reading of all pins on, with a time of 250ms between reasds, use "T,250,0". Then, every 250ms, the EBB will read all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an "I" command, and simply contains the binary values of each pin of each port. To turn on the analog reading of any enabled analog inputs every 400ms, use "T,400,1". This will cause the EBB to read all enabled analog inputs every 400ms and send back an A packet (exactly the same as the reply to the "A" command) repeatedly. Note that while digital mode will read every pin, analog mode will only read (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be read by this command - no matter what the pin is set to, the "I" response packet will read the pin's digital state.
+              For example, to turn the digital reading of all pins on, with a time of 250 ms between reads, use "T,250,0". Then, every 250 ms, the EBB will read all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an "I" command, and simply contains the binary values of each pin of each port. To turn on the analog reading of any enabled analog inputs every 400 ms, use "T,400,1". This will cause the EBB to read all enabled analog inputs every 400 ms and send back an A packet (exactly the same as the reply to the "A" command) repeatedly. Note that while digital mode will read every pin, analog mode will only read (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be read by this command - no matter what the pin is set to, the "I" response packet will read the pin's digital state.
             </p>
             <p>
-              To turn off a mode, use 0 for the duration paramter. Thus "T,0,0" will turn off digital mode, and "T,0,1" will turn off analog mode.
+              To turn off a mode, use 0 for the duration parameter. Thus "T,0,0" will turn off digital mode, and "T,0,1" will turn off analog mode.
             </p>
             <p>
-              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T command. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1ms. Each time the "A" timer times out, the latest set of analog values is used to create a new "A" packet and that is then sent out.
+              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T command. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1 ms. Each time the "A" timer times out, the latest set of analog values is used to create a new "A" packet and that is then sent out.
             </p>
             <p>
-              Just because the EBB can kick out I and A packets every 1ms (at its fastest) doesn't mean that your PC app can read them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the data coming in. (Realizing that the last packet may not be complete.)
+              Just because the EBB can kick out I and A packets every 1 ms (at its fastest) doesn't mean that your PC app can read them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the data coming in. (Realizing that the last packet may not be complete.)
             </p>
             <p>
-              It has been discovered that if an attempt is made to have all 13 channels of analog be reported any faster than every 4ms, then an internal EBB buffer overflow occurs. Be careful with the speed you choose for A packets. The maximum speed is based upon how many analog channels are being sent back.
+              If an attempt is made to have all 13 channels of analog be reported any faster than every 4 ms, then an internal EBB buffer overflow occurs. Be careful with the speed you choose for A packets. The maximum speed is based upon how many analog channels are being sent back.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span><code>T,250,0&lt;CR&gt;</code>
-            Turn on digital reading of pins and generation of I packet every 250ms.
+            Turn on digital reading of pins and generation of I packet every 250 ms.
           </li>
           <li>
             <span style="font-weight: bold;">Note:</span>
@@ -1721,7 +1719,7 @@
               The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
             </p>
             <p>
-              If the current channel is enabled, then at the beginning of its 3 ms time slot, it's RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be 2.666 ms. A value of 0 will produce zero length, without any pulse.
+              If the current channel is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be 2.666 ms. A value of 0 will produce zero length, without any pulse.
             </p>
             <p>
               The number of available channels is normally (by default) 8. This can be reduced with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms.
@@ -1731,8 +1729,7 @@
               <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms.
             </p>
             <p>
-              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use S2 channel 1. If you wish to to use SP and TP, then ignore
-              channel 1 and start with channel 2. If you do not need the SP and TP commands, then you can use channels 1 through <i>maximum_S2_channels</i>.
+              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use S2 channel 1. If you wish to to use SP and TP, then ignore channel 1 and start with channel 2. If you do not need the SP and TP commands, then you can use channels 1 through <i>maximum_S2_channels</i>.
             </p>
             <p>        
               <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
@@ -1806,7 +1803,7 @@
               The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
             </p>
             <p>
-              If a given servo output is enabled, then at the beginning of its 3 ms time slot, it's RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be about 2.666 ms. A value of 0 will produce zero output only, with no pulse created. If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
+              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be about 2.666 ms. A value of 0 will produce zero output only, with no pulse created. If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
             </p>
             <p>
               The number of available channels is normally (by default) 8. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses. The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the RC,9 command.
@@ -2036,7 +2033,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
             <p>
-              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decrimented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
+              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
             </p>
             <p>
               The value of the node counter can also be manipulated with the following commands:
@@ -2064,7 +2061,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> all</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
