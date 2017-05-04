@@ -990,7 +990,7 @@
             <span style="font-weight: bold;">Description:</span>
             <p>This command sets one of the processor pins to be an input or an output, depending on the <i>Direction</i> parameter.</p>
             <p>
-              This command is a very low-level I/O command. Higher level commands (like SM, S2, etc.) will not change the direction of pins that they need after boot, so if this command gets used to change the pin direction, be sure to change it back before expecting the higher level commands that need the pin to work properly.
+              This command is a very low-level I/O command. Higher level commands (like <code><a href="#SM">SM</a></code>, <code><a href="#S2">S2</a></code>, etc.) will not change the direction of pins that they need after boot, so if this command gets used to change the pin direction, be sure to change it back before expecting the higher level commands that need the pin to work properly.
             </p>
           </li>
           <li>
@@ -1019,7 +1019,7 @@
               This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 (and optionally on RB1, RB2 and RB3). It uses the parameters from the <code>PC</code> command to control the pulse width and repetition rate on each pin.
             </p>
             <p>
-              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have S2 RC Servo outputs or other outputs on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
+              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have <code><a href="#S2">S2</a></code> RC Servo outputs or other outputs on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
               desire.
             </p>
           </li>
@@ -1084,7 +1084,7 @@
               This command will not change a pin's direction to output first, so you must set the pin's direction to be an output using the <code>PD</code> command first if you want anything to come out of the pin.
             </p>
             <p>
-              This command is a very low-level I/O command. Many other higher level commands (like SM, S2, etc.) will over-write the output state of pins that they need. This commands allows you low-level access to every pin on the processor.
+              This command is a very low-level I/O command. Many other higher level commands (like <code><a href="#SM">SM</a></code>, <code><a href="#S2">S2</a></code>, etc.) will over-write the output state of pins that they need. This commands allows you low-level access to every pin on the processor.
             </p>
           </li>
           <li>
@@ -1212,7 +1212,7 @@
               <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>   
             </ul>
             <p>
-              The definition of a "motion command" is any command that has a time associated with it. For example, all SM commands. Also, any Command (like S2, SP, or TP) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
+              The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
               It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
@@ -1239,7 +1239,7 @@
               <li><i>FIFOStatus</i> is non zero if the FIFO is not empty, and 0 if the FIFO is empty.</li>
             </ul>
             <p>
-              The definition of a "motion command" is any command that has a time associated with it. For example, all SM commands. Also, any Command (like S2, SP, or TP) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
+              The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
               It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
@@ -1392,13 +1392,13 @@
               Default: 3 ms on reset.
             </li>
             <li>
-              <code>SC,10,<i>servo_rate</i></code> Set rate of change of the servo position, for both raising and lowering movements. Same units as <i>rate</i> parameter in S2 command.
+              <code>SC,10,<i>servo_rate</i></code> Set rate of change of the servo position, for both raising and lowering movements. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,11,<i>servo_rate_up</i></code> Set the rate of change of the servo when going up. Same units as <i>rate</i> parameter in S2 command.
+              <code>SC,11,<i>servo_rate_up</i></code> Set the rate of change of the servo when going up. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of the servo when going down. Same units as <i>rate</i> parameter in S2 command.
+              <code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of the servo when going down. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
               <code>SC,13,<i>use_alt_pause</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.
