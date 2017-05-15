@@ -682,7 +682,7 @@ class EggBot( inkex.Effect ):
 						self.pathcount += 1
 						pa = pl.split()
 						if not len( pa ):
-							pass
+							continue
 						# Issue 29: pre 2.5.? versions of Python do not have
 						#    "statement-1 if expression-1 else statement-2"
 						# which came out of PEP 308, Conditional Expressions
@@ -728,7 +728,7 @@ class EggBot( inkex.Effect ):
 						self.pathcount += 1
 						pa = pl.split()
 						if not len( pa ):
-							pass
+							continue
 						# Issue 29: pre 2.5.? versions of Python do not have
 						#    "statement-1 if expression-1 else statement-2"
 						# which came out of PEP 308, Conditional Expressions
