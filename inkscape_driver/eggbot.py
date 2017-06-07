@@ -2,7 +2,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.0, dated August 7, 2016.
+# Version 2.8.1, dated June 7, 2017.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -487,12 +487,14 @@ class EggBot( inkex.Effect ):
 		paths in Inkscape.
 		"""
 		for node in aNodeList:
+			if self.bStopped:
+				return
 			# Ignore invisible nodes
 			v = node.get( 'visibility', parent_visibility )
 			if v == 'inherit':
 				v = parent_visibility
 			if v == 'hidden' or v == 'collapse':
-				pass
+				continue
 
 			# first apply the current matrix transform to this node's tranform
 			matNew = composeTransform( matCurrent, parseTransform( node.get( "transform" ) ) )
@@ -713,7 +715,7 @@ class EggBot( inkex.Effect ):
 	
 					pl = node.get( 'points', '' ).strip()
 					if pl == '':
-						pass
+						continue
 	
 					doWePlotThisPath = False 
 					if (self.resumeMode):
