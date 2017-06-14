@@ -170,7 +170,7 @@
           <li><i>Italics</i> are used to represent variables and adjustable parameters.</li>
           <li>Square brackets (<code>[ ]</code>) are used to enclose optional items.</li>
           <li>
-            Angle brackets (<code>&lt; &gt;</code>) are used to represent individual control characters, such as <code>&lt;CR&gt;</code> for carriage return or <code>&lt;LF&gt;</code>, in command and query format descriptions.
+            Angle brackets (<code>&lt; &gt;</code>) are used to represent individual control characters, such as <code>&lt;CR&gt;</code> for carriage return or <code>&lt;NL&gt;</code> for newline, in command and query format descriptions.
           </li>
           <li>
             Individual control characters may also be given by their backslash-escaped representation, as in <code>\r</code> for carriage return or <code>\n</code> for linefeed, in the context of literal command examples.
@@ -185,7 +185,6 @@
           <li>All commands are case insensitive.</li>
           <li>No whitespace (including spaces, tabs, or returns) is allowed within a command.</li>
           <li>All commands must have a total length of 64 characters or fewer, including the terminating <code>&lt;CR&gt;</code> .</li>
-          <li>All replies sent back from the EBB end in <code>&lt;NL&gt;&lt;CR&gt;</code> .</li>
         </ul>
     
         <h3><a name="commands"></a>The EBB Command Set<br></h3>
@@ -286,7 +285,7 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -316,7 +315,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>AM,<i>initial_velocity</i>,<i>final_velocity</i>,<i>axis1</i>,<i>axis2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>  v2.4.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
           <li>
@@ -365,7 +364,7 @@
    
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>BL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -397,7 +396,7 @@
             <span style="font-weight: bold;">Command:</span> 
             <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -429,7 +428,7 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>CN&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Removed, as of v1.9.5 </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span> 
@@ -447,7 +446,7 @@
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -471,15 +470,15 @@
           </li>
           <li>
             <span style="font-weight: bold;">Response:</span>
-            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;&lt;CR&gt;</code></p>
-            <p><code>OK&lt;NL&gt;&lt;CR&gt;</code></p>
+            <p><code>Param1=</code><i>pVal_1</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param2=</code><i>pVal_2</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param3=</code><i>pVal_3</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param4=</code><i>pVal_4</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param5=</code><i>pVal_5</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param6=</code><i>pVal_6</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param7=</code><i>pVal_7</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>Param8=</code><i>pVal_8</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <p><code>OK&lt;CR&gt;&lt;NL&gt;</code></p>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
@@ -511,7 +510,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>CU,<i>Param_Number</i>,<i>Param_Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response: </span><code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response: </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions: </span>All</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
@@ -547,7 +546,7 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -581,7 +580,7 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>[,<i>Enable2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -629,7 +628,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span><br />
-            <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>
+            <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
@@ -653,11 +652,11 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
+            <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-              <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
+              <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
@@ -668,10 +667,10 @@
             <p>Returned values:</p>
             <ul>
               <li>
-                <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
               </li>
               <li>
-                <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
               </li>
             </ul>
           </li>
@@ -683,7 +682,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -698,7 +697,7 @@
           <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>I,128,255,130,000,007&lt;NL&gt;&lt;CR&gt;</code>
+            <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
           </li>
         </ul>
 
@@ -710,7 +709,7 @@
             <code>
               LM,<i>RateTerm1</i>,<i>AxisSteps1</i>,<i>DeltaR1</i>,<i>RateTerm2</i>,<i>AxisSteps2</i>,<i>DeltaR2</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.1 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -838,7 +837,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -858,7 +857,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>MR,071&lt;NL&gt;&lt;CR&gt;</code>
+            <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
           </li>
         </ul>
         
@@ -868,7 +867,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MW,<i>Address</i>,<i>Data</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -892,7 +891,7 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ND&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -909,7 +908,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>NI&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -926,7 +925,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -955,7 +954,7 @@
             <span style="font-weight: bold;">Command:</span>
             <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1,<i>Length2</i>,<i>Period2</i>,<i>Length3</i>,<i>Period3</i>]</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -998,7 +997,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PD,<i>Port</i>,<i>Pin</i>,<i>Direction</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1026,7 +1025,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1056,14 +1055,14 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PI,<i>Port</i>,<i>Pin</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>PI,<i>Value</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>PI,<i>Value</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used.</li>
               <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used.</li>
-              <li><i>Value</i>: is a 0 or 1. It reflets the state of the pin when read as a digital input.</li>
+              <li><i>Value</i>: is a 0 or 1. It reflects the state of the pin when read as a digital input.</li>
             </ul>
           </li>
           <li>
@@ -1077,7 +1076,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>PI,1&lt;NL&gt;&lt;CR&gt;</code>
+            <code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
           </li>
         </ul>
 
@@ -1087,7 +1086,7 @@
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1120,7 +1119,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>state</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1131,13 +1130,13 @@
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
         </ul>
      
-        <hr class="short" />    
+        <hr class="short" />
      
         <h4><a name="QC"></a>"QC" &mdash; Query Current</h4>
   
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QC&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1175,7 +1174,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>0394,0300&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>
+            <code>0394,0300&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query has returned values of 394 for RA0_VOLTAGE and 300 for V+_VOLTAGE.</p>
             <p>
               The first returned value, 0394, indicates a voltage of 1.27 V at REF_RA0. This indicates that the maximum motor current is currently set to 0.72 A.
@@ -1193,13 +1192,13 @@
           </li>
         </ul>  
         
-        <hr class="short" />    
+        <hr class="short" />
     
         <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>CurrentLayerValue</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -1207,15 +1206,15 @@
               This command asks the EBB to report back the current value of the Layer variable. This variable is set with the <code><a href="#SL">SL</a></code> command, as a single unsigned byte.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example:</span> <code>QL\r</code></li>
+          <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>4&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>
+            <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
         </ul>  
        
-        <hr class="short" />    
+        <hr class="short" />
 
         <h4><a name="QM"></a>"QM" &mdash; Query Motor</h4>
         
@@ -1270,13 +1269,13 @@
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
         </ul>
 
-        <hr class="short" />    
+        <hr class="short" />
         
         <h4><a name="QP"></a>"QP" &mdash; Query Pen</h4>
   
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QP&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1286,7 +1285,7 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QP\r</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9</li>
         </ul>
 
@@ -1298,7 +1297,7 @@
           <li><span style="font-weight: bold;">Command:</span><code>QS&lt;CR&gt;</code></li>
           <li>
             <span style="font-weight: bold;">Response:</span>
-            <code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code>
+            <code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
@@ -1315,20 +1314,20 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QS\r</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
             <p>Added in v2.4.3</p>
           </li>
         </ul>
     
-        <hr class="short" />    
+        <hr class="short" />
         
         <h4><a name="R"></a>"R" &mdash; Reset</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1338,7 +1337,7 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
         </ul>
 
         <hr class="short" />    
@@ -1347,7 +1346,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SC,<i>value1</i>,<i>value2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1447,7 +1446,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SE,<i>state</i>[,<i>power</i>[,<i>use_motion_queue</i>]]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -1489,7 +1488,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gtCR&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1515,7 +1514,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>duration</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1574,7 +1573,7 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SN,<i>value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1597,7 +1596,7 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>          
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -1655,7 +1654,7 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1701,7 +1700,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>S2,<i>channel</i>,<i>position</i>,<i>output_pin</i>[,<i>rate</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Command:</span> <code>S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1788,7 +1787,7 @@
             <code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2006,7 +2005,7 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>TP[,<i>duration</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2043,13 +2042,13 @@
           </li>
         </ul>
 
-        <hr class="short" />    
+        <hr class="short" />
 
         <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;NL&gt;&lt;CR&gt;OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2068,7 +2067,7 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span> <code>1234567890&lt;NL&gt;&lt;CR&gt;</code> then </span> <code>OK&lt;NL&gt;&lt;CR&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then </span> <code>OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
@@ -2076,13 +2075,13 @@
           </li>
         </ul>
      
-        <hr class="short" />    
+        <hr class="short" />
     
         <h4><a name="V"></a> "V" &mdash; Version query</h4>
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -2099,7 +2098,7 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>XM,<i>duration</i>,<i>AxisStepsA</i>,<i>AxisStepsB</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
