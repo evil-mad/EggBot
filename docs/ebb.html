@@ -727,24 +727,26 @@
             </p>
             <p>
 	         <b>Methods and consequences:</b> 
-	         Each axis has a separate 32 bit accumulator to control its timing. When the LM command is called, both accumulators are initialized to zero. Then, 
-	         every 40 &mu;s (when the 25 kHz ISR executes) the following sequence of events happens for each channel:
+	         Each axis has a separate 32 bit accumulator to control its timing. When the LM command is called, both accumulators are initialized to zero.
+	         Then, every 40 &mu;s (when the 25 kHz ISR executes) a certain sequence of events happens for each channel:
+
+	         <ol>	         
+              <li>Check to see if the total number of steps moved equals <i>AxisSteps</i>. If true, the move is complete for this axis, skip ahead
+              to the last item of this list (which checks whether the move is complete for both axes).
 	         
-	         
-	         <ul>
-              <li>The value of <i>RateTerm</i> is added to the accumulator</li>
-              <li>If the new accumulator value is greater than 2^31 (2147483648 or 0x80000000), then:
+              <li>The value of <i>RateTerm</i> is added to the accumulator.</li>
+              <li>If the new accumulator value is greater than 2^31 (2147483648 decimal; 0x80000000 hex), then:
               
               <ul>
               <li>The motor on that axis moves one step</li>
               <li>2^31 is subtracted from the accumulator for that axis</li>
-              <li>If the total number of steps moved equals <i>AxisSteps</i>, then note that the move is complete for this axis, and no longer update the 
-               accumulator value.
-              <li>If the move is complete for both axes, then we are done: exit the LM command</li>
-            </ul></li>
-	         
-              <li>The value of <i>DeltaR</i> value is added to <i>RateTerm</i></li>   
-            </ul>
+            </ul></li> 
+            
+            <li>The value of <i>DeltaR</i> value is added to <i>RateTerm</i>. Note that this occurs after (not before) <i>RateTerm</i> is added to the accumulator.</li>   
+            <li>If the move is complete for both axes, then we are done: exit the LM command.</li>
+            
+            
+            </ol>
 	         <p>       
 	         For example, if the <i>RateTerm</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>RateTerm</i> value is 1, then a step is taken every 85899 seconds. If the <i>RateTerm</i> value is 0, then no steps are taken on that axis. Each time a step is taken, the <i>AxisSteps</i> count for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete. 
             </p>
