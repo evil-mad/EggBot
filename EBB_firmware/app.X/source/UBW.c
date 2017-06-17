@@ -152,7 +152,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.1\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.2\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -605,7 +605,7 @@ void low_ISR(void)
 
 void UserInit(void)
 {
-	char i, j;
+	int  i, j;
 
 	// Make all of 3 digital inputs
 	LATA = 0x00;
@@ -684,12 +684,25 @@ void UserInit(void)
     	ISR_A_FIFO[i] = 0;
 	}	
 
-    // Inialize USB TX and RX buffer management
+    // Initialize USB TX and RX buffer management
     g_RX_buf_in = 0;
     g_RX_buf_out = 0;
 	g_TX_buf_in = 0;
 	g_TX_buf_out = 0;
 
+    for (i=0; i < kTX_BUF_SIZE; i++)
+    {
+        g_TX_buf[i] = 0;
+    }
+    for (i=0; i < kRX_COMMAND_BUF_SIZE; i++)
+    {
+        g_RX_command_buf[i] = 0;
+    }
+    for (i=0; i < kRX_BUF_SIZE; i++)
+    {
+        g_RX_buf[i] = 0;
+    }
+    
 	// And the USART TX and RX buffer management
 	g_USART_RX_buf_in = 0;
 	g_USART_RX_buf_out = 0;
