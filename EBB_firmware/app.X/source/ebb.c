@@ -1210,7 +1210,6 @@ void parse_LM_packet (void)
         ((StepsCounter2 == 0) || (StepAdd2 == 0))
     )
     {
-        printf((far rom char *)"!0 Err: Invalid parameter set detected.\n\r");
         return;
     }
     
