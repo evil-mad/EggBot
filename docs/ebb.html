@@ -783,10 +783,10 @@
               To compute the DeltaR values, calculate the desired starting and ending step speed using the above RateTerm formula, then divide the difference up by the number of 25 kHz ISRs that will happen during the move. See the Move Time formula below to get the amount of time the move will take.
             </p>
             <p>
-              To compute the total time of a move involving acceleration/deceleration (where DeltaR is non-zero), use the average step rate. For example, if we have a starting step rate (in Hz) of SR1 and an ending step rate of SR2, and the move is Steps steps long:
+              To compute the total time of a move involving acceleration/deceleration (where DeltaR is non-zero), use the average step rate. For example, if we have a starting step rate (in Hz) of <i>F1</i> and an ending step rate of <i>F2</i>, and the move is <i>AxisSteps</i> motor steps long, then the total move time in seconds is given by:
             </p>
             <p>
-              Move Time = Steps/((SR1 + SR2)/2)
+              Move Time = <i>AxisSteps</i>/((<i>F1</i> + <i>F2</i>)/2) = 2 * <i>AxisSteps</i> / (<i>F1</i> + <i>F2</i>)
             </p>
             <p>
               Example: Let's say we wanted to start moving an axis at 45 steps/second, and end at 250 steps/second, and go for a total of 60 steps. By the above formulas, we know that our starting RateTerm is 3865470, our ending RateTerm is 21474836, and our Move Time is 60/((45 + 250)/2) = 0.4068 seconds. So we want to get from a RateTerm of 3865470 at the beginning of the move to a RateTerm of 21474836 at the end, so we need to add a total of (21474836 - 3865470) = 17609366 to our initial RateTerm over the course of the move. Because the move takes 0.4068 seconds, and we will be adding DeltaR to RateTerm 25000 times/second, we divide 17609366 by the total number of adds (0.4068 * 25000) to get 17609366/(0.4068 * 25000) = 1732. So if we use a DeltaR of 1732, then we will get from 45 steps/second to 250 steps/second in 0.4068 seconds and 60 steps. You would then use the following LM command:
