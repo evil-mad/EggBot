@@ -788,38 +788,39 @@
             <p>
               Move Time = <i>AxisSteps</i>/((<i>F1</i> + <i>F2</i>)/2) = 2 * <i>AxisSteps</i> / (<i>F1</i> + <i>F2</i>)
             </p>
-            <p>
-              Example: Let's say we wanted to start moving an axis at 45 steps/second, and end at 250 steps/second, and go for a total of 60 steps. By the above formulas, we know that our starting RateTerm is 3865470, our ending RateTerm is 21474836, and our Move Time is 60/((45 + 250)/2) = 0.4068 seconds. So we want to get from a RateTerm of 3865470 at the beginning of the move to a RateTerm of 21474836 at the end, so we need to add a total of (21474836 - 3865470) = 17609366 to our initial RateTerm over the course of the move. Because the move takes 0.4068 seconds, and we will be adding DeltaR to RateTerm 25000 times/second, we divide 17609366 by the total number of adds (0.4068 * 25000) to get 17609366/(0.4068 * 25000) = 1732. So if we use a DeltaR of 1732, then we will get from 45 steps/second to 250 steps/second in 0.4068 seconds and 60 steps. You would then use the following LM command:
-            </p>
+          </li>
+          <li>
+              
+              <span style="font-weight: bold;">Example 1:</span>  Suppose that we wanted to start moving an axis at 45 steps/second, and end at 250 steps/second, and go for a total of 60 steps. By the above formulas, we know that our starting RateTerm is 3865470, our ending RateTerm is 21474836, and our Move Time is 60/((45 + 250)/2) = 0.4068 seconds. So we want to get from a RateTerm of 3865470 at the beginning of the move to a RateTerm of 21474836 at the end, so we need to add a total of (21474836 - 3865470) = 17609366 to our initial RateTerm over the course of the move. Because the move takes 0.4068 seconds, and we will be adding DeltaR to RateTerm 25000 times/second, we divide 17609366 by the total number of adds (0.4068 * 25000) to get 17609366/(0.4068 * 25000) = 1732. So if we use a DeltaR of 1732, then we will get from 45 steps/second to 250 steps/second in 0.4068 seconds and 60 steps. You would then use the following LM command:
+
             <p>
               <code>LM,3865470,60,1732,0,0,0</code>
             </p>
-            <p>
-              Notice that we're only using axis 1 in this example. You can of course use both axes at the same time, but you need to be careful that the times for each axis match up or you won't be drawing a straight line (since one axis would then finish before the other).
-            </p> 
+            Notice that we're only using axis 1 in this example. You can of course use both axes at the same time, but you need to be careful that the times for each axis match up or you won't be drawing a straight line (since one axis would then finish before the other).
+
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,3865481,1000,0,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,3865481,1000,0,0,0,0\r</code> 
             This simple example will move axis 1 at a constant speed of 45 steps/second for 1000 steps. Axis 2 does not move.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
+            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
             This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
+            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
             This example will step both axis at a 1 ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - one normally prefers to have both axes stepping for the whole length of the move. This is a (poor, jerky) "constant-rate" move without acceleration or deceleration on either axis.
 
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
+            <span style="font-weight: bold;">Example 5:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
             This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,42949573,50,25769804,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 6:</span> <code>LM,42949573,50,25769804,0,0,0\r</code> 
             This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>LM,17179869,75,-687,8589934,75,687\r</code> 
+            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179869,75,-687,8589934,75,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
