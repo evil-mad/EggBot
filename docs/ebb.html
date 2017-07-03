@@ -738,8 +738,8 @@
               <li>If the new accumulator value is greater than or equal to 2^31 (2147483648 decimal; 0x80000000 hex), then:
               
               <ul>
-              <li>The motor on that axis moves one step</li>
-              <li>2^31 is subtracted from the accumulator for that axis</li>
+              <li>The motor on that axis moves one step.</li>
+              <li>2^31 is subtracted from the accumulator for that axis. </li>
             </ul></li> 
             
             <li>The value of <i>DeltaR</i> value is added to <i>RateTerm</i>. Note that this occurs after (not before) <i>RateTerm</i> is added to the accumulator.</li>   
@@ -751,7 +751,7 @@
 	         For example, if the <i>RateTerm</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>RateTerm</i> value is 1, then a step is taken every 85899 seconds. If the <i>RateTerm</i> value is 0, then no steps are taken on that axis. Each time a step is taken, the <i>AxisSteps</i> count for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete. 
             </p>
             <p>              
-             A practical restriction on the parameters is that you must ensure that either both <i>RateTerm1</i> and <i>AxisSteps1</i> are nonzero or that both <i>RateTerm2</i> and <i>AxisSteps2</i> are nonzero. If you do not, there will be no movement, and this command will never terminate, clogging the FIFO. (Again, note that the EBB firmware performs no sanity or limit checking on the parameter inputs; it is up to you to provide good input to the function.)
+             A practical restriction on the parameters is that you must ensure that motion is possible on at least one axis. That is to say, you must ensure that both <i>AxisSteps</i> is nonzero <i>and</i> that either <i>RateTerm</i> or <i>DeltaR</i> are nonzero for at least one axis of motion. If you do not, there will be no movement, and (for some combinations of parameters) this command may never terminate, potentially clogging the FIFO. (Again, note that the EBB firmware performs no sanity or limit checking on the parameter inputs; it is up to you to provide good input to the function.)
               
               
               
