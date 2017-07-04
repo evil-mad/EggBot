@@ -751,10 +751,7 @@
 	         For example, if the <i>RateTerm</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>RateTerm</i> value is 1, then a step is taken every 85899 seconds. If the <i>RateTerm</i> value is 0, then no steps are taken on that axis. Each time a step is taken, the <i>AxisSteps</i> count for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete. 
             </p>
             <p>
-             A practical restriction on the parameters is that you must ensure that motion is possible on at least one axis. That is to say, you must ensure that both <i>AxisSteps</i> is nonzero <i>and</i> that either <i>RateTerm</i> or <i>DeltaR</i> are nonzero for at least one axis of motion. If you do not, there will be no movement, and (for some combinations of parameters) this command may never terminate, potentially clogging the FIFO. (Again, note that the EBB firmware performs no sanity or limit checking on the parameter inputs; it is up to you to provide good input to the function.)
-              
-              
-              
+             A practical restriction on the parameters is that you must ensure that motion is possible on at least one axis. That is to say, you must ensure that both <i>AxisSteps</i> is nonzero <i>and</i> that either <i>RateTerm</i> or <i>DeltaR</i> are nonzero for at least one axis of motion, or no motion will occur.
             </p>
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis will (in most cases) finish stepping before the other. In extreme cases, one axis will finish moving well before the other, which can lead to (correct but) unintuitive behavior. Imagine for example that you have an XY movement command where both axes move the same distance, but the movement along axis 1 finishes in half the time of the movement along axis 2.  The apparent motion along this path will be a diagonal XY movement for the first half of the transit time, and then a straight movement along axis 2 for the second half of the transit time. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. If you don't want this to happen, be careful to compute your parameters correctly so that both axes step continuously throughout the whole move.
