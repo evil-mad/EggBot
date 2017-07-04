@@ -1203,11 +1203,19 @@ void parse_LM_packet (void)
     }
 
     /* Quickly eliminate obvious invalid parameter combinations,
-     * like LM,0,0,0,0,0,0. GH issue #78 */
+     * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
     if (
-        ((StepsCounter1 == 0) || (StepAdd1 == 0))
+        (
+            ((StepAdd1 == 0) && (StepAddInc1 == 0))
+            ||
+            (StepsCounter1 == 0)
+        )
         &&
-        ((StepsCounter2 == 0) || (StepAdd2 == 0))
+        (
+            ((StepAdd2 == 0) && (StepAddInc2 == 0))
+            ||
+            (StepsCounter2 == 0)
+        )
     )
     {
         return;

@@ -717,7 +717,7 @@
           <ul>
             <li><i>RateTerm1</i> and <i>RateTerm2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken.</li>
             <li><i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>AxisSteps</i> parameter controls the direction that the axis should turn.       </li>
-            <li><i>DeltaR1</i> and <i>DeltaR2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. These values are added to their respective RateTerm values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>DeltaR1</i> and <i>DeltaR2</i> are signed 16 bit integers in the range from -32768 to 32767. These values are added to their respective RateTerm values every 40 &mu;s and control acceleration or deceleration during a move.</li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
@@ -747,10 +747,10 @@
             
             
             </ol>
-	         <p>       
+	         <p>
 	         For example, if the <i>RateTerm</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>RateTerm</i> value is 1, then a step is taken every 85899 seconds. If the <i>RateTerm</i> value is 0, then no steps are taken on that axis. Each time a step is taken, the <i>AxisSteps</i> count for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete. 
             </p>
-            <p>              
+            <p>
              A practical restriction on the parameters is that you must ensure that motion is possible on at least one axis. That is to say, you must ensure that both <i>AxisSteps</i> is nonzero <i>and</i> that either <i>RateTerm</i> or <i>DeltaR</i> are nonzero for at least one axis of motion. If you do not, there will be no movement, and (for some combinations of parameters) this command may never terminate, potentially clogging the FIFO. (Again, note that the EBB firmware performs no sanity or limit checking on the parameter inputs; it is up to you to provide good input to the function.)
               
               
@@ -816,7 +816,7 @@
             <span style="font-weight: bold;">Example 5:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
             This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
-            <span style="font-weight: bold;">Example 6:</span> <code>LM,42949573,50,25769804,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> 
             This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
@@ -831,6 +831,9 @@
             </p>
             <p>
               In v2.5.1 and beyond, DeltaR can be negative or positive and will properly decelerate or accelerate the axis.
+            </p>
+            <p>
+              In v2.5.2 and beyond, invalid combinations of zero values for parameters will cause the command to be ignored. See <a href="https://github.com/evil-mad/EggBot/issues/78">GitHub issue #78</a>.
             </p>
           </li>
         </ul>
