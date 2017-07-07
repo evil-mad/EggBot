@@ -80,7 +80,7 @@ typedef struct
 {
     CommandType     Command;
     INT32           StepAdd[NUMBER_OF_STEPPERS];
-    INT16           StepAddInc[NUMBER_OF_STEPPERS];
+    INT32           StepAddInc[NUMBER_OF_STEPPERS];
     UINT32          StepsCounter[NUMBER_OF_STEPPERS];
     UINT8           DirBits;
     UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units

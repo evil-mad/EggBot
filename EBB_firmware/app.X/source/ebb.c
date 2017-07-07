@@ -214,8 +214,9 @@
 // 2.5.0 01/09/17 - Added LM (low level move) command to allow PC to do all math
 // 2.5.1 01/18/17 - Fixed LM command to take negative and positive StepAddIncs
 //                  Fixed 25KHz ISR to be much closer to 25KHz
-// 2.5.2 17/06/17 - Fixed issue #78 : detected and reject 0,0 for LM command
+// 2.5.2 07/07/17 - Fixed issue #78 : detected and reject 0,0 for LM command
 //                  Fixed some uninitialized variables
+//                  LM StepAddInc parameter went to 32 bits signed from 16 bit signed
 
 #include <p18cxxx.h>
 #include <usart.h>

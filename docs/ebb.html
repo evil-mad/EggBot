@@ -717,7 +717,7 @@
           <ul>
             <li><i>RateTerm1</i> and <i>RateTerm2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken.</li>
             <li><i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>AxisSteps</i> parameter controls the direction that the axis should turn.       </li>
-            <li><i>DeltaR1</i> and <i>DeltaR2</i> are signed 16 bit integers in the range from -32768 to 32767. These values are added to their respective RateTerm values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>DeltaR1</i> and <i>DeltaR2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective RateTerm values every 40 &mu;s and control acceleration or deceleration during a move.</li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
