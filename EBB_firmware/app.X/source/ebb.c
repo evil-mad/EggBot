@@ -217,6 +217,8 @@
 // 2.5.2 07/07/17 - Fixed issue #78 : detected and reject 0,0 for LM command
 //                  Fixed some uninitialized variables
 //                  LM StepAddInc parameter went to 32 bits signed from 16 bit signed
+// 2.5.3 07/09/17 - Fixed bug in LM command that would corrupt currently running
+//                    moves with new data.
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1188,7 +1190,8 @@ void parse_LM_packet (void)
 {
 	UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
     INT32 StepsCounter1, StepsCounter2 = 0;
-
+    MoveCommandType move;
+    
     // Extract each of the values.
 	extract_number (kULONG, &StepAdd1, kREQUIRED);
 	extract_number (kLONG,  &StepsCounter1, kREQUIRED);
@@ -1222,8 +1225,8 @@ void parse_LM_packet (void)
         return;
     }
     
-    CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
-    CommandFIFO[0].DirBits = 0;
+    move.DelayCounter = 0; // No delay for motor moves
+    move.DirBits = 0;
 
     // Always enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
@@ -1232,26 +1235,28 @@ void parse_LM_packet (void)
     // First, set the direction bits
     if (StepsCounter1 < 0)
     {
-        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR1_BIT;
+        move.DirBits = move.DirBits | DIR1_BIT;
         StepsCounter1 = -StepsCounter1;
     }
     if (StepsCounter2 < 0)
     {
-        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+        move.DirBits = move.DirBits | DIR2_BIT;
         StepsCounter2 = -StepsCounter2;
     }
+
+    move.StepAdd[0] = StepAdd1;
+    move.StepsCounter[0] = StepsCounter1;
+    move.StepAddInc[0] = StepAddInc1;
+    move.StepAdd[1] = StepAdd2;
+    move.StepsCounter[1] = StepsCounter2;
+    move.StepAddInc[1] = StepAddInc2;
+    move.Command = COMMAND_MOTOR_MOVE;
 
 	// Spin here until there's space in the fifo
 	while(!FIFOEmpty)
 	;
 
-    CommandFIFO[0].StepAdd[0] = StepAdd1;
-    CommandFIFO[0].StepsCounter[0] = StepsCounter1;
-    CommandFIFO[0].StepAddInc[0] = StepAddInc1;
-    CommandFIFO[0].StepAdd[1] = StepAdd2;
-    CommandFIFO[0].StepsCounter[1] = StepsCounter2;
-    CommandFIFO[0].StepAddInc[1] = StepAddInc2;
-    CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+    CommandFIFO[0] = move;
 
     /* For debugging step motion , uncomment the next line */
     /*
@@ -1598,14 +1603,14 @@ static void process_SM(
         move.Command = COMMAND_MOTOR_MOVE;
         
         /* For debugging step motion , uncomment the next line */
-        /*
-         * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-                CommandFIFO[0].StepAdd[0],
-                CommandFIFO[0].StepsCounter[0],
-                CommandFIFO[0].StepAdd[1],
-                CommandFIFO[0].StepsCounter[1]
+        
+        printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+                move.StepAdd[0],
+                move.StepsCounter[0],
+                move.StepAdd[1],
+                move.StepsCounter[1]
             );
-         */
+        
 	}
 		
 	// Spin here until there's space in the fifo
