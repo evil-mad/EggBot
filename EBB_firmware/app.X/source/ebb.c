@@ -1604,13 +1604,12 @@ static void process_SM(
         
         /* For debugging step motion , uncomment the next line */
         
-        printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-                move.StepAdd[0],
-                move.StepsCounter[0],
-                move.StepAdd[1],
-                move.StepsCounter[1]
-            );
-        
+        //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+        //        move.StepAdd[0],
+        //        move.StepsCounter[0],
+        //        move.StepAdd[1],
+        //        move.StepsCounter[1]
+        //    );
 	}
 		
 	// Spin here until there's space in the fifo
