@@ -1,35 +1,37 @@
 #!/bin/bash
 
+echo -e "Welcome to the EiBotBoard (EBB) Firmware Updater, version 2.5.3"
+
 base='/dev/'
 result=`ls /dev | grep -m 1 usbmodem`
 portName=$base$result
 
-#echo "$portName"
+#echo -e "$portName"
 if [ "$result" ]
 then
-  echo "USB device found at $portName"
-  echo "Entering bootloader."
+  printf "\n\nEBB appears to be located; Beginning update process. "
+
   echo -e "BL" > $portName
   sleep 2s
-  echo "Calling mphidflash to update firmware 2.5.1"
+  #echo -e "Calling mphidflash to update firmware"
   ./mphidflash -w app.X.production.hex -r
-  echo "Firmware burn complete. Preparing to test."
-  sleep 1s
-  echo "Querying EBB version"
+  printf "\n\nFirmware update complete. Preparing to test."
+  sleep 2s
+  printf "\nAsking the EBB for its firmware version:"
   echo -e "V" > $portName
   result2=`head -n 1 < $portName`
-  echo "$result2"
+  printf "\n$result2"
 
-  if [[ $result2 == *"2.5.1"* ]]
+  if [[ $result2 == *"2.5.3"* ]]
   then
-    echo "Firmware updated successfully.";
+    printf "\n\nFirmware updated successfully."
   else
-    echo "Firmware update may not have succeeded.";
+    printf "\n\nFirmware update may not have succeeded."
   fi
 
 else
-  echo "No EBB found via standard method...."
-  echo "Checking to see if we have a device in bootloader mode."
+  printf "\nChecking to see if we have a device in bootloader mode."
+
   ./mphidflash -w app.X.production.hex -r
   sleep 2s
   base='/dev/'
@@ -38,23 +40,23 @@ else
 
 if [ "$result" ]
  then
-  echo "Firmware burn complete. Preparing to test."
-  sleep 1s
-  echo "Querying EBB version"
+  printf "\nFirmware burn complete. Preparing to test."
+ 
+  sleep 2s
+  printf "\nAsking the EBB for its firmware version:"
   echo -e "V" > $portName
   result2=`head -n 1 < $portName`
-  echo "$result2"
+  printf "\n$result2"
 
-  if [[ $result2 == *"2.5.1"* ]]
+  if [[ $result2 == *"2.5.3"* ]]
   then
-    echo "Firmware updated successfully.";
+    printf "\n\nFirmware updated successfully."
   else
-    echo "Firmware update may not have succeeded.";
+    printf "\n\nFirmware update may not have succeeded."
   fi
 
 else
-  echo "Firmware update appears to have failed.";
+  printf "\n\nFirmware update appears to have failed."
 fi
 
 fi
-
