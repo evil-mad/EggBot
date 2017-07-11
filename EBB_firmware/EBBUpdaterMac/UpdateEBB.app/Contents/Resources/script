@@ -9,35 +9,27 @@ portName=$base$result
 #echo -e "$portName"
 if [ "$result" ]
 then
-  #echo -e "\nApparent EBB found; Beginning update process. "
   printf "\n\nEBB appears to be located; Beginning update process. "
 
   echo -e "BL" > $portName
   sleep 2s
   #echo -e "Calling mphidflash to update firmware"
   ./mphidflash -w app.X.production.hex -r
-  #echo -e "\nFirmware update complete. Preparing to test."
   printf "\n\nFirmware update complete. Preparing to test."
   sleep 2s
   printf "\nAsking the EBB for its firmware version:"
-#  echo -e "Querying EBB version"
   echo -e "V" > $portName
   result2=`head -n 1 < $portName`
-#  echo -e "$result2"
   printf "\n$result2"
 
   if [[ $result2 == *"2.5.3"* ]]
   then
-    #echo -e "\n\nFirmware updated successfully.";
     printf "\n\nFirmware updated successfully."
   else
-    #echo -e "\n\nFirmware update may not have succeeded.";
     printf "\n\nFirmware update may not have succeeded."
   fi
 
 else
-  #echo -e "No EBB found via standard methods...."
-  #echo -e "Checking to see if we have a device in bootloader mode."
   printf "\nChecking to see if we have a device in bootloader mode."
 
   ./mphidflash -w app.X.production.hex -r
@@ -48,27 +40,22 @@ else
 
 if [ "$result" ]
  then
-#  echo -e "Firmware burn complete. Preparing to test."
   printf "\nFirmware burn complete. Preparing to test."
  
   sleep 2s
   printf "\nAsking the EBB for its firmware version:"
   echo -e "V" > $portName
   result2=`head -n 1 < $portName`
-#  echo -e "$result2"
   printf "\n$result2"
 
   if [[ $result2 == *"2.5.3"* ]]
   then
-#    echo -e "\n\nFirmware updated successfully.";
     printf "\n\nFirmware updated successfully."
   else
-#    echo -e "\n\nFirmware update may not have succeeded.";
     printf "\n\nFirmware update may not have succeeded."
   fi
 
 else
-#  echo -e "\n\nFirmware update appears to have failed.";
   printf "\n\nFirmware update appears to have failed."
 fi
 
