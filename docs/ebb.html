@@ -541,42 +541,8 @@
         </ul>
 
         <hr class="short" />
-     
-        <h4><a name="EM"></a> "EM" &mdash; Enable Motors (for EBB hardware v1.1)</h4>
- 
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li>
-            <span style="font-weight: bold;">Arguments:</span> For each stepper motor (<i>EnableAxis1</i> or <i>EnableAxis2</i>), an integer in the range of 0 through 4, inclusive. The allowed values and their effects are as follows:
-            <ul>
-              <li>0: Disable that axis (both axis disabled by default at boot)</li>
-              <li>1: Enable in 1/8 step mode</li>
-              <li>2: Enable in 1/4 step mode</li>
-              <li>3: Enable in 1/2 step mode</li>
-              <li>4: Enable in full step mode</li>
-            </ul>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Description:</span> 
-            <p>Enable or disable stepper motors and set step size.</p>
-            <p>
-              Each stepper motor axis may be enabled (energized) or disabled. When disabled, the driver will stop sending current to the motor, so the motor will "freewheel" &mdash; it will not be actively driven, but instead will present little resistance to being turned by external torques.
-            </p>
-            <p>
-              When enabled, the stepper motor axes may be configured to be in whole, half, quarter, or eighth step sizes. In a motor with a native resolution of 200 steps per revolution, these settings would produce effective stepping resolutions of 200, 400, 800, and 1600 steps per revolution, respectively. Using fine sub-steps ("microstepping") gives higher resolution at the cost of decreasing step size reproducibility. 
-            </p>
-            <p>Note that this version of the command is only for EBB hardware v1.1. </p>
-          </li>
-          <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8 step mode, and disable Axis 2</li>
-          <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axis 1 in 1/4 step mode, disable Axis 2</li>
-        </ul>
-         
-        <hr class="short" />    
 
-        <h4><a name="EM"></a> "EM" &mdash; Enable Motors (for EBB hardware v1.2 and newer)</h4>
+        <h4><a name="EM"></a> "EM" &mdash; Enable Motors</h4>
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>[,<i>Enable2</i>]&lt;CR&gt;</code></li>
@@ -585,7 +551,7 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <p>
-                For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor.
+                For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor. This command is also used to set the step resolution of the stepper motors.
             </p>
             <p>The allowed values of <i>Enable1</i> are as follows:</p>
               <ul>
@@ -620,7 +586,7 @@
               Because only <i>Enable1</i> can set the global step mode, <i>Enable2</i> simply enables or disables axis 2, and can not change the previously set step mode on its own.
             </p>
             <p>
-              Note that this version of the command is only for EBB hardware v1.2 and newer.
+              Note that this version of the command is for current versions of the EBB hardware, v1.2 and newer. (This includes all versions manufactured since September 2010.)
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2</li>
@@ -632,6 +598,41 @@
         </ul>
       
         <hr class="short" />
+
+     
+        <h4><a name="EM"></a> "EM" &mdash; Enable Motors (legacy version for EBB hardware v1.1)</h4>
+ 
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Arguments:</span> For each stepper motor (<i>EnableAxis1</i> or <i>EnableAxis2</i>), an integer in the range of 0 through 4, inclusive. The allowed values and their effects are as follows:
+            <ul>
+              <li>0: Disable that axis (both axis disabled by default at boot)</li>
+              <li>1: Enable in 1/8 step mode</li>
+              <li>2: Enable in 1/4 step mode</li>
+              <li>3: Enable in 1/2 step mode</li>
+              <li>4: Enable in full step mode</li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>Enable or disable stepper motors and set step size.</p>
+            <p>
+              Each stepper motor axis may be enabled (energized) or disabled. When disabled, the driver will stop sending current to the motor, so the motor will "freewheel" &mdash; it will not be actively driven, but instead will present little resistance to being turned by external torques.
+            </p>
+            <p>
+              When enabled, the stepper motor axes may be configured to be in whole, half, quarter, or eighth step sizes. In a motor with a native resolution of 200 steps per revolution, these settings would produce effective stepping resolutions of 200, 400, 800, and 1600 steps per revolution, respectively. Using fine sub-steps ("microstepping") gives higher resolution at the cost of decreasing step size reproducibility. 
+            </p>
+            <p>Note that this version of the command is only for legacy EBB hardware, v1.1. </p>
+          </li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8 step mode, and disable Axis 2</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axis 1 in 1/4 step mode, disable Axis 2</li>
+        </ul>
+         
+        <hr class="short" />    
 
         <h4><a name="ES"></a>"ES" &mdash; E Stop</h4>
 
