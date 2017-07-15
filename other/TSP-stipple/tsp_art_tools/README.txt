@@ -30,7 +30,11 @@ These tools have had very limited testing on Windows XP SP3.
                       For purposes of debugging, the tour file was being
                       written to the current working directory.  That is no
                       longer done.
-
+ 15 Jul 2017        The build script is out of date and broken.
+                       Current downloads are available at:
+                       http://www.math.uwaterloo.ca/~bico/qsopt/downloads/downloads.htm
+                       However, it is not clear that 64-bit compatible versions
+                       are still available.
 
 build-concorde-osx.sh
   Shell script to obtain with Curl the QSopt LP Solver library and the
@@ -43,7 +47,7 @@ build-concorde-osx.sh
 
   While binary executables are available for concorde and linkern for
   Windows, they require a minimal cygwin install.  See
-  http://www.tsp.gatech.edu/concorde/downloads/downloads.htm
+  http://www.math.uwaterloo.ca/~bico/qsopt/downloads/downloads.htm
 
 cmyk.jsx
   Photoshop script for producing CMYK "separations" for Color TSP art.
