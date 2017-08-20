@@ -1,5 +1,5 @@
 MPLINK 5.00, LINKER
-Linker Map File - Created Tue Jul 11 13:32:15 2017
+Linker Map File - Created Sun Jul 16 20:37:51 2017
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -10,30 +10,30 @@ Linker Map File - Created Tue Jul 11 13:32:15 2017
                boot_entry       code   0x00001e    program   0x000010
                    .cinit    romdata   0x000030    program   0x000002
   .code_Boot46J50Family.o       code   0x000032    program   0x00038c
-       .code_usbctrltrf.o       code   0x0003be    program   0x000350
-             .code_usb9.o       code   0x00070e    program   0x00029a
-           .code_usbdrv.o       code   0x0009a8    program   0x000214
-              .code_hid.o       code   0x000bbc    program   0x0001e6
-             .code_main.o       code   0x000da2    program   0x0000f8
-        .romdata_usbdsc.o    romdata   0x000e9a    program   0x0000c2
-                    .code       code   0x000f5c    program   0x000020
-          .code_usbmmap.o       code   0x000f7c    program   0x000000
-        .idata_usbdsc.o_i    romdata   0x000f7c    program   0x000000
-           .code_usbdsc.o       code   0x000f7c    program   0x000000
-        .romdata_usbdrv.o    romdata   0x000f7c    program   0x000000
-        .idata_usbdrv.o_i    romdata   0x000f7c    program   0x000000
-       .idata_usbmmap.o_i    romdata   0x000f7c    program   0x000000
-    .romdata_usbctrltrf.o    romdata   0x000f7c    program   0x000000
-    .idata_usbctrltrf.o_i    romdata   0x000f7c    program   0x000000
-       .romdata_usbmmap.o    romdata   0x000f7c    program   0x000000
-          .romdata_usb9.o    romdata   0x000f7c    program   0x000000
-          .idata_usb9.o_i    romdata   0x000f7c    program   0x000000
-          .romdata_main.o    romdata   0x000f7c    program   0x000000
-          .idata_main.o_i    romdata   0x000f7c    program   0x000000
-           .romdata_hid.o    romdata   0x000f7c    program   0x000000
-           .idata_hid.o_i    romdata   0x000f7c    program   0x000000
-.romdata_Boot46J50Family.o    romdata   0x000f7c    program   0x000000
-.idata_Boot46J50Family.o_i    romdata   0x000f7c    program   0x000000
+       .code_usbctrltrf.o       code   0x0003be    program   0x0002e0
+             .code_usb9.o       code   0x00069e    program   0x000264
+           .code_usbdrv.o       code   0x000902    program   0x000214
+              .code_hid.o       code   0x000b16    program   0x0001d6
+             .code_main.o       code   0x000cec    program   0x0000f8
+        .romdata_usbdsc.o    romdata   0x000de4    program   0x0000c2
+                    .code       code   0x000ea6    program   0x000020
+          .code_usbmmap.o       code   0x000ec6    program   0x000000
+        .idata_usbdsc.o_i    romdata   0x000ec6    program   0x000000
+           .code_usbdsc.o       code   0x000ec6    program   0x000000
+        .romdata_usbdrv.o    romdata   0x000ec6    program   0x000000
+        .idata_usbdrv.o_i    romdata   0x000ec6    program   0x000000
+       .idata_usbmmap.o_i    romdata   0x000ec6    program   0x000000
+    .romdata_usbctrltrf.o    romdata   0x000ec6    program   0x000000
+    .idata_usbctrltrf.o_i    romdata   0x000ec6    program   0x000000
+       .romdata_usbmmap.o    romdata   0x000ec6    program   0x000000
+          .romdata_usb9.o    romdata   0x000ec6    program   0x000000
+          .idata_usb9.o_i    romdata   0x000ec6    program   0x000000
+          .romdata_main.o    romdata   0x000ec6    program   0x000000
+          .idata_main.o_i    romdata   0x000ec6    program   0x000000
+           .romdata_hid.o    romdata   0x000ec6    program   0x000000
+           .idata_hid.o_i    romdata   0x000ec6    program   0x000000
+.romdata_Boot46J50Family.o    romdata   0x000ec6    program   0x000000
+.idata_Boot46J50Family.o_i    romdata   0x000ec6    program   0x000000
       .config_fff8_main.o    romdata   0x00fff8    program   0x000001
       .config_fff9_main.o    romdata   0x00fff9    program   0x000001
       .config_fffa_main.o    romdata   0x00fffa    program   0x000001
@@ -84,55 +84,55 @@ Linker Map File - Created Tue Jul 11 13:32:15 2017
                             0x000000    0x000005      
                             0x000008    0x00000d      
                             0x000018    0x00002d      
-                            0x000030    0x000f7b      
+                            0x000030    0x000ec5      
                             0x00fff8    0x00ffff      
-            3958 out of 65538 program addresses used, program memory utilization is 6%
+            3776 out of 65538 program addresses used, program memory utilization is 5%
 
 
 
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-           BlinkUSBStatus   0x000e50    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-          ClassReqHandler   0x000f5a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-               ClearArray   0x000b92    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+           BlinkUSBStatus   0x000d9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+          ClassReqHandler   0x000ea4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+               ClearArray   0x000aec    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
                EraseFlash   0x0002cc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-      HIDGetReportHandler   0x000c88    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-                HIDInitEP   0x000c8c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-              HIDRxReport   0x000d2a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-      HIDSetReportHandler   0x000c8a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-              HIDTxReport   0x000cb6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-                     Init   0x000da2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-         InitializeSystem   0x000df6    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+      HIDGetReportHandler   0x000be2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                HIDInitEP   0x000be6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+              HIDRxReport   0x000c70    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+      HIDSetReportHandler   0x000be4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+              HIDTxReport   0x000c10    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                     Init   0x000cec    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+         InitializeSystem   0x000d40    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                 LongDelay   0x00038e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                     Main   0x000dda    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+                     Main   0x000d24    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                 ProcessIO   0x00004a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        USBCheckBusStatus   0x0009a8    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-       USBCheckHIDRequest   0x000bbc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-       USBCheckStdRequest   0x00070e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+        USBCheckBusStatus   0x000902    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+       USBCheckHIDRequest   0x000b16    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+       USBCheckStdRequest   0x00069e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
          USBCtrlEPService   0x0003be    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
- USBCtrlEPServiceComplete   0x00068a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfInHandler   0x0004f2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-     USBCtrlTrfOutHandler   0x0004ba    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfRxService   0x000610    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-   USBCtrlTrfSetupHandler   0x00044c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfTxService   0x000532    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-         USBDriverService   0x0009e0    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBModuleDisable   0x0009d2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBModuleEnable   0x0009c4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-  USBProtocolResetHandler   0x000b30    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-            USBSoftDetach   0x0009dc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBStallHandler   0x000b0c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-  USBStdFeatureReqHandler   0x00091c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdGetDscHandler   0x0007b2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-   USBStdGetStatusHandler   0x00089a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdSetCfgHandler   0x000852    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-               USBSuspend   0x000a58    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-                 USBTasks   0x000e48    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-       USBWakeFromSuspend   0x000afc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-               USB_CD_Ptr   0x000f50    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_SD_Ptr   0x000f54    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+ USBCtrlEPServiceComplete   0x0005da    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004ce    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004a2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfRxService   0x000596    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+   USBCtrlTrfSetupHandler   0x000440    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfTxService   0x00050e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+         USBDriverService   0x00093a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBModuleDisable   0x00092c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBModuleEnable   0x00091e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+USBPrepareForNextSetupTrf   0x00063e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+  USBProtocolResetHandler   0x000a8a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+            USBSoftDetach   0x000936    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBStallHandler   0x000a66    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+  USBStdFeatureReqHandler   0x00083e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdGetDscHandler   0x000742    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+   USBStdGetStatusHandler   0x0007e2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdSetCfgHandler   0x0007ae    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+               USBSuspend   0x0009b2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+                 USBTasks   0x000d92    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+       USBWakeFromSuspend   0x000a56    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+               USB_CD_Ptr   0x000e9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_SD_Ptr   0x000e9e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
                  UserInit   0x000032    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
        WriteFlashSubBlock   0x0002f2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
        ___case_2_lbl00008   0x0000bc    program     static                          
@@ -161,11 +161,11 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
           ___for_lbl00043   0x0003b4    program     static                          
           ___for_lbl00046   0x00039a    program     static                          
            ___if_lbl00005   0x000092    program     static                          
-           ___if_lbl00006   0x000dd2    program     static                          
+           ___if_lbl00006   0x000d1c    program     static                          
            ___if_lbl00007   0x00013c    program     static                          
-           ___if_lbl00009   0x000dd6    program     static                          
            ___if_lbl00009   0x00015e    program     static                          
-           ___if_lbl00014   0x000df2    program     static                          
+           ___if_lbl00009   0x000d20    program     static                          
+           ___if_lbl00014   0x000d3c    program     static                          
            ___if_lbl00016   0x00019a    program     static                          
            ___if_lbl00020   0x000224    program     static                          
            ___if_lbl00021   0x000236    program     static                          
@@ -175,35 +175,35 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
            ___if_lbl00038   0x000364    program     static                          
            ___if_lbl00040   0x00037e    program     static                          
        ___return_lbl00000   0x000004    program     static                          
-       ___return_lbl00001   0x0002c2    program     static                          
        ___return_lbl00001   0x00000c    program     static                          
+       ___return_lbl00001   0x0002c2    program     static                          
        ___return_lbl00002   0x00001c    program     static                          
        ___return_lbl00003   0x00002c    program     static                          
-       ___return_lbl00004   0x000dd8    program     static                          
-       ___return_lbl00010   0x000df4    program     static                          
-       ___return_lbl00029   0x000ae8    program     static                          
+       ___return_lbl00004   0x000d22    program     static                          
+       ___return_lbl00010   0x000d3e    program     static                          
+       ___return_lbl00029   0x000a42    program     static                          
        ___return_lbl00034   0x0002f0    program     static                          
        ___return_lbl00035   0x000384    program     static                          
        ___return_lbl00041   0x0003b4    program     static                          
-       ___return_lbl00042   0x000b90    program     static                          
-       ___return_lbl00045   0x000bb4    program     static                          
+       ___return_lbl00042   0x000aea    program     static                          
+       ___return_lbl00045   0x000b0e    program     static                          
    ___switchexit_lbl00006   0x0002c2    program     static                          
-        ___while_lbl00007   0x000dd2    program     static                          
-        ___while_lbl00008   0x000dd6    program     static                          
-        ___while_lbl00011   0x000ddc    program     static                          
-        ___while_lbl00012   0x000df4    program     static                          
-        ___while_lbl00030   0x000a98    program     static                          
-        ___while_lbl00031   0x000aa8    program     static                          
-        ___while_lbl00033   0x000ad0    program     static                          
-        ___while_lbl00034   0x000ae8    program     static                          
+        ___while_lbl00007   0x000d1c    program     static                          
+        ___while_lbl00008   0x000d20    program     static                          
+        ___while_lbl00011   0x000d26    program     static                          
+        ___while_lbl00012   0x000d3e    program     static                          
+        ___while_lbl00030   0x0009f2    program     static                          
+        ___while_lbl00031   0x000a02    program     static                          
+        ___while_lbl00033   0x000a2a    program     static                          
+        ___while_lbl00034   0x000a42    program     static                          
         ___while_lbl00036   0x0002fe    program     static                          
         ___while_lbl00037   0x000380    program     static                          
-        ___while_lbl00043   0x000b5e    program     static                          
-        ___while_lbl00044   0x000b6c    program     static                          
+        ___while_lbl00043   0x000ab8    program     static                          
+        ___while_lbl00044   0x000ac6    program     static                          
         ___while_lbl00044   0x0003a2    program     static                          
         ___while_lbl00045   0x0003b0    program     static                          
-        ___while_lbl00046   0x000ba6    program     static                          
-        ___while_lbl00047   0x000bb4    program     static                          
+        ___while_lbl00046   0x000b00    program     static                          
+        ___while_lbl00047   0x000b0e    program     static                          
                __config_0   0x00fff8    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_1   0x00fff9    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_2   0x00fffa    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
@@ -212,34 +212,46 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
                __config_5   0x00fffd    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_6   0x00fffe    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_7   0x00ffff    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-               __tmplbl_0   0x000dca    program     static                          
+                   __pa_0   0x000cd4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                   __pa_0   0x0008a4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_0   0x000646    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_1   0x0008c0    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_1   0x000660    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_2   0x0008d2    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_2   0x000670    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_3   0x0008e4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_3   0x00067e    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x000688    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x0008f4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_5   0x000690    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+               __tmplbl_0   0x000d14    program     static                          
                __tmplbl_0   0x00018c    program     static                          
+               __tmplbl_1   0x000d04    program     static                          
                __tmplbl_1   0x0001b2    program     static                          
-               __tmplbl_1   0x000dba    program     static                          
-              __tmplbl_10   0x000aa4    program     static                          
-              __tmplbl_11   0x000a9e    program     static                          
+              __tmplbl_10   0x0009fe    program     static                          
+              __tmplbl_11   0x0009f8    program     static                          
+               __tmplbl_2   0x000d38    program     static                          
                __tmplbl_2   0x0001f2    program     static                          
-               __tmplbl_2   0x000dee    program     static                          
-               __tmplbl_3   0x000de8    program     static                          
                __tmplbl_3   0x0001cc    program     static                          
+               __tmplbl_3   0x000d32    program     static                          
                __tmplbl_4   0x0001f0    program     static                          
                __tmplbl_5   0x00030c    program     static                          
                __tmplbl_6   0x000324    program     static                          
-            __zero_memory   0x000f5c    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+            __zero_memory   0x000ea6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               _boot_entry   0x00001e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                    _entry   0x000000    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                 _high_isr   0x000008    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                  _low_isr   0x000018    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-                    cfg01   0x000eac    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                compare_l   0x000f72    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               device_dsc   0x000e9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                hid_rpt01   0x000f33    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                   loop_h   0x000f6a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   loop_l   0x000f74    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    sd000   0x000ed5    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd001   0x000ed9    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd002   0x000f0d    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-               zero_block   0x000f6a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    cfg01   0x000df6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                compare_l   0x000ebc    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               device_dsc   0x000de4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                hid_rpt01   0x000e7d    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                   loop_h   0x000eb4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   loop_l   0x000ebe    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    sd000   0x000e1f    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd001   0x000e23    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd002   0x000e57    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+               zero_block   0x000eb4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADCON0   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ADCON0bits   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADCON1   0x000fc1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -722,8 +734,8 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
                 ProcessIO   0x00004a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
           ___for_lbl00004   0x00007a    program     static                          
           ___for_lbl00002   0x00008e    program     static                          
-          ___for_lbl00003   0x000092    program     static                          
            ___if_lbl00005   0x000092    program     static                          
+          ___for_lbl00003   0x000092    program     static                          
          ___else_lbl00033   0x000094    program     static                          
        ___case_2_lbl00008   0x0000bc    program     static                          
            ___if_lbl00007   0x00013c    program     static                          
@@ -743,8 +755,8 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
                __tmplbl_4   0x0001f0    program     static                          
                __tmplbl_2   0x0001f2    program     static                          
            ___if_lbl00020   0x000224    program     static                          
-           ___if_lbl00021   0x000236    program     static                          
           ___for_lbl00017   0x000236    program     static                          
+           ___if_lbl00021   0x000236    program     static                          
            ___if_lbl00023   0x00023a    program     static                          
           ___for_lbl00018   0x00023a    program     static                          
        ___case_6_lbl00025   0x00023e    program     static                          
@@ -754,9 +766,9 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
           ___for_lbl00027   0x000298    program     static                          
            ___if_lbl00029   0x0002b6    program     static                          
        ___case_8_lbl00031   0x0002b8    program     static                          
-   ___switchexit_lbl00006   0x0002c2    program     static                          
        ___return_lbl00001   0x0002c2    program     static                          
            ___if_lbl00032   0x0002c2    program     static                          
+   ___switchexit_lbl00006   0x0002c2    program     static                          
                EraseFlash   0x0002cc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
        ___return_lbl00034   0x0002f0    program     static                          
        WriteFlashSubBlock   0x0002f2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\Boot46J50Family.c
@@ -773,82 +785,94 @@ USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_Gi
         ___while_lbl00044   0x0003a2    program     static                          
         ___while_lbl00045   0x0003b0    program     static                          
           ___for_lbl00042   0x0003b0    program     static                          
-          ___for_lbl00043   0x0003b4    program     static                          
        ___return_lbl00041   0x0003b4    program     static                          
+          ___for_lbl00043   0x0003b4    program     static                          
          USBCtrlEPService   0x0003be    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-   USBCtrlTrfSetupHandler   0x00044c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-     USBCtrlTrfOutHandler   0x0004ba    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfInHandler   0x0004f2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfTxService   0x000532    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfRxService   0x000610    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
- USBCtrlEPServiceComplete   0x00068a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-USBPrepareForNextSetupTrf   0x000706    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
-       USBCheckStdRequest   0x00070e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdGetDscHandler   0x0007b2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdSetCfgHandler   0x000852    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-   USBStdGetStatusHandler   0x00089a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-  USBStdFeatureReqHandler   0x00091c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
-        USBCheckBusStatus   0x0009a8    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBModuleEnable   0x0009c4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBModuleDisable   0x0009d2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-            USBSoftDetach   0x0009dc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBDriverService   0x0009e0    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-               USBSuspend   0x000a58    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00030   0x000a98    program     static                          
-              __tmplbl_11   0x000a9e    program     static                          
-              __tmplbl_10   0x000aa4    program     static                          
-        ___while_lbl00031   0x000aa8    program     static                          
-        ___while_lbl00033   0x000ad0    program     static                          
-       ___return_lbl00029   0x000ae8    program     static                          
-        ___while_lbl00034   0x000ae8    program     static                          
-       USBWakeFromSuspend   0x000afc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBStallHandler   0x000b0c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-  USBProtocolResetHandler   0x000b30    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00043   0x000b5e    program     static                          
-        ___while_lbl00044   0x000b6c    program     static                          
-       ___return_lbl00042   0x000b90    program     static                          
-               ClearArray   0x000b92    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00046   0x000ba6    program     static                          
-       ___return_lbl00045   0x000bb4    program     static                          
-        ___while_lbl00047   0x000bb4    program     static                          
-       USBCheckHIDRequest   0x000bbc    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-      HIDGetReportHandler   0x000c88    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-      HIDSetReportHandler   0x000c8a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-                HIDInitEP   0x000c8c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-              HIDTxReport   0x000cb6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-              HIDRxReport   0x000d2a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
-                     Init   0x000da2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-               __tmplbl_1   0x000dba    program     static                          
-               __tmplbl_0   0x000dca    program     static                          
-           ___if_lbl00006   0x000dd2    program     static                          
-        ___while_lbl00007   0x000dd2    program     static                          
-           ___if_lbl00009   0x000dd6    program     static                          
-        ___while_lbl00008   0x000dd6    program     static                          
-       ___return_lbl00004   0x000dd8    program     static                          
-                     Main   0x000dda    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-        ___while_lbl00011   0x000ddc    program     static                          
-               __tmplbl_3   0x000de8    program     static                          
-               __tmplbl_2   0x000dee    program     static                          
-           ___if_lbl00014   0x000df2    program     static                          
-        ___while_lbl00012   0x000df4    program     static                          
-       ___return_lbl00010   0x000df4    program     static                          
-         InitializeSystem   0x000df6    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-                 USBTasks   0x000e48    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-           BlinkUSBStatus   0x000e50    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
-               device_dsc   0x000e9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    cfg01   0x000eac    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd000   0x000ed5    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd001   0x000ed9    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd002   0x000f0d    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-                hid_rpt01   0x000f33    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_CD_Ptr   0x000f50    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_SD_Ptr   0x000f54    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-          ClassReqHandler   0x000f5a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
-            __zero_memory   0x000f5c    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               zero_block   0x000f6a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   loop_h   0x000f6a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                compare_l   0x000f72    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   loop_l   0x000f74    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+   USBCtrlTrfSetupHandler   0x000440    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004a2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004ce    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfTxService   0x00050e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfRxService   0x000596    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+ USBCtrlEPServiceComplete   0x0005da    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+USBPrepareForNextSetupTrf   0x00063e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_0   0x000646    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_1   0x000660    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_2   0x000670    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_3   0x00067e    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x000688    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_5   0x000690    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbctrltrf.c
+       USBCheckStdRequest   0x00069e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdGetDscHandler   0x000742    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdSetCfgHandler   0x0007ae    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+   USBStdGetStatusHandler   0x0007e2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+  USBStdFeatureReqHandler   0x00083e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_0   0x0008a4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_1   0x0008c0    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_2   0x0008d2    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_3   0x0008e4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_4   0x0008f4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usb9.c
+        USBCheckBusStatus   0x000902    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBModuleEnable   0x00091e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBModuleDisable   0x00092c    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+            USBSoftDetach   0x000936    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBDriverService   0x00093a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+               USBSuspend   0x0009b2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+        ___while_lbl00030   0x0009f2    program     static                          
+              __tmplbl_11   0x0009f8    program     static                          
+              __tmplbl_10   0x0009fe    program     static                          
+        ___while_lbl00031   0x000a02    program     static                          
+        ___while_lbl00033   0x000a2a    program     static                          
+        ___while_lbl00034   0x000a42    program     static                          
+       ___return_lbl00029   0x000a42    program     static                          
+       USBWakeFromSuspend   0x000a56    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBStallHandler   0x000a66    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+  USBProtocolResetHandler   0x000a8a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+        ___while_lbl00043   0x000ab8    program     static                          
+        ___while_lbl00044   0x000ac6    program     static                          
+       ___return_lbl00042   0x000aea    program     static                          
+               ClearArray   0x000aec    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdrv.c
+        ___while_lbl00046   0x000b00    program     static                          
+       ___return_lbl00045   0x000b0e    program     static                          
+        ___while_lbl00047   0x000b0e    program     static                          
+       USBCheckHIDRequest   0x000b16    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+      HIDGetReportHandler   0x000be2    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+      HIDSetReportHandler   0x000be4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                HIDInitEP   0x000be6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+              HIDTxReport   0x000c10    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+              HIDRxReport   0x000c70    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                   __pa_0   0x000cd4    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\hid.c
+                     Init   0x000cec    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+               __tmplbl_1   0x000d04    program     static                          
+               __tmplbl_0   0x000d14    program     static                          
+           ___if_lbl00006   0x000d1c    program     static                          
+        ___while_lbl00007   0x000d1c    program     static                          
+           ___if_lbl00009   0x000d20    program     static                          
+        ___while_lbl00008   0x000d20    program     static                          
+       ___return_lbl00004   0x000d22    program     static                          
+                     Main   0x000d24    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+        ___while_lbl00011   0x000d26    program     static                          
+               __tmplbl_3   0x000d32    program     static                          
+               __tmplbl_2   0x000d38    program     static                          
+           ___if_lbl00014   0x000d3c    program     static                          
+       ___return_lbl00010   0x000d3e    program     static                          
+        ___while_lbl00012   0x000d3e    program     static                          
+         InitializeSystem   0x000d40    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+                 USBTasks   0x000d92    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+           BlinkUSBStatus   0x000d9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
+               device_dsc   0x000de4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    cfg01   0x000df6    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd000   0x000e1f    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd001   0x000e23    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd002   0x000e57    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+                hid_rpt01   0x000e7d    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_CD_Ptr   0x000e9a    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_SD_Ptr   0x000e9e    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+          ClassReqHandler   0x000ea4    program     extern D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\usbdsc.c
+            __zero_memory   0x000ea6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               zero_block   0x000eb4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   loop_h   0x000eb4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                compare_l   0x000ebc    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   loop_l   0x000ebe    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                __config_0   0x00fff8    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_1   0x00fff9    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c
                __config_2   0x00fffa    program     static D:\Projects\EggBot_GitHub\EBB_firmware\bootloader.X\source\main.c

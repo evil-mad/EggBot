@@ -219,6 +219,10 @@
 //                  LM StepAddInc parameter went to 32 bits signed from 16 bit signed
 // 2.5.3 07/09/17 - Fixed bug in LM command that would corrupt currently running
 //                    moves with new data.
+// 2.5.4 07/11/17 - Added 3D move commands :
+//                    SM becomes S3
+//                    XM becomes X3
+//                    LM becomes L3
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -256,6 +260,13 @@ static void process_SM(
 	UINT32 Duration,
 	INT32 A1Stp,
 	INT32 A2Stp
+);
+
+static void process_S3(
+	UINT32 Duration,
+	INT32 A1Stp,
+	INT32 A2Stp,
+    UINT16 ServoPos
 );
 
 typedef enum
@@ -1276,6 +1287,12 @@ void parse_LM_packet (void)
     }
 }
 
+void parse_L3_packet (void)
+{
+
+    
+}
+
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
@@ -1359,6 +1376,106 @@ void parse_SM_packet (void)
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   	process_SM(Duration, A1Steps, A2Steps);
+
+    if (g_ack_enable)
+    {
+    	print_ack();
+    }
+}
+
+// The Stepper Motor command, 3D version
+// Usage: S3,<move_duration>,<axis1_steps>,<axis2_steps>,<new_servo_position><CR>
+// <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
+// <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
+// <NewServoPosition> A new, absolute, position for the servo to be by the end of the move. Same units
+//   as S2 command, from 0 to 32000, the 'on time' of the servo, unit of 1/12,000,000 of a second.
+// If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
+// i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
+// NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
+// pauses before raising or lowering the pen, for example.
+void parse_S3_packet (void)
+{
+	UINT32 Duration = 0;
+	INT32 A1Steps = 0, A2Steps = 0;
+    INT32 Steps = 0;
+    UINT16 NewServoPos = 0;
+    
+	// Extract each of the values.
+	extract_number (kULONG, &Duration, kREQUIRED);
+	extract_number (kLONG, &A1Steps, kREQUIRED);
+	extract_number (kLONG, &A2Steps, kREQUIRED);
+    extract_number (kUINT, &NewServoPos, kREQUIRED);
+
+    if (gLimitChecks)
+    {
+        // Check for invalid duration
+        if (Duration == 0) {
+            bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        }
+        // Bail if we got a conversion error
+        if (error_byte)
+        {
+            return;
+        }
+        // Limit each parameter to just 3 bytes
+        if (Duration > 0xFFFFFF) {
+           printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+           return;
+        }
+        // Check for too-fast step request (>25KHz)
+        // First get absolute value of steps, then check if it's asking for >25KHz
+        if (A1Steps > 0) {
+            Steps = A1Steps;
+        }
+        else {
+            Steps = -A1Steps;
+        }
+        if (Steps > 0xFFFFFF) {
+           printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+           return;
+        }
+        // Check for too fast
+        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+           printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+           return;
+        }
+        // And check for too slow
+        if ((Duration/1311) >= Steps && Steps != 0) {
+           printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+           return;
+        }
+                
+        if (A2Steps > 0) {
+            Steps = A2Steps;
+        }
+        else {
+            Steps = -A2Steps;
+        }    
+
+        if (Steps > 0xFFFFFF) {
+            printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+            return;
+        }
+        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
+            printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+            return;
+        }
+        if ((Duration/1311) >= Steps && Steps != 0) {
+            printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+            return;
+        }
+        
+        /* Check to see if ServoPos is beyond limit */
+        if (NewServoPos > 32000)
+        {
+            printf((far rom char *)"!0 Err: Servo Position greater than 32000.\n\r");
+            return;
+        }
+    }
+
+    // If we get here, we know that step rate for both A1 and A2 is
+    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  	process_S3(Duration, A1Steps, A2Steps, NewServoPos);
 
     if (g_ack_enable)
     {
@@ -1454,6 +1571,13 @@ void parse_XM_packet (void)
 	print_ack();
 }
 
+void parse_X3_packet (void)
+{
+
+    
+}
+
+
 // Main stepper move function. This is the reason EBB exists.
 // <Duration> is a 3 byte unsigned int, the number of mS that the move should take
 // <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
@@ -1480,6 +1604,176 @@ static void process_SM(
 
 	// Check for delay
 	if (A1Stp == 0 && A2Stp == 0)
+	{
+		move.Command = COMMAND_DELAY;
+        // This is OK because we only need to multiply the 3 byte Duration by
+        // 25, so it fits in 4 bytes OK.
+  		move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+	}
+	else
+	{
+		move.DelayCounter = 0; // No delay for motor moves
+		move.DirBits = 0;
+		
+		// Always enable both motors when we want to move them
+		Enable1IO = ENABLE_MOTOR;
+		Enable2IO = ENABLE_MOTOR;
+
+		// First, set the direction bits
+		if (A1Stp < 0)
+		{
+			move.DirBits = move.DirBits | DIR1_BIT;
+			A1Stp = -A1Stp;
+		}
+		if (A2Stp < 0)
+		{
+			move.DirBits = move.DirBits | DIR2_BIT;
+			A2Stp = -A2Stp;
+		}
+        // To compute StepAdd values from Duration.
+        // A1Stp is from 0x000001 to 0xFFFFFF.
+        // HIGH_ISR_TICKS_PER_MS = 25
+        // Duration is from 0x000001 to 0xFFFFFF.
+        // temp needs to be from 0x0001 to 0x7FFF.
+        // Temp is added to accumulator every 25KHz. So slowest step rate
+        // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+        // Fastest step rate is obviously 25KHz.
+        // If A1Stp is 1, then duration must be 763 or less.
+        // If A1Stp is 2, then duration must be 763 * 2 or less.
+        // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+        
+        // First check for duration to large.
+//        if (A1Stp < (0xFFFFFF/763)) {
+//            if (duration > (A1Stp * 763)) {
+//                printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
+//                temp = 0;
+//                A1Stp = 0;
+//            }
+//        }
+        
+        if (A1Stp < 0x1FFFF) {
+            temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
+            temp = (A1Stp << 15)/temp1;
+            temp2 = (A1Stp << 15) % temp1;
+            /* Because it takes us about 5ms extra time to do this division,
+             * we only perform this extra step if our move is long enough to
+             * warrant it. That way, for really short moves (where the extra
+             * precision isn't necessary) we don't take up extra time. Without
+             * this optimization, our minimum move time is 20ms. With it, it
+             * drops down to about 15ms.
+             */
+            if (Duration > 30)
+            {
+                remainder = (temp2 << 16) / temp1;
+            }
+        }
+        else {
+            temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+            remainder = 0;
+        }
+        if (temp > 0x8000) {
+            printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+            temp = 0x8000;
+        }
+        if (temp == 0 && A1Stp != 0) {
+            printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
+            temp = 1;
+        }
+        if (Duration > 30)
+        {
+            temp = (temp << 16) + remainder;
+        }
+        else
+        {
+            temp = (temp << 16);
+        }
+
+        move.StepAdd[0] = temp;
+        move.StepsCounter[0] = A1Stp;
+        move.StepAddInc[0] = 0;
+        
+        if (A2Stp < 0x1FFFF) {
+            temp = (A2Stp << 15)/temp1;
+            temp2 = (A2Stp << 15) % temp1; 
+            if (Duration > 30)
+            {
+                remainder = (temp2 << 16) / temp1;
+            }
+        }
+        else {
+            temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+            remainder = 0;
+        }
+        if (temp > 0x8000) {
+            printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+            temp = 0x8000;
+        }
+        if (temp == 0 && A2Stp != 0) {
+            printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
+            temp = 1;
+        }
+        if (Duration > 30)
+        {
+            temp = (temp << 16) + remainder;
+        }
+        else
+        {
+            temp = (temp << 16);
+        }
+        
+        move.StepAdd[1] = temp;
+        move.StepsCounter[1] = A2Stp;
+        move.StepAddInc[1] = 0;
+        move.Command = COMMAND_MOTOR_MOVE;
+        
+        /* For debugging step motion , uncomment the next line */
+        
+        //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+        //        move.StepAdd[0],
+        //        move.StepsCounter[0],
+        //        move.StepAdd[1],
+        //        move.StepsCounter[1]
+        //    );
+	}
+		
+	// Spin here until there's space in the fifo
+	while(!FIFOEmpty)
+	;
+
+    // Now, quick copy over the computed command data to the command fifo
+    CommandFIFO[0] = move;
+    
+	FIFOEmpty = FALSE;
+}
+
+// Main stepper move function. This is the reason EBB exists. 3D version
+// <Duration> is a 3 byte unsigned int, the number of mS that the move should take
+// <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
+//  <Duration> mS, as 3 byte signed values, where the sign determines the motor
+//  direction.
+// <NewServoPosition> A servo position where the servo should be by the end of the move
+// This function waits until there is room in the 1-deep FIFO before placing
+// the data in the FIFO. The ISR then sees this data when it is done with its
+// current move, and starts this new move.
+//
+// In the future, making the FIFO more elements deep may be cool.
+// 
+static void process_S3(
+	UINT32 Duration,
+	INT32 A1Stp,
+	INT32 A2Stp,
+    UINT16 NewServoPos
+)
+{
+    UINT32 temp = 0;
+    UINT32 temp1 = 0;
+    UINT32 temp2 = 0;
+    UINT32 remainder = 0;
+    MoveCommandType move;
+
+
+	// Check for delay
+	if (A1Stp == 0 && A2Stp == 0 && NewServoPos == 0)
 	{
 		move.Command = COMMAND_DELAY;
         // This is OK because we only need to multiply the 3 byte Duration by
