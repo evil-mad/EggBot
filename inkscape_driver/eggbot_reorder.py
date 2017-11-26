@@ -1,9 +1,11 @@
+# coding: utf-8
 # EggBot Path Ordering extension
 # This extension tries to re-order the document's paths to improve
 # the plotting time by plotting nearby paths consecutively.
 #
 # Written by Matthew Beckler for the EggBot project.
 # Email questions and comments to matthew at mbeckler dot org
+# Modified by Romain Testuz
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,60 +32,61 @@ import sys
 def dist( x0, y0, x1, y1 ):
 	return math.sqrt( ( x1 - x0 ) ** 2 + ( y1 - y0 ) ** 2 )
 
-def find_ordering_naive( objlist ):
+def find_ordering( objlist, allowReverse ):
 	"""
 	Takes a list of (id, (startX, startY, endX, endY)), and finds the best ordering.
-	Doesn't handle anything fancy, like reversing the ordering, but it's useful for now.
-	Returns a list of JUST THE IDs, in a better order, as well as the original and optimized
-	"air distance" which is just the distance traveled in the air. Perhaps we want to make
-	these comparison distances into something more relevant such as degrees traveled?
+	Uses a greedy algorithm which can reverse the path direction if necessary
+	Returns a list of (id, reverse), as well as the original and optimized
+	"air distance" which is just the distance traveled in the air. Reverse indicate if the path must be reversed
 	"""
 
-	# let's figure out the default in-air length, so we know how much we improved
+	startX, startY = 0.0, 0.0 #Start point TODO 0,0 is not top left of the page
+
+	# let's figure out the default in-air length (this is not meaningful as we are using the dictionary ordering)
 	air_length_default = 0
-	try:
-		oldx = objlist[0][1][2]
-		oldy = objlist[0][1][3]
-	except:
-		inkex.errormsg( gettext.gettext( str( objlist[0] ) ) )
-		sys.exit( 1 )
-	for id, coords in objlist[1:]:
+	oldx, oldy = startX, startY
+
+	for id, coords in objlist:
+		#inkex.debug(( id, oldx, oldy, coords[0], coords[1] ))
 		air_length_default += dist( oldx, oldy, coords[0], coords[1] )
 		oldx = coords[2]
 		oldy = coords[3]
 	#fid.write("Default air distance: %d\n" % air_length_default)
 
 	air_length_ordered = 0
-	# for now, start with a random one:
-	sort_list = []
-	random_index = random.randint( 0, len( objlist ) - 1 )
-	sort_list.append( objlist[random_index] )
-	objlist.remove( objlist[random_index] )
 
-	# for now, do this in the most naive way:
-	# for the previous end point, iterate over each remaining path and pick the closest starting point
+	sort_list = []
+	prevX, prevY = startX, startY
+
+	# for the previous end point, iterate over each remaining path and pick the closest starting point or ending point if allowed
 	while len( objlist ) > 0:
-		min_distance = 100000000 # TODO put something else here better?
+		min_distance = sys.float_info.max #The biggest number possible
 		for path in objlist:
-			# instead of having a prevX, prevY, we just look at the last item in sort_list
-			this_distance = dist( sort_list[-1][1][2], sort_list[-1][1][3], path[1][0], path[1][1] )
-			# this is such a common thing to do, you'd think there would be a name for it...
-			if this_distance < min_distance:
-				min_distance = this_distance
+			dist_to_start = dist( prevX, prevY, path[1][0], path[1][1] )
+			dist_to_end = dist( prevX, prevY, path[1][2], path[1][3] ) if allowReverse else -1
+
+			if dist_to_start < min_distance:
+				min_distance = dist_to_start
 				min_path = path
+				reverse = False
+
+			if allowReverse and dist_to_end < min_distance:
+				min_distance = dist_to_end
+				min_path = path
+				reverse = True
+
 		air_length_ordered += min_distance
-		sort_list.append( min_path )
+		sort_list.append( (min_path[0], reverse) ) #Add (id, reverse)
 		objlist.remove( min_path )
+		(prevX, prevY) = (min_path[1][0], min_path[1][1]) if reverse else (min_path[1][2], min_path[1][3])
 
 	#fid.write("optimized air distance: %d\n" % air_length_ordered)
 
-	# remove the extraneous info from the list order
-	sort_order = [id for id, coords in sort_list]
-	return sort_order, air_length_default, air_length_ordered
+	return sort_list, air_length_default, air_length_ordered
 
 def conv( x, y, trans_matrix=None ):
 	"""
-	not used currently, but can be used to apply a translation matrix to an (x, y) pair
+	apply a translation matrix to an (x, y) pair
 	I'm sure there is a better way to do this using simpletransform or it's ilk
 	"""
 
@@ -94,33 +97,109 @@ def conv( x, y, trans_matrix=None ):
 	else:
 		return x, y
 
+def reversePath( path ):
+	#Input: path in simplepath format
+	#Returns the reversed path in a svg string format
+	#In case of error the path is returned unchanged
+	#Some commands like A, H, V are not supported
+	#Adapted from https://github.com/Pomax/svg-path-reverse/blob/gh-pages/reverse.js
+
+	#Unpack sublists into a single list
+	flattenedPath = [item for sublist in path for subsublist in sublist for item in subsublist]#Sorry
+	reversedPath = []
+
+	i = 0
+	while i < len(flattenedPath):
+		term = flattenedPath[i]
+		#At this point the next term must be a letter because the coordinates must have all been read
+		if term == "C":
+			pairs = 3; shift = 2
+		elif term == "Q":
+			pairs = 2; shift = 1
+		elif term == "L":
+			pairs = 1; shift = 1
+		elif term == "M":
+			pairs = 1; shift = 0
+		elif term == "Z":
+			reversedPath[0] = "Z"; i += 1; continue
+		else:
+			inkex.errormsg("Cannot reverse path, unknown command: {} or malformed path: {}".format(term, flattenedPath))
+			return ' '.join(str(e) for e in flattenedPath)#to string
+
+		if pairs == shift:
+			reversedPath.append(term)
+
+		for pair in range(0, pairs):
+			if pair == shift:
+				reversedPath.append(term)
+			i += 1
+			x = flattenedPath[i]
+			i += 1
+			y = flattenedPath[i]
+			reversedPath.append(y)
+			reversedPath.append(x)
+		i += 1
+
+	reversedPath.append("M")
+	reversedPath = list(reversed(reversedPath))
+	if reversedPath[-1] == "M":#Only remove the last element if it's not a Z
+		reversedPath = reversedPath[:-1]
+
+	return ' '.join(str(e) for e in reversedPath)#to string
+
 class EggBotReorderPaths( inkex.Effect ):
 	def __init__( self ):
 		inkex.Effect.__init__( self )
-# 		self.OptionParser.add_option( '-r', '--reverse', action='store', type="inkbool",
-# 			dest="reverse", default=True, help="Enable 'reverse path direction' optimizations" )
-# 		self.OptionParser.add_option( '-w', '--wrap', action='store', type="inkbool",
-# 				dest="wrap", default=True, help="Enable 'wrap egg axis' optimizations" )
+		self.OptionParser.add_option("-r", "--allowReverse", action="store", type="inkbool",
+                        dest="allowReverse", default=True, help="Allow path reversal")
 
-	def get_start_end( self, node, transform ):
+	def get_start_end( self, node ):
 		"""Given a node, return the start and end points"""
-		d = node.get( 'd' )
-		sp = simplepath.parsePath( d )
+		nodeStart = node
+		nodeEnd = node
+		transformStart = simpletransform.parseTransform( node.get( 'transform' ) )
+		transformEnd = transformStart
 
-		# simplepath converts coordinates to absolute and cleans them up, but
-		# these are still some big assumptions here, are they always valid? TODO
-		startX = sp[0][1][0]
-		startY = sp[0][1][1]
-		if sp[-1][0] == 'Z':
-			# go back to start
-			endX = startX
-			endY = startY
+		while nodeStart.tag == inkex.addNS( 'g', 'svg' ):
+			nodeStart = nodeStart[0]
+			if transformStart:
+				transformStart = simpletransform.parseTransform( nodeStart.get( 'transform' ), transformStart )
+
+		while nodeEnd.tag == inkex.addNS( 'g', 'svg' ):
+			nodeEnd = nodeEnd[-1]
+			if transformEnd:
+				transformEnd = simpletransform.parseTransform( nodeEnd.get( 'transform' ), transformEnd )
+
+		if nodeStart.tag == inkex.addNS( 'path', 'svg' ):
+			d_start = nodeStart.get( 'd' )
+			sp_start = simplepath.parsePath( d_start )
+			# simplepath converts coordinates to absolute and cleans them up, but
+			# these are still some big assumptions here, are they always valid? TODO
+			startX = sp_start[0][1][0]
+			startY = sp_start[0][1][1]
 		else:
-			endX = sp[-1][1][-2]
-			endY = sp[-1][1][-1]
+			inkex.errormsg("This script only work with paths and groups, please convert objects to paths")
+			startX = 0.0
+			startY = 0.0
 
-		sx, sy = conv( startX, startY, transform )
-		ex, ey = conv( endX, endY, transform )
+		if nodeEnd.tag == inkex.addNS( 'path', 'svg' ):
+			d_end = nodeEnd.get( 'd' )
+			sp_end = simplepath.parsePath( d_end )
+			if sp_end[-1][0] == 'Z':
+				# go back to start
+				endX = sp_end[0][1][0]
+				endY = sp_end[0][1][1]
+			else:
+				endX = sp_end[-1][1][-2]
+				endY = sp_end[-1][1][-1]
+		else:
+			inkex.errormsg("This script only work with paths and groups, please convert objects to paths")
+			endX = 0.0
+			endY = 0.0
+
+		sx, sy = conv( startX, startY, transformStart )
+		ex, ey = conv( endX, endY, transformEnd )
+		#inkex.debug(( sx, sy, ex, ey ))
 		return ( sx, sy, ex, ey )
 
 	def effect( self ):
@@ -128,40 +207,50 @@ class EggBotReorderPaths( inkex.Effect ):
 
 		# based partially on the restack.py extension
 		if len( self.selected ) > 0:
-			svg = self.document.getroot()
-
 			# TODO check for non-path elements?
 			# TODO it seems like the order of selection is not consistent
+			# => self.selected is a dict so it has no meaningful order and should not be used to evaluate the original path length
 
 			#fid = open("/home/matthew/debug.txt", "w")
 
-			# for each selected item - TODO make this be all objects, everywhere
+			# for each selected item
 			# I can think of two options:
 			# 1. Iterate over all paths in root, then iterate over all layers, and their paths
 			# 2. Some magic with xpath? (would this limit us to specific node types?)
 
 			objlist = []
 			for id, node in self.selected.iteritems():
-				transform = node.get( 'transform' )
-				if transform:
-					transform = simpletransform.parseTransform( transform )
-
-				item = ( id, self.get_start_end( node, transform ) )
+				item = ( id, self.get_start_end( node ) )
 				objlist.append( item )
 
 			# sort / order the objects
-			sort_order, air_distance_default, air_distance_ordered = find_ordering_naive( objlist )
+			sort_order, air_distance_default, air_distance_ordered = find_ordering( objlist, self.options.allowReverse )
 
-			for id in sort_order:
-				# There's some good magic here, that you can use an
-				# object id to index into self.selected. Brilliant!
-				self.current_layer.append( self.selected[id] )
+			reverseCount = 0
+			for id, reverse in sort_order:
+				node = self.selected[id]
+				if node.tag == inkex.addNS( 'path', 'svg' ):
+					node_sp = simplepath.parsePath( node.get( 'd' ) )
+					if(reverse):
+						node_sp_string = reversePath(node_sp)
+						reverseCount += 1
+					else:
+						node_sp_string = simplepath.formatPath(node_sp)
 
+					node.set('d', node_sp_string)
+				elif node.tag == inkex.addNS( 'g', 'svg' ) and reverse:
+						#TODO Every element of the group should be reversed
+						inkex.errormsg("Reversing groups is currently not possible, please ungroup for better results")
+
+				#keep in mind the different selected ids might have different parents
+				self.getParentNode( node ).append( node )
+
+			inkex.errormsg("Reversed {} paths.".format(reverseCount))
 			#fid.close()
 
 			if air_distance_default > 0 :  #don't divide by zero. :P
 				improvement_pct = 100 * ( ( air_distance_default - air_distance_ordered ) / ( air_distance_default ) )
-				inkex.errormsg( gettext.gettext( "Selected paths have been reordered and optimized for quicker EggBot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % ( air_distance_default, air_distance_ordered, improvement_pct ) ) )
+				inkex.errormsg( gettext.gettext( "Selected paths have been reordered and optimized for quicker EggBot plotting.\n\nDefault air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % ( air_distance_default, air_distance_ordered, improvement_pct ) ) )
 			else:
 				inkex.errormsg( gettext.gettext( "Unable to start. Please select multiple distinct paths. :)" ) )
 

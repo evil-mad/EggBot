@@ -6,27 +6,27 @@
   <dependency type="executable" location="extensions">eggbot_reorder.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
   <!-- Written by Matthew Beckler for the Egg-Bot project. Email questions and comments to matthew at mbeckler dot org -->
-
-	  <_param name="Header" type="description" xml:space="preserve">
- This extension will perform simple optimizations 
- of selected paths. It will try to change the 
+  <_param name="Header" type="description" xml:space="preserve">
+ This extension will perform simple optimizations
+ of selected paths. It will try to change the
  order of plotting so as to reduce the amount
  of "pen-up" travel that occurs between paths.
- 
+
  Solving for optimal plot order is a difficult
  problem, known in computer science as the
- "traveling salesman problem," or just "TSP."  
- 
+ "traveling salesman problem," or just "TSP".
+
  This routine does not look for the best possible
  solution; that can be slow. Instead it tries a
- few quick methods that often reduce pen-up 
- travel distance (and time) by 30% or more. 
+ few quick methods that often reduce pen-up
+ travel distance (and time) by 30% or more.
 
- Please note: This extension is still considered 
- experimental, and is only provided in case you 
- may find it useful. Be sure to save a copy of 
+ Please note: This extension is still considered
+ experimental, and is only provided in case you
+ may find it useful. Be sure to save a copy of
  your document before running this routine.
-            </_param>
+  </_param>
+  <param name="allowReverse" type="boolean" _gui-text="Allow Reverse">true</param>
 
   <!--
   <param name="reverse" type="boolean" _gui-text="Allow paths to be reversed*">false</param>
