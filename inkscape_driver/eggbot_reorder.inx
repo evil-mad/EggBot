@@ -28,14 +28,6 @@
   </_param>
   <param name="allowReverse" type="boolean" _gui-text="Allow Reverse">true</param>
 
-  <!--
-  <param name="reverse" type="boolean" _gui-text="Allow paths to be reversed*">false</param>
-  <param name="wrap" type="boolean" _gui-text="Allow wrap-around egg axis*">false</param>
-
-	  <_param name="nyet" type="description" xml:space="preserve">
-  *Option not yet implemented.
-            </_param>
--->
   <effect needs-live-preview="false" needs-document="no">
     <object-type>all</object-type>
     <effects-menu>
