@@ -101,6 +101,10 @@ class Hershey( inkex.Effect ):
             w,v = self.render_table_of_all_fonts( 'group_allfonts', g, spacing, clearfont )
             OutputGenerated = True
             scale *= 0.4	#Typically scales to about A4/US Letter size
+        elif self.options.action == 'sampleHW':
+            w,v = self.render_table_of_all_fonts( 'group_hwfonts', g, spacing, clearfont )
+            OutputGenerated = True
+            scale *= 0.5	#Typically scales to about A4/US Letter size
         else:
             #Generate glyph table
             wmax = 0;

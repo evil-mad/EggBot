@@ -1,10 +1,10 @@
 '''
 hersheydata.py
 
-Version 2.0.2, dated July 31, 2016.
+Version 2.2, dated November 28, 2017.
 
 Originally prepared in 2011 by Windell H. Oskay, www.evilmadscientist.com
-Updated, 2016 by Windell H. Oskay, www.evilmadscientist.com
+Updated, 2017 by Windell H. Oskay, www.evilmadscientist.com
 
 Contents adapted from emergent.unpythonic.net/software/hershey
  by way of "Hershey Fonts in SVG" by Marty McGuire
@@ -330,5 +330,31 @@ group_allfonts = (
 						['meteorology','Meteorology'],
 						['music','Music'],
 						['symbolic','Symbolic']
+					]
+                )
+group_hwfonts = (
+                    [
+						['scripts','Script 1-stroke'],
+						['EMSAllure','EMS Allure'],
+						['EMSBird','EMS Bird'],
+						['EMSBirdSwashCaps','EMS Bird Swash Caps'],
+						['EMSBrush','EMS Brush'],
+						['EMSCapitol','EMS Capitol'],
+						['EMSCasualHand','EMS Casual Hand'],
+						['EMSDecorousScript','EMS Decorous Script'],
+						['EMSDelight','EMS Delight'],
+						['EMSDelightSwashCaps','EMS Delight Swash Caps'],
+						['EMSElfin','EMS Elfin'],
+						['EMSFelix','EMS Felix'],
+						['EMSInvite','EMS Invite'],
+						['EMSLeague','EMS League'],
+						['EMSLittlePrincess','EMS Little Princess'],
+						['EMSNeato','EMS Neato'],
+						['EMSPancakes','EMS Pancakes'],
+						['EMSPepita','EMS Pepita'],
+						['EMSQwandry','EMS Qwandry'],
+						['EMSSociety','EMS Society'],
+						['EMSSwiss','EMS Swiss'],
+						['EMSTech','EMS Tech']
 					]
                 )
