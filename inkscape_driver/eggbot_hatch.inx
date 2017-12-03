@@ -19,10 +19,11 @@
 This extension fills each closed figure in your drawing
 with a path consisting of back and forth drawn "hatch" lines.
 If any objects are selected, then only those selected objects
-will be filled. 
+will be filled.
 
 Hatched figures will be grouped with their fills.
   </_param>
+
   <param name="hatchSpacing" type="float" min="0" max="1000" _gui-text="   Hatch spacing (px)">5.0</param>
   <param name="hatchAngle" type="float" min="-360" max="360" _gui-text="   Hatch angle (degrees)">45</param>
   <param name="crossHatch" type="boolean" _gui-text="   Crosshatch?">false</param>
@@ -35,10 +36,16 @@ Hatched figures will be grouped with their fills.
   <param name="footer" type="description" xml:space="preserve">
             (v2.0.1, December 23, 2016)</_param>
 
+  <param name="removeOriginal" type="boolean" _gui-text="   Delete original object (to remove outline)?">false</param>
+  <param name="useRange" type="boolean" _gui-text="   Use a range, instead of fixed values (see info tab)?">false</param>
+  <param name="minHatchSpacing" type="float" min="0" max="1000" _gui-text="   Minimum hatch spacing (px)">5.0</param>
+  <param name="maxHatchSpacing" type="float" min="0" max="1000" _gui-text="   Maximum hatch spacing (px)">10.0</param>
+  <param name="minHatchAngle" type="float" min="-360" max="360" _gui-text="   Minimum hatch angle (degrees)">45</param>
+  <param name="maxHatchAngle" type="float" min="-360" max="360" _gui-text="   Maximum hatch angle (degrees)">90</param>
   </page>
   <page name="info" _gui-text="More info...">
   <_param name="aboutpage" type="description" xml:space="preserve">
-Hatch spacing is the distance between hatch lines, 
+Hatch spacing is the distance between hatch lines,
 measured in units of screen pixels (px). Angles are in
 degrees from horizontal; for example 90 is vertical.
 
@@ -50,9 +57,9 @@ nearby line ends with a smoothly flowing curve, to improve
 the smoothness of plotting.
 
 The Range parameter sets the distance (in hatch widths)
-over which that option searches for segments to join. 
+over which that option searches for segments to join.
 Large values may result in hatches where you don't want
-them. Consider using a value in the range of 2-4. 
+them. Consider using a value in the range of 2-4.
 
 The Inset option allows you to hold back the edges of the
 fill somewhat from the edge of your original object.
@@ -63,8 +70,18 @@ The hatches will be the same color and width
 as the original object.
 
 The Tolerance parameter affects how precisely
-the hatches try to fill the input paths.</_param>
- 
+the hatches try to fill the input paths.
+
+The Remove original element parameter lets the script delete
+the element you choose to hatch, so only the new hatch will
+remain (no outline around the object).
+
+When Use range is selected the hatch settings for each
+element will depend on its brightness, with black elements
+using the minimum value of the set range, white elements
+using the maximum and gray elements using any
+value in between.</_param>
+
   </page>
   </param>
   <effect needs-live-preview="true">
