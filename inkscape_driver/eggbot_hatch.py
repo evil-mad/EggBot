@@ -78,22 +78,22 @@
 # Added feature: Option to inset the hatch segments from boundaries
 # Added feature: Option to join hatch segments that are "nearby", to minimize pen lifts
 # The joins are made using cubic Bezier segments.
-# https://github.com/evil-mad/EggBot/issues/36
-#
+# https://github.com/evil-mad/EggBot/issues/36						
+
 # Updated by Nathan Depew, 12/6/2017
 # Modified hatch fill to create hatches as a relevant object it found on the SVG tree
 # This prevents extremely complex plots from generating glitches
-# Modifications are limited to recursivelyTraverseSvg and effect methods
+# Modifications are limited to recursivelyTraverseSvg and effect methods 
+ 
 #
 # Current software version:
-# (v2.1.0, December 7, 2017)
-#
-
+# (v2.1.0, December 6, 2017)
+# 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-#
+
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -788,20 +788,26 @@ class Eggbot_Hatch( inkex.Effect ):
 
 		All other SVG elements trigger an error (including <text>)
 		
-        Once a supported graphical element is found, we call functions to
-        create a hatchfil specific to this element. These hatches and their
-        corresponding transforms are stored in self.hatches and self.transforms
-        These two dictionaries are used when we return to the effect method
-        in joinFillsWithNode()
-        
-        '''
+		Once a supported graphical element is found, we call functions to
+		create a hatchfil specific to this element. These hatches and their
+		corresponding transforms are stored in self.hatches and self.transforms
+		These two dictionaries are used when we return to the effect method
+		in joinFillsWithNode() 
+
+		'''
 		for node in aNodeList:
-            '''
-            Initialize dictionary for each new node
-            This allows us to create hatch fills as if each
-            object to be hatched has been selected individually
-                
-            '''
+
+			'''
+			 Initialize dictionary for each new node
+			 This allows us to create hatch fills as if each 
+			 object to be hatched has been selected individually
+
+			''' 
+			self.xmin, self.ymin = ( float( 0 ), float( 0 ) )
+			self.xmax, self.ymax = ( float( 0 ), float( 0 ) )
+			self.paths = {}
+			self.grid = []
+
 			# Ignore invisible nodes
 			v = node.get( 'visibility', parent_visibility )
 			if v == 'inherit':
@@ -854,19 +860,21 @@ class Eggbot_Hatch( inkex.Effect ):
 				path_data = node.get( 'd')
 				if path_data:
 					self.addPathVertices( path_data, node, matNew )
-                    # We now have a path we want to apply a (cross)hatch to
-                    # Apply appropriate functions
-                    bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                    if bHaveGrid:
-                        if self.options.crossHatch:
-                            self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                        # if self.options.crossHatch:
-                        # Now loop over our hatch lines looking for intersections
-                                for h in self.grid:
-                                    interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                # if bHaveGrid
-                else:
-                    inkex.errormsg( ' Nothing to plot' )
+					# We now have a path we want to apply a (cross)hatch to
+					# Apply appropriate functions
+					bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+					if bHaveGrid:
+						if self.options.crossHatch:
+							self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+						for h in self.grid:
+		                                	interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+					# if bHaveGrid
+					else:	
+						inkex.errormsg( ' Nothing to plot' )
+
+
 
 			elif node.tag == inkex.addNS( 'rect', 'svg' ) or node.tag == 'rect':
 
@@ -895,19 +903,22 @@ class Eggbot_Hatch( inkex.Effect ):
 				a.append( [' l ', [-w, 0]] )
 				a.append( [' Z', []] )
 				self.addPathVertices( simplepath.formatPath( a ), node, matNew )
-                # We now have a path we want to apply a (cross)hatch to
-                # Apply appropriate functions
-                bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                if bHaveGrid:
-                    if self.options.crossHatch:
-                        self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                    # if self.options.crossHatch:
-                    # Now loop over our hatch lines looking for intersections
-                    for h in self.grid:
-                        interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                # if bHaveGrid
-                else:
-                    inkex.errormsg( ' Nothing to plot' )
+				# We now have a path we want to apply a (cross)hatch to
+				# Apply appropriate functions
+				bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+				if bHaveGrid:
+					if self.options.crossHatch:
+						self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+					for h in self.grid:
+		                               	interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+				# if bHaveGrid
+				else:	
+					inkex.errormsg( ' Nothing to plot' )
+
+
+
 			elif node.tag == inkex.addNS( 'line', 'svg' ) or node.tag == 'line':
 
 				# Convert
@@ -928,19 +939,20 @@ class Eggbot_Hatch( inkex.Effect ):
 				a.append( ['M ', [x1, y1]] )
 				a.append( [' L ', [x2, y2]] )
 				self.addPathVertices( simplepath.formatPath( a ), node, matNew )
-                # We now have a path we want to apply a (cross)hatch to
-                # Apply appropriate functions
-                bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                if bHaveGrid:
-                    if self.options.crossHatch:
-                        self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                    # if self.options.crossHatch:
-                    # Now loop over our hatch lines looking for intersections
-                    for h in self.grid:
-                        interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                # if bHaveGrid
-                else:
-                    inkex.errormsg( ' Nothing to plot' )
+				# We now have a path we want to apply a (cross)hatch to
+				# Apply appropriate functions
+				bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+				if bHaveGrid:
+					if self.options.crossHatch:
+						self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+					for h in self.grid:
+		                               	interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+				# if bHaveGrid
+				else:	
+					inkex.errormsg( ' Nothing to plot' )
+
 			elif node.tag == inkex.addNS( 'polyline', 'svg' ) or node.tag == 'polyline':
 
 				# Convert
@@ -960,20 +972,21 @@ class Eggbot_Hatch( inkex.Effect ):
 				pa = pl.split()
 				d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
 				self.addPathVertices( d, node, matNew )
-                # We now have a path we want to apply a (cross)hatch to
-                # Apply appropriate functions
-                bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                if bHaveGrid:
-                    if self.options.crossHatch:
-                        self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                    # if self.options.crossHatch:
-                    # Now loop over our hatch lines looking for intersections
-                    for h in self.grid:
-                        interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                # if bHaveGrid
-                else:
-                    inkex.errormsg( ' Nothing to plot' )
-                
+
+				# We now have a path we want to apply a (cross)hatch to
+				# Apply appropriate functions
+				bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+				if bHaveGrid:
+					if self.options.crossHatch:
+						self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+					for h in self.grid:
+		                               	interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+				# if bHaveGrid
+				else:	
+					inkex.errormsg( ' Nothing to plot' )
+
 			elif node.tag == inkex.addNS( 'polygon', 'svg' ) or node.tag == 'polygon':
 				# Convert
 				#
@@ -993,19 +1006,18 @@ class Eggbot_Hatch( inkex.Effect ):
 				d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
 				d += " Z"
 				self.addPathVertices( d, node, matNew )
-                # We now have a path we want to apply a (cross)hatch to
-                # Apply appropriate functions
-                bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                if bHaveGrid:
-                    if self.options.crossHatch:
-                        self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                    # if self.options.crossHatch:
-                    # Now loop over our hatch lines looking for intersections
-                    for h in self.grid:
-                        interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                # if bHaveGrid
-                else:
-                    inkex.errormsg( ' Nothing to plot' )
+				# We now have a path we want to apply a (cross)hatch to
+				# Apply appropriate functions
+				bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+				if bHaveGrid:
+					if self.options.crossHatch:
+						self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+					for h in self.grid:
+		                               	interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+				else:	
+					inkex.errormsg( ' Nothing to plot' )
 
 			elif node.tag == inkex.addNS( 'ellipse', 'svg' ) or \
 				node.tag == 'ellipse' or \
@@ -1047,19 +1059,18 @@ class Eggbot_Hatch( inkex.Effect ):
 						'A %f,%f ' % ( rx, ry ) + \
 						'0 1 0 %f,%f' % ( x1, cy )
 					self.addPathVertices( d, node, matNew )
-                    # We now have a path we want to apply a (cross)hatch to
-                    # Apply appropriate functions
-                    bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
-                    if bHaveGrid:
-                        if self.options.crossHatch:
-                            self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
-                        # if self.options.crossHatch:
-                        # Now loop over our hatch lines looking for intersections
-                        for h in self.grid:
-                            interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
-                    # if bHaveGrid
-                    else:
-                        inkex.errormsg( ' Nothing to plot' )
+					# We now have a path we want to apply a (cross)hatch to
+					# Apply appropriate functions
+					bHaveGrid = self.makeHatchGrid( float( self.options.hatchAngle ),float( self.options.hatchSpacing ), True )
+					if bHaveGrid:
+						if self.options.crossHatch:
+							self.makeHatchGrid( float( self.options.hatchAngle + 90.0 ),float( self.options.hatchSpacing ), False )
+						# if self.options.crossHatch:
+                         			# Now loop over our hatch lines looking for intersections
+						for h in self.grid:
+		                               		interstices( self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps )
+					else:	
+						inkex.errormsg( ' Nothing to plot' )
 
 			elif node.tag == inkex.addNS( 'pattern', 'svg' ) or node.tag == 'pattern':
 				pass
@@ -1081,8 +1092,6 @@ class Eggbot_Hatch( inkex.Effect ):
 			else:
 				inkex.errormsg( 'Warning: unable to hatch object <%s>, please convert it to a path first.' % node.tag )
 				pass
-		# for node in aNodeList:
-	# def recursivelyTraverseSvg( self, aNodeList,...
 	
 	def joinFillsWithNode ( self, node, stroke_width, path ):
 
@@ -1234,8 +1243,7 @@ class Eggbot_Hatch( inkex.Effect ):
 			# Traverse the entire document
 			self.recursivelyTraverseSvg( self.document.getroot(), self.docTransform )
 
-		# After recursively traversing the svg, we will have a dictionary of transforms and hatches
-			
+		# After recursively traversing the svg, we will have a dictionary of transforms and hatches		
 		# Target stroke width will be (doc width + doc height) / 2 / 1000
 		# stroke_width_target = ( self.docHeight + self.docWidth ) / 2000
 		# stroke_width_target = 1
@@ -1537,7 +1545,10 @@ class Eggbot_Hatch( inkex.Effect ):
 		# if self.options.reducePenLifts:
 		#inkex.errormsg("Elapsed CPU time was %f" % (time.clock()-self.t0))
 		'''
+	
 	# def effect( self ):
+	
+			
 	
 	def recursivelyAppendNearbySegmentIfAny( 
 		self,
