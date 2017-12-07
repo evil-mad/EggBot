@@ -33,7 +33,7 @@ Hatched figures will be grouped with their fills.
   <param name="holdBackSteps" type="float" min="0.1" max="10.0" _gui-text="   Inset distance (px) (default: 1)">1.0</param>
   <param name="tolerance" type="float" min="0.1" max="100" _gui-text="   Tolerance (default: 20)">20.0</param>
   <param name="footer" type="description" xml:space="preserve">
-            (v2.0.1, December 23, 2016)</_param>
+            (v2.1.0, December 8, 2017)</_param>
 
   </page>
   <page name="info" _gui-text="More info...">
