@@ -176,51 +176,31 @@ class EggBotReorderPaths( inkex.Effect ):
 
 	def get_start_end( self, node ):
 		"""Given a node, return the start and end points"""
-		nodeStart = node
-		nodeEnd = node
-		transformStart = simpletransform.parseTransform( node.get( 'transform' ) )
-		transformEnd = transformStart
+		if node.tag != inkex.addNS( 'path', 'svg' ):
+			inkex.errormsg("Groups are not supported, please ungroup for better results")
+			return (0, 0, 0, 0)
 
-		while nodeStart.tag == inkex.addNS( 'g', 'svg' ):
-			nodeStart = nodeStart[0]
-			if transformStart:
-				transformStart = simpletransform.parseTransform( nodeStart.get( 'transform' ), transformStart )
+		d = node.get( 'd' )
+		sp = simplepath.parsePath( d )
 
-		while nodeEnd.tag == inkex.addNS( 'g', 'svg' ):
-			nodeEnd = nodeEnd[-1]
-			if transformEnd:
-				transformEnd = simpletransform.parseTransform( nodeEnd.get( 'transform' ), transformEnd )
-
-		if nodeStart.tag == inkex.addNS( 'path', 'svg' ):
-			d_start = nodeStart.get( 'd' )
-			sp_start = simplepath.parsePath( d_start )
-			# simplepath converts coordinates to absolute and cleans them up, but
-			# these are still some big assumptions here, are they always valid? TODO
-			startX = sp_start[0][1][0]
-			startY = sp_start[0][1][1]
+		# simplepath converts coordinates to absolute and cleans them up, but
+		# these are still some big assumptions here, are they always valid? TODO
+		startX = sp[0][1][0]
+		startY = sp[0][1][1]
+		if sp[-1][0] == 'Z':
+			# go back to start
+			endX = startX
+			endY = startY
 		else:
-			inkex.errormsg("This script only work with paths and groups, please convert objects to paths")
-			startX = 0.0
-			startY = 0.0
+			endX = sp[-1][1][-2]
+			endY = sp[-1][1][-1]
 
-		if nodeEnd.tag == inkex.addNS( 'path', 'svg' ):
-			d_end = nodeEnd.get( 'd' )
-			sp_end = simplepath.parsePath( d_end )
-			if sp_end[-1][0] == 'Z':
-				# go back to start
-				endX = sp_end[0][1][0]
-				endY = sp_end[0][1][1]
-			else:
-				endX = sp_end[-1][1][-2]
-				endY = sp_end[-1][1][-1]
-		else:
-			inkex.errormsg("This script only work with paths and groups, please convert objects to paths")
-			endX = 0.0
-			endY = 0.0
+		transform = node.get( 'transform' )
+		if transform:
+			transform = simpletransform.parseTransform( transform )
 
-		sx, sy = conv( startX, startY, transformStart )
-		ex, ey = conv( endX, endY, transformEnd )
-		#inkex.debug(( sx, sy, ex, ey ))
+		sx, sy = conv( startX, startY, transform )
+		ex, ey = conv( endX, endY, transform )
 		return ( sx, sy, ex, ey )
 
 	def effect( self ):
@@ -260,9 +240,6 @@ class EggBotReorderPaths( inkex.Effect ):
 						node_sp_string = simplepath.formatPath(node_sp)
 
 					node.set('d', node_sp_string)
-				elif node.tag == inkex.addNS('g', 'svg') and path.reversed:
-						#TODO Every element of the group should be reversed
-						inkex.errormsg("Reversing groups is currently not possible, please ungroup for better results")
 
 				#keep in mind the different selected ids might have different parents
 				self.getParentNode(node).append(node)
