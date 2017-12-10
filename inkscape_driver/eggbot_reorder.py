@@ -32,55 +32,76 @@ import sys
 def dist( x0, y0, x1, y1 ):
 	return math.sqrt( ( x1 - x0 ) ** 2 + ( y1 - y0 ) ** 2 )
 
+def dist_t( x, y ):
+	return dist(x[0], x[1], y[0], y[1])
+
+class Path:
+	def __init__(self, id, start, end, reversed=False):
+		self.id = id
+		self.start = start
+		self.end = end
+		self.reversed = reversed
+
+	def __eq__(self, other): #ids must be unique
+		return self.id == other.id
+
+	def get_start(self):
+		return self.start if not self.reversed else self.end
+
+	def get_end(self):
+		return self.end if not self.reversed else self.start
+
+	def reverse(self):
+		self.reversed = not self.reversed
+
+	def dist_to_start(self, otherPath):
+		return dist_t(self.get_end(), otherPath.get_start())
+
+	def dist_to_end(self, otherPath):
+		return dist_t(self.get_end(), otherPath.get_end())
+
 def find_ordering( objlist, allowReverse ):
 	"""
-	Takes a list of (id, (startX, startY, endX, endY)), and finds the best ordering.
+	Takes a list of Paths, and finds the best ordering.
 	Uses a greedy algorithm which can reverse the path direction if necessary
 	Returns a list of (id, reverse), as well as the original and optimized
 	"air distance" which is just the distance traveled in the air. Reverse indicate if the path must be reversed
 	"""
 
-	startX, startY = 0.0, 0.0 #Start point TODO 0,0 is not top left of the page
+	start = (0.0, 0.0) #Start point TODO 0,0 is not always top left of the page
 
 	# let's figure out the default in-air length (this is not meaningful as we are using the dictionary ordering)
 	air_length_default = 0
-	oldx, oldy = startX, startY
+	old = start
 
-	for id, coords in objlist:
-		#inkex.debug(( id, oldx, oldy, coords[0], coords[1] ))
-		air_length_default += dist( oldx, oldy, coords[0], coords[1] )
-		oldx = coords[2]
-		oldy = coords[3]
-	#fid.write("Default air distance: %d\n" % air_length_default)
+	for i, path in enumerate(objlist[1:]):
+		air_length_default += objlist[i-1].dist_to_start(path)
 
 	air_length_ordered = 0
 
 	sort_list = []
-	prevX, prevY = startX, startY
+	prev = Path(-1, (0,0), (0,0))
 
 	# for the previous end point, iterate over each remaining path and pick the closest starting point or ending point if allowed
 	while len( objlist ) > 0:
 		min_distance = sys.float_info.max #The biggest number possible
 		for path in objlist:
-			dist_to_start = dist( prevX, prevY, path[1][0], path[1][1] )
-			dist_to_end = dist( prevX, prevY, path[1][2], path[1][3] ) if allowReverse else -1
+			dist_to_start = prev.dist_to_start(path)
+			dist_to_end = prev.dist_to_end(path)
 
 			if dist_to_start < min_distance:
 				min_distance = dist_to_start
 				min_path = path
-				reverse = False
 
 			if allowReverse and dist_to_end < min_distance:
 				min_distance = dist_to_end
+				path.reverse()
 				min_path = path
-				reverse = True
 
 		air_length_ordered += min_distance
-		sort_list.append( (min_path[0], reverse) ) #Add (id, reverse)
+		sort_list.append( min_path )
 		objlist.remove( min_path )
-		(prevX, prevY) = (min_path[1][0], min_path[1][1]) if reverse else (min_path[1][2], min_path[1][3])
-
-	#fid.write("optimized air distance: %d\n" % air_length_ordered)
+		prev = min_path
 
 	return sort_list, air_length_default, air_length_ordered
 
@@ -105,7 +126,7 @@ def reversePath( path ):
 	#Adapted from https://github.com/Pomax/svg-path-reverse/blob/gh-pages/reverse.js
 
 	#Unpack sublists into a single list
-	flattenedPath = [item for sublist in path for subsublist in sublist for item in subsublist]#Sorry
+	flattenedPath = [item for sublist in path for subsublist in sublist for item in subsublist]
 	reversedPath = []
 
 	i = 0
@@ -220,30 +241,31 @@ class EggBotReorderPaths( inkex.Effect ):
 
 			objlist = []
 			for id, node in self.selected.iteritems():
-				item = ( id, self.get_start_end( node ) )
-				objlist.append( item )
+				(sx, sy, ex, ey) = self.get_start_end( node )
+				path = Path( id, (sx, sy), (ex, ey) )
+				objlist.append( path )
 
 			# sort / order the objects
 			sort_order, air_distance_default, air_distance_ordered = find_ordering( objlist, self.options.allowReverse )
 
 			reverseCount = 0
-			for id, reverse in sort_order:
-				node = self.selected[id]
+			for path in sort_order:
+				node = self.selected[path.id]
 				if node.tag == inkex.addNS( 'path', 'svg' ):
 					node_sp = simplepath.parsePath( node.get( 'd' ) )
-					if(reverse):
+					if(path.reversed):
 						node_sp_string = reversePath(node_sp)
 						reverseCount += 1
 					else:
 						node_sp_string = simplepath.formatPath(node_sp)
 
 					node.set('d', node_sp_string)
-				elif node.tag == inkex.addNS( 'g', 'svg' ) and reverse:
+				elif node.tag == inkex.addNS('g', 'svg') and path.reversed:
 						#TODO Every element of the group should be reversed
 						inkex.errormsg("Reversing groups is currently not possible, please ungroup for better results")
 
 				#keep in mind the different selected ids might have different parents
-				self.getParentNode( node ).append( node )
+				self.getParentNode(node).append(node)
 
 			inkex.errormsg("Reversed {} paths.".format(reverseCount))
 			#fid.close()
