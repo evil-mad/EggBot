@@ -36,20 +36,23 @@ def dist_t( x, y ):
 	return dist(x[0], x[1], y[0], y[1])
 
 class Path:
-	def __init__(self, id, start, end, reversed=False):
+	def __init__(self, id, p1, p2, reversed=False):
 		self.id = id
-		self.start = start
-		self.end = end
+		self.p1 = p1
+		self.p2 = p2
 		self.reversed = reversed
 
 	def __eq__(self, other): #ids must be unique
 		return self.id == other.id
 
+	def __str__(self):
+		return "{}: {} {}".format(self.id, self.get_start(), self.get_end())
+
 	def get_start(self):
-		return self.start if not self.reversed else self.end
+		return self.p1 if not self.reversed else self.p2
 
 	def get_end(self):
-		return self.end if not self.reversed else self.start
+		return self.p2 if not self.reversed else self.p1
 
 	def reverse(self):
 		self.reversed = not self.reversed
@@ -80,7 +83,7 @@ def find_ordering( objlist, allowReverse ):
 	air_length_ordered = 0
 
 	sort_list = []
-	prev = Path(-1, (0,0), (0,0))
+	prev = Path("", start, start)
 
 	# for the previous end point, iterate over each remaining path and pick the closest starting point or ending point if allowed
 	while len( objlist ) > 0:
