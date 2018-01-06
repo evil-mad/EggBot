@@ -133,14 +133,16 @@ extern volatile unsigned int g_RC_value[kRC_DATA_SIZE];			// Stores reload value
 extern volatile tRC_state g_RC_state[kRC_DATA_SIZE];
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
-void UserInit(void);
-void ProcessIO(void);
-void low_ISR(void);
-void high_ISR(void);
-ExtractReturnType extract_number(ExtractType Type, void * ReturnValue, unsigned char Required);
+void UserInit (void);
+void ProcessIO (void);
+void low_ISR (void);
+void high_ISR (void);
+ExtractReturnType extract_number (ExtractType Type, void * ReturnValue, unsigned char Required);
+UINT8 extract_string (unsigned char * ReturnValue, UINT8 MaxBytes);
 void print_ack (void);
-void SetPinTRISFromRPn(char Pin, char State);
-void SetPinLATFromRPn(char Pin, char State);
-void AnalogConfigure(unsigned char Channel, unsigned char Enable);
+void SetPinTRISFromRPn (char Pin, char State);
+void SetPinLATFromRPn (char Pin, char State);
+void AnalogConfigure (unsigned char Channel, unsigned char Enable);
+void populateDeviceStringWithName(void);
 
 #endif //UBW_H

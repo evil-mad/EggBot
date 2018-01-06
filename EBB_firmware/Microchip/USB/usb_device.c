@@ -363,7 +363,7 @@ volatile BYTE CtrlTrfData[USB_EP0_BUFF_SIZE] CTRL_TRF_DATA_ADDR_TAG;
     USB_USER_CONFIG_DESCRIPTOR_INCLUDE;
 #endif
 
-extern ROM BYTE *ROM USB_SD_Ptr[];
+extern BYTE * USB_SD_Ptr[];
 
 /** DECLARATIONS ***************************************************/
 #if defined(__18CXX)
@@ -2238,10 +2238,12 @@ static void USBStdGetDscHandler(void)
                 //  indicate the number of string descriptors.
                 if(SetupPkt.bDscIndex<USB_NUM_STRING_DESCRIPTORS)
                 {
+                    // Set memory type to RAM
+                    inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;
                     //Get a pointer to the String descriptor requested
-                    inPipes[0].pSrc.bRom = *(USB_SD_Ptr+SetupPkt.bDscIndex);
+                    inPipes[0].pSrc.bRam = *(USB_SD_Ptr+SetupPkt.bDscIndex);
                     // Set data count
-                    inPipes[0].wCount.Val = *inPipes[0].pSrc.bRom;                    
+                    inPipes[0].wCount.Val = *inPipes[0].pSrc.bRam;
                 }
                 #if defined(IMPLEMENT_MICROSOFT_OS_DESCRIPTOR)
                 else if(SetupPkt.bDscIndex == MICROSOFT_OS_DESCRIPTOR_INDEX)

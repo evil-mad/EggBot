@@ -268,18 +268,20 @@ ROM BYTE configDescriptor1[]={
 
 
 //Language code string descriptor
-ROM struct{BYTE bLength;BYTE bDscType;WORD string[1];}sd000={
+struct{BYTE bLength;BYTE bDscType;WORD string[1];}sd000={
 sizeof(sd000),USB_DESCRIPTOR_STRING,{0x0409}};
 
 //Manufacturer string descriptor
-ROM struct{BYTE bLength;BYTE bDscType;WORD string[11];}sd001={
+struct{BYTE bLength;BYTE bDscType;WORD string[11];}sd001={
 sizeof(sd001),USB_DESCRIPTOR_STRING,
 {'S','c','h','m','a','l','z','H','a','u','s'}};
 
 //Product string descriptor
-ROM struct{BYTE bLength;BYTE bDscType;WORD string[10];}sd002={
+// As of EBB firmware v2.5.4 this is now stored in ram, and we set it up here to
+// have enough space to put the 'name' (set via the 'NS' command) on the end 
+struct{BYTE bLength;BYTE bDscType;WORD string[27];}sd002={
 sizeof(sd002),USB_DESCRIPTOR_STRING,
-{'E','i','B','o','t','B','o','a','r','d'}};
+{'E','i','B','o','t','B','o','a','r','d',',',0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000}};
 
 //Array of configuration descriptors
 ROM BYTE *ROM USB_CD_Ptr[]=
@@ -287,11 +289,11 @@ ROM BYTE *ROM USB_CD_Ptr[]=
     (ROM BYTE *ROM)&configDescriptor1
 };
 //Array of string descriptors
-ROM BYTE *ROM USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS]=
+BYTE * USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS]=
 {
-    (ROM BYTE *ROM)&sd000,
-    (ROM BYTE *ROM)&sd001,
-    (ROM BYTE *ROM)&sd002
+    (BYTE *)&sd000,
+    (BYTE *)&sd001,
+    (BYTE *)&sd002
 };
 
 #pragma code

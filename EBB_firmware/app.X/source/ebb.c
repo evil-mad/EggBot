@@ -219,6 +219,9 @@
 //                  LM StepAddInc parameter went to 32 bits signed from 16 bit signed
 // 2.5.3 07/09/17 - Fixed bug in LM command that would corrupt currently running
 //                    moves with new data.
+// 2.5.4 01/06/18 - Added NS (Name Set), NG (Name Get) commands.
+//                  Added RB (ReBoot) command
+//                  Added any name set with NS command to end of USB Device Name
 
 #include <p18cxxx.h>
 #include <usart.h>

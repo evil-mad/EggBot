@@ -24,17 +24,20 @@ LIBPATH .
 
 #IFDEF _DEBUGCODESTART
   CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
-  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		   PROTECTED
+  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029         PROTECTED
   CODEPAGE   NAME=page       START=0x102A         END=_CODEEND
-  CODEPAGE   NAME=debug      START=_DEBUGCODESTART   END=_CEND        PROTECTED
+  CODEPAGE   NAME=debug      START=_DEBUGCODESTART END=_CEND         PROTECTED
 #ELSE
   CODEPAGE   NAME=bootloader START=0x0            END=0xFFF          PROTECTED
-  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029		   PROTECTED
-  CODEPAGE   NAME=page       START=0x102A               END=0xFFF7
+  CODEPAGE   NAME=vectors    START=0x1000         END=0x1029         PROTECTED
+  // Top of program memory is decreased by two flash blocks - one to hold the
+  // configuration words (we don't want them to ever get erased) and one to hold
+  // our persistent storage across reboots (like the EBB's name)
+  CODEPAGE   NAME=page       START=0x102A         END=0xF7FF
 #FI
 
-CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF         PROTECTED
-CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF       PROTECTED
+CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF        PROTECTED
+CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF      PROTECTED
 
 #IFDEF _EXTENDEDMODE
   DATABANK   NAME=gpre       START=0x0               END=0x5F

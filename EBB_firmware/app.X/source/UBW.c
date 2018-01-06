@@ -84,6 +84,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <delays.h>
+#include <flash.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
 #include "usb_config.h"
@@ -101,11 +102,14 @@
 
 #define kISR_FIFO_A_DEPTH		3
 #define kISR_FIFO_D_DEPTH		3
-#define kPR4_RELOAD				250		// For 1ms TMR4 tick
+#define kPR4_RELOAD				250             // For 1ms TMR4 tick
 #define kCR						0x0D
 #define kLF						0x0A
 
-#define ANALOG_INITATE_MS_BETWEEN_STARTS 5     // Number of ms between analog converts (all enabled channels)
+#define ANALOG_INITATE_MS_BETWEEN_STARTS 5      // Number of ms between analog converts (all enabled channels)
+
+#define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
+#define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 /** V A R I A B L E S ********************************************************/
 //#pragma udata access fast_vars
@@ -152,7 +156,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.3\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.4\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -253,6 +257,9 @@ void parse_BL_packet (void);	// BL Boot Load command
 void parse_CK_packet (void);	// CK ChecK command
 void parse_MR_packet (void);	// MR Motors Run command
 void parse_AC_packet (void);    // AC Analog Configure
+void parse_NS_packet (void);    // NS Name Set command
+void parse_NG_packet (void);    // NG Name Get command
+void parse_RB_packet (void);    // RB ReBoot command
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -758,6 +765,10 @@ void UserInit(void)
 
 	// Turn on the Timer4
 	T4CONbits.TMR4ON = 1; 
+    
+    // If there's a name in FLASH for us, copy it over to the USB Device
+    // descriptor before we enumerate
+    populateDeviceStringWithName();
 }//end UserInit
 
 /******************************************************************************
@@ -1456,6 +1467,24 @@ void parse_packet(void)
 		{
 			// CS for Clear Step position
 			parse_CS_packet();
+			break;
+		}
+		case ('N' * 256) + 'S':
+		{
+			// NS for Name Set
+			parse_NS_packet();
+			break;
+		}
+		case ('N' * 256) + 'G':
+		{
+			// NG for Name Get
+			parse_NG_packet();
+			break;
+		}
+		case ('R' * 256) + 'B':
+		{
+			// RB for ReBoot
+			parse_RB_packet();
 			break;
 		}
 		default:
@@ -2903,6 +2932,21 @@ void parse_BL_packet()
 	_asm goto 0x00001E _endasm
 }
 
+// RB ReBoot command : simply jump to the reset vector
+// Example: "RB<CR>"
+void parse_RB_packet()
+{
+	// First, kill interrupts though
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts on
+    INTCONbits.GIEL = 0;	// Turn low priority interrupts on
+
+	UCONbits.SUSPND = 0;		//Disable USB module
+	UCON = 0x00;				//Disable USB module
+	//And wait awhile for the USB cable capacitance to discharge down to disconnected (SE0) state. 
+	//Otherwise host might not realize we disconnected/reconnected when we do the reset.
+	LongDelay();
+    Reset();
+}
 // Just used for testing/debugging the packet parsing routines
 void parse_CK_packet()
 {
@@ -2935,6 +2979,146 @@ void parse_CK_packet()
 	
 	print_ack();
 }
+
+void populateDeviceStringWithName(void)
+{
+    extern BYTE * USB_SD_Ptr[];
+
+    unsigned char name[FLASH_NAME_LENGTH+1];    
+    UINT8 i;
+    
+    // Clear out our name array
+    for (i=0; i < FLASH_NAME_LENGTH+1; i++)
+    {
+        name[i] = 0x00;
+    }
+    
+    // We always read 16, knowing that any unused bytes will be set to zero
+    ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+
+    // The EEB's name is now in the 'name' local variable as a straight string
+    // of bytes. We need to move it to the proper locations in the sd002
+    // USB string descriptor (which is in RAM now). But it needs to be a 
+    // unicode string, so we've got to skip every other byte.
+    // Since the FLASH copy of 'name' is padded with zeros and is always 16
+    // bytes long, we are safe to always copy 16 bytes over to the string
+    // descriptor. 
+    // Because sd002 is an anonymous structure without any names for its
+    // members, we are totally going to just hack this bad boy and jump
+    // into a known offset from the beginning of the structure.
+    for (i=0; i < FLASH_NAME_LENGTH; i++)
+    {
+        // Only copy over valid ASCII characters
+        if (name[i] <= 128 && name[i] >= 32)
+        {
+            *(USB_SD_Ptr[2] + 24 + (i*2)) = name[i];
+        }
+    }
+}
+
+// NS command : Name Set
+// "NS,<new name><CR>"
+// <new name> is a 0 to 16 character ASCII string.
+// This string gets saved in FLASH, and is returned by the "NG" command, as
+// well as being appended to the USB name that shows up in the OS
+void parse_NS_packet()
+{
+	unsigned char name[FLASH_NAME_LENGTH+1];
+    UINT8 bytes = 0;
+    UINT8 i;
+    
+    // Clear out our name array
+    for (i=0; i < FLASH_NAME_LENGTH+1; i++)
+    {
+        name[i] = 0x00;
+    }
+    
+    bytes = extract_string(name, FLASH_NAME_LENGTH);
+    
+    // We have reserved FLASH addresses 0xF800 to 0xFBFF (1024 bytes) for
+    // storing persistent variables like the EEB's name. Note that no wear-leveling
+    // is done, so it's not a good idea to change these values more than 10K times. :-)
+    
+    EraseFlash(FLASH_NAME_ADDRESS, FLASH_NAME_ADDRESS + 0x3FF);
+    
+    WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+    
+	print_ack();
+}
+
+// NG command : Name Get command
+void parse_NG_packet()
+{
+    unsigned char name[FLASH_NAME_LENGTH+1];    
+    UINT8 i;
+    
+    // Clear out our name array
+    for (i=0; i < FLASH_NAME_LENGTH+1; i++)
+    {
+        name[i] = 0x00;
+    }
+    
+    // We always read 16, knowing that any unused bytes will be set to zero
+    ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+    
+	printf ((rom char far *)"%s\r\n", name);
+    print_ack();
+}
+
+// Look at the string in g_RX_buf[]
+// Copy over all bytes from g_RX_buf_out into ReturnValue until you hit
+// a comma or a CR or you've copied over MaxBytes characters. 
+// Return the number of bytes copied. Advance g_RX_buf_out as you go.
+UINT8 extract_string (
+	unsigned char * ReturnValue, 
+	UINT8 MaxBytes
+)
+{
+    UINT8 bytes = 0;
+
+    // Always terminate the string
+    *ReturnValue = 0x00;
+    
+	// Check to see if we're already at the end
+	if (kCR == g_RX_buf[g_RX_buf_out])
+	{
+    	bitset (error_byte, kERROR_BYTE_MISSING_PARAMETER);
+		return (0);
+	}
+
+	// Check for comma where ptr points
+	if (g_RX_buf[g_RX_buf_out] != ',')
+	{
+		printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+		bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
+		return (0);
+	}
+
+    // Move to the next character
+    advance_RX_buf_out();
+
+    while(1)
+    {
+        // Check to see if we're already at the end
+        if (kCR == g_RX_buf[g_RX_buf_out] || ',' == g_RX_buf[g_RX_buf_out] || bytes >= MaxBytes)
+        {
+            return (bytes);
+        }
+
+        // Copy over a byte
+        *ReturnValue = g_RX_buf[g_RX_buf_out];
+        
+        // Move to the next character
+        advance_RX_buf_out();
+        
+        // Count this one
+        bytes++;
+        ReturnValue++;
+    }
+    
+    return(bytes);
+}
+
 
 // Look at the string pointed to by ptr
 // There should be a comma where ptr points to upon entry.
