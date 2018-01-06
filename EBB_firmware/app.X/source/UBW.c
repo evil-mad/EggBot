@@ -257,8 +257,8 @@ void parse_BL_packet (void);	// BL Boot Load command
 void parse_CK_packet (void);	// CK ChecK command
 void parse_MR_packet (void);	// MR Motors Run command
 void parse_AC_packet (void);    // AC Analog Configure
-void parse_NS_packet (void);    // NS Name Set command
-void parse_NG_packet (void);    // NG Name Get command
+void parse_ST_packet (void);    // ST Set Tag command
+void parse_QT_packet (void);    // QT Query Tag command
 void parse_RB_packet (void);    // RB ReBoot command
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
@@ -1469,16 +1469,16 @@ void parse_packet(void)
 			parse_CS_packet();
 			break;
 		}
-		case ('N' * 256) + 'S':
+		case ('S' * 256) + 'T':
 		{
-			// NS for Name Set
-			parse_NS_packet();
+			// ST for Set Tag
+			parse_ST_packet();
 			break;
 		}
-		case ('N' * 256) + 'G':
+		case ('Q' * 256) + 'T':
 		{
-			// NG for Name Get
-			parse_NG_packet();
+			// QT for Query Tag
+			parse_QT_packet();
 			break;
 		}
 		case ('R' * 256) + 'B':
@@ -3016,12 +3016,12 @@ void populateDeviceStringWithName(void)
     }
 }
 
-// NS command : Name Set
-// "NS,<new name><CR>"
+// ST command : Set Tag
+// "ST,<new name><CR>"
 // <new name> is a 0 to 16 character ASCII string.
-// This string gets saved in FLASH, and is returned by the "NG" command, as
+// This string gets saved in FLASH, and is returned by the "QT" command, as
 // well as being appended to the USB name that shows up in the OS
-void parse_NS_packet()
+void parse_ST_packet()
 {
 	unsigned char name[FLASH_NAME_LENGTH+1];
     UINT8 bytes = 0;
@@ -3046,8 +3046,10 @@ void parse_NS_packet()
 	print_ack();
 }
 
-// NG command : Name Get command
-void parse_NG_packet()
+// QT command : Query Tag
+// "QT<CR>"
+// Prints out the 'tag' that was set with the "ST" command previously, if any
+void parse_QT_packet()
 {
     unsigned char name[FLASH_NAME_LENGTH+1];    
     UINT8 i;
@@ -3061,7 +3063,15 @@ void parse_NG_packet()
     // We always read 16, knowing that any unused bytes will be set to zero
     ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
     
-	printf ((rom char far *)"%s\r\n", name);
+    // Only print it out if the first character is printable ASCII
+    if (name[0] >= 128 || name[0] < 32)
+    {
+    	printf ((rom char far *)"\r\n");
+    }
+    else
+    {
+    	printf ((rom char far *)"%s\r\n", name);
+    }
     print_ack();
 }
 

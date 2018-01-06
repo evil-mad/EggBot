@@ -208,9 +208,7 @@
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
           <li><a href="#MW">MW</a> &mdash; Memory Write</li>
           <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
-          <li><a href="#NG">NG</a> &mdash; Name Get</li>
           <li><a href="#NI">NI</a> &mdash; Node count Increment</li>
-          <li><a href="#NS">NS</a> &mdash; Name Set</li>
           <li><a href="#O">O</a> &mdash; Output</li>
           <li><a href="#PC">PC</a> &mdash; Pulse Configure</li>
           <li><a href="#PD">PD</a> &mdash; Pin Direction</li>
@@ -224,6 +222,7 @@
           <li><a href="#QN">QN</a> &mdash; Query Node count</li>
           <li><a href="#QP">QP</a> &mdash; Query Pen</li>
           <li><a href="#QS">QS</a> &mdash; Query Step position</li>
+          <li><a href="#QT">QT</a> &mdash; Query EBB name Tag</li>
           <li><a href="#RB">RB</a> &mdash; Reboot</li>
           <li><a href="#R">R</a> &mdash; Reset</li>
           <li><a href="#S2">S2</a> &mdash; General RC Servo Output</li>
@@ -233,6 +232,7 @@
           <li><a href="#SM">SM</a> &mdash; Stepper Move</li>
           <li><a href="#SN">SN</a> &mdash; Set Node count</li>
           <li><a href="#SP">SP</a> &mdash; Set Pen State</li>
+          <li><a href="#ST">ST</a> &mdash; Set EBB name Tag</li>
           <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
           <li><a href="#V">V</a> &mdash; Version Query</li>
@@ -913,27 +913,6 @@
                 
         <hr class="short" />
          
-        <h4><a name="NG"></a>"NG" &mdash; Name Get</h4>
-
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>NG&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li>
-            <span style="font-weight: bold;">Description:</span>
-            <p>This command gets the EBB's "name", which is set with the <code><a href="#NS">NS</a></code> command. It simply prints out the current value of the EBB's "name". If a name has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>NG&lt;CR&gt;</code>
-            <p>If the EBB's name has been set to "Brian's EBB" then the output of this command would be:</p>
-            <code>Brian's EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
-        </ul>
-     
-        <hr class="short"/>
-
         <h4><a name="NI"></a>"NI" &mdash; Node Count Increment</h4>
 
         <ul>
@@ -947,31 +926,6 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-        </ul>
-     
-        <hr class="short"/>
-
-        <h4><a name="NS"></a>"NS" &mdash; Name Set</h4>
-
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>NS,<i>NewNameString</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li><span style="font-weight: bold;">Arguments:</span>
-            <ul>
-              <li><i>NewNameString</i>: A string of ASCII characters from 0 to 16 characters in length.</li>
-            </ul>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Description:</span>
-            <p>This command sets the EBB's "name". This is an arbitrary, user settable string, which is stored in flash memory across reboots.</p>
-            <p>After setting the EBBs name and rebooting, the EBB's USB Device Name will have the name append at the end, after a comma. So if no name is set
-               the Device Name will be "EiBotBoard,". But if the name is set to "Brian's EBB", then the Device Name will be "EiBotBoard,Brian's EBB".</p>
-            <p>The name string can be any combination of ASCII characters, including an empty string which will clear the EBB's name.</p>
-            <p>Use the <code><a href="#NG">NG</a></code> command to retrieve the name at any time.</p>
-          </li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
      
         <hr class="short"/>
@@ -1377,6 +1331,27 @@
         </ul>
     
         <hr class="short" />
+
+        <h4><a name="QT"></a>"QT" &mdash; Query EBB name Tag</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QT&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>This command gets the EBB's "name", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's "name". If a name has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>QT&lt;CR&gt;</code>
+            <p>If the EBB's name has been set to "Brian's EBB" then the output of this command would be:</p>
+            <code>Brian's EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
+        </ul>
+     
+        <hr class="short"/>
         
         <h4><a name="RB"></a>"RB" &mdash; ReBoot</h4>
 
@@ -1666,7 +1641,7 @@
           <li><span style="font-weight: bold;">Version History:</span>  Added in v1.9.5</li>
         </ul>    
 
-        <hr class="short" />    
+        <hr class="short" />
    
         <h4><a name="SP"></a>"SP" &mdash; Set Pen State </h4>
       
@@ -1722,9 +1697,34 @@
               </li>
             </ul>
           </li>
-        </ul>    
+        </ul>
    
-        <hr class="short" />       
+        <hr class="short" />
+
+        <h4><a name="ST"></a>"ST" &mdash; Set EBB name Tag</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>ST,<i>NewNameString</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li><i>NewNameString</i>: A string of ASCII characters from 0 to 16 characters in length.</li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>This command sets the EBB's "name". This is an arbitrary, user settable string, which is stored in flash memory across reboots.</p>
+            <p>After setting the EBBs name and rebooting, the EBB's USB Device Name will have the name append at the end, after a comma. So if no name is set
+               the Device Name will be "EiBotBoard,". But if the name is set to "Brian's EBB", then the Device Name will be "EiBotBoard,Brian's EBB".</p>
+            <p>The name string can be any combination of ASCII characters, including an empty string which will clear the EBB's name.</p>
+            <p>Use the <code><a href="#QT">QT</a></code> command to retrieve the name at any time.</p>
+          </li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
+        </ul>
+     
+        <hr class="short"/>
         
         <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Read</h4>
       
