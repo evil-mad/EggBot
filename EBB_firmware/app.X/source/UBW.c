@@ -2143,7 +2143,7 @@ void parse_PI_packet(void)
 
 	extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
 	extract_number (kUCHAR, &pin, kREQUIRED);
-
+    
 	// Bail if we got a conversion error
 	if (error_byte)
 	{

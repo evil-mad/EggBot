@@ -222,6 +222,7 @@
 // 2.5.4 01/06/18 - Added ST (Set Tag), QT (Query Tag) commands.
 //                  Added RB (ReBoot) command
 //                  Added any name set with ST command to end of USB Device Name
+//                  Fixed problem with reading bit 7 of any I/O port (issue #82)
 
 #include <p18cxxx.h>
 #include <usart.h>
