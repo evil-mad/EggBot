@@ -1384,7 +1384,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reinitializes the EBB to its power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc.
+              This command reinitializes the the internal state of the EBB to the default power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not reinitialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
