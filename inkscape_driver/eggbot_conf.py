@@ -1,3 +1,4 @@
+# coding=utf-8
 # eggbot-conf.py
 # Part of the EggBot driver for Inkscape
 # Version 2.7.5, dated May 1, 2016.
@@ -7,14 +8,12 @@
 # "Change numbers here, not there." :)
 
 
-
 # Page size values typically do not need to be changed. They primarily affect viewpoint and centering.
 
-N_PAGE_HEIGHT = 800       # Default Inkscape page height (each unit equiv. to one pixel/step)
-N_PAGE_WIDTH = 3200       # Default Inkscape page width (each unit equiv. to one pixel/step) 
+N_PAGE_HEIGHT = 800  # Default Inkscape page height (each unit equiv. to one pixel/step)
+N_PAGE_WIDTH = 3200  # Default Inkscape page width (each unit equiv. to one pixel/step)
 
-
-'''
+"""
 Motor resolution: The "standard" setup for brand-name EggBot machines (at least through 2015) has been 3200 steps per revolution. 
 
 Early (clear-chassis) models had 400 step/rev motors with 8X microstepping drivers, and more recent versions ("white-chassis" EggBot 2.0, Deluxe EggBot, Ostrich EggBot, and EggBot Pro) have all used 200 step/rev motors with 16X microstepping drivers (EBB 2.0).
@@ -33,8 +32,8 @@ For 6400 steps/rev, use:
 	
 Other _integer_ scaling values can be used as well, with similar scaling.
 
-'''
+"""
 
 STEP_SCALE = 2
 
-MIN_GAP = 1.0			#Minimum pen-up movement that results in an actual pen lift.
+MIN_GAP = 1.0  # Minimum pen-up movement that results in an actual pen lift.
