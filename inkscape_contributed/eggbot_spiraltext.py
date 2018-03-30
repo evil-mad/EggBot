@@ -261,7 +261,7 @@ def processMarkup(text, family='sans'):
                     outstr += entity_refs[eref]
                     i = j + 1
                 else:
-                    inkex.errormsg('Ignoring the unrecognized entity reference {}.'.format(eref))
+                    inkex.errormsg('Ignoring the unrecognized entity reference {0}.'.format(eref))
                     outstr += eref
                     i = j + 1
             else:
@@ -285,12 +285,12 @@ def processMarkup(text, family='sans'):
                     # We'll pop the most recent tag from the queue of opened tags and see if
                     # it matches
                     if len(tags_used) == 0:
-                        inkex.errormsg('The ending tag </{}> appeared before any start tag <{}>.'.format(tag, tag))
+                        inkex.errormsg('The ending tag </{0}> appeared before any start tag <{1}>.'.format(tag, tag))
                         break
                     else:
                         old_tag = tags_used.pop()
                         if old_tag != tag:
-                            inkex.errormsg('The ending tag </{}> does not appear to be correctly nested; it tried to close the tag <{}>.  Sorry, but all tags must be properly nested.'.format(tag, old_tag))
+                            inkex.errormsg('The ending tag </{0}> does not appear to be correctly nested; it tried to close the tag <{1}>.  Sorry, but all tags must be properly nested.'.format(tag, old_tag))
                             break
                 else:
                     # Start tag (opening tag)
@@ -337,9 +337,9 @@ def processMarkup(text, family='sans'):
                         tag = normalize_possible_EMS_string(tag)
                     if (tag not in generic_families) and (tag not in map_our_names_to_hersheydata) and (not b_valid_ems_name):
                         if close:
-                            inkex.errormsg('Ignoring the unrecognized tag </{}>.'.format(tag))
+                            inkex.errormsg('Ignoring the unrecognized tag </{0}>.'.format(tag))
                         else:
-                            inkex.errormsg('Ignoring the unrecognized tag <{}>.'.format(tag))
+                            inkex.errormsg('Ignoring the unrecognized tag <{0}>.'.format(tag))
                     else:
                         if outstr != '':
                             markup.append([face, outstr])
@@ -435,10 +435,10 @@ class SpiralText(inkex.Effect):
 
         if self.options.flip:
             angle += 180.0
-            t = 'translate({:f},{:f}) rotate({:f},{:f},0) scale({:f},{:f})'.format(-w * scale_x, h * scale_y, angle,
+            t = 'translate({0:f},{1:f}) rotate({2:f},{3:f},0) scale({4:f},{5:f})'.format(-w * scale_x, h * scale_y, angle,
                                                                                    w * scale_x, scale_x, scale_y)
         else:
-            t = 'translate(0,{:f}) rotate({:f},0,0) scale({:f},{:f})'.format(h, angle, scale_x, scale_y)
+            t = 'translate(0,{0:f}) rotate({1:f},0,0) scale({2:f},{3:f})'.format(h, angle, scale_x, scale_y)
         g.set('transform', t)
 
 

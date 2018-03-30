@@ -176,7 +176,7 @@ def drawSine(cycles=8, rn=0, rm=0, nPoints=50, offset=None,
         dYs = lambda s: -y_scale * cos(x_min + (x_max - x_min) * s) * (x_max - x_min)
         dYdXs = lambda s: dYs(s) / dXs(s)
     else:
-        inkex.errormsg('Unknown function {} specified'.format(fun))
+        inkex.errormsg('Unknown function {0} specified'.format(fun))
         return
 
     # Derivatives: remember the chain rule....
@@ -243,9 +243,9 @@ def drawSine(cycles=8, rn=0, rm=0, nPoints=50, offset=None,
         dy1 = dy2
 
     path_desc = \
-        'version:{:d};style:linear;function:sin(x);'.format(VERSION) + \
-        'cycles:{:f};rn:{:d};rm:{:d};points:{:d};'.format(cycles, rn, rm, nPoints) + \
-        'width:{:d};height:{:d};x:{:d};y:{:d}'.format(width, height, offset[0], offset[1])
+        'version:{0:d};style:linear;function:sin(x);'.format(VERSION) + \
+        'cycles:{0:f};rn:{1:d};rm:{2:d};points:{3:d};'.format(cycles, rn, rm, nPoints) + \
+        'width:{0:d};height:{1:d};x:{2:d};y:{3:d}'.format(width, height, offset[0], offset[1])
 
     return path_data, path_desc
 

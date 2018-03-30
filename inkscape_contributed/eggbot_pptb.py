@@ -84,7 +84,7 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
             # Add Inkscape layer attributes to this new group
             count += 1
             layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
-            layer.set(inkex.addNS('label', 'inkscape'), '{:d} - {}'.format(count, color))
+            layer.set(inkex.addNS('label', 'inkscape'), '{0:d} - {1}'.format(count, color))
 
             # Now move this path from where it was to being a child
             # of this new group/layer we just made

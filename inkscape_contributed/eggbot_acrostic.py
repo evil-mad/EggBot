@@ -251,9 +251,9 @@ class AcrosticText(inkex.Effect):
         # approximate position, etc.).
 
         if self.options.flip:
-            attribs = {'transform': 'matrix(-{:f},0,0,-{:f},{:d},{:d})'.format(scale_x, scale_y, doc_width, doc_height)}
+            attribs = {'transform': 'matrix(-{0:f},0,0,-{1:f},{2:d},{3:d})'.format(scale_x, scale_y, doc_width, doc_height)}
         else:
-            attribs = {'transform': 'scale({:f},{:f})'.format(scale_x, scale_y)}
+            attribs = {'transform': 'scale({0:f},{1:f})'.format(scale_x, scale_y)}
         container = inkex.etree.SubElement(self.document.getroot(), 'g', attribs)
 
         # Finally, we render each line of text

@@ -76,9 +76,9 @@ def draw_SVG_path(pts, c, t, parent):
         return
     if isinstance(pts, list):
         assert len(pts) % 3 == 0, "len(pts) must be a multiple of three"
-        d = "{} {:d},{:d}".format(pts[0], pts[1], pts[2])
+        d = "{0} {1:d},{2:d}".format(pts[0], pts[1], pts[2])
         for i in range(3, len(pts), 3):
-            d += " {} {:d},{:d}".format(pts[i], pts[i + 1], pts[i + 2])
+            d += " {0} {1:d},{2:d}".format(pts[i], pts[i + 1], pts[i + 2])
     elif isinstance(pts, str):
         d = pts
     else:
@@ -264,7 +264,7 @@ class Maze(inkex.Effect):
         translate_y = float(PLOT_HEIGHT - TARGET_HEIGHT) / 2.0
 
         # And the SVG transform is thus
-        t = 'translate({:f},{:f}) scale({:f},{:f})'.format(translate_x, translate_y, scale_x, scale_y)
+        t = 'translate({0:f},{1:f}) scale({2:f},{3:f})'.format(translate_x, translate_y, scale_x, scale_y)
 
         # For scaling line thicknesses.  We'll typically draw a line of
         # thickness 1 but will need to make the SVG path have a thickness
@@ -535,16 +535,16 @@ class Maze(inkex.Effect):
 
         if self.last_point is not None:
             if (self.last_point[0] == x1) and (self.last_point[1] == y1):
-                self.path += ' L {:d},{:d}'.format(x2, y2)
+                self.path += ' L {0:d},{1:d}'.format(x2, y2)
                 self.last_point = [x2, y2]
             elif (self.last_point[0] == x2) and (self.last_point[1] == y2):
-                self.path += ' L {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
+                self.path += ' L {0:d},{1:d} L {2:d},{3:d}'.format(x1, y1, x2, y2)
                 # self.last_point unchanged
             else:
-                self.path += ' M {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
+                self.path += ' M {0:d},{1:d} L {2:d},{3:d}'.format(x1, y1, x2, y2)
                 self.last_point = [x2, y2]
         else:
-            self.path = 'M {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
+            self.path = 'M {0:d},{1:d} L {2:d},{3:d}'.format(x1, y1, x2, y2)
             self.last_point = [x2, y2]
 
     def draw_wall(self, x, y, d, dir_):
@@ -650,7 +650,7 @@ class Maze(inkex.Effect):
         tracing = False
         segment = y_start
         for y in range(y_start, y_finis, dy):
-            assert 0 <= y < self.h, "y ({:d}) is out of range".format(y)
+            assert 0 <= y < self.h, "y ({0:d}) is out of range".format(y)
             if self.is_wall(x, y, wall):
                 if not tracing:
                     # Starting a new segment
