@@ -21,35 +21,35 @@ import inkex
 
 
 class PresetHatch(inkex.Effect):
-	def __init__(self):
-		inkex.Effect.__init__(self)
-		self.OptionParser.add_option("--title")
+    def __init__(self):
+        inkex.Effect.__init__(self)
+        self.OptionParser.add_option("--title")
 
-	def effect(self):
-		self.svgDefRead = False
-		self.svg = self.document.getroot()
-		self.recursiveDefDataScan(self.svg)
+    def effect(self):
+        self.svgDefRead = False
+        self.svg = self.document.getroot()
+        self.recursiveDefDataScan(self.svg)
 
-	def recursiveDefDataScan(self, aNodeList):
-		for node in aNodeList:
-			if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
-				self.recursiveDefDataScan(node)
-			elif node.tag == inkex.addNS('path-effect', 'inkscape'):
-				if node.get('effect') == 'rough_hatches':
-					node.set('dist_rdm', '0;1')
-					node.set('growth', str(0))
-					# node.set( 'do_bend', 'false' )
-					node.set('bottom_edge_variation', '0;1')
-					node.set('top_edge_variation', '0;1')
-					node.set('bottom_tgt_variation', '0;1')
-					node.set('top_tgt_variation', '0;1')
-					node.set('scale_bf', str(2))
-					node.set('scale_bb', str(2))
-					node.set('scale_tf', str(2))
-					node.set('scale_tb', str(2))
-					node.set('top_smth_variation', '0;1')
-					node.set('bottom_smth_variation', '0;1')
-					node.set('fat_output', 'false')
+    def recursiveDefDataScan(self, aNodeList):
+        for node in aNodeList:
+            if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
+                self.recursiveDefDataScan(node)
+            elif node.tag == inkex.addNS('path-effect', 'inkscape'):
+                if node.get('effect') == 'rough_hatches':
+                    node.set('dist_rdm', '0;1')
+                    node.set('growth', str(0))
+                    # node.set( 'do_bend', 'false' )
+                    node.set('bottom_edge_variation', '0;1')
+                    node.set('top_edge_variation', '0;1')
+                    node.set('bottom_tgt_variation', '0;1')
+                    node.set('top_tgt_variation', '0;1')
+                    node.set('scale_bf', str(2))
+                    node.set('scale_bb', str(2))
+                    node.set('scale_tf', str(2))
+                    node.set('scale_tb', str(2))
+                    node.set('top_smth_variation', '0;1')
+                    node.set('bottom_smth_variation', '0;1')
+                    node.set('fat_output', 'false')
 
 
 e = PresetHatch()
