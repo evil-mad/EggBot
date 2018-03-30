@@ -30,6 +30,7 @@
 
 import inkex
 import simplestyle
+import hersheydata  # used by evals
 
 WIDTH = 3200
 HEIGHT = 800
