@@ -84,7 +84,7 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
             # Add Inkscape layer attributes to this new group
             count += 1
             layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
-            layer.set(inkex.addNS('label', 'inkscape'), '%d - %s' % (count, color))
+            layer.set(inkex.addNS('label', 'inkscape'), '{:d} - {}'.format(count, color))
 
             # Now move this path from where it was to being a child
             # of this new group/layer we just made
@@ -99,8 +99,7 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
         if self.options.removeImage:
             for node in self.document.xpath('//svg:image', namespaces=inkex.NSS):
                 parent = node.getparent()
-                if (parent.tag == 'svg') or \
-                        (parent.tag == inkex.addNS('svg', 'svg')):
+                if (parent.tag == 'svg') or (parent.tag == inkex.addNS('svg', 'svg')):
                     parent.remove(node)
                 else:
                     gparent = parent.getparent()
