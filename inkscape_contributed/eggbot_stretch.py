@@ -25,7 +25,7 @@ import cspsubdiv
 import cubicsuperpath
 import inkex
 import simplepath
-from simpletransform import applyTransformToPath, composeTransform, parseTransform, applyTransformToPoint
+from simpletransform import applyTransformToPath, applyTransformToPoint, composeTransform, parseTransform
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
@@ -74,7 +74,7 @@ def inverseTransform(tran):
              (tran[1][0] * tran[0][2] - tran[0][0] * tran[1][2]) / D]]
 
 
-def parseLengthWithUnits(str):
+def parseLengthWithUnits(a_str):
     """
     Parse an SVG value which may or may not have units attached
     This version is greatly simplified in that it only allows: no units,
@@ -84,7 +84,7 @@ def parseLengthWithUnits(str):
     """
 
     u = 'px'
-    s = str.strip()
+    s = a_str.strip()
     if s[-2:] == 'px':
         s = s[:-2]
     elif s[-1:] == '%':
@@ -173,9 +173,9 @@ class Map(inkex.Effect):
         no units (''), units of pixels ('px'), and units of percentage ('%').
         """
 
-        str = self.document.getroot().get(name)
-        if str:
-            v, u = parseLengthWithUnits(str)
+        s = self.document.getroot().get(name)
+        if s:
+            v, u = parseLengthWithUnits(s)
             if not v:
                 # Couldn't parse the value
                 return None
@@ -218,7 +218,7 @@ class Map(inkex.Effect):
                 if (vinfo[2] != 0) and (vinfo[3] != 0):
                     sx = self.docWidth / float(vinfo[2])
                     sy = self.docHeight / float(vinfo[3])
-                    self.docTransform = parseTransform('scale(%f,%f)' % (sx, sy))
+                    self.docTransform = parseTransform('scale({0:f},{1:f})'.format(sx, sy))
 
     def getPathVertices(self, path, node=None, transform=None, find_bbox=False):
 
@@ -289,30 +289,28 @@ class Map(inkex.Effect):
 
         transform = self.transforms[node]
         if transform is None:
-            invTransform = None
+            inv_transform = None
         else:
-            invTransform = inverseTransform(transform)
+            inv_transform = inverseTransform(transform)
 
-        newPath = ''
+        new_path = ''
         for subpath in self.paths[node]:
-            lastPoint = subpath[0]
-            lastPoint[0] = self.cx + (lastPoint[0] - self.cx) / math.cos((lastPoint[1] - self.cy) * steps2rads)
-            if invTransform is not None:
-                applyTransformToPoint(invTransform, lastPoint)
-            newPath += ' M %f,%f' % (lastPoint[0], lastPoint[1])
+            last_point = subpath[0]
+            last_point[0] = self.cx + (last_point[0] - self.cx) / math.cos((last_point[1] - self.cy) * steps2rads)
+            if inv_transform is not None:
+                applyTransformToPoint(inv_transform, last_point)
+            new_path += ' M {0:f},{1:f}'.format(last_point[0], last_point[1])
             for point in subpath[1:]:
                 x = self.cx + (point[0] - self.cx) / math.cos((point[1] - self.cy) * steps2rads)
                 pt = [x, point[1]]
-                if invTransform is not None:
-                    applyTransformToPoint(invTransform, pt)
-                newPath += ' l %f,%f' % (pt[0] - lastPoint[0], pt[1] - lastPoint[1])
-                lastPoint = pt
+                if inv_transform is not None:
+                    applyTransformToPoint(inv_transform, pt)
+                new_path += ' l {0:f},{1:f}'.format(pt[0] - last_point[0], pt[1] - last_point[1])
+                last_point = pt
 
-        self.paths[node] = newPath
+        self.paths[node] = new_path
 
-    def recursivelyTraverseSvg(self, aNodeList,
-                               matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
-                               parent_visibility='visible', find_bbox=False):
+    def recursivelyTraverseSvg(self, a_node_list, mat_current=None, parent_visibility='visible', find_bbox=False):
 
         """
         [ This too is largely lifted from eggbot.py ]
@@ -333,7 +331,10 @@ class Map(inkex.Effect):
         All other SVG elements trigger an error (including <text>)
         """
 
-        for node in aNodeList:
+        if mat_current is None:
+            mat_current = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+
+        for node in a_node_list:
 
             # Ignore invisible nodes
             v = node.get('visibility', parent_visibility)
@@ -343,13 +344,12 @@ class Map(inkex.Effect):
                 pass
 
             # First apply the current matrix transform to this node's transform
-            matNew = composeTransform(matCurrent, parseTransform(node.get("transform")))
+            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
 
-            if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
+            if node.tag in [inkex.addNS('g', 'svg'), 'g']:
+                self.recursivelyTraverseSvg(node, mat_new, v, find_bbox)
 
-                self.recursivelyTraverseSvg(node, matNew, v, find_bbox)
-
-            elif node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
+            elif node.tag in [inkex.addNS('use', 'svg'), 'use']:
 
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
                 # attribute.  We will handle the element by doing an XPath search through
@@ -369,26 +369,25 @@ class Map(inkex.Effect):
                     pass
 
                 # [1:] to ignore leading '#' in reference
-                path = '//*[@id="%s"]' % refid[1:]
+                path = '//*[@id="{0}"]'.format(refid[1:])
                 refnode = node.xpath(path)
                 if refnode:
                     x = float(node.get('x', '0'))
                     y = float(node.get('y', '0'))
                     # Note: the transform has already been applied
                     if (x != 0) or (y != 0):
-                        matNew2 = composeTransform(matNew, parseTransform('translate(%f,%f)' % (x, y)))
+                        mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
                     else:
-                        matNew2 = matNew
+                        mat_new2 = mat_new
                     v = node.get('visibility', v)
-                    self.recursivelyTraverseSvg(refnode, matNew2, v, find_bbox)
+                    self.recursivelyTraverseSvg(refnode, mat_new2, v, find_bbox)
 
             elif node.tag == inkex.addNS('path', 'svg'):
-
                 path_data = node.get('d')
                 if path_data:
-                    self.getPathVertices(path_data, node, matNew, find_bbox)
+                    self.getPathVertices(path_data, node, mat_new, find_bbox)
 
-            elif node.tag == inkex.addNS('rect', 'svg') or node.tag == 'rect':
+            elif node.tag in [inkex.addNS('rect', 'svg'), 'rect']:
 
                 # Manually transform
                 #
@@ -414,9 +413,9 @@ class Map(inkex.Effect):
                 a.append([' l ', [0, h]])
                 a.append([' l ', [-w, 0]])
                 a.append([' Z', []])
-                self.getPathVertices(simplepath.formatPath(a), node, matNew, find_bbox)
+                self.getPathVertices(simplepath.formatPath(a), node, mat_new, find_bbox)
 
-            elif node.tag == inkex.addNS('line', 'svg') or node.tag == 'line':
+            elif node.tag in [inkex.addNS('line', 'svg'), 'line']:
 
                 # Convert
                 #
@@ -430,14 +429,14 @@ class Map(inkex.Effect):
                 y1 = float(node.get('y1'))
                 x2 = float(node.get('x2'))
                 y2 = float(node.get('y2'))
-                if (not x1) or (not y1) or (not x2) or (not y2):
+                if any([not x1, not y1, not x2, not y2]):
                     pass
                 a = []
                 a.append(['M ', [x1, y1]])
                 a.append([' L ', [x2, y2]])
-                self.getPathVertices(simplepath.formatPath(a), node, matNew, find_bbox)
+                self.getPathVertices(simplepath.formatPath(a), node, mat_new, find_bbox)
 
-            elif node.tag == inkex.addNS('polyline', 'svg') or node.tag == 'polyline':
+            elif node.tag in [inkex.addNS('polyline', 'svg'), 'polyline']:
 
                 # Convert
                 #
@@ -450,14 +449,14 @@ class Map(inkex.Effect):
                 # Note: we ignore polylines with no points
 
                 pl = node.get('points', '').strip()
-                if pl == '':
+                if not pl:
                     pass
 
                 pa = pl.split()
                 d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0, len(pa))])
-                self.getPathVertices(d, node, matNew, find_bbox)
+                self.getPathVertices(d, node, mat_new, find_bbox)
 
-            elif node.tag == inkex.addNS('polygon', 'svg') or node.tag == 'polygon':
+            elif node.tag in [inkex.addNS('polygon', 'svg'), 'polygon']:
 
                 # Convert
                 #
@@ -470,18 +469,16 @@ class Map(inkex.Effect):
                 # Note: we ignore polygons with no points
 
                 pl = node.get('points', '').strip()
-                if pl == '':
+                if not pl:
                     pass
 
                 pa = pl.split()
-                d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0, len(pa))])
+                d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(len(pa))])
                 d += " Z"
-                self.getPathVertices(d, node, matNew, find_bbox)
+                self.getPathVertices(d, node, mat_new, find_bbox)
 
-            elif node.tag == inkex.addNS('ellipse', 'svg') or \
-                    node.tag == 'ellipse' or \
-                    node.tag == inkex.addNS('circle', 'svg') or \
-                    node.tag == 'circle':
+            elif node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse',
+                              inkex.addNS('circle', 'svg'), 'circle']:
 
                 # Convert circles and ellipses to a path with two 180 degree arcs.
                 # In general (an ellipse), we convert
@@ -499,7 +496,7 @@ class Map(inkex.Effect):
                 #
                 # Note: ellipses or circles with a radius attribute of value 0 are ignored
 
-                if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
+                if node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse']:
                     rx = float(node.get('rx', '0'))
                     ry = float(node.get('ry', '0'))
                 else:
@@ -512,51 +509,48 @@ class Map(inkex.Effect):
                 cy = float(node.get('cy', '0'))
                 x1 = cx - rx
                 x2 = cx + rx
-                d = 'M %f,%f ' % (x1, cy) + \
-                    'A %f,%f ' % (rx, ry) + \
-                    '0 1 0 %f,%f ' % (x2, cy) + \
-                    'A %f,%f ' % (rx, ry) + \
-                    '0 1 0 %f,%f' % (x1, cy)
-                self.mapPathVertices(d, node, matNew, find_bbox)
 
-            elif node.tag == inkex.addNS('pattern', 'svg') or node.tag == 'pattern':
+                d = 'M {x1:f},{cy:f} ' \
+                    'A {rx:f},{ry:f} ' \
+                    '0 1 0 {x2:f},{cy:f} ' \
+                    'A {rx:f},{ry:f} ' \
+                    '0 1 0 {x1:f},{cy:f}'.format(x1=x1,
+                                                 x2=x2,
+                                                 rx=rx,
+                                                 ry=ry,
+                                                 cy=cy)
 
+                self.mapPathVertices(d, node, mat_new, find_bbox)  # TODO This will crash Wrong call arguments
+
+            elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
                 pass
 
-            elif node.tag == inkex.addNS('metadata', 'svg') or node.tag == 'metadata':
-
+            elif node.tag in [inkex.addNS('metadata', 'svg'), 'metadata']:
                 pass
 
-            elif node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
-
+            elif node.tag in [inkex.addNS('defs', 'svg'), 'defs']:
                 pass
 
-            elif node.tag == inkex.addNS('namedview', 'sodipodi') or node.tag == 'namedview':
-
+            elif node.tag in [inkex.addNS('namedview', 'sodipodi'), 'namedview']:
                 pass
 
-            elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
-
+            elif node.tag in [inkex.addNS('eggbot', 'svg'), 'eggbot']:
                 pass
 
-            elif node.tag == inkex.addNS('text', 'svg') or node.tag == 'text':
-
+            elif node.tag in [inkex.addNS('text', 'svg'), 'text']:
                 inkex.errormsg('Warning: unable to draw text, please convert it to a path first.')
-
                 pass
 
             elif not isinstance(node.tag, basestring):
-
                 pass
 
             else:
-
-                inkex.errormsg('Warning: unable to draw object <%s>, please convert it to a path first.' % node.tag)
+                inkex.errormsg('Warning: unable to draw object <{0}>, please convert it to a path first.'.format(node.tag))
                 pass
 
     def recursivelyReplaceSvg(self, nodes, parent_visibility='visible'):
 
-        for i in range(0, len(nodes)):
+        for i in range(len(nodes)):
 
             node = nodes[i]
 
@@ -567,7 +561,7 @@ class Map(inkex.Effect):
             if v == 'hidden' or v == 'collapse':
                 pass
 
-            if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
+            if node.tag in [inkex.addNS('g', 'svg'), 'g']:
 
                 self.recursivelyReplaceSvg(node, parent_visibility=v)
 
@@ -578,13 +572,13 @@ class Map(inkex.Effect):
                     node.set('d', self.paths[node][1:])
                     del self.paths[node]
 
-            elif node.tag == inkex.addNS('use', 'svg') or node.tag == 'use' or \
-                    node.tag == inkex.addNS('rect', 'svg') or node.tag == 'rect' or \
-                    node.tag == inkex.addNS('line', 'svg') or node.tag == 'line' or \
-                    node.tag == inkex.addNS('polyline', 'svg') or node.tag == 'polyline' or \
-                    node.tag == inkex.addNS('polygon', 'svg') or node.tag == 'polygon' or \
-                    node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse' or \
-                    node.tag == inkex.addNS('circle', 'svg') or node.tag == 'circle':
+            elif node.tag in [inkex.addNS('use', 'svg'), 'use',
+                              inkex.addNS('rect', 'svg'), 'rect',
+                              inkex.addNS('line', 'svg'), 'line',
+                              inkex.addNS('polyline', 'svg'), 'polyline',
+                              inkex.addNS('polygon', 'svg'), 'polygon',
+                              inkex.addNS('ellipse', 'svg'), 'ellipse',
+                              inkex.addNS('circle', 'svg'), 'circle']:
                 # Replace this element with a <path> element
 
                 if node in self.paths:
@@ -592,11 +586,11 @@ class Map(inkex.Effect):
                     # We simply copy all of the attributes from
                     # the old element to this new element even though
                     # some of the attributes are no longer relevant
-                    newNode = inkex.etree.Element(inkex.addNS('path', 'svg'), node.attrib)
-                    newNode.set('d', self.paths[node][1:])
+                    new_node = inkex.etree.Element(inkex.addNS('path', 'svg'), node.attrib)
+                    new_node.set('d', self.paths[node][1:])
 
                     # Now replace the old element with this element
-                    nodes[i] = newNode
+                    nodes[i] = new_node
 
                     # And dispose of the old data and element
                     del self.paths[node]
@@ -636,8 +630,8 @@ class Map(inkex.Effect):
         if (self.docHeight is None) or (self.docWidth is None):
             inkex.errormsg('Document has inappropriate width or height units')
             return
-        self.cy = self.docHeight / float(2)
-        self.cx = self.docWidth / float(2)
+        self.cy = self.docHeight / 2.0
+        self.cx = self.docWidth / 2.0
 
         # First traverse the document (or selected items), reducing
         # everything to line segments.  If working on a selection,
@@ -646,9 +640,9 @@ class Map(inkex.Effect):
 
         if self.options.ids:
             # Traverse the selected objects
-            for id in self.options.ids:
-                transform = self.recursivelyGetEnclosingTransform(self.selected[id])
-                self.recursivelyTraverseSvg([self.selected[id]], transform, find_bbox=True)
+            for id_ in self.options.ids:
+                transform = self.recursivelyGetEnclosingTransform(self.selected[id_])
+                self.recursivelyTraverseSvg([self.selected[id_]], transform, find_bbox=True)
             # Use as the vertical centerline the midpoint between
             # the bounding box's extremal X coordinates
             self.cx = 0.5 * (self.xmin + self.xmax)
@@ -668,7 +662,7 @@ class Map(inkex.Effect):
         # WE DO NOT compute and replace the paths in the same pass!
         # So doing can cause multiple transformations of cloned paths
 
-        self.recursivelyReplaceSvg(self.document.getroot(), self.docTransform)
+        self.recursivelyReplaceSvg(self.document.getroot(), self.docTransform)  # TODO The arguments here don't look right.
 
 
 if __name__ == '__main__':
