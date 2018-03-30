@@ -191,8 +191,9 @@ class AcrosticText(inkex.Effect):
         prior_empty = False
         for i in range(1, 13):
             line = getattr(self.options.line, str(i)).strip()
-            if line == '' and len(lines) != 0:
-                prior_empty = True
+            if line == '':
+                if len(lines) != 0:
+                    prior_empty = True
             else:
                 if prior_empty:
                     lines.append('')

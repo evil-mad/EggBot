@@ -335,7 +335,9 @@ def processMarkup(text, family='sans'):
                     b_valid_ems_name = is_valid_EMS_name(tag)
                     if b_valid_ems_name:
                         tag = normalize_possible_EMS_string(tag)
-                    if (tag not in generic_families) and (tag not in map_our_names_to_hersheydata) and (not b_valid_ems_name):
+                    if all([tag not in generic_families,
+                            tag not in map_our_names_to_hersheydata,
+                            not b_valid_ems_name]):
                         if close:
                             inkex.errormsg('Ignoring the unrecognized tag </{0}>.'.format(tag))
                         else:

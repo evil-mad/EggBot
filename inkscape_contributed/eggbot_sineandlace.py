@@ -328,7 +328,7 @@ class SpiroSine(inkex.Effect):
             if len(self.options.ids) == 2:
                 desc1 = self.selected[self.options.ids[0]].get(inkex.addNS('desc', self.nsPrefix))
                 desc2 = self.selected[self.options.ids[1]].get(inkex.addNS('desc', self.nsPrefix))
-                if not (desc1 and desc2):
+                if (not desc1) or (not desc2):
                     inkex.errormsg('Selected objects do not smell right')
                     return
                 path_data, path_desc = drawSine(self.options.fCycles,
