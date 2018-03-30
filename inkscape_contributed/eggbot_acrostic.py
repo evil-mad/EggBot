@@ -30,7 +30,7 @@
 
 import inkex
 import simplestyle
-import hersheydata  # used by evals
+import hersheydata
 
 WIDTH = 3200
 HEIGHT = 800
@@ -74,16 +74,16 @@ map_our_names_to_hersheydata = {
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
     style = {'stroke': '#000000', 'fill': 'none'}
-    pathString = face[char]
-    splitString = pathString.split()
-    midpoint = offset - int(splitString[0])
-    i = pathString.find("M")
+    path_string = face[char]
+    split_string = path_string.split()
+    midpoint = offset - int(split_string[0])
+    i = path_string.find("M")
     if i >= 0:
-        pathString = pathString[i:]  # portion after first move
+        path_string = path_string[i:]  # portion after first move
         trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
-        text_attribs = {'style': simplestyle.formatStyle(style), 'd': pathString, 'transform': trans}
+        text_attribs = {'style': simplestyle.formatStyle(style), 'd': path_string, 'transform': trans}
         inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
-    return midpoint + int(splitString[1])  # new offset value
+    return midpoint + int(split_string[1])  # new offset value
 
 
 def renderText(parent, w, y, text, typeface):
@@ -92,14 +92,14 @@ def renderText(parent, w, y, text, typeface):
     the supplied typeface data.
     """
 
-    if (text is None) or (text == ''):
+    if not text:
         return
 
     spacing = 3  # spacing between letters
-    letterVals = [ord(q) - 32 for q in text]
+    letter_vals = (ord(q) - 32 for q in text)
 
-    for q in letterVals:
-        if (q < 0) or (q > 95):
+    for q in letter_vals:
+        if q < 0 or q > 95:
             w += 2 * spacing
         else:
             w = draw_svg_text(q, typeface, w, y, parent)
@@ -123,7 +123,7 @@ def renderLine(parent, x, y, line, typeface1, typeface2):
     """
 
     # Return now if there's nothing to do
-    if (line is None) or (line == ''):
+    if not line:
         return
 
     # Render the first character
@@ -131,7 +131,7 @@ def renderLine(parent, x, y, line, typeface1, typeface2):
 
     # Render the rest of the line
     line = line[1:]
-    if line == '':
+    if not line:
         return
     g = inkex.etree.SubElement(parent, 'g')
     renderText(g, x, y, line, typeface2)
@@ -190,10 +190,9 @@ class AcrosticText(inkex.Effect):
         lines = []
         prior_empty = False
         for i in range(1, 13):
-            line = eval('self.options.line' + str(i)).strip()
-            if line == '':
-                if len(lines) != 0:
-                    prior_empty = True
+            line = getattr(self.options.line, str(i)).strip()
+            if line == '' and len(lines) != 0:
+                prior_empty = True
             else:
                 if prior_empty:
                     lines.append('')
@@ -235,11 +234,11 @@ class AcrosticText(inkex.Effect):
         name1 = self.options.face1
         if name1 in map_our_names_to_hersheydata:
             name1 = map_our_names_to_hersheydata[name1]
-        face1 = eval('hersheydata.' + name1)
+        face1 = getattr(hersheydata, name1)
         name2 = self.options.face2
         if name2 in map_our_names_to_hersheydata:
             name2 = map_our_names_to_hersheydata[name2]
-        face2 = eval('hersheydata.' + name2)
+        face2 = getattr(hersheydata, name2)
 
         # Create the group which will contain all of the text
         # We DO NOT make this a child of the current layer as that
@@ -252,16 +251,16 @@ class AcrosticText(inkex.Effect):
         # approximate position, etc.).
 
         if self.options.flip:
-            attribs = {'transform': 'matrix(-%f,0,0,-%f,%d,%d)' % (scale_x, scale_y, doc_width, doc_height)}
+            attribs = {'transform': 'matrix(-{:f},0,0,-{:f},{:d},{:d})'.format(scale_x, scale_y, doc_width, doc_height)}
         else:
-            attribs = {'transform': 'scale(%f,%f)' % (scale_x, scale_y)}
+            attribs = {'transform': 'scale({:f},{:f})'.format(scale_x, scale_y)}
         container = inkex.etree.SubElement(self.document.getroot(), 'g', attribs)
 
         # Finally, we render each line of text
-        for i in range(0, len(lines)):
-            if lines[i] != '':
+        for line in lines:
+            if line:
                 g = inkex.etree.SubElement(container, 'g')
-                renderLine(g, x, y, lines[i], face1, face2)
+                renderLine(g, x, y, line, face1, face2)
             y += MAX_H + LINE_SKIP
 
 
