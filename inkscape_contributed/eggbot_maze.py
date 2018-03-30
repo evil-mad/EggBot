@@ -60,24 +60,25 @@ import simplestyle
 # Initialize the pseudo random number generator
 random.seed()
 
-PLOT_WIDTH = int(3200)  # Eggbot plot width in pixels
-PLOT_HEIGHT = int(800)  # Eggbot plot height in pixels
+PLOT_WIDTH = 3200  # Eggbot plot width in pixels
+PLOT_HEIGHT = 800  # Eggbot plot height in pixels
 
-TARGET_WIDTH = int(3200)  # Desired plot width in pixels
-TARGET_HEIGHT = int(600)  # Desired plot height in pixels
+TARGET_WIDTH = 3200  # Desired plot width in pixels
+TARGET_HEIGHT = 600  # Desired plot height in pixels
 
-
-# Add a SVG path element to the document
-# We could do this just as easily as a polyline
 
 def draw_SVG_path(pts, c, t, parent):
-    if (pts is None) or len(pts) == 0:  # Nothing to draw
+    """
+    Add a SVG path element to the document
+    We could do this just as easily as a polyline
+    """
+    if not pts:  # Nothing to draw
         return
     if isinstance(pts, list):
         assert len(pts) % 3 == 0, "len(pts) must be a multiple of three"
-        d = "%s %d,%d" % (pts[0], pts[1], pts[2])
+        d = "{} {:d},{:d}".format(pts[0], pts[1], pts[2])
         for i in range(3, len(pts), 3):
-            d += " %s %d,%d" % (pts[i], pts[i + 1], pts[i + 2])
+            d += " {} {:d},{:d}".format(pts[i], pts[i + 1], pts[i + 2])
     elif isinstance(pts, str):
         d = pts
     else:
@@ -87,32 +88,34 @@ def draw_SVG_path(pts, c, t, parent):
     inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), line_attribs)
 
 
-# Add a SVG rect element to the document
-
 def draw_SVG_rect(x, y, w, h, c, t, fill, parent):
+    """
+    Add a SVG rect element to the document
+    """
     style = {'stroke': c, 'stroke-width': str(t), 'fill': fill}
     rect_attribs = {'style': simplestyle.formatStyle(style),
                     'x': str(x), 'y': str(y),
                     'width': str(w), 'height': str(h)}
-    inkex.etree.SubElement(parent, inkex.addNS('rect', 'svg'),
-                           rect_attribs)
+    inkex.etree.SubElement(parent, inkex.addNS('rect', 'svg'), rect_attribs)
 
 
 class Maze(inkex.Effect):
-    # Each cell in the maze is represented using 9 bits:
-    #
-    #  Visited -- When set, indicates that this cell has been visited during
-    #             construction of the maze
-    #
-    #  Border  -- Four bits indicating which if any of this cell's walls are
-    #             part of the maze's boundary (i.e., are unremovable walls)
-    #
-    #  Walls   -- Four bits indicating which if any of this cell's walls are
-    #             still standing
-    #
-    #  Visited     Border      Walls
-    #        x    x x x x    x x x x
-    #             W S E N    W S E N
+    """
+    Each cell in the maze is represented using 9 bits:
+
+     Visited -- When set, indicates that this cell has been visited during
+                construction of the maze
+
+     Border  -- Four bits indicating which if any of this cell's walls are
+                part of the maze's boundary (i.e., are unremovable walls)
+
+     Walls   -- Four bits indicating which if any of this cell's walls are
+                still standing
+
+     Visited     Border      Walls
+           x    x x x x    x x x x
+                W S E N    W S E N
+    """
 
     _VISITED = 0x0100
     _NORTH = 0x0001
@@ -138,19 +141,19 @@ class Maze(inkex.Effect):
 
         self.hpp = False
 
-        self.w = int(0)
-        self.h = int(0)
-        self.solved = int(0)
-        self.start_x = int(0)
-        self.start_y = int(0)
-        self.finish_x = int(0)
-        self.finish_y = int(0)
+        self.w = 0
+        self.h = 0
+        self.solved = 0
+        self.start_x = 0
+        self.start_y = 0
+        self.finish_x = 0
+        self.finish_y = 0
         self.solution_x = None
         self.solution_y = None
         self.cells = None
 
         # Drawing information
-        self.scale = float(25.0)
+        self.scale = 25.0
         self.last_point = None
         self.path = ''
 
@@ -161,17 +164,17 @@ class Maze(inkex.Effect):
         # Presently that's 3200 to 600 which leads to a ratio of 5 and 1/3.
 
         if self.options.mazeSize == 'SMALL':
-            self.w = int(32)
-            self.h = int(6)
+            self.w = 32
+            self.h = 6
         elif self.options.mazeSize == 'MEDIUM':
-            self.w = int(64)
-            self.h = int(12)
+            self.w = 64
+            self.h = 12
         elif self.options.mazeSize == 'LARGE':
-            self.w = int(96)
-            self.h = int(18)
+            self.w = 96
+            self.h = 18
         else:
-            self.w = int(128)
-            self.h = int(24)
+            self.w = 128
+            self.h = 24
 
         # The large mazes tend to hit the recursion limit
         limit = sys.getrecursionlimit()
@@ -179,11 +182,11 @@ class Maze(inkex.Effect):
             sys.setrecursionlimit(4 + self.w * self.h)
 
         maze_size = self.w * self.h
-        self.finish_x = int(self.w - 1)
-        self.finish_y = int(self.h - 1)
-        self.solution_x = array.array('i', range(0, maze_size))
-        self.solution_y = array.array('i', range(0, maze_size))
-        self.cells = array.array('H', range(0, maze_size))
+        self.finish_x = self.w - 1
+        self.finish_y = self.h - 1
+        self.solution_x = array.array('i', range(maze_size))
+        self.solution_y = array.array('i', range(maze_size))
+        self.cells = array.array('H', range(maze_size))
 
         # Remove any old maze
         for node in self.document.xpath('//svg:g[@inkscape:label="1 - Maze"]', namespaces=inkex.NSS):
@@ -208,7 +211,7 @@ class Maze(inkex.Effect):
 
         # Initialize every cell with all four walls up
 
-        for i in range(0, maze_size):
+        for i in range(maze_size):
             self.cells[i] = Maze._NORTH | Maze._EAST | Maze._SOUTH | Maze._WEST
 
         # Now set our borders -- borders being walls which cannot be removed.
@@ -217,7 +220,7 @@ class Maze(inkex.Effect):
         # from WEST to EAST and to be at the NORTH and SOUTH.
 
         z = (self.h - 1) * self.w
-        for x in range(0, self.w):
+        for x in range(self.w):
             self.cells[x] |= Maze._NORTH << 4
             self.cells[x + z] |= Maze._SOUTH << 4
 
@@ -261,8 +264,7 @@ class Maze(inkex.Effect):
         translate_y = float(PLOT_HEIGHT - TARGET_HEIGHT) / 2.0
 
         # And the SVG transform is thus
-        t = 'translate(%f,%f)' % (translate_x, translate_y) + \
-            ' scale(%f,%f)' % (scale_x, scale_y)
+        t = 'translate({:f},{:f}) scale({:f},{:f})'.format(translate_x, translate_y, scale_x, scale_y)
 
         # For scaling line thicknesses.  We'll typically draw a line of
         # thickness 1 but will need to make the SVG path have a thickness
@@ -283,7 +285,7 @@ class Maze(inkex.Effect):
             # the WEST and NORTH walls and then draw up drawing the EAST and SOUTH walls.
             # By drawing in this back and forth fashion, we minimize the effect of slippage.
 
-            for x in range(0, self.w, 2):
+            for x in range(self.w, step=2):
                 self.draw_vertical(x)
 
         else:
@@ -296,7 +298,7 @@ class Maze(inkex.Effect):
             # Draw the horizontal walls
 
             self.draw_horizontal_hpp(0, Maze._NORTH)
-            for y in range(0, self.h - 1):
+            for y in range(self.h - 1):
                 self.draw_horizontal_hpp(y, Maze._SOUTH)
             self.draw_horizontal_hpp(self.h - 1, Maze._SOUTH)
 
@@ -305,7 +307,7 @@ class Maze(inkex.Effect):
             # Since this is a maze on the surface of a cylinder, we don't need
             # to draw the vertical walls at the outer edges (x = 0 & x = w - 1)
 
-            for x in range(0, self.w):
+            for x in range(self.w):
                 self.draw_vertical_hpp(x, Maze._EAST)
 
         # Maze in layer "1 - Maze"
@@ -473,31 +475,31 @@ class Maze(inkex.Effect):
         # Now from the cell at (x, y), look to each of the four
         # directions for unvisited neighboring cells
 
-        for i in range(0, 4):
+        for each_direction in directions:
 
             # If there is a border in direction[i], then don't try
             # looking for a neighboring cell in that direction.  We
             # Use this check and borders to prevent generating invalid
             # cell coordinates.
 
-            if self.is_border(x, y, directions[i]):
+            if self.is_border(x, y, each_direction):
                 continue
 
             # Determine the cell coordinates of a neighboring cell
             # NOTE: we trust the use of maze borders to prevent us
             # from generating invalid cell coordinates
 
-            if directions[i] == Maze._NORTH:
+            if each_direction == Maze._NORTH:
                 nx = x
                 ny = y - 1
                 opposite_direction = Maze._SOUTH
 
-            elif directions[i] == Maze._SOUTH:
+            elif each_direction == Maze._SOUTH:
                 nx = x
                 ny = y + 1
                 opposite_direction = Maze._NORTH
 
-            elif directions[i] == Maze._EAST:
+            elif each_direction == Maze._EAST:
                 nx = x + 1
                 ny = y
                 opposite_direction = Maze._WEST
@@ -522,7 +524,7 @@ class Maze(inkex.Effect):
             # the current cell leading to the neighbor.  And, from the
             # neighbor remove its wall leading to the current cell.
 
-            self.remove_wall(x, y, directions[i])
+            self.remove_wall(x, y, each_direction)
             self.remove_wall(nx, ny, opposite_direction)
 
             # Now recur by "moving" to this unvisited neighboring cell
@@ -533,21 +535,21 @@ class Maze(inkex.Effect):
 
         if self.last_point is not None:
             if (self.last_point[0] == x1) and (self.last_point[1] == y1):
-                self.path += ' L %d,%d' % (x2, y2)
+                self.path += ' L {:d},{:d}'.format(x2, y2)
                 self.last_point = [x2, y2]
             elif (self.last_point[0] == x2) and (self.last_point[1] == y2):
-                self.path += ' L %d,%d L %d,%d' % (x1, y1, x2, y2)
+                self.path += ' L {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
                 # self.last_point unchanged
             else:
-                self.path += ' M %d,%d L %d,%d' % (x1, y1, x2, y2)
+                self.path += ' M {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
                 self.last_point = [x2, y2]
         else:
-            self.path = 'M %d,%d L %d,%d' % (x1, y1, x2, y2)
+            self.path = 'M {:d},{:d} L {:d},{:d}'.format(x1, y1, x2, y2)
             self.last_point = [x2, y2]
 
-    def draw_wall(self, x, y, d, dir):
+    def draw_wall(self, x, y, d, dir_):
 
-        if dir > 0:
+        if dir_ > 0:
             if d == Maze._NORTH:
                 self.draw_line(2 * (x + 1), 2 * y, 2 * x, 2 * y)
             elif d == Maze._WEST:
@@ -576,7 +578,7 @@ class Maze(inkex.Effect):
         if self.is_wall(x, 0, Maze._NORTH):
             self.draw_wall(x, 0, Maze._NORTH, +1)
 
-        for y in range(0, self.h):
+        for y in range(self.h):
             if self.is_wall(x, y, Maze._WEST):
                 self.draw_wall(x, y, Maze._WEST, +1)
             if self.is_wall(x, y, Maze._SOUTH):
@@ -609,7 +611,8 @@ class Maze(inkex.Effect):
             dy = 1
 
         tracing = False
-        for x in range(0, self.w):
+        segment = 0
+        for x in range(self.w):
 
             if self.is_wall(x, y, wall):
                 if not tracing:
@@ -633,12 +636,7 @@ class Maze(inkex.Effect):
 
     def draw_vertical_hpp(self, x, wall):
 
-        # Cater to Python 2.4 and earlier
-        # dx = 0 if wall == Maze._WEST else 1
-        if wall == Maze._WEST:
-            dx = 0
-        else:
-            dx = 1
+        dx = 0 if wall == Maze._WEST else 1
 
         # We alternate the direction in which we draw each vertical wall.
         # First, from North to South and then from South to North.  This
@@ -650,8 +648,9 @@ class Maze(inkex.Effect):
             y_start, y_finis, dy, offset = self.h - 1, -1, -1, 2
 
         tracing = False
+        segment = y_start
         for y in range(y_start, y_finis, dy):
-            assert 0 <= y < self.h, "y (%d) is out of range" % y
+            assert 0 <= y < self.h, "y ({:d}) is out of range".format(y)
             if self.is_wall(x, y, wall):
                 if not tracing:
                     # Starting a new segment
