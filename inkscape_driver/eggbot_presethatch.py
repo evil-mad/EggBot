@@ -24,6 +24,8 @@ class PresetHatch(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
         self.OptionParser.add_option("--title")
+        self.svgDefRead = None
+        self.svg = None
 
     def effect(self):
         self.svgDefRead = False
@@ -32,13 +34,12 @@ class PresetHatch(inkex.Effect):
 
     def recursiveDefDataScan(self, aNodeList):
         for node in aNodeList:
-            if node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
+            if node.tag in [inkex.addNS('defs', 'svg'), 'defs']:
                 self.recursiveDefDataScan(node)
             elif node.tag == inkex.addNS('path-effect', 'inkscape'):
                 if node.get('effect') == 'rough_hatches':
                     node.set('dist_rdm', '0;1')
                     node.set('growth', str(0))
-                    # node.set( 'do_bend', 'false' )
                     node.set('bottom_edge_variation', '0;1')
                     node.set('top_edge_variation', '0;1')
                     node.set('bottom_tgt_variation', '0;1')
