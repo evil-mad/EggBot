@@ -826,7 +826,7 @@ class Eggbot_Hatch(inkex.Effect):
                     y = float(node.get('y', '0'))
                     # Note: the transform has already been applied
                     if x != 0 or y != 0:
-                        mat_new2 = composeTransform(mat_new, parseTransform('translate(%f,%f)' % (x, y)))
+                        mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
                     else:
                         mat_new2 = mat_new
                     v = node.get('visibility', v)
@@ -1007,11 +1007,16 @@ class Eggbot_Hatch(inkex.Effect):
                 cy = float(node.get('cy', '0'))
                 x1 = cx - rx
                 x2 = cx + rx
-                d = 'M %f,%f ' % (x1, cy) + \
-                    'A %f,%f ' % (rx, ry) + \
-                    '0 1 0 %f,%f ' % (x2, cy) + \
-                    'A %f,%f ' % (rx, ry) + \
-                    '0 1 0 %f,%f' % (x1, cy)
+
+                d = 'M {x1:f},{cy:f} ' \
+                    'A {rx:f},{ry:f} ' \
+                    '0 1 0 {x2:f},{cy:f} ' \
+                    'A {rx:f},{ry:f} ' \
+                    '0 1 0 {x1:f},{cy:f}'.format(x1=x1,
+                                                 x2=x2,
+                                                 rx=rx,
+                                                 ry=ry,
+                                                 cy=cy)
                 self.addPathVertices(d, node, mat_new)
                 # We now have a path we want to apply a (cross)hatch to
                 # Apply appropriate functions
@@ -1043,7 +1048,7 @@ class Eggbot_Hatch(inkex.Effect):
             elif not isinstance(node.tag, basestring):
                 pass
             else:
-                inkex.errormsg('Warning: unable to hatch object <%s>, please convert it to a path first.' % node.tag)
+                inkex.errormsg('Warning: unable to hatch object <{0}>, please convert it to a path first.'.format(node.tag))
                 pass
 
     def joinFillsWithNode(self, node, stroke_width, path):
@@ -1387,9 +1392,10 @@ class Eggbot_Hatch(inkex.Effect):
                             # Must start a new line, not joined to any previous paths
                             delta_x = absolute_line_segments[reference_count][1][0] - absolute_line_segments[reference_count][0][0]  # end minus start, in original direction
                             delta_y = absolute_line_segments[reference_count][1][1] - absolute_line_segments[reference_count][0][1]  # end minus start, in original direction
-                            path += ('M %f,%f l %f,%f ' %
-                                     (absolute_line_segments[reference_count][0][0], absolute_line_segments[reference_count][0][1],
-                                      delta_x, delta_y))  # delta is from initial point
+                            path += ('M {0:f},{1:f} l {2:f},{3:f} '.format(absolute_line_segments[reference_count][0][0],
+                                                                           absolute_line_segments[reference_count][0][1],
+                                                                           delta_x,
+                                                                           delta_y))  # delta is from initial point
                             f_distance_moved_with_pen_up += math.hypot(
                                     absolute_line_segments[reference_count][0][0] - pt_last_position_absolute[0],
                                     absolute_line_segments[reference_count][0][1] - pt_last_position_absolute[1])
@@ -1409,9 +1415,8 @@ class Eggbot_Hatch(inkex.Effect):
                                        absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1])
                             # final point (which was closer to the closest continuation segment) minus initial point = delta_y
 
-                            path += ('M %f,%f l ' % (
-                                absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0],
-                                absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1]))
+                            path += ('M {0:f},{1:f} l '.format(absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0],
+                                                               absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1]))
                             f_distance_moved_with_pen_up += math.hypot(
                                     absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0] - pt_last_position_absolute[0],
                                     absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1] - pt_last_position_absolute[1])
@@ -1531,7 +1536,8 @@ class Eggbot_Hatch(inkex.Effect):
         # At last we've looked at all the candidate segment ends
         n_recursion_count += 1
         if not b_found_segment_to_add or n_recursion_count >= RECURSION_LIMIT:
-            cumulative_path += '%f,%f ' % (relative_position_of_last_plotted_line_was_held_in_abeyance[0], relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment
+            cumulative_path += '{0:f},{1:f} '.format(relative_position_of_last_plotted_line_was_held_in_abeyance[0],
+                                                     relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment
             pt_last_position_absolute[0] += relative_position_of_last_plotted_line_was_held_in_abeyance[0]
             pt_last_position_absolute[1] += relative_position_of_last_plotted_line_was_held_in_abeyance[1]
             return cumulative_path  # No undrawn segments were suitable for appending,
@@ -1613,17 +1619,17 @@ class Eggbot_Hatch(inkex.Effect):
                     delta_x,
                     delta_y)
 
-            cumulative_path += '%f,%f ' % (relative_position_of_last_plotted_line_was_held_in_abeyance[0], relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment, which has been modified
+            cumulative_path += '{0:f},{1:f} '.format(relative_position_of_last_plotted_line_was_held_in_abeyance[0],
+                                                     relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment, which has been modified
             pt_last_position_absolute[0] += relative_position_of_last_plotted_line_was_held_in_abeyance[0]
             pt_last_position_absolute[1] += relative_position_of_last_plotted_line_was_held_in_abeyance[1]
             # add bezier cubic curve
-            cumulative_path += ('c %f,%f %f,%f %f,%f l ' %
-                                (pt_relative_control_point_incoming[0],
-                                 pt_relative_control_point_incoming[1],
-                                 pt_relative_control_point_outgoing[0],
-                                 pt_relative_control_point_outgoing[1],
-                                 delta_x,
-                                 delta_y))
+            cumulative_path += ('c {0:f},{1:f} {2:f},{3:f} {4:f},{5:f} l '.format(pt_relative_control_point_incoming[0],
+                                                                                  pt_relative_control_point_incoming[1],
+                                                                                  pt_relative_control_point_outgoing[0],
+                                                                                  pt_relative_control_point_outgoing[1],
+                                                                                  delta_x,
+                                                                                  delta_y))
             pt_last_position_absolute[0] += delta_x
             pt_last_position_absolute[1] += delta_y
             # Next, move pen in appropriate direction to draw the new segment, given that
