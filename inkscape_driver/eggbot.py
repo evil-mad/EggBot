@@ -135,6 +135,11 @@ class EggBot(inkex.Effect):
                                      dest="revEggMotor", default=False,
                                      help="Reverse motion of egg motor.")
 
+        self.allLayers = None
+        self.plotCurrentLayer = None
+        self.LayerFound = None
+        self.sCurrentLayerName = None
+
         self.bPenIsUp = None  # Initial state of pen is neither up nor down, but _unknown_.
         self.virtualPenIsUp = False  # Keeps track of pen position when stepping through plot before resuming
         self.engraverIsOn = False
@@ -147,22 +152,20 @@ class EggBot(inkex.Effect):
         self.bStopped = False
         self.fSpeed = 1
         self.resumeMode = False
-        self.nodeCount = int(0)  # NOTE: python uses 32-bit ints.
-        self.nodeTarget = int(0)
-        self.pathcount = int(0)
+        self.nodeCount = 0  # NOTE: python uses 32-bit ints.
+        self.nodeTarget = 0
+        self.pathcount = 0
         self.LayersPlotted = 0
-        self.svgLayer = int(0)
-        self.svgNodeCount = int(0)
+        self.svgLayer = 0
+        self.svgNodeCount = 0
         self.svgDataRead = False
-        self.svgLastPath = int(0)
-        self.svgLastPathNC = int(0)
-        self.svgTotalDeltaX = int(0)
-        self.svgTotalDeltaY = int(0)
+        self.svgLastPath = 0
+        self.svgLastPathNC = 0
+        self.svgTotalDeltaX = 0
+        self.svgTotalDeltaY = 0
         self.serialPort = None
 
-        nDeltaX = 0
-        nDeltaY = 0
-
+        self.svg = None
         self.svgWidth = float(eggbot_conf.N_PAGE_WIDTH)
         self.svgHeight = float(eggbot_conf.N_PAGE_HEIGHT)
         self.svgTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
@@ -185,7 +188,7 @@ class EggBot(inkex.Effect):
         self.svg = self.document.getroot()
         self.CheckSVGforEggbotData()
 
-        if (self.options.tab == '"Help"') or (self.options.tab == '"options"') or (self.options.tab == '"timing"'):
+        if self.options.tab in ['"Help"', '"options"', '"timing"']:
             pass
         else:
             self.serialPort = ebb_serial.openPort()
@@ -257,9 +260,9 @@ class EggBot(inkex.Effect):
             eggbotlayer.set('totaldeltax', str(0))
             eggbotlayer.set('totaldeltay', str(0))
 
-    def recursiveEggbotDataScan(self, aNodeList):
+    def recursiveEggbotDataScan(self, a_node_list):
         if not self.svgDataRead:
-            for node in aNodeList:
+            for node in a_node_list:
                 if node.tag == 'svg':
                     self.recursiveEggbotDataScan(node)
                 elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
@@ -279,9 +282,9 @@ class EggBot(inkex.Effect):
                         node.set('totaldeltay', str(0))
                         self.svgDataRead = True
 
-    def UpdateSVGEggbotData(self, aNodeList):
+    def UpdateSVGEggbotData(self, a_node_list):
         if not self.svgDataRead:
-            for node in aNodeList:
+            for node in a_node_list:
                 if node.tag == 'svg':
                     self.UpdateSVGEggbotData(node)
                 elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
@@ -295,7 +298,7 @@ class EggBot(inkex.Effect):
 
     def resumePlotSetup(self):
         self.LayerFound = False
-        if (self.svgLayer < 101) and (self.svgLayer >= 0):
+        if 101 > self.svgLayer >= 0:
             self.options.layernumber = self.svgLayer
             self.allLayers = False
             self.plotCurrentLayer = False
@@ -347,8 +350,8 @@ class EggBot(inkex.Effect):
             self.sendDisableMotors()
 
         elif self.options.manualType == "version-check":
-            strVersion = ebb_serial.query(self.serialPort, 'v\r')
-            inkex.errormsg('I asked the EBB for its version info, and it replied:\n ' + strVersion)
+            str_version = ebb_serial.query(self.serialPort, 'v\r')
+            inkex.errormsg('I asked the EBB for its version info, and it replied:\n ' + str_version)
 
         elif self.options.manualType == "enable-engraver":
             if not self.options.engraving:
@@ -362,36 +365,36 @@ class EggBot(inkex.Effect):
 
         else:  # self.options.manualType is "walk-egg-motor" or "walk-pen-motor":
             if self.options.manualType == "walk-egg-motor":
-                nDeltaX = self.options.WalkDistance
-                nDeltaY = 0
+                n_delta_x = self.options.WalkDistance
+                n_delta_y = 0
             elif self.options.manualType == "walk-pen-motor":
-                nDeltaY = self.options.WalkDistance
-                nDeltaX = 0
+                n_delta_y = self.options.WalkDistance
+                n_delta_x = 0
             else:
                 return
 
             ebb_motion.sendEnableMotors(self.serialPort, 1)  # 16X microstepping
 
             # Query pen position: 1 up, 0 down (followed by OK)
-            strVersion = ebb_serial.query(self.serialPort, 'QP\r')
+            str_version = ebb_serial.query(self.serialPort, 'QP\r')
 
-            if strVersion[0] == '0':
+            if str_version[0] == '0':
                 self.fSpeed = self.options.penDownSpeed
-            if strVersion[0] == '1':
+            if str_version[0] == '1':
                 self.fSpeed = self.options.penUpSpeed
 
             if self.options.revPenMotor:
-                nDeltaY = -1 * nDeltaY
+                n_delta_y *= -1
             if self.options.revEggMotor:
-                nDeltaX = -1 * nDeltaX
+                n_delta_x *= -1
 
-            nTime = 10000.00 / self.fSpeed * plot_utils.distance(nDeltaX, nDeltaY)
-            nTime = int(math.ceil(nTime / 10.0))
+            n_time = 10000.00 / self.fSpeed * plot_utils.distance(n_delta_x, n_delta_y)
+            n_time = int(math.ceil(n_time / 10.0))
 
-            strOutput = ','.join(['SM', str(nTime), str(nDeltaY), str(nDeltaX)]) + '\r'
-            # inkex.errormsg( 'strOutput:  ' + strOutput )
+            str_output = ','.join(['SM', str(n_time), str(n_delta_y), str(n_delta_x)]) + '\r'
+            # inkex.errormsg( 'str_output:  ' + str_output )
 
-            ebb_serial.command(self.serialPort, strOutput)
+            ebb_serial.command(self.serialPort, str_output)
 
     def setupCommand(self):
         """Execute commands from the "setup" tab"""
@@ -428,10 +431,10 @@ class EggBot(inkex.Effect):
         viewbox = self.svg.get('viewBox')
         if viewbox:
             vinfo = viewbox.strip().replace(',', ' ').split(' ')
-            if (float(vinfo[2]) != 0) and (float(vinfo[3]) != 0):
+            if float(vinfo[2]) != 0 and float(vinfo[3]) != 0:
                 sx = self.svgWidth / float(vinfo[2])
                 sy = self.svgHeight / float(vinfo[3])
-                self.svgTransform = parseTransform('scale(%f,%f) translate(%f,%f)' % (sx, sy, -float(vinfo[0]), -float(vinfo[1])))
+                self.svgTransform = parseTransform('scale({0:f},{1:f}) translate({2:f},{3:f})'.format(sx, sy, -float(vinfo[0]), -float(vinfo[1])))
 
         self.ServoSetup()
         ebb_motion.sendEnableMotors(self.serialPort, 1)  # 16X microstepping
@@ -457,7 +460,7 @@ class EggBot(inkex.Effect):
                 self.fX = self.ptFirst[0]
                 self.fY = self.ptFirst[1]
                 # self.penUp()
-                self.nodeCount = self.nodeTarget  # enablesfpx return-to-home only option
+                self.nodeCount = self.nodeTarget  # enables fpx return-to-home only option
                 self.plotLineAndTime()
             # inkex.errormsg('Final node count: ' + str(self.svgNodeCount))  #Node Count - Debug option
             if not self.bStopped:
@@ -471,11 +474,11 @@ class EggBot(inkex.Effect):
         finally:
             # We may have had an exception and lost the serial port...
             self.penDownActivatesEngraver = False
-            if (not (self.serialPort is None)) and self.options.engraving:
+            if self.serialPort is not None and self.options.engraving:
                 self.engraverOff()
 
-    def recursivelyTraverseSvg(self, aNodeList,
-                               matCurrent=[[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
+    def recursivelyTraverseSvg(self, a_node_list,
+                               mat_current=None,
                                parent_visibility='visible'):
         """
         Recursively traverse the svg file to plot out all of the
@@ -487,29 +490,31 @@ class EggBot(inkex.Effect):
         handled include text.  Unhandled elements should be converted to
         paths in Inkscape.
         """
-        for node in aNodeList:
+        if mat_current is None:
+            mat_current = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
+        for node in a_node_list:
             if self.bStopped:
                 return
             # Ignore invisible nodes
             v = node.get('visibility', parent_visibility)
             if v == 'inherit':
                 v = parent_visibility
-            if v == 'hidden' or v == 'collapse':
+            if v in ['hidden', 'collapse']:
                 continue
 
             # first apply the current matrix transform to this node's transform
-            matNew = composeTransform(matCurrent, parseTransform(node.get("transform")))
+            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
 
-            if node.tag == inkex.addNS('g', 'svg') or node.tag == 'g':
+            if node.tag in [inkex.addNS('g', 'svg'), 'g']:
 
                 self.penUp()
                 if node.get(inkex.addNS('groupmode', 'inkscape')) == 'layer':
                     self.sCurrentLayerName = node.get(inkex.addNS('label', 'inkscape'))
                     if not self.allLayers:
                         self.DoWePlotLayer(self.sCurrentLayerName)
-                self.recursivelyTraverseSvg(node, matNew, parent_visibility=v)
+                self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
 
-            elif node.tag == inkex.addNS('use', 'svg') or node.tag == 'use':
+            elif node.tag in [inkex.addNS('use', 'svg'), 'use']:
 
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
                 # attribute.  We will handle the element by doing an XPath search through
@@ -527,18 +532,18 @@ class EggBot(inkex.Effect):
                 refid = node.get(inkex.addNS('href', 'xlink'))
                 if refid:
                     # [1:] to ignore leading '#' in reference
-                    path = '//*[@id="%s"]' % refid[1:]
+                    path = '//*[@id="{0}"]'.format(refid[1:])
                     refnode = node.xpath(path)
                     if refnode:
                         x = float(node.get('x', '0'))
                         y = float(node.get('y', '0'))
                         # Note: the transform has already been applied
-                        if (x != 0) or (y != 0):
-                            matNew2 = composeTransform(matNew, parseTransform('translate(%f,%f)' % (x, y)))
+                        if x != 0 or y != 0:
+                            mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
                         else:
-                            matNew2 = matNew
+                            mat_new2 = mat_new
                         v = node.get('visibility', v)
-                        self.recursivelyTraverseSvg(refnode, matNew2, parent_visibility=v)
+                        self.recursivelyTraverseSvg(refnode, mat_new2, parent_visibility=v)
                     else:
                         pass
                 else:
@@ -552,23 +557,23 @@ class EggBot(inkex.Effect):
                     #    then start here, and set
                     # self.nodeCount equal to self.svgLastPathNC
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
-                        self.plotPath(node, matNew)
+                        self.plotPath(node, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('rect', 'svg') or node.tag == 'rect':
+                elif node.tag in [inkex.addNS('rect', 'svg'), 'rect']:
 
                     # Manually transform
                     #
@@ -581,16 +586,16 @@ class EggBot(inkex.Effect):
                     # I.e., explicitly draw three sides of the rectangle and the
                     # fourth side implicitly
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
                         newpath = inkex.etree.Element(inkex.addNS('path', 'svg'))
                         x = float(node.get('x'))
@@ -603,19 +608,19 @@ class EggBot(inkex.Effect):
                         t = node.get('transform')
                         if t:
                             newpath.set('transform', t)
-                        a = []
-                        a.append(['M ', [x, y]])
-                        a.append([' l ', [w, 0]])
-                        a.append([' l ', [0, h]])
-                        a.append([' l ', [-w, 0]])
-                        a.append([' Z', []])
+                        a = [['M ', [x, y]],
+                             [' l ', [w, 0]],
+                             [' l ', [0, h]],
+                             [' l ', [-w, 0]],
+                             [' Z', []],
+                             ]
                         newpath.set('d', simplepath.formatPath(a))
-                        self.plotPath(newpath, matNew)
+                        self.plotPath(newpath, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('line', 'svg') or node.tag == 'line':
+                elif node.tag in [inkex.addNS('line', 'svg'), 'line']:
 
                     # Convert
                     #
@@ -625,16 +630,16 @@ class EggBot(inkex.Effect):
                     #
                     #   <path d="MX1,Y1 LX2,Y2"/>
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
                         newpath = inkex.etree.Element(inkex.addNS('path', 'svg'))
                         x1 = float(node.get('x1'))
@@ -647,16 +652,16 @@ class EggBot(inkex.Effect):
                         t = node.get('transform')
                         if t:
                             newpath.set('transform', t)
-                        a = []
-                        a.append(['M ', [x1, y1]])
-                        a.append([' L ', [x2, y2]])
+                        a = [['M ', [x1, y1]],
+                             [' L ', [x2, y2]],
+                             ]
                         newpath.set('d', simplepath.formatPath(a))
-                        self.plotPath(newpath, matNew)
+                        self.plotPath(newpath, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('polyline', 'svg') or node.tag == 'polyline':
+                elif node.tag in [inkex.addNS('polyline', 'svg'), 'polyline']:
 
                     # Convert
                     #
@@ -672,16 +677,16 @@ class EggBot(inkex.Effect):
                     if pl == '':
                         pass
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
                         pa = pl.split()
                         if not len(pa):
@@ -701,12 +706,12 @@ class EggBot(inkex.Effect):
                         t = node.get('transform')
                         if t:
                             newpath.set('transform', t)
-                        self.plotPath(newpath, matNew)
+                        self.plotPath(newpath, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('polygon', 'svg') or node.tag == 'polygon':
+                elif node.tag in [inkex.addNS('polygon', 'svg'), 'polygon']:
 
                     # Convert
                     #    <polygon points="x1,y1 x2,y2 x3,y3 [...]"/>
@@ -718,24 +723,21 @@ class EggBot(inkex.Effect):
                     if pl == '':
                         continue
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
                         pa = pl.split()
                         if not len(pa):
                             continue
-                        # Issue 29: pre 2.5.? versions of Python do not have
-                        #    "statement-1 if expression-1 else statement-2"
-                        # which came out of PEP 308, Conditional Expressions
-                        # d = "".join( ["M " + pa[i] if i == 0 else " L " + pa[i] for i in range( 0, len( pa ) )] )
+
                         d = "M " + pa[0]
                         for i in range(1, len(pa)):
                             d += " L " + pa[i]
@@ -748,15 +750,13 @@ class EggBot(inkex.Effect):
                         t = node.get('transform')
                         if t:
                             newpath.set('transform', t)
-                        self.plotPath(newpath, matNew)
+                        self.plotPath(newpath, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('ellipse', 'svg') or \
-                        node.tag == 'ellipse' or \
-                        node.tag == inkex.addNS('circle', 'svg') or \
-                        node.tag == 'circle':
+                elif node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse',
+                                  inkex.addNS('circle', 'svg'), 'circle']:
 
                     # Convert circles and ellipses to a path with two 180 degree arcs.
                     # In general (an ellipse), we convert
@@ -774,7 +774,7 @@ class EggBot(inkex.Effect):
                     #
                     # Note: ellipses or circles with a radius attribute of value 0 are ignored
 
-                    if node.tag == inkex.addNS('ellipse', 'svg') or node.tag == 'ellipse':
+                    if node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse']:
                         rx = float(node.get('rx', '0'))
                         ry = float(node.get('ry', '0'))
                     else:
@@ -783,26 +783,32 @@ class EggBot(inkex.Effect):
                     if rx == 0 or ry == 0:
                         pass
 
-                    doWePlotThisPath = False
+                    do_we_plot_this_path = False
                     if self.resumeMode:
                         if self.pathcount < self.svgLastPath:
                             self.pathcount += 1
                         elif self.pathcount == self.svgLastPath:
                             self.nodeCount = self.svgLastPathNC
-                            doWePlotThisPath = True
+                            do_we_plot_this_path = True
                     else:
-                        doWePlotThisPath = True
-                    if doWePlotThisPath:
+                        do_we_plot_this_path = True
+                    if do_we_plot_this_path:
                         self.pathcount += 1
                         cx = float(node.get('cx', '0'))
                         cy = float(node.get('cy', '0'))
                         x1 = cx - rx
                         x2 = cx + rx
-                        d = 'M %f,%f ' % (x1, cy) + \
-                            'A %f,%f ' % (rx, ry) + \
-                            '0 1 0 %f,%f ' % (x2, cy) + \
-                            'A %f,%f ' % (rx, ry) + \
-                            '0 1 0 %f,%f' % (x1, cy)
+
+                        d = 'M {x1:f},{cy:f} ' \
+                            'A {rx:f},{ry:f} ' \
+                            '0 1 0 {x2:f},{cy:f} ' \
+                            'A {rx:f},{ry:f} ' \
+                            '0 1 0 {x1:f},{cy:f}'.format(x1=x1,
+                                                         x2=x2,
+                                                         rx=rx,
+                                                         ry=ry,
+                                                         cy=cy)
+
                         newpath = inkex.etree.Element(inkex.addNS('path', 'svg'))
                         newpath.set('d', d)
                         s = node.get('style')
@@ -811,27 +817,27 @@ class EggBot(inkex.Effect):
                         t = node.get('transform')
                         if t:
                             newpath.set('transform', t)
-                        self.plotPath(newpath, matNew)
+                        self.plotPath(newpath, mat_new)
                         if not self.bStopped:  # an "index" for resuming plots quickly-- record last complete path
                             self.svgLastPath += 1
                             self.svgLastPathNC = self.nodeCount
 
-                elif node.tag == inkex.addNS('metadata', 'svg') or node.tag == 'metadata':
+                elif node.tag in [inkex.addNS('metadata', 'svg'), 'metadata']:
                     pass
-                elif node.tag == inkex.addNS('defs', 'svg') or node.tag == 'defs':
+                elif node.tag in [inkex.addNS('defs', 'svg'), 'defs']:
                     pass
-                elif node.tag == inkex.addNS('namedview', 'sodipodi') or node.tag == 'namedview':
+                elif node.tag in [inkex.addNS('namedview', 'sodipodi'), 'namedview']:
                     pass
-                elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
+                elif node.tag in [inkex.addNS('eggbot', 'svg'), 'eggbot']:
                     pass
-                elif node.tag == inkex.addNS('WCB', 'svg') or node.tag == 'WCB':
+                elif node.tag in [inkex.addNS('WCB', 'svg'), 'WCB']:
                     pass
-                elif node.tag == inkex.addNS('title', 'svg') or node.tag == 'title':
+                elif node.tag in [inkex.addNS('title', 'svg'), 'title']:
                     pass
-                elif node.tag == inkex.addNS('desc', 'svg') or node.tag == 'desc':
+                elif node.tag in [inkex.addNS('desc', 'svg'), 'desc']:
                     pass
-                elif (node.tag == inkex.addNS('text', 'svg') or node.tag == 'text' or
-                      node.tag == inkex.addNS('flowRoot', 'svg') or node.tag == 'flowRoot'):
+                elif node.tag in [inkex.addNS('text', 'svg'), 'text',
+                                  inkex.addNS('flowRoot', 'svg'), 'flowRoot']:
                     if 'text' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
                                                        self.sCurrentLayerName + '" unable to draw text; ' +
@@ -840,7 +846,7 @@ class EggBot(inkex.Effect):
                                                        '"Render" category of extensions.'))
                         self.warnings['text'] = 1
                     pass
-                elif node.tag == inkex.addNS('image', 'svg') or node.tag == 'image':
+                elif node.tag in [inkex.addNS('image', 'svg'), 'image']:
                     if 'image' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
                                                        self.sCurrentLayerName + '" unable to draw bitmap images; ' +
@@ -849,21 +855,21 @@ class EggBot(inkex.Effect):
                                                        'cause cut-and-paste operations to paste in bitmap copies.'))
                         self.warnings['image'] = 1
                     pass
-                elif node.tag == inkex.addNS('pattern', 'svg') or node.tag == 'pattern':
+                elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
                     pass
-                elif node.tag == inkex.addNS('radialGradient', 'svg') or node.tag == 'radialGradient':
+                elif node.tag in [inkex.addNS('radialGradient', 'svg'), 'radialGradient']:
                     # Similar to pattern
                     pass
-                elif node.tag == inkex.addNS('linearGradient', 'svg') or node.tag == 'linearGradient':
+                elif node.tag in [inkex.addNS('linearGradient', 'svg'), 'linearGradient']:
                     # Similar in pattern
                     pass
-                elif node.tag == inkex.addNS('style', 'svg') or node.tag == 'style':
+                elif node.tag in [inkex.addNS('style', 'svg'), 'style']:
                     # This is a reference to an external style sheet and not the value
                     # of a style attribute to be inherited by child elements
                     pass
-                elif node.tag == inkex.addNS('cursor', 'svg') or node.tag == 'cursor':
+                elif node.tag in [inkex.addNS('cursor', 'svg'), 'cursor']:
                     pass
-                elif node.tag == inkex.addNS('color-profile', 'svg') or node.tag == 'color-profile':
+                elif node.tag in [inkex.addNS('color-profile', 'svg'), 'color-profile']:
                     # Gamma curves, color temp, etc. are not relevant to single color output
                     pass
                 elif not isinstance(node.tag, basestring):
@@ -882,7 +888,7 @@ class EggBot(inkex.Effect):
                         self.warnings[str(node.tag)] = 1
                     pass
 
-    def DoWePlotLayer(self, strLayerName):
+    def DoWePlotLayer(self, str_layer_name):
         """
         We are only plotting *some* layers. Check to see
         whether or not we're going to plot this one.
@@ -893,26 +899,26 @@ class EggBot(inkex.Effect):
         Then, see if the number matches the layer.
         """
 
-        TempNumString = 'x'
-        stringPos = 1
-        CurrentLayerName = strLayerName.encode('ascii', 'ignore').lstrip()  # remove leading whitespace
+        temp_num_string = 'x'
+        string_pos = 1
+        current_layer_name = str_layer_name.encode('ascii', 'ignore').lstrip()  # remove leading whitespace
 
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
         # digit characters only.
 
-        MaxLength = len(CurrentLayerName)
-        if MaxLength > 0:
-            while stringPos <= MaxLength:
-                if str.isdigit(CurrentLayerName[:stringPos]):
-                    TempNumString = CurrentLayerName[:stringPos]  # Store longest numeric string so far
-                    stringPos = stringPos + 1
+        max_length = len(current_layer_name)
+        if max_length > 0:
+            while string_pos <= max_length:
+                if str.isdigit(current_layer_name[:string_pos]):
+                    temp_num_string = current_layer_name[:string_pos]  # Store longest numeric string so far
+                    string_pos += 1
                 else:
                     break
 
         self.plotCurrentLayer = False  # Temporarily assume that we aren't plotting the layer
-        if str.isdigit(TempNumString):
-            if self.svgLayer == int(float(TempNumString)):
+        if str.isdigit(temp_num_string):
+            if self.svgLayer == int(float(temp_num_string)):
                 self.plotCurrentLayer = True  # We get to plot the layer!
                 self.LayersPlotted += 1
         # Note: this function is only called if we are NOT plotting all layers.
@@ -930,10 +936,10 @@ class EggBot(inkex.Effect):
         else:
             return True
 
-    def plotPath(self, path, matTransform):
+    def plotPath(self, path, mat_transform):
         """
         Plot the path while applying the transformation defined
-        by the matrix [matTransform].
+        by the matrix [mat_transform].
         """
         # turn this path into a cubicsuperpath (list of beziers)...
 
@@ -945,14 +951,14 @@ class EggBot(inkex.Effect):
         p = cubicsuperpath.parsePath(d)
 
         # ...and apply the transformation to each point
-        applyTransformToPath(matTransform, p)
+        applyTransformToPath(mat_transform, p)
 
         # p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
         # where the start-point is the last point in the previous segment.
         for sp in p:
 
             plot_utils.subdivideCubicPath(sp, self.options.smoothness)
-            nIndex = 0
+            n_index = 0
 
             for csp in sp:
 
@@ -975,16 +981,16 @@ class EggBot(inkex.Effect):
                         self.ptFirst = (self.fX, self.fY)
 
                 if self.plotCurrentLayer:
-                    if nIndex == 0:
+                    if n_index == 0:
                         if plot_utils.distance(self.fX - self.fPrevX, self.fY - self.fPrevY) > eggbot_conf.MIN_GAP:
                             # Only raise pen between two points if there is at least a 1 step gap between them.
                             self.penUp()
                             self.virtualPenIsUp = True
-                    elif nIndex == 1:
+                    elif n_index == 1:
                         self.penDown()
                         self.virtualPenIsUp = False
 
-                nIndex += 1
+                n_index += 1
 
                 if self.plotCurrentLayer:
                     self.plotLineAndTime()
@@ -1011,7 +1017,7 @@ class EggBot(inkex.Effect):
     def penDown(self):
         self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
         if self.bPenIsUp:  # Continue only if pen state is up (or unknown)
-            if (not self.resumeMode) and (not self.bStopped):  # skip if we're resuming or stopped
+            if not self.resumeMode and not self.bStopped:  # skip if we're resuming or stopped
                 self.bPenIsUp = False
                 if self.penDownActivatesEngraver:
                     self.engraverOn()  # will check self.enableEngraver
@@ -1034,15 +1040,15 @@ class EggBot(inkex.Effect):
         self.engraverIsOn = False
 
     def engraverOn(self):
-        if self.options.engraving and (not self.engraverIsOn):
+        if self.options.engraving and not self.engraverIsOn:
             self.engraverIsOn = True
             ebb_serial.command(self.serialPort, 'PD,B,3,0\r')  # Added 6/6/2011, necessary.
             ebb_serial.command(self.serialPort, 'PO,B,3,1\r')
 
     def ServoSetupWrapper(self):
         self.ServoSetup()
-        strVersion = ebb_serial.query(self.serialPort, 'QP\r')  # Query pen position: 1 up, 0 down (followed by OK)
-        if strVersion[0] == '0':
+        str_version = ebb_serial.query(self.serialPort, 'QP\r')  # Query pen position: 1 up, 0 down (followed by OK)
+        if str_version[0] == '0':
             ebb_motion.sendPenDown(self.serialPort, 0)
         else:
             ebb_motion.sendPenUp(self.serialPort, 0)
@@ -1052,11 +1058,11 @@ class EggBot(inkex.Effect):
         # a timing range of 6000 - 30000 in units of 1/(12 MHz).
         # 1% corresponds to 20 us, or 240 units of 1/(12 MHz).
 
-        intTemp = 240 * (self.options.penUpPosition + 25)
-        ebb_serial.command(self.serialPort, 'SC,4,' + str(intTemp) + '\r')
+        int_temp = 240 * (self.options.penUpPosition + 25)
+        ebb_serial.command(self.serialPort, 'SC,4,' + str(int_temp) + '\r')
 
-        intTemp = 240 * (self.options.penDownPosition + 25)
-        ebb_serial.command(self.serialPort, 'SC,5,' + str(intTemp) + '\r')
+        int_temp = 240 * (self.options.penDownPosition + 25)
+        ebb_serial.command(self.serialPort, 'SC,5,' + str(int_temp) + '\r')
 
         # Servo speed units are in units of %/second, referring to the
         # percentages above.  The EBB takes speeds in units of 1/(12 MHz) steps
@@ -1065,10 +1071,10 @@ class EggBot(inkex.Effect):
         # to 5.04 steps/21 ms.  Rounding this to 5 steps/21 ms is correct
         # to within 1 %.
 
-        intTemp = 5 * self.options.ServoUpSpeed
-        ebb_serial.command(self.serialPort, 'SC,11,' + str(intTemp) + '\r')
-        intTemp = 5 * self.options.ServoDownSpeed
-        ebb_serial.command(self.serialPort, 'SC,12,' + str(intTemp) + '\r')
+        int_temp = 5 * self.options.ServoUpSpeed
+        ebb_serial.command(self.serialPort, 'SC,11,' + str(int_temp) + '\r')
+        int_temp = 5 * self.options.ServoDownSpeed
+        ebb_serial.command(self.serialPort, 'SC,12,' + str(int_temp) + '\r')
 
     def stop(self):
         self.bStopped = True
@@ -1084,24 +1090,24 @@ class EggBot(inkex.Effect):
         if self.fPrevX is None:
             return
 
-        nDeltaX = int(self.fX) - int(self.fPrevX)
-        nDeltaY = int(self.fY) - int(self.fPrevY)
+        n_delta_x = int(self.fX) - int(self.fPrevX)
+        n_delta_y = int(self.fY) - int(self.fPrevY)
 
         if self.bPenIsUp:
             self.fSpeed = self.options.penUpSpeed
 
             if self.options.wraparound:
-                if nDeltaX > self.halfWrapSteps:
-                    while nDeltaX > self.halfWrapSteps:
-                        nDeltaX -= self.wrapSteps
-                elif nDeltaX < -1 * self.halfWrapSteps:
-                    while nDeltaX < -1 * self.halfWrapSteps:
-                        nDeltaX += self.wrapSteps
+                if n_delta_x > self.halfWrapSteps:
+                    while n_delta_x > self.halfWrapSteps:
+                        n_delta_x -= self.wrapSteps
+                elif n_delta_x < -1 * self.halfWrapSteps:
+                    while n_delta_x < -1 * self.halfWrapSteps:
+                        n_delta_x += self.wrapSteps
 
         else:
             self.fSpeed = self.options.penDownSpeed
 
-        if plot_utils.distance(nDeltaX, nDeltaY) > 0:
+        if plot_utils.distance(n_delta_x, n_delta_y) > 0:
             self.nodeCount += 1
 
             if self.resumeMode:
@@ -1111,12 +1117,12 @@ class EggBot(inkex.Effect):
                         self.penDown()
                         self.fSpeed = self.options.penDownSpeed
 
-            nTime = int(math.ceil(1000.0 / self.fSpeed * plot_utils.distance(nDeltaX, nDeltaY)))
+            n_time = int(math.ceil(1000.0 / self.fSpeed * plot_utils.distance(n_delta_x, n_delta_y)))
 
-            while (abs(nDeltaX) > 0) or (abs(nDeltaY) > 0):
-                xd = nDeltaX
-                yd = nDeltaY
-                td = nTime
+            while abs(n_delta_x) > 0 or abs(n_delta_y) > 0:
+                xd = n_delta_x
+                yd = n_delta_y
+                td = n_time
                 if td < 1:
                     td = 1  # don't allow zero-time moves.
 
@@ -1141,22 +1147,22 @@ class EggBot(inkex.Effect):
                     if td > 50:
                         time.sleep(float(td - 50) / 1000.0)  # pause before issuing next command
 
-                nDeltaX -= xd
-                nDeltaY -= yd
-                nTime -= td
+                n_delta_x -= xd
+                n_delta_y -= yd
+                n_time -= td
 
-            strButton = ebb_motion.QueryPRGButton(self.serialPort)  # Query if button pressed
-            if strButton == "":
+            str_button = ebb_motion.QueryPRGButton(self.serialPort)  # Query if button pressed
+            if str_button == "":
                 # Can't get a response from EBB, so
                 # attempt to shut down in a way which allows user to continue.
-                bNoResponseFromEbb = True
-                strButton = '1'  # simulate pushed button for pause
+                b_no_response_from_ebb = True
+                str_button = '1'  # simulate pushed button for pause
             else:
-                bNoResponseFromEbb = False
+                b_no_response_from_ebb = False
 
-            if strButton[0] == '1':  # button pressed, or simulated pressed because of communication error to allow resume
+            if str_button[0] == '1':  # button pressed, or simulated pressed because of communication error to allow resume
                 self.svgNodeCount = self.nodeCount
-                if bNoResponseFromEbb:
+                if b_no_response_from_ebb:
                     inkex.errormsg('Plot halted by communication error after node number ' + str(self.nodeCount) + '.')
                 else:
                     inkex.errormsg('Plot paused by button press after node number ' + str(self.nodeCount) + '.')
