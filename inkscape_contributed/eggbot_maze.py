@@ -134,10 +134,6 @@ class Maze(inkex.Effect):
         self.OptionParser.add_option(
                 "--mazeSize", action="store", type="string", dest="mazeSize",
                 default="MEDIUM", help="Difficulty of maze to build")
-        # self.OptionParser.add_option(
-        #	"--hpp", action="store", type="inkbool", dest="hpp", default=False,
-        #	help="Use a faster plotting technique that requires much better plotting precision" )
-        # self.hpp = self.options.hpp
 
         self.hpp = False
 

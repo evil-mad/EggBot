@@ -167,9 +167,6 @@ class Twist(inkex.Effect):
             # Probably never happens, but...
             return
 
-        # if transform:
-        #	simpletransform.applyTransformToPath( transform, p )
-
         # Now traverse the cubic super path
         subpath_list = []
         subpath_vertices = []

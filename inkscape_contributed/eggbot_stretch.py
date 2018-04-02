@@ -365,8 +365,7 @@ class Map(inkex.Effect):
                 #     hidden only if its visibility is "inherit" or "hidden".
 
                 refid = node.get(inkex.addNS('href', 'xlink'))
-                if not refid:
-                    pass
+
 
                 # [1:] to ignore leading '#' in reference
                 path = '//*[@id="{0}"]'.format(refid[1:])
@@ -403,16 +402,15 @@ class Map(inkex.Effect):
                 # Create a path with the outline of the rectangle
                 x = float(node.get('x'))
                 y = float(node.get('y'))
-                if (not x) or (not y):
-                    pass
+
                 w = float(node.get('width', '0'))
                 h = float(node.get('height', '0'))
-                a = []
-                a.append(['M ', [x, y]])
-                a.append([' l ', [w, 0]])
-                a.append([' l ', [0, h]])
-                a.append([' l ', [-w, 0]])
-                a.append([' Z', []])
+                a = [['M ', [x, y]],
+                     [' l ', [w, 0]],
+                     [' l ', [0, h]],
+                     [' l ', [-w, 0]],
+                     [' Z', []],
+                     ]
                 self.getPathVertices(simplepath.formatPath(a), node, mat_new, find_bbox)
 
             elif node.tag in [inkex.addNS('line', 'svg'), 'line']:
@@ -429,11 +427,10 @@ class Map(inkex.Effect):
                 y1 = float(node.get('y1'))
                 x2 = float(node.get('x2'))
                 y2 = float(node.get('y2'))
-                if any([not x1, not y1, not x2, not y2]):
-                    pass
-                a = []
-                a.append(['M ', [x1, y1]])
-                a.append([' L ', [x2, y2]])
+
+                a = [['M ', [x1, y1]],
+                     [' L ', [x2, y2]],
+                     ]
                 self.getPathVertices(simplepath.formatPath(a), node, mat_new, find_bbox)
 
             elif node.tag in [inkex.addNS('polyline', 'svg'), 'polyline']:
@@ -449,8 +446,6 @@ class Map(inkex.Effect):
                 # Note: we ignore polylines with no points
 
                 pl = node.get('points', '').strip()
-                if not pl:
-                    pass
 
                 pa = pl.split()
                 d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0, len(pa))])
@@ -469,8 +464,6 @@ class Map(inkex.Effect):
                 # Note: we ignore polygons with no points
 
                 pl = node.get('points', '').strip()
-                if not pl:
-                    pass
 
                 pa = pl.split()
                 d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(len(pa))])
@@ -502,8 +495,6 @@ class Map(inkex.Effect):
                 else:
                     rx = float(node.get('r', '0'))
                     ry = rx
-                if rx == 0 or ry == 0:
-                    pass
 
                 cx = float(node.get('cx', '0'))
                 cy = float(node.get('cy', '0'))

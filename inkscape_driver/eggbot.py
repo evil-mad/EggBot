@@ -26,7 +26,7 @@ import math
 import time
 
 import cubicsuperpath
-import ebb_motion  # https://github.com/evil-mad/plotink	Requires version 0.2 or newer.
+import ebb_motion  # https://github.com/evil-mad/plotink    Requires version 0.2 or newer.
 import ebb_serial  # https://github.com/evil-mad/plotink
 import eggbot_conf  # Some settings can be changed here.
 import inkex
