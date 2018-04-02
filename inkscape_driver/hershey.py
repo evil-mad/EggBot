@@ -33,25 +33,25 @@ FONT_GROUP_V_SPACING = 45
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
     style = {'stroke': '#000000', 'fill': 'none'}
-    pathString = face[char]
-    splitString = pathString.split()
-    midpoint = offset - float(splitString[0])
-    splitpoint = pathString.find("M")
+    path_string = face[char]
+    split_string = path_string.split()
+    midpoint = offset - float(split_string[0])
+    splitpoint = path_string.find("M")
     # Space glyphs have just widths with no moves, so their splitpoint is 0
     # We only want to generate paths for visible glyphs where splitpoint > 0
     if splitpoint > 0:
-        pathString = pathString[splitpoint:]  # portion after first move
-        trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
-        text_attribs = {'style': simplestyle.formatStyle(style), 'd': pathString, 'transform': trans}
+        path_string = path_string[splitpoint:]  # portion after first move
+        trans = 'translate({0},{1})'.format(midpoint, vertoffset)
+        text_attribs = {'style': simplestyle.formatStyle(style), 'd': path_string, 'transform': trans}
         inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
-    return midpoint + float(splitString[1])  # new offset value
+    return midpoint + float(split_string[1])  # new offset value
 
 
 def svg_text_width(char, face, offset):
-    pathString = face[char]
-    splitString = pathString.split()
-    midpoint = offset - float(splitString[0])
-    return midpoint + float(splitString[1])  # new offset value
+    path_string = face[char]
+    split_string = path_string.split()
+    midpoint = offset - float(split_string[0])
+    return midpoint + float(split_string[1])  # new offset value
 
 
 class Hershey(inkex.Effect):
@@ -76,14 +76,14 @@ class Hershey(inkex.Effect):
 
     def effect(self):
 
-        OutputGenerated = False
+        output_generated = False
 
         # Embed text in group to make manipulation easier:
         g_attribs = {inkex.addNS('label', 'inkscape'): 'Hershey Text'}
         g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
 
         scale = self.unittouu('1px')  # convert to document units
-        font = eval('hersheydata.' + str(self.options.fontface))
+        font = getattr(hersheydata, str(self.options.fontface))
         clearfont = hersheydata.futural
         # Baseline: modernized roman simplex from JHF distribution.
 
@@ -93,30 +93,30 @@ class Hershey(inkex.Effect):
 
         if self.options.action == "render":
             # evaluate text string
-            letterVals = [ord(q) - 32 for q in self.options.text]
-            for q in letterVals:
-                if (q <= 0) or (q > 95):
+            letter_vals = (ord(q) - 32 for q in self.options.text)
+            for q in letter_vals:
+                if q <= 0 or q > 95:
                     w += 2 * spacing
                 else:
                     w = draw_svg_text(q, font, w, 0, g)
-                    OutputGenerated = True
+                    output_generated = True
         elif self.options.action == 'sample':
             w, v = self.render_table_of_all_fonts('group_allfonts', g, spacing, clearfont)
-            OutputGenerated = True
+            output_generated = True
             scale *= 0.4  # Typically scales to about A4/US Letter size
         elif self.options.action == 'sampleHW':
             w, v = self.render_table_of_all_fonts('group_hwfonts', g, spacing, clearfont)
-            OutputGenerated = True
+            output_generated = True
             scale *= 0.5  # Typically scales to about A4/US Letter size
         else:
             # Generate glyph table
             wmax = 0
-            for p in range(0, 10):
+            for p in range(10):
                 w = 0
                 v = spacing * (15 * p - 67)
-                for q in range(0, 10):
+                for q in range(10):
                     r = p * 10 + q
-                    if (r <= 0) or (r > 95):
+                    if r <= 0 or r > 95:
                         w += 5 * spacing
                     else:
                         w = draw_svg_text(r, clearfont, w, v, g)
@@ -125,36 +125,36 @@ class Hershey(inkex.Effect):
                 if w > wmax:
                     wmax = w
             w = wmax
-            OutputGenerated = True
+            output_generated = True
             #  Translate group to center of view, approximately
-        t = 'translate(' + str(self.view_center[0] - scale * w / 2) + ',' + str(self.view_center[1] - scale * v / 2) + ')'
+        t = 'translate({0}, {1})'.format(str(self.view_center[0] - scale * w / 2),
+                                         str(self.view_center[1] - scale * v / 2))
         if scale != 1:
-            t += ' scale(' + str(scale) + ')'
+            t += ' scale({0})'.format(scale)
         g.set('transform', t)
 
-        if not OutputGenerated:
+        if not output_generated:
             self.current_layer.remove(g)  # remove empty group, if no SVG was generated.
 
     def render_table_of_all_fonts(self, fontgroupname, parent, spacing, clearfont):
         v = 0
         wmax = 0
         wmin = 0
-        fontgroup = eval('hersheydata.' + fontgroupname)
+        fontgroup = getattr(hersheydata, fontgroupname)
 
         # Render list of font names in a vertical column:
-        nFontIndex = 0
         for f in fontgroup:
             w = 0
-            letterVals = [ord(q) - 32 for q in (f[1] + ' -> ')]
+            letter_vals = (ord(q) - 32 for q in (f[1] + ' -> '))
             # we want to right-justify the clear text, so need to know its width
-            for q in letterVals:
+            for q in letter_vals:
                 w = svg_text_width(q, clearfont, w)
 
             w = -w  # move the name text left by its width
             if w < wmin:
                 wmin = w
             # print the font name
-            for q in letterVals:
+            for q in letter_vals:
                 w = draw_svg_text(q, clearfont, w, v, parent)
             v += FONT_GROUP_V_SPACING
             if w > wmax:
@@ -165,11 +165,11 @@ class Hershey(inkex.Effect):
         wmaxname = wmax + 8  # single space width
         for f in fontgroup:
             w = wmaxname
-            font = eval('hersheydata.' + f[0])
+            font = getattr(hersheydata, f[0])
             # evaluate text string
-            letterVals = [ord(q) - 32 for q in self.options.text]
-            for q in letterVals:
-                if (q <= 0) or (q > 95):
+            letter_vals = (ord(q) - 32 for q in self.options.text)
+            for q in letter_vals:
+                if q <= 0 or q > 95:
                     w += 2 * spacing
                 else:
                     w = draw_svg_text(q, font, w, v, parent)
@@ -182,4 +182,3 @@ class Hershey(inkex.Effect):
 if __name__ == '__main__':
     e = Hershey()
     e.affect()
-
