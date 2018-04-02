@@ -137,7 +137,7 @@ def renderText(parent, markup):
     for face, text in markup:
         if face in map_our_names_to_hersheydata:
             face = map_our_names_to_hersheydata[face]
-        font = eval('hersheydata.' + face)
+        font = getattr(hersheydata, face)
         letter_vals = (ord(q) - 32 for q in text)
         for q in letter_vals:
             if (q < 0) or (q > 95):
