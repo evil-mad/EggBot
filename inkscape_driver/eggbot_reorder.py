@@ -51,11 +51,10 @@ def find_ordering_naive(objlist):
     except:
         inkex.errormsg(gettext.gettext(str(objlist[0])))
         sys.exit(1)
-    for id, coords in objlist[1:]:
+    for _, coords in objlist[1:]:
         air_length_default += dist(oldx, oldy, coords[0], coords[1])
         oldx = coords[2]
         oldy = coords[3]
-    # fid.write("Default air distance: %d\n" % air_length_default)
 
     air_length_ordered = 0
     # for now, start with a random one:
@@ -66,7 +65,7 @@ def find_ordering_naive(objlist):
 
     # for now, do this in the most naive way:
     # for the previous end point, iterate over each remaining path and pick the closest starting point
-    while len(objlist) > 0:
+    while objlist:
         min_distance = 100000000  # TODO put something else here better?
         for path in objlist:
             # instead of having a prevX, prevY, we just look at the last item in sort_list
@@ -78,8 +77,6 @@ def find_ordering_naive(objlist):
         air_length_ordered += min_distance
         sort_list.append(min_path)
         objlist.remove(min_path)
-
-    # fid.write("optimized air distance: %d\n" % air_length_ordered)
 
     # remove the extraneous info from the list order
     sort_order = [id for id, coords in sort_list]
@@ -104,11 +101,6 @@ class EggBotReorderPaths(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
 
-    # 		self.OptionParser.add_option( '-r', '--reverse', action='store', type="inkbool",
-    # 			dest="reverse", default=True, help="Enable 'reverse path direction' optimizations" )
-    # 		self.OptionParser.add_option( '-w', '--wrap', action='store', type="inkbool",
-    # 				dest="wrap", default=True, help="Enable 'wrap egg axis' optimizations" )
-
     def get_start_end(self, node, transform):
         """Given a node, return the start and end points"""
         d = node.get('d')
@@ -116,31 +108,28 @@ class EggBotReorderPaths(inkex.Effect):
 
         # simplepath converts coordinates to absolute and cleans them up, but
         # these are still some big assumptions here, are they always valid? TODO
-        startX = sp[0][1][0]
-        startY = sp[0][1][1]
+        start_x = sp[0][1][0]
+        start_y = sp[0][1][1]
         if sp[-1][0] == 'Z':
             # go back to start
-            endX = startX
-            endY = startY
+            end_x = start_x
+            end_y = start_y
         else:
-            endX = sp[-1][1][-2]
-            endY = sp[-1][1][-1]
+            end_x = sp[-1][1][-2]
+            end_y = sp[-1][1][-1]
 
-        sx, sy = conv(startX, startY, transform)
-        ex, ey = conv(endX, endY, transform)
+        sx, sy = conv(start_x, start_y, transform)
+        ex, ey = conv(end_x, end_y, transform)
         return sx, sy, ex, ey
 
     def effect(self):
         """This is the main entry point"""
 
         # based partially on the restack.py extension
-        if len(self.selected) > 0:
-            svg = self.document.getroot()
+        if self.selected:
 
             # TODO check for non-path elements?
             # TODO it seems like the order of selection is not consistent
-
-            # fid = open("/home/matthew/debug.txt", "w")
 
             # for each selected item - TODO make this be all objects, everywhere
             # I can think of two options:
@@ -148,27 +137,29 @@ class EggBotReorderPaths(inkex.Effect):
             # 2. Some magic with xpath? (would this limit us to specific node types?)
 
             objlist = []
-            for id, node in self.selected.iteritems():
+            for id_, node in self.selected.iteritems():
                 transform = node.get('transform')
                 if transform:
                     transform = simpletransform.parseTransform(transform)
 
-                item = (id, self.get_start_end(node, transform))
+                item = (id_, self.get_start_end(node, transform))
                 objlist.append(item)
 
             # sort / order the objects
             sort_order, air_distance_default, air_distance_ordered = find_ordering_naive(objlist)
 
-            for id in sort_order:
+            for id_ in sort_order:
                 # There's some good magic here, that you can use an
                 # object id to index into self.selected. Brilliant!
-                self.current_layer.append(self.selected[id])
-
-            # fid.close()
+                self.current_layer.append(self.selected[id_])
 
             if air_distance_default > 0:  # don't divide by zero. :P
                 improvement_pct = 100 * ((air_distance_default - air_distance_ordered) / air_distance_default)
-                inkex.errormsg(gettext.gettext("Selected paths have been reordered and optimized for quicker EggBot plotting.\n\nOriginal air-distance: %d\nOptimized air-distance: %d\nDistance reduced by: %1.2d%%\n\nHave a nice day!" % (air_distance_default, air_distance_ordered, improvement_pct)))
+                inkex.errormsg(gettext.gettext("Selected paths have been reordered and optimized for quicker EggBot plotting.\n\n"
+                                               "Original air-distance: {0:d}\n"
+                                               "Optimized air-distance: {1:d}\n"
+                                               "Distance reduced by: {2:1.2f}%\n\n"
+                                               "Have a nice day!".format(air_distance_default, air_distance_ordered, improvement_pct)))
             else:
                 inkex.errormsg(gettext.gettext("Unable to start. Please select multiple distinct paths. :)"))
 
