@@ -23,34 +23,42 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
-import hersheydata  # data file w/ Hershey font data
 import inkex
+import lxml
 import simplestyle
 
-Debug = False
+try:
+    from typing import List, Tuple
+except ImportError:
+    pass  # Not needed for runtime.
+
+import hersheydata  # data file w/ Hershey font data
+
 FONT_GROUP_V_SPACING = 45
 
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
+    # type: (int, List[str], float, float, lxml.etree.ElementTree) -> float
     style = {'stroke': '#000000', 'fill': 'none'}
-    path_string = face[char]
-    split_string = path_string.split()
-    midpoint = offset - float(split_string[0])
-    splitpoint = path_string.find("M")
-    # Space glyphs have just widths with no moves, so their splitpoint is 0
+    path = face[char]  # type: str
+    split_string = path.split()  # type: List[str]
+    midpoint = offset - float(split_string[0])  # type: float
+    splitpoint = path.find("M")  # type: int
+    # Space glyphs have just widths with no moves, so their splitpoint is -1
     # We only want to generate paths for visible glyphs where splitpoint > 0
     if splitpoint > 0:
-        path_string = path_string[splitpoint:]  # portion after first move
+        path = path[splitpoint:]  # portion after first move
         trans = 'translate({0},{1})'.format(midpoint, vertoffset)
-        text_attribs = {'style': simplestyle.formatStyle(style), 'd': path_string, 'transform': trans}
+        text_attribs = {'style': simplestyle.formatStyle(style), 'd': path, 'transform': trans}
         inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
     return midpoint + float(split_string[1])  # new offset value
 
 
 def svg_text_width(char, face, offset):
-    path_string = face[char]
-    split_string = path_string.split()
-    midpoint = offset - float(split_string[0])
+    # type: (int, List[str], int) -> float
+    path = face[char]  # type: str
+    split_string = path.split()  # type: List[str]
+    midpoint = offset - float(split_string[0])  # type: float
     return midpoint + float(split_string[1])  # new offset value
 
 
@@ -80,11 +88,11 @@ class Hershey(inkex.Effect):
 
         # Embed text in group to make manipulation easier:
         g_attribs = {inkex.addNS('label', 'inkscape'): 'Hershey Text'}
-        g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)
+        g = inkex.etree.SubElement(self.current_layer, 'g', g_attribs)  # type: lxml.etree.ElementTree
 
-        scale = self.unittouu('1px')  # convert to document units
-        font = getattr(hersheydata, str(self.options.fontface))
-        clearfont = hersheydata.futural
+        scale = self.unittouu('1px')  # type: float # convert to document units
+        font = getattr(hersheydata, self.options.fontface)  # type: List[str]
+        clearfont = hersheydata.futural  # type: List[str]
         # Baseline: modernized roman simplex from JHF distribution.
 
         w = 0  # Initial spacing offset
@@ -100,14 +108,17 @@ class Hershey(inkex.Effect):
                 else:
                     w = draw_svg_text(q, font, w, 0, g)
                     output_generated = True
+
         elif self.options.action == 'sample':
             w, v = self.render_table_of_all_fonts('group_allfonts', g, spacing, clearfont)
             output_generated = True
             scale *= 0.4  # Typically scales to about A4/US Letter size
+
         elif self.options.action == 'sampleHW':
             w, v = self.render_table_of_all_fonts('group_hwfonts', g, spacing, clearfont)
             output_generated = True
             scale *= 0.5  # Typically scales to about A4/US Letter size
+
         else:
             # Generate glyph table
             wmax = 0
@@ -126,7 +137,8 @@ class Hershey(inkex.Effect):
                     wmax = w
             w = wmax
             output_generated = True
-            #  Translate group to center of view, approximately
+
+        #  Translate group to center of view, approximately
         t = 'translate({0}, {1})'.format(str(self.view_center[0] - scale * w / 2),
                                          str(self.view_center[1] - scale * v / 2))
         if scale != 1:
@@ -137,15 +149,16 @@ class Hershey(inkex.Effect):
             self.current_layer.remove(g)  # remove empty group, if no SVG was generated.
 
     def render_table_of_all_fonts(self, fontgroupname, parent, spacing, clearfont):
+        # type: (str, lxml.etree.ElementTree, int, List[str]) -> Tuple[float, float]
         v = 0
         wmax = 0
         wmin = 0
-        fontgroup = getattr(hersheydata, fontgroupname)
+        fontgroup = getattr(hersheydata, fontgroupname)  # type: List[Tuple[str, str]]
 
         # Render list of font names in a vertical column:
-        for f in fontgroup:
+        for f in fontgroup:  # type: Tuple[str, str]
             w = 0
-            letter_vals = [ord(q) - 32 for q in (f[1] + ' -> ')]
+            letter_vals = [ord(q) - 32 for q in (f[1] + ' -> ')]  # type: List[int]
             # we want to right-justify the clear text, so need to know its width
             for q in letter_vals:
                 w = svg_text_width(q, clearfont, w)
@@ -163,7 +176,7 @@ class Hershey(inkex.Effect):
         # Next, we render a second column. The user's text, in each of the different fonts:
         v = 0  # back to top line
         wmaxname = wmax + 8  # single space width
-        for f in fontgroup:
+        for f in fontgroup:  # type: Tuple[str, str]
             w = wmaxname
             font = getattr(hersheydata, f[0])
             # evaluate text string
