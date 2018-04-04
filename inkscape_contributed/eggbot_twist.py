@@ -365,7 +365,7 @@ class Twist(inkex.Effect):
                 self.addPathVertices(d, node, mat_new, clone_transform)
 
             elif node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse',
-                              inkex.addNS('circle', 'svg'), node.tag == 'circle']:
+                              inkex.addNS('circle', 'svg'), 'circle']:
 
                 # Convert circles and ellipses to a path with two 180 degree arcs.
                 # In general (an ellipse), we convert
