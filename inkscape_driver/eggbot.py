@@ -265,7 +265,7 @@ class EggBot(inkex.Effect):
             for node in a_node_list:
                 if node.tag == 'svg':
                     self.recursiveEggbotDataScan(node)
-                elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
+                elif node.tag in [inkex.addNS('eggbot', 'svg'), 'eggbot']:
                     self.svgLayer = int(node.get('layer'))
                     self.svgNodeCount = int(node.get('node'))
 
@@ -287,7 +287,7 @@ class EggBot(inkex.Effect):
             for node in a_node_list:
                 if node.tag == 'svg':
                     self.UpdateSVGEggbotData(node)
-                elif node.tag == inkex.addNS('eggbot', 'svg') or node.tag == 'eggbot':
+                elif node.tag in [inkex.addNS('eggbot', 'svg'), 'eggbot']:
                     node.set('layer', str(self.svgLayer))
                     node.set('node', str(self.svgNodeCount))
                     node.set('lastpath', str(self.svgLastPath))
