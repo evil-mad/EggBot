@@ -118,23 +118,34 @@ from simpletransform import applyTransformToPath, applyTransformToPoint, compose
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
 
-F_MINGAP_SMALL_VALUE = 0.0000000001  # Was 0.00001 in the original version which did not have joined lines.
+F_MINGAP_SMALL_VALUE = 0.0000000001  
+# Was 0.00001 in the original version which did not have joined lines.
 # Reducing this by a factor of 10^5 decreased probability of occurrence of
 # the bug in the original, which got confused when the path barely
 # grazed a corner.
+
 BEZIER_OVERSHOOT_MULTIPLIER = 0.75  # evaluation of cubic Bezier curve equation value,
 # at x = 0, with
 # endpoints at ( -0.5, 0 ), ( +0.5, 0 )
 # and control points at ( -0.5, 1.0 ), ( +0.5, 1.0 )
 
-RADIAN_TOLERANCE_FOR_COLINEAR = 0.1  # Pragmatically adjusted to allow adjacent segments from the same scan line, even short ones,
+RADIAN_TOLERANCE_FOR_COLINEAR = 0.1  
+# Pragmatically adjusted to allow adjacent segments from the same scan line, even short ones,
 # to be classified as having the same angle
-RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1  # Pragmatic adjustment again, as with colinearity tolerance
-RECURSION_LIMIT = 500  # Pragmatic - if too high, risk runtime python error; if too low, miss some chances for reducing pen lifts
-EXTREME_POSITIVE_NUMBER = 1.0E70
-EXTREME_NEGATIVE_NUMBER = -1.0E70
-MIN_HATCH_LENGTH_AS_FRACTION_OF_HATCH_SPACING = 0.25  # set minimum hatch length to some function
-# (e.g. this multiplier) of the hatch spacing
+
+RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1  
+# Pragmatic adjustment again, as with colinearity tolerance
+
+RECURSION_LIMIT = 500  
+# Pragmatic - if too high, risk runtime python error; 
+# if too low, miss some chances for reducing pen lifts
+
+EXTREME_POS = 1.0E70 # Extremely large positive number
+EXTREME_NEG = -1.0E70 # Extremely large negative number
+
+MIN_HATCH_FRACTION = 0.25  
+# Minimum hatch length, as a fraction of the hatch spacing.
+
 """
 Geometry 101: Determining if two lines intersect
 
@@ -324,7 +335,7 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
                         f_sin_of_join_angle = math.sin(angle_difference_radians)
                         f_abs_sin_of_join_angle = abs(f_sin_of_join_angle)
                         if f_abs_sin_of_join_angle != 0.0:  # Worrying about case of intersecting a segment parallel to the hatch
-                            f_preliminary_length_to_be_removed_from_pt = f_hold_back_steps / f_abs_sin_of_join_angle
+                            prelim_length_to_be_removed = f_hold_back_steps / f_abs_sin_of_join_angle
                             b_unconditionally_excise_hatch = False
                         else:
                             b_unconditionally_excise_hatch = True
@@ -349,12 +360,12 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
                             # nb: difference angle has been forced to the range -pi to +pi
                             if abs(angle_difference_radians) < math.pi / 2:
                                 # It's near the p3 the relevant end from which the hatch departs
-                                f_distance_from_intersection_to_relevant_end = math.hypot(p3[0] - intersection[0], p3[1] - intersection[1])
-                                f_distance_from_intersection_to_irrelevant_end = math.hypot(p4[0] - intersection[0], p4[1] - intersection[1])
+                                dist_intersection_to_relevant_end = math.hypot(p3[0] - intersection[0], p3[1] - intersection[1])
+                                dist_intersection_to_irrelevant_end = math.hypot(p4[0] - intersection[0], p4[1] - intersection[1])
                             else:
                                 # It's near the p4 end from which the hatch departs
-                                f_distance_from_intersection_to_relevant_end = math.hypot(p4[0] - intersection[0], p4[1] - intersection[1])
-                                f_distance_from_intersection_to_irrelevant_end = math.hypot(p3[0] - intersection[0], p3[1] - intersection[1])
+                                dist_intersection_to_relevant_end = math.hypot(p4[0] - intersection[0], p4[1] - intersection[1])
+                                dist_intersection_to_irrelevant_end = math.hypot(p3[0] - intersection[0], p3[1] - intersection[1])
 
                             # Now, the problem defined in issue 22 is that we may not need to remove the
                             # entire preliminary length we've calculated.  This problem occurs because
@@ -371,18 +382,18 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
                             # Let's see if either end, or perhaps both ends, has a case of excessive holdback
 
                             # First, default assumption is that neither end has excessive holdback
-                            f_final_length_to_be_removed_from_pt_when_starting_hatch = f_preliminary_length_to_be_removed_from_pt
-                            f_final_length_to_be_removed_from_pt_when_ending_hatch = f_preliminary_length_to_be_removed_from_pt
+                            length_remove_starting_hatch = prelim_length_to_be_removed
+                            length_remove_ending_hatch = prelim_length_to_be_removed
 
                             # Now check each of the two ends
-                            if f_preliminary_length_to_be_removed_from_pt > (f_distance_from_intersection_to_relevant_end + f_hold_back_steps):
+                            if prelim_length_to_be_removed > (dist_intersection_to_relevant_end + f_hold_back_steps):
                                 # Yes, would be excessive holdback approaching from this direction
-                                f_final_length_to_be_removed_from_pt_when_starting_hatch = f_distance_from_intersection_to_relevant_end + f_hold_back_steps
-                            if f_preliminary_length_to_be_removed_from_pt > (f_distance_from_intersection_to_irrelevant_end + f_hold_back_steps):
+                                length_remove_starting_hatch = dist_intersection_to_relevant_end + f_hold_back_steps
+                            if prelim_length_to_be_removed > (dist_intersection_to_irrelevant_end + f_hold_back_steps):
                                 # Yes, would be excessive holdback approaching from other direction
-                                f_final_length_to_be_removed_from_pt_when_ending_hatch = f_distance_from_intersection_to_irrelevant_end + f_hold_back_steps
+                                length_remove_ending_hatch = dist_intersection_to_irrelevant_end + f_hold_back_steps
 
-                            d_and_a.append((s, path, f_final_length_to_be_removed_from_pt_when_starting_hatch, f_final_length_to_be_removed_from_pt_when_ending_hatch))
+                            d_and_a.append((s, path, length_remove_starting_hatch, length_remove_ending_hatch))
                         else:
                             d_and_a.append((s, path, 123456.0, 123456.0))  # Mark for complete hatch excision, hatch is parallel to segment
                             # Just a random number guaranteed large enough to be longer than any hatch length
@@ -461,7 +472,7 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
             # remove it from consideration by marking it as already drawn - a
             # fiction, but is much quicker than actually removing the hatch from the list.
 
-            f_min_allowed_hatch_length = self.options.hatchSpacing * MIN_HATCH_LENGTH_AS_FRACTION_OF_HATCH_SPACING
+            f_min_allowed_hatch_length = self.options.hatchSpacing * MIN_HATCH_FRACTION
             f_initial_hatch_length = math.hypot(x2 - x1, y2 - y1)
             # We did as much as possible of the inset operation back when we were finding intersections.
             # We did it back then because at that point we knew more about the geometry than we know now.
@@ -736,8 +747,8 @@ class Eggbot_Hatch(inkex.Effect):
         Determine the bounding box for our collection of polygons
         """
 
-        self.xmin, self.xmax = EXTREME_POSITIVE_NUMBER, EXTREME_NEGATIVE_NUMBER
-        self.ymin, self.ymax = EXTREME_POSITIVE_NUMBER, EXTREME_NEGATIVE_NUMBER
+        self.xmin, self.xmax = EXTREME_POS, EXTREME_NEG
+        self.ymin, self.ymax = EXTREME_POS, EXTREME_NEG
         for path in self.paths:
             for subpath in self.paths[path]:
                 for vertex in subpath:
@@ -1128,7 +1139,7 @@ class Eggbot_Hatch(inkex.Effect):
         w = self.xmax - self.xmin
         h = self.ymax - self.ymin
 
-        b_bounding_box_exists = ((w != (EXTREME_NEGATIVE_NUMBER - EXTREME_POSITIVE_NUMBER)) and (h != (EXTREME_NEGATIVE_NUMBER - EXTREME_POSITIVE_NUMBER)))
+        b_bounding_box_exists = ((w != (EXTREME_NEG - EXTREME_POS)) and (h != (EXTREME_NEG - EXTREME_POS)))
         ret_value = b_bounding_box_exists
 
         if b_bounding_box_exists:
@@ -1177,13 +1188,13 @@ class Eggbot_Hatch(inkex.Effect):
 
     def effect(self):
 
-        global reference_count
-        global pt_last_position_absolute
+        global ref_count
+        global pt_last_position_abs
         # Viewbox handling
         self.handleViewBox()
 
-        reference_count = 0
-        pt_last_position_absolute = [0, 0]
+        ref_count = 0
+        pt_last_position_abs = [0, 0]
 
         # Build a list of the vertices for the document's graphical elements
         if self.options.ids:
@@ -1218,8 +1229,8 @@ class Eggbot_Hatch(inkex.Effect):
         # pointer as the dictionary key under which to save the hatch
         # fills for that node.
 
-        absolute_line_segments = {}
-        n_absolute_line_segment_total = 0
+        abs_line_segments = {} # Absolute line segments
+        n_abs_line_segment_total = 0
         n_pen_lifts = 0
         # To implement
         for key in self.hatches:
@@ -1245,9 +1256,9 @@ class Eggbot_Hatch(inkex.Effect):
             transformed_hatch_spacing = stroke_width * self.options.hatchSpacing
 
             path = ''  # regardless of whether or not we're reducing pen lifts
-            pt_last_position_absolute = [0, 0]
-            pt_last_position_absolute[0] = 0
-            pt_last_position_absolute[1] = 0
+            pt_last_position_abs = [0, 0]
+            pt_last_position_abs[0] = 0
+            pt_last_position_abs[1] = 0
             f_distance_moved_with_pen_up = 0
             if not self.options.reducePenLifts:
                 for segment in self.hatches[key]:
@@ -1318,18 +1329,20 @@ class Eggbot_Hatch(inkex.Effect):
                     # but instead of drawing them into the path right away, we put them in
                     # an array where they'll be available for random access
                     # by our anti-pen-lift algorithm
-                    absolute_line_segments[n_absolute_line_segment_total] = [pt1, pt2, False]  # False indicates that segment has not yet been drawn
-                    n_absolute_line_segment_total += 1
+                    abs_line_segments[n_abs_line_segment_total] = [pt1, pt2, False]  # False indicates that segment has not yet been drawn
+                    n_abs_line_segment_total += 1
                     direction = not direction
 
                 # Now have a nice juicy buffer full of line segments with absolute coordinates
-                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)  # Just fixed and simple for now - may make function of neighborhood later
-                for reference_count in range(n_absolute_line_segment_total):  # This is the entire range of segments,
-                    # Sets global reference_count to segment which has an end closest to current pen position.
-                    # Doesn't need to select which end is closest, as that will happen below, with n_reference_end_index.
+                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)  
+                # Just fixed and simple for now - may make function of neighborhood later
+                
+                for ref_count in range(n_abs_line_segment_total):  # This is the entire range of segments,
+                    # Sets global ref_count to segment which has an end closest to current pen position.
+                    # Doesn't need to select which end is closest, as that will happen below, with n_ref_end_index.
                     # When we have gone thru this whole range, we will be completely done.
                     # We only get here again, after all _connected_ segments have been "drawn".
-                    if not absolute_line_segments[reference_count][2]:  # Test whether this segment has been drawn
+                    if not abs_line_segments[ref_count][2]:  # Test whether this segment has been drawn
                         # Has not been drawn yet
 
                         # Before we do any irrevocable changes to path, let's see if we are going to be able to append any segments.
@@ -1340,28 +1353,28 @@ class Eggbot_Hatch(inkex.Effect):
                         # Lazily, again, select the desired direction of line ahead of time.
 
                         b_found_segment_to_add = False  # default assumption
-                        n_reference_end_index_at_closest = 0
+                        n_ref_end_index_at_closest = 0
                         f_closest_distance_squared = 123456  # just a random large number
-                        for n_reference_end_index in range(2):
-                            pt_reference = absolute_line_segments[reference_count][n_reference_end_index]
-                            pt_reference_other_end = absolute_line_segments[reference_count][not n_reference_end_index]
+                        for n_ref_end_index in range(2):
+                            pt_reference = abs_line_segments[ref_count][n_ref_end_index]
+                            pt_reference_other_end = abs_line_segments[ref_count][not n_ref_end_index]
                             f_reference_direction_radians = math.atan2(pt_reference_other_end[1] - pt_reference[1], pt_reference_other_end[0] - pt_reference[0])  # from other end to this end
-                            # The following is just a simple copy from the routine in recursivelyAppendNearbySegmentIfAny procedure
+                            # The following is just a simple copy from the routine in recursivelyAppendNearbySegments procedure
                             # Look through all possibilities to choose the closest that fulfills all requirements e.g. direction and colinearity
-                            for innerCount in range(n_absolute_line_segment_total):  # investigate all segments
-                                if not absolute_line_segments[innerCount][2]:
+                            for innerCount in range(n_abs_line_segment_total):  # investigate all segments
+                                if not abs_line_segments[innerCount][2]:
                                     # This segment currently undrawn, so it is a candidate for a path extension
                                     # Need to check both ends of each and every proposed segment so we can find the most appropriate one
                                     # Define pt2 in the reference as the end which we want to extend
                                     for nNewSegmentInitialEndIndex in range(2):
                                         # First try initial end of test segment (aka pt1) vs final end (aka pt2) of reference segment
-                                        if innerCount != reference_count:  # don't investigate self ends
-                                            delta_x = absolute_line_segments[innerCount][nNewSegmentInitialEndIndex][0] - pt_reference[0]  # proposed initial pt1 X minus existing final pt1 X
-                                            delta_y = absolute_line_segments[innerCount][nNewSegmentInitialEndIndex][1] - pt_reference[1]  # proposed initial pt1 Y minus existing final pt1 Y
+                                        if innerCount != ref_count:  # don't investigate self ends
+                                            delta_x = abs_line_segments[innerCount][nNewSegmentInitialEndIndex][0] - pt_reference[0]  # proposed initial pt1 X minus existing final pt1 X
+                                            delta_y = abs_line_segments[innerCount][nNewSegmentInitialEndIndex][1] - pt_reference[1]  # proposed initial pt1 Y minus existing final pt1 Y
                                             if (delta_x * delta_x + delta_y * delta_y) < f_proposed_neighborhood_radius_squared:
                                                 f_this_distance_squared = delta_x * delta_x + delta_y * delta_y
-                                                pt_new_segment_this_end = absolute_line_segments[innerCount][nNewSegmentInitialEndIndex]
-                                                pt_new_segment_other_end = absolute_line_segments[innerCount][not nNewSegmentInitialEndIndex]
+                                                pt_new_segment_this_end = abs_line_segments[innerCount][nNewSegmentInitialEndIndex]
+                                                pt_new_segment_other_end = abs_line_segments[innerCount][not nNewSegmentInitialEndIndex]
                                                 f_new_segment_direction_radians = math.atan2(pt_new_segment_this_end[1] - pt_new_segment_other_end[1], pt_new_segment_this_end[0] - pt_new_segment_other_end[0])  # from other end to this end
                                                 # If this end would cause an alternating direction,
                                                 # then exclude it
@@ -1384,44 +1397,44 @@ class Eggbot_Hatch(inkex.Effect):
                                                         # not colinear
                                                         f_closest_distance_squared = f_this_distance_squared
                                                         b_found_segment_to_add = True
-                                                        n_reference_end_index_at_closest = n_reference_end_index
+                                                        n_ref_end_index_at_closest = n_ref_end_index
 
                         # At last we've looked at all the candidate segment ends, as related to all the reference ends
                         if not b_found_segment_to_add:
                             # This segment is solitary.
                             # Must start a new line, not joined to any previous paths
-                            delta_x = absolute_line_segments[reference_count][1][0] - absolute_line_segments[reference_count][0][0]  # end minus start, in original direction
-                            delta_y = absolute_line_segments[reference_count][1][1] - absolute_line_segments[reference_count][0][1]  # end minus start, in original direction
-                            path += ('M {0:f},{1:f} l {2:f},{3:f} '.format(absolute_line_segments[reference_count][0][0],
-                                                                           absolute_line_segments[reference_count][0][1],
+                            delta_x = abs_line_segments[ref_count][1][0] - abs_line_segments[ref_count][0][0]  # end minus start, in original direction
+                            delta_y = abs_line_segments[ref_count][1][1] - abs_line_segments[ref_count][0][1]  # end minus start, in original direction
+                            path += ('M {0:f},{1:f} l {2:f},{3:f} '.format(abs_line_segments[ref_count][0][0],
+                                                                           abs_line_segments[ref_count][0][1],
                                                                            delta_x,
                                                                            delta_y))  # delta is from initial point
                             f_distance_moved_with_pen_up += math.hypot(
-                                    absolute_line_segments[reference_count][0][0] - pt_last_position_absolute[0],
-                                    absolute_line_segments[reference_count][0][1] - pt_last_position_absolute[1])
-                            pt_last_position_absolute[0] = absolute_line_segments[reference_count][0][0] + delta_x
-                            pt_last_position_absolute[1] = absolute_line_segments[reference_count][0][1] + delta_y
-                            absolute_line_segments[reference_count][2] = True  # True flags that this line segment has been
+                                    abs_line_segments[ref_count][0][0] - pt_last_position_abs[0],
+                                    abs_line_segments[ref_count][0][1] - pt_last_position_abs[1])
+                            pt_last_position_abs[0] = abs_line_segments[ref_count][0][0] + delta_x
+                            pt_last_position_abs[1] = abs_line_segments[ref_count][0][1] + delta_y
+                            abs_line_segments[ref_count][2] = True  # True flags that this line segment has been
                             # added to the path to be drawn, so should
                             # no longer be a candidate for any kind of move.
                             n_pen_lifts += 1
                         else:
                             # Found segment to add, and we must get to it in absolute terms
-                            delta_x = (absolute_line_segments[reference_count][n_reference_end_index_at_closest][0] -
-                                       absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0])
+                            delta_x = (abs_line_segments[ref_count][n_ref_end_index_at_closest][0] -
+                                       abs_line_segments[ref_count][not n_ref_end_index_at_closest][0])
                             # final point (which was closer to the closest continuation segment) minus initial point = delta_x
 
-                            delta_y = (absolute_line_segments[reference_count][n_reference_end_index_at_closest][1] -
-                                       absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1])
+                            delta_y = (abs_line_segments[ref_count][n_ref_end_index_at_closest][1] -
+                                       abs_line_segments[ref_count][not n_ref_end_index_at_closest][1])
                             # final point (which was closer to the closest continuation segment) minus initial point = delta_y
 
-                            path += ('M {0:f},{1:f} l '.format(absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0],
-                                                               absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1]))
+                            path += ('M {0:f},{1:f} l '.format(abs_line_segments[ref_count][not n_ref_end_index_at_closest][0],
+                                                               abs_line_segments[ref_count][not n_ref_end_index_at_closest][1]))
                             f_distance_moved_with_pen_up += math.hypot(
-                                    absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0] - pt_last_position_absolute[0],
-                                    absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1] - pt_last_position_absolute[1])
-                            pt_last_position_absolute[0] = absolute_line_segments[reference_count][not n_reference_end_index_at_closest][0]
-                            pt_last_position_absolute[1] = absolute_line_segments[reference_count][not n_reference_end_index_at_closest][1]
+                                    abs_line_segments[ref_count][not n_ref_end_index_at_closest][0] - pt_last_position_abs[0],
+                                    abs_line_segments[ref_count][not n_ref_end_index_at_closest][1] - pt_last_position_abs[1])
+                            pt_last_position_abs[0] = abs_line_segments[ref_count][not n_ref_end_index_at_closest][0]
+                            pt_last_position_abs[1] = abs_line_segments[ref_count][not n_ref_end_index_at_closest][1]
                             # Note that this does not complete the line, as the completion (the delta_x, delta_y part) is being held in abeyance
 
                             # We are coming up on a problem:
@@ -1430,14 +1443,14 @@ class Eggbot_Hatch(inkex.Effect):
                             # The solution is to hold in abeyance the actual plotting of the line,
                             # holding it available for shrinking if a curve is to be added.
                             # That is
-                            relative_position_of_last_plotted_line_was_held_in_abeyance = {0: delta_x, 1: delta_y}
+                            relative_held_line_pos = {0: delta_x, 1: delta_y}
                             # delta is from initial point
                             # Will be printed after we know if it must be modified
                             # to keep the ending join within bounds
-                            pt_last_position_absolute[0] += delta_x
-                            pt_last_position_absolute[1] += delta_y
+                            pt_last_position_abs[0] += delta_x
+                            pt_last_position_abs[1] += delta_y
 
-                            absolute_line_segments[reference_count][2] = True  # True flags that this line segment has been
+                            abs_line_segments[ref_count][2] = True  # True flags that this line segment has been
                             # added to the path to be drawn, so should
                             # no longer be a candidate for any kind of move.
                             n_pen_lifts += 1
@@ -1450,61 +1463,61 @@ class Eggbot_Hatch(inkex.Effect):
                             # Do this recursively, marking each segment True to show that
                             # it has been "drawn" already.
                             # pt2 is the reference point, ie. the point from which the next segment will start
-                            path = self.recursivelyAppendNearbySegmentIfAny(transformed_hatch_spacing,
+                            path = self.recursivelyAppendNearbySegments(transformed_hatch_spacing,
                                                                             0,
-                                                                            reference_count,
-                                                                            n_reference_end_index_at_closest,
-                                                                            n_absolute_line_segment_total,
-                                                                            absolute_line_segments,
+                                                                            ref_count,
+                                                                            n_ref_end_index_at_closest,
+                                                                            n_abs_line_segment_total,
+                                                                            abs_line_segments,
                                                                             path,
-                                                                            relative_position_of_last_plotted_line_was_held_in_abeyance)
+                                                                            relative_held_line_pos)
 
                 self.joinFillsWithNode(key, stroke_width, path[:-1])
 
-    def recursivelyAppendNearbySegmentIfAny(self,
+    def recursivelyAppendNearbySegments(self,
                                             transformed_hatch_spacing,
                                             n_recursion_count,
-                                            n_reference_segment_count,
-                                            n_reference_end_index,
-                                            n_absolute_line_segment_total,
-                                            absolute_line_segments,
+                                            n_ref_segment_count,
+                                            n_ref_end_index,
+                                            n_abs_line_segment_total,
+                                            abs_line_segments,
                                             cumulative_path,
-                                            relative_position_of_last_plotted_line_was_held_in_abeyance):
+                                            relative_held_line_pos):
 
-        global pt_last_position_absolute
+        global pt_last_position_abs
         f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)
 
         # Look through all possibilities to choose the closest
         b_found_segment_to_add = False  # default assumption
-        n_new_segment_initial_end_index_at_closest = 0
+        n_new_segment_end1_index_at_closest = 0
         n_outer_count_at_closest = -1
         f_closest_distance_squared = 123456789.0  # just a random large number
 
-        pt_reference = absolute_line_segments[n_reference_segment_count][n_reference_end_index]
-        pt_reference_other_end = absolute_line_segments[n_reference_segment_count][not n_reference_end_index]
+        pt_reference = abs_line_segments[n_ref_segment_count][n_ref_end_index]
+        pt_reference_other_end = abs_line_segments[n_ref_segment_count][not n_ref_end_index]
         f_reference_delta_x = pt_reference_other_end[0] - pt_reference[0]
         f_reference_delta_y = pt_reference_other_end[1] - pt_reference[1]
         f_reference_direction_radians = math.atan2(f_reference_delta_y, f_reference_delta_x)  # from other end to this end
 
-        for outerCount in range(n_absolute_line_segment_total):  # investigate all segments
-            if not absolute_line_segments[outerCount][2]:
+        for outerCount in range(n_abs_line_segment_total):  # investigate all segments
+            if not abs_line_segments[outerCount][2]:
                 # This segment currently undrawn, so it is a candidate for a path extension
 
                 # Need to check both ends of each and every proposed segment until we find one in the neighborhood
                 # Defines pt2 in the reference as the end which we want to extend
 
-                for n_new_segment_initial_end_index in range(2):
+                for n_new_segment_end1_index in range(2):
                     # First try initial end of test segment (aka pt1) vs final end (aka pt2) of reference segment
-                    if outerCount != n_reference_segment_count:  # don't investigate self ends
-                        delta_x = absolute_line_segments[outerCount][n_new_segment_initial_end_index][0] - pt_reference[0]  # proposed initial pt1 X minus existing final pt1 X
-                        delta_y = absolute_line_segments[outerCount][n_new_segment_initial_end_index][1] - pt_reference[1]  # proposed initial pt1 Y minus existing final pt1 Y
+                    if outerCount != n_ref_segment_count:  # don't investigate self ends
+                        delta_x = abs_line_segments[outerCount][n_new_segment_end1_index][0] - pt_reference[0]  # proposed initial pt1 X minus existing final pt1 X
+                        delta_y = abs_line_segments[outerCount][n_new_segment_end1_index][1] - pt_reference[1]  # proposed initial pt1 Y minus existing final pt1 Y
                         if (delta_x * delta_x + delta_y * delta_y) < f_proposed_neighborhood_radius_squared:
                             f_this_distance_squared = delta_x * delta_x + delta_y * delta_y
-                            pt_new_segment_this_end = absolute_line_segments[outerCount][n_new_segment_initial_end_index]
-                            pt_new_segment_other_end = absolute_line_segments[outerCount][not n_new_segment_initial_end_index]
-                            f_new_segment_delta_x = pt_new_segment_this_end[0] - pt_new_segment_other_end[0]
-                            f_new_segment_delta_y = pt_new_segment_this_end[1] - pt_new_segment_other_end[1]
-                            f_new_segment_direction_radians = math.atan2(f_new_segment_delta_y, f_new_segment_delta_x)  # from other end to this end
+                            pt_new_segment_this_end = abs_line_segments[outerCount][n_new_segment_end1_index]
+                            pt_new_segment_other_end = abs_line_segments[outerCount][not n_new_segment_end1_index]
+                            f_new_segment_Dx = pt_new_segment_this_end[0] - pt_new_segment_other_end[0]
+                            f_new_segment_Dy = pt_new_segment_this_end[1] - pt_new_segment_other_end[1]
+                            f_new_segment_direction_radians = math.atan2(f_new_segment_Dy, f_new_segment_Dx)  # from other end to this end
                             if not self.WouldBeAnAlternatingDirection(f_reference_direction_radians, f_new_segment_direction_radians):
                                 # If this end would cause an alternating direction,
                                 # then exclude it regardless of how close it is
@@ -1528,7 +1541,7 @@ class Eggbot_Hatch(inkex.Effect):
                                     # not colinear
                                     f_closest_distance_squared = f_this_distance_squared
                                     b_found_segment_to_add = True
-                                    n_new_segment_initial_end_index_at_closest = n_new_segment_initial_end_index
+                                    n_new_segment_end1_index_at_closest = n_new_segment_end1_index
                                     n_outer_count_at_closest = outerCount
                                     delta_x_at_closest = delta_x
                                     delta_y_at_closest = delta_y
@@ -1536,16 +1549,16 @@ class Eggbot_Hatch(inkex.Effect):
         # At last we've looked at all the candidate segment ends
         n_recursion_count += 1
         if not b_found_segment_to_add or n_recursion_count >= RECURSION_LIMIT:
-            cumulative_path += '{0:f},{1:f} '.format(relative_position_of_last_plotted_line_was_held_in_abeyance[0],
-                                                     relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment
-            pt_last_position_absolute[0] += relative_position_of_last_plotted_line_was_held_in_abeyance[0]
-            pt_last_position_absolute[1] += relative_position_of_last_plotted_line_was_held_in_abeyance[1]
+            cumulative_path += '{0:f},{1:f} '.format(relative_held_line_pos[0],
+                                                     relative_held_line_pos[1])  # close out this segment
+            pt_last_position_abs[0] += relative_held_line_pos[0]
+            pt_last_position_abs[1] += relative_held_line_pos[1]
             return cumulative_path  # No undrawn segments were suitable for appending,
             # or there were so many that we worry about python recursion limit
         else:
-            n_new_segment_initial_end_index = n_new_segment_initial_end_index_at_closest
-            n_new_segment_final_end_index = not n_new_segment_initial_end_index
-            # n_new_segment_initial_end_index is 0 for connecting to pt1,
+            n_new_segment_end1_index = n_new_segment_end1_index_at_closest
+            n_new_segment_end2_index = not n_new_segment_end1_index
+            # n_new_segment_end1_index is 0 for connecting to pt1,
             # and is 1 for connecting to pt2
             count = n_outer_count_at_closest  # count is the index of the segment to be appended.
             delta_x = delta_x_at_closest  # delta from final end of incoming segment to initial end of outgoing segment
@@ -1557,14 +1570,14 @@ class Eggbot_Hatch(inkex.Effect):
             # To accomplish this, we need information on the incoming and outgoing segments.
             # Specifically, we need to know the lengths and angles of the segments in
             # order to decide on control points.
-            f_incoming_delta_x = absolute_line_segments[n_reference_segment_count][n_reference_end_index][0] - absolute_line_segments[n_reference_segment_count][not n_reference_end_index][0]
-            f_incoming_delta_y = absolute_line_segments[n_reference_segment_count][n_reference_end_index][1] - absolute_line_segments[n_reference_segment_count][not n_reference_end_index][1]
+            f_in_Dx = abs_line_segments[n_ref_segment_count][n_ref_end_index][0] - abs_line_segments[n_ref_segment_count][not n_ref_end_index][0]
+            f_in_Dy = abs_line_segments[n_ref_segment_count][n_ref_end_index][1] - abs_line_segments[n_ref_segment_count][not n_ref_end_index][1]
             # The outgoing deltas are based on the reverse direction of the segment, i.e. the segment pointing back to the joiner bezier curve
-            f_outgoing_delta_x = absolute_line_segments[count][n_new_segment_initial_end_index][0] - absolute_line_segments[count][n_new_segment_final_end_index][0]  # index is [count][start point = 0, final point = 1][0=x, 1=y]
-            f_outgoing_delta_y = absolute_line_segments[count][n_new_segment_initial_end_index][1] - absolute_line_segments[count][n_new_segment_final_end_index][1]
+            f_out_Dx = abs_line_segments[count][n_new_segment_end1_index][0] - abs_line_segments[count][n_new_segment_end2_index][0]  # index is [count][start point = 0, final point = 1][0=x, 1=y]
+            f_out_Dy = abs_line_segments[count][n_new_segment_end1_index][1] - abs_line_segments[count][n_new_segment_end2_index][1]
 
-            length_of_incoming = math.hypot(f_incoming_delta_x, f_incoming_delta_y)
-            length_of_outgoing = math.hypot(f_outgoing_delta_x, f_outgoing_delta_y)
+            length_of_incoming = math.hypot(f_in_Dx, f_in_Dy)
+            length_of_outgoing = math.hypot(f_out_Dx, f_out_Dy)
 
             # We are going to trim-up the ends of the incoming and outgoing segments,
             # in order to get a curve which reliably does not extend beyond the boundary.
@@ -1594,63 +1607,63 @@ class Eggbot_Hatch(inkex.Effect):
                 f_control_point_divider = f_largest_desired_control_point_divider
             f_desired_shorten = f_desired_shorten_for_smoothest_join / f_control_point_divider
 
-            pt_delta_to_subtract_from_incoming_end = self.RelativeControlPointPosition(f_desired_shorten, f_incoming_delta_x, f_incoming_delta_y, 0, 0)
+            pt_delta_to_subtract_from_incoming_end = self.RelativeControlPointPosition(f_desired_shorten, f_in_Dx, f_in_Dy, 0, 0)
             # Note that this will be subtracted from the _point held in abeyance_.
-            relative_position_of_last_plotted_line_was_held_in_abeyance[0] -= pt_delta_to_subtract_from_incoming_end[0]
-            relative_position_of_last_plotted_line_was_held_in_abeyance[1] -= pt_delta_to_subtract_from_incoming_end[1]
+            relative_held_line_pos[0] -= pt_delta_to_subtract_from_incoming_end[0]
+            relative_held_line_pos[1] -= pt_delta_to_subtract_from_incoming_end[1]
 
-            pt_delta_to_add_to_outgoing_start = self.RelativeControlPointPosition(f_desired_shorten, f_outgoing_delta_x, f_outgoing_delta_y, 0, 0)
+            pt_delta_to_add_to_outgoing_start = self.RelativeControlPointPosition(f_desired_shorten, f_out_Dx, f_out_Dy, 0, 0)
 
             # We know that when we tack on a curve, we must chop some off the end of the incoming segment,
             # and also chop some off the start of the outgoing segment.
             # Now, we know we want the control points to be on a projection of each segment,
             # in order that there be no abrupt change of plotting angle.  The question is, how
             # far beyond the endpoint should we place the control point.
-            pt_relative_control_point_incoming = self.RelativeControlPointPosition(
+            pt_relative_control_point_in = self.RelativeControlPointPosition(
                     transformed_hatch_spacing / f_control_point_divider,
-                    f_incoming_delta_x,
-                    f_incoming_delta_y,
+                    f_in_Dx,
+                    f_in_Dy,
                     0,
                     0)
-            pt_relative_control_point_outgoing = self.RelativeControlPointPosition(
+            pt_relative_control_point_out = self.RelativeControlPointPosition(
                     transformed_hatch_spacing / f_control_point_divider,
-                    f_outgoing_delta_x,
-                    f_outgoing_delta_y,
+                    f_out_Dx,
+                    f_out_Dy,
                     delta_x,
                     delta_y)
 
-            cumulative_path += '{0:f},{1:f} '.format(relative_position_of_last_plotted_line_was_held_in_abeyance[0],
-                                                     relative_position_of_last_plotted_line_was_held_in_abeyance[1])  # close out this segment, which has been modified
-            pt_last_position_absolute[0] += relative_position_of_last_plotted_line_was_held_in_abeyance[0]
-            pt_last_position_absolute[1] += relative_position_of_last_plotted_line_was_held_in_abeyance[1]
+            cumulative_path += '{0:f},{1:f} '.format(relative_held_line_pos[0],
+                                                     relative_held_line_pos[1])  # close out this segment, which has been modified
+            pt_last_position_abs[0] += relative_held_line_pos[0]
+            pt_last_position_abs[1] += relative_held_line_pos[1]
             # add bezier cubic curve
-            cumulative_path += ('c {0:f},{1:f} {2:f},{3:f} {4:f},{5:f} l '.format(pt_relative_control_point_incoming[0],
-                                                                                  pt_relative_control_point_incoming[1],
-                                                                                  pt_relative_control_point_outgoing[0],
-                                                                                  pt_relative_control_point_outgoing[1],
+            cumulative_path += ('c {0:f},{1:f} {2:f},{3:f} {4:f},{5:f} l '.format(pt_relative_control_point_in[0],
+                                                                                  pt_relative_control_point_in[1],
+                                                                                  pt_relative_control_point_out[0],
+                                                                                  pt_relative_control_point_out[1],
                                                                                   delta_x,
                                                                                   delta_y))
-            pt_last_position_absolute[0] += delta_x
-            pt_last_position_absolute[1] += delta_y
+            pt_last_position_abs[0] += delta_x
+            pt_last_position_abs[1] += delta_y
             # Next, move pen in appropriate direction to draw the new segment, given that
             # we have just moved to the initial end of the new segment.
             # This needs special treatment, as we just did some length changing.
-            delta_x = absolute_line_segments[count][n_new_segment_final_end_index][0] - absolute_line_segments[count][n_new_segment_initial_end_index][0] + pt_delta_to_add_to_outgoing_start[0]
-            delta_y = absolute_line_segments[count][n_new_segment_final_end_index][1] - absolute_line_segments[count][n_new_segment_initial_end_index][1] + pt_delta_to_add_to_outgoing_start[1]
-            relative_position_of_last_plotted_line_was_held_in_abeyance[0] = delta_x  # delta is from initial point
-            relative_position_of_last_plotted_line_was_held_in_abeyance[1] = delta_y  # Will be printed after we know if it must be modified
+            delta_x = abs_line_segments[count][n_new_segment_end2_index][0] - abs_line_segments[count][n_new_segment_end1_index][0] + pt_delta_to_add_to_outgoing_start[0]
+            delta_y = abs_line_segments[count][n_new_segment_end2_index][1] - abs_line_segments[count][n_new_segment_end1_index][1] + pt_delta_to_add_to_outgoing_start[1]
+            relative_held_line_pos[0] = delta_x  # delta is from initial point
+            relative_held_line_pos[1] = delta_y  # Will be printed after we know if it must be modified
 
             # Mark this segment as drawn
-            absolute_line_segments[count][2] = True
+            abs_line_segments[count][2] = True
 
-            cumulative_path = self.recursivelyAppendNearbySegmentIfAny(transformed_hatch_spacing,
+            cumulative_path = self.recursivelyAppendNearbySegments(transformed_hatch_spacing,
                                                                        n_recursion_count,
                                                                        count,
-                                                                       n_new_segment_final_end_index,
-                                                                       n_absolute_line_segment_total,
-                                                                       absolute_line_segments,
+                                                                       n_new_segment_end2_index,
+                                                                       n_abs_line_segment_total,
+                                                                       abs_line_segments,
                                                                        cumulative_path,
-                                                                       relative_position_of_last_plotted_line_was_held_in_abeyance)
+                                                                       relative_held_line_pos)
             return cumulative_path
 
     def ProposeNeighborhoodRadiusSquared(self, transformed_hatch_spacing):
@@ -1681,14 +1694,15 @@ class Eggbot_Hatch(inkex.Effect):
     def WouldBeAnAlternatingDirection(f_reference_direction_radians, f_new_segment_direction_radians):
         # atan2 returns values in the range -pi to +pi, so we must evaluate difference values
         # in the range of -2*pi to +2*pi
-        f_direction_difference_radians = f_reference_direction_radians - f_new_segment_direction_radians
-        if f_direction_difference_radians < 0:
-            f_direction_difference_radians += 2 * math.pi
+        # f_dir_diff_rad:  Direction difference, radians
+        f_dir_diff_rad = f_reference_direction_radians - f_new_segment_direction_radians
+        if f_dir_diff_rad < 0:
+            f_dir_diff_rad += 2 * math.pi
         # Without having changed the vector direction of the difference, we have
         # now reduced the range to 0 to 2*pi
-        f_direction_difference_radians -= math.pi  # flip opposite direction to coincide with same direction
+        f_dir_diff_rad -= math.pi  # flip opposite direction to coincide with same direction
         # Of course they may not be _exactly_ pi different due to osmosis, so allow a tolerance
-        b_ret_val = abs(f_direction_difference_radians) < RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION
+        b_ret_val = abs(f_dir_diff_rad) < RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION
 
         return b_ret_val
 
