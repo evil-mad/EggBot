@@ -511,7 +511,7 @@ class Map(inkex.Effect):
                                                  ry=ry,
                                                  cy=cy)
 
-                self.mapPathVertices(d, node, mat_new, find_bbox)  # TODO This will crash Wrong call arguments
+                self.getPathVertices(d, node, mat_new, find_bbox)
 
             elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
                 pass
