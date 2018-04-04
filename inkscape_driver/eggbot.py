@@ -253,12 +253,12 @@ class EggBot(inkex.Effect):
         self.recursiveEggbotDataScan(self.svg)
         if not self.svgDataRead:  # if there is no eggbot data, add some:
             eggbotlayer = inkex.etree.SubElement(self.svg, 'eggbot')
-            eggbotlayer.set('layer', str(0))
-            eggbotlayer.set('node', str(0))
-            eggbotlayer.set('lastpath', str(0))
-            eggbotlayer.set('lastpathnc', str(0))
-            eggbotlayer.set('totaldeltax', str(0))
-            eggbotlayer.set('totaldeltay', str(0))
+            eggbotlayer.set('layer', '0')
+            eggbotlayer.set('node', '0')
+            eggbotlayer.set('lastpath', '0')
+            eggbotlayer.set('lastpathnc', '0')
+            eggbotlayer.set('totaldeltax', '0')
+            eggbotlayer.set('totaldeltay', '0')
 
     def recursiveEggbotDataScan(self, a_node_list):
         if not self.svgDataRead:
@@ -276,10 +276,10 @@ class EggBot(inkex.Effect):
                         self.svgTotalDeltaY = int(node.get('totaldeltay'))
                         self.svgDataRead = True
                     except:
-                        node.set('lastpath', str(0))
-                        node.set('lastpathnc', str(0))
-                        node.set('totaldeltax', str(0))
-                        node.set('totaldeltay', str(0))
+                        node.set('lastpath', '0')
+                        node.set('lastpathnc', '0')
+                        node.set('totaldeltax', '0')
+                        node.set('totaldeltay', '0')
                         self.svgDataRead = True
 
     def UpdateSVGEggbotData(self, a_node_list):
