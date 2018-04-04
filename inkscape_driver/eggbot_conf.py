@@ -22,14 +22,14 @@ The STEP SCALING FACTOR below can be used to work with motor-driver combinations
 
 
 For 1600 steps/rev, use:
-	STEP_SCALE = 4
+    STEP_SCALE = 4
 
 For NORMAL USE, with overall 3200 steps/rev, use the default value:
-	STEP_SCALE = 2
+    STEP_SCALE = 2
 
 For 6400 steps/rev, use:
-	STEP_SCALE = 1
-	
+    STEP_SCALE = 1
+    
 Other _integer_ scaling values can be used as well, with similar scaling.
 
 """
