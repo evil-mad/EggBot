@@ -281,7 +281,7 @@ class Maze(inkex.Effect):
             # the WEST and NORTH walls and then draw up drawing the EAST and SOUTH walls.
             # By drawing in this back and forth fashion, we minimize the effect of slippage.
 
-            for x in range(self.w, step=2):
+            for x in range(0, self.w, step=2):
                 self.draw_vertical(x)
 
         else:
