@@ -145,7 +145,7 @@ class Hershey(inkex.Effect):
         # Render list of font names in a vertical column:
         for f in fontgroup:
             w = 0
-            letter_vals = (ord(q) - 32 for q in (f[1] + ' -> '))
+            letter_vals = [ord(q) - 32 for q in (f[1] + ' -> ')]
             # we want to right-justify the clear text, so need to know its width
             for q in letter_vals:
                 w = svg_text_width(q, clearfont, w)
