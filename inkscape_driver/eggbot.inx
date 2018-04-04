@@ -83,8 +83,6 @@ _gui-text="Reverse motion of Motor 1 (pen)">true</param>
 _gui-text="Reverse motion of Motor 2 (egg)">true</param> 
 <param indent="1" name="wraparound" type="boolean"
 _gui-text="Egg (x) axis wraps around">true</param>
-<param indent="1" name="startCentered" type="boolean"
-_gui-text="Start with pen centered">true</param>	
 <param indent="1" name="returnToHome" type="boolean"
 _gui-text="Return home when done">true</param> 
 <param indent="1" name="engraving" type="boolean"

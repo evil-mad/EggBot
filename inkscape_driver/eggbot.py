@@ -54,10 +54,6 @@ class EggBot(inkex.Effect):
                                      action="store", type="float",
                                      dest="smoothness", default=.2,
                                      help="Smoothness of curves")
-        self.OptionParser.add_option("--startCentered",
-                                     action="store", type="inkbool",
-                                     dest="startCentered", default=True,
-                                     help="Start plot with pen centered in the y-axis.")
         self.OptionParser.add_option("--returnToHome",
                                      action="store", type="inkbool",
                                      dest="returnToHome", default=True,
@@ -415,7 +411,7 @@ class EggBot(inkex.Effect):
         if self.serialPort is None:
             return
 
-        if self.options.startCentered and (not self.getDocProps()):
+        if not self.getDocProps():
             # Cannot handle the document's dimensions!!!
             inkex.errormsg(gettext.gettext(
                     'This document does not have valid dimensions.\r\r' +
@@ -971,14 +967,11 @@ class EggBot(inkex.Effect):
                 # store home
                 if self.ptFirst is None:
 
-                    # if we should start at center, then the first line segment should draw from there
-                    if self.options.startCentered:
-                        self.fPrevX = self.svgWidth / self.step_scaling_factor
-                        self.fPrevY = self.svgHeight / self.step_scaling_factor
+                    # Start with pen centered:
+                    self.fPrevX = self.svgWidth / self.step_scaling_factor
+                    self.fPrevY = self.svgHeight / self.step_scaling_factor
 
-                        self.ptFirst = (self.fPrevX, self.fPrevY)
-                    else:
-                        self.ptFirst = (self.fX, self.fY)
+                    self.ptFirst = (self.fPrevX, self.fPrevY)
 
                 if self.plotCurrentLayer:
                     if n_index == 0:
