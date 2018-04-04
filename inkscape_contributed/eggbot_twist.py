@@ -383,7 +383,7 @@ class Twist(inkex.Effect):
                 #
                 # Note: ellipses or circles with a radius attribute of value 0 are ignored
 
-                if node.tag in [inkex.addNS('ellipse', 'svg'), node.tag == 'ellipse']:
+                if node.tag in [inkex.addNS('ellipse', 'svg'),  'ellipse']:
                     rx = float(node.get('rx', '0'))
                     ry = float(node.get('ry', '0'))
                 else:
