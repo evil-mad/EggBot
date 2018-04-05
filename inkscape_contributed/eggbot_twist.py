@@ -229,7 +229,7 @@ class Twist(inkex.Effect):
             if v == 'hidden' or v == 'collapse':
                 pass
 
-            # First apply the current matrix transform to this node's tranform
+            # First apply the current matrix transform to this node's transform
             mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
 
             if node.tag in [inkex.addNS('g', 'svg'), 'g']:

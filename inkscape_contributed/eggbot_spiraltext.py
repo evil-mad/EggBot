@@ -23,7 +23,7 @@
 # This extension also permits some basic markup of the passage using
 # XHTML-like conventions and a limited set of tags:
 #
-#  <sams>   - A simple typeface which lacks serifs
+#  <sans>   - A simple typeface which lacks serifs
 #  <times>  - "Times" like typeface (a face with serifs)
 #  <script> - A flowing script font
 #  <b>      - Boldface
