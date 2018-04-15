@@ -1,5 +1,6 @@
-#!/usr/bin/env python 
-'''
+#!/usr/bin/env python
+# coding=utf-8
+"""
 Copyright (C) 2010 Windell Oskay, drwho@evilmadscientist.com
 
 This program is free software; you can redistribute it and/or modify
@@ -15,38 +16,42 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-'''
+"""
 import inkex
 
-class PresetHatch(inkex.Effect):
-	def __init__(self):
-		inkex.Effect.__init__(self)
-		self.OptionParser.add_option("--title")
-	def effect(self):
-		self.svgDefRead = False;
-		self.svg = self.document.getroot()
-		self.recursiveDefDataScan(self.svg)
 
-	def recursiveDefDataScan( self, aNodeList ):
-		for node in aNodeList:
-			if (node.tag == inkex.addNS( 'defs', 'svg' ) or node.tag == 'defs'): 
-				self.recursiveDefDataScan( node )
-			elif ( node.tag == inkex.addNS( 'path-effect', 'inkscape' )):
-				if (node.get( 'effect' ) == 'rough_hatches' ):
-					node.set( 'dist_rdm', '0;1' )
-					node.set( 'growth', str( 0 ) )
-					#node.set( 'do_bend', 'false' )
-					node.set( 'bottom_edge_variation', '0;1' )
-					node.set( 'top_edge_variation', '0;1' )
-					node.set( 'bottom_tgt_variation', '0;1' )
-					node.set( 'top_tgt_variation', '0;1' )
-					node.set( 'scale_bf', str( 2 ) )
-					node.set( 'scale_bb', str( 2 ) )
-					node.set( 'scale_tf', str( 2 ) )
-					node.set( 'scale_tb', str( 2 ) )
-					node.set( 'top_smth_variation', '0;1' )
-					node.set( 'bottom_smth_variation', '0;1' )
-					node.set( 'fat_output', 'false' )
+class PresetHatch(inkex.Effect):
+    def __init__(self):
+        inkex.Effect.__init__(self)
+        self.OptionParser.add_option("--title")
+        self.svgDefRead = None
+        self.svg = None
+
+    def effect(self):
+        self.svgDefRead = False
+        self.svg = self.document.getroot()
+        self.recursiveDefDataScan(self.svg)
+
+    def recursiveDefDataScan(self, aNodeList):
+        for node in aNodeList:
+            if node.tag in [inkex.addNS('defs', 'svg'), 'defs']:
+                self.recursiveDefDataScan(node)
+            elif node.tag == inkex.addNS('path-effect', 'inkscape'):
+                if node.get('effect') == 'rough_hatches':
+                    node.set('dist_rdm', '0;1')
+                    node.set('growth', '0')
+                    node.set('bottom_edge_variation', '0;1')
+                    node.set('top_edge_variation', '0;1')
+                    node.set('bottom_tgt_variation', '0;1')
+                    node.set('top_tgt_variation', '0;1')
+                    node.set('scale_bf', '2')
+                    node.set('scale_bb', '2')
+                    node.set('scale_tf', '2')
+                    node.set('scale_tb', '2')
+                    node.set('top_smth_variation', '0;1')
+                    node.set('bottom_smth_variation', '0;1')
+                    node.set('fat_output', 'false')
+
 
 e = PresetHatch()
 e.affect()

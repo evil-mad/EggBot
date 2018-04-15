@@ -1,48 +1,49 @@
-'''
+# coding=utf-8
+"""
 hersheydata.py
 
-Version 2.0.2, dated July 31, 2016.
+Version 2.2, dated November 28, 2017.
 
 Originally prepared in 2011 by Windell H. Oskay, www.evilmadscientist.com
-Updated, 2016 by Windell H. Oskay, www.evilmadscientist.com
+Updated, 2017 by Windell H. Oskay, www.evilmadscientist.com
 
 Contents adapted from emergent.unpythonic.net/software/hershey
  by way of "Hershey Fonts in SVG" by Marty McGuire
- http://www.thingiverse.com/thing:6168 
+ http://www.thingiverse.com/thing:6168
 
 Modified and expanded in May, 2016 by Sheldon B. Michaels to include
-additional engraving fonts, created from modern sources (the "EMS" series), 
-and to allow additional precision in the specification of vectors.  
+additional engraving fonts, created from modern sources (the "EMS" series),
+and to allow additional precision in the specification of vectors.
 The new engraving fonts are all based on fonts which are licensed
-under the SIL Open Font License. 
+under the SIL Open Font License.
 shel at shel dot net
 
 -------------------------------------------------------------------
-The Hershey Fonts are a set of vector fonts with a liberal license. 
+The Hershey Fonts are a set of vector fonts with a liberal license.
 
 USE RESTRICTION:
-	This distribution of the Hershey Fonts may be used by anyone for
-	any purpose, commercial or otherwise, providing that:
-		1. The following acknowledgements must be distributed with
-			the font data:
-			- The Hershey Fonts were originally created by Dr.
-				A. V. Hershey while working at the U. S.
-				National Bureau of Standards.
-			- The format of the Font data in this distribution
-				was originally created by
-					James Hurt
-					Cognition, Inc.
-					900 Technology Park Drive
-					Billerica, MA 01821
-					(mit-eddie!ci-dandelion!hurt)
-		2. The font data in this distribution may be converted into
-			any other format *EXCEPT* the format distributed by
-			the U.S. NTIS (which organization holds the rights
-			to the distribution and use of the font data in that
-			particular format). Not that anybody would really
-			*want* to use their format... each point is described
-			in eight bytes as "xxx yyy:", where xxx and yyy are
-			the coordinate values as ASCII numbers.
+    This distribution of the Hershey Fonts may be used by anyone for
+    any purpose, commercial or otherwise, providing that:
+        1. The following acknowledgements must be distributed with
+            the font data:
+            - The Hershey Fonts were originally created by Dr.
+                A. V. Hershey while working at the U. S.
+                National Bureau of Standards.
+            - The format of the Font data in this distribution
+                was originally created by
+                    James Hurt
+                    Cognition, Inc.
+                    900 Technology Park Drive
+                    Billerica, MA 01821
+                    (mit-eddie!ci-dandelion!hurt)
+        2. The font data in this distribution may be converted into
+            any other format *EXCEPT* the format distributed by
+            the U.S. NTIS (which organization holds the rights
+            to the distribution and use of the font data in that
+            particular format). Not that anybody would really
+            *want* to use their format... each point is described
+            in eight bytes as "xxx yyy:", where xxx and yyy are
+            the coordinate values as ASCII numbers.
 -------------------------------------------------------------------
 
 Modern Engraving Fonts: EMS Series
@@ -54,53 +55,53 @@ where possible to the designer or foundry and to the entry in
 Google's list of open source fonts.
 
 
-Engraving font name: 	EMS Allure	
+Engraving font name: 	EMS Allure
 A derivative of: 		Allura
 Designer: 				Rob Leuschke, TypeSETit
 Link:					http://www.typesetit.com
-Google font page: 		https://fonts.google.com/specimen/Allura 
+Google font page: 		https://fonts.google.com/specimen/Allura
 
-Engraving font name: 	EMS Bird	
+Engraving font name: 	EMS Bird
 A derivative of: 		Bilbo
 Designer: 				Rob Leuschke, TypeSETit
 Link:					http://www.typesetit.com
 Google font page: 		https://fonts.google.com/specimen/Bilbo
 
-Engraving font name: 	EMS Bird Swash Caps	
+Engraving font name: 	EMS Bird Swash Caps
 A derivative of: 		Bilbo Swash Caps
 Designer: 				Rob Leuschke, TypeSETit
 Link:					http://www.typesetit.com
 Google font page: 		https://fonts.google.com/specimen/Bilbo+Swash+Caps
 
-Engraving font name: 	EMS Brush	
+Engraving font name: 	EMS Brush
 A derivative of: 		Alex Brush
 Designer: 				Rob Leuschke, TypeSETit
 Link:					http://www.typesetit.com
-Google font page: 		https://fonts.google.com/specimen/Alex+Brush 
+Google font page: 		https://fonts.google.com/specimen/Alex+Brush
 
-Engraving font name: 	EMS Capitol	
+Engraving font name: 	EMS Capitol
 A derivative of: 		Sacramento
-Designer: 				Brian J. Bonislawsky, Astigmatic One Eye Typographic Institute 
+Designer: 				Brian J. Bonislawsky, Astigmatic One Eye Typographic Institute
 Link:					http://www.astigmatic.com
-Google font page: 		https://fonts.google.com/specimen/Sacramento 
+Google font page: 		https://fonts.google.com/specimen/Sacramento
 
-Engraving font name: 	EMS Casual Hand	
+Engraving font name: 	EMS Casual Hand
 A derivative of: 		Covered By Your Grace
 Designer: 				Kimberly Geswein, Kimberly Geswein Fonts
 Link: 					http://www.kimberlygeswein.com/
-Google font page: 		https://fonts.google.com/specimen/Covered+By+Your+Grace 
+Google font page: 		https://fonts.google.com/specimen/Covered+By+Your+Grace
 
 Engraving font name: 	EMS Decorous Script
 A derivative of: 		Petit Formal Script
 Designer: 				Impallari Type
 Google font page: 		https://fonts.google.com/specimen/Petit+Formal+Script
 
-Engraving font name: 	EMS Delight	
+Engraving font name: 	EMS Delight
 A derivative of: 		Delius
 Designer: 				Natalia Raices
-Google font page: 		https://fonts.google.com/specimen/Delius 
+Google font page: 		https://fonts.google.com/specimen/Delius
 
-Engraving font name: 	EMS Delight Swash Caps	
+Engraving font name: 	EMS Delight Swash Caps
 A derivative of: 		Delius Swash Caps
 Designer: 				Natalia Raices
 Google font page: 		https://fonts.google.com/specimen/Delius+Swash+Caps
@@ -109,7 +110,7 @@ Engraving font name: 	EMS Elfin
 A derivative of: 		Mountains of Christmas
 Designer: 				Crystal Kluge, Tart Workshop
 Link: 					http://www.tartworkshop.com
-Google font page: 		https://fonts.google.com/specimen/Mountains+of+Christmas 
+Google font page: 		https://fonts.google.com/specimen/Mountains+of+Christmas
 Note: 					SIL OFL per metadata; Google cites Apache License, version 2.0
 
 Engraving font name: 	EMS Felix
@@ -122,31 +123,31 @@ Engraving font name: 	EMS Herculean
 A derivative of: 		Poiret One
 Designer: 				Denis Masharov
 Link: 					https://www.myfonts.com/foundry/Denis_Masharov/
-Google font page: 		https://fonts.google.com/specimen/Poiret+One 
+Google font page: 		https://fonts.google.com/specimen/Poiret+One
 
 Engraving font name: 	EMS Invite
 A derivative of: 		Tangerine
 Designer: 				Toshi Omagari
 Link: 					http://tosche.net/about
-Google font page: 		https://fonts.google.com/specimen/Tangerine 
+Google font page: 		https://fonts.google.com/specimen/Tangerine
 
 Engraving font name: 	EMS League
 A derivative of: 		League Script
 Designer: 				Haley Fiege, the League of Moveable Type
 Link: 					https://www.theleagueofmoveabletype.com
-Google font page: 		https://fonts.google.com/specimen/League+Script 
+Google font page: 		https://fonts.google.com/specimen/League+Script
 
 Engraving font name: 	EMS Little Princess
 A derivative of: 		Princess Sofia
 Designer: 				Crystal Kluge, Tart Workshop
 Link: 					http://www.tartworkshop.com
-Google font page: 		https://fonts.google.com/specimen/Princess+Sofia 
+Google font page: 		https://fonts.google.com/specimen/Princess+Sofia
 
 Engraving font name: 	EMS Misty Night
 A derivative of: 		Foglihten No03
 Designer: 				Grzegorz L, GLUK fonts
 Link: 					http://www.glukfonts.pl
-FontSquirrel page: 		https://www.fontsquirrel.com/fonts/foglihten 
+FontSquirrel page: 		https://www.fontsquirrel.com/fonts/foglihten
 
 Engraving font name: 	EMS Neato
 A derivative of: 		Bad Script
@@ -212,18 +213,18 @@ Engraving font name: 	EMS Swiss
 A derivative of: 		Italianno
 Designer: 				Rob Leuschke, TypeSETit
 Link:					http://www.typesetit.com
-Google font page: 		https://fonts.google.com/specimen/Italianno 
+Google font page: 		https://fonts.google.com/specimen/Italianno
 
 Engraving font name: 	EMS Tech
 A derivative of: 		Architects Daughter
 Designer: 				Kimberly Geswein, Kimberly Geswein Fonts
-Link: 					http://www.kimberlygeswein.com/			
+Link: 					http://www.kimberlygeswein.com/
 Google font page: 		https://fonts.google.com/specimen/Architects+Daughter
 
 
 -------------------------------------------------------------------
 
-'''
+"""
 
 astrology = ["-8 8","-12 12 M -8 -10 L -4 -8 L -2 -6 L -1 -3 L -1 0 L -2 3 L -4 5 L -8 7 M -8 -10 L -5 -9 L -3 -8 L -1 -6 L 0 -3 M 0 0 L -1 3 L -3 5 L -5 6 L -8 7 M 8 -10 L 5 -9 L 3 -8 L 1 -6 L 0 -3 M 0 0 L 1 3 L 3 5 L 5 6 L 8 7 M 8 -10 L 4 -8 L 2 -6 L 1 -3 L 1 0 L 2 3 L 4 5 L 8 7 M -9 -2 L 9 -2 M -9 -1 L 9 -1","-9 9 M -4 -12 L -5 -11 L -5 -5 M -4 -11 L -5 -5 M -4 -12 L -3 -11 L -5 -5 M 5 -12 L 4 -11 L 4 -5 M 5 -11 L 4 -5 M 5 -12 L 6 -11 L 4 -5","-13 14 M -1 -12 L -4 -11 L -7 -9 L -9 -6 L -10 -3 L -10 0 L -9 3 L -7 6 L -4 8 L -1 9 L 2 9 L 5 8 L 8 6 L 10 3 L 11 0 L 11 -3 L 10 -6 L 8 -9 L 5 -11 L 2 -12 L -1 -12 M 0 -3 L -1 -2 L -1 -1 L 0 0 L 1 0 L 2 -1 L 2 -2 L 1 -3 L 0 -3 M 0 -2 L 0 -1 L 1 -1 L 1 -2 L 0 -2","-8 9 M -2 -12 L -4 -11 L -3 -9 L -1 -8 M -2 -12 L -3 -11 L -3 -9 M 3 -12 L 5 -11 L 4 -9 L 2 -8 M 3 -12 L 4 -11 L 4 -9 M -1 -8 L -3 -7 L -4 -6 L -5 -4 L -5 -1 L -4 1 L -3 2 L -1 3 L 2 3 L 4 2 L 5 1 L 6 -1 L 6 -4 L 5 -6 L 4 -7 L 2 -8 L -1 -8 M 0 3 L 0 9 M 1 3 L 1 9 M -4 6 L 5 6","-9 10 M 0 -12 L -3 -11 L -5 -9 L -6 -6 L -6 -5 L -5 -2 L -3 0 L 0 1 L 1 1 L 4 0 L 6 -2 L 7 -5 L 7 -6 L 6 -9 L 4 -11 L 1 -12 L 0 -12 M 0 1 L 0 9 M 1 1 L 1 9 M -4 5 L 5 5","-14 14 M -2 -12 L -5 -11 L -8 -9 L -10 -6 L -11 -3 L -11 1 L -10 4 L -8 7 L -5 9 L -2 10 L 2 10 L 5 9 L 8 7 L 10 4 L 11 1 L 11 -3 L 10 -6 L 8 -9 L 5 -11 L 2 -12 L -2 -12 M 0 -12 L 0 10 M -11 -1 L 11 -1","-11 14 M -2 -5 L -5 -4 L -7 -2 L -8 1 L -8 2 L -7 5 L -5 7 L -2 8 L -1 8 L 2 7 L 4 5 L 5 2 L 5 1 L 4 -2 L 2 -4 L -1 -5 L -2 -5 M 11 -11 L 5 -11 L 9 -10 L 3 -4 M 11 -11 L 11 -5 L 10 -9 L 4 -3 M 10 -10 L 4 -4","-7 7 M 4 -16 L 2 -14 L 0 -11 L -2 -7 L -3 -2 L -3 2 L -2 7 L 0 11 L 2 14 L 4 16 M 2 -14 L 0 -10 L -1 -7 L -2 -2 L -2 2 L -1 7 L 0 10 L 2 14","-7 7 M -4 -16 L -2 -14 L 0 -11 L 2 -7 L 3 -2 L 3 2 L 2 7 L 0 11 L -2 14 L -4 16 M -2 -14 L 0 -10 L 1 -7 L 2 -2 L 2 2 L 1 7 L 0 10 L -2 14","-12 10 M -9 -9 L -8 -11 L -6 -12 L -3 -12 L -1 -11 L 0 -9 L 0 -6 L -1 -3 L -2 -1 L -4 1 L -7 3 M -3 -12 L -2 -11 L -1 -9 L -1 -5 L -2 -2 L -4 1 M 4 -12 L 2 9 M 5 -12 L 1 9 M -7 3 L 7 3","-9 10 M -5 -12 L -5 3 M -4 -12 L -5 -1 M -5 -1 L -4 -3 L -3 -4 L -1 -5 L 2 -5 L 5 -4 L 6 -2 L 6 0 L 5 2 L 3 4 M 2 -5 L 4 -4 L 5 -2 L 5 0 L 2 6 L 2 8 L 3 9 L 5 9 L 7 7 M -7 -12 L -4 -12","-4 4 M 1 5 L 0 6 L -1 5 L 0 4 L 1 5 L 1 7 L -1 9","-9 10 M 0 -4 L -3 -3 L -5 -1 L -6 2 L -6 3 L -5 6 L -3 8 L 0 9 L 1 9 L 4 8 L 6 6 L 7 3 L 7 2 L 6 -1 L 4 -3 L 1 -4 L 0 -4 M 0 -10 L -4 -8 L 0 -12 L 0 -4 M 1 -10 L 5 -8 L 1 -12 L 1 -4 M 0 1 L -1 2 L -1 3 L 0 4 L 1 4 L 2 3 L 2 2 L 1 1 L 0 1 M 0 2 L 0 3 L 1 3 L 1 2 L 0 2","-4 4 M 0 4 L -1 5 L 0 6 L 1 5 L 0 4","-11 12 M -1 -10 L 0 -12 L 0 9 M 2 -10 L 1 -12 L 1 9 M -8 -10 L -7 -12 L -7 -5 L -6 -2 L -4 0 L -1 1 L 0 1 M -5 -10 L -6 -12 L -6 -4 L -5 -1 M 9 -10 L 8 -12 L 8 -5 L 7 -2 L 5 0 L 2 1 L 1 1 M 6 -10 L 7 -12 L 7 -4 L 6 -1 M -4 5 L 5 5","-10 11 M 2 -12 L -1 -11 L -3 -9 L -5 -6 L -6 -3 L -7 1 L -7 4 L -6 7 L -5 8 L -3 9 L -1 9 L 2 8 L 4 6 L 6 3 L 7 0 L 8 -4 L 8 -7 L 7 -10 L 6 -11 L 4 -12 L 2 -12 M -1 -10 L -3 -8 L -4 -6 L -5 -3 L -6 1 L -6 5 L -5 7 M 2 7 L 4 5 L 5 3 L 6 0 L 7 -4 L 7 -8 L 6 -10 M 2 -12 L 0 -11 L -2 -8 L -3 -6 L -4 -3 L -5 1 L -5 6 L -4 8 L -3 9 M -1 9 L 1 8 L 3 5 L 4 3 L 5 0 L 6 -4 L 6 -9 L 5 -11 L 4 -12","-10 11 M 2 -8 L -3 9 L -1 9 M 5 -12 L 3 -8 L -2 9 M 5 -12 L -1 9 M 5 -12 L 2 -9 L -1 -7 L -3 -6 M 2 -8 L 0 -7 L -3 -6","-10 11 M -3 -7 L -3 -8 L -2 -8 L -2 -6 L -4 -6 L -4 -8 L -3 -10 L -2 -11 L 1 -12 L 4 -12 L 7 -11 L 8 -9 L 8 -7 L 7 -5 L 5 -3 L -5 3 L -7 5 L -9 9 M 6 -11 L 7 -9 L 7 -7 L 6 -5 L 4 -3 L 1 -1 M 4 -12 L 5 -11 L 6 -9 L 6 -7 L 5 -5 L 3 -3 L -5 3 M -8 7 L -7 6 L -5 6 L 0 7 L 5 7 L 6 6 M -5 6 L 0 8 L 5 8 M -5 6 L 0 9 L 3 9 L 5 8 L 6 6 L 6 5","-10 11 M -3 -7 L -3 -8 L -2 -8 L -2 -6 L -4 -6 L -4 -8 L -3 -10 L -2 -11 L 1 -12 L 4 -12 L 7 -11 L 8 -9 L 8 -7 L 7 -5 L 6 -4 L 4 -3 L 1 -2 M 6 -11 L 7 -9 L 7 -7 L 6 -5 L 5 -4 M 4 -12 L 5 -11 L 6 -9 L 6 -7 L 5 -5 L 3 -3 L 1 -2 M -1 -2 L 1 -2 L 4 -1 L 5 0 L 6 2 L 6 5 L 5 7 L 3 8 L 0 9 L -3 9 L -6 8 L -7 7 L -8 5 L -8 3 L -6 3 L -6 5 L -7 5 L -7 4 M 4 0 L 5 2 L 5 5 L 4 7 M 1 -2 L 3 -1 L 4 1 L 4 5 L 3 7 L 2 8 L 0 9","-10 11 M 5 -8 L 0 9 L 2 9 M 8 -12 L 6 -8 L 1 9 M 8 -12 L 2 9 M 8 -12 L -8 3 L 8 3","-10 11 M -1 -12 L -6 -2 M -1 -12 L 9 -12 M -1 -11 L 7 -11 M -2 -10 L 3 -10 L 7 -11 L 9 -12 M -6 -2 L -5 -3 L -2 -4 L 1 -4 L 4 -3 L 5 -2 L 6 0 L 6 3 L 5 6 L 3 8 L -1 9 L -4 9 L -6 8 L -7 7 L -8 5 L -8 3 L -6 3 L -6 5 L -7 5 L -7 4 M 4 -2 L 5 0 L 5 3 L 4 6 L 2 8 M 1 -4 L 3 -3 L 4 -1 L 4 3 L 3 6 L 1 8 L -1 9","-10 11 M 7 -8 L 7 -9 L 6 -9 L 6 -7 L 8 -7 L 8 -9 L 7 -11 L 5 -12 L 2 -12 L -1 -11 L -3 -9 L -5 -6 L -6 -3 L -7 1 L -7 4 L -6 7 L -5 8 L -3 9 L 0 9 L 3 8 L 5 6 L 6 4 L 6 1 L 5 -1 L 4 -2 L 2 -3 L -1 -3 L -3 -2 L -4 -1 L -5 1 M -2 -9 L -4 -6 L -5 -3 L -6 1 L -6 5 L -5 7 M 4 6 L 5 4 L 5 1 L 4 -1 M 2 -12 L 0 -11 L -2 -8 L -3 -6 L -4 -3 L -5 1 L -5 6 L -4 8 L -3 9 M 0 9 L 2 8 L 3 7 L 4 4 L 4 0 L 3 -2 L 2 -3","-10 11 M -4 -12 L -6 -6 M 9 -12 L 8 -9 L 6 -6 L 2 -1 L 0 2 L -1 5 L -2 9 M 0 1 L -2 5 L -3 9 M 6 -6 L 0 0 L -2 3 L -3 5 L -4 9 L -2 9 M -5 -9 L -2 -12 L 0 -12 L 5 -9 M -3 -11 L 0 -11 L 5 -9 M -5 -9 L -3 -10 L 0 -10 L 5 -9 L 7 -9 L 8 -10 L 9 -12","-10 11 M 1 -12 L -2 -11 L -3 -10 L -4 -8 L -4 -5 L -3 -3 L -1 -2 L 2 -2 L 5 -3 L 7 -4 L 8 -6 L 8 -9 L 7 -11 L 5 -12 L 1 -12 M 3 -12 L -2 -11 M -2 -10 L -3 -8 L -3 -4 L -2 -3 M -3 -3 L 0 -2 M 1 -2 L 5 -3 M 6 -4 L 7 -6 L 7 -9 L 6 -11 M 7 -11 L 3 -12 M 1 -12 L -1 -10 L -2 -8 L -2 -4 L -1 -2 M 2 -2 L 4 -3 L 5 -4 L 6 -6 L 6 -10 L 5 -12 M -1 -2 L -5 -1 L -7 1 L -8 3 L -8 6 L -7 8 L -4 9 L 0 9 L 4 8 L 5 7 L 6 5 L 6 2 L 5 0 L 4 -1 L 2 -2 M 0 -2 L -5 -1 M -4 -1 L -6 1 L -7 3 L -7 6 L -6 8 M -7 8 L -2 9 L 4 8 M 4 7 L 5 5 L 5 2 L 4 0 M 4 -1 L 1 -2 M -1 -2 L -3 -1 L -5 1 L -6 3 L -6 6 L -5 8 L -4 9 M 0 9 L 2 8 L 3 7 L 4 5 L 4 1 L 3 -1 L 2 -2","-10 11 M 6 -4 L 5 -2 L 4 -1 L 2 0 L -1 0 L -3 -1 L -4 -2 L -5 -4 L -5 -7 L -4 -9 L -2 -11 L 1 -12 L 4 -12 L 6 -11 L 7 -10 L 8 -7 L 8 -4 L 7 0 L 6 3 L 4 6 L 2 8 L -1 9 L -4 9 L -6 8 L -7 6 L -7 4 L -5 4 L -5 6 L -6 6 L -6 5 M -3 -2 L -4 -4 L -4 -7 L -3 -9 M 6 -10 L 7 -8 L 7 -4 L 6 0 L 5 3 L 3 6 M -1 0 L -2 -1 L -3 -3 L -3 -7 L -2 -10 L -1 -11 L 1 -12 M 4 -12 L 5 -11 L 6 -9 L 6 -4 L 5 0 L 4 3 L 3 5 L 1 8 L -1 9","-11 11 M -6 -12 L -6 9 M -5 -12 L -5 9 M -9 -12 L 3 -12 L 6 -11 L 7 -10 L 8 -8 L 8 -5 L 7 -3 L 6 -2 L 3 -1 L -5 -1 M 3 -12 L 5 -11 L 6 -10 L 7 -8 L 7 -5 L 6 -3 L 5 -2 L 3 -1 M -9 9 L 7 9 L 7 4 L 6 9","-10 9 M 7 -11 L 3 -11 L -1 -10 L -4 -8 L -6 -5 L -7 -2 L -7 1 L -6 4 L -4 7 L -1 9 L 3 10 L 7 10 M 7 -11 L 4 -10 L 1 -8 L -1 -5 L -2 -2 L -2 1 L -1 4 L 1 7 L 4 9 L 7 10","-12 13 M -3 -1 L -5 -1 L -7 0 L -8 1 L -9 3 L -9 5 L -8 7 L -7 8 L -5 9 L -3 9 L -1 8 L 0 7 L 1 5 L 1 3 L 0 1 L -1 0 L -3 -1 M 1 -10 L -2 -1 M 8 -8 L 0 0 M 10 -1 L 1 2","-10 10 M -3 -7 L 3 7 M 3 -7 L -3 7 M -7 -3 L 7 3 M 7 -3 L -7 3","-12 12 M -4 4 L -6 3 L -7 3 L -9 4 L -10 6 L -10 7 L -9 9 L -7 10 L -6 10 L -4 9 L -3 7 L -3 6 L -4 4 L -7 0 L -8 -3 L -8 -5 L -7 -8 L -5 -10 L -2 -11 L 2 -11 L 5 -10 L 7 -8 L 8 -5 L 8 -3 L 7 0 L 4 4 L 3 6 L 3 7 L 4 9 L 6 10 L 7 10 L 9 9 L 10 7 L 10 6 L 9 4 L 7 3 L 6 3 L 4 4 M -8 -5 L -7 -7 L -5 -9 L -2 -10 L 2 -10 L 5 -9 L 7 -7 L 8 -5","-12 12 M -4 -5 L -6 -4 L -7 -4 L -9 -5 L -10 -7 L -10 -8 L -9 -10 L -7 -11 L -6 -11 L -4 -10 L -3 -8 L -3 -7 L -4 -5 L -7 -1 L -8 2 L -8 4 L -7 7 L -5 9 L -2 10 L 2 10 L 5 9 L 7 7 L 8 4 L 8 2 L 7 -1 L 4 -5 L 3 -7 L 3 -8 L 4 -10 L 6 -11 L 7 -11 L 9 -10 L 10 -8 L 10 -7 L 9 -5 L 7 -4 L 6 -4 L 4 -5 M -8 4 L -7 6 L -5 8 L -2 9 L 2 9 L 5 8 L 7 6 L 8 4","-12 13 M -8 -5 L -9 -6 L -9 -8 L -8 -10 L -6 -11 L -4 -11 L -2 -10 L -1 -9 L 0 -7 L 1 -2 M -9 -8 L -7 -10 L -5 -10 L -3 -9 L -2 -8 L -1 -6 L 0 -2 L 0 9 M 9 -5 L 10 -6 L 10 -8 L 9 -10 L 7 -11 L 5 -11 L 3 -10 L 2 -9 L 1 -7 L 0 -2 M 10 -8 L 8 -10 L 6 -10 L 4 -9 L 3 -8 L 2 -6 L 1 -2 L 1 9","-10 10 M 0 -12 L -7 8 M -1 -9 L 5 9 M 0 -9 L 6 9 M 0 -12 L 7 9 M -5 3 L 4 3 M -9 9 L -3 9 M 2 9 L 9 9 M -7 8 L -8 9 M -7 8 L -5 9 M 5 8 L 3 9 M 5 7 L 4 9 M 6 7 L 8 9","-11 11 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 3 -12 L 6 -11 L 7 -10 L 8 -8 L 8 -6 L 7 -4 L 6 -3 L 3 -2 M 6 -10 L 7 -8 L 7 -6 L 6 -4 M 3 -12 L 5 -11 L 6 -9 L 6 -5 L 5 -3 L 3 -2 M -4 -2 L 3 -2 L 6 -1 L 7 0 L 8 2 L 8 5 L 7 7 L 6 8 L 3 9 L -9 9 M 6 0 L 7 2 L 7 5 L 6 7 M 3 -2 L 5 -1 L 6 1 L 6 6 L 5 8 L 3 9 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9","-11 10 M 6 -9 L 7 -12 L 7 -6 L 6 -9 L 4 -11 L 2 -12 L -1 -12 L -4 -11 L -6 -9 L -7 -7 L -8 -4 L -8 1 L -7 4 L -6 6 L -4 8 L -1 9 L 2 9 L 4 8 L 6 6 L 7 4 M -5 -9 L -6 -7 L -7 -4 L -7 1 L -6 4 L -5 6 M -1 -12 L -3 -11 L -5 -8 L -6 -4 L -6 1 L -5 5 L -3 8 L -1 9","-11 11 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 1 -12 L 4 -11 L 6 -9 L 7 -7 L 8 -4 L 8 1 L 7 4 L 6 6 L 4 8 L 1 9 L -9 9 M 5 -9 L 6 -7 L 7 -4 L 7 1 L 6 4 L 5 6 M 1 -12 L 3 -11 L 5 -8 L 6 -4 L 6 1 L 5 5 L 3 8 L 1 9 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9","-11 10 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 7 -12 L 7 -6 M -4 -2 L 2 -2 M 2 -6 L 2 2 M -9 9 L 7 9 L 7 3 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M 2 -12 L 7 -11 M 4 -12 L 7 -10 M 5 -12 L 7 -9 M 6 -12 L 7 -6 M 2 -6 L 1 -2 L 2 2 M 2 -4 L 0 -2 L 2 0 M 2 -3 L -2 -2 L 2 -1 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9 M 2 9 L 7 8 M 4 9 L 7 7 M 5 9 L 7 6 M 6 9 L 7 3","-11 9 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 7 -12 L 7 -6 M -4 -2 L 2 -2 M 2 -6 L 2 2 M -9 9 L -1 9 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M 2 -12 L 7 -11 M 4 -12 L 7 -10 M 5 -12 L 7 -9 M 6 -12 L 7 -6 M 2 -6 L 1 -2 L 2 2 M 2 -4 L 0 -2 L 2 0 M 2 -3 L -2 -2 L 2 -1 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9","-11 12 M 6 -9 L 7 -12 L 7 -6 L 6 -9 L 4 -11 L 2 -12 L -1 -12 L -4 -11 L -6 -9 L -7 -7 L -8 -4 L -8 1 L -7 4 L -6 6 L -4 8 L -1 9 L 2 9 L 4 8 L 6 8 L 7 9 L 7 1 M -5 -9 L -6 -7 L -7 -4 L -7 1 L -6 4 L -5 6 M -1 -12 L -3 -11 L -5 -8 L -6 -4 L -6 1 L -5 5 L -3 8 L -1 9 M 6 2 L 6 7 M 5 1 L 5 7 L 4 8 M 2 1 L 10 1 M 3 1 L 5 2 M 4 1 L 5 3 M 8 1 L 7 3 M 9 1 L 7 2","-12 12 M -7 -12 L -7 9 M -6 -11 L -6 8 M -5 -12 L -5 9 M 5 -12 L 5 9 M 6 -11 L 6 8 M 7 -12 L 7 9 M -10 -12 L -2 -12 M 2 -12 L 10 -12 M -5 -2 L 5 -2 M -10 9 L -2 9 M 2 9 L 10 9 M -9 -12 L -7 -11 M -8 -12 L -7 -10 M -4 -12 L -5 -10 M -3 -12 L -5 -11 M 3 -12 L 5 -11 M 4 -12 L 5 -10 M 8 -12 L 7 -10 M 9 -12 L 7 -11 M -7 8 L -9 9 M -7 7 L -8 9 M -5 7 L -4 9 M -5 8 L -3 9 M 5 8 L 3 9 M 5 7 L 4 9 M 7 7 L 8 9 M 7 8 L 9 9","-6 6 M -1 -12 L -1 9 M 0 -11 L 0 8 M 1 -12 L 1 9 M -4 -12 L 4 -12 M -4 9 L 4 9 M -3 -12 L -1 -11 M -2 -12 L -1 -10 M 2 -12 L 1 -10 M 3 -12 L 1 -11 M -1 8 L -3 9 M -1 7 L -2 9 M 1 7 L 2 9 M 1 8 L 3 9","-8 8 M 1 -12 L 1 5 L 0 8 L -1 9 M 2 -11 L 2 5 L 1 8 M 3 -12 L 3 5 L 2 8 L -1 9 L -3 9 L -5 8 L -6 6 L -6 4 L -5 3 L -4 3 L -3 4 L -3 5 L -4 6 L -5 6 M -5 4 L -5 5 L -4 5 L -4 4 L -5 4 M -2 -12 L 6 -12 M -1 -12 L 1 -11 M 0 -12 L 1 -10 M 4 -12 L 3 -10 M 5 -12 L 3 -11","-12 10 M -7 -12 L -7 9 M -6 -11 L -6 8 M -5 -12 L -5 9 M 6 -11 L -5 0 M -2 -2 L 5 9 M -1 -2 L 6 9 M -1 -4 L 7 9 M -10 -12 L -2 -12 M 3 -12 L 9 -12 M -10 9 L -2 9 M 2 9 L 9 9 M -9 -12 L -7 -11 M -8 -12 L -7 -10 M -4 -12 L -5 -10 M -3 -12 L -5 -11 M 5 -12 L 6 -11 M 8 -12 L 6 -11 M -7 8 L -9 9 M -7 7 L -8 9 M -5 7 L -4 9 M -5 8 L -3 9 M 5 7 L 3 9 M 5 7 L 8 9","-9 9 M -4 -12 L -4 9 M -3 -11 L -3 8 M -2 -12 L -2 9 M -7 -12 L 1 -12 M -7 9 L 8 9 L 8 3 M -6 -12 L -4 -11 M -5 -12 L -4 -10 M -1 -12 L -2 -10 M 0 -12 L -2 -11 M -4 8 L -6 9 M -4 7 L -5 9 M -2 7 L -1 9 M -2 8 L 0 9 M 3 9 L 8 8 M 5 9 L 8 7 M 6 9 L 8 6 M 7 9 L 8 3","-13 13 M -8 -12 L -8 8 M -8 -12 L -1 9 M -7 -12 L -1 6 M -6 -12 L 0 6 M 6 -12 L -1 9 M 6 -12 L 6 9 M 7 -11 L 7 8 M 8 -12 L 8 9 M -11 -12 L -6 -12 M 6 -12 L 11 -12 M -11 9 L -5 9 M 3 9 L 11 9 M -10 -12 L -8 -11 M 9 -12 L 8 -10 M 10 -12 L 8 -11 M -8 8 L -10 9 M -8 8 L -6 9 M 6 8 L 4 9 M 6 7 L 5 9 M 8 7 L 9 9 M 8 8 L 10 9","-12 12 M -7 -12 L -7 8 M -7 -12 L 7 9 M -6 -12 L 6 6 M -5 -12 L 7 6 M 7 -11 L 7 9 M -10 -12 L -5 -12 M 4 -12 L 10 -12 M -10 9 L -4 9 M -9 -12 L -7 -11 M 5 -12 L 7 -11 M 9 -12 L 7 -11 M -7 8 L -9 9 M -7 8 L -5 9","-11 11 M -1 -12 L -4 -11 L -6 -9 L -7 -7 L -8 -3 L -8 0 L -7 4 L -6 6 L -4 8 L -1 9 L 1 9 L 4 8 L 6 6 L 7 4 L 8 0 L 8 -3 L 7 -7 L 6 -9 L 4 -11 L 1 -12 L -1 -12 M -5 -9 L -6 -7 L -7 -4 L -7 1 L -6 4 L -5 6 M 5 6 L 6 4 L 7 1 L 7 -4 L 6 -7 L 5 -9 M -1 -12 L -3 -11 L -5 -8 L -6 -4 L -6 1 L -5 5 L -3 8 L -1 9 M 1 9 L 3 8 L 5 5 L 6 1 L 6 -4 L 5 -8 L 3 -11 L 1 -12","-11 11 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 3 -12 L 6 -11 L 7 -10 L 8 -8 L 8 -5 L 7 -3 L 6 -2 L 3 -1 L -4 -1 M 6 -10 L 7 -8 L 7 -5 L 6 -3 M 3 -12 L 5 -11 L 6 -9 L 6 -4 L 5 -2 L 3 -1 M -9 9 L -1 9 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9","-11 11 M -1 -12 L -4 -11 L -6 -9 L -7 -7 L -8 -3 L -8 0 L -7 4 L -6 6 L -4 8 L -1 9 L 1 9 L 4 8 L 6 6 L 7 4 L 8 0 L 8 -3 L 7 -7 L 6 -9 L 4 -11 L 1 -12 L -1 -12 M -5 -9 L -6 -7 L -7 -4 L -7 1 L -6 4 L -5 6 M 5 6 L 6 4 L 7 1 L 7 -4 L 6 -7 L 5 -9 M -1 -12 L -3 -11 L -5 -8 L -6 -4 L -6 1 L -5 5 L -3 8 L -1 9 M 1 9 L 3 8 L 5 5 L 6 1 L 6 -4 L 5 -8 L 3 -11 L 1 -12 M -4 6 L -3 4 L -1 3 L 0 3 L 2 4 L 3 6 L 4 12 L 5 14 L 7 14 L 8 12 L 8 10 M 4 10 L 5 12 L 6 13 L 7 13 M 3 6 L 5 11 L 6 12 L 7 12 L 8 11","-11 11 M -6 -12 L -6 9 M -5 -11 L -5 8 M -4 -12 L -4 9 M -9 -12 L 3 -12 L 6 -11 L 7 -10 L 8 -8 L 8 -6 L 7 -4 L 6 -3 L 3 -2 L -4 -2 M 6 -10 L 7 -8 L 7 -6 L 6 -4 M 3 -12 L 5 -11 L 6 -9 L 6 -5 L 5 -3 L 3 -2 M 0 -2 L 2 -1 L 3 1 L 5 7 L 6 9 L 8 9 L 9 7 L 9 5 M 5 5 L 6 7 L 7 8 L 8 8 M 2 -1 L 3 0 L 6 6 L 7 7 L 8 7 L 9 6 M -9 9 L -1 9 M -8 -12 L -6 -11 M -7 -12 L -6 -10 M -3 -12 L -4 -10 M -2 -12 L -4 -11 M -6 8 L -8 9 M -6 7 L -7 9 M -4 7 L -3 9 M -4 8 L -2 9","-10 10 M 6 -9 L 7 -12 L 7 -6 L 6 -9 L 4 -11 L 1 -12 L -2 -12 L -5 -11 L -7 -9 L -7 -6 L -6 -4 L -3 -2 L 3 0 L 5 1 L 6 3 L 6 6 L 5 8 M -6 -6 L -5 -4 L -3 -3 L 3 -1 L 5 0 L 6 2 M -5 -11 L -6 -9 L -6 -7 L -5 -5 L -3 -4 L 3 -2 L 6 0 L 7 2 L 7 5 L 6 7 L 5 8 L 2 9 L -1 9 L -4 8 L -6 6 L -7 3 L -7 9 L -6 6","-10 10 M -8 -12 L -8 -6 M -1 -12 L -1 9 M 0 -11 L 0 8 M 1 -12 L 1 9 M 8 -12 L 8 -6 M -8 -12 L 8 -12 M -4 9 L 4 9 M -7 -12 L -8 -6 M -6 -12 L -8 -9 M -5 -12 L -8 -10 M -3 -12 L -8 -11 M 3 -12 L 8 -11 M 5 -12 L 8 -10 M 6 -12 L 8 -9 M 7 -12 L 8 -6 M -1 8 L -3 9 M -1 7 L -2 9 M 1 7 L 2 9 M 1 8 L 3 9","-12 12 M -7 -12 L -7 3 L -6 6 L -4 8 L -1 9 L 1 9 L 4 8 L 6 6 L 7 3 L 7 -11 M -6 -11 L -6 4 L -5 6 M -5 -12 L -5 4 L -4 7 L -3 8 L -1 9 M -10 -12 L -2 -12 M 4 -12 L 10 -12 M -9 -12 L -7 -11 M -8 -12 L -7 -10 M -4 -12 L -5 -10 M -3 -12 L -5 -11 M 5 -12 L 7 -11 M 9 -12 L 7 -11","-10 10 M -7 -12 L 0 9 M -6 -12 L 0 6 L 0 9 M -5 -12 L 1 6 M 7 -11 L 0 9 M -9 -12 L -2 -12 M 3 -12 L 9 -12 M -8 -12 L -6 -10 M -4 -12 L -5 -10 M -3 -12 L -5 -11 M 5 -12 L 7 -11 M 8 -12 L 7 -11","-12 12 M -8 -12 L -4 9 M -7 -12 L -4 4 L -4 9 M -6 -12 L -3 4 M 0 -12 L -3 4 L -4 9 M 0 -12 L 4 9 M 1 -12 L 4 4 L 4 9 M 2 -12 L 5 4 M 8 -11 L 5 4 L 4 9 M -11 -12 L -3 -12 M 0 -12 L 2 -12 M 5 -12 L 11 -12 M -10 -12 L -7 -11 M -9 -12 L -7 -10 M -5 -12 L -6 -10 M -4 -12 L -6 -11 M 6 -12 L 8 -11 M 10 -12 L 8 -11","-10 10 M -7 -12 L 5 9 M -6 -12 L 6 9 M -5 -12 L 7 9 M 6 -11 L -6 8 M -9 -12 L -2 -12 M 3 -12 L 9 -12 M -9 9 L -3 9 M 2 9 L 9 9 M -8 -12 L -5 -10 M -4 -12 L -5 -10 M -3 -12 L -5 -11 M 4 -12 L 6 -11 M 8 -12 L 6 -11 M -6 8 L -8 9 M -6 8 L -4 9 M 5 8 L 3 9 M 5 7 L 4 9 M 5 7 L 8 9","-11 11 M -8 -12 L -1 -1 L -1 9 M -7 -12 L 0 -1 L 0 8 M -6 -12 L 1 -1 L 1 9 M 7 -11 L 1 -1 M -10 -12 L -3 -12 M 4 -12 L 10 -12 M -4 9 L 4 9 M -9 -12 L -7 -11 M -4 -12 L -6 -11 M 5 -12 L 7 -11 M 9 -12 L 7 -11 M -1 8 L -3 9 M -1 7 L -2 9 M 1 7 L 2 9 M 1 8 L 3 9","-10 10 M 7 -12 L -7 -12 L -7 -6 M 5 -12 L -7 9 M 6 -12 L -6 9 M 7 -12 L -5 9 M -7 9 L 7 9 L 7 3 M -6 -12 L -7 -6 M -5 -12 L -7 -9 M -4 -12 L -7 -10 M -2 -12 L -7 -11 M 2 9 L 7 8 M 4 9 L 7 7 M 5 9 L 7 6 M 6 9 L 7 3","-12 12 M -9 -11 L -8 -7 L -7 -5 L -5 -3 L -2 -2 L 2 -2 L 5 -3 L 7 -5 L 8 -7 L 9 -11 M -9 -11 L -8 -8 L -7 -6 L -5 -4 L -2 -3 L 2 -3 L 5 -4 L 7 -6 L 8 -8 L 9 -11 M -2 -3 L -4 -2 L -5 -1 L -6 1 L -6 4 L -5 6 L -3 8 L -1 9 L 1 9 L 3 8 L 5 6 L 6 4 L 6 1 L 5 -1 L 4 -2 L 2 -3 M -2 -2 L -4 -1 L -5 1 L -5 4 L -4 7 M 4 7 L 5 4 L 5 1 L 4 -1 L 2 -2","-7 7 M -7 -12 L 7 12","-12 12 M -5 -8 L -5 4 M -4 -7 L -4 3 M 4 -7 L 4 3 M 5 -8 L 5 4 M -9 -11 L -7 -9 L -5 -8 L -2 -7 L 2 -7 L 5 -8 L 7 -9 L 9 -11 M -9 7 L -7 5 L -5 4 L -2 3 L 2 3 L 5 4 L 7 5 L 9 7","-12 12 M 9 -9 L -6 -9 L -8 -8 L -9 -6 L -9 -4 L -8 -2 L -6 -1 L -4 -1 L -2 -2 L -1 -4 L -1 -6 L -2 -8 L 9 -8 M -9 -5 L -8 -3 L -7 -2 L -5 -1 M -1 -5 L -2 -7 L -3 -8 L -5 -9 M -9 6 L 6 6 L 8 5 L 9 3 L 9 1 L 8 -1 L 6 -2 L 4 -2 L 2 -1 L 1 1 L 1 3 L 2 5 L -9 5 M 9 2 L 8 0 L 7 -1 L 5 -2 M 1 2 L 2 4 L 3 5 L 5 6","-12 11 M -3 3 L -5 2 L -6 2 L -8 3 L -9 5 L -9 6 L -8 8 L -6 9 L -5 9 L -3 8 L -2 6 L -2 5 L -3 3 L -8 -2 L -9 -4 L -9 -7 L -8 -9 L -6 -10 L -3 -11 L 1 -11 L 5 -10 L 7 -8 L 8 -6 L 8 -3 L 7 0 L 4 3 L 3 5 L 3 7 L 4 9 L 6 9 L 7 8 L 8 6 M -5 1 L -7 -2 L -8 -4 L -8 -7 L -7 -9 L -6 -10 M 1 -11 L 4 -10 L 6 -8 L 7 -6 L 7 -3 L 6 0 L 4 3","-11 13 M -10 -7 L -7 -10 L -5 -7 L -5 4 M -8 -9 L -6 -6 L -6 4 M -5 -7 L -2 -10 L 0 -7 L 0 3 M -3 -9 L -1 -6 L -1 3 M 0 -7 L 3 -10 L 5 -7 L 5 9 M 2 -9 L 4 -6 L 4 9 M 5 -7 L 8 -10 L 9 -8 L 10 -5 L 10 -2 L 9 1 L 8 3 L 6 5 L 3 7 L -2 9 M 7 -9 L 8 -8 L 9 -5 L 9 -2 L 8 1 L 7 3 L 5 5 L 2 7 L -2 9","-11 11 M 5 -5 L 3 2 L 3 6 L 4 8 L 5 9 L 7 9 L 9 7 L 10 5 M 6 -5 L 4 2 L 4 8 M 5 -5 L 7 -5 L 5 2 L 4 6 M 3 2 L 3 -1 L 2 -4 L 0 -5 L -2 -5 L -5 -4 L -7 -1 L -8 2 L -8 4 L -7 7 L -6 8 L -4 9 L -2 9 L 0 8 L 1 7 L 2 5 L 3 2 M -4 -4 L -6 -1 L -7 2 L -7 5 L -6 7 M -2 -5 L -4 -3 L -5 -1 L -6 2 L -6 5 L -5 8 L -4 9","-9 10 M -2 -12 L -4 -5 L -5 1 L -5 5 L -4 7 L -3 8 L -1 9 L 1 9 L 4 8 L 6 5 L 7 2 L 7 0 L 6 -3 L 5 -4 L 3 -5 L 1 -5 L -1 -4 L -2 -3 L -3 -1 L -4 2 M -1 -12 L -3 -5 L -4 -1 L -4 5 L -3 8 M 4 7 L 5 5 L 6 2 L 6 -1 L 5 -3 M -5 -12 L 0 -12 L -2 -5 L -4 2 M 1 9 L 3 7 L 4 5 L 5 2 L 5 -1 L 4 -4 L 3 -5 M -4 -12 L -1 -11 M -3 -12 L -2 -10","-9 9 M 5 -1 L 5 -2 L 4 -2 L 4 0 L 6 0 L 6 -2 L 5 -4 L 3 -5 L 0 -5 L -3 -4 L -5 -1 L -6 2 L -6 4 L -5 7 L -4 8 L -2 9 L 0 9 L 3 8 L 5 5 M -3 -3 L -4 -1 L -5 2 L -5 5 L -4 7 M 0 -5 L -2 -3 L -3 -1 L -4 2 L -4 5 L -3 8 L -2 9","-11 11 M 7 -12 L 4 -1 L 3 3 L 3 6 L 4 8 L 5 9 L 7 9 L 9 7 L 10 5 M 8 -12 L 5 -1 L 4 3 L 4 8 M 4 -12 L 9 -12 L 5 2 L 4 6 M 3 2 L 3 -1 L 2 -4 L 0 -5 L -2 -5 L -5 -4 L -7 -1 L -8 2 L -8 4 L -7 7 L -6 8 L -4 9 L -2 9 L 0 8 L 1 7 L 2 5 L 3 2 M -5 -3 L -6 -1 L -7 2 L -7 5 L -6 7 M -2 -5 L -4 -3 L -5 -1 L -6 2 L -6 5 L -5 8 L -4 9 M 5 -12 L 8 -11 M 6 -12 L 7 -10","-9 9 M -5 4 L -1 3 L 2 2 L 5 0 L 6 -2 L 5 -4 L 3 -5 L 0 -5 L -3 -4 L -5 -1 L -6 2 L -6 4 L -5 7 L -4 8 L -2 9 L 0 9 L 3 8 L 5 6 M -3 -3 L -4 -1 L -5 2 L -5 5 L -4 7 M 0 -5 L -2 -3 L -3 -1 L -4 2 L -4 5 L -3 8 L -2 9","-8 8 M 8 -10 L 8 -11 L 7 -11 L 7 -9 L 9 -9 L 9 -11 L 8 -12 L 6 -12 L 4 -11 L 2 -9 L 1 -7 L 0 -4 L -1 0 L -3 9 L -4 12 L -5 14 L -7 16 M 2 -8 L 1 -5 L 0 0 L -2 9 L -3 12 M 6 -12 L 4 -10 L 3 -8 L 2 -5 L 1 0 L -1 8 L -2 11 L -3 13 L -5 15 L -7 16 L -9 16 L -10 15 L -10 13 L -8 13 L -8 15 L -9 15 L -9 14 M -4 -5 L 7 -5","-10 11 M 6 -5 L 2 9 L 1 12 L -1 15 L -3 16 M 7 -5 L 3 9 L 1 13 M 6 -5 L 8 -5 L 4 9 L 2 13 L 0 15 L -3 16 L -6 16 L -8 15 L -9 14 L -9 12 L -7 12 L -7 14 L -8 14 L -8 13 M 4 2 L 4 -1 L 3 -4 L 1 -5 L -1 -5 L -4 -4 L -6 -1 L -7 2 L -7 4 L -6 7 L -5 8 L -3 9 L -1 9 L 1 8 L 2 7 L 3 5 L 4 2 M -4 -3 L -5 -1 L -6 2 L -6 5 L -5 7 M -1 -5 L -3 -3 L -4 -1 L -5 2 L -5 5 L -4 8 L -3 9","-11 11 M -3 -12 L -9 9 L -7 9 M -2 -12 L -8 9 M -6 -12 L -1 -12 L -7 9 M -5 2 L -3 -2 L -1 -4 L 1 -5 L 3 -5 L 5 -4 L 6 -2 L 6 1 L 4 6 M 5 -4 L 5 0 L 4 4 L 4 8 M 5 -2 L 3 3 L 3 6 L 4 8 L 5 9 L 7 9 L 9 7 L 10 5 M -5 -12 L -2 -11 M -4 -12 L -3 -10","-7 6 M 1 -12 L 1 -10 L 3 -10 L 3 -12 L 1 -12 M 2 -12 L 2 -10 M 1 -11 L 3 -11 M -6 -1 L -5 -3 L -3 -5 L -1 -5 L 0 -4 L 1 -2 L 1 1 L -1 6 M 0 -4 L 0 0 L -1 4 L -1 8 M 0 -2 L -2 3 L -2 6 L -1 8 L 0 9 L 2 9 L 4 7 L 5 5","-7 6 M 3 -12 L 3 -10 L 5 -10 L 5 -12 L 3 -12 M 4 -12 L 4 -10 M 3 -11 L 5 -11 M -5 -1 L -4 -3 L -2 -5 L 0 -5 L 1 -4 L 2 -2 L 2 1 L 0 8 L -1 11 L -2 13 L -4 15 L -6 16 L -8 16 L -9 15 L -9 13 L -7 13 L -7 15 L -8 15 L -8 14 M 1 -4 L 1 1 L -1 8 L -2 11 L -3 13 M 1 -2 L 0 2 L -2 9 L -3 12 L -4 14 L -6 16","-11 11 M -3 -12 L -9 9 L -7 9 M -2 -12 L -8 9 M -6 -12 L -1 -12 L -7 9 M 7 -3 L 7 -4 L 6 -4 L 6 -2 L 8 -2 L 8 -4 L 7 -5 L 5 -5 L 3 -4 L -1 0 L -3 1 M -5 1 L -3 1 L -1 2 L 0 3 L 2 7 L 3 8 L 5 8 M -1 3 L 1 7 L 2 8 M -3 1 L -2 2 L 0 8 L 1 9 L 3 9 L 5 8 L 7 5 M -5 -12 L -2 -11 M -4 -12 L -3 -10","-6 6 M 2 -12 L -1 -1 L -2 3 L -2 6 L -1 8 L 0 9 L 2 9 L 4 7 L 5 5 M 3 -12 L 0 -1 L -1 3 L -1 8 M -1 -12 L 4 -12 L 0 2 L -1 6 M 0 -12 L 3 -11 M 1 -12 L 2 -10","-18 17 M -17 -1 L -16 -3 L -14 -5 L -12 -5 L -11 -4 L -10 -2 L -10 1 L -12 9 M -11 -4 L -11 1 L -13 9 M -11 -2 L -12 2 L -14 9 L -12 9 M -10 1 L -8 -2 L -6 -4 L -4 -5 L -2 -5 L 0 -4 L 1 -2 L 1 1 L -1 9 M 0 -4 L 0 1 L -2 9 M 0 -2 L -1 2 L -3 9 L -1 9 M 1 1 L 3 -2 L 5 -4 L 7 -5 L 9 -5 L 11 -4 L 12 -2 L 12 1 L 10 6 M 11 -4 L 11 0 L 10 4 L 10 8 M 11 -2 L 9 3 L 9 6 L 10 8 L 11 9 L 13 9 L 15 7 L 16 5","-12 12 M -11 -1 L -10 -3 L -8 -5 L -6 -5 L -5 -4 L -4 -2 L -4 1 L -6 9 M -5 -4 L -5 1 L -7 9 M -5 -2 L -6 2 L -8 9 L -6 9 M -4 1 L -2 -2 L 0 -4 L 2 -5 L 4 -5 L 6 -4 L 7 -2 L 7 1 L 5 6 M 6 -4 L 6 0 L 5 4 L 5 8 M 6 -2 L 4 3 L 4 6 L 5 8 L 6 9 L 8 9 L 10 7 L 11 5","-10 10 M -1 -5 L -4 -4 L -6 -1 L -7 2 L -7 4 L -6 7 L -5 8 L -2 9 L 1 9 L 4 8 L 6 5 L 7 2 L 7 0 L 6 -3 L 5 -4 L 2 -5 L -1 -5 M -4 -3 L -5 -1 L -6 2 L -6 5 L -5 7 M 4 7 L 5 5 L 6 2 L 6 -1 L 5 -3 M -1 -5 L -3 -3 L -4 -1 L -5 2 L -5 5 L -4 8 L -2 9 M 1 9 L 3 7 L 4 5 L 5 2 L 5 -1 L 4 -4 L 2 -5","-11 11 M -10 -1 L -9 -3 L -7 -5 L -5 -5 L -4 -4 L -3 -2 L -3 1 L -4 5 L -7 16 M -4 -4 L -4 1 L -5 5 L -8 16 M -4 -2 L -5 2 L -9 16 M -3 2 L -2 -1 L -1 -3 L 0 -4 L 2 -5 L 4 -5 L 6 -4 L 7 -3 L 8 0 L 8 2 L 7 5 L 5 8 L 2 9 L 0 9 L -2 8 L -3 5 L -3 2 M 6 -3 L 7 -1 L 7 2 L 6 5 L 5 7 M 4 -5 L 5 -4 L 6 -1 L 6 2 L 5 5 L 4 7 L 2 9 M -12 16 L -4 16 M -8 15 L -11 16 M -8 14 L -10 16 M -7 14 L -6 16 M -8 15 L -5 16","-11 10 M 5 -5 L -1 16 M 6 -5 L 0 16 M 5 -5 L 7 -5 L 1 16 M 3 2 L 3 -1 L 2 -4 L 0 -5 L -2 -5 L -5 -4 L -7 -1 L -8 2 L -8 4 L -7 7 L -6 8 L -4 9 L -2 9 L 0 8 L 1 7 L 2 5 L 3 2 M -5 -3 L -6 -1 L -7 2 L -7 5 L -6 7 M -2 -5 L -4 -3 L -5 -1 L -6 2 L -6 5 L -5 8 L -4 9 M -4 16 L 4 16 M 0 15 L -3 16 M 0 14 L -2 16 M 1 14 L 2 16 M 0 15 L 3 16","-9 9 M -8 -1 L -7 -3 L -5 -5 L -3 -5 L -2 -4 L -1 -2 L -1 2 L -3 9 M -2 -4 L -2 2 L -4 9 M -2 -2 L -3 2 L -5 9 L -3 9 M 7 -3 L 7 -4 L 6 -4 L 6 -2 L 8 -2 L 8 -4 L 7 -5 L 5 -5 L 3 -4 L 1 -2 L -1 2","-8 9 M 6 -2 L 6 -3 L 5 -3 L 5 -1 L 7 -1 L 7 -3 L 6 -4 L 3 -5 L 0 -5 L -3 -4 L -4 -3 L -4 -1 L -3 1 L -1 2 L 2 3 L 4 4 L 5 6 M -3 -4 L -4 -1 M -3 0 L -1 1 L 2 2 L 4 3 M 5 4 L 4 8 M -4 -3 L -3 -1 L -1 0 L 2 1 L 4 2 L 5 4 L 5 6 L 4 8 L 1 9 L -2 9 L -5 8 L -6 7 L -6 5 L -4 5 L -4 7 L -5 7 L -5 6","-7 7 M 2 -12 L -1 -1 L -2 3 L -2 6 L -1 8 L 0 9 L 2 9 L 4 7 L 5 5 M 3 -12 L 0 -1 L -1 3 L -1 8 M 2 -12 L 4 -12 L 0 2 L -1 6 M -4 -5 L 6 -5","-12 12 M -11 -1 L -10 -3 L -8 -5 L -6 -5 L -5 -4 L -4 -2 L -4 1 L -6 6 M -5 -4 L -5 0 L -6 4 L -6 8 M -5 -2 L -7 3 L -7 6 L -6 8 L -4 9 L -2 9 L 0 8 L 2 6 L 4 3 M 6 -5 L 4 3 L 4 6 L 5 8 L 6 9 L 8 9 L 10 7 L 11 5 M 7 -5 L 5 3 L 5 8 M 6 -5 L 8 -5 L 6 2 L 5 6","-10 10 M -9 -1 L -8 -3 L -6 -5 L -4 -5 L -3 -4 L -2 -2 L -2 1 L -4 6 M -3 -4 L -3 0 L -4 4 L -4 8 M -3 -2 L -5 3 L -5 6 L -4 8 L -2 9 L 0 9 L 2 8 L 4 6 L 6 3 L 7 -1 L 7 -5 L 6 -5 L 6 -4 L 7 -2","-15 15 M -14 -1 L -13 -3 L -11 -5 L -9 -5 L -8 -4 L -7 -2 L -7 1 L -9 6 M -8 -4 L -8 0 L -9 4 L -9 8 M -8 -2 L -10 3 L -10 6 L -9 8 L -7 9 L -5 9 L -3 8 L -1 6 L 0 3 M 2 -5 L 0 3 L 0 6 L 1 8 L 3 9 L 5 9 L 7 8 L 9 6 L 11 3 L 12 -1 L 12 -5 L 11 -5 L 11 -4 L 12 -2 M 3 -5 L 1 3 L 1 8 M 2 -5 L 4 -5 L 2 2 L 1 6","-11 11 M -8 -1 L -6 -4 L -4 -5 L -2 -5 L 0 -4 L 1 -2 L 1 0 M -2 -5 L -1 -4 L -1 0 L -2 4 L -3 6 L -5 8 L -7 9 L -9 9 L -10 8 L -10 6 L -8 6 L -8 8 L -9 8 L -9 7 M 0 -3 L 0 0 L -1 4 L -1 7 M 8 -3 L 8 -4 L 7 -4 L 7 -2 L 9 -2 L 9 -4 L 8 -5 L 6 -5 L 4 -4 L 2 -2 L 1 0 L 0 4 L 0 8 L 1 9 M -2 4 L -2 6 L -1 8 L 1 9 L 3 9 L 5 8 L 7 5","-11 11 M -10 -1 L -9 -3 L -7 -5 L -5 -5 L -4 -4 L -3 -2 L -3 1 L -5 6 M -4 -4 L -4 0 L -5 4 L -5 8 M -4 -2 L -6 3 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 L 3 6 L 5 2 M 7 -5 L 3 9 L 2 12 L 0 15 L -2 16 M 8 -5 L 4 9 L 2 13 M 7 -5 L 9 -5 L 5 9 L 3 13 L 1 15 L -2 16 L -5 16 L -7 15 L -8 14 L -8 12 L -6 12 L -6 14 L -7 14 L -7 13","-10 10 M 7 -5 L 6 -3 L 4 -1 L -4 5 L -6 7 L -7 9 M 6 -3 L -3 -3 L -5 -2 L -6 0 M 4 -3 L 0 -4 L -3 -4 L -4 -3 M 4 -3 L 0 -5 L -3 -5 L -5 -3 L -6 0 M -6 7 L 3 7 L 5 6 L 6 4 M -4 7 L 0 8 L 3 8 L 4 7 M -4 7 L 0 9 L 3 9 L 5 7 L 6 4","-12 13 M -11 -6 L -8 -9 L -5 -6 L -5 6 M -9 -8 L -6 -5 L -6 6 M -5 -6 L -2 -9 L 1 -6 L 1 6 M -3 -8 L 0 -5 L 0 6 M 1 -6 L 4 -9 L 7 -6 L 7 5 L 9 7 M 3 -8 L 6 -5 L 6 6 L 8 8 L 11 5","-11 11 M 8 -9 L -8 7 M 8 -9 L 5 -8 L -1 -8 M 6 -7 L 3 -7 L -1 -8 M 8 -9 L 7 -6 L 7 0 M 6 -7 L 6 -4 L 7 0 M -1 0 L -8 0 M -2 1 L -5 1 L -8 0 M -1 0 L -1 7 M -2 1 L -2 4 L -1 7","-12 12 M -10 -3 L -8 -7 L -3 3 M -8 -5 L -3 5 L 0 -2 L 5 -2 L 8 -3 L 9 -5 L 9 -7 L 8 -9 L 6 -10 L 5 -10 L 3 -9 L 2 -7 L 2 -5 L 3 -2 L 4 0 L 5 3 L 5 6 L 3 8 M 5 -10 L 4 -9 L 3 -7 L 3 -5 L 5 -1 L 6 2 L 6 5 L 5 7 L 3 8","-12 12 M -9 -3 L -6 -6 L -2 -4 M -7 -5 L -3 -3 L 0 -6 L 3 -4 M -1 -5 L 2 -3 L 5 -6 L 7 -4 M 4 -5 L 6 -3 L 9 -6 M -9 3 L -6 0 L -2 2 M -7 1 L -3 3 L 0 0 L 3 2 M -1 1 L 2 3 L 5 0 L 7 2 M 4 1 L 6 3 L 9 0","-12 12 M -9 3 L -9 1 L -8 -2 L -6 -3 L -4 -3 L -2 -2 L 2 1 L 4 2 L 6 2 L 8 1 L 9 -1 M -9 1 L -8 -1 L -6 -2 L -4 -2 L -2 -1 L 2 2 L 4 3 L 6 3 L 8 2 L 9 -1 L 9 -3"]
 cursive = ["-8 8","-5 5 M 0 -12 L 0 2 M 0 7 L -1 8 L 0 9 L 1 8 L 0 7","-8 8 M -4 -12 L -4 -5 M 4 -12 L 4 -5","-10 11 M 1 -16 L -6 16 M 7 -16 L 0 16 M -6 -3 L 8 -3 M -7 3 L 7 3","-10 10 M -2 -16 L -2 13 M 2 -16 L 2 13 M 7 -9 L 5 -11 L 2 -12 L -2 -12 L -5 -11 L -7 -9 L -7 -7 L -6 -5 L -5 -4 L -3 -3 L 3 -1 L 5 0 L 6 1 L 7 3 L 7 6 L 5 8 L 2 9 L -2 9 L -5 8 L -7 6","-12 12 M 9 -12 L -9 9 M -4 -12 L -2 -10 L -2 -8 L -3 -6 L -5 -5 L -7 -5 L -9 -7 L -9 -9 L -8 -11 L -6 -12 L -4 -12 L -2 -11 L 1 -10 L 4 -10 L 7 -11 L 9 -12 M 5 2 L 3 3 L 2 5 L 2 7 L 4 9 L 6 9 L 8 8 L 9 6 L 9 4 L 7 2 L 5 2","-13 13 M 10 -3 L 10 -4 L 9 -5 L 8 -5 L 7 -4 L 6 -2 L 4 3 L 2 6 L 0 8 L -2 9 L -6 9 L -8 8 L -9 7 L -10 5 L -10 3 L -9 1 L -8 0 L -1 -4 L 0 -5 L 1 -7 L 1 -9 L 0 -11 L -2 -12 L -4 -11 L -5 -9 L -5 -7 L -4 -4 L -2 -1 L 3 6 L 5 8 L 7 9 L 9 9 L 10 8 L 10 7","-2 2 M 0 -5 L 0 -1","-7 7 M 4 -16 L 2 -14 L 0 -11 L -2 -7 L -3 -2 L -3 2 L -2 7 L 0 11 L 2 14 L 4 16","-7 7 M -4 -16 L -2 -14 L 0 -11 L 2 -7 L 3 -2 L 3 2 L 2 7 L 0 11 L -2 14 L -4 16","-8 8 M 0 -6 L 0 6 M -5 -3 L 5 3 M 5 -3 L -5 3","-13 13 M 0 -9 L 0 9 M -9 0 L 9 0","-4 4 M 1 5 L 0 6 L -1 5 L 0 4 L 1 5 L 1 7 L -1 9","-13 13 M -9 0 L 9 0","-4 4 M 0 4 L -1 5 L 0 6 L 1 5 L 0 4","-11 11 M 9 -16 L -9 16","-10 10 M -1 -12 L -4 -11 L -6 -8 L -7 -3 L -7 0 L -6 5 L -4 8 L -1 9 L 1 9 L 4 8 L 6 5 L 7 0 L 7 -3 L 6 -8 L 4 -11 L 1 -12 L -1 -12","-10 10 M -4 -8 L -2 -9 L 1 -12 L 1 9","-10 10 M -6 -7 L -6 -8 L -5 -10 L -4 -11 L -2 -12 L 2 -12 L 4 -11 L 5 -10 L 6 -8 L 6 -6 L 5 -4 L 3 -1 L -7 9 L 7 9","-10 10 M -5 -12 L 6 -12 L 0 -4 L 3 -4 L 5 -3 L 6 -2 L 7 1 L 7 3 L 6 6 L 4 8 L 1 9 L -2 9 L -5 8 L -6 7 L -7 5","-10 10 M 3 -12 L -7 2 L 8 2 M 3 -12 L 3 9","-10 10 M 5 -12 L -5 -12 L -6 -3 L -5 -4 L -2 -5 L 1 -5 L 4 -4 L 6 -2 L 7 1 L 7 3 L 6 6 L 4 8 L 1 9 L -2 9 L -5 8 L -6 7 L -7 5","-10 10 M 6 -9 L 5 -11 L 2 -12 L 0 -12 L -3 -11 L -5 -8 L -6 -3 L -6 2 L -5 6 L -3 8 L 0 9 L 1 9 L 4 8 L 6 6 L 7 3 L 7 2 L 6 -1 L 4 -3 L 1 -4 L 0 -4 L -3 -3 L -5 -1 L -6 2","-10 10 M 7 -12 L -3 9 M -7 -12 L 7 -12","-10 10 M -2 -12 L -5 -11 L -6 -9 L -6 -7 L -5 -5 L -3 -4 L 1 -3 L 4 -2 L 6 0 L 7 2 L 7 5 L 6 7 L 5 8 L 2 9 L -2 9 L -5 8 L -6 7 L -7 5 L -7 2 L -6 0 L -4 -2 L -1 -3 L 3 -4 L 5 -5 L 6 -7 L 6 -9 L 5 -11 L 2 -12 L -2 -12","-10 10 M 6 -5 L 5 -2 L 3 0 L 0 1 L -1 1 L -4 0 L -6 -2 L -7 -5 L -7 -6 L -6 -9 L -4 -11 L -1 -12 L 0 -12 L 3 -11 L 5 -9 L 6 -5 L 6 0 L 5 5 L 3 8 L 0 9 L -2 9 L -5 8 L -6 6","-4 4 M 0 -3 L -1 -2 L 0 -1 L 1 -2 L 0 -3 M 0 4 L -1 5 L 0 6 L 1 5 L 0 4","-4 4 M 0 -3 L -1 -2 L 0 -1 L 1 -2 L 0 -3 M 1 5 L 0 6 L -1 5 L 0 4 L 1 5 L 1 7 L -1 9","-12 12 M 8 -9 L -8 0 L 8 9","-13 13 M -9 -3 L 9 -3 M -9 3 L 9 3","-12 12 M -8 -9 L 8 0 L -8 9","-9 9 M -6 -7 L -6 -8 L -5 -10 L -4 -11 L -2 -12 L 2 -12 L 4 -11 L 5 -10 L 6 -8 L 6 -6 L 5 -4 L 4 -3 L 0 -1 L 0 2 M 0 7 L -1 8 L 0 9 L 1 8 L 0 7","-13 14 M 5 -4 L 4 -6 L 2 -7 L -1 -7 L -3 -6 L -4 -5 L -5 -2 L -5 1 L -4 3 L -2 4 L 1 4 L 3 3 L 4 1 M -1 -7 L -3 -5 L -4 -2 L -4 1 L -3 3 L -2 4 M 5 -7 L 4 1 L 4 3 L 6 4 L 8 4 L 10 2 L 11 -1 L 11 -3 L 10 -6 L 9 -8 L 7 -10 L 5 -11 L 2 -12 L -1 -12 L -4 -11 L -6 -10 L -8 -8 L -9 -6 L -10 -3 L -10 0 L -9 3 L -8 5 L -6 7 L -4 8 L -1 9 L 2 9 L 5 8 L 7 7 L 8 6 M 6 -7 L 5 1 L 5 3 L 6 4","-11 9 M -11 9 L -9 8 L -6 5 L -3 1 L 1 -6 L 4 -12 L 4 9 L 3 6 L 1 3 L -1 1 L -4 -1 L -6 -1 L -7 0 L -7 2 L -6 4 L -4 6 L -1 8 L 2 9 L 7 9","-12 11 M 1 -10 L 2 -9 L 2 -6 L 1 -2 L 0 1 L -1 3 L -3 6 L -5 8 L -7 9 L -8 9 L -9 8 L -9 5 L -8 0 L -7 -3 L -6 -5 L -4 -8 L -2 -10 L 0 -11 L 3 -12 L 6 -12 L 8 -11 L 9 -9 L 9 -7 L 8 -5 L 7 -4 L 5 -3 L 2 -2 M 1 -2 L 2 -2 L 5 -1 L 6 0 L 7 2 L 7 5 L 6 7 L 5 8 L 3 9 L 0 9 L -2 8 L -3 6","-10 10 M 2 -6 L 2 -5 L 3 -4 L 5 -4 L 7 -5 L 8 -7 L 8 -9 L 7 -11 L 5 -12 L 2 -12 L -1 -11 L -3 -9 L -5 -6 L -6 -4 L -7 0 L -7 4 L -6 7 L -5 8 L -3 9 L -1 9 L 2 8 L 4 6 L 5 4","-11 12 M 2 -12 L 0 -11 L -1 -9 L -2 -5 L -3 1 L -4 4 L -5 6 L -7 8 L -9 9 L -11 9 L -12 8 L -12 6 L -11 5 L -9 5 L -7 6 L -5 8 L -2 9 L 1 9 L 4 8 L 6 6 L 8 2 L 9 -3 L 9 -7 L 8 -10 L 7 -11 L 5 -12 L 2 -12 L 0 -10 L 0 -8 L 1 -5 L 3 -2 L 5 0 L 8 2 L 10 3","-10 10 M 4 -8 L 4 -7 L 5 -6 L 7 -6 L 8 -7 L 8 -9 L 7 -11 L 4 -12 L 0 -12 L -3 -11 L -4 -9 L -4 -6 L -3 -4 L -2 -3 L 1 -2 L -2 -2 L -5 -1 L -6 0 L -7 2 L -7 5 L -6 7 L -5 8 L -2 9 L 1 9 L 4 8 L 6 6 L 7 4","-10 10 M 0 -6 L -2 -6 L -4 -7 L -5 -9 L -4 -11 L -1 -12 L 2 -12 L 6 -11 L 9 -11 L 11 -12 M 6 -11 L 4 -4 L 2 2 L 0 6 L -2 8 L -4 9 L -6 9 L -8 8 L -9 6 L -9 4 L -8 3 L -6 3 L -4 4 M -1 -2 L 8 -2","-11 12 M -11 9 L -9 8 L -5 4 L -2 -1 L -1 -4 L 0 -8 L 0 -11 L -1 -12 L -2 -12 L -3 -11 L -4 -9 L -4 -6 L -3 -4 L -1 -3 L 3 -3 L 6 -4 L 7 -5 L 8 -7 L 8 -1 L 7 4 L 6 6 L 4 8 L 1 9 L -3 9 L -6 8 L -8 6 L -9 4 L -9 2","-12 12 M -5 -5 L -7 -6 L -8 -8 L -8 -9 L -7 -11 L -5 -12 L -4 -12 L -2 -11 L -1 -9 L -1 -7 L -2 -3 L -4 3 L -6 7 L -8 9 L -10 9 L -11 8 L -11 6 M -5 0 L 4 -3 L 6 -4 L 9 -6 L 11 -8 L 12 -10 L 12 -11 L 11 -12 L 10 -12 L 8 -10 L 6 -6 L 4 0 L 3 5 L 3 8 L 4 9 L 5 9 L 7 8 L 8 7 L 10 4","-9 8 M 5 4 L 3 2 L 1 -1 L 0 -3 L -1 -6 L -1 -9 L 0 -11 L 1 -12 L 3 -12 L 4 -11 L 5 -9 L 5 -6 L 4 -1 L 2 4 L 1 6 L -1 8 L -3 9 L -5 9 L -7 8 L -8 6 L -8 4 L -7 3 L -5 3 L -3 4","-8 7 M 2 12 L 0 9 L -2 4 L -3 -2 L -3 -8 L -2 -11 L 0 -12 L 2 -12 L 3 -11 L 4 -8 L 4 -5 L 3 0 L 0 9 L -2 15 L -3 18 L -4 20 L -6 21 L -7 20 L -7 18 L -6 15 L -4 12 L -2 10 L 1 8 L 5 6","-12 12 M -5 -5 L -7 -6 L -8 -8 L -8 -9 L -7 -11 L -5 -12 L -4 -12 L -2 -11 L -1 -9 L -1 -7 L -2 -3 L -4 3 L -6 7 L -8 9 L -10 9 L -11 8 L -11 6 M 12 -9 L 12 -11 L 11 -12 L 10 -12 L 8 -11 L 6 -9 L 4 -6 L 2 -4 L 0 -3 L -2 -3 M 0 -3 L 1 -1 L 1 6 L 2 8 L 3 9 L 4 9 L 6 8 L 7 7 L 9 4","-9 10 M -5 0 L -3 0 L 1 -1 L 4 -3 L 6 -5 L 7 -7 L 7 -10 L 6 -12 L 4 -12 L 3 -11 L 2 -9 L 1 -4 L 0 1 L -1 4 L -2 6 L -4 8 L -6 9 L -8 9 L -9 8 L -9 6 L -8 5 L -6 5 L -4 6 L -1 8 L 2 9 L 4 9 L 7 8 L 9 6","-18 15 M -13 -5 L -15 -6 L -16 -8 L -16 -9 L -15 -11 L -13 -12 L -12 -12 L -10 -11 L -9 -9 L -9 -7 L -10 -2 L -11 2 L -13 9 M -11 2 L -8 -6 L -6 -10 L -5 -11 L -3 -12 L -2 -12 L 0 -11 L 1 -9 L 1 -7 L 0 -2 L -1 2 L -3 9 M -1 2 L 2 -6 L 4 -10 L 5 -11 L 7 -12 L 8 -12 L 10 -11 L 11 -9 L 11 -7 L 10 -2 L 8 5 L 8 8 L 9 9 L 10 9 L 12 8 L 13 7 L 15 4","-13 11 M -8 -5 L -10 -6 L -11 -8 L -11 -9 L -10 -11 L -8 -12 L -7 -12 L -5 -11 L -4 -9 L -4 -7 L -5 -2 L -6 2 L -8 9 M -6 2 L -3 -6 L -1 -10 L 0 -11 L 2 -12 L 4 -12 L 6 -11 L 7 -9 L 7 -7 L 6 -2 L 4 5 L 4 8 L 5 9 L 6 9 L 8 8 L 9 7 L 11 4","-10 11 M 2 -12 L -1 -11 L -3 -9 L -5 -6 L -6 -4 L -7 0 L -7 4 L -6 7 L -5 8 L -3 9 L -1 9 L 2 8 L 4 6 L 6 3 L 7 1 L 8 -3 L 8 -7 L 7 -10 L 6 -11 L 4 -12 L 2 -12 L 0 -10 L 0 -7 L 1 -4 L 3 -1 L 5 1 L 8 3 L 10 4","-12 13 M 1 -10 L 2 -9 L 2 -6 L 1 -2 L 0 1 L -1 3 L -3 6 L -5 8 L -7 9 L -8 9 L -9 8 L -9 5 L -8 0 L -7 -3 L -6 -5 L -4 -8 L -2 -10 L 0 -11 L 3 -12 L 8 -12 L 10 -11 L 11 -10 L 12 -8 L 12 -5 L 11 -3 L 10 -2 L 8 -1 L 5 -1 L 3 -2 L 2 -3","-10 12 M 3 -6 L 2 -4 L 1 -3 L -1 -2 L -3 -2 L -4 -4 L -4 -6 L -3 -9 L -1 -11 L 2 -12 L 5 -12 L 7 -11 L 8 -9 L 8 -5 L 7 -2 L 5 1 L 1 5 L -2 7 L -4 8 L -7 9 L -9 9 L -10 8 L -10 6 L -9 5 L -7 5 L -5 6 L -2 8 L 1 9 L 4 9 L 7 8 L 9 6","-12 13 M 1 -10 L 2 -9 L 2 -6 L 1 -2 L 0 1 L -1 3 L -3 6 L -5 8 L -7 9 L -8 9 L -9 8 L -9 5 L -8 0 L -7 -3 L -6 -5 L -4 -8 L -2 -10 L 0 -11 L 3 -12 L 7 -12 L 9 -11 L 10 -10 L 11 -8 L 11 -5 L 10 -3 L 9 -2 L 7 -1 L 4 -1 L 1 -2 L 2 -1 L 3 1 L 3 6 L 4 8 L 6 9 L 8 8 L 9 7 L 11 4","-10 10 M -10 9 L -8 8 L -6 6 L -3 2 L -1 -1 L 1 -5 L 2 -8 L 2 -11 L 1 -12 L 0 -12 L -1 -11 L -2 -9 L -2 -7 L -1 -5 L 1 -3 L 4 -1 L 6 1 L 7 3 L 7 5 L 6 7 L 5 8 L 2 9 L -2 9 L -5 8 L -7 6 L -8 4 L -8 2","-10 9 M 0 -6 L -2 -6 L -4 -7 L -5 -9 L -4 -11 L -1 -12 L 2 -12 L 6 -11 L 9 -11 L 11 -12 M 6 -11 L 4 -4 L 2 2 L 0 6 L -2 8 L -4 9 L -6 9 L -8 8 L -9 6 L -9 4 L -8 3 L -6 3 L -4 4","-13 11 M -8 -5 L -10 -6 L -11 -8 L -11 -9 L -10 -11 L -8 -12 L -7 -12 L -5 -11 L -4 -9 L -4 -7 L -5 -3 L -6 0 L -7 4 L -7 6 L -6 8 L -4 9 L -2 9 L 0 8 L 1 7 L 3 3 L 6 -5 L 8 -12 M 6 -5 L 5 -1 L 4 5 L 4 8 L 5 9 L 6 9 L 8 8 L 9 7 L 11 4","-12 11 M -7 -5 L -9 -6 L -10 -8 L -10 -9 L -9 -11 L -7 -12 L -6 -12 L -4 -11 L -3 -9 L -3 -7 L -4 -3 L -5 0 L -6 4 L -6 7 L -5 9 L -3 9 L -1 8 L 2 5 L 4 2 L 6 -2 L 7 -5 L 8 -9 L 8 -11 L 7 -12 L 6 -12 L 5 -11 L 4 -9 L 4 -7 L 5 -4 L 7 -2 L 9 -1","-15 13 M -10 -5 L -12 -6 L -13 -8 L -13 -9 L -12 -11 L -10 -12 L -9 -12 L -7 -11 L -6 -9 L -6 -6 L -7 9 M 3 -12 L -7 9 M 3 -12 L 1 9 M 15 -12 L 13 -11 L 10 -8 L 7 -4 L 4 2 L 1 9","-12 12 M -4 -6 L -6 -6 L -7 -7 L -7 -9 L -6 -11 L -4 -12 L -2 -12 L 0 -11 L 1 -9 L 1 -6 L -1 3 L -1 6 L 0 8 L 2 9 L 4 9 L 6 8 L 7 6 L 7 4 L 6 3 L 4 3 M 11 -9 L 11 -11 L 10 -12 L 8 -12 L 6 -11 L 4 -9 L 2 -6 L -2 3 L -4 6 L -6 8 L -8 9 L -10 9 L -11 8 L -11 6","-12 11 M -7 -5 L -9 -6 L -10 -8 L -10 -9 L -9 -11 L -7 -12 L -6 -12 L -4 -11 L -3 -9 L -3 -7 L -4 -3 L -5 0 L -6 4 L -6 6 L -5 8 L -4 9 L -2 9 L 0 8 L 2 6 L 4 3 L 5 1 L 7 -5 M 9 -12 L 7 -5 L 4 5 L 2 11 L 0 16 L -2 20 L -4 21 L -5 20 L -5 18 L -4 15 L -2 12 L 1 9 L 4 7 L 9 4","-10 11 M 3 -6 L 2 -4 L 1 -3 L -1 -2 L -3 -2 L -4 -4 L -4 -6 L -3 -9 L -1 -11 L 2 -12 L 5 -12 L 7 -11 L 8 -9 L 8 -5 L 7 -2 L 5 2 L 2 5 L -2 8 L -4 9 L -7 9 L -8 8 L -8 6 L -7 5 L -4 5 L -2 6 L -1 7 L 0 9 L 0 12 L -1 15 L -2 17 L -4 20 L -6 21 L -7 20 L -7 18 L -6 15 L -4 12 L -1 9 L 2 7 L 8 4","-7 7 M -3 -16 L -3 16 M -2 -16 L -2 16 M -3 -16 L 4 -16 M -3 16 L 4 16","-7 7 M -7 -12 L 7 12","-7 7 M 2 -16 L 2 16 M 3 -16 L 3 16 M -4 -16 L 3 -16 M -4 16 L 3 16","-8 8 M 0 -14 L -8 0 M 0 -14 L 8 0","-11 9 M -11 16 L 9 16","-4 4 M 1 -7 L -1 -5 L -1 -3 L 0 -2 L 1 -3 L 0 -4 L -1 -3","-6 10 M 3 3 L 2 1 L 0 0 L -2 0 L -4 1 L -5 2 L -6 4 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 L 2 6 L 4 0 L 3 5 L 3 8 L 4 9 L 5 9 L 7 8 L 8 7 L 10 4","-5 9 M -5 4 L -3 1 L 0 -4 L 1 -6 L 2 -9 L 2 -11 L 1 -12 L -1 -11 L -2 -9 L -3 -5 L -4 2 L -4 8 L -3 9 L -2 9 L 0 8 L 2 6 L 3 3 L 3 0 L 4 4 L 5 5 L 7 5 L 9 4","-5 6 M 2 2 L 2 1 L 1 0 L -1 0 L -3 1 L -4 2 L -5 4 L -5 6 L -4 8 L -2 9 L 1 9 L 4 7 L 6 4","-6 10 M 3 3 L 2 1 L 0 0 L -2 0 L -4 1 L -5 2 L -6 4 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 L 2 6 L 8 -12 M 4 0 L 3 5 L 3 8 L 4 9 L 5 9 L 7 8 L 8 7 L 10 4","-4 6 M -3 7 L -1 6 L 0 5 L 1 3 L 1 1 L 0 0 L -1 0 L -3 1 L -4 3 L -4 6 L -3 8 L -1 9 L 1 9 L 3 8 L 4 7 L 6 4","-3 5 M -3 4 L 1 -1 L 3 -4 L 4 -6 L 5 -9 L 5 -11 L 4 -12 L 2 -11 L 1 -9 L -1 -1 L -4 8 L -7 15 L -8 18 L -8 20 L -7 21 L -5 20 L -4 17 L -3 8 L -2 9 L 0 9 L 2 8 L 3 7 L 5 4","-6 9 M 3 3 L 2 1 L 0 0 L -2 0 L -4 1 L -5 2 L -6 4 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 L 2 7 M 4 0 L 2 7 L -2 18 L -3 20 L -5 21 L -6 20 L -6 18 L -5 15 L -2 12 L 1 10 L 3 9 L 6 7 L 9 4","-5 10 M -5 4 L -3 1 L 0 -4 L 1 -6 L 2 -9 L 2 -11 L 1 -12 L -1 -11 L -2 -9 L -3 -5 L -4 1 L -5 9 M -5 9 L -4 6 L -3 4 L -1 1 L 1 0 L 3 0 L 4 1 L 4 3 L 3 6 L 3 8 L 4 9 L 5 9 L 7 8 L 8 7 L 10 4","-2 5 M 1 -5 L 1 -4 L 2 -4 L 2 -5 L 1 -5 M -2 4 L 0 0 L -2 6 L -2 8 L -1 9 L 0 9 L 2 8 L 3 7 L 5 4","-2 5 M 1 -5 L 1 -4 L 2 -4 L 2 -5 L 1 -5 M -2 4 L 0 0 L -6 18 L -7 20 L -9 21 L -10 20 L -10 18 L -9 15 L -6 12 L -3 10 L -1 9 L 2 7 L 5 4","-5 9 M -5 4 L -3 1 L 0 -4 L 1 -6 L 2 -9 L 2 -11 L 1 -12 L -1 -11 L -2 -9 L -3 -5 L -4 1 L -5 9 M -5 9 L -4 6 L -3 4 L -1 1 L 1 0 L 3 0 L 4 1 L 4 3 L 2 4 L -1 4 M -1 4 L 1 5 L 2 8 L 3 9 L 4 9 L 6 8 L 7 7 L 9 4","-3 5 M -3 4 L -1 1 L 2 -4 L 3 -6 L 4 -9 L 4 -11 L 3 -12 L 1 -11 L 0 -9 L -1 -5 L -2 2 L -2 8 L -1 9 L 0 9 L 2 8 L 3 7 L 5 4","-13 12 M -13 4 L -11 1 L -9 0 L -8 1 L -8 2 L -9 6 L -10 9 M -9 6 L -8 4 L -6 1 L -4 0 L -2 0 L -1 1 L -1 2 L -2 6 L -3 9 M -2 6 L -1 4 L 1 1 L 3 0 L 5 0 L 6 1 L 6 3 L 5 6 L 5 8 L 6 9 L 7 9 L 9 8 L 10 7 L 12 4","-8 10 M -8 4 L -6 1 L -4 0 L -3 1 L -3 2 L -4 6 L -5 9 M -4 6 L -3 4 L -1 1 L 1 0 L 3 0 L 4 1 L 4 3 L 3 6 L 3 8 L 4 9 L 5 9 L 7 8 L 8 7 L 10 4","-6 8 M 0 0 L -2 0 L -4 1 L -5 2 L -6 4 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 L 2 7 L 3 5 L 3 3 L 2 1 L 0 0 L -1 1 L -1 3 L 0 5 L 2 6 L 5 6 L 7 5 L 8 4","-7 8 M -7 4 L -5 1 L -4 -1 L -5 3 L -11 21 M -5 3 L -4 1 L -2 0 L 0 0 L 2 1 L 3 3 L 3 5 L 2 7 L 1 8 L -1 9 M -5 8 L -3 9 L 0 9 L 3 8 L 5 7 L 8 4","-6 9 M 3 3 L 2 1 L 0 0 L -2 0 L -4 1 L -5 2 L -6 4 L -6 6 L -5 8 L -3 9 L -1 9 L 1 8 M 4 0 L 3 3 L 1 8 L -2 15 L -3 18 L -3 20 L -2 21 L 0 20 L 1 17 L 1 10 L 3 9 L 6 7 L 9 4","-5 8 M -5 4 L -3 1 L -2 -1 L -2 1 L 1 1 L 2 2 L 2 4 L 1 7 L 1 8 L 2 9 L 3 9 L 5 8 L 6 7 L 8 4","-4 7 M -4 4 L -2 1 L -1 -1 L -1 1 L 1 4 L 2 6 L 2 8 L 0 9 M -4 8 L -2 9 L 2 9 L 4 8 L 5 7 L 7 4","-3 6 M -3 4 L -1 1 L 1 -3 M 4 -12 L -2 6 L -2 8 L -1 9 L 1 9 L 3 8 L 4 7 L 6 4 M -2 -4 L 5 -4","-6 9 M -6 4 L -4 0 L -6 6 L -6 8 L -5 9 L -3 9 L -1 8 L 1 6 L 3 3 M 4 0 L 2 6 L 2 8 L 3 9 L 4 9 L 6 8 L 7 7 L 9 4","-6 9 M -6 4 L -4 0 L -5 5 L -5 8 L -4 9 L -3 9 L 0 8 L 2 6 L 3 3 L 3 0 M 3 0 L 4 4 L 5 5 L 7 5 L 9 4","-9 12 M -6 0 L -8 2 L -9 5 L -9 7 L -8 9 L -6 9 L -4 8 L -2 6 M 0 0 L -2 6 L -2 8 L -1 9 L 1 9 L 3 8 L 5 6 L 6 3 L 6 0 M 6 0 L 7 4 L 8 5 L 10 5 L 12 4","-8 8 M -8 4 L -6 1 L -4 0 L -2 0 L -1 1 L -1 8 L 0 9 L 3 9 L 6 7 L 8 4 M 5 1 L 4 0 L 2 0 L 1 1 L -3 8 L -4 9 L -6 9 L -7 8","-6 9 M -6 4 L -4 0 L -6 6 L -6 8 L -5 9 L -3 9 L -1 8 L 1 6 L 3 3 M 4 0 L -2 18 L -3 20 L -5 21 L -6 20 L -6 18 L -5 15 L -2 12 L 1 10 L 3 9 L 6 7 L 9 4","-6 8 M -6 4 L -4 1 L -2 0 L 0 0 L 2 2 L 2 4 L 1 6 L -1 8 L -4 9 L -2 10 L -1 12 L -1 15 L -2 18 L -3 20 L -5 21 L -6 20 L -6 18 L -5 15 L -2 12 L 1 10 L 5 7 L 8 4","-7 7 M 2 -16 L 0 -15 L -1 -14 L -2 -12 L -2 -10 L -1 -8 L 0 -7 L 1 -5 L 1 -3 L -1 -1 M 0 -15 L -1 -13 L -1 -11 L 0 -9 L 1 -8 L 2 -6 L 2 -4 L 1 -2 L -3 0 L 1 2 L 2 4 L 2 6 L 1 8 L 0 9 L -1 11 L -1 13 L 0 15 M -1 1 L 1 3 L 1 5 L 0 7 L -1 8 L -2 10 L -2 12 L -1 14 L 0 15 L 2 16","-4 4 M 0 -16 L 0 16","-7 7 M -2 -16 L 0 -15 L 1 -14 L 2 -12 L 2 -10 L 1 -8 L 0 -7 L -1 -5 L -1 -3 L 1 -1 M 0 -15 L 1 -13 L 1 -11 L 0 -9 L -1 -8 L -2 -6 L -2 -4 L -1 -2 L 3 0 L -1 2 L -2 4 L -2 6 L -1 8 L 0 9 L 1 11 L 1 13 L 0 15 M 1 1 L -1 3 L -1 5 L 0 7 L 1 8 L 2 10 L 2 12 L 1 14 L 0 15 L -2 16","-12 12 M -9 3 L -9 1 L -8 -2 L -6 -3 L -4 -3 L -2 -2 L 2 1 L 4 2 L 6 2 L 8 1 L 9 -1 M -9 1 L -8 -1 L -6 -2 L -4 -2 L -2 -1 L 2 2 L 4 3 L 6 3 L 8 2 L 9 -1 L 9 -3","-8 8 M -8 -12 L -8 9 L -7 9 L -7 -12 L -6 -12 L -6 9 L -5 9 L -5 -12 L -4 -12 L -4 9 L -3 9 L -3 -12 L -2 -12 L -2 9 L -1 9 L -1 -12 L 0 -12 L 0 9 L 1 9 L 1 -12 L 2 -12 L 2 9 L 3 9 L 3 -12 L 4 -12 L 4 9 L 5 9 L 5 -12 L 6 -12 L 6 9 L 7 9 L 7 -12 L 8 -12 L 8 9"]
@@ -279,56 +280,82 @@ timesrb = ["-8 8","-5 6 M 0 -12 L -1 -11 L -1 -9 L 0 -1 M 0 -12 L 0 2 L 1 2 M 0 
 
 group_allfonts = (
                     [
-						['futural','Sans 1-stroke'],
-						['futuram','Sans bold'],
-						['timesr','Serif medium'],
-						['timesi','Serif medium italic'],
-						['timesib','Serif bold italic'],
-						['timesrb','Serif bold'],
-						['scripts','Script 1-stroke'],
-						['cursive','Script 1-stroke (alt)'],
-						['scriptc','Script medium'],
-						['gothiceng','Gothic English'],
-						['gothicger','Gothic German'],
-						['gothicita','Gothic Italian'],
-						['EMSAllure','EMS Allure'],
-						['EMSBird','EMS Bird'],
-						['EMSBirdSwashCaps','EMS Bird Swash Caps'],
-						['EMSBrush','EMS Brush'],
-						['EMSCapitol','EMS Capitol'],
-						['EMSCasualHand','EMS Casual Hand'],
-						['EMSDecorousScript','EMS Decorous Script'],
-						['EMSDelight','EMS Delight'],
-						['EMSDelightSwashCaps','EMS Delight Swash Caps'],
-						['EMSElfin','EMS Elfin'],
-						['EMSFelix','EMS Felix'],
-						['EMSHerculean','EMS Herculean'],
-						['EMSInvite','EMS Invite'],
-						['EMSLeague','EMS League'],
-						['EMSLittlePrincess','EMS Little Princess'],
-						['EMSMistyNight','EMS Misty Night'],
-						['EMSNeato','EMS Neato'],
-						['EMSNixish','EMS Nixish'],
-						['EMSNixishItalic','EMS Nixish Italic'],
-						['EMSOsmotron','EMS Osmotron'],
-						['EMSPancakes','EMS Pancakes'],
-						['EMSPepita','EMS Pepita'],
-						['EMSQwandry','EMS Qwandry'],
-						['EMSReadability','EMS Readability'],
-						['EMSReadabilityItalic','EMS Readability Italic'],
-						['EMSSociety','EMS Society'],
-						['EMSSwiss','EMS Swiss'],
-						['EMSTech','EMS Tech'],
-						['greek','Greek 1-stroke'],
-						['timesg','Greek medium'],
-						['cyrillic','Cyrillic'],
-						['japanese','Japanese'],
-						['astrology','Astrology'],
-						['mathlow','Math (lower)'],
-						['mathupp','Math (upper)'],
-						['markers','Markers'],
-						['meteorology','Meteorology'],
-						['music','Music'],
-						['symbolic','Symbolic']
-					]
+                        ['futural','Sans 1-stroke'],
+                        ['futuram','Sans bold'],
+                        ['timesr','Serif medium'],
+                        ['timesi','Serif medium italic'],
+                        ['timesib','Serif bold italic'],
+                        ['timesrb','Serif bold'],
+                        ['scripts','Script 1-stroke'],
+                        ['cursive','Script 1-stroke (alt)'],
+                        ['scriptc','Script medium'],
+                        ['gothiceng','Gothic English'],
+                        ['gothicger','Gothic German'],
+                        ['gothicita','Gothic Italian'],
+                        ['EMSAllure','EMS Allure'],
+                        ['EMSBird','EMS Bird'],
+                        ['EMSBirdSwashCaps','EMS Bird Swash Caps'],
+                        ['EMSBrush','EMS Brush'],
+                        ['EMSCapitol','EMS Capitol'],
+                        ['EMSCasualHand','EMS Casual Hand'],
+                        ['EMSDecorousScript','EMS Decorous Script'],
+                        ['EMSDelight','EMS Delight'],
+                        ['EMSDelightSwashCaps','EMS Delight Swash Caps'],
+                        ['EMSElfin','EMS Elfin'],
+                        ['EMSFelix','EMS Felix'],
+                        ['EMSHerculean','EMS Herculean'],
+                        ['EMSInvite','EMS Invite'],
+                        ['EMSLeague','EMS League'],
+                        ['EMSLittlePrincess','EMS Little Princess'],
+                        ['EMSMistyNight','EMS Misty Night'],
+                        ['EMSNeato','EMS Neato'],
+                        ['EMSNixish','EMS Nixish'],
+                        ['EMSNixishItalic','EMS Nixish Italic'],
+                        ['EMSOsmotron','EMS Osmotron'],
+                        ['EMSPancakes','EMS Pancakes'],
+                        ['EMSPepita','EMS Pepita'],
+                        ['EMSQwandry','EMS Qwandry'],
+                        ['EMSReadability','EMS Readability'],
+                        ['EMSReadabilityItalic','EMS Readability Italic'],
+                        ['EMSSociety','EMS Society'],
+                        ['EMSSwiss','EMS Swiss'],
+                        ['EMSTech','EMS Tech'],
+                        ['greek','Greek 1-stroke'],
+                        ['timesg','Greek medium'],
+                        ['cyrillic','Cyrillic'],
+                        ['japanese','Japanese'],
+                        ['astrology','Astrology'],
+                        ['mathlow','Math (lower)'],
+                        ['mathupp','Math (upper)'],
+                        ['markers','Markers'],
+                        ['meteorology','Meteorology'],
+                        ['music','Music'],
+                        ['symbolic','Symbolic']
+                    ]
+                )
+group_hwfonts = (
+                    [
+                        ['scripts','Script 1-stroke'],
+                        ['EMSAllure','EMS Allure'],
+                        ['EMSBird','EMS Bird'],
+                        ['EMSBirdSwashCaps','EMS Bird Swash Caps'],
+                        ['EMSBrush','EMS Brush'],
+                        ['EMSCapitol','EMS Capitol'],
+                        ['EMSCasualHand','EMS Casual Hand'],
+                        ['EMSDecorousScript','EMS Decorous Script'],
+                        ['EMSDelight','EMS Delight'],
+                        ['EMSDelightSwashCaps','EMS Delight Swash Caps'],
+                        ['EMSElfin','EMS Elfin'],
+                        ['EMSFelix','EMS Felix'],
+                        ['EMSInvite','EMS Invite'],
+                        ['EMSLeague','EMS League'],
+                        ['EMSLittlePrincess','EMS Little Princess'],
+                        ['EMSNeato','EMS Neato'],
+                        ['EMSPancakes','EMS Pancakes'],
+                        ['EMSPepita','EMS Pepita'],
+                        ['EMSQwandry','EMS Qwandry'],
+                        ['EMSSociety','EMS Society'],
+                        ['EMSSwiss','EMS Swiss'],
+                        ['EMSTech','EMS Tech']
+                    ]
                 )

@@ -2,7 +2,7 @@
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
   <_name>Hershey Text</_name>
   <id>org.evilmad.render.hershe</id>
-  <!-- Version 2.1.1 October 3, 2017 -->
+  <!-- Version 2.2 November 28, 2017 -->
   <dependency type="executable" location="extensions">hershey.py</dependency>
   <dependency type="executable" location="extensions">hersheydata.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
@@ -17,9 +17,10 @@ Hershey Text: Engraving Fonts for Inkscape
       <param indent="2" name="text" type="string" _gui-text="Text:">The Quick Brown Fox Jumps Over a Lazy Dog</param>
 
       <param indent="2" name="action" type="enum" _gui-text="Action: ">
-        <_item value="render">Typeset that text</_item>
-        <_item value="sample" >Generate a table of font samples</_item> 
-        <_item value="table"  >Generate glyph table in selected font</_item> 
+        <_item value="render"   >Typeset that text</_item>
+        <_item value="sample"   >Generate font table: All fonts</_item> 
+        <_item value="sampleHW" >Generate font table: Handwriting-like</_item> 
+        <_item value="table"    >Generate glyph table in selected font</_item> 
       </param>
 
       <param indent="2" name="fontface" type="enum" _gui-text="Font face: ">
@@ -89,7 +90,7 @@ Hershey Text: Engraving Fonts for Inkscape
 
     </page>
     <page name="info" _gui-text="About Hershey Text">
-<_param indent="1" name="aboutTitle" type="description" appearance="header">Hershey Text 2.0</_param>
+<_param indent="1" name="aboutTitle" type="description" appearance="header">Hershey Text 2.2</_param>
 <_param name="aboutpage" type="description" xml:space="preserve">This tool renders a line of text using specialized
 "stroke" or "engraving" fonts designed for plotters. 
 

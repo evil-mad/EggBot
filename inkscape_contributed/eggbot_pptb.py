@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 # Post Process a bitmap image traced with Inkscape's Trace Bitmap tool
 # The output of Trace Bitmap is traversed and each <path> is put into
@@ -25,89 +26,91 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import inkex
 import gettext
+
+import inkex
 import simplestyle
 
-class EggBot_PostProcessTraceBitmap( inkex.Effect ):
 
-	def __init__(self):
-		inkex.Effect.__init__( self )
-		self.OptionParser.add_option(
-			"--outlineRegions", action="store", dest="outlineRegions",
-			type="inkbool", default=True,
-			help="Outline the regions with a stroked line of the same color as the region itself" )
-		self.OptionParser.add_option(
-			"--fillRegions", action="store", dest="fillRegions",
-			type="inkbool", default=True,
-			help="Fill regions with color" )
-		self.OptionParser.add_option(
-			"--removeImage", action="store", dest="removeImage",
-			type="inkbool", default=True,
-			help="Remove the traced bitmap image from the drawing" )
+class EggBot_PostProcessTraceBitmap(inkex.Effect):
 
-	def effect(self):
+    def __init__(self):
+        inkex.Effect.__init__(self)
+        self.OptionParser.add_option(
+                "--outlineRegions", action="store", dest="outlineRegions",
+                type="inkbool", default=True,
+                help="Outline the regions with a stroked line of the same color as the region itself")
+        self.OptionParser.add_option(
+                "--fillRegions", action="store", dest="fillRegions",
+                type="inkbool", default=True,
+                help="Fill regions with color")
+        self.OptionParser.add_option(
+                "--removeImage", action="store", dest="removeImage",
+                type="inkbool", default=True,
+                help="Remove the traced bitmap image from the drawing")
 
-		root = self.document.getroot()
+    def effect(self):
 
-		count = 0
-		for path in self.document.xpath( '//svg:path', namespaces=inkex.NSS ):
+        root = self.document.getroot()
 
-			# Default settings for now
-			stroke, fill, color = ( 'none', 'none', 'unknown' )
+        count = 0
+        for path in self.document.xpath('//svg:path', namespaces=inkex.NSS):
 
-			# Get the paths style attribute
-			style = simplestyle.parseStyle( path.get( 'style', '' ) )
-			# Obtain the fill color from the path's style attribute
-			if 'fill' in style:
-				color = style['fill']
-				if self.options.fillRegions:
-					fill = color
-				if self.options.outlineRegions:
-					stroke = color
+            # Default settings for now
+            stroke, fill, color = ('none', 'none', 'unknown')
 
-			# Now add or change the fill color in the path's style
-			style['fill'] = fill
+            # Get the paths style attribute
+            style = simplestyle.parseStyle(path.get('style', ''))
+            # Obtain the fill color from the path's style attribute
+            if 'fill' in style:
+                color = style['fill']
+                if self.options.fillRegions:
+                    fill = color
+                if self.options.outlineRegions:
+                    stroke = color
 
-			# Add or change the stroke behavior in the path's style
-			style['stroke'] = stroke
+            # Now add or change the fill color in the path's style
+            style['fill'] = fill
 
-			# And change the style attribute for the path
-			path.set( 'style', simplestyle.formatStyle( style ) )
+            # Add or change the stroke behavior in the path's style
+            style['stroke'] = stroke
 
-			# Create a group <g> element under the document root
-			layer = inkex.etree.SubElement( root, inkex.addNS( 'g', 'svg' ) )
+            # And change the style attribute for the path
+            path.set('style', simplestyle.formatStyle(style))
 
-			# Add Inkscape layer attributes to this new group
-			count += 1
-			layer.set( inkex.addNS('groupmode', 'inkscape' ), 'layer' )
-			layer.set( inkex.addNS( 'label', 'inkscape' ), '%d - %s' % ( count, color ) )
+            # Create a group <g> element under the document root
+            layer = inkex.etree.SubElement(root, inkex.addNS('g', 'svg'))
 
-			# Now move this path from where it was to being a child
-			# of this new group/layer we just made
-			layer.append( path )
+            # Add Inkscape layer attributes to this new group
+            count += 1
+            layer.set(inkex.addNS('groupmode', 'inkscape'), 'layer')
+            layer.set(inkex.addNS('label', 'inkscape'), '{0:d} - {1}'.format(count, color))
 
-		# Remove any image
-		# For color scans, Trace Bitmap seems to put the
-		# image in the same layer & group as the traced regions.
-		# BUT, for gray scans, it seems to leave the image by
-		# itself as a child of the root document
+            # Now move this path from where it was to being a child
+            # of this new group/layer we just made
+            layer.append(path)
 
-		if self.options.removeImage:
-			for node in self.document.xpath( '//svg:image', namespaces=inkex.NSS ):
-				parent = node.getparent()
-				if ( parent.tag == 'svg' ) or \
-				   ( parent.tag == inkex.addNS( 'svg', 'svg' ) ):
-					parent.remove( node )
-				else:
-					gparent = parent.getparent()
-					try:
-						gparent.remove( parent )
-					except:
-						parent.remove( node)
+        # Remove any image
+        # For color scans, Trace Bitmap seems to put the
+        # image in the same layer & group as the traced regions.
+        # BUT, for gray scans, it seems to leave the image by
+        # itself as a child of the root document
 
-		inkex.errormsg( gettext.gettext( 'Finished.  Created %d layers' ) % count )
+        if self.options.removeImage:
+            for node in self.document.xpath('//svg:image', namespaces=inkex.NSS):
+                parent = node.getparent()
+                if (parent.tag == 'svg') or (parent.tag == inkex.addNS('svg', 'svg')):
+                    parent.remove(node)
+                else:
+                    gparent = parent.getparent()
+                    try:
+                        gparent.remove(parent)
+                    except:
+                        parent.remove(node)
+
+        inkex.errormsg(gettext.gettext('Finished.  Created %d layers') % count)
+
 
 if __name__ == '__main__':
-	e = EggBot_PostProcessTraceBitmap()
-	e.affect()
+    e = EggBot_PostProcessTraceBitmap()
+    e.affect()
