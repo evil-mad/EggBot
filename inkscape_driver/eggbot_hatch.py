@@ -857,8 +857,6 @@ class Eggbot_Hatch(inkex.Effect):
                         # Now loop over our hatch lines looking for intersections
                         for h in self.grid:
                             interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                    else:
-                        inkex.errormsg(' Nothing to plot')
 
             elif node.tag in [inkex.addNS('rect', 'svg'), 'rect']:
 
@@ -895,8 +893,6 @@ class Eggbot_Hatch(inkex.Effect):
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
                         interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                else:
-                    inkex.errormsg(' Nothing to plot')
 
             elif node.tag in [inkex.addNS('line', 'svg'), 'line']:
 
@@ -926,8 +922,6 @@ class Eggbot_Hatch(inkex.Effect):
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
                         interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                else:
-                    inkex.errormsg(' Nothing to plot')
 
             elif node.tag in [inkex.addNS('polyline', 'svg'), 'polyline']:
 
@@ -942,22 +936,33 @@ class Eggbot_Hatch(inkex.Effect):
                 # Note: we ignore polylines with no points
 
                 pl = node.get('points', '').strip()
-
+                if pl == '':
+                    continue
                 pa = pl.split()
-                d = "".join(["M " + pa[i] if i == 0 else " L " + pa[i] for i in range(0, len(pa))])
-                self.addPathVertices(d, node, mat_new)
+                if not pa:
+                    continue
+                pathLength = len( pa )
+                if (pathLength < 4): # Minimum of x1,y1 x2,y2 required.
+                    continue
 
-                # We now have a path we want to apply a (cross)hatch to
-                # Apply appropriate functions
-                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
-                if b_have_grid:
-                    if self.options.crossHatch:
-                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
-                        # Now loop over our hatch lines looking for intersections
-                    for h in self.grid:
-                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                else:
-                    inkex.errormsg(' Nothing to plot')
+                d = "M " + pa[0] + " " + pa[1]
+                i = 2
+                while (i < (pathLength - 1 )):
+                    d += " L " + pa[i] + " " + pa[i + 1]
+                    i += 2
+
+                if d:
+                    self.addPathVertices(d, node, mat_new)
+
+                    # We now have a path we want to apply a (cross)hatch to
+                    # Apply appropriate functions
+                    b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                    if b_have_grid:
+                        if self.options.crossHatch:
+                            self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                            # Now loop over our hatch lines looking for intersections
+                        for h in self.grid:
+                            interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
 
             elif node.tag in [inkex.addNS('polygon', 'svg'), 'polygon']:
                 # Convert
@@ -985,8 +990,6 @@ class Eggbot_Hatch(inkex.Effect):
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
                         interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                else:
-                    inkex.errormsg(' Nothing to plot')
 
             elif node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse',
                               inkex.addNS('circle', 'svg'), 'circle']:
@@ -1038,8 +1041,6 @@ class Eggbot_Hatch(inkex.Effect):
                     # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
                         interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
-                else:
-                    inkex.errormsg(' Nothing to plot')
 
             elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
                 pass
