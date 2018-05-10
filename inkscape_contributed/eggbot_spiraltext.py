@@ -1,3 +1,4 @@
+# coding=utf-8
 # eggbot_spiraltext.py
 #
 # Render a passage of text using the Hershey fonts, then stretch it so
@@ -22,7 +23,7 @@
 # This extension also permits some basic markup of the passage using
 # XHTML-like conventions and a limited set of tags:
 #
-#  <sams>   - A simple typeface which lacks serifs
+#  <sans>   - A simple typeface which lacks serifs
 #  <times>  - "Times" like typeface (a face with serifs)
 #  <script> - A flowing script font
 #  <b>      - Boldface
@@ -51,7 +52,7 @@
 # Copyright 2011, Windell H. Oskay, www.evilmadscientist.com
 #
 # Small portions of this code were changed by Sheldon B. Michaels 2016,
-# in order to accomodate the addition of several new faces
+# in order to accommodate the addition of several new faces
 # (the "EMS" series) to hersheydata.py.  Additionally, changes were made
 # to the default text rendering style.
 #
@@ -69,12 +70,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import sys
-import hersheydata			#data file w/ Hershey font data
+import math
+
+import hersheydata  # data file w/ Hershey font data
 import inkex
 import simplestyle
-import math
-import string
 
 # Mapping table to map the names used here to the corresponding
 # names used in hersheydata.py.  This helps prevent end users from
@@ -82,355 +82,368 @@ import string
 # be used to deal with a face being removed from hersheydata.py
 
 map_our_names_to_hersheydata = {
-	'astrology' : 'astrology',
-	'cursive' : 'cursive',
-	'cyrillic' : 'cyrillic',
-	'futural' : 'futural',
-	'futuram' : 'futuram',
-	'gothiceng' : 'gothiceng',
-	'gothicger' : 'gothicger',
-	'gothicita' : 'gothicita',
-	'greek' : 'greek',
-	'japanese' : 'japanese',
-	'markers' : 'markers',
-	'mathlow' : 'mathlow',
-	'mathupp' : 'mathupp',
-	'meteorology' : 'meteorology',
-	'music' : 'music',
-	'scriptc' : 'scriptc',
-	'scripts' : 'scripts',
-	'symbolic' : 'symbolic',
-	'timesg' : 'timesg',
-	'timesi' : 'timesi',
-	'timesib' : 'timesib',
-	'timesr' : 'timesr',
-	'timesrb' : 'timesrb' }
+    'astrology': 'astrology',
+    'cursive': 'cursive',
+    'cyrillic': 'cyrillic',
+    'futural': 'futural',
+    'futuram': 'futuram',
+    'gothiceng': 'gothiceng',
+    'gothicger': 'gothicger',
+    'gothicita': 'gothicita',
+    'greek': 'greek',
+    'japanese': 'japanese',
+    'markers': 'markers',
+    'mathlow': 'mathlow',
+    'mathupp': 'mathupp',
+    'meteorology': 'meteorology',
+    'music': 'music',
+    'scriptc': 'scriptc',
+    'scripts': 'scripts',
+    'symbolic': 'symbolic',
+    'timesg': 'timesg',
+    'timesi': 'timesi',
+    'timesib': 'timesib',
+    'timesr': 'timesr',
+    'timesrb': 'timesrb'}
+
 
 # The following two routines are lifted with impunity from Windell H. Oskay's
 # hershey.py Hershey Text extension for Inkscape.  They are,
 # Copyright 2011, Windell H. Oskay, www.evilmadscientist.com
 
 def draw_svg_text(char, face, offset, vertoffset, parent):
-	style = { 'stroke' : '#000000', 'fill' : 'none', 'stroke-linecap' : 'round', 'stroke-linejoin' : 'round' }
-		# Apply rounding to ends so that user gets best impression of final printed text appearance.
-	pathString = face[char]
-	splitString = pathString.split()
-	midpoint = offset - float(splitString[0])
-	i = pathString.find("M")
-	if i >= 0:
-		pathString = pathString[i:] #portion after first move
-		trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
-		text_attribs = {'style':simplestyle.formatStyle(style), 'd':pathString, 'transform':trans}
-		inkex.etree.SubElement(parent, inkex.addNS('path','svg'), text_attribs)
-	return midpoint + float(splitString[1]) 	#new offset value
+    style = {'stroke': '#000000', 'fill': 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
+    # Apply rounding to ends so that user gets best impression of final printed text appearance.
+    path_string = face[char]
+    split_string = path_string.split()
+    midpoint = offset - float(split_string[0])
+    i = path_string.find("M")
+    if i >= 0:
+        path_string = path_string[i:]  # portion after first move
+        trans = 'translate(' + str(midpoint) + ',' + str(vertoffset) + ')'
+        text_attribs = {'style': simplestyle.formatStyle(style), 'd': path_string, 'transform': trans}
+        inkex.etree.SubElement(parent, inkex.addNS('path', 'svg'), text_attribs)
+    return midpoint + float(split_string[1])  # new offset value
 
-def renderText( parent, markup ):
-	# Embed text in group to make manipulation easier:
-	g_attribs = {inkex.addNS('label','inkscape'):'Hershey Text' }
-	g = inkex.etree.SubElement(parent, 'g', g_attribs)
 
-	w = 0  #Initial spacing offset
-	spacing = 3  # spacing between letters
+def renderText(parent, markup):
+    # Embed text in group to make manipulation easier:
+    g_attribs = {inkex.addNS('label', 'inkscape'): 'Hershey Text'}
+    g = inkex.etree.SubElement(parent, 'g', g_attribs)
 
-	for Face, Text in markup:
-		if map_our_names_to_hersheydata.has_key(Face):
-			Face = map_our_names_to_hersheydata[Face]
-		font = eval('hersheydata.' + Face)
-		letterVals = [ord(q) - 32 for q in Text]
-		for q in letterVals:
-			if (q < 0) or (q > 95):
-				w += 2*spacing
-			else:
-				w = draw_svg_text(q, font, w, 0, g)
-	return g, w
+    w = 0  # Initial spacing offset
+    spacing = 3  # spacing between letters
+
+    for face, text in markup:
+        if face in map_our_names_to_hersheydata:
+            face = map_our_names_to_hersheydata[face]
+        font = getattr(hersheydata, face)
+        letter_vals = (ord(q) - 32 for q in text)
+        for q in letter_vals:
+            if (q < 0) or (q > 95):
+                w += 2 * spacing
+            else:
+                w = draw_svg_text(q, font, w, 0, g)
+    return g, w
+
 
 # The generic font "families" we support
-generic_families = ( 'sans', 'script', 'times' )
+generic_families = ('sans', 'script', 'times')
 
 # Convert "family-name" + "bold-0-or-1" + "italic-0-or-1" to a typeface name
-family_to_font = {
-	'sans00' : 'futural', 'sans10' : 'futuram', 'sans01' : 'futural', 'sans11' : 'futuram',
-	'times00' : 'timesr', 'times10' : 'timesrb', 'times01' : 'timesi', 'times11' : 'timesib',
-	'script00' : 'scripts', 'script10' : 'scriptc', 'script01' : 'scripts', 'script11' : 'scriptc' }
-emphasis_is_bold = { 'sans' : True, 'times' : False, 'script' : True }
+family_to_font = {'sans00': 'futural',
+                  'sans10': 'futuram',
+                  'sans01': 'futural',
+                  'sans11': 'futuram',
+                  'times00': 'timesr',
+                  'times10': 'timesrb',
+                  'times01': 'timesi',
+                  'times11': 'timesib',
+                  'script00': 'scripts',
+                  'script10': 'scriptc',
+                  'script01': 'scripts',
+                  'script11': 'scriptc'}
+emphasis_is_bold = {'sans': True, 'times': False, 'script': True}
 
 # Short list of entity references
-entity_refs = { '&lt;' : '<', '&gt;' : '>', '&amp;' : '&', '&quot;' : '"', '&apos' : "'", '&nbsp;' : ' ' }
+entity_refs = {'&lt;': '<', '&gt;': '>', '&amp;': '&', '&quot;': '"', '&apos': "'", '&nbsp;': ' '}
 
-def normalize_possible_EMS_string( tag ):
-	# Normalizes tag name by removing any spaces
-	sNormalizedTag = string.replace( tag, ' ', '')
-	return sNormalizedTag
 
-def is_valid_EMS_name( tag ):
-	# returns true if family is one of the "EMS" faces in hersheydata.py
-	# else false
-	sNormalizedTag = normalize_possible_EMS_string( tag )
-	bRetVal = False		# default assumption
-	try:
-		fontgroup = hersheydata.group_allfonts
-	except:
-		# User probably has old version of hersheydata.py
-		pass
-	else:
-		for f in fontgroup:
-			if f[0] == sNormalizedTag:
-				bRetVal = True
-				break
-			
-	return bRetVal
+def normalize_possible_EMS_string(tag):
+    # Normalizes tag name by removing any spaces
+    s_normalized_tag = tag.replace(' ', '')
+    return s_normalized_tag
 
-def pickFace( family, bold=False, italics=False, emphasis=False ):
 
-	if ( family is None ) or ( family == '' ):
-		return None
+def is_valid_EMS_name(tag):
+    # returns true if family is one of the "EMS" faces in hersheydata.py
+    # else false
+    s_normalized_tag = normalize_possible_EMS_string(tag)
+    b_ret_val = False  # default assumption
+    try:
+        fontgroup = hersheydata.group_allfonts
+    except:
+        # User probably has old version of hersheydata.py
+        pass
+    else:
+        for f in fontgroup:
+            if f[0] == s_normalized_tag:
+                b_ret_val = True
+                break
 
-	b = '0'
-	i = '0'
+    return b_ret_val
 
-	# If using a generic font family, then determine how to map <em>
-	if emphasis and ( family in generic_families ):
-		if emphasis_is_bold[family]:
-			bold = True
-		else:
-			italics = True
 
-	if bold:
-		b = '1'
+def pickFace(family, bold=False, italics=False, emphasis=False):
+    if not family:
+        return None
 
-	if italics:
-		i = '1'
+    b = '0'
+    i = '0'
 
-	if family_to_font.has_key( family + b + i ):
-		return family_to_font[family + b + i]
+    # If using a generic font family, then determine how to map <em>
+    if emphasis and (family in generic_families):
+        if emphasis_is_bold[family]:
+            bold = True
+        else:
+            italics = True
 
-	return family
+    if bold:
+        b = '1'
 
-def processMarkup( text, family='sans' ):
-	if ( text is None ):
-		text = ''
+    if italics:
+        i = '1'
 
-	# By default we assume 'sans'
-	if ( family is None ) or ( family == ''):
-		family = 'sans'
-	family_default = family
-	face_stack = [ family ]
+    if (family + b + i) in family_to_font:
+        return family_to_font[family + b + i]
 
-	# Bold and italics off
-	bold = False
-	emphasis = False
-	italic = False
+    return family
 
-	# Set the current typeface
-	face = pickFace( family, bold, italic, emphasis )
 
-	# And the result of markup processing so far
-	markup = []
+def processMarkup(text, family='sans'):
+    if text is None:
+        text = ''
 
-	# We keep a queue / list of the open markup tags
-	# When a tag is closed, we expect it to be well nested.  To enforce
-	# that expectation, we make sure that we are closing the most recently
-	# opened tag.  While this may seem overly picky, it's easier than worrying
-	# issues like, "Does closing a typeface imply implicitly closing <b> or <it>?"
-	# And, "Does starting a new typeface imply closing the prior selected face?"
-	tags_used = []
+    # By default we assume 'sans'
+    if not family:
+        family = 'sans'
+    default_family = family
+    face_stack = [family]
 
-	outstr = ''
-	i = 0
-	while i < len( text ):
-		# An entity reference?
-		if text[i] == '&':
-			j = text.find( ';', i+1 )
-			if ( j != -1 ):
-				eref = text[i:j+1]
-				if entity_refs.has_key(eref):
-					outstr += entity_refs[eref]
-					i = j + 1
-				else:
-					inkex.errormsg( 'Ignoring the unrecognized entity reference %s.' % eref )
-					outstr += eref
-					i = j + 1
-			else:
-				inkex.errormsg( 'An unescaped "&" was encountered; please replace it with "&amp;".' )
-				break
+    # Bold and italics off
+    bold = False
+    emphasis = False
+    italic = False
 
-		# Start of a tag (start-tag or end-tag? self-closing tags not supported)
-		elif text[i] == '<':
-			j = text.find( '>', i+1 )
-			if ( j != -1 ) and ( j > ( i + 1) ):
+    # Set the current typeface
+    face = pickFace(family, bold, italic, emphasis)
 
-				tag = text[i+1:j]
-				i = j + 1
+    # And the result of markup processing so far
+    markup = []
 
-				if tag[0] == '/':
-					# This is an end-tag (closing tag)
-					close = True
-					tag = tag[1:]
+    # We keep a queue / list of the open markup tags
+    # When a tag is closed, we expect it to be well nested.  To enforce
+    # that expectation, we make sure that we are closing the most recently
+    # opened tag.  While this may seem overly picky, it's easier than worrying
+    # issues like, "Does closing a typeface imply implicitly closing <b> or <it>?"
+    # And, "Does starting a new typeface imply closing the prior selected face?"
+    tags_used = []
 
-					# Ensure that the most recently opened tag is that which we are closing here
-					# We'll pop the most recent tag from the queue of opened tags and see if
-					# it matches
-					if len( tags_used ) == 0:
-						inkex.errormsg( 'The ending tag </%s> appeared before any start tag <%s>.' % ( tag, tag ) )
-						break
-					else:
-						old_tag = tags_used.pop()
-						if old_tag != tag:
-							inkex.errormsg( 'The ending tag </%s> does not appear to be correctly nested; it tried to close the tag <%s>.  Sorry, but all tags must be properly nested.' % ( tag, old_tag ) )
-							break
-				else:
-					# Start tag (opening tag)
-					# Push it onto the queue of opened tags
-					close = False
-					tags_used.append( tag )
+    outstr = ''
+    i = 0
+    while i < len(text):
+        # An entity reference?
+        if text[i] == '&':
+            j = text.find(';', i + 1)
+            if j != -1:
+                eref = text[i:j + 1]
+                if eref in entity_refs:
+                    outstr += entity_refs[eref]
+                    i = j + 1
+                else:
+                    inkex.errormsg('Ignoring the unrecognized entity reference {0}.'.format(eref))
+                    outstr += eref
+                    i = j + 1
+            else:
+                inkex.errormsg('An unescaped "&" was encountered; please replace it with "&amp;".')
+                break
 
-				if ( tag == 'b' ) or ( tag == 'strong' ):
-					if bold == close:
-						# Push prior string and font onto the stack
-						if outstr != '':
-							markup.append( [ face, outstr ] )
-							outstr = ''
+        # Start of a tag (start-tag or end-tag? self-closing tags not supported)
+        elif text[i] == '<':
+            j = text.find('>', i + 1)
+            if (j != -1) and (j > (i + 1)):
 
-						# Start a new boldface string
-						bold = not bold
-						face = pickFace( family, bold, italic, emphasis )
+                tag = text[i + 1:j]
+                i = j + 1
 
-				elif tag == 'i':
-					if italic == close:
-						# Push the prior string and font unto the stack
-						if outstr != '':
-							markup.append( [ face, outstr ] )
-							outstr = ''
+                if tag[0] == '/':
+                    # This is an end-tag (closing tag)
+                    close = True
+                    tag = tag[1:]
 
-						# Start a new italicized string
-						italic = not italic
-						face = pickFace( family, bold, italic, emphasis )
+                    # Ensure that the most recently opened tag is that which we are closing here
+                    # We'll pop the most recent tag from the queue of opened tags and see if
+                    # it matches
+                    if len(tags_used) == 0:
+                        inkex.errormsg('The ending tag </{0}> appeared before any start tag <{1}>.'.format(tag, tag))
+                        break
+                    else:
+                        old_tag = tags_used.pop()
+                        if old_tag != tag:
+                            inkex.errormsg('The ending tag </{0}> does not appear to be correctly nested; it tried to close the tag <{1}>.  Sorry, but all tags must be properly nested.'.format(tag, old_tag))
+                            break
+                else:
+                    # Start tag (opening tag)
+                    # Push it onto the queue of opened tags
+                    close = False
+                    tags_used.append(tag)
 
-				elif tag == 'em':
-					if emphasis == close:
-						# Push the prior string and font unto the stack
-						if outstr != '':
-							markup.append( [ face, outstr ] )
-							outstr = ''
+                if (tag == 'b') or (tag == 'strong'):
+                    if bold == close:
+                        # Push prior string and font onto the stack
+                        if outstr != '':
+                            markup.append([face, outstr])
+                            outstr = ''
 
-						# Start a new italicized string
-						emphasis = not emphasis
-						face = pickFace( family, bold, italic, emphasis )
+                        # Start a new boldface string
+                        bold = not bold
+                        face = pickFace(family, bold, italic, emphasis)
 
-				else:
-					bValidEMSName = is_valid_EMS_name( tag )
-					if bValidEMSName:
-						tag = normalize_possible_EMS_string( tag )
-					if (
-							( tag not in generic_families )
-							and ( not map_our_names_to_hersheydata.has_key( tag ) )
-							and ( not bValidEMSName )
-						):
-						if close:
-							inkex.errormsg( 'Ignoring the unrecognized tag </%s>.' % tag )
-						else:
-							inkex.errormsg( 'Ignoring the unrecognized tag <%s>.' % tag )
-					else:
-						if outstr != '':
-							markup.append( [face, outstr] )
-							outstr = ''
-						if not close:
-							family = tag
-							face_stack.append( family )
-						else:
-							if len( face_stack ) > 0:
-								# Current face on the stack should be the one we just closed
-								face_stack.pop()
-								if len( face_stack ) > 0:
-									family = face_stack[len( face_stack) - 1]
-								else:
-									family = default_family
-							else:
-								family = default_family
-						face = pickFace( family, bold, italic, emphasis )
-			else:
-				inkex.errormsg( 'Ignoring unescaped "<"' )
-				outstr += '<'
-				i += 1
-		else:
-			outstr += text[i]
-			i += 1
+                elif tag == 'i':
+                    if italic == close:
+                        # Push the prior string and font unto the stack
+                        if outstr != '':
+                            markup.append([face, outstr])
+                            outstr = ''
 
-	# We won't worry about unclosed tags -- we're not trying to be an XML or XHTML parser
+                        # Start a new italicized string
+                        italic = not italic
+                        face = pickFace(family, bold, italic, emphasis)
 
-	# See if there was a hard error
-	if i < len( text):
-		return None
+                elif tag == 'em':
+                    if emphasis == close:
+                        # Push the prior string and font unto the stack
+                        if outstr != '':
+                            markup.append([face, outstr])
+                            outstr = ''
 
-	# And push the last text into the list of processed markup
-	if outstr != '':
-		markup.append( [face, outstr] )
+                        # Start a new italicized string
+                        emphasis = not emphasis
+                        face = pickFace(family, bold, italic, emphasis)
 
-	return markup
+                else:
+                    b_valid_ems_name = is_valid_EMS_name(tag)
+                    if b_valid_ems_name:
+                        tag = normalize_possible_EMS_string(tag)
+                    if all([tag not in generic_families,
+                            tag not in map_our_names_to_hersheydata,
+                            not b_valid_ems_name]):
+                        if close:
+                            inkex.errormsg('Ignoring the unrecognized tag </{0}>.'.format(tag))
+                        else:
+                            inkex.errormsg('Ignoring the unrecognized tag <{0}>.'.format(tag))
+                    else:
+                        if outstr != '':
+                            markup.append([face, outstr])
+                            outstr = ''
+                        if not close:
+                            family = tag
+                            face_stack.append(family)
+                        else:
+                            if face_stack:
+                                # Current face on the stack should be the one we just closed
+                                face_stack.pop()
+                                if face_stack:
+                                    family = face_stack[len(face_stack) - 1]
+                                else:
+                                    family = default_family
+                            else:
+                                family = default_family
+                        face = pickFace(family, bold, italic, emphasis)
+            else:
+                inkex.errormsg('Ignoring unescaped "<"')
+                outstr += '<'
+                i += 1
+        else:
+            outstr += text[i]
+            i += 1
 
-class SpiralText( inkex.Effect ):
+    # We won't worry about unclosed tags -- we're not trying to be an XML or XHTML parser
 
-	def __init__( self ):
-		inkex.Effect.__init__( self )
-		self.OptionParser.add_option( "--tab",	#NOTE: value is not used.
-			action="store", type="string",
-			dest="tab", default="splash",
-			help="The active tab when Apply was pressed" )
-		self.OptionParser.add_option( "--text",
-			action="store", type="string",
-			dest="text", default="Hershey Text for Inkscape",
-			help="The input text to render")
-		self.OptionParser.add_option( "--fontfamily",
-			action="store", type="string",
-			dest="fontfamily", default="sans",
-			help="The selected font face when Apply was pressed" )
-		self.OptionParser.add_option( "--wrap",
-			action="store", type="float",
-			dest="wrap", default=float(10),
-			help="Number of times to wrap the text around the egg" )
-		self.OptionParser.add_option( "--flip",
-			action="store", type="inkbool",
-			dest="flip", default=False,
-			help="Flip the text for plotting with the egg's bottom at the egg motor" )
-		self.OptionParser.add_option( "--stretch",
-			action="store", type="inkbool",
-			dest="stretch", default=True,
-			help="Stretch the text horizontally to account for egg distortions" )
+    # See if there was a hard error
+    if i < len(text):
+        return None
 
-	def effect( self ):
+    # And push the last text into the list of processed markup
+    if outstr != '':
+        markup.append([face, outstr])
 
-		markup = processMarkup( self.options.text, self.options.fontfamily )
-		g,w = renderText( self.current_layer, markup )
+    return markup
 
-		# Now to wrap the text N times around the egg, we need to scale it to have
-		# length 3200 * N.  It's current width is w so the scale factor is (3200 * N) / w.
 
-		scale_x = float( 3200 * self.options.wrap ) / float( w )
-		scale_y = scale_x
-		if self.options.stretch:
-			scale_y = scale_y * 2.0 / 3.0
+class SpiralText(inkex.Effect):
 
-		# In planning the scaling, we'd like to know the height of our line of text.
-		# Rather than computing its bounding box, we'll just use the height of the
-		# parens from the Simplex Roman font.  And, we could compute that but we'll
-		# just use our prior knowledge of it being 32.
+    def __init__(self):
+        inkex.Effect.__init__(self)
+        self.OptionParser.add_option("--tab",  # NOTE: value is not used.
+                                     action="store", type="string",
+                                     dest="tab", default="splash",
+                                     help="The active tab when Apply was pressed")
+        self.OptionParser.add_option("--text",
+                                     action="store", type="string",
+                                     dest="text", default="Hershey Text for Inkscape",
+                                     help="The input text to render")
+        self.OptionParser.add_option("--fontfamily",
+                                     action="store", type="string",
+                                     dest="fontfamily", default="sans",
+                                     help="The selected font face when Apply was pressed")
+        self.OptionParser.add_option("--wrap",
+                                     action="store", type="float",
+                                     dest="wrap", default=10.0,
+                                     help="Number of times to wrap the text around the egg")
+        self.OptionParser.add_option("--flip",
+                                     action="store", type="inkbool",
+                                     dest="flip", default=False,
+                                     help="Flip the text for plotting with the egg's bottom at the egg motor")
+        self.OptionParser.add_option("--stretch",
+                                     action="store", type="inkbool",
+                                     dest="stretch", default=True,
+                                     help="Stretch the text horizontally to account for egg distortions")
 
-		h = float( 32.0 )
+    def effect(self):
 
-		# And the angular tilt will be arcsine( height / (3200 * fWrap) )
-		svg = self.document.getroot()
-		height = float( self.unittouu( svg.attrib['height'] ) ) - h * scale_y
-		angle = ( float( 180 ) / math.pi ) * \
-			math.asin( height / float( 3200 * self.options.wrap ) )
+        markup = processMarkup(self.options.text, self.options.fontfamily)
+        g, w = renderText(self.current_layer, markup)
 
-		if self.options.flip:
-			angle += float( 180.0 )
-			t = 'translate(%f,%f) rotate(%f,%f,0) scale(%f,%f)' % ( -w*scale_x, h*scale_y, angle,
-										 w*scale_x, scale_x, scale_y )
-		else:
-			t = 'translate(0,%f) rotate(%f,0,0) scale(%f,%f)' % ( h, angle, scale_x, scale_y )
-		g.set( 'transform', t)
+        # Now to wrap the text N times around the egg, we need to scale it to have
+        # length 3200 * N.  It's current width is w so the scale factor is (3200 * N) / w.
+
+        scale_x = float(3200 * self.options.wrap) / float(w)
+        scale_y = scale_x
+        if self.options.stretch:
+            scale_y = scale_y * 2.0 / 3.0
+
+        # In planning the scaling, we'd like to know the height of our line of text.
+        # Rather than computing its bounding box, we'll just use the height of the
+        # parens from the Simplex Roman font.  And, we could compute that but we'll
+        # just use our prior knowledge of it being 32.
+
+        h = 32.0
+
+        # And the angular tilt will be arcsine( height / (3200 * fWrap) )
+        svg = self.document.getroot()
+        height = float(self.unittouu(svg.attrib['height'])) - h * scale_y
+        angle = (180.0 / math.pi) * math.asin(height / float(3200 * self.options.wrap))
+
+        if self.options.flip:
+            angle += 180.0
+            t = 'translate({0:f},{1:f}) rotate({2:f},{3:f},0) scale({4:f},{5:f})'.format(-w * scale_x, h * scale_y, angle,
+                                                                                   w * scale_x, scale_x, scale_y)
+        else:
+            t = 'translate(0,{0:f}) rotate({1:f},0,0) scale({2:f},{3:f})'.format(h, angle, scale_x, scale_y)
+        g.set('transform', t)
+
 
 if __name__ == '__main__':
-	e = SpiralText()
-	e.affect()
+    e = SpiralText()
+    e.affect()
