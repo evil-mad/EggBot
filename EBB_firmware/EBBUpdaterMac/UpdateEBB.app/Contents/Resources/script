@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo -e "Welcome to the EiBotBoard (EBB) Firmware Updater, version 2.5.3"
+echo -e "Welcome to the EiBotBoard (EBB) Firmware Updater, version 2.5.4"
 
 base='/dev/'
 result=`ls /dev | grep -m 1 usbmodem`
@@ -22,7 +22,7 @@ then
   result2=`head -n 1 < $portName`
   printf "\n$result2"
 
-  if [[ $result2 == *"2.5.3"* ]]
+  if [[ $result2 == *"2.5.4"* ]]
   then
     printf "\n\nFirmware updated successfully."
   else
@@ -48,7 +48,7 @@ if [ "$result" ]
   result2=`head -n 1 < $portName`
   printf "\n$result2"
 
-  if [[ $result2 == *"2.5.3"* ]]
+  if [[ $result2 == *"2.5.4"* ]]
   then
     printf "\n\nFirmware updated successfully."
   else
