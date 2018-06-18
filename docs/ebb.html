@@ -1365,7 +1365,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command causes the EBB to drop off the USB, then completely reboot as if just plugged in. Useful after a name change with the <code>NS</code> command. There is no output after the command executes.
+              This command causes the EBB to drop off the USB, then completely reboot as if just plugged in. Useful after a name change with the <code>ST</code> command. There is no output after the command executes.
             </p>
           </li>
           <li>
@@ -1722,7 +1722,9 @@
             <p>After setting the EBBs nickname and rebooting, the EBB's USB Device Name will
 	           have the nickname appended at the end, after a comma. So if no name is set
                the Device Name will be "EiBotBoard,". But if the nickname is set to "East EBB",
-               then the Device Name will be "EiBotBoard,East EBB".</p>
+               then the Device Name will be "EiBotBoard,East EBB". 
+               Note that the change may not be recognized by your computer until after you reboot the
+               EBB. See the <code><a href="#RB">RB</a></code> command.</p>
             <p>The nickname string can be any combination of ASCII characters, including an empty string which will clear the EBB's nickname.
             For best compatibility, please avoid use of apostrophes or quotation marks 
             (single or double quotes) within the name.</p>
