@@ -1332,7 +1332,7 @@
     
         <hr class="short" />
 
-        <h4><a name="QT"></a>"QT" &mdash; Query EBB name Tag</h4>
+        <h4><a name="QT"></a>"QT" &mdash; Query EBB nickname Tag</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QT&lt;CR&gt;</code></li>
@@ -1341,11 +1341,13 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command gets the EBB's "name", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's "name". If a name has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
+            <p>This command gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. 
+            It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it
+            will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>QT&lt;CR&gt;</code>
-            <p>If the EBB's name has been set to "East EBB" then the output of this command would be:</p>
+            <p>If the EBB's nickname has been set to "East EBB" then the output of this command would be:</p>
             <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
@@ -1701,7 +1703,7 @@
    
         <hr class="short" />
 
-        <h4><a name="ST"></a>"ST" &mdash; Set EBB name Tag</h4>
+        <h4><a name="ST"></a>"ST" &mdash; Set EBB nickname Tag</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ST,<i>NewNameString</i>&lt;CR&gt;</code></li>
@@ -1715,13 +1717,16 @@
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command sets the EBB's "name". This is an arbitrary, user settable string, which is stored in flash memory across reboots.</p>
-            <p>After setting the EBBs name and rebooting, the EBB's USB Device Name will have the name append at the end, after a comma. So if no name is set
-               the Device Name will be "EiBotBoard,". But if the name is set to "East EBB", then the Device Name will be "EiBotBoard,East EBB".</p>
-            <p>The name string can be any combination of ASCII characters, including an empty string which will clear the EBB's name.
+            <p>This command sets the EBB's "nickname". This is an arbitrary, user settable string,
+	            which is stored in flash memory across reboots.</p>
+            <p>After setting the EBBs nickname and rebooting, the EBB's USB Device Name will
+	           have the nickname appended at the end, after a comma. So if no name is set
+               the Device Name will be "EiBotBoard,". But if the nickname is set to "East EBB",
+               then the Device Name will be "EiBotBoard,East EBB".</p>
+            <p>The nickname string can be any combination of ASCII characters, including an empty string which will clear the EBB's nickname.
             For best compatibility, please avoid use of apostrophes or quotation marks 
             (single or double quotes) within the name.</p>
-            <p>Use the <code><a href="#QT">QT</a></code> command to retrieve the name at any time.</p>
+            <p>Use the <code><a href="#QT">QT</a></code> command to retrieve the nickname at any time.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
