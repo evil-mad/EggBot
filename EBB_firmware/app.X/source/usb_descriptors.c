@@ -177,7 +177,7 @@ ROM USB_DEVICE_DESCRIPTOR device_dsc=
     0x0182,                 // Device release number in BCD format
     0x01,                   // Manufacturer string index
     0x02,                   // Product string index
-    0x00,                   // Device serial number string index
+    0x03,                   // Device serial number string index
     0x01                    // Number of possible configurations
 };
 
@@ -281,7 +281,11 @@ sizeof(sd001),USB_DESCRIPTOR_STRING,
 // have enough space to put the 'name' (set via the 'NS' command) on the end 
 struct{BYTE bLength;BYTE bDscType;WORD string[27];}sd002={
 sizeof(sd002),USB_DESCRIPTOR_STRING,
-{'E','i','B','o','t','B','o','a','r','d',',',0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000}};
+{'E','i','B','o','t','B','o','a','r','d',',',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}};
+
+struct{BYTE bLength;BYTE bDscType;WORD string[16];}sd003={
+sizeof(sd003),USB_DESCRIPTOR_STRING,
+{' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}};
 
 //Array of configuration descriptors
 ROM BYTE *ROM USB_CD_Ptr[]=
@@ -293,7 +297,8 @@ BYTE * USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS]=
 {
     (BYTE *)&sd000,
     (BYTE *)&sd001,
-    (BYTE *)&sd002
+    (BYTE *)&sd002,
+    (BYTE *)&sd003
 };
 
 #pragma code

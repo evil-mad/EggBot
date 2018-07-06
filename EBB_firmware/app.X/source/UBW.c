@@ -156,7 +156,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.4\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.5\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -3006,14 +3006,26 @@ void populateDeviceStringWithName(void)
     // Because sd002 is an anonymous structure without any names for its
     // members, we are totally going to just hack this bad boy and jump
     // into a known offset from the beginning of the structure.
+    // As of 2.5.5, we now not only update the Product string, but also the
+    // serial number string.
     for (i=0; i < FLASH_NAME_LENGTH; i++)
     {
-        // Only copy over valid ASCII characters
+        // Only copy over valid ASCII characters. On the first invalid
+        // one, bail out.
         if (name[i] <= 128 && name[i] >= 32)
         {
             *(USB_SD_Ptr[2] + 24 + (i*2)) = name[i];
+            *(USB_SD_Ptr[3] + 2 + (i*2)) = name[i];
+        }
+        else
+        {
+            break;
         }
     }
+    // Now update the string descriptor lengths based on how many characters
+    // we copied over from Flash
+    *(USB_SD_Ptr[2]) = 24 + (i * 2);
+    *(USB_SD_Ptr[3]) = 2 + (i * 2);
 }
 
 // ST command : Set Tag

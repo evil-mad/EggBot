@@ -223,6 +223,8 @@
 //                  Added RB (ReBoot) command
 //                  Added any name set with ST command to end of USB Device Name
 //                  Fixed problem with reading bit 7 of any I/O port (issue #82)
+// 2.5.5 07/06/18 - Enhanced ST command by writing to both Device name and 
+//                    serial number USB fields.
 
 #include <p18cxxx.h>
 #include <usart.h>
