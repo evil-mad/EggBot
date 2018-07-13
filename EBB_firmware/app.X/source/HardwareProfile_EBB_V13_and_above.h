@@ -154,7 +154,7 @@
 	#define Step2IO_TRIS		TRISDbits.TRISD4
 	#define Dir2IO				LATDbits.LATD5
 	#define Dir2IO_TRIS			TRISDbits.TRISD5
-    // Alternat STEP/DIR for external drivers
+    // Alternate STEP/DIR for external drivers
 	#define Step1AltIO			LATCbits.LATC6
 	#define Step1AltIO_TRIS		TRISCbits.TRISC6
 	#define Dir1AltIO			LATCbits.LATC2
@@ -163,6 +163,14 @@
 	#define Step2AltIO_TRIS		TRISAbits.TRISA5
 	#define Dir2AltIO			LATAbits.LATA2
 	#define Dir2AltIO_TRIS		TRISAbits.TRISA2
+    
+    /** R C   S E R V O  ************************************************/
+
+    #define RCServoPowerIO_TRIS TRISAbits.TRISA3
+    #define RCServoPowerIO      LATAbits.LATA3
+    #define RCServoPowerIO_PORT PORTAbits.RA3
+    #define RCSERVO_POWER_ON    1
+    #define RCSERVO_POWER_OFF   0
     
 	/** G E N E R I C ***************************************************/
 	

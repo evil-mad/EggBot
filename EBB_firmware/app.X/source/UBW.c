@@ -111,6 +111,8 @@
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
+#define RCSERVO_POWEROFF_DEFAULT_MS 1*60*60*1000ul  // Number of milliseconds to defeault the RCServo power autotimeout (1h)
+
 /** V A R I A B L E S ********************************************************/
 //#pragma udata access fast_vars
 
@@ -156,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.5\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.6\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -209,7 +211,7 @@ unsigned char g_USART_RX_buf_out;
 unsigned char g_USART_TX_buf_in;
 unsigned char g_USART_TX_buf_out;
 
-// Normally set to TRUE. Able to set FALSE to not send "OK" message after packet recepetion
+// Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
 BOOL	g_ack_enable;
 
 // Set to TRUE to turn Pulse Mode on
@@ -220,6 +222,10 @@ unsigned int gPulseLen[4] = {0,0,0,0};
 unsigned int gPulseRate[4] = {0,0,0,0};
 // For Pulse Mode, counters keeping track of where we are
 unsigned int gPulseCounters[4] = {0,0,0,0};
+
+// Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
+unsigned volatile long int gRCServoPoweroffCounterMS;
+unsigned volatile long int gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
@@ -260,6 +266,8 @@ void parse_AC_packet (void);    // AC Analog Configure
 void parse_ST_packet (void);    // ST Set Tag command
 void parse_QT_packet (void);    // QT Query Tag command
 void parse_RB_packet (void);    // RB ReBoot command
+void parse_QR_packet (void);    // QR Query RC Servo power state
+void parse_SR_packet (void);    // SR Set RC Servo power timeout
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
 int _user_putc (char c);		// Our UBS based stream character printer
 
@@ -279,7 +287,7 @@ void low_ISR(void)
 		PIR3bits.TMR4IF = 0;
 		
 		// Handle RC servo pulse generation (for next pulse/channel)
-		// Always incriment the gRCServo2msCounter
+		// Always increment the gRCServo2msCounter
         gRC2msCounter++;
 
         if (gRC2msCounter >= gRC2SlotMS)
@@ -365,7 +373,7 @@ void low_ISR(void)
                 // Turn TIMER3 back on
                 T3CONbits.TMR3ON = 1;
 
-                // Renable interrupts
+                // Re-enable interrupts
                 INTCONbits.GIEH = 1;
             }
         }
@@ -453,7 +461,7 @@ void low_ISR(void)
                 // Reset AnalogInitiate counter
                 AnalogInitiate = 0;
             }
-            // Otherwise, incriment each 1ms
+            // Otherwise, increment each 1ms
             else
             {
                 AnalogInitiate++;
@@ -489,7 +497,7 @@ void low_ISR(void)
 						if (i==3) PORTBbits.RB3 = 0;
 					}
 
-					// Now incriment the counter
+					// Now increment the counter
 					gPulseCounters[i]++;
 
 					// And check to see if we've reached the end of the rate
@@ -514,7 +522,19 @@ void low_ISR(void)
 		if (QC_ms_timer)
 		{
 			QC_ms_timer--;
-		}	
+		}
+        
+        // Software timer for RCServo power control
+        if (gRCServoPoweroffCounterMS)
+        {
+            gRCServoPoweroffCounterMS--;
+            // If we just timed out, then shut off RC Servo power
+            if (gRCServoPoweroffCounterMS == 0)
+            {
+                RCServoPowerIO = RCSERVO_POWER_OFF;
+                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+            }
+        }
 
 	} // end of 1ms interrupt
 
@@ -1487,6 +1507,18 @@ void parse_packet(void)
 			parse_RB_packet();
 			break;
 		}
+		case ('Q' * 256) + 'R':
+		{
+			// QR is for Query RC Servo power state
+			parse_QR_packet();
+			break;
+		}
+		case ('S' * 256) + 'R':
+		{
+			// SR is for Set RC Servo power timeout
+			parse_SR_packet();
+			break;
+		}
 		default:
 		{
 			if (0 == cmd2)
@@ -1532,7 +1564,7 @@ void parse_packet(void)
 	g_RX_buf_out = g_RX_buf_in;
 }
 
-// Print out the positive acknowledgement that the packet was received
+// Print out the positive acknowledgment that the packet was received
 // if we have acks turned on.
 void print_ack(void)
 {
@@ -2892,7 +2924,7 @@ void parse_PG_packet (void)
 		gPulsesOn = FALSE;
 	}
 
-	print_ack ();
+	print_ack();
 }	
 
 void LongDelay(void)
@@ -2947,6 +2979,44 @@ void parse_RB_packet()
 	LongDelay();
     Reset();
 }
+
+// QR Query RC Servo power state command
+// Example: "RR<CR>"
+// Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>" 
+// 0 = power to RC servo off
+// 1 = power to RC servo on
+void parse_QR_packet()
+{
+  	printf ((far rom char *)"%1u\r\n", RCServoPowerIO_PORT);
+    print_ack();
+}
+
+// SR Set RC Servo power timeout
+// Example: "SR,<new_time_ms><CR><LF>"
+// Returns "OK<CR><LF>"
+// <new_time_ms> is a 32-bit unsigned integer, representing the new RC servo 
+// poweroff timeout in milliseconds. This value is not saved across reboots.
+// It is the length of time the system will wait after any command that uses
+// the motors or servo before killing power to the RC servo.
+// Use a value of 0 for <new_time_ms> to completely disable the poweroff timer.
+void parse_SR_packet()
+{
+	unsigned long Value;
+
+	extract_number(kULONG, &Value, kREQUIRED);
+
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+    gRCServoPoweroffCounterReloadMS = Value;
+    
+    print_ack();
+}
+
+
 // Just used for testing/debugging the packet parsing routines
 void parse_CK_packet()
 {

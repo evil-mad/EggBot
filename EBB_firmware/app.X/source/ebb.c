@@ -225,6 +225,8 @@
 //                  Fixed problem with reading bit 7 of any I/O port (issue #82)
 // 2.5.5 07/06/18 - Enhanced ST command by writing to both Device name and 
 //                    serial number USB fields.
+// 2.5.6 07/11/18 - Added RC Servo power control functionality on pin RA3
+//                    Includes new QR and SR commands. See issue #103 for more
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -755,6 +757,10 @@ void EBB_Init(void)
     // Set up pen up/down direction as output
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
+    
+    // Set up RC Servo power control to be off
+    RCServoPowerIO = 0;
+    RCServoPowerIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;
 	DriverConfiguration = PIC_CONTROLS_DRIVERS;
@@ -800,8 +806,6 @@ void EBB_Init(void)
 // SC,12,<servo2_rate><CR> sets the pen down speed
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
-
-
 void parse_SC_packet (void)
 {
 	unsigned char Para1 = 0;
@@ -1053,6 +1057,8 @@ void parse_AM_packet (void)
     // Always enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
+    RCServoPowerIO = RCSERVO_POWER_ON;
+    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
     // First, set the direction bits
     if (A1Steps < 0)
@@ -1237,6 +1243,8 @@ void parse_LM_packet (void)
     // Always enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
+    RCServoPowerIO = RCSERVO_POWER_ON;
+    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
     // First, set the direction bits
     if (StepsCounter1 < 0)
@@ -1483,7 +1491,6 @@ static void process_SM(
     UINT32 remainder = 0;
     MoveCommandType move;
 
-
 	// Check for delay
 	if (A1Stp == 0 && A2Stp == 0)
 	{
@@ -1500,6 +1507,8 @@ static void process_SM(
 		// Always enable both motors when we want to move them
 		Enable1IO = ENABLE_MOTOR;
 		Enable2IO = ENABLE_MOTOR;
+        RCServoPowerIO = RCSERVO_POWER_ON;
+        gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
 		// First, set the direction bits
 		if (A1Stp < 0)
@@ -1801,7 +1810,7 @@ void parse_SP_packet(void)
 
     // Execute the servo state change
 	process_SP(State, CommandDuration);
-
+    
 	print_ack();
 }
 
@@ -1830,13 +1839,16 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
         Rate = g_servo2_rate_down;
 	}
 
+    RCServoPowerIO = RCSERVO_POWER_ON;
+    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+
     // Now schedule the movement with the RCServo2 function
     RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }
 
 // Enable Motor
 // Usage: EM,<EnableAxis1>,<EnableAxis2><CR>
-// Everything afer EnableAxis1 is optional
+// Everything after EnableAxis1 is optional
 // Each parameter can have a value of
 //		0 to disable that motor driver
 // FOR OLD DRIVER CHIP (A3967) - can do separate enables for each axis
@@ -1883,6 +1895,8 @@ void parse_EM_packet(void)
 				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
                 {
                     Enable1IO = ENABLE_MOTOR;
+                    RCServoPowerIO = RCSERVO_POWER_ON;
+                    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
                 }
 				if (EA1 == 1)
 				{
@@ -1928,6 +1942,8 @@ void parse_EM_packet(void)
 			if (EA1 > 0)
 			{
 				Enable1AltIO = ENABLE_MOTOR;
+                RCServoPowerIO = RCSERVO_POWER_ON;
+                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 			}
 			else
 			{
@@ -1949,6 +1965,8 @@ void parse_EM_packet(void)
 			if (EA2 > 0)
 			{
 				Enable2IO = ENABLE_MOTOR;
+                RCServoPowerIO = RCSERVO_POWER_ON;
+                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 			}
 			else
 			{
@@ -1960,6 +1978,8 @@ void parse_EM_packet(void)
 			if (EA2 > 0)
 			{
 				Enable2AltIO = ENABLE_MOTOR;
+                RCServoPowerIO = RCSERVO_POWER_ON;
+                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 			}
 			else
 			{
@@ -1971,7 +1991,7 @@ void parse_EM_packet(void)
     print_ack();
 }
 
-// Node counter Incriment
+// Node counter increment
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {

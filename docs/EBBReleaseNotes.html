@@ -270,6 +270,25 @@
           </ul>
         </p>
         
+        <h4>2.5.5 &mdash; 07/06/18</h4>
+        <p>
+          <ul>
+            <li>Enhanced the ST command to write to both device name and serial number USB fields.</li>
+          </ul>
+        </p>
+
+        <h4>2.5.6 &mdash; 07/13/18</h4>
+        <p>
+          <ul>
+            <li>In response to <a href="https://github.com/evil-mad/EggBot/issues/103">issue #103</a> the following commands were added:</li>
+            <li>Added QR (Query RC Servo power state) command</li>
+            <li>Added SR (Set RC Servo poweroff timeout value) command</li>
+            <li>In addition, for EBB v1.5s and above, the RC Servo's 5V power signal is now controlled by the firmware, to allow the servo
+            to power down after some amount of time (either set by the SR command or defaults to 1h), but power is restored upon any
+            command using the motors or the servo.</li>
+          </ul>
+        </p>
+
         <p/>
         <hr/>
         <p/>
