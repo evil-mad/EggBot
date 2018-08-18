@@ -210,18 +210,18 @@ void RCServo2_Init(void)
 
     // Start with some reasonable default values for min and max
 	g_servo2_max = 16000;           // max = down
-	g_servo2_min = 12000;           // min = up, 1ms, inital value
+	g_servo2_min = 12000;           // min = up, 1ms, initial value
 
 	g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;		// Always start out with RP4 as the output (just for this test version of code)
 	
 	g_servo2_rate_up = 400;
 	g_servo2_rate_down = 400;
-	process_SP(PEN_UP, 0);			// Start servo up
+//	process_SP(PEN_UP, 0);			// Start servo up
 }
 
-// Return the current channel that is assocated with the PPS output pin
+// Return the current channel that is associated with the PPS output pin
 // RPn. If there is no channel yet assigned for this RPn, then pick the
-// next avaialble one. If there are none available, then return channel 0
+// next available one. If there are none available, then return channel 0
 // (which is considered an error.)
 // Remember, channels are from 1 through 8 (Normally - can be increased with 
 // SC,8 command). Channel 0 is the 'error' channel.

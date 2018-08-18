@@ -759,7 +759,7 @@ void EBB_Init(void)
 	PenUpDownIO_TRIS = OUTPUT_PIN;
     
     // Set up RC Servo power control to be off
-    RCServoPowerIO = 0;
+    RCServoPowerIO = RCSERVO_POWER_OFF;
     RCServoPowerIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;

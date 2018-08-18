@@ -111,7 +111,7 @@
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
-#define RCSERVO_POWEROFF_DEFAULT_MS 1*60*60*1000ul  // Number of milliseconds to defeault the RCServo power autotimeout (1h)
+#define RCSERVO_POWEROFF_DEFAULT_MS (1ul*60ul*60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (1h)
 
 /** V A R I A B L E S ********************************************************/
 //#pragma udata access fast_vars
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.6\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.7\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -224,8 +224,8 @@ unsigned int gPulseRate[4] = {0,0,0,0};
 unsigned int gPulseCounters[4] = {0,0,0,0};
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
-unsigned volatile long int gRCServoPoweroffCounterMS;
-unsigned volatile long int gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+volatile UINT32 gRCServoPoweroffCounterMS = 0;
+volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
@@ -532,7 +532,6 @@ void low_ISR(void)
             if (gRCServoPoweroffCounterMS == 0)
             {
                 RCServoPowerIO = RCSERVO_POWER_OFF;
-                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
             }
         }
 
