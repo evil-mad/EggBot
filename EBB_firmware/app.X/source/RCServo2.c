@@ -142,7 +142,7 @@ UINT8  g_servo2_RPn;
 The idea with RCServo2 is to use the ECCP2 module and timer 3.
 We divide time into 24ms periods. Inside each 24ms period, we
 can fire up to 8 RC servo's pulses (slots). Each pulse can be between
-0ms and 3ms long, controlled entierly by the ECCP2 hardware,
+0ms and 3ms long, controlled entirely by the ECCP2 hardware,
 so there is no jitter in the high time of the pulse.
 
 We want to go from 0ms to 3ms so we can accomodate RC servos
@@ -150,7 +150,7 @@ who need really short or really long pulses to reach the
 physical extremes of its motion.
 
 This RCServo2 method will only be available on the 18F45J50 based
-EggBotBoards, because it requires the PPS (perhipheral pin select)
+EggBotBoards, because it requires the PPS (peripheral pin select)
 facility to be possible.
 
 Timer3 will be configured to clock at Fosc/4 = 12MHz.
@@ -186,7 +186,7 @@ void RCServo2_Init(void)
 		gRC2Target[i] = 0;
 		gRC2Rate[i] = 0;
 	}
-	// Initalize the RPOR pointer
+	// Initialize the RPOR pointer
 	gRC2RPORPtr = &RPOR0;
 
 	// Set up TIMER3
@@ -209,14 +209,14 @@ void RCServo2_Init(void)
 	gRC2SlotMS = 3;
 
     // Start with some reasonable default values for min and max
-	g_servo2_max = 16000;           // max = down
-	g_servo2_min = 12000;           // min = up, 1ms, initial value
+	g_servo2_max = 15302;           // max = down (SC,5,15302)
+	g_servo2_min = 22565;           // min = up (SC,4,22565)
 
 	g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;		// Always start out with RP4 as the output (just for this test version of code)
 	
 	g_servo2_rate_up = 400;
 	g_servo2_rate_down = 400;
-//	process_SP(PEN_UP, 0);			// Start servo up
+	process_SP(PEN_UP, 0);			// Start servo up
 }
 
 // Return the current channel that is associated with the PPS output pin

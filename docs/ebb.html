@@ -1728,7 +1728,7 @@
         <h4><a name="SR"></a>"SR" &mdash; Set RC Servo power timeout value</h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>,<i>state</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>v2.5.6 and above</li>
           <li><span style="font-weight: bold;">Execution:</span>Immediate</li>
@@ -1736,23 +1736,28 @@
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li><i>value</i> is a decimal unsigned long integer (32-bit) representing the number of milliseconds to wait after the last motor or servo move before shutting off power to the RC Servo (RB1).</li>
+              <li><i>state</i> is value of either 0 or 1, and is optional. It represents an immediate new state for the servo power (1 = on, 0 = off).</li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
-            <p>This command sets a new RC Servo power timeout value.</p>
+            <p>This command sets a new RC Servo power timeout value and optionally a new immediate power state.</p>
             <p>The <i>value</i> argument is in milliseconds.</p>
             <p>If <i>value</i> is 0, then the auto-poweroff feature is disabled and the power will not be turned off to the RC servo once applied.</p>
-            <p>On boot, the EBB will use a default value of 1 hour. This means that 1 hour after the last servo or stepper motion command, the RC servo power will be turned off.</p>
-            <p>On boot, the power to the RC Servo (on pin RB1) will be off, just like the power to the motor is off at boot.</p>
-            <p>Whenever any command turns power on to the stepper motors, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer 
-            reaches 0, the power to the RC servo connector will be shut off.</p>
-            <p>Only EBB boards v2.5 and above have the necessary power switch. On other versions of the EBB hardware, the power to the servo is always on.</p>
+            <p>On boot, the EBB will use a default value of 15 minutes. This means that 15 minutes after the last servo or stepper motion command, the RC servo power will be turned off.</p>
+            <p>On boot, the power to the RC Servo (on pin RB1) will be on.</p>
+            <p>Whenever any command that moves the stepper motors or RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
+            <p>Only EBB boards v2.5 and above have the necessary power switch hardware. On other versions of the EBB hardware, the power to the servo is always on.</p>
             <p>Pin RA3 of the MCU is used to control the RC Servo power. So from software version 2.5.6 and above, this pin is now dedicated to RC Servo power control and can't be easily used for other things.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> 
-            <code>SR,60000&lt;CR&gt;</code> Set new RC servo power timeout value to 1 minute.
+            <code>SR,60000,1&lt;CR&gt;</code> Set new RC servo power timeout value to 1 minute and turn power to the servo on.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> 
+            <li>Command appeared in v2.5.6 with just the <i>value</i> parameter.</li>
+            <li>In v2.6.0, the optional second parameter <i>state</i> was added and the default timeout time was changed from 1 hour to 15 minutes.</li>
           </li>
         </ul>
 

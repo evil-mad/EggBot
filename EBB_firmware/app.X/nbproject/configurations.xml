@@ -72,7 +72,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="0.1.3"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -229,7 +229,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="0.1.3"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -385,7 +385,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="0.1.3"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -561,7 +561,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="0.1.3"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
       </packs>
       <compileType>
         <linkerTool>
@@ -926,7 +926,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="0.1.3"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.0.8"/>
       </packs>
       <compileType>
         <linkerTool>

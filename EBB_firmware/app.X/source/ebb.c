@@ -227,6 +227,10 @@
 //                    serial number USB fields.
 // 2.5.6 07/11/18 - Added RC Servo power control functionality on pin RA3
 //                    Includes new QR and SR commands. See issue #103 for more
+// 2.6.0 09/08/19 - Added direct servo power toggle command SR
+//                  Set servo default timeout to 15 minutes, pen up at boot,
+//                    servo power on at boot
+//                  Changed default pen up/down positions
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -758,8 +762,8 @@ void EBB_Init(void)
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
     
-    // Set up RC Servo power control to be off
-    RCServoPowerIO = RCSERVO_POWER_OFF;
+    // Set up RC Servo power control to be on
+    RCServoPowerIO = RCSERVO_POWER_ON;
     RCServoPowerIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;

@@ -111,7 +111,7 @@
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
-#define RCSERVO_POWEROFF_DEFAULT_MS (1ul*60ul*60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (1h)
+#define RCSERVO_POWEROFF_DEFAULT_MS (15ul*60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (15min)
 
 /** V A R I A B L E S ********************************************************/
 //#pragma udata access fast_vars
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.5.7\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.0\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -2991,20 +2991,26 @@ void parse_QR_packet()
 }
 
 // SR Set RC Servo power timeout
-// Example: "SR,<new_time_ms><CR><LF>"
+// Example: "SR,<new_time_ms>,<new_power_state><CR><LF>"
 // Returns "OK<CR><LF>"
 // <new_time_ms> is a 32-bit unsigned integer, representing the new RC servo 
 // poweroff timeout in milliseconds. This value is not saved across reboots.
 // It is the length of time the system will wait after any command that uses
 // the motors or servo before killing power to the RC servo.
 // Use a value of 0 for <new_time_ms> to completely disable the poweroff timer.
-void parse_SR_packet()
+// <new_power_state> is an optional parameter of either 0 or 1. It will
+// immediately affect the servo's power state, where 0 turns it off and 1 
+// turns it on.
+void parse_SR_packet(void)
 {
 	unsigned long Value;
+    UINT8 State;
+    ExtractReturnType GotState;
 
 	extract_number(kULONG, &Value, kREQUIRED);
+	GotState = extract_number(kUCHAR, &State, kOPTIONAL);
 
-	// Bail if we got a conversion error
+  	// Bail if we got a conversion error
 	if (error_byte)
 	{
 		return;
@@ -3012,9 +3018,22 @@ void parse_SR_packet()
 
     gRCServoPoweroffCounterReloadMS = Value;
     
+    // Check to see if <new_power_state> is there
+    if (GotState == kEXTRACT_OK)
+    {
+        // Yup, so set new power state
+        if (State)
+        {
+            RCServoPowerIO = RCSERVO_POWER_ON;
+        }
+        else
+        {
+            RCServoPowerIO = RCSERVO_POWER_OFF;
+        }
+    }
+    
     print_ack();
 }
-
 
 // Just used for testing/debugging the packet parsing routines
 void parse_CK_packet()
