@@ -229,7 +229,7 @@
 //                    Includes new QR and SR commands. See issue #103 for more
 // 2.6.0 09/08/19 - Added direct servo power toggle command SR
 //                  Set servo default timeout to 15 minutes, pen up at boot,
-//                    servo power on at boot
+//                    servo power off at boot
 //                  Changed default pen up/down positions
 
 #include <p18cxxx.h>
@@ -762,8 +762,8 @@ void EBB_Init(void)
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
     
-    // Set up RC Servo power control to be on
-    RCServoPowerIO = RCSERVO_POWER_ON;
+    // Set up RC Servo power control to be off
+    RCServoPowerIO = RCSERVO_POWER_OFF;
     RCServoPowerIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;
