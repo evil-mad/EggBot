@@ -1307,7 +1307,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QR&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code><i>RCServoPowerState</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.6 and newer</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
@@ -1317,7 +1317,7 @@
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QR\r</code></li>
           <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.6</li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.6.0</li>
         </ul>
 
         <hr class="short" />
@@ -1730,7 +1730,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>,<i>state</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span>v2.5.6 and above</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span>v2.6.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span>Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
@@ -1748,7 +1748,7 @@
             <p>On boot, the power to the RC Servo (on pin RB1) will be off.</p>
             <p>Whenever any command that moves the stepper motors or RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
             <p>Only EBB boards v2.5 and above have the necessary power switch hardware. On other versions of the EBB hardware, the power to the servo is always on.</p>
-            <p>Pin RA3 of the MCU is used to control the RC Servo power. So from software version 2.5.6 and above, this pin is now dedicated to RC Servo power control and can't be easily used for other things.</p>
+            <p>Pin RA3 of the MCU is used to control the RC Servo power. So from software version 2.6.0 and above, this pin is now dedicated to RC Servo power control and can't be easily used for other things.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> 
@@ -1756,8 +1756,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span> 
-            <li>Command appeared in v2.5.6 with just the <i>value</i> parameter.</li>
-            <li>In v2.6.0, the optional second parameter <i>state</i> was added and the default timeout time was changed from 1 hour to 15 minutes.</li>
+            <li>Added in v2.6.0.</li>
           </li>
         </ul>
 
