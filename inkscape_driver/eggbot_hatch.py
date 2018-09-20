@@ -1169,6 +1169,8 @@ class Eggbot_Hatch(inkex.Effect):
             # Since the spacing may be fractional (e.g., 6.5), we
             # don't try to use range() or other integer iterator
             spacing = float(abs(spacing))
+            if spacing < 0.05:
+                spacing = 0.05
             i = -r
             while i <= r:
                 # Line starts at (i, -r) and goes to (i, +r)
