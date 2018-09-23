@@ -71,7 +71,7 @@
 # Add min span/gap width
 
 # Updated by Windell H. Oskay, 1/8/2016
-# Added live preview and correct issue with nonzero min gap 
+# Added live preview and correct issue with nonzero min gap
 # https://github.com/evil-mad/EggBot/issues/32
 
 # Updated by Sheldon B. Michaels, 1/11/2016 thru 3/15/2016
@@ -84,12 +84,12 @@
 # Updated by Nathan Depew, 12/6/2017
 # Modified hatch fill to create hatches as a relevant object it found on the SVG tree
 # This prevents extremely complex plots from generating glitches
-# Modifications are limited to recursivelyTraverseSvg and effect methods 
+# Modifications are limited to recursivelyTraverseSvg and effect methods
 
 #
 # Current software version:
 # (v2.1.0, December 6, 2017)
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -118,7 +118,7 @@ from simpletransform import applyTransformToPath, applyTransformToPoint, compose
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
 
-F_MINGAP_SMALL_VALUE = 0.0000000001  
+F_MINGAP_SMALL_VALUE = 0.0000000001
 # Was 0.00001 in the original version which did not have joined lines.
 # Reducing this by a factor of 10^5 decreased probability of occurrence of
 # the bug in the original, which got confused when the path barely
@@ -129,21 +129,21 @@ BEZIER_OVERSHOOT_MULTIPLIER = 0.75  # evaluation of cubic Bezier curve equation 
 # endpoints at ( -0.5, 0 ), ( +0.5, 0 )
 # and control points at ( -0.5, 1.0 ), ( +0.5, 1.0 )
 
-RADIAN_TOLERANCE_FOR_COLINEAR = 0.1  
+RADIAN_TOLERANCE_FOR_COLINEAR = 0.1
 # Pragmatically adjusted to allow adjacent segments from the same scan line, even short ones,
 # to be classified as having the same angle
 
-RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1  
+RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1
 # Pragmatic adjustment again, as with colinearity tolerance
 
-RECURSION_LIMIT = 500  
-# Pragmatic - if too high, risk runtime python error; 
+RECURSION_LIMIT = 500
+# Pragmatic - if too high, risk runtime python error;
 # if too low, miss some chances for reducing pen lifts
 
 EXTREME_POS = 1.0E70 # Extremely large positive number
 EXTREME_NEG = -1.0E70 # Extremely large negative number
 
-MIN_HATCH_FRACTION = 0.25  
+MIN_HATCH_FRACTION = 0.25
 # Minimum hatch length, as a fraction of the hatch spacing.
 
 """
@@ -790,7 +790,7 @@ class Eggbot_Hatch(inkex.Effect):
 
             """
              Initialize dictionary for each new node
-             This allows us to create hatch fills as if each 
+             This allows us to create hatch fills as if each
              object to be hatched has been selected individually
 
             """
@@ -1337,9 +1337,9 @@ class Eggbot_Hatch(inkex.Effect):
                     direction = not direction
 
                 # Now have a nice juicy buffer full of line segments with absolute coordinates
-                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)  
+                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)
                 # Just fixed and simple for now - may make function of neighborhood later
-                
+
                 for ref_count in range(n_abs_line_segment_total):  # This is the entire range of segments,
                     # Sets global ref_count to segment which has an end closest to current pen position.
                     # Doesn't need to select which end is closest, as that will happen below, with n_ref_end_index.

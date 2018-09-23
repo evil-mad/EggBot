@@ -14,7 +14,7 @@ N_PAGE_HEIGHT = 800  # Default Inkscape page height (each unit equiv. to one pix
 N_PAGE_WIDTH = 3200  # Default Inkscape page width (each unit equiv. to one pixel/step)
 
 """
-Motor resolution: The "standard" setup for brand-name EggBot machines (at least through 2015) has been 3200 steps per revolution. 
+Motor resolution: The "standard" setup for brand-name EggBot machines (at least through 2015) has been 3200 steps per revolution.
 
 Early (clear-chassis) models had 400 step/rev motors with 8X microstepping drivers, and more recent versions ("white-chassis" EggBot 2.0, Deluxe EggBot, Ostrich EggBot, and EggBot Pro) have all used 200 step/rev motors with 16X microstepping drivers (EBB 2.0).
 
@@ -29,7 +29,7 @@ For NORMAL USE, with overall 3200 steps/rev, use the default value:
 
 For 6400 steps/rev, use:
     STEP_SCALE = 1
-    
+
 Other _integer_ scaling values can be used as well, with similar scaling.
 
 """
