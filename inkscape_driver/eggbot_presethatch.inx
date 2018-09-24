@@ -10,12 +10,12 @@ default presets to the live path effect called
 "Hatch (rough)."
 
 It affects all objects in your document that
-already have the live hatch effect applied. 
+already have the live hatch effect applied.
 
 After using this tool to apply presets, use
-the "Edit paths by node" tool to change the 
-frequency, direction, and/or bending of the 
-hatching, by dragging the diamond control 
+the "Edit paths by node" tool to change the
+frequency, direction, and/or bending of the
+hatching, by dragging the diamond control
 points.
 </_param>
    <effect>
