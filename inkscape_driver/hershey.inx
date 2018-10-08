@@ -18,14 +18,14 @@ Hershey Text: Engraving Fonts for Inkscape
 
       <param indent="2" name="action" type="enum" _gui-text="Action: ">
         <_item value="render"   >Typeset that text</_item>
-        <_item value="sample"   >Generate font table: All fonts</_item> 
-        <_item value="sampleHW" >Generate font table: Handwriting-like</_item> 
-        <_item value="table"    >Generate glyph table in selected font</_item> 
+        <_item value="sample"   >Generate font table: All fonts</_item>
+        <_item value="sampleHW" >Generate font table: Handwriting-like</_item>
+        <_item value="table"    >Generate glyph table in selected font</_item>
       </param>
 
       <param indent="2" name="fontface" type="enum" _gui-text="Font face: ">
         <_item value="futural">Sans 1-stroke</_item>
-        <_item value="futuram">Sans bold</_item> 
+        <_item value="futuram">Sans bold</_item>
 
         <_item value="timesr">Serif medium</_item>
         <_item value="timesi">Serif medium italic</_item>
@@ -38,8 +38,8 @@ Hershey Text: Engraving Fonts for Inkscape
 
         <_item value="gothiceng">Gothic English</_item>
         <_item value="gothicger">Gothic German</_item>
-        <_item value="gothicita">Gothic Italian</_item>	   
-        
+        <_item value="gothicita">Gothic Italian</_item>
+
         <!-- Block below this are loosely adapted from fonts licensed under SIL Open Font License -->
 		<_item value="EMSAllure">EMS Allure</_item>
 		<_item value="EMSBird">EMS Bird</_item>
@@ -68,31 +68,31 @@ Hershey Text: Engraving Fonts for Inkscape
 		<_item value="EMSReadabilityItalic">EMS Readability Italic</_item>
 		<_item value="EMSSociety">EMS Society</_item>
 		<_item value="EMSSwiss">EMS Swiss</_item>
-        <_item value="EMSTech">EMS Tech</_item> 
+        <_item value="EMSTech">EMS Tech</_item>
         <!-- Block above this are loosely adapted from fonts licensed under SIL Open Font License -->
 
         <_item value="greek">Greek 1-stroke</_item>
         <_item value="timesg">Greek medium</_item>
-        <_item value="cyrillic">Cyrillic</_item>		
-        <_item value="japanese">Japanese</_item> 
+        <_item value="cyrillic">Cyrillic</_item>
+        <_item value="japanese">Japanese</_item>
 
         <_item value="astrology">Astrology</_item>
         <_item value="mathlow">Math (lower)</_item>
         <_item value="mathupp">Math (upper)</_item>
-        <_item value="markers">Markers</_item> 
+        <_item value="markers">Markers</_item>
         <_item value="meteorology">Meteorology</_item>
         <_item value="music">Music</_item>
         <_item value="symbolic">Symbolic</_item>
 
       </param>
-      <_param name="emptyspace" type="description" xml:space="preserve"> 
+      <_param name="emptyspace" type="description" xml:space="preserve">
 </_param>
 
     </page>
     <page name="info" _gui-text="About Hershey Text">
 <_param indent="1" name="aboutTitle" type="description" appearance="header">Hershey Text 2.2</_param>
 <_param name="aboutpage" type="description" xml:space="preserve">This tool renders a line of text using specialized
-"stroke" or "engraving" fonts designed for plotters. 
+"stroke" or "engraving" fonts designed for plotters.
 
 Whereas regular "outline" fonts (e.g., TrueType) work
 by filling in the region inside an invisible outline,
@@ -101,7 +101,7 @@ or strokes; much like human handwriting.
 
 Engraving fonts are used for creating text paths that
 computer controlled drawing and cutting machines (from
-pen plotters to CNC routers) can efficiently follow. 
+pen plotters to CNC routers) can efficiently follow.
 
 For a full introduction, please visit:
   www.evilmadscientist.com/go/hershey</_param>
@@ -112,7 +112,7 @@ For a full introduction, please visit:
 The classic fonts included -- those without the "EMS"
 prefix -- are derived from work by Dr. A. V. Hershey,
 distributed by the US National Bureau of Standards
-(now NIST) in NBS SP-424 1976-04, "A contribution to 
+(now NIST) in NBS SP-424 1976-04, "A contribution to
 computer typesetting techniques: Tables of Coordinates
 for Hershey's Repertory of Occidental Type Fonts and
 Graphic Symbols."

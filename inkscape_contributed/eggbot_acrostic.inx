@@ -26,7 +26,7 @@ drawn using the "Secondary font".
 	<_option value="cursive">Script 1-stroke (alt)</_option>
 
 	<_option value="futural">Sans 1-stroke</_option>
-	<_option value="futuram">Sans bold</_option> 
+	<_option value="futuram">Sans bold</_option>
 
 	<_option value="timesr">Serif medium</_option>
 	<_option value="timesi">Serif medium italic</_option>
@@ -35,17 +35,17 @@ drawn using the "Secondary font".
 
 	<_option value="gothiceng">Gothic English</_option>
 	<_option value="gothicger">Gothic German</_option>
-	<_option value="gothicita">Gothic Italian</_option>	   
+	<_option value="gothicita">Gothic Italian</_option>
 
 	<_option value="greek">Greek 1-stroke</_option>
 	<_option value="timesg">Greek medium</_option>
-	<_option value="cyrillic">Cyrillic</_option>		
-	<_option value="japanese">Japanese</_option> 
+	<_option value="cyrillic">Cyrillic</_option>
+	<_option value="japanese">Japanese</_option>
 
 	<_option value="astrology">Astrology</_option>
 	<_option value="mathlow">Math (lower)</_option>
 	<_option value="mathupp">Math (upper)</_option>
-	<_option value="markers">Markers</_option> 
+	<_option value="markers">Markers</_option>
 	<_option value="meteorology">Meteorology</_option>
 	<_option value="music">Music</_option>
 	<_option value="symbolic">Symbolic</_option>
@@ -57,7 +57,7 @@ drawn using the "Secondary font".
 	<_option value="scriptc">Script medium</_option>
 
 	<_option value="futural">Sans 1-stroke</_option>
-	<_option value="futuram">Sans bold</_option> 
+	<_option value="futuram">Sans bold</_option>
 
 	<_option value="timesr">Serif medium</_option>
 	<_option value="timesi">Serif medium italic</_option>
@@ -66,17 +66,17 @@ drawn using the "Secondary font".
 
 	<_option value="gothiceng">Gothic English</_option>
 	<_option value="gothicger">Gothic German</_option>
-	<_option value="gothicita">Gothic Italian</_option>	   
+	<_option value="gothicita">Gothic Italian</_option>
 
 	<_option value="greek">Greek 1-stroke</_option>
 	<_option value="timesg">Greek medium</_option>
-	<_option value="cyrillic">Cyrillic</_option>		
-	<_option value="japanese">Japanese</_option> 
+	<_option value="cyrillic">Cyrillic</_option>
+	<_option value="japanese">Japanese</_option>
 
 	<_option value="astrology">Astrology</_option>
 	<_option value="mathlow">Math (lower)</_option>
 	<_option value="mathupp">Math (upper)</_option>
-	<_option value="markers">Markers</_option> 
+	<_option value="markers">Markers</_option>
 	<_option value="meteorology">Meteorology</_option>
 	<_option value="music">Music</_option>
 	<_option value="symbolic">Symbolic</_option>

@@ -46,7 +46,7 @@ Markup:
 Special characters:
   &lt;  --  Enter " &amp;lt; " in your text
   &gt;  --  Enter " &amp;gt; " in your text
-  &amp;  --  Enter " &amp;amp; " in your text 
+  &amp;  --  Enter " &amp;amp; " in your text
 </_param>
     </page>
     <page name="fonts1" _gui-text="Text Fonts">
