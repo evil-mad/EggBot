@@ -66,7 +66,7 @@ def find_ordering_naive(objlist):
     # for now, do this in the most naive way:
     # for the previous end point, iterate over each remaining path and pick the closest starting point
     while objlist:
-        min_distance = 100000000  # TODO put something else here better?
+        min_distance = float('inf') # Set the inital min distance to infinity.
         for path in objlist:
             # instead of having a prevX, prevY, we just look at the last item in sort_list
             this_distance = dist(sort_list[-1][1][2], sort_list[-1][1][3], path[1][0], path[1][1])
@@ -77,6 +77,10 @@ def find_ordering_naive(objlist):
         air_length_ordered += min_distance
         sort_list.append(min_path)
         objlist.remove(min_path)
+
+    # Explicitly cast to float for use later.
+    air_length_default = float(air_length_default)
+    air_length_ordered = float(air_length_ordered)
 
     # remove the extraneous info from the list order
     sort_order = [id for id, coords in sort_list]
@@ -155,11 +159,18 @@ class EggBotReorderPaths(inkex.Effect):
 
             if air_distance_default > 0:  # don't divide by zero. :P
                 improvement_pct = 100 * ((air_distance_default - air_distance_ordered) / air_distance_default)
-                inkex.errormsg(gettext.gettext("Selected paths have been reordered and optimized for quicker EggBot plotting.\n\n"
-                                               "Original air-distance: {0:d}\n"
-                                               "Optimized air-distance: {1:d}\n"
-                                               "Distance reduced by: {2:1.2f}%\n\n"
-                                               "Have a nice day!".format(air_distance_default, air_distance_ordered, improvement_pct)))
+                reorder_msg = gettext.gettext(
+                    "Selected paths have been reordered and optimized for quicker EggBot plotting.\n\n"
+                    "Original air-distance: {0:.2f}\n"
+                    "Optimized air-distance: {1:.2f}\n"
+                    "Distance reduced by: {2:1.2f}%\n\n"
+                    "Have a nice day!".format(
+                        air_distance_default,
+                        air_distance_ordered,
+                        improvement_pct
+                    )
+                )
+                inkex.errormsg(reorder_msg)
             else:
                 inkex.errormsg(gettext.gettext("Unable to start. Please select multiple distinct paths. :)"))
 
