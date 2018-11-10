@@ -27,8 +27,6 @@ import hersheydata  # data file w/ Hershey font data
 import inkex
 import simplestyle
 
-import hello
-
 Debug = False
 FONT_GROUP_V_SPACING = 45
 
