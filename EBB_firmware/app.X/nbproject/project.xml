@@ -14,6 +14,34 @@
             <make-dep-projects>
                 <make-dep-project>../bootloader.X</make-dep-project>
             </make-dep-projects>
+            <sourceRootList>
+                <sourceRootElem>source</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>EBBv13_with_bootloader</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>EBBv13_no_bootloader</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>EBBv13_XC8_no_bootloader</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>EBBv13_XC8_with_bootloader</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>EBBv13_45J50_with_bootloader</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>breifly</word>

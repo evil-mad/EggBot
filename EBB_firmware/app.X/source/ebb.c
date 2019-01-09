@@ -227,10 +227,11 @@
 //                    serial number USB fields.
 // 2.5.6 07/11/18 - Added RC Servo power control functionality on pin RA3
 //                    Includes new QR and SR commands. See issue #103 for more
-// 2.6.0 09/08/19 - Added direct servo power toggle command SR
+// 2.6.0 09/08/18 - Added direct servo power toggle command SR
 //                  Set servo default timeout to 15 minutes, pen up at boot,
 //                    servo power off at boot
 //                  Changed default pen up/down positions
+// 2.6.1 01/07/19 - Added "QG" general query command 
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -315,6 +316,10 @@ BOOL gUseSolenoid;
 BOOL gUseRCPenServo;
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 BOOL gLimitChecks = TRUE;
+
+/* Local function definitions */
+UINT8 process_QM(void);
+
 
 // ISR
 #pragma interrupt high_ISR
@@ -2078,8 +2083,10 @@ void parse_QL_packet(void)
 void parse_QB_packet(void)
 {
 	printf ((far rom char*)"%1i\r\n", ButtonPushed);
-	ButtonPushed = FALSE;
-
+	if (ButtonPushed)
+    {
+        ButtonPushed = FALSE;
+    }
 	print_ack();
 }
 
@@ -2104,6 +2111,51 @@ void parse_QC_packet(void)
 	// Print out our results
 	printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
 
+	print_ack();
+}	
+
+// Query General
+// Usage: QG<CR>
+// Returns: <status><NL><CR>
+// <status> is a single byte, printed as a decimal number "0" to "255".
+// Each bit in the byte represents the status of a single bit of information in the EBB.
+// Bit 0 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
+// Bit 1 : Motor2 status (0 = not moving, 1 = moving)
+// Bit 2 : Motor1 status (0 = not moving, 1 = moving)
+// Bit 3 : Pen status (0 = up, 1 = down)
+// Bit 4 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
+// Bit 5 : reserved
+// Bit 6 : reserved
+// Bit 7 : reserved
+// Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
+void parse_QG_packet(void)
+{
+    UINT8 CommandExecuting = 0;
+    UINT8 Motor1Running = 0;
+    UINT8 Motor2Running = 0;
+    UINT8 FIFOStatus = 0;
+    UINT8 result = process_QM();
+
+    // process_QM() gives us everything we want, but it also has something in bit 3, which we need to mask off
+    // to put our pen status in.
+    result = result & 0x07;
+    
+    if (ButtonPushed)
+    {
+        result = result | (1 << 4);
+    }
+    if (PenState)
+    {
+        result = result | (1 << 3);
+    }
+
+	printf ((far rom char*)"%02X\r\n", result);
+    
+    // Reset the button pushed flag
+    if (ButtonPushed)
+    {
+        ButtonPushed = FALSE;
+    }
 	print_ack();
 }	
 
@@ -2237,20 +2289,9 @@ void parse_RM_packet(void)
 	
 }
 
-// QM command
-// For Query Motor - returns the current status of each motor
-// QM takes no parameters, so usage is just QM<CR>
-// QM returns:
-// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status><CR>
-// where:
-//   <CommandExecutingStatus>: 0 if no 'motion command' is executing, > 0 if some 'motion command' is executing
-//   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
-//   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
-//
-// As of version 2.4.4, there is now a fourth parameter at the end of the reply packet.
-// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status>,<FIFOStatus><CR>
-// Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
-void parse_QM_packet(void)
+// Do the work of the QM command so we can use this same code for QM and
+// for QG commands.
+UINT8 process_QM(void)
 {
     UINT8 CommandExecuting = 0;
     UINT8 Motor1Running = 0;
@@ -2283,6 +2324,47 @@ void parse_QM_packet(void)
     }
     if (CommandExecuting && LocalCommand.StepsCounter[1] != 0) {
         Motor2Running = 1;
+    }
+    
+    return ((CommandExecuting << 3) | (Motor1Running << 2) | (Motor2Running << 1) | FIFOStatus);
+}
+
+// QM command
+// For Query Motor - returns the current status of each motor
+// QM takes no parameters, so usage is just QM<CR>
+// QM returns:
+// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status><CR>
+// where:
+//   <CommandExecutingStatus>: 0 if no 'motion command' is executing, > 0 if some 'motion command' is executing
+//   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
+//   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
+//
+// As of version 2.4.4, there is now a fourth parameter at the end of the reply packet.
+// QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status>,<FIFOStatus><CR>
+// Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
+void parse_QM_packet(void)
+{
+    UINT8 CommandExecuting = 0;
+    UINT8 Motor1Running = 0;
+    UINT8 Motor2Running = 0;
+    UINT8 FIFOStatus = 0;
+    UINT8 result = process_QM();
+
+    if (result & 0x01)
+    {
+        FIFOStatus = 1;
+    }
+    if (result & 0x02)
+    {
+        Motor2Running = 1;
+    }
+    if (result & 0x04)
+    {
+        Motor1Running = 1;
+    }
+    if (result & 0x08)
+    {
+        CommandExecuting = 1;
     }
 
 	printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);

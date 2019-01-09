@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.0\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.1\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -1430,6 +1430,12 @@ void parse_packet(void)
 		{
 			// QC for Query Current
 			parse_QC_packet();
+			break;
+		}
+		case ('Q' * 256) + 'G':
+		{
+			// QG for Query General
+			parse_QG_packet();
 			break;
 		}
 		case ('S' * 256) + 'E':

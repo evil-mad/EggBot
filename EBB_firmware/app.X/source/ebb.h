@@ -139,6 +139,7 @@ void parse_QL_packet(void);
 void parse_QB_packet(void);
 void parse_EM_packet(void);
 void parse_QC_packet(void);
+void parse_QG_packet(void);
 void parse_SE_packet(void);
 void parse_RM_packet(void);
 void parse_QM_packet(void);
