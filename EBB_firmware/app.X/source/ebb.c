@@ -2122,31 +2122,34 @@ void parse_QC_packet(void)
 // Bit 0 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
 // Bit 1 : Motor2 status (0 = not moving, 1 = moving)
 // Bit 2 : Motor1 status (0 = not moving, 1 = moving)
-// Bit 3 : Pen status (0 = up, 1 = down)
-// Bit 4 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
-// Bit 5 : reserved
-// Bit 6 : reserved
-// Bit 7 : reserved
+// Bit 3 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
+// Bit 4 : Pen status (0 = up, 1 = down)
+// Bit 5 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
+// Bit 6 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 7 : GPIO Pin RB5 state (0 = low, 1 = high)
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
 {
-    UINT8 CommandExecuting = 0;
-    UINT8 Motor1Running = 0;
-    UINT8 Motor2Running = 0;
-    UINT8 FIFOStatus = 0;
     UINT8 result = process_QM();
 
-    // process_QM() gives us everything we want, but it also has something in bit 3, which we need to mask off
-    // to put our pen status in.
-    result = result & 0x07;
-    
-    if (ButtonPushed)
+    // process_QM() gives us the low 4 bits of our output result.
+    result = result & 0x0F;
+
+    if (PenState)
     {
         result = result | (1 << 4);
     }
-    if (PenState)
+    if (ButtonPushed)
     {
-        result = result | (1 << 3);
+        result = result | (1 << 5);
+    }
+    if (PORTBbits.RB2)
+    {
+        result = result | (1 << 6);
+    }
+    if (PORTBbits.RB5)
+    {
+        result = result | (1 << 7);
     }
 
 	printf ((far rom char*)"%02X\r\n", result);
@@ -2156,7 +2159,6 @@ void parse_QG_packet(void)
     {
         ButtonPushed = FALSE;
     }
-	print_ack();
 }	
 
 // Set Engraver

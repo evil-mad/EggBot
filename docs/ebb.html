@@ -1210,30 +1210,33 @@
   
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QG&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>Status Bits</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>Status Bits</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.1 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reads the status of five bits of information, and returns them as a bitfield expressed as a single hexadecimal byte.
+              This command reads the status of eight bits of information, and returns them as a bitfield expressed as a single hexadecimal byte.
             </p>
             <p>The returned status byte consists of the following status bits:</p>
+            <p>
             <ul>
               <li>Bit 0: FIFO - 1 = FIFO not empty, 0 = FIFO empty</li>
               <li>Bit 1: Motor2 - 1 = Motor 2 is moving, 0 = Motor 2 is not moving</li>
               <li>Bit 2: Motor1 - 1 = Motor 1 is moving, 0 = Motor 1 is not moving</li>
-              <li>Bit 3: Pen - 1 = pen down, 0 = pen up</li>
-              <li>Bit 4: PRG Button - 1 = PRG button has been pressed since last QG or QB command, 0 = PRG button has not been pressed</li>
-              <li>Bit 5: Reserved for future use</li>
-              <li>Bit 6: Reserved for future use</li>
-              <li>Bit 7: Reserved for future use</li>
+              <li>Bit 3: CommandStaus - 1 = a motion command is executing, 0 = no motion command is executing</li>
+              <li>Bit 4: Pen - 1 = pen down, 0 = pen up</li>
+              <li>Bit 5: PRG Button - 1 = PRG button has been pressed since last QG or QB command, 0 = PRG button has not been pressed</li>
+              <li>Bit 6: RB2 - 1 = GPIO pin RB2 is high, 0 = GPIO pin RB2 is low</li>
+              <li>Bit 7: RB5 - 1 = GPIO pin RB5 is high, 0 = GPIO pin RB5 is low</li>
             </ul>
+            </p>
+            <p>For bits 6 and 7, the RB2 and RB5 pins do not have to be set to be inputs. The <code>QG</code> command will read their states even if they are outputs. If they are set to be RC servo outputs, these bits will be toggling and will be reflected that way in the <code>QG</code> response. These bits are included in the response because RB0, RB1, RB3 and RB4 already have existing functions assigned to them, and these two bits could be used for home switches or some similar function.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
-            <code>1E&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-            <p>This query return value of 1E indicates that the PRG button has been pressed, the pen is down, motor1 and motor2 are moving but the FIFO is empty.</p>
+            <code>3E&lt;CR&gt;&lt;NL&gt;</code>
+            <p>This query return value of 3E indicates that RB2 and RB5 are low, the PRG button has been pressed, the pen is down, a command is being executed, motor1 and motor2 are moving but the FIFO is empty.</p>
           </li>
         </ul>
 
