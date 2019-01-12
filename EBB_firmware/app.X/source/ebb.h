@@ -148,6 +148,7 @@ void parse_XM_packet(void);
 void parse_QS_packet(void);
 void parse_CS_packet(void);
 void parse_LM_packet(void);
+void parse_HM_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 #endif

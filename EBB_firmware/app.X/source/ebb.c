@@ -231,7 +231,8 @@
 //                  Set servo default timeout to 15 minutes, pen up at boot,
 //                    servo power off at boot
 //                  Changed default pen up/down positions
-// 2.6.1 01/07/19 - Added "QG" general query command 
+// 2.6.1 01/07/19 - Added "QG" general query command
+// 2/6/2 01/11/19 - Added "HM" Home Motor command
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1389,6 +1390,102 @@ void parse_SM_packet (void)
     }
 }
 
+// Home
+// If the step rate is too high or too low, don't error out, just use a legal value
+// May need to make 2 moves if one of the axis has few steps to go and the other has
+// lots.
+// When parsing this command, always wait until both the FIFO is empty and the motion 
+// commands are finished. That way two SM commands can be issued back to back to take 
+// care of both moves (or just one if a 'dog leg' move is needed)
+void parse_HM_packet (void)
+{
+	UINT32 StepRate = 0;
+	INT32 Steps1 = 0, Steps2 = 0;
+    INT32 AbsSteps1 = 0, AbsSteps2 = 0;
+    UINT32 Duration = 0;
+    MoveCommandType LocalCommand;
+    UINT8 CommandExecuting = 1;
+
+	// Extract the step rate.
+	extract_number (kULONG, &StepRate, kREQUIRED);
+
+    // Wait until FIFO is empty
+	while(!FIFOEmpty)
+	;
+
+    // Then wait for motion command to finish (if one's running)
+    while(CommandExecuting == 1)
+    {
+        // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+        INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+
+        // Make a local copy of the things we care about
+        LocalCommand = CurrentCommand;
+
+        // Re-enable interrupts
+        INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+
+        // Create our output values to print back to the PC
+        if ((LocalCommand.DelayCounter == 0) && (LocalCommand.Command == COMMAND_NONE))
+        {
+            CommandExecuting = 0;
+        }
+    }
+    
+    // Make a local copy of the things we care about. This is how far we need to move.
+    Steps1 = -globalStepCounter1;
+    Steps2 = -globalStepCounter2;
+    
+    // Compute absolute value versions of steps for computation
+    if (Steps1 < 0)
+    {
+        AbsSteps1 = -Steps1;
+    }
+    else
+    {
+        AbsSteps1 = Steps1;
+    }
+    if (Steps2 < 0)
+    {
+        AbsSteps2 = -Steps2;
+    }
+    else
+    {
+        AbsSteps2 = Steps2;
+    }
+    
+    // Always perform limit checks
+    
+    // Compute duration based on step rate user requested. Take bigger step count to use for calculation
+    if (Steps1 > Steps2)
+    {
+        Duration = Steps1 / StepRate;        
+    }
+    else
+    {
+        Duration = Steps2 / StepRate;        
+    }
+    
+    if (Duration > 10)
+    {
+        Duration = 10;
+    }
+            printf((far rom char *)"SA1=%li SC1=%li SA2=%li\n\r",
+                Duration,
+                Steps1,
+                Steps2
+            );
+
+    // If we get here, we know that step rate for both A1 and A2 is
+    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  	process_SM(Duration, Steps1, Steps2);
+
+    if (g_ack_enable)
+    {
+    	print_ack();
+    }
+}
+
 // The X Stepper Motor command
 // Usage: XM,<move_duration>,<axisA_steps>,<axisB_steps><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
@@ -1499,6 +1596,13 @@ static void process_SM(
     UINT32 temp2 = 0;
     UINT32 remainder = 0;
     MoveCommandType move;
+
+    // Uncomment the following printf() for debugging
+    printf((far rom char *)"Duration=%lu SA1=%lu SA2=%lu\n\r",
+            Duration,
+            A1Stp,
+            A2Stp
+        );
 
 	// Check for delay
 	if (A1Stp == 0 && A2Stp == 0)
@@ -1628,12 +1732,12 @@ static void process_SM(
         
         /* For debugging step motion , uncomment the next line */
         
-        //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-        //        move.StepAdd[0],
-        //        move.StepsCounter[0],
-        //        move.StepAdd[1],
-        //        move.StepsCounter[1]
-        //    );
+        printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+                move.StepAdd[0],
+                move.StepsCounter[0],
+                move.StepAdd[1],
+                move.StepsCounter[1]
+            );
 	}
 		
 	// Spin here until there's space in the fifo

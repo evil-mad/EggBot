@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.1\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.2\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -1522,6 +1522,12 @@ void parse_packet(void)
 		{
 			// SR is for Set RC Servo power timeout
 			parse_SR_packet();
+			break;
+		}
+		case ('H' * 256) + 'M':
+		{
+			// HM is for Home Motor
+			parse_HM_packet();
 			break;
 		}
 		default:
