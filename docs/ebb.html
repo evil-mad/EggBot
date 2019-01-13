@@ -203,6 +203,7 @@
           <li><a href="#CS">CS</a> &mdash; Clear Step position</li>
           <li><a href="#EM">EM</a> &mdash; Enable Motors</li>
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
+          <li><a href="#HM">HM</a> &mdash; Home Motors</li>
           <li><a href="#I">I</a> &mdash; Input</li>
           <li><a href="#LM">LM</a> &mdash; Low-level Move</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
@@ -601,6 +602,10 @@
           <li><span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode</li>
           <li><span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)</li>
           <li><span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode</li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
+          </li>
         </ul>
       
         <hr class="short" />
@@ -638,7 +643,7 @@
           <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axis 1 in 1/4 step mode, disable Axis 2</li>
         </ul>
          
-        <hr class="short" />    
+        <hr class="short" />
 
         <h4><a name="ES"></a>"ES" &mdash; E Stop</h4>
 
@@ -690,6 +695,45 @@
                 <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
               </li>
             </ul>
+          </li>
+        </ul>
+    
+        <hr class="short" />
+
+        <h4><a name="HM"></a>"HM" &mdash; Home Motors</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>HM,<i>StepRate</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span><br/>
+            <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li>
+            <span style="font-weight: bold;">Parameters:</span>
+            <p>
+              <i>StepRate</i> is an unsigned integers in the range from 2 to 25000. It represents the step rate, in steps per second, which the EBB should maintain during the homing operation.
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              Use this command to return the motors from whatever their current position is (as defined by the global step counters, which are available in the <code>QS</code> command) back to position 0,0. The step rate at which the homing should happen is specified as a parameter. 
+            </p>
+            <p>
+              The move may not be a straight line. There are circumstances (where one axis has a lot of steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
+            </p>
+            <p>The command will wait until all previous motor motion ceases before beginning the home operation.</p>
+            <p>
+              If either of the global step counter values is greater than 4,294,967 the command will error out. If you need to home from further away than this, multiple normal moves back to zero can be sent to accomplish the same thing.
+            </p>
+            <p>
+              When the motors are disabled, enabled, or the microstep size is changed (all via the <code>EM</code> command) the global step counters are zeroed.
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.6.2
           </li>
         </ul>
     
