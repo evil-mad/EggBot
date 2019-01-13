@@ -71,25 +71,25 @@ typedef enum
 	COMMAND_MOTOR_MOVE,
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
-    COMMAND_SE
+  COMMAND_SE
 } CommandType;
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {
-    CommandType     Command;
-    INT32           StepAdd[NUMBER_OF_STEPPERS];
-    INT32           StepAddInc[NUMBER_OF_STEPPERS];
-    UINT32          StepsCounter[NUMBER_OF_STEPPERS];
-    UINT8           DirBits;
-    UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
-    UINT16          ServoPosition;
-    UINT8           ServoRPn;
-    UINT8           ServoChannel;
-    UINT16          ServoRate;
-    UINT8           SEState;
-    UINT16          SEPower;
+  CommandType     Command;
+  INT32           StepAdd[NUMBER_OF_STEPPERS];
+  INT32           StepAddInc[NUMBER_OF_STEPPERS];
+  UINT32          StepsCounter[NUMBER_OF_STEPPERS];
+  UINT8           DirBits;
+  UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
+  UINT16          ServoPosition;
+  UINT8           ServoRPn;
+  UINT8           ServoChannel;
+  UINT16          ServoRate;
+  UINT8           SEState;
+  UINT16          SEPower;
 } MoveCommandType;
 
 // Define global things that depend on the board type

@@ -280,7 +280,7 @@ typedef enum
 } DriverConfigurationType;
 
 // Working registers
-static MoveCommandType CurrentCommand;
+static volatile MoveCommandType CurrentCommand;
 //#pragma udata access fast_vars
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 BOOL FIFOEmpty;
@@ -320,6 +320,7 @@ BOOL gLimitChecks = TRUE;
 
 /* Local function definitions */
 UINT8 process_QM(void);
+void clear_StepCounters(void);
 
 
 // ISR
@@ -1390,100 +1391,192 @@ void parse_SM_packet (void)
     }
 }
 
-// Home
+// Home the motors
+// "HM,<step_rate><CR>"
+// <step_rate> is the desired rate of the primary (larger) axis in steps/s.
+// Use the current global step counts to "undo" the current pen position so
+// it gets back to zero.
+// To figure out what the duration of the move should be, look at the axis
+// with more steps to move (the 'primary' axis).
+// There are a couple of special cases to consider:
+// 1) If <step_rate> causes a step rate that's too high on the primary axis, 
+//    then just use a duration which is slow enough.
+// 2) If the <step_rate> causes the non-primary axis to need to move too slowly,
+//    break the move into two parts. (i.e. "dog-leg" it) First move will move
+//    with a duration such that the minor axis moves at the minimum step rate.
+//    Second move will move at <step_rate> but with minor axis moving zero steps.
 // If the step rate is too high or too low, don't error out, just use a legal value
 // May need to make 2 moves if one of the axis has few steps to go and the other has
 // lots.
 // When parsing this command, always wait until both the FIFO is empty and the motion 
 // commands are finished. That way two SM commands can be issued back to back to take 
 // care of both moves (or just one if a 'dog leg' move is needed)
+//
+// TODO: This code can't handle steps counts above 4,294,967 in either axis. Is
+// there a way to allow it to handle steps counts up to 16,777,215 easily?
 void parse_HM_packet (void)
 {
 	UINT32 StepRate = 0;
 	INT32 Steps1 = 0, Steps2 = 0;
-    INT32 AbsSteps1 = 0, AbsSteps2 = 0;
-    UINT32 Duration = 0;
-    MoveCommandType LocalCommand;
-    UINT8 CommandExecuting = 1;
+  INT32 AbsSteps1 = 0, AbsSteps2 = 0;
+  UINT32 Duration = 0;
+  UINT8 CommandExecuting = 1;
+  INT32 XSteps = 0;
 
 	// Extract the step rate.
 	extract_number (kULONG, &StepRate, kREQUIRED);
 
-    // Wait until FIFO is empty
+  // Wait until FIFO is empty
 	while(!FIFOEmpty)
 	;
 
-    // Then wait for motion command to finish (if one's running)
-    while(CommandExecuting == 1)
-    {
-        // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-        INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+  // Then wait for motion command to finish (if one's running)
+  while(CommandExecuting == 1)
+  {
+    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
-        // Make a local copy of the things we care about
-        LocalCommand = CurrentCommand;
+    // Create our output values to print back to the PC
+    if ((CurrentCommand.DelayCounter == 0) && (CurrentCommand.Command == COMMAND_NONE))
+    {
+      CommandExecuting = 0;
+    }
 
-        // Re-enable interrupts
-        INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+  }
+    
+  // Make a local copy of the things we care about. This is how far we need to move.
+  Steps1 = -globalStepCounter1;
+  Steps2 = -globalStepCounter2;
 
-        // Create our output values to print back to the PC
-        if ((LocalCommand.DelayCounter == 0) && (LocalCommand.Command == COMMAND_NONE))
-        {
-            CommandExecuting = 0;
-        }
-    }
+  // Compute absolute value versions of steps for computation
+  if (Steps1 < 0)
+  {
+    AbsSteps1 = -Steps1;
+  }
+  else
+  {
+    AbsSteps1 = Steps1;
+  }
+  if (Steps2 < 0)
+  {
+    AbsSteps2 = -Steps2;
+  }
+  else
+  {
+    AbsSteps2 = Steps2;
+  }
     
-    // Make a local copy of the things we care about. This is how far we need to move.
-    Steps1 = -globalStepCounter1;
-    Steps2 = -globalStepCounter2;
-    
-    // Compute absolute value versions of steps for computation
-    if (Steps1 < 0)
+  // Check for too many steps to step
+  if ((AbsSteps1 > 0xFFFFFF) || (AbsSteps2 > 0xFFFFFF))
+  {
+    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.\n\r");
+    return;
+  }
+  
+  // Compute duration based on step rate user requested. Take bigger step count to use for calculation
+  if (AbsSteps1 > AbsSteps2)
+  {
+    Duration = (AbsSteps1 * 1000) / StepRate;
+    // Axis1 is primary
+    // Check for too fast 
+    if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-        AbsSteps1 = -Steps1;
+      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.\n\r");
+      return;
     }
-    else
+    // Check for too slow, on the non-primary axis
+    if ((Duration/1311) >= AbsSteps2 && AbsSteps2 != 0)
     {
-        AbsSteps1 = Steps1;
+      // We need to break apart the home into two moves.
+      // The first will be to get the non-primary axis down to zero.
+      // Recompute duration for the first move
+      Duration = (AbsSteps2 * 1000) / StepRate;
+      if (Steps1 > 0 && Steps2 > 0)       // C
+      {
+        XSteps = Steps2;
+      }
+      else if (Steps1 < 0 && Steps2 > 0)  // B
+      {
+        XSteps = -Steps2;
+      }
+      else if (Steps1 > 0 && Steps2 < 0)  // D
+      {
+        XSteps = -Steps2;
+      }
+      else if (Steps1 < 0 && Steps2 < 0)  // A
+      {
+        XSteps = Steps2;
+      }
+      process_SM(Duration, XSteps, Steps2);
+      // Update both steps count for final move
+      Steps1 = Steps1 - XSteps;
+      Steps2 = 0;
+      // Recompute duration
+      Duration = (AbsSteps1 * 1000) / StepRate;
     }
-    if (Steps2 < 0)
+  }
+  else
+  {
+    Duration = (AbsSteps2 * 1000) / StepRate;        
+    // Axis2 is primary
+    // Check for too fast 
+    if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-        AbsSteps2 = -Steps2;
+      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.\n\r");
+      return;
     }
-    else
+    // Check for too slow, on the non-primary axis
+    if ((Duration/1311) >= AbsSteps1 && AbsSteps1 != 0)
     {
-        AbsSteps2 = Steps2;
+      // We need to break apart the home into two moves.
+      // The first will be to get the non-primary axis down to zero.
+      // Recompute duration for the first move
+      Duration = (AbsSteps1 * 1000) / StepRate;
+      if (Steps2 > 0 && Steps1 > 0)       // C
+      {
+        XSteps = Steps1;
+      }
+      else if (Steps2 < 0 && Steps1 > 0)  // B
+      {
+        XSteps = -Steps1;
+      }
+      else if (Steps2 > 0 && Steps1 < 0)  // D
+      {
+        XSteps = -Steps1;
+      }
+      else if (Steps2 < 0 && Steps1 < 0)  // A
+      {
+        XSteps = Steps1;
+      }
+      process_SM(Duration, Steps1, XSteps);
+      // Update both steps count for final move
+      Steps2 = Steps2 - XSteps;
+      Steps1 = 0;
+      // Recompute duration
+      Duration = (AbsSteps2 * 1000) / StepRate;
     }
-    
-    // Always perform limit checks
-    
-    // Compute duration based on step rate user requested. Take bigger step count to use for calculation
-    if (Steps1 > Steps2)
-    {
-        Duration = Steps1 / StepRate;        
-    }
-    else
-    {
-        Duration = Steps2 / StepRate;        
-    }
-    
-    if (Duration > 10)
-    {
-        Duration = 10;
-    }
-            printf((far rom char *)"SA1=%li SC1=%li SA2=%li\n\r",
-                Duration,
-                Steps1,
-                Steps2
-            );
+  }
 
-    // If we get here, we know that step rate for both A1 and A2 is
-    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_SM(Duration, Steps1, Steps2);
+  if (Duration < 10)
+  {
+    Duration = 10;
+  }
+  //printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
+  //  Duration,
+  //  Steps1,
+  //  Steps2
+  //);
 
-    if (g_ack_enable)
-    {
-    	print_ack();
-    }
+  // If we get here, we know that step rate for both A1 and A2 is
+  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  process_SM(Duration, Steps1, Steps2);
+
+  if (g_ack_enable)
+  {
+    print_ack();
+  }
 }
 
 // The X Stepper Motor command
@@ -1598,11 +1691,11 @@ static void process_SM(
     MoveCommandType move;
 
     // Uncomment the following printf() for debugging
-    printf((far rom char *)"Duration=%lu SA1=%lu SA2=%lu\n\r",
-            Duration,
-            A1Stp,
-            A2Stp
-        );
+    //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+    //        Duration,
+    //        A1Stp,
+    //        A2Stp
+    //    );
 
 	// Check for delay
 	if (A1Stp == 0 && A2Stp == 0)
@@ -1732,12 +1825,12 @@ static void process_SM(
         
         /* For debugging step motion , uncomment the next line */
         
-        printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-                move.StepAdd[0],
-                move.StepsCounter[0],
-                move.StepAdd[1],
-                move.StepsCounter[1]
-            );
+        //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+        //        move.StepAdd[0],
+        //        move.StepsCounter[0],
+        //        move.StepAdd[1],
+        //        move.StepsCounter[1]
+        //    );
 	}
 		
 	// Spin here until there's space in the fifo
@@ -2101,6 +2194,10 @@ void parse_EM_packet(void)
 		}
 	}
 
+  // Always clear the step counts if motors are enabled/disabled or 
+  // resolution is changed.
+  clear_StepCounters();
+  
     print_ack();
 }
 
@@ -2403,34 +2500,30 @@ UINT8 process_QM(void)
     UINT8 Motor1Running = 0;
     UINT8 Motor2Running = 0;
     UINT8 FIFOStatus = 0;
-    MoveCommandType LocalCommand;
 
     // Need to turn off high priority interrupts breifly here to read out value that ISR uses
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
-    // Make a local copy of the things we care about
-    LocalCommand = CurrentCommand;
-
-    // Re-enable interrupts
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
-
     // Create our output values to print back to the PC
-    if (LocalCommand.DelayCounter != 0) {
+    if (CurrentCommand.DelayCounter != 0) {
         CommandExecuting = 1;
     }
-    if (LocalCommand.Command != COMMAND_NONE) {
+    if (CurrentCommand.Command != COMMAND_NONE) {
         CommandExecuting = 1;
     }
     if (FIFOEmpty == FALSE) {
         CommandExecuting = 1;
         FIFOStatus = 1;
     }
-    if (CommandExecuting && LocalCommand.StepsCounter[0] != 0) {
+    if (CommandExecuting && CurrentCommand.StepsCounter[0] != 0) {
         Motor1Running = 1;
     }
-    if (CommandExecuting && LocalCommand.StepsCounter[1] != 0) {
+    if (CommandExecuting && CurrentCommand.StepsCounter[1] != 0) {
         Motor2Running = 1;
     }
+
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
     
     return ((CommandExecuting << 3) | (Motor1Running << 2) | (Motor2Running << 1) | FIFOStatus);
 }
@@ -2502,12 +2595,8 @@ void parse_QS_packet(void)
 	print_ack();
 }
 
-// CS command
-// For Clear Stepper position - zeros out both step1 and step2 global positions
-// CS takes no parameters, so usage is just CS<CR>
-// QS returns:
-// OK<CR>
-void parse_CS_packet(void)
+// Perform the actual clearing of the step counters (used from several places)
+void clear_StepCounters(void)
 {
     // Need to turn off high priority interrupts breifly here to read out value that ISR uses
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
@@ -2518,6 +2607,16 @@ void parse_CS_packet(void)
     
     // Re-enable interrupts
     INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+}
 
+// CS command
+// For Clear Stepper position - zeros out both step1 and step2 global positions
+// CS takes no parameters, so usage is just CS<CR>
+// QS returns:
+// OK<CR>
+void parse_CS_packet(void)
+{
+  clear_StepCounters();
+  
 	print_ack();
 }
