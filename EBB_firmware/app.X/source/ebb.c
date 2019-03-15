@@ -2119,14 +2119,14 @@ void parse_QC_packet(void)
 // Returns: <status><NL><CR>
 // <status> is a single byte, printed as a decimal number "0" to "255".
 // Each bit in the byte represents the status of a single bit of information in the EBB.
-// Bit 0 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
-// Bit 1 : Motor2 status (0 = not moving, 1 = moving)
-// Bit 2 : Motor1 status (0 = not moving, 1 = moving)
-// Bit 3 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
-// Bit 4 : Pen status (0 = up, 1 = down)
-// Bit 5 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
-// Bit 6 : GPIO Pin RB2 state (0 = low, 1 = high)
-// Bit 7 : GPIO Pin RB5 state (0 = low, 1 = high)
+// Bit 1 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
+// Bit 2 : Motor2 status (0 = not moving, 1 = moving)
+// Bit 3 : Motor1 status (0 = not moving, 1 = moving)
+// Bit 4 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
+// Bit 5 : Pen status (0 = up, 1 = down)
+// Bit 6 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
+// Bit 7 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 8 : GPIO Pin RB5 state (0 = low, 1 = high)
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
 {
