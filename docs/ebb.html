@@ -217,6 +217,7 @@
           <li><a href="#PO">PO</a> &mdash; Pin Output</li>
           <li><a href="#QB">QB</a> &mdash; Query Button</li>
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
+          <li><a href="#QG">QG</a> &mdash; Query General</li>
           <li><a href="#QL">QL</a> &mdash; Query Layer</li>
           <li><a href="#QM">QM</a> &mdash; Query Motor</li>
           <li><a href="#QN">QN</a> &mdash; Query Node count</li>
@@ -1193,7 +1194,7 @@
             <p>
               The second returned value, 0300, indicates a voltage of 0.96 V at the V+ ADC input. Scaling by 9.2 (for the voltage divider on an EBB v2.3) and adding 0.3 V (for the diode drop), this indicates that the "actual" input voltage is about 9.1 V. 
             </p>
-          </li>   
+          </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
             <p>This command was originally introduced in v2.0.0, but should not be considered functional until version 2.2.3.</p>
@@ -1201,10 +1202,124 @@
               Note also that this command only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
             </p>
           </li>
-        </ul>  
-        
+        </ul>
+
         <hr class="short" />
-    
+
+        <h4><a name="QG"></a>"QG" &mdash; Query General</h4>
+  
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QG&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>Status Bits</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.1 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              This command reads the status of eight bits of information, and returns them as a bitfield expressed as a single hexadecimal byte.
+            </p>
+            <p>The returned status byte consists of the following status bits:</p>
+            <p>
+            <ul>
+              <li>Bit 1: FIFO - 1 = FIFO not empty, 0 = FIFO empty</li>
+              <li>Bit 2: Motor2 - 1 = Motor 2 is moving, 0 = Motor 2 is not moving</li>
+              <li>Bit 3: Motor1 - 1 = Motor 1 is moving, 0 = Motor 1 is not moving</li>
+              <li>Bit 4: CommandStatus - 1 = a motion command is executing, 0 = no motion command is executing</li>
+              <li>Bit 5: Pen - 1 = pen down, 0 = pen up</li>
+              <li>Bit 6: PRG Button - 1 = PRG button has been pressed since last QG or QB command, 0 = PRG button has not been pressed</li>
+              <li>Bit 7: RB2 - 1 = GPIO pin RB2 is high, 0 = GPIO pin RB2 is low</li>
+              <li>Bit 8: RB5 - 1 = GPIO pin RB5 is high, 0 = GPIO pin RB5 is low</li>
+            </ul>
+            </p>
+            <p>Bit 1: FIFO empty state: If there is already a motion command executing, and another command comes in from the PC, it is placed in the 1-deep motion FIFO. Having a command in the FIFO will result in this bit being returned as a 1. If there is no command in the FIFO, it will be a 0. If this bit is 1, then the Command Status bit will also be a 1, since it's impossible to have a command in the FIFO but none executing.
+            </p>
+            <p>Bits 2 and 3: Motor moving state: These bits indicate that a motor is currently taking steps. If one of these bits is 1, then Command Status will also be a 1, since in order for a motor to be moving a motion command must be executing.
+            </p>
+            <p>Bit 4: Command Status: When this bit is a 1, it indicates that some command is currently being executed. It could be a command that causes motion (like a motor move command) or any command listed in this document as 'Execution: Added to FIFO motion queue'.
+            </p>
+            <p>Bit 5: Pen status: This bit simply reflects the state of the pen servo. Even though the servo takes some time to move, for the purposes of this command it is considered to have moved to its new state instantly.
+            </p>
+            <p>Bit 6: PRG Button state: This bit will be a 1 if the PRG button has been pushed since the last QG or QB command. Otherwise it will be 0.
+            </p>
+            <p>Bits 7 and 8: RB2 and RB5 status: The RB2 and RB5 pins do not have to be set to be inputs. The <code>QG</code> command will read their states even if they are outputs. If they are set to be RC servo outputs, these bits will be toggling and will be reflected that way in the <code>QG</code> response. These bits are included in the response because RB0, RB1, RB3 and RB4 already have existing functions assigned to them, and these two bits could be used for home switches or some similar function.</p>
+          </li>
+          <li>
+            Table of bits within the returned status byte:
+            <table border="1">
+              <tr>
+                <th>Bit Number</th>
+                <th>Decimal</th>
+                <th>Bit Name</th>
+                <th>Meaning When 0</th>
+                <th>Meaning when 1</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>1</td>
+                <td>FIFO Status</td>
+                <td>no command in FIFO</td>
+                <td>command waiting in FIFO</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>2</td>
+                <td>Motor 2 Status</td>
+                <td>not moving</td>
+                <td>moving</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>4</td>
+                <td>Motor 1 Status</td>
+                <td>not moving</td>
+                <td>moving</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>8</td>
+                <td>Command Executing</td>
+                <td>no command executing</td>
+                <td>a command is executing</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>16</td>
+                <td>Pen Status</td>
+                <td>up</td>
+                <td>down</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>32</td>
+                <td>PRG Button Status</td>
+                <td>button not pushed</td>
+                <td>button pushed</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>64</td>
+                <td>Pin RB2 State</td>
+                <td>low</td>
+                <td>high</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>128</td>
+                <td>Pin RB5 State</td>
+                <td>low</td>
+                <td>high</td>
+              </tr>
+            </table>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>3E&lt;CR&gt;&lt;NL&gt;</code>
+            <p>This query return value of 3E indicates that RB2 and RB5 are low, the PRG button has been pressed, the pen is down, a command is being executed, motor1 and motor2 are moving but the FIFO is empty.</p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+
         <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
 
         <ul>
