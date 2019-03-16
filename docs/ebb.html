@@ -208,7 +208,7 @@ td {text-align: center}
           <li><a href="#CS">CS</a> &mdash; Clear Step position</li>
           <li><a href="#EM">EM</a> &mdash; Enable Motors</li>
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
-          <li><a href="#HM">HM</a> &mdash; Home Motors</li>
+          <li><a href="#HM">HM</a> &mdash; Home Move</li>
           <li><a href="#I">I</a> &mdash; Input</li>
           <li><a href="#LM">LM</a> &mdash; Low-level Move</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
@@ -225,7 +225,7 @@ td {text-align: center}
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
           <li><a href="#QG">QG</a> &mdash; Query General</li>
           <li><a href="#QL">QL</a> &mdash; Query Layer</li>
-          <li><a href="#QM">QM</a> &mdash; Query Motor</li>
+          <li><a href="#QM">QM</a> &mdash; Query Motors</li>
           <li><a href="#QN">QN</a> &mdash; Query Node count</li>
           <li><a href="#QP">QP</a> &mdash; Query Pen</li>
           <li><a href="#QR">QR</a> &mdash; Query RC Servo power state</li>
@@ -616,7 +616,7 @@ td {text-align: center}
         <hr class="short" />
 
      
-        <h4><a name="EM"></a> "EM" &mdash; Enable Motors (legacy version for EBB hardware v1.1)</h4>
+        <h4>"EM" &mdash; Enable Motors (Legacy version)</h4>
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
@@ -705,7 +705,7 @@ td {text-align: center}
     
         <hr class="short" />
 
-        <h4><a name="HM"></a>"HM" &mdash; Home Motors</h4>
+        <h4><a name="HM"></a>"HM" &mdash; Home Move</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>HM,<i>StepRate</i>&lt;CR&gt;</code></li>
@@ -717,16 +717,17 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Parameters:</span>
             <p>
-              <i>StepRate</i> is an unsigned integers in the range from 2 to 25000. It represents the step rate, in steps per second, which the EBB should maintain during the homing operation.
+              <i>StepRate</i> is an unsigned integers in the range from 2 to 25000. It represents the step rate, in steps per second, which the EBB should maintain during the movement.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Use this command to return the motors from whatever their current position is (as defined by the global step counters, which are available in the <code>QS</code> command) back to position 0,0. The step rate at which the homing should happen is specified as a parameter. 
+              Use this command to return the motors from whatever their current position is, as defined by the global step counters, back to position 0,0. The value of the
+              step counters can be read with the <code><a href="#QS">QS</a></code> query. The step rate at which the homing should happen is specified as a parameter. 
             </p>
             <p>
-              The move may not be a straight line. There are circumstances (where one axis has a lot of steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
+              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has a lot of steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
             </p>
             <p>The command will wait until all previous motor motion ceases before beginning the home operation.</p>
             <p>
@@ -1318,12 +1319,13 @@ td {text-align: center}
                 This bit is 1 when GPIO pin RB2 is high, and 0 when it is low. Its properties are otherwise the same as the RB5 bit.</p>
                 
             <p><div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div>
-                This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <a href="#QB">QB</a> query. 
+                This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. 
                 Otherwise it will be 0.</p>
 
             <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div>
                 This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift
-                servo output, which can be controlled with the <a href="#SP">SP</a> command and can be read with the <a href="#QP">QP</a> query.
+                servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read 
+                with the <code><a href="#QP">QP</a></code> query.
                 Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
                 </p>
                 
@@ -1342,7 +1344,7 @@ td {text-align: center}
                 This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO"
                 motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is
                 full, then a command is currently executing. Additional information about the motion queue can be found in the
-                description of the <a href="#QM">QM</a> command.  </p>
+                description of the <code><a href="#QM">QM</a></code> query.</p>
 
           </li>
           
@@ -1377,33 +1379,7 @@ td {text-align: center}
        
         <hr class="short" />
 
-        <h4><a name="QM"></a>"QM" &mdash; Query Motor</h4>
-        
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 to v2.4.3</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li><span style="font-weight: bold;">Description:</span>
-            <p>
-              Use this command to see what the EBB is currently doing. It will return the current state of the 'motion system' and each motor's current state.
-            </p>
-            <ul>
-              <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
-              <li><i>Motor1Status</i> is 1 if motor 1 is currently moving, and 0 if it is idle.</li>
-              <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>   
-            </ul>
-            <p>
-              The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
-            </p>
-            <p>
-              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
-            </p>
-          </li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
-        </ul>
-
-        <h4><a name="QM"></a>"QM" &mdash; Query Motor</h4>
+        <h4><a name="QM"></a>"QM" &mdash; Query Motors</h4>
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
@@ -1428,6 +1404,32 @@ td {text-align: center}
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
+        </ul>
+
+        <h4>"QM" &mdash; Query Motors (Legacy version)</h4>
+        
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 to v2.4.3</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Description:</span>
+            <p>
+              Use this command to see what the EBB is currently doing. It will return the current state of the 'motion system' and each motor's current state.
+            </p>
+            <ul>
+              <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
+              <li><i>Motor1Status</i> is 1 if motor 1 is currently moving, and 0 if it is idle.</li>
+              <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>   
+            </ul>
+            <p>
+              The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
+            </p>
+            <p>
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+            </p>
+          </li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
         </ul>
 
         <hr class="short" />
@@ -1995,8 +1997,8 @@ td {text-align: center}
 
         <hr class="short" />
 
-        <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output (v2.2.0 and newer)</h4>
- 
+        <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output</h4>
+
         <ul>
           <li>
             <span style="font-weight: bold;">Command:</span> 
@@ -2213,7 +2215,7 @@ td {text-align: center}
   
         <hr class="short" />
 
-        <h4> "S2"  &mdash; General RC Servo Output (versions prior to v2.2.0)</h4>
+        <h4> "S2"  &mdash; General RC Servo Output (Legacy version)</h4>
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>S2,<i>channel</i>,<i>position</i>,<i>output_pin</i>[,<i>rate</i>]&lt;CR&gt;</code></li>
