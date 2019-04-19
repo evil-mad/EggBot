@@ -4,67 +4,34 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Resources/AppSettings.plist</key>
-		<data>
-		Few2LBNciX42IkdrBnAq3ary+Uc=
-		</data>
-		<key>Resources/EBF_v260_BL.unified.hex</key>
-		<data>
-		s9cKhmyEnUvrmv5ynpB6CYdTWm8=
-		</data>
-		<key>Resources/MainMenu.nib</key>
-		<data>
-		NewvWHjsdhvS62VxKoSkxe8dNhs=
-		</data>
-		<key>Resources/appIcon.icns</key>
+		<key>Resources/AppIcon.icns</key>
 		<data>
 		HBDI8vivcy+joKCWSHorAjo37UE=
 		</data>
+		<key>Resources/AppSettings.plist</key>
+		<data>
+		SHG5UoBg3fWJuZNc2C7Xr6hEZN4=
+		</data>
+		<key>Resources/EBF_v262_BL.unified.hex</key>
+		<data>
+		L6WUA1XDYoUqhqK0IpgUPq6BOd8=
+		</data>
+		<key>Resources/MainMenu.nib</key>
+		<data>
+		A6U5zHCI1Zl1YQ+TIqTKmpcniU0=
+		</data>
 		<key>Resources/mphidflash</key>
 		<data>
-		3KdBqjTE7qyfv7Etq2F8YRWZT/Q=
+		ckkmQbL4dMHVggQnW8mExJPEJWo=
 		</data>
 		<key>Resources/script</key>
 		<data>
-		cATecCXkCvA2MpyQRL4vN2r8IyQ=
+		smvCZ0aGIaXtEz3M5mkPeW5knq8=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Resources/AppSettings.plist</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			Few2LBNciX42IkdrBnAq3ary+Uc=
-			</data>
-			<key>hash2</key>
-			<data>
-			tvdQEx9EBjtU1x4RLoGR03RNnIgh8fDhKyjlMlv1TqY=
-			</data>
-		</dict>
-		<key>Resources/EBF_v260_BL.unified.hex</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			s9cKhmyEnUvrmv5ynpB6CYdTWm8=
-			</data>
-			<key>hash2</key>
-			<data>
-			go8YqxUTnYmsJalAkCdRcNNYj0xGwIeLgmtLlcLa1mE=
-			</data>
-		</dict>
-		<key>Resources/MainMenu.nib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			NewvWHjsdhvS62VxKoSkxe8dNhs=
-			</data>
-			<key>hash2</key>
-			<data>
-			qzWV1mtMEaQ+rRLjlHVn30rpOa7zWu+teJbf1ayCG7Y=
-			</data>
-		</dict>
-		<key>Resources/appIcon.icns</key>
+		<key>Resources/AppIcon.icns</key>
 		<dict>
 			<key>hash</key>
 			<data>
@@ -75,26 +42,59 @@
 			p55gXGHE70E5eNgYzXp0+85fSIcBbVCIqaC97xQ1EA4=
 			</data>
 		</dict>
+		<key>Resources/AppSettings.plist</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			SHG5UoBg3fWJuZNc2C7Xr6hEZN4=
+			</data>
+			<key>hash2</key>
+			<data>
+			K9MuyW52SBwKrg/SeVtPT0PDp+9HmIjo0SV+B667apU=
+			</data>
+		</dict>
+		<key>Resources/EBF_v262_BL.unified.hex</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			L6WUA1XDYoUqhqK0IpgUPq6BOd8=
+			</data>
+			<key>hash2</key>
+			<data>
+			hEafjK0Z3c/uT2tkiCVkEke4E6c/2O3Um1nww+F6gqQ=
+			</data>
+		</dict>
+		<key>Resources/MainMenu.nib</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			A6U5zHCI1Zl1YQ+TIqTKmpcniU0=
+			</data>
+			<key>hash2</key>
+			<data>
+			8w0RE82geIQkOHKQc3NB/B4A+XdVRxGHC7LS+8TTLa0=
+			</data>
+		</dict>
 		<key>Resources/mphidflash</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			3KdBqjTE7qyfv7Etq2F8YRWZT/Q=
+			ckkmQbL4dMHVggQnW8mExJPEJWo=
 			</data>
 			<key>hash2</key>
 			<data>
-			XwJ81XvQTzcdKyoQ9I3UpTskPSTZnIKQZ068YUbP704=
+			S2fKlUmn4wwAkjK65c5f37psKKUpynu4r16XBJ5G4+k=
 			</data>
 		</dict>
 		<key>Resources/script</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			cATecCXkCvA2MpyQRL4vN2r8IyQ=
+			smvCZ0aGIaXtEz3M5mkPeW5knq8=
 			</data>
 			<key>hash2</key>
 			<data>
-			zOofptU6bp2TSE4FxV2JhzBfkPxhD8O5TWrko9WJNLM=
+			K9C6FVsrLlSsAQ0jU4dE5tVELIBM104YoQdG0h3nMI0=
 			</data>
 		</dict>
 	</dict>
