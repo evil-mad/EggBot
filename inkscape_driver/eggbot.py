@@ -906,14 +906,14 @@ class EggBot(inkex.Effect):
         max_length = len(current_layer_name)
         if max_length > 0:
             while string_pos <= max_length:
-                if str.isdigit(current_layer_name[:string_pos]):
+                if str.isdigit( str(current_layer_name[:string_pos])):
                     temp_num_string = current_layer_name[:string_pos]  # Store longest numeric string so far
                     string_pos += 1
                 else:
                     break
 
         self.plotCurrentLayer = False  # Temporarily assume that we aren't plotting the layer
-        if str.isdigit(temp_num_string):
+        if str.isdigit( str(temp_num_string)):
             if self.svgLayer == int(float(temp_num_string)):
                 self.plotCurrentLayer = True  # We get to plot the layer!
                 self.LayersPlotted += 1
