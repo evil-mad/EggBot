@@ -97,21 +97,21 @@
 
 /** D E F I N E S ********************************************************/
 
-#define kUSART_TX_BUF_SIZE		10				// In bytes
-#define kUSART_RX_BUF_SIZE		10				// In bytes
+#define kUSART_TX_BUF_SIZE		10                // In bytes
+#define kUSART_RX_BUF_SIZE		10                // In bytes
 
-#define kISR_FIFO_A_DEPTH		3
-#define kISR_FIFO_D_DEPTH		3
-#define kPR4_RELOAD				250             // For 1ms TMR4 tick
-#define kCR						0x0D
-#define kLF						0x0A
+#define kISR_FIFO_A_DEPTH     3
+#define kISR_FIFO_D_DEPTH     3
+#define kPR4_RELOAD           250               // For 1ms TMR4 tick
+#define kCR                   0x0D
+#define kLF                   0x0A
 
 #define ANALOG_INITATE_MS_BETWEEN_STARTS 5      // Number of ms between analog converts (all enabled channels)
 
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
-#define RCSERVO_POWEROFF_DEFAULT_MS (15ul*60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (15min)
+#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
 /** V A R I A B L E S ********************************************************/
 //#pragma udata access fast_vars
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.2\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.3\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
