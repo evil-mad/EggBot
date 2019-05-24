@@ -1,0 +1,55 @@
+Uses "CONSOLE"
+Uses "WMI"
+Uses "OS"
+     
+Global hComm           As Long
+Global nBytes          As Long
+Global sBuffer         As String 
+Global gPortOpen       As Boolean
+Global pID             As Number
+Global vData()         As String
+Global nItems          As Long
+Global Counter         As Long
+Global Position        As Long
+Global ComputerName    As String   Value OS_GetComputerName
+Global Ports()         As String
+Global CountATI        As Long
+Global sHexFilename    As String
+Global sFirmwareNumber As String
+Global bConsole        As Boolean
+Global bUpdaterConsole As Boolean   
+Global sCommandLine    As String
+                                  
+
+sBuffer = WMI_GetData(ComputerName, "", "", "", "Win32_PnPEntity", "", "Caption" )
+
+Console_WriteLine(sBuffer)
+
+WaitKey
+
+'nItems = Parse( sBuffer, vData(), $CRLF)
+ 
+ 
+            
+'            ReDim Ports() 
+              
+'            For Counter = 1 To nItems
+'              Position = InStr(Ucase$(vData(Counter)),"(COM")
+'              If Position Then
+'                ReDim Preserve Ports(UBound(Ports)+1)
+'                PortS(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
+'              End If
+'            Next
+
+            ' Check for no COM ports found
+'            If LBound(Ports) = 0 And UBound(Ports) = 0 Then
+'              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No COM ports found on this computer. Click Exit." + Chr$(13) + Chr$(10)
+'            Else
+'              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following ports:" + Chr$(13) + Chr$(10)
+'              For Counter = LBound(Ports) To UBound(Ports)
+'                Control Append Text CBHNDL, %ID_CommandOutputTexBox, Ports(Counter) + Chr$(13) + Chr$(10)
+'              Next
+'              For Counter = LBound(Ports) To UBound(Ports)
+'                hComm = COMM_FreeFile
+'                Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Testing port " & Ports(Counter) & " ... "
+'                COMM_Open("\\.\" & Ports(Counter), hComm)
