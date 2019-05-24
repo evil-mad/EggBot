@@ -1909,7 +1909,7 @@ td {text-align: center}
             <p>This command sets a new RC Servo power timeout value and optionally a new immediate power state.</p>
             <p>The <i>value</i> argument is in milliseconds.</p>
             <p>If <i>value</i> is 0, then the auto-poweroff feature is disabled and the power will not be turned off to the RC servo once applied.</p>
-            <p>On boot, the EBB will use a default value of 15 minutes. This means that 15 minutes after the last servo or stepper motion command, the RC servo power will be turned off.</p>
+            <p>On boot, the EBB will use a default value of 60 seconds. This means that 60 seconds after the last servo or stepper motion command, the RC servo power will be turned off.</p>
             <p>On boot, the power to the RC Servo (on pin RB1) will be off.</p>
             <p>Whenever any command that moves the stepper motors or RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
             <p>Only EBB boards v2.5 and above have the necessary power switch hardware. On other versions of the EBB hardware, the power to the servo is always on.</p>
@@ -1922,6 +1922,7 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Version History:</span> 
             <li>Added in v2.6.0.</li>
+            <li>Changed default power timeout value from 15 minutes to 60 seconds in v2.6.3.</li>
           </li>
         </ul>
 

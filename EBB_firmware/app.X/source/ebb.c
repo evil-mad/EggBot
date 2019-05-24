@@ -232,7 +232,8 @@
 //                    servo power off at boot
 //                  Changed default pen up/down positions
 // 2.6.1 01/07/19 - Added "QG" general query command
-// 2/6/2 01/11/19 - Added "HM" Home Motor command
+// 2.6.2 01/11/19 - Added "HM" Home Motor command
+// 2.6.3 05/24/19 - Changed default RC servo power down time from 15min to 60s
 
 #include <p18cxxx.h>
 #include <usart.h>
