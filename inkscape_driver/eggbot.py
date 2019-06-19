@@ -3,7 +3,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.1, dated June 7, 2017.
+# Version 2.8.1, dated June 19, 2019.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
