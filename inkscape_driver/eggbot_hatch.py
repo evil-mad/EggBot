@@ -71,7 +71,7 @@
 # Add min span/gap width
 
 # Updated by Windell H. Oskay, 1/8/2016
-# Added live preview and correct issue with nonzero min gap
+# Added live preview and correct issue with nonzero min gap 
 # https://github.com/evil-mad/EggBot/issues/32
 
 # Updated by Sheldon B. Michaels, 1/11/2016 thru 3/15/2016
@@ -84,12 +84,12 @@
 # Updated by Nathan Depew, 12/6/2017
 # Modified hatch fill to create hatches as a relevant object it found on the SVG tree
 # This prevents extremely complex plots from generating glitches
-# Modifications are limited to recursivelyTraverseSvg and effect methods
+# Modifications are limited to recursivelyTraverseSvg and effect methods 
 
 #
 # Current software version:
-# (v2.1.0, December 6, 2017)
-#
+# (v2.3.0, June 11, 2019)
+# 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -106,19 +106,30 @@
 
 import math
 
-import bezmisc
-import cspsubdiv
-import cubicsuperpath
-import inkex
+try:
+    from plot_utils_import import from_dependency_import # plotink
+    inkex = from_dependency_import('ink_extensions.inkex')
+    simplepath = from_dependency_import('ink_extensions.simplepath')
+    simpletransform = from_dependency_import('ink_extensions.simpletransform')
+    simplestyle = from_dependency_import('ink_extensions.simplestyle')
+    cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+    cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
+    bezmisc = from_dependency_import('ink_extensions.bezmisc')
+except:
+    import inkex
+    import simplepath
+    import simpletransform
+    import simplestyle
+    import cubicsuperpath
+    import cspsubdiv
+    import bezmisc
+
 import plot_utils  # https://github.com/evil-mad/plotink
-import simplepath
-import simplestyle
-from simpletransform import applyTransformToPath, applyTransformToPoint, composeTransform, parseTransform
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
 
-F_MINGAP_SMALL_VALUE = 0.0000000001
+F_MINGAP_SMALL_VALUE = 0.0000000001  
 # Was 0.00001 in the original version which did not have joined lines.
 # Reducing this by a factor of 10^5 decreased probability of occurrence of
 # the bug in the original, which got confused when the path barely
@@ -129,21 +140,21 @@ BEZIER_OVERSHOOT_MULTIPLIER = 0.75  # evaluation of cubic Bezier curve equation 
 # endpoints at ( -0.5, 0 ), ( +0.5, 0 )
 # and control points at ( -0.5, 1.0 ), ( +0.5, 1.0 )
 
-RADIAN_TOLERANCE_FOR_COLINEAR = 0.1
+RADIAN_TOLERANCE_FOR_COLINEAR = 0.1  
 # Pragmatically adjusted to allow adjacent segments from the same scan line, even short ones,
 # to be classified as having the same angle
 
-RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1
+RADIAN_TOLERANCE_FOR_ALTERNATING_DIRECTION = 0.1  
 # Pragmatic adjustment again, as with colinearity tolerance
 
-RECURSION_LIMIT = 500
-# Pragmatic - if too high, risk runtime python error;
+RECURSION_LIMIT = 500  
+# Pragmatic - if too high, risk runtime python error; 
 # if too low, miss some chances for reducing pen lifts
 
 EXTREME_POS = 1.0E70 # Extremely large positive number
 EXTREME_NEG = -1.0E70 # Extremely large negative number
 
-MIN_HATCH_FRACTION = 0.25
+MIN_HATCH_FRACTION = 0.25  
 # Minimum hatch length, as a fraction of the hatch spacing.
 
 """
@@ -675,7 +686,7 @@ class Eggbot_Hatch(inkex.Effect):
                 if vinfo[2] != 0 and vinfo[3] != 0:
                     sx = self.docWidth / float(vinfo[2])
                     sy = self.docHeight / float(vinfo[3])
-                    self.docTransform = parseTransform('scale({0:f},{1:f})'.format(sx, sy))
+                    self.docTransform = simpletransform.parseTransform('scale({0:f},{1:f})'.format(sx, sy))
 
     def addPathVertices(self, path, node=None, transform=None):
 
@@ -706,7 +717,7 @@ class Eggbot_Hatch(inkex.Effect):
 
         # Apply any transformation
         if transform is not None:
-            applyTransformToPath(transform, p)
+            simpletransform.applyTransformToPath(transform, p)
 
         # Now traverse the simplified path
         subpaths = []
@@ -790,7 +801,7 @@ class Eggbot_Hatch(inkex.Effect):
 
             """
              Initialize dictionary for each new node
-             This allows us to create hatch fills as if each
+             This allows us to create hatch fills as if each 
              object to be hatched has been selected individually
 
             """
@@ -807,7 +818,7 @@ class Eggbot_Hatch(inkex.Effect):
                 pass
 
             # first apply the current matrix transform to this node's transform
-            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
+            mat_new = simpletransform.composeTransform(mat_current, simpletransform.parseTransform(node.get("transform")))
 
             if node.tag in [inkex.addNS('g', 'svg'), 'g']:
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
@@ -837,7 +848,7 @@ class Eggbot_Hatch(inkex.Effect):
                     y = float(node.get('y', '0'))
                     # Note: the transform has already been applied
                     if x != 0 or y != 0:
-                        mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
+                        mat_new2 = simpletransform.composeTransform(mat_new, simpletransform.parseTransform('translate({0:f},{1:f})'.format(x, y)))
                     else:
                         mat_new2 = mat_new
                     v = node.get('visibility', v)
@@ -1169,8 +1180,6 @@ class Eggbot_Hatch(inkex.Effect):
             # Since the spacing may be fractional (e.g., 6.5), we
             # don't try to use range() or other integer iterator
             spacing = float(abs(spacing))
-            if spacing < 0.05:
-                spacing = 0.05
             i = -r
             while i <= r:
                 # Line starts at (i, -r) and goes to (i, +r)
@@ -1246,8 +1255,8 @@ class Eggbot_Hatch(inkex.Effect):
                 # resulting line segment.
                 pt1 = [0, 0]
                 pt2 = [s, s]
-                applyTransformToPoint(transform, pt1)
-                applyTransformToPoint(transform, pt2)
+                simpletransform.applyTransformToPoint(transform, pt1)
+                simpletransform.applyTransformToPoint(transform, pt2)
                 dx = pt2[0] - pt1[0]
                 dy = pt2[1] - pt1[1]
                 stroke_width = math.sqrt(dx * dx + dy * dy)
@@ -1284,8 +1293,8 @@ class Eggbot_Hatch(inkex.Effect):
                     # after the fact (i.e., what's this transform here for?).
                     # So, we compute the inverse transform and apply it here.
                     if transform is not None:
-                        applyTransformToPoint(transform, pt1)
-                        applyTransformToPoint(transform, pt2)
+                        simpletransform.applyTransformToPoint(transform, pt1)
+                        simpletransform.applyTransformToPoint(transform, pt2)
                     # Now generate the path data for the <path>
                     if direction:
                         # Go this direction
@@ -1322,8 +1331,8 @@ class Eggbot_Hatch(inkex.Effect):
                     # after the fact (i.e., what's this transform here for?).
                     # So, we compute the inverse transform and apply it here.
                     if transform is not None:
-                        applyTransformToPoint(transform, pt1)
-                        applyTransformToPoint(transform, pt2)
+                        simpletransform.applyTransformToPoint(transform, pt1)
+                        simpletransform.applyTransformToPoint(transform, pt2)
 
                     # Now generate the path data for the <path>
                     # BUT we want to combine as many paths as possible to reduce pen lifts.
@@ -1337,9 +1346,9 @@ class Eggbot_Hatch(inkex.Effect):
                     direction = not direction
 
                 # Now have a nice juicy buffer full of line segments with absolute coordinates
-                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)
+                f_proposed_neighborhood_radius_squared = self.ProposeNeighborhoodRadiusSquared(transformed_hatch_spacing)  
                 # Just fixed and simple for now - may make function of neighborhood later
-
+                
                 for ref_count in range(n_abs_line_segment_total):  # This is the entire range of segments,
                     # Sets global ref_count to segment which has an end closest to current pen position.
                     # Doesn't need to select which end is closest, as that will happen below, with n_ref_end_index.
