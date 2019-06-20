@@ -10,7 +10,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="traditional3b.svg"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    version="1.1"
    id="svg27345"
    height="800"
@@ -22,9 +22,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.26450996"
-     inkscape:cx="1603.5121"
-     inkscape:cy="391.23737"
+     inkscape:zoom="0.291875"
+     inkscape:cx="1600"
+     inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="false"
@@ -177,7 +177,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -448,22 +448,22 @@
      style="display:inline">
     <path
        style="display:inline;fill:none;stroke:#c93838;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 3.1098966,133.79304 3196.9737034,0"
+       d="M 3.1098966,133.79304 H 3200.0836"
        id="path24389"
        inkscape:connector-curvature="0" />
     <path
        style="display:inline;fill:none;stroke:#c93838;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 3.1098966,683.73233 3196.9737034,0"
+       d="M 3.1098966,683.73233 H 3200.0836"
        id="path24411"
        inkscape:connector-curvature="0" />
     <path
        style="display:inline;fill:none;stroke:#c93838;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       d="m 3.1098966,818.24472 3196.9737034,0"
+       d="M 3.1098966,818.24472 H 3200.0836"
        id="path24421"
        inkscape:connector-curvature="0" />
     <path
        id="path24425"
-       d="m 3.1098966,-0.71947 3196.9737034,0"
+       d="M 3.1098966,-0.71947 H 3200.0836"
        style="display:inline;fill:none;stroke:#c93838;stroke-width:10;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        inkscape:connector-curvature="0" />
     <path

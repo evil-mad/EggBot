@@ -13,8 +13,8 @@
    height="800"
    id="svg3008"
    version="1.1"
-   inkscape:version="0.48.1 r9760"
-   sodipodi:docname="CandyCane1.svg">
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
+   sodipodi:docname="CandyCane1x4.svg">
   <defs
      id="defs3010" />
   <sodipodi:namedview
@@ -24,17 +24,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.3953125"
+     inkscape:zoom="0.159375"
      inkscape:cx="1600"
      inkscape:cy="400"
      inkscape:document-units="px"
-     inkscape:current-layer="1-default"
+     inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1676"
-     inkscape:window-height="1006"
+     inkscape:window-width="1022"
+     inkscape:window-height="649"
      inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="1"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata3013">
     <rdf:RDF>
@@ -43,7 +43,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -169,7 +169,7 @@
        sodipodi:nodetypes="ccszzccccccczcccccccczscc"
        inkscape:connector-curvature="0"
        d="m 1081.1074,95.637535 21.9317,-32.571568 c 0,0 -4.2343,5.719433 -7.8118,14.04004 -2.6344,6.127288 -4.9128,13.665127 -4.8817,21.368312 0.031,7.703181 9.3303,52.134171 9.3659,70.914221 0.036,18.78001 -2.8019,32.59421 -2.8019,32.59421 l -3.0086,7.44922 2.3859,-41.16133 -4.2672,-33.42217 -5.0847,-30.74398 2.8098,-19.518243 11.6472,-20.49911 c 0,0 -5.8269,6.399385 -7.91,9.155093 -2.0831,2.755707 -6.7348,9.325602 -6.7348,9.325602 l -1.1603,36.362268 6.7768,47.46006 -2.9252,54.09117 -1.0656,-56.00715 -5.3412,-39.23171 3.6991,-43.188576 -5.3664,8.926971 c 0,0 -1.7572,18.105765 -1.7182,31.657035 0.039,13.55127 6.066,44.21882 8.0232,70.40325 1.2479,16.69556 -1.2395,34.8894 -1.2395,34.8894 l 9.9453,-24.62467"
-       style="fill:none;stroke:#ff0000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#ff0000;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path3922" />
     <path
        id="path3924"

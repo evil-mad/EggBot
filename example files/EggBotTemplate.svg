@@ -13,7 +13,7 @@
    height="800"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="EggBotTemplate.svg">
   <defs
      id="defs4" />
@@ -24,8 +24,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.2065625"
-     inkscape:cx="1600"
+     inkscape:zoom="0.07625"
+     inkscape:cx="1586.8852"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -51,5 +51,6 @@
      inkscape:label="1-default"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-252.36218)" />
+     transform="translate(0,-252.36218)"
+     style="display:inline" />
 </svg>

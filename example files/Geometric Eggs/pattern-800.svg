@@ -11,7 +11,7 @@
    height="800"
    id="svg12675"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="pattern-800.svg">
   <metadata
      id="metadata13155">
@@ -53,568 +53,413 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1436"
-     inkscape:window-height="855"
+     inkscape:window-width="1680"
+     inkscape:window-height="1005"
      id="namedview13151"
      showgrid="false"
      inkscape:showpageshadow="false"
-     inkscape:zoom="0.1590625"
-     inkscape:cx="480.94303"
+     inkscape:zoom="0.36625"
+     inkscape:cx="1600"
      inkscape:cy="400"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="1"
      inkscape:window-maximized="1"
      inkscape:current-layer="g12677" />
   <g
      inkscape:groupmode="layer"
      inkscape:label="1 - red"
-     id="g12677">
+     id="g12677"
+     style="display:inline">
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M -82,164 L -61,102 L -41,61 L -20,41 L 20,20 L 82,0 L 61,61 L 41,102 L 20,123 L -20,143 L -82.051282,164.102564"
+       d="M -82,164 -61,102 -41,61 -20,41 20,20 82,0 61,61 l -20,41 -21,21 -40,20 -62.051282,21.10256"
        id="path12679"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M -82,410 L -61,348 L -41,307 L -20,287 L 20,266 L 82,246 L 61,307 L 41,348 L 20,369 L -20,389 L -82.051282,410.256410"
+       d="m -82,410 21,-62 20,-41 21,-20 40,-21 62,-20 -21,61 -20,41 -21,21 -40,20 -62.051282,21.25641"
        id="path12681"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M -82,656 L -61,594 L -41,553 L -20,533 L 20,512 L 82,492 L 61,553 L 41,594 L 20,615 L -20,635 L -82.051282,656.410256"
+       d="m -82,656 21,-62 20,-41 21,-20 40,-21 62,-20 -21,61 -20,41 -21,21 -40,20 -62.051282,21.41026"
        id="path12683"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 164,164 L 184,102 L 205,61 L 225,41 L 266,20 L 328,0 L 307,61 L 287,102 L 266,123 L 225,143 L 164.102564,164.102564"
+       d="m 164,164 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.89744,21.10256"
        id="path12685"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 164,410 L 184,348 L 205,307 L 225,287 L 266,266 L 328,246 L 307,307 L 287,348 L 266,369 L 225,389 L 164.102564,410.256410"
+       d="m 164,410 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.89744,21.25641"
        id="path12687"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 164,656 L 184,594 L 205,553 L 225,533 L 266,512 L 328,492 L 307,553 L 287,594 L 266,615 L 225,635 L 164.102564,656.410256"
+       d="m 164,656 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.89744,21.41026"
        id="path12689"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 410,164 L 430,102 L 451,61 L 471,41 L 512,20 L 574,0 L 553,61 L 533,102 L 512,123 L 471,143 L 410.256410,164.102564"
+       d="m 410,164 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.74359,21.10256"
        id="path12691"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 410,410 L 430,348 L 451,307 L 471,287 L 512,266 L 574,246 L 553,307 L 533,348 L 512,369 L 471,389 L 410.256410,410.256410"
+       d="m 410,410 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.74359,21.25641"
        id="path12693"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 410,656 L 430,594 L 451,553 L 471,533 L 512,512 L 574,492 L 553,553 L 533,594 L 512,615 L 471,635 L 410.256410,656.410256"
+       d="m 410,656 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.74359,21.41026"
        id="path12695"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 656,164 L 676,102 L 697,61 L 717,41 L 758,20 L 820,0 L 800,61 L 779,102 L 758,123 L 717,143 L 656.410256,164.102564"
+       d="m 656,164 20,-62 21,-41 20,-20 41,-21 62,-20 -20,61 -21,41 -21,21 -41,20 -60.58974,21.10256"
        id="path12697"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 656,410 L 676,348 L 697,307 L 717,287 L 758,266 L 820,246 L 800,307 L 779,348 L 758,369 L 717,389 L 656.410256,410.256410"
+       d="m 656,410 20,-62 21,-41 20,-20 41,-21 62,-20 -20,61 -21,41 -21,21 -41,20 -60.58974,21.25641"
        id="path12699"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 656,656 L 676,594 L 697,553 L 717,533 L 758,512 L 820,492 L 800,553 L 779,594 L 758,615 L 717,635 L 656.410256,656.410256"
+       d="m 656,656 20,-62 21,-41 20,-20 41,-21 62,-20 -20,61 -21,41 -21,21 -41,20 -60.58974,21.41026"
        id="path12701"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 902,164 L 923,102 L 943,61 L 964,41 L 1005,20 L 1066,0 L 1046,61 L 1025,102 L 1005,123 L 964,143 L 902.564103,164.102564"
+       d="m 902,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.4359,21.10256"
        id="path12703"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 902,410 L 923,348 L 943,307 L 964,287 L 1005,266 L 1066,246 L 1046,307 L 1025,348 L 1005,369 L 964,389 L 902.564103,410.256410"
+       d="m 902,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.4359,21.25641"
        id="path12705"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 902,656 L 923,594 L 943,553 L 964,533 L 1005,512 L 1066,492 L 1046,553 L 1025,594 L 1005,615 L 964,635 L 902.564103,656.410256"
+       d="m 902,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.4359,21.41026"
        id="path12707"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1148,164 L 1169,102 L 1189,61 L 1210,41 L 1251,20 L 1312,0 L 1292,61 L 1271,102 L 1251,123 L 1210,143 L 1148.717949,164.102564"
+       d="m 1148,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2821,21.10256"
        id="path12709"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1148,410 L 1169,348 L 1189,307 L 1210,287 L 1251,266 L 1312,246 L 1292,307 L 1271,348 L 1251,369 L 1210,389 L 1148.717949,410.256410"
+       d="m 1148,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2821,21.25641"
        id="path12711"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1148,656 L 1169,594 L 1189,553 L 1210,533 L 1251,512 L 1312,492 L 1292,553 L 1271,594 L 1251,615 L 1210,635 L 1148.717949,656.410256"
+       d="m 1148,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2821,21.41026"
        id="path12713"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1394,164 L 1415,102 L 1435,61 L 1456,41 L 1497,20 L 1558,0 L 1538,61 L 1517,102 L 1497,123 L 1456,143 L 1394.871795,164.102564"
+       d="m 1394,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.1282,21.10256"
        id="path12715"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1394,410 L 1415,348 L 1435,307 L 1456,287 L 1497,266 L 1558,246 L 1538,307 L 1517,348 L 1497,369 L 1456,389 L 1394.871795,410.256410"
+       d="m 1394,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.1282,21.25641"
        id="path12717"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1394,656 L 1415,594 L 1435,553 L 1456,533 L 1497,512 L 1558,492 L 1538,553 L 1517,594 L 1497,615 L 1456,635 L 1394.871795,656.410256"
+       d="m 1394,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.1282,21.41026"
        id="path12719"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1641,164 L 1661,102 L 1682,61 L 1702,41 L 1743,20 L 1805,0 L 1784,61 L 1764,102 L 1743,123 L 1702,143 L 1641.025641,164.102564"
+       d="m 1641,164 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.9744,21.10256"
        id="path12721"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1641,410 L 1661,348 L 1682,307 L 1702,287 L 1743,266 L 1805,246 L 1784,307 L 1764,348 L 1743,369 L 1702,389 L 1641.025641,410.256410"
+       d="m 1641,410 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.9744,21.25641"
        id="path12723"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1641,656 L 1661,594 L 1682,553 L 1702,533 L 1743,512 L 1805,492 L 1784,553 L 1764,594 L 1743,615 L 1702,635 L 1641.025641,656.410256"
+       d="m 1641,656 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.9744,21.41026"
        id="path12725"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1887,164 L 1907,102 L 1928,61 L 1948,41 L 1989,20 L 2051,0 L 2030,61 L 2010,102 L 1989,123 L 1948,143 L 1887.179487,164.102564"
+       d="m 1887,164 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.8205,21.10256"
        id="path12727"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1887,410 L 1907,348 L 1928,307 L 1948,287 L 1989,266 L 2051,246 L 2030,307 L 2010,348 L 1989,369 L 1948,389 L 1887.179487,410.256410"
+       d="m 1887,410 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.8205,21.25641"
        id="path12729"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1887,656 L 1907,594 L 1928,553 L 1948,533 L 1989,512 L 2051,492 L 2030,553 L 2010,594 L 1989,615 L 1948,635 L 1887.179487,656.410256"
+       d="m 1887,656 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.8205,21.41026"
        id="path12731"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2133,164 L 2153,102 L 2174,61 L 2194,41 L 2235,20 L 2297,0 L 2276,61 L 2256,102 L 2235,123 L 2194,143 L 2133.333333,164.102564"
+       d="m 2133,164 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.6667,21.10256"
        id="path12733"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2133,410 L 2153,348 L 2174,307 L 2194,287 L 2235,266 L 2297,246 L 2276,307 L 2256,348 L 2235,369 L 2194,389 L 2133.333333,410.256410"
+       d="m 2133,410 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.6667,21.25641"
        id="path12735"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2133,656 L 2153,594 L 2174,553 L 2194,533 L 2235,512 L 2297,492 L 2276,553 L 2256,594 L 2235,615 L 2194,635 L 2133.333333,656.410256"
+       d="m 2133,656 20,-62 21,-41 20,-20 41,-21 62,-20 -21,61 -20,41 -21,21 -41,20 -60.6667,21.41026"
        id="path12737"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2379,164 L 2400,102 L 2420,61 L 2441,41 L 2482,20 L 2543,0 L 2523,61 L 2502,102 L 2482,123 L 2441,143 L 2379.487179,164.102564"
+       d="m 2379,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.5128,21.10256"
        id="path12739"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2379,410 L 2400,348 L 2420,307 L 2441,287 L 2482,266 L 2543,246 L 2523,307 L 2502,348 L 2482,369 L 2441,389 L 2379.487179,410.256410"
+       d="m 2379,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.5128,21.25641"
        id="path12741"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2379,656 L 2400,594 L 2420,553 L 2441,533 L 2482,512 L 2543,492 L 2523,553 L 2502,594 L 2482,615 L 2441,635 L 2379.487179,656.410256"
+       d="m 2379,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.5128,21.41026"
        id="path12743"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2625,164 L 2646,102 L 2666,61 L 2687,41 L 2728,20 L 2789,0 L 2769,61 L 2748,102 L 2728,123 L 2687,143 L 2625.641026,164.102564"
+       d="m 2625,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.359,21.10256"
        id="path12745"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2625,410 L 2646,348 L 2666,307 L 2687,287 L 2728,266 L 2789,246 L 2769,307 L 2748,348 L 2728,369 L 2687,389 L 2625.641026,410.256410"
+       d="m 2625,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.359,21.25641"
        id="path12747"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2625,656 L 2646,594 L 2666,553 L 2687,533 L 2728,512 L 2789,492 L 2769,553 L 2748,594 L 2728,615 L 2687,635 L 2625.641026,656.410256"
+       d="m 2625,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.359,21.41026"
        id="path12749"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2871,164 L 2892,102 L 2912,61 L 2933,41 L 2974,20 L 3035,0 L 3015,61 L 2994,102 L 2974,123 L 2933,143 L 2871.794872,164.102564"
+       d="m 2871,164 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2051,21.10256"
        id="path12751"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2871,410 L 2892,348 L 2912,307 L 2933,287 L 2974,266 L 3035,246 L 3015,307 L 2994,348 L 2974,369 L 2933,389 L 2871.794872,410.256410"
+       d="m 2871,410 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2051,21.25641"
        id="path12753"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2871,656 L 2892,594 L 2912,553 L 2933,533 L 2974,512 L 3035,492 L 3015,553 L 2994,594 L 2974,615 L 2933,635 L 2871.794872,656.410256"
+       d="m 2871,656 21,-62 20,-41 21,-20 41,-21 61,-20 -20,61 -21,41 -20,21 -41,20 -61.2051,21.41026"
        id="path12755"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 82,164 L 61,102 L 41,61 L 20,41 L -20,20 L -82,0 L -61,61 L -41,102 L -20,123 L 20,143 L 82.051282,164.102564"
+       d="M 82,164 61,102 41,61 20,41 -20,20 -82,0 l 21,61 20,41 21,21 40,20 62.051282,21.10256"
        id="path12757"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 82,410 L 61,348 L 41,307 L 20,287 L -20,266 L -82,246 L -61,307 L -41,348 L -20,369 L 20,389 L 82.051282,410.256410"
+       d="M 82,410 61,348 41,307 20,287 l -40,-21 -62,-20 21,61 20,41 21,21 40,20 62.051282,21.25641"
        id="path12759"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 82,656 L 61,594 L 41,553 L 20,533 L -20,512 L -82,492 L -61,553 L -41,594 L -20,615 L 20,635 L 82.051282,656.410256"
+       d="M 82,656 61,594 41,553 20,533 l -40,-21 -62,-20 21,61 20,41 21,21 40,20 62.051282,21.41026"
        id="path12761"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 328,164 L 307,102 L 287,61 L 266,41 L 225,20 L 164,0 L 184,61 L 205,102 L 225,123 L 266,143 L 328.205128,164.102564"
+       d="M 328,164 307,102 287,61 266,41 225,20 164,0 l 20,61 21,41 20,21 41,20 62.20513,21.10256"
        id="path12763"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 328,410 L 307,348 L 287,307 L 266,287 L 225,266 L 164,246 L 184,307 L 205,348 L 225,369 L 266,389 L 328.205128,410.256410"
+       d="m 328,410 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.20513,21.25641"
        id="path12765"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 328,656 L 307,594 L 287,553 L 266,533 L 225,512 L 164,492 L 184,553 L 205,594 L 225,615 L 266,635 L 328.205128,656.410256"
+       d="m 328,656 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.20513,21.41026"
        id="path12767"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 574,164 L 553,102 L 533,61 L 512,41 L 471,20 L 410,0 L 430,61 L 451,102 L 471,123 L 512,143 L 574.358974,164.102564"
+       d="M 574,164 553,102 533,61 512,41 471,20 410,0 l 20,61 21,41 20,21 41,20 62.35897,21.10256"
        id="path12769"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 574,410 L 553,348 L 533,307 L 512,287 L 471,266 L 410,246 L 430,307 L 451,348 L 471,369 L 512,389 L 574.358974,410.256410"
+       d="m 574,410 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.35897,21.25641"
        id="path12771"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 574,656 L 553,594 L 533,553 L 512,533 L 471,512 L 410,492 L 430,553 L 451,594 L 471,615 L 512,635 L 574.358974,656.410256"
+       d="m 574,656 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.35897,21.41026"
        id="path12773"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 820,164 L 800,102 L 779,61 L 758,41 L 717,20 L 656,0 L 676,61 L 697,102 L 717,123 L 758,143 L 820.512821,164.102564"
+       d="M 820,164 800,102 779,61 758,41 717,20 656,0 l 20,61 21,41 20,21 41,20 62.51282,21.10256"
        id="path12775"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 820,410 L 800,348 L 779,307 L 758,287 L 717,266 L 656,246 L 676,307 L 697,348 L 717,369 L 758,389 L 820.512821,410.256410"
+       d="m 820,410 -20,-62 -21,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.51282,21.25641"
        id="path12777"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 820,656 L 800,594 L 779,553 L 758,533 L 717,512 L 656,492 L 676,553 L 697,594 L 717,615 L 758,635 L 820.512821,656.410256"
+       d="m 820,656 -20,-62 -21,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.51282,21.41026"
        id="path12779"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1066,164 L 1046,102 L 1025,61 L 1005,41 L 964,20 L 902,0 L 923,61 L 943,102 L 964,123 L 1005,143 L 1066.666667,164.102564"
+       d="m 1066,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.6667,21.10256"
        id="path12781"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1066,410 L 1046,348 L 1025,307 L 1005,287 L 964,266 L 902,246 L 923,307 L 943,348 L 964,369 L 1005,389 L 1066.666667,410.256410"
+       d="m 1066,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.6667,21.25641"
        id="path12783"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1066,656 L 1046,594 L 1025,553 L 1005,533 L 964,512 L 902,492 L 923,553 L 943,594 L 964,615 L 1005,635 L 1066.666667,656.410256"
+       d="m 1066,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.6667,21.41026"
        id="path12785"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1312,164 L 1292,102 L 1271,61 L 1251,41 L 1210,20 L 1148,0 L 1169,61 L 1189,102 L 1210,123 L 1251,143 L 1312.820513,164.102564"
+       d="m 1312,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8205,21.10256"
        id="path12787"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1312,410 L 1292,348 L 1271,307 L 1251,287 L 1210,266 L 1148,246 L 1169,307 L 1189,348 L 1210,369 L 1251,389 L 1312.820513,410.256410"
+       d="m 1312,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8205,21.25641"
        id="path12789"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1312,656 L 1292,594 L 1271,553 L 1251,533 L 1210,512 L 1148,492 L 1169,553 L 1189,594 L 1210,615 L 1251,635 L 1312.820513,656.410256"
+       d="m 1312,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8205,21.41026"
        id="path12791"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1558,164 L 1538,102 L 1517,61 L 1497,41 L 1456,20 L 1394,0 L 1415,61 L 1435,102 L 1456,123 L 1497,143 L 1558.974359,164.102564"
+       d="m 1558,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.9744,21.10256"
        id="path12793"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1558,410 L 1538,348 L 1517,307 L 1497,287 L 1456,266 L 1394,246 L 1415,307 L 1435,348 L 1456,369 L 1497,389 L 1558.974359,410.256410"
+       d="m 1558,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.9744,21.25641"
        id="path12795"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1558,656 L 1538,594 L 1517,553 L 1497,533 L 1456,512 L 1394,492 L 1415,553 L 1435,594 L 1456,615 L 1497,635 L 1558.974359,656.410256"
+       d="m 1558,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.9744,21.41026"
        id="path12797"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1805,164 L 1784,102 L 1764,61 L 1743,41 L 1702,20 L 1641,0 L 1661,61 L 1682,102 L 1702,123 L 1743,143 L 1805.128205,164.102564"
+       d="m 1805,164 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.1282,21.10256"
        id="path12799"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1805,410 L 1784,348 L 1764,307 L 1743,287 L 1702,266 L 1641,246 L 1661,307 L 1682,348 L 1702,369 L 1743,389 L 1805.128205,410.256410"
+       d="m 1805,410 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.1282,21.25641"
        id="path12801"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 1805,656 L 1784,594 L 1764,553 L 1743,533 L 1702,512 L 1641,492 L 1661,553 L 1682,594 L 1702,615 L 1743,635 L 1805.128205,656.410256"
+       d="m 1805,656 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.1282,21.41026"
        id="path12803"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2051,164 L 2030,102 L 2010,61 L 1989,41 L 1948,20 L 1887,0 L 1907,61 L 1928,102 L 1948,123 L 1989,143 L 2051.282051,164.102564"
+       d="m 2051,164 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.2821,21.10256"
        id="path12805"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2051,410 L 2030,348 L 2010,307 L 1989,287 L 1948,266 L 1887,246 L 1907,307 L 1928,348 L 1948,369 L 1989,389 L 2051.282051,410.256410"
+       d="m 2051,410 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.2821,21.25641"
        id="path12807"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2051,656 L 2030,594 L 2010,553 L 1989,533 L 1948,512 L 1887,492 L 1907,553 L 1928,594 L 1948,615 L 1989,635 L 2051.282051,656.410256"
+       d="m 2051,656 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.2821,21.41026"
        id="path12809"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2297,164 L 2276,102 L 2256,61 L 2235,41 L 2194,20 L 2133,0 L 2153,61 L 2174,102 L 2194,123 L 2235,143 L 2297.435897,164.102564"
+       d="m 2297,164 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.4359,21.10256"
        id="path12811"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2297,410 L 2276,348 L 2256,307 L 2235,287 L 2194,266 L 2133,246 L 2153,307 L 2174,348 L 2194,369 L 2235,389 L 2297.435897,410.256410"
+       d="m 2297,410 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.4359,21.25641"
        id="path12813"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2297,656 L 2276,594 L 2256,553 L 2235,533 L 2194,512 L 2133,492 L 2153,553 L 2174,594 L 2194,615 L 2235,635 L 2297.435897,656.410256"
+       d="m 2297,656 -21,-62 -20,-41 -21,-20 -41,-21 -61,-20 20,61 21,41 20,21 41,20 62.4359,21.41026"
        id="path12815"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2543,164 L 2523,102 L 2502,61 L 2482,41 L 2441,20 L 2379,0 L 2400,61 L 2420,102 L 2441,123 L 2482,143 L 2543.589744,164.102564"
+       d="m 2543,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.5897,21.10256"
        id="path12817"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2543,410 L 2523,348 L 2502,307 L 2482,287 L 2441,266 L 2379,246 L 2400,307 L 2420,348 L 2441,369 L 2482,389 L 2543.589744,410.256410"
+       d="m 2543,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.5897,21.25641"
        id="path12819"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2543,656 L 2523,594 L 2502,553 L 2482,533 L 2441,512 L 2379,492 L 2400,553 L 2420,594 L 2441,615 L 2482,635 L 2543.589744,656.410256"
+       d="m 2543,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.5897,21.41026"
        id="path12821"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2789,164 L 2769,102 L 2748,61 L 2728,41 L 2687,20 L 2625,0 L 2646,61 L 2666,102 L 2687,123 L 2728,143 L 2789.743590,164.102564"
+       d="m 2789,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.7436,21.10256"
        id="path12823"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2789,410 L 2769,348 L 2748,307 L 2728,287 L 2687,266 L 2625,246 L 2646,307 L 2666,348 L 2687,369 L 2728,389 L 2789.743590,410.256410"
+       d="m 2789,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.7436,21.25641"
        id="path12825"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 2789,656 L 2769,594 L 2748,553 L 2728,533 L 2687,512 L 2625,492 L 2646,553 L 2666,594 L 2687,615 L 2728,635 L 2789.743590,656.410256"
+       d="m 2789,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.7436,21.41026"
        id="path12827"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 3035,164 L 3015,102 L 2994,61 L 2974,41 L 2933,20 L 2871,0 L 2892,61 L 2912,102 L 2933,123 L 2974,143 L 3035.897436,164.102564"
+       d="m 3035,164 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8974,21.10256"
        id="path12829"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 3035,410 L 3015,348 L 2994,307 L 2974,287 L 2933,266 L 2871,246 L 2892,307 L 2912,348 L 2933,369 L 2974,389 L 3035.897436,410.256410"
+       d="m 3035,410 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8974,21.25641"
        id="path12831"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
     <path
-       stroke-width="1"
-       stroke="red"
-       fill="none"
-       d="M 3035,656 L 3015,594 L 2994,553 L 2974,533 L 2933,512 L 2871,492 L 2892,553 L 2912,594 L 2933,615 L 2974,635 L 3035.897436,656.410256"
+       d="m 3035,656 -20,-62 -21,-41 -20,-20 -41,-21 -62,-20 21,61 20,41 21,21 41,20 61.8974,21.41026"
        id="path12833"
-       style="stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round" />
+       style="fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0" />
   </g>
   <g
      inkscape:groupmode="layer"

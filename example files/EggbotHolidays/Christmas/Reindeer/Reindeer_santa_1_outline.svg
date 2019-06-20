@@ -13,7 +13,7 @@
    height="800"
    id="svg3168"
    version="1.1"
-   inkscape:version="0.48.1 r9760"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="Reindeer_santa_1_outline.svg">
   <sodipodi:namedview
      id="base"
@@ -22,17 +22,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.3946875"
-     inkscape:cx="1600"
+     inkscape:zoom="0.1134375"
+     inkscape:cx="1591.1846"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="false"
-     inkscape:window-width="1676"
-     inkscape:window-height="1006"
+     inkscape:window-width="875"
+     inkscape:window-height="528"
      inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="1"
+     inkscape:window-maximized="0" />
   <defs
      id="defs3170">
     <inkscape:path-effect
@@ -140,7 +140,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -156,5 +156,6 @@
   <g
      inkscape:groupmode="layer"
      id="layer3"
-     inkscape:label="2-red" />
+     inkscape:label="2-red"
+     style="display:inline" />
 </svg>

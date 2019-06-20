@@ -13,7 +13,7 @@
    height="800"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="flag-stretchedForEgg.svg">
   <sodipodi:namedview
      id="base"
@@ -22,9 +22,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.29366442"
-     inkscape:cx="1677.5203"
-     inkscape:cy="400.35961"
+     inkscape:zoom="0.46845824"
+     inkscape:cx="1048.4619"
+     inkscape:cy="503.06159"
      inkscape:document-units="px"
      inkscape:current-layer="layer4"
      showgrid="false"
@@ -282,7 +282,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>

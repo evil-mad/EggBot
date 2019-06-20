@@ -13,7 +13,7 @@
    height="800"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="Baseball_Template.svg">
   <sodipodi:namedview
      id="base"
@@ -22,8 +22,8 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.318125"
-     inkscape:cx="1600"
+     inkscape:zoom="0.2925"
+     inkscape:cx="1596.5812"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
@@ -43,7 +43,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -375,7 +375,7 @@
      id="layer2"
      inkscape:label="9 - Safe area">
     <path
-       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;-inkscape-font-specification:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#00ffff;stroke-width:2.4053793;stroke-opacity:1;marker:none;enable-background:accumulate"
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:medium;line-height:normal;font-family:Sans;-inkscape-font-specification:Sans;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;letter-spacing:normal;word-spacing:normal;text-transform:none;writing-mode:lr-tb;direction:ltr;baseline-shift:baseline;text-anchor:start;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#00ffff;stroke-width:2.4053793;stroke-opacity:1;marker:none;enable-background:accumulate"
        d="m 1062.7866,628.4986 c -75.0131,28.3107 -237.7364,57.7987 -334.3952,57.7987 -262.3703,0 -412.18872,-134.4436 -412.18872,-284.2594 0,-149.8157 149.81842,-288.3352 412.18872,-288.3352 95.0822,0 256.4471,33.0305 329.9593,60.3698 151.7269,58.5431 334.1,82.3853 531.7837,82.3853 195.7417,0 399.0001,-23.1725 550.858,-80.7773 76.102,-28.9485 212.6134,-61.9778 310.6938,-61.9778 263.6891,0 432.1111,138.2178 432.1111,288.7868 0,150.569 -168.422,283.8078 -432.1111,283.8078 -99.7027,0 -257.5283,-28.6135 -334.3024,-58.3529 -151.1251,-56.94149 -332.707,-79.4231 -527.2494,-79.4231 -195.065,0 -375.8537,22.6602 -527.0247,79.99061"
        id="path4084-1"
        inkscape:connector-curvature="0"

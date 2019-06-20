@@ -13,7 +13,7 @@
    height="800"
    id="svg4770"
    version="1.1"
-   inkscape:version="0.48.1 r9760"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="Reindeer_2_rednose_outline.svg">
   <sodipodi:namedview
      id="base"
@@ -22,17 +22,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.5040625"
-     inkscape:cx="1600"
+     inkscape:zoom="0.1871875"
+     inkscape:cx="1594.6578"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="1-default"
      showgrid="false"
-     inkscape:window-width="1676"
-     inkscape:window-height="1006"
+     inkscape:window-width="1111"
+     inkscape:window-height="712"
      inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1" />
+     inkscape:window-y="1"
+     inkscape:window-maximized="0" />
   <defs
      id="defs4772">
     <inkscape:path-effect
@@ -68,7 +68,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -85,9 +85,10 @@
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="2-Red (nose)">
+     inkscape:label="2-Red (nose)"
+     style="display:inline">
     <path
-       style="color:#000000;fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       style="color:#000000;display:inline;overflow:visible;visibility:visible;fill:none;stroke:#ff0000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1;marker:none;enable-background:accumulate"
        d="m 1902.1897,315.62263 c 0,8.98122 -7.2807,16.26193 -16.2619,16.26193 -8.9812,0 -16.2619,-7.28071 -16.2619,-16.26193 0,-8.98122 7.2807,-16.26193 16.2619,-16.26193 8.9812,0 16.2619,7.28071 16.2619,16.26193 z"
        id="path5388"
        inkscape:connector-curvature="0" />

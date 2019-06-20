@@ -13,7 +13,7 @@
    height="800"
    id="svg10075"
    sodipodi:version="0.32"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="Notebook_paper.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    version="1.0">
@@ -24,9 +24,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.3853125"
-     inkscape:cx="868.52298"
-     inkscape:cy="500"
+     inkscape:zoom="0.2925"
+     inkscape:cx="1596.5812"
+     inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="layer7"
      showgrid="false"
@@ -266,7 +266,7 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
        id="path48494"
-       d="m 185.30067,238.40261 0,719.03591"
+       d="M 185.30067,238.40261 V 957.43852"
        style="fill:none;stroke:#ff1515;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
   </g>
 </svg>

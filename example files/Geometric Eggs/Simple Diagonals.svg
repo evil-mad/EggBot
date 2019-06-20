@@ -13,7 +13,7 @@
    height="800"
    id="svg2825"
    version="1.1"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    sodipodi:docname="Simple Diagonals.svg">
   <sodipodi:namedview
      id="base"
@@ -22,14 +22,14 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.12875"
+     inkscape:zoom="0.1690625"
      inkscape:cx="1600"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="svg2825"
      showgrid="false"
-     inkscape:window-width="509"
-     inkscape:window-height="442"
+     inkscape:window-width="911"
+     inkscape:window-height="484"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0" />
@@ -87,7 +87,8 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-252.36218)" />
+     transform="translate(0,-252.36218)"
+     style="display:inline" />
   <g
      style="stroke-width:3.44475355;stroke-miterlimit:4;stroke-dasharray:none"
      id="g8048"

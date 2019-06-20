@@ -10,7 +10,7 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    sodipodi:docname="us_states.svg"
-   inkscape:version="0.48.5 r10040"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06"
    version="1.1"
    id="svg27345"
    height="800"
@@ -22,14 +22,14 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.184375"
-     inkscape:cx="1600"
+     inkscape:zoom="0.1971875"
+     inkscape:cx="1594.9287"
      inkscape:cy="400"
      inkscape:document-units="px"
      inkscape:current-layer="svg27345"
      showgrid="false"
-     inkscape:window-width="687"
-     inkscape:window-height="461"
+     inkscape:window-width="1135"
+     inkscape:window-height="589"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0" />
@@ -73,7 +73,8 @@
      transform="translate(0,-252.36218)"
      id="layer1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1" />
+     inkscape:label="Layer 1"
+     style="display:inline" />
   <path
      sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
      style="fill:none;stroke:#2b1930;stroke-width:4;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
