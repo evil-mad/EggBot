@@ -12,7 +12,7 @@ The release version of the code is labeled version 2.5.0. New Mac and Windows in
 
 ----
 
-This repository has been migrated from: https://code.google.com/p/eggbotcode/
+This repository was originally migrated from: https://code.google.com/p/eggbotcode/
 
 Extended documentation available at: http://wiki.evilmadscientist.com/eggbot
 
