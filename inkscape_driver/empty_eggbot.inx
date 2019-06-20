@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+    <_name>EggBot Template</_name>
+    <id>org.inkscape.render.empty_eggbot</id>
+    <dependency type="executable" location="extensions">empty_eggbot.py</dependency>
+    <dependency type="executable" location="extensions">inkex.py</dependency>
+    
+    <!--
+    <param name="layer" type="boolean" _gui-text="Include default layer">true</param>
+    -->
+
+    <param name="width"  _gui-text="Custom Width (default 3200):"  type="float" min="1" max="12800">3200</param>
+    <param name="height" _gui-text="Custom Height (default 800):" type="float" min="1" max="3200">800</param>
+
+
+
+    <effect needs-live-preview="false">
+        <object-type>all</object-type>
+        <effects-menu hidden="true" />
+    </effect>
+    <inkscape:_templateinfo>
+      <inkscape:_name>EggBot Template</inkscape:_name>
+      <inkscape:author>Windell Oskay</inkscape:author>
+      <inkscape:_shortdesc>A blank document for EggBot drawing</inkscape:_shortdesc>
+      <inkscape:date>2019-06-19</inkscape:date>
+      <inkscape:_keywords>eggbot</inkscape:_keywords>
+    </inkscape:_templateinfo>
+    <script>
+        <command reldir="extensions" interpreter="python">empty_eggbot.py</command>
+    </script>
+</inkscape-extension>
