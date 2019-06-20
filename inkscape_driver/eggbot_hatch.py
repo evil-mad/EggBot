@@ -61,8 +61,6 @@
 
 # Written by Daniel C. Newman for the Eggbot Project
 # dan dot newman at mtbaldy dot us
-# Last updated 28 November 2010
-# 15 October 2010
 
 # Updated by Windell H. Oskay, 6/14/2012
 # Added tolerance parameter
@@ -86,9 +84,8 @@
 # This prevents extremely complex plots from generating glitches
 # Modifications are limited to recursivelyTraverseSvg and effect methods 
 
-#
 # Current software version:
-# (v2.3.0, June 11, 2019)
+# (v2.3.1, June 19, 2019)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1204,6 +1201,9 @@ class Eggbot_Hatch(inkex.Effect):
         global pt_last_position_abs
         # Viewbox handling
         self.handleViewBox()
+
+        if self.options.hatchSpacing == 0:
+            self.options.hatchSpacing = 0.1 # Hardcode minimum value
 
         ref_count = 0
         pt_last_position_abs = [0, 0]
