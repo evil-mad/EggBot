@@ -51,7 +51,7 @@ line segments by this extension.
   <effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="EggBot Contributed"/>
+      <submenu _name="EggBot"/>
     </effects-menu>
   </effect>
   <script>
