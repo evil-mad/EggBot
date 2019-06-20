@@ -1,48 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Reorder Paths for Speed</_name>
-  <id>command.evilmadscience.eggbot_reorder2.eggbot</id>
-  <dependency type="extension">org.inkscape.output.svg.inkscape</dependency>
-  <dependency type="executable" location="extensions">eggbot_reorder.py</dependency>
+  <_name>Plot Optimization</_name>
+  <id>command.evilmadscientist.eggbot.reorder</id>
+  <dependency type="executable" location="extensions">axidraw_svg_reorder.py</dependency>
   <dependency type="executable" location="extensions">inkex.py</dependency>
-  <!-- Written by Matthew Beckler for the Egg-Bot project. Email questions and comments to matthew at mbeckler dot org -->
 
-	  <_param name="Header" type="description" xml:space="preserve">
- This extension will perform simple optimizations 
- of selected paths. It will try to change the 
- order of plotting so as to reduce the amount
- of "pen-up" travel that occurs between paths.
- 
- Solving for optimal plot order is a difficult
- problem, known in computer science as the
- "traveling salesman problem," or just "TSP."  
- 
- This routine does not look for the best possible
- solution; that can be slow. Instead it tries a
- few quick methods that often reduce pen-up 
- travel distance (and time) by 30% or more. 
 
- Please note: This extension is still considered 
- experimental, and is only provided in case you 
- may find it useful. Be sure to save a copy of 
- your document before running this routine.
-            </_param>
+<_param indent="5" name="splashpage" type="description" 
+appearance="header">EggBot Plot Optimization Tool</_param>
 
-  <!--
-  <param name="reverse" type="boolean" _gui-text="Allow paths to be reversed*">false</param>
-  <param name="wrap" type="boolean" _gui-text="Allow wrap-around egg axis*">false</param>
+<_param name="Header" type="description" xml:space="preserve">
+This utility will re-order objects within each layer of your
+document, to reduce pen-up travel distance and time.
+</_param>
 
-	  <_param name="nyet" type="description" xml:space="preserve">
-  *Option not yet implemented.
-            </_param>
--->
-  <effect needs-live-preview="false" needs-document="no">
+<param name="reordering" _gui-text="Group Handling" type="optiongroup" indent="2" >
+<_option value="2">Reorder within groups</_option>
+<_option value="1">Preserve groups</_option>
+<_option value="3">Break apart groups</_option>
+</param>
+
+<_param name="Footer" type="description" indent="3" xml:space="preserve">
+v 2.5. Copyright 2019, Evil Mad Scientist</_param>
+
+
+<effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu>
-        <submenu _name="EggBot"/>
+      <submenu _name="EggBot"/>
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">eggbot_reorder.py</command>
+    <command reldir="extensions" interpreter="python">axidraw_svg_reorder.py</command>
   </script>
 </inkscape-extension>
