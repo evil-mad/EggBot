@@ -1,7 +1,7 @@
 EggBot
 ======
 
-*_Software for the Original EggBot_*
+*_Software for The Original EggBot_*
 
 This is a repository for software to drive The Original EggBot, by Evil Mad Scientist Laboratories. More information at http://www.egg-bot.com/
 
