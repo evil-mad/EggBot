@@ -7,7 +7,7 @@ This is a repository for software to drive The Original EggBot, by Evil Mad Scie
 
 Code here includes the extensions for Inkscape, firmware for the EiBotBoard (AKA "EBB", or EggBotBoard), and example plot files. All code is designed to work on Mac, Windows and Linux.
 
-The release version of the code is labeled version 2.5.0. New Mac and Windows installers have been released. Manual install is available for Linux (as well as Mac or Windows).
+The latest version of the code is labeled version 2.8.1. New Mac and Windows installers have been released. Manual install is available for Linux (as well as Mac or Windows).
 
 
 ----
