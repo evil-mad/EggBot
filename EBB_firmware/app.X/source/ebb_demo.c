@@ -1,6 +1,6 @@
 //#include "system\typedefs.h"
 #include "ebb_demo.h"
-
+#if 0
 packet_type far rom packet_list[] = 
 {
   {COMD_SP, 1, 0, 0},
@@ -2072,3 +2072,5 @@ packet_type far rom packet_list[] =
   {COMD_SP, 1, 0, 0},
   {COMD_END, 0, 0, 0},
 };
+
+#endif
