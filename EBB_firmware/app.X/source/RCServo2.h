@@ -53,9 +53,9 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 
-#define MAX_RC2_SERVOS	24		// This is 24 because there are 24 RPn pins
-#define INITAL_RC2_SLOTS 8      // Inital number of RC2 slots (determines repeat rate of pulses)
-#define DEFAULT_EBB_SERVO_PORTB_PIN	(1)	// Note, this indicates a PortB pin number, not RPn number
+#define MAX_RC2_SERVOS    24      // This is 24 because there are 24 RPn pins
+#define INITAL_RC2_SLOTS  8       // Inital number of RC2 slots (determines repeat rate of pulses)
+#define DEFAULT_EBB_SERVO_PORTB_PIN   1 // Note, this indicates a PortB pin number, not RPn number
 #define DEFAULT_EBB_SERVO_RPN (DEFAULT_EBB_SERVO_PORTB_PIN + 3) // RPn number for default pen up/down servo
 
 extern UINT8 gRC2msCounter;

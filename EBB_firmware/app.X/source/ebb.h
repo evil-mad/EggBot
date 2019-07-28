@@ -51,7 +51,7 @@
 #ifndef EBB_H
 #define EBB_H
 
-// 	These are used for Enable<X>IO to control the enable lines for the driver
+// These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
 #define DISABLE_MOTOR       1
 

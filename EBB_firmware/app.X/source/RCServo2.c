@@ -54,7 +54,7 @@
  * Started by Brian Schmalz (www.schmalzhaus.com) on 8/22/09
  * For the Egg Bot Firmware
  *
- * There are several paarts of this file. It is written in a modular
+ * There are several parts of this file. It is written in a modular
  * way to ease incorporation into different UBW (www.schmalzhaus.com/UBW) 
  * hardware builds. Because we don't want to have any function calls in the ISR,
  * the part of the ISR that this module contributes is implemented as a big
@@ -62,7 +62,7 @@
  * on/off RC method 2 and to set values and configure outputs. Then there is the
  * user command section that handles parsing user input. This module (the .c and
  * .h files) should be able to be dropped into any UBW firmware that is 'module
- * aware' with minimial changes. There is also an init section that gets called
+ * aware' with minimal changes. There is also an init section that gets called
  * on bootup.
  *
  * MODULE THEORY
@@ -71,9 +71,9 @@
  * We want a maximum of resolution in their timing, and a minimum of CPU and ISR
  * overhead. We want maximum flexibility with respect to which pins receive the
  * output pulses. This 'method 2' only works with PICs that have the PPS
- * (Perhipheral Pin Select) hardware. Using this method, we will be able to
+ * (Peripheral Pin Select) hardware. Using this method, we will be able to
  * generate servo output pulses (positive going) on up to eight output pins
- * (selectable using PPS), with times from 0ms to 3ms, at a repitition rate of
+ * (selectable using PPS), with times from 0ms to 3ms, at a repetition rate of
  * 24ms. The resolution of the pulse will be 83ns (Fosc/4). So a value of 0 will
  * represent 0ms pulse, and 36000 will represent 3ms.
  *
@@ -93,8 +93,8 @@
  * queue and then 'executes' the command. (All it does there is transfer the
  * proper values to the data structures that the actual RC servo ISR uses to
  * update the various output pins for each servo pulse.) But the key here is
- * that the S2 command no longer takes effect immediatly - RC servo commands
- * are now handleded in the same way that SM commands are handled. Which means
+ * that the S2 command no longer takes effect immediately - RC servo commands
+ * are now handled in the same way that SM commands are handled. Which means
  * they can be queued up and delays added, etc.
  *
  * The other effect of this change is that the normal SP pen up/pen down
@@ -174,49 +174,49 @@ The value in gRC2Pin is the PPS RPx pin number that this slot controls
  */
 void RCServo2_Init(void)
 {
-	unsigned char i;
+  unsigned char i;
 
-	gRC2msCounter = 0;
-	gRC2Ptr = 0;
+  gRC2msCounter = 0;
+  gRC2Ptr = 0;
 
-	for (i=0; i < MAX_RC2_SERVOS; i++)
-	{
-		gRC2Value[i] = 0;
-		gRC2RPn[i] = 0;
-		gRC2Target[i] = 0;
-		gRC2Rate[i] = 0;
-	}
-	// Initialize the RPOR pointer
-	gRC2RPORPtr = &RPOR0;
+  for (i=0; i < MAX_RC2_SERVOS; i++)
+  {
+    gRC2Value[i] = 0;
+    gRC2RPn[i] = 0;
+    gRC2Target[i] = 0;
+    gRC2Rate[i] = 0;
+  }
+  // Initialize the RPOR pointer
+  gRC2RPORPtr = &RPOR0;
 
-	// Set up TIMER3
-	T3CONbits.TMR3CS = 0b00;  	// Use Fosc/4 as input
-	T3CONbits.T3CKPS = 0b00;  	// Prescale is 1:1
-	T3CONbits.RD16 = 1;			// Enable 16 bit mode
-	TMR3H = 0;
-	TMR3L = 0;
-	T3CONbits.TMR3ON = 0;		// Keep timer off for now
-	
-	TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-	TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+  // Set up TIMER3
+  T3CONbits.TMR3CS = 0b00;    // Use Fosc/4 as input
+  T3CONbits.T3CKPS = 0b00;    // Prescale is 1:1
+  T3CONbits.RD16 = 1;         // Enable 16 bit mode
+  TMR3H = 0;
+  TMR3L = 0;
+  T3CONbits.TMR3ON = 0;       // Keep timer off for now
 
-	CCP2CONbits.CCP2M = 0b1001;	// Set EECP2 as compare, clear output on match
+  TCLKCONbits.T3CCP1 = 1;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+  TCLKCONbits.T3CCP2 = 0;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
 
-	// We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
-	gRC2Slots = INITAL_RC2_SLOTS;
+  CCP2CONbits.CCP2M = 0b1001; // Set EECP2 as compare, clear output on match
 
-	// We start out with 3ms slot duration because it's good for RC servos
-	gRC2SlotMS = 3;
+  // We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
+  gRC2Slots = INITAL_RC2_SLOTS;
+
+  // We start out with 3ms slot duration because it's good for RC servos
+  gRC2SlotMS = 3;
 
     // Start with some reasonable default values for min and max
-	g_servo2_max = 15302;           // max = down (SC,5,15302)
-	g_servo2_min = 22565;           // min = up (SC,4,22565)
+  g_servo2_max = 15302;           // max = down (SC,5,15302)
+  g_servo2_min = 22565;           // min = up (SC,4,22565)
 
-	g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;		// Always start out with RP4 as the output (just for this test version of code)
-	
-	g_servo2_rate_up = 400;
-	g_servo2_rate_down = 400;
-	process_SP(PEN_UP, 0);			// Start servo up
+  g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;   // Always start out with RP4 as the output (just for this test version of code)
+
+  g_servo2_rate_up = 400;
+  g_servo2_rate_down = 400;
+  process_SP(PEN_UP, 0);            // Start servo up
   RCServoPowerIO = RCSERVO_POWER_OFF;
 }
 
@@ -228,70 +228,70 @@ void RCServo2_Init(void)
 // SC,8 command). Channel 0 is the 'error' channel.
 UINT8 RCServo2_get_channel_from_RPn(UINT8 RPn)
 {
-    UINT8 i;
+  UINT8 i;
 
-    // Search through the existing channels, and see if our RPn is there
-    for (i=0; i < MAX_RC2_SERVOS; i++)
+  // Search through the existing channels, and see if our RPn is there
+  for (i=0; i < MAX_RC2_SERVOS; i++)
+  {
+    if (gRC2RPn[i] == RPn)
     {
-        if (gRC2RPn[i] == RPn)
-        {
-            // Found it! Return the channel number
-            return (i + 1);
-        }
+      // Found it! Return the channel number
+      return (i + 1);
     }
+  }
 
-    // We have not found it, so we need to allocate a new channel for this RPn
-    for (i=0; i < MAX_RC2_SERVOS; i++)
+  // We have not found it, so we need to allocate a new channel for this RPn
+  for (i=0; i < MAX_RC2_SERVOS; i++)
+  {
+    if (gRC2RPn[i] == 0)
     {
-        if (gRC2RPn[i] == 0)
-        {
-            // Found one that's free! Return the channel number
-            return (i + 1);
-        }
+      // Found one that's free! Return the channel number
+      return (i + 1);
     }
+  }
 
-    // We do not have room for another channel, so return an error
-    return 0;
+  // We do not have room for another channel, so return an error
+  return 0;
 }
 
 // Servo method 2 enable command
 // S2,<duration>,<output_pin>,<rate>,<delay><CR>
 //  will set RC output <channel> for <duration> on output pin <output_pin>
-//	<duration> can be 0 (output off) to 32,000 (3ms on time)
+//    <duration> can be 0 (output off) to 32,000 (3ms on time)
 //      (a 0 for <duration> de-allocates the channel for this output_pin)
-//	<output_pin> is an RPn pin number (0 through 24)
-//  <rate> is the rate to change (optional, defaults to 0 = instant)
-//  <delay> is the number of milliseconds to delay the start of the next command
+//    <output_pin> is an RPn pin number (0 through 24)
+//    <rate> is the rate to change (optional, defaults to 0 = instant)
+//    <delay> is the number of milliseconds to delay the start of the next command
 //      (optional, defaults to 0 = instant)
 
 void RCServo2_S2_command (void)
 {
-	UINT16 Duration = 0;
-	UINT8 Pin = 0;
-	UINT16 Rate = 0;
-    UINT16 Delay = 0;
+  UINT16 Duration = 0;
+  UINT8 Pin = 0;
+  UINT16 Rate = 0;
+  UINT16 Delay = 0;
 
-	// Extract each of the values.
-	extract_number (kUINT, &Duration, kOPTIONAL);
-	extract_number (kUCHAR, &Pin, kOPTIONAL);
-	extract_number (kUINT, &Rate, kOPTIONAL);
-    extract_number (kUINT, &Delay, kOPTIONAL);
+  // Extract each of the values.
+  extract_number (kUINT, &Duration, kOPTIONAL);
+  extract_number (kUCHAR, &Pin, kOPTIONAL);
+  extract_number (kUINT, &Rate, kOPTIONAL);
+  extract_number (kUINT, &Delay, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-	if (Pin > 24)
-	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		return;
-	}
-	
-	RCServo2_Move(Duration, Pin, Rate, Delay);
+  if (Pin > 24)
+  {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
 
-	print_ack();
+  RCServo2_Move(Duration, Pin, Rate, Delay);
+
+  print_ack();
 }
 
 // Function to set up an RC Servo move. Takes Duration, RPn, and Rate
@@ -313,76 +313,76 @@ void RCServo2_S2_command (void)
 // And, if this is the first time we're starting up the channel, make sure that
 // it starts out low.
 UINT8 RCServo2_Move(
-	UINT16 Position,
-	UINT8  RPn,
-	UINT16 Rate,
-    UINT16 Delay
+  UINT16 Position,
+  UINT8  RPn,
+  UINT16 Rate,
+  UINT16 Delay
 )
 {
-    UINT8 i;
-    UINT8 Channel;
+  UINT8 i;
+  UINT8 Channel;
 
-    // Get the channel that's already assigned to the RPn, or assign a new one
-    // if possible. If this returns zero, then do nothing as we're out of
-    // channels.
-    Channel = RCServo2_get_channel_from_RPn(RPn);
+  // Get the channel that's already assigned to the RPn, or assign a new one
+  // if possible. If this returns zero, then do nothing as we're out of
+  // channels.
+  Channel = RCServo2_get_channel_from_RPn(RPn);
 
-    // Error out if there were no available channels left
-    if (Channel == 0)
+  // Error out if there were no available channels left
+  if (Channel == 0)
+  {
+    return 0;
+  }
+
+  // If Duration is zero, then caller wants to shut down this channel
+  if (0 == Position)
+  {
+    // Turn off the PPS routing to the pin
+    *(gRC2RPORPtr + gRC2RPn[Channel - 1]) = 0;
+    gRC2Rate[Channel - 1] = 0;
+    gRC2Target[Channel - 1] = 0;
+    gRC2RPn[Channel - 1] = 0;
+    gRC2Value[Channel - 1] = 0;
+  }
+  else
+  {
+    // If we have a valid channel, and RPn, then make the move
+    if ((Channel - 1) < gRC2Slots && RPn <= 24)
     {
-        return 0;
+      // As a special case, if the pin is the same as the pin
+      // used for the solenoid, then turn off the solenoid function
+      // so that we can output PWM on that pin
+      if (RPn == PEN_UP_DOWN_RPN)
+      {
+        gUseSolenoid = FALSE;
+      }
+
+      // Is this the first time we've used this channel?
+      if (gRC2Value[Channel - 1] == 0)
+      {
+        // Make sure the pin is set as an output, or this won't do much good
+        SetPinTRISFromRPn(RPn, OUTPUT_PIN);
+
+        // For v2.1.5, found bug where if a pin is HIGH when we start doing
+        // RC output, the output is totally messed up. So make sure to set
+        // the pin low first.
+        SetPinLATFromRPn(RPn, 0);
+      }
+
+      // Wait until we have a free spot in the FIFO, and add our new
+      // command in
+      while(!FIFOEmpty)
+      ;
+
+      // Now copy the values over into the FIFO element
+      CommandFIFO[0].Command = COMMAND_SERVO_MOVE;
+      CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+      CommandFIFO[0].ServoChannel = Channel;
+      CommandFIFO[0].ServoRPn = RPn;
+      CommandFIFO[0].ServoPosition = Position;
+      CommandFIFO[0].ServoRate = Rate;
+
+      FIFOEmpty = FALSE;
     }
-
-    // If Duration is zero, then caller wants to shut down this channel
-    if (0 == Position)
-    {
-        // Turn off the PPS routing to the pin
-        *(gRC2RPORPtr + gRC2RPn[Channel - 1]) = 0;
-        gRC2Rate[Channel - 1] = 0;
-        gRC2Target[Channel - 1] = 0;
-        gRC2RPn[Channel - 1] = 0;
-        gRC2Value[Channel - 1] = 0;
-    }
-    else
-    {
-        // If we have a valid channel, and RPn, then make the move
-        if ((Channel - 1) < gRC2Slots && RPn <= 24)
-        {
-            // As a speical case, if the pin is the same as the pin
-            // used for the solenoid, then turn off the solenoid function
-            // so that we can output PWM on that pin
-            if (RPn == PEN_UP_DOWN_RPN)
-            {
-                gUseSolenoid = FALSE;
-            }
-
-            // Is this the first time we've used this channel?
-            if (gRC2Value[Channel - 1] == 0)
-            {
-                // Make sure the pin is set as an output, or this won't do much good
-                SetPinTRISFromRPn(RPn, OUTPUT_PIN);
-
-                // For v2.1.5, found bug where if a pin is HIGH when we start doing
-                // RC output, the output is totally messed up. So make sure to set
-                // the pin low first.
-                SetPinLATFromRPn(RPn, 0);
-            }
-
-            // Wait until we have a free spot in the FIFO, and add our new
-            // command in
-            while(!FIFOEmpty)
-            ;
-
-            // Now copy the values over into the FIFO element
-            CommandFIFO[0].Command = COMMAND_SERVO_MOVE;
-            CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-            CommandFIFO[0].ServoChannel = Channel;
-            CommandFIFO[0].ServoRPn = RPn;
-            CommandFIFO[0].ServoPosition = Position;
-            CommandFIFO[0].ServoRate = Rate;
-
-            FIFOEmpty = FALSE;
-        }
-	}
-    return Channel;
+  }
+  return Channel;
 }

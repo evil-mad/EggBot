@@ -54,15 +54,15 @@
 #define DEMO_BOARD
 
 #if defined(UBW)
-	#include "HardwareProfile_UBW.h"
+  #include "HardwareProfile_UBW.h"
 #elif defined(BOARD_EBB_V10)
-	#include "HardwareProfile_EBB_V10.h"
+  #include "HardwareProfile_EBB_V10.h"
 #elif defined(BOARD_EBB_V11)
-	#include "HardwareProfile_EBB_V11.h"
+  #include "HardwareProfile_EBB_V11.h"
 #elif defined(BOARD_EBB_V12)
-	#include "HardwareProfile_EBB_V12.h"
+  #include "HardwareProfile_EBB_V12.h"
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	#include "HardwareProfile_EBB_V13_and_above.h"
+  #include "HardwareProfile_EBB_V13_and_above.h"
 #endif
 
 #if !defined(DEMO_BOARD)
