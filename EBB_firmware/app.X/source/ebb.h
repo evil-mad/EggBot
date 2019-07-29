@@ -112,8 +112,24 @@ typedef struct
 #define TIMER1_H_RELOAD (254)
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 
+// Maximum number of elements in the command FIFO
+#define COMMAND_FIFO_LENGTH     25
 
-extern MoveCommandType CommandFIFO[];
+///extern MoveCommandType CommandFIFO[];
+extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
+extern INT32           FIFO_StepAdd[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+extern INT32           FIFO_StepAddInc[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+extern UINT32          FIFO_StepsCounter[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+extern UINT8           FIFO_DirBits[COMMAND_FIFO_LENGTH];
+extern UINT32          FIFO_DelayCounter[COMMAND_FIFO_LENGTH];   // NOT Milliseconds! In 25KHz units
+extern UINT16          FIFO_ServoPosition[COMMAND_FIFO_LENGTH];
+extern UINT8           FIFO_ServoRPn[COMMAND_FIFO_LENGTH];
+extern UINT8           FIFO_ServoChannel[COMMAND_FIFO_LENGTH];
+extern UINT16          FIFO_ServoRate[COMMAND_FIFO_LENGTH];
+extern UINT8           FIFO_SEState[COMMAND_FIFO_LENGTH];
+extern UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
+
+
 extern unsigned int DemoModeActive;
 extern BOOL FIFOEmpty;
 extern unsigned int comd_counter;

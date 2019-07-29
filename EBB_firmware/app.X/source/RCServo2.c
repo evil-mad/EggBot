@@ -374,12 +374,12 @@ UINT8 RCServo2_Move(
       ;
 
       // Now copy the values over into the FIFO element
-      CommandFIFO[0].Command = COMMAND_SERVO_MOVE;
-      CommandFIFO[0].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      CommandFIFO[0].ServoChannel = Channel;
-      CommandFIFO[0].ServoRPn = RPn;
-      CommandFIFO[0].ServoPosition = Position;
-      CommandFIFO[0].ServoRate = Rate;
+      FIFO_Command[0] = COMMAND_SERVO_MOVE;
+      FIFO_DelayCounter[0] = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+      FIFO_ServoChannel[0] = Channel;
+      FIFO_ServoRPn[0] = RPn;
+      FIFO_ServoPosition[0] = Position;
+      FIFO_ServoRate[0] = Rate;
 
       FIFOEmpty = FALSE;
     }

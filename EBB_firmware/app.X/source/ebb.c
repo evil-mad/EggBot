@@ -258,9 +258,6 @@
 
 #define MAX_RC_DURATION         11890
 
-// Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     6
-
 typedef enum
 {
   SOLENOID_OFF = 0,
@@ -282,14 +279,48 @@ typedef enum
 } DriverConfigurationType;
 
 // Working registers
-static volatile MoveCommandType CurrentCommand;
+///static volatile MoveCommandType CurrentCommand;
+static volatile CommandType CurrentCommand_Command;
+static volatile INT32       CurrentCommand_StepAdd[NUMBER_OF_STEPPERS];
+static volatile INT32       CurrentCommand_StepAddInc[NUMBER_OF_STEPPERS];
+static volatile UINT32      CurrentCommand_StepsCounter[NUMBER_OF_STEPPERS];
+static volatile UINT8       CurrentCommand_DirBits;
+static volatile UINT32      CurrentCommand_DelayCounter;
+static volatile UINT16      CurrentCommand_ServoPosition;
+static volatile UINT8       CurrentCommand_ServoRPn;
+static volatile UINT8       CurrentCommand_ServoChannel;
+static volatile UINT16      CurrentCommand_ServoRate;
+static volatile UINT8       CurrentCommand_SEState;
+static volatile UINT16      CurrentCommand_SEPower;
+
 //#pragma udata access fast_vars
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 BOOL FIFOEmpty;
 
 #pragma udata FIFO=0x800
-MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
+/// MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
+// What used to be an array of structures is now separate arrays. Why? To
+// get around the 256 byte (1 bank)/variable limitation of C18/PIC18
+INT32           FIFO_StepAdd[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
+#pragma udata FIFO2=0x900
+UINT32          FIFO_StepsCounter[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+UINT8           FIFO_DirBits[COMMAND_FIFO_LENGTH];
+UINT8           FIFO_ServoChannel[COMMAND_FIFO_LENGTH];
+#pragma udata FIFO3=0xA00
+UINT32          FIFO_DelayCounter[COMMAND_FIFO_LENGTH];   // NOT Milliseconds! In 25KHz units
+UINT16          FIFO_ServoPosition[COMMAND_FIFO_LENGTH];
+#pragma udata FIFO4=0xB00
+UINT16          FIFO_ServoRate[COMMAND_FIFO_LENGTH];
+INT32           FIFO_StepAddInc[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+#pragma udata FIFO5=0xC00
+CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
+UINT8           FIFO_ServoRPn[COMMAND_FIFO_LENGTH];
+UINT8           FIFO_SEState[COMMAND_FIFO_LENGTH];
+
 #pragma udata
+
+
 /* These values hold the global step position of each axis */
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
@@ -346,25 +377,25 @@ void high_ISR(void)
     TMR1H = TIMER1_H_RELOAD;  //
     TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
-    OutByte = CurrentCommand.DirBits;
+    OutByte = CurrentCommand_DirBits;
     TookStep = FALSE;
     AllDone = TRUE;
 
     // Note, you don't even need a command to delay. Any command can have
     // a delay associated with it, if DelayCounter is != 0.
-    if (CurrentCommand.DelayCounter)
+    if (CurrentCommand_DelayCounter)
     {
       // Double check that things aren't way too big
-      if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+      if (CurrentCommand_DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
       {
-        CurrentCommand.DelayCounter = 0;
+        CurrentCommand_DelayCounter = 0;
       }
       else {
-        CurrentCommand.DelayCounter--;
+        CurrentCommand_DelayCounter--;
       }
     }
 
-    if (CurrentCommand.DelayCounter)
+    if (CurrentCommand_DelayCounter)
     {
         AllDone = FALSE;
     }
@@ -376,14 +407,14 @@ void high_ISR(void)
     // counting done at the same time as our motor move or servo move.
     // This allows the delay time to start counting at the beginning of the
     // command execution.
-    if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+    if (CurrentCommand_Command == COMMAND_MOTOR_MOVE)
     {
       // Only output DIR bits if we are actually doing something
-      if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
+      if (CurrentCommand_StepsCounter[0] || CurrentCommand_StepsCounter[1])
       {
         if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
         {
-          if (CurrentCommand.DirBits & DIR1_BIT)
+          if (CurrentCommand_DirBits & DIR1_BIT)
           {
             Dir1IO = 1;
           }
@@ -391,7 +422,7 @@ void high_ISR(void)
           {
             Dir1IO = 0;
           }
-          if (CurrentCommand.DirBits & DIR2_BIT)
+          if (CurrentCommand_DirBits & DIR2_BIT)
           {
             Dir2IO = 1;
           }
@@ -402,7 +433,7 @@ void high_ISR(void)
         }
         else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
         {
-          if (CurrentCommand.DirBits & DIR1_BIT)
+          if (CurrentCommand_DirBits & DIR1_BIT)
           {
             Dir1AltIO = 1;
           }
@@ -410,7 +441,7 @@ void high_ISR(void)
           {
             Dir1AltIO = 0;
           }
-          if (CurrentCommand.DirBits & DIR2_BIT)
+          if (CurrentCommand_DirBits & DIR2_BIT)
           {
             Dir2AltIO = 1;
           }
@@ -421,16 +452,16 @@ void high_ISR(void)
         }
 
         // Only do this if there are steps left to take
-        if (CurrentCommand.StepsCounter[0])
+        if (CurrentCommand_StepsCounter[0])
         {
-          StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
+          StepAcc[0] = StepAcc[0] + CurrentCommand_StepAdd[0];
           if (StepAcc[0] & 0x80000000)
           {
             StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
             OutByte = OutByte | STEP1_BIT;
             TookStep = TRUE;
-            CurrentCommand.StepsCounter[0]--;
-            if (CurrentCommand.DirBits & DIR1_BIT)
+            CurrentCommand_StepsCounter[0]--;
+            if (CurrentCommand_DirBits & DIR1_BIT)
             {
               globalStepCounter1--;
             }
@@ -440,19 +471,19 @@ void high_ISR(void)
             }
           }
           // For acceleration, we now add a bit to StepAdd each time through as well
-          CurrentCommand.StepAdd[0] += CurrentCommand.StepAddInc[0];
+          CurrentCommand_StepAdd[0] += CurrentCommand_StepAddInc[0];
           AllDone = FALSE;
         }
-        if (CurrentCommand.StepsCounter[1])
+        if (CurrentCommand_StepsCounter[1])
         {
-          StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
+          StepAcc[1] = StepAcc[1] + CurrentCommand_StepAdd[1];
           if (StepAcc[1] & 0x80000000)
           {
             StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
             OutByte = OutByte | STEP2_BIT;
             TookStep = TRUE;
-            CurrentCommand.StepsCounter[1]--;
-            if (CurrentCommand.DirBits & DIR2_BIT)
+            CurrentCommand_StepsCounter[1]--;
+            if (CurrentCommand_DirBits & DIR2_BIT)
             {
               globalStepCounter2--;
             }
@@ -462,7 +493,7 @@ void high_ISR(void)
             }
           }
           // For acceleration, we now add a bit to StepAdd each time through as well
-          CurrentCommand.StepAdd[1] += CurrentCommand.StepAddInc[1];
+          CurrentCommand_StepAdd[1] += CurrentCommand_StepAddInc[1];
           AllDone = FALSE;
         }
 
@@ -531,12 +562,12 @@ void high_ISR(void)
       }
     }
     // Check to see if we should change the state of the pen
-    else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
+    else if (CurrentCommand_Command == COMMAND_SERVO_MOVE)
     {
       if (gUseRCPenServo)
       {
         // Precompute the channel, since we use it all over the place
-        UINT8 Channel = CurrentCommand.ServoChannel - 1;
+        UINT8 Channel = CurrentCommand_ServoChannel - 1;
 
         // This code below is the meat of the RCServo2_Move() function
         // We have to manually write it in here rather than calling
@@ -545,7 +576,7 @@ void high_ISR(void)
         // code and things run way too slowly.
 
         // If the user is trying to turn off this channel's RC servo output
-        if (0 == CurrentCommand.ServoPosition)
+        if (0 == CurrentCommand_ServoPosition)
         {
           // Turn off the PPS routing to the pin
           *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
@@ -558,21 +589,21 @@ void high_ISR(void)
         else
         {
           // Otherwise, set all of the values that start this RC servo moving
-          gRC2Rate[Channel] = CurrentCommand.ServoRate;
-          gRC2Target[Channel] = CurrentCommand.ServoPosition;
-          gRC2RPn[Channel] = CurrentCommand.ServoRPn;
+          gRC2Rate[Channel] = CurrentCommand_ServoRate;
+          gRC2Target[Channel] = CurrentCommand_ServoPosition;
+          gRC2RPn[Channel] = CurrentCommand_ServoRPn;
           if (gRC2Value[Channel] == 0)
           {
-            gRC2Value[Channel] = CurrentCommand.ServoPosition;
+            gRC2Value[Channel] = CurrentCommand_ServoPosition;
           }
         }
       }
             
       // If this servo is the pen servo (on g_servo2_RPn)
-      if (CurrentCommand.ServoRPn == g_servo2_RPn)
+      if (CurrentCommand_ServoRPn == g_servo2_RPn)
       {
         // Then set its new state based on the new position
-        if (CurrentCommand.ServoPosition == g_servo2_min)
+        if (CurrentCommand_ServoPosition == g_servo2_min)
         {
           PenState = PEN_UP;
           SolenoidState = SOLENOID_OFF;
@@ -593,13 +624,13 @@ void high_ISR(void)
       }
     }
     // Check to see if we should start or stop the engraver
-    else if (CurrentCommand.Command == COMMAND_SE)
+    else if (CurrentCommand_Command == COMMAND_SE)
     {
       // Now act on the State of the SE command
-      if (CurrentCommand.SEState)
+      if (CurrentCommand_SEState)
       {
         // Set RB3 to StoredEngraverPower
-        CCPR1L = CurrentCommand.SEPower >> 2;
+        CCPR1L = CurrentCommand_SEPower >> 2;
         CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
       }
       else
@@ -612,31 +643,48 @@ void high_ISR(void)
     }
         
     // If we're done with our current command, load in the next one
-    if (AllDone && CurrentCommand.DelayCounter == 0)
+    if (AllDone && CurrentCommand_DelayCounter == 0)
     {
-      CurrentCommand.Command = COMMAND_NONE;
+      CurrentCommand_Command = COMMAND_NONE;
       if (!FIFOEmpty)
       {
-        CurrentCommand = CommandFIFO[0];
+        /// CurrentCommand = CommandFIFO[0];
+
+        CurrentCommand_Command = FIFO_Command[0];
+        CurrentCommand_StepAdd[0] = FIFO_StepAdd[0][0];
+        CurrentCommand_StepAdd[1] = FIFO_StepAdd[1][0];
+        CurrentCommand_StepAddInc[0] = FIFO_StepAddInc[0][0];
+        CurrentCommand_StepAddInc[1] = FIFO_StepAddInc[1][0];
+        CurrentCommand_StepsCounter[0] = FIFO_StepsCounter[0][0];
+        CurrentCommand_StepsCounter[1] = FIFO_StepsCounter[1][0];
+        CurrentCommand_DirBits = FIFO_DirBits[0];
+        CurrentCommand_DelayCounter = FIFO_DelayCounter[0];
+        CurrentCommand_ServoPosition = FIFO_ServoPosition[0];
+        CurrentCommand_ServoRPn = FIFO_ServoRPn[0];
+        CurrentCommand_ServoChannel = FIFO_ServoChannel[0];
+        CurrentCommand_ServoRate = FIFO_ServoRate[0];
+        CurrentCommand_SEState = FIFO_SEState[0];
+        CurrentCommand_SEPower = FIFO_SEPower[0];
+
         // Zero out command in FIFO
-        CommandFIFO[0].Command = COMMAND_NONE;
-        CommandFIFO[0].StepAdd[0] = 0;
-        CommandFIFO[0].StepAdd[1] = 0;
-        CommandFIFO[0].StepsCounter[0] = 0;
-        CommandFIFO[0].StepsCounter[1] = 0;
-        CommandFIFO[0].DirBits = 0;
-        CommandFIFO[0].DelayCounter = 0;
-        CommandFIFO[0].ServoPosition = 0;
-        CommandFIFO[0].ServoRPn = 0;
-        CommandFIFO[0].ServoChannel = 0;
-        CommandFIFO[0].ServoRate = 0;
-        CommandFIFO[0].SEState = 0;
-        CommandFIFO[0].SEPower = 0;
+        FIFO_Command[0] = COMMAND_NONE;
+        FIFO_StepAdd[0][0] = 0;
+        FIFO_StepAdd[1][0] = 0;
+        FIFO_StepsCounter[0][0] = 0;
+        FIFO_StepsCounter[1][0] = 0;
+        FIFO_DirBits[0] = 0;
+        FIFO_DelayCounter[0] = 0;
+        FIFO_ServoPosition[0] = 0;
+        FIFO_ServoRPn[0] = 0;
+        FIFO_ServoChannel[0] = 0;
+        FIFO_ServoRate[0] = 0;
+        FIFO_SEState[0] = 0;
+        FIFO_SEPower[0] = 0;
         FIFOEmpty = TRUE;
       }
       else 
       {
-        CurrentCommand.DelayCounter = 0;
+        CurrentCommand_DelayCounter = 0;
       }
     }
 
@@ -662,19 +710,19 @@ void EBB_Init(void)
   char i;
 
   // Initialize all Current Command values
-  for (i = 0; i < NUMBER_OF_STEPPERS; i++)
-  {
-    CurrentCommand.StepAdd[i] = 1;
-    CurrentCommand.StepsCounter[i] = 0;
-    CurrentCommand.StepAddInc[i] = 0;
-  }
-  CurrentCommand.Command = COMMAND_NONE;
-  CurrentCommand.DirBits = 0;
-  CurrentCommand.DelayCounter = 0;
-  CurrentCommand.ServoPosition = 0;
-  CurrentCommand.ServoRPn = 0;
-  CurrentCommand.ServoChannel = 0;
-  CurrentCommand.ServoRate = 0;
+  CurrentCommand_StepAdd[0] = 1;
+  CurrentCommand_StepAdd[1] = 1;
+  CurrentCommand_StepsCounter[0] = 0;
+  CurrentCommand_StepsCounter[1] = 0;
+  CurrentCommand_StepAddInc[0] = 0;
+  CurrentCommand_StepAddInc[1] = 0;
+  CurrentCommand_Command = COMMAND_NONE;
+  CurrentCommand_DirBits = 0;
+  CurrentCommand_DelayCounter = 0;
+  CurrentCommand_ServoPosition = 0;
+  CurrentCommand_ServoRPn = 0;
+  CurrentCommand_ServoChannel = 0;
+  CurrentCommand_ServoRate = 0;
 
   FIFOEmpty = TRUE;
 
@@ -1066,8 +1114,8 @@ void parse_AM_packet (void)
     
   while(!FIFOEmpty);
 
-  CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
-  CommandFIFO[0].DirBits = 0;
+  FIFO_DelayCounter[0] = 0; // No delay for motor moves
+  FIFO_DirBits[0] = 0;
 
   // Always enable both motors when we want to move them
   Enable1IO = ENABLE_MOTOR;
@@ -1078,12 +1126,12 @@ void parse_AM_packet (void)
   // First, set the direction bits
   if (A1Steps < 0)
   {
-    CommandFIFO[0].DirBits = DIR1_BIT;
+    FIFO_DirBits[0] = DIR1_BIT;
     A1Steps = -A1Steps;
   }
   if (A2Steps < 0)
   {
-    CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+    FIFO_DirBits[0] = FIFO_DirBits[0] | DIR2_BIT;
     A2Steps = -A2Steps;
   }
 
@@ -1128,13 +1176,13 @@ void parse_AM_packet (void)
   //temp = (UINT32)ftemp;
 
   /* Amount to add to accumulator each 25KHz */
-  CommandFIFO[0].StepAdd[0] = (UINT32)(distance_temp * (float)A1Steps);
+  FIFO_StepAdd[0][0] = (UINT32)(distance_temp * (float)A1Steps);
 
   // For debug
   //printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
 
   /* Total number of steps for this axis for this move */
-  CommandFIFO[0].StepsCounter[0] = A1Steps;
+  FIFO_StepsCounter[0][0] = A1Steps;
 
   //ftemp = (float)VelocityFinal * 2147483648.0;
   //fprint(ftemp);
@@ -1159,7 +1207,7 @@ void parse_AM_packet (void)
   //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
 
   /* Amount to add to StepAdd each 25KHz */
-  CommandFIFO[0].StepAddInc[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
+  FIFO_StepAddInc[0][0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
 
   /* Compute StepAdd Axis 2 Initial */
   // temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
@@ -1181,8 +1229,8 @@ void parse_AM_packet (void)
   // For debug
   //printf((far rom char *)"SAyi = %lu\n\r", temp);
 
-  CommandFIFO[0].StepAdd[1] = (UINT32)(distance_temp * A2Steps);
-  CommandFIFO[0].StepsCounter[1] = A2Steps;
+  FIFO_StepAdd[1][0] = (UINT32)(distance_temp * A2Steps);
+  FIFO_StepsCounter[1][0] = A2Steps;
     
   /* Compute StepAddInc for axis 2 */
   //    Accel2 = ((float)A2Steps * accel_temp);
@@ -1191,20 +1239,20 @@ void parse_AM_packet (void)
   //    stemp = (INT32)((Accel2 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
   //    stemp = (INT32)(((float)A2Steps * accel_temp) * 343.59738);
     
-  CommandFIFO[0].StepAddInc[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
+  FIFO_StepAddInc[1][0] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
 
-  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[0] == 0 && CommandFIFO[0].StepsCounter[0] > 0)
+  if (VelocityInital != VelocityFinal && FIFO_StepAddInc[0][0] == 0 && FIFO_StepsCounter[0][0] > 0)
   {
      printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
      return;
   }
-  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[1] == 0 && CommandFIFO[0].StepsCounter[1] > 0)
+  if (VelocityInital != VelocityFinal && FIFO_StepAddInc[1][0] == 0 && FIFO_StepsCounter[1][0] > 0)
   {
      printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
      return;
   }
 
-  CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+  FIFO_Command[0] = COMMAND_MOTOR_MOVE;
     
   FIFOEmpty = FALSE;
     
@@ -1217,7 +1265,6 @@ void parse_LM_packet (void)
 {
   UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
   INT32 StepsCounter1, StepsCounter2 = 0;
-  MoveCommandType move;
     
   // Extract each of the values.
   extract_number (kULONG, &StepAdd1, kREQUIRED);
@@ -1252,8 +1299,6 @@ void parse_LM_packet (void)
     return;
   }
     
-  move.DelayCounter = 0; // No delay for motor moves
-  move.DirBits = 0;
 
   // Always enable both motors when we want to move them
   Enable1IO = ENABLE_MOTOR;
@@ -1261,31 +1306,32 @@ void parse_LM_packet (void)
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
-  // First, set the direction bits
-  if (StepsCounter1 < 0)
-  {
-    move.DirBits = move.DirBits | DIR1_BIT;
-    StepsCounter1 = -StepsCounter1;
-  }
-  if (StepsCounter2 < 0)
-  {
-    move.DirBits = move.DirBits | DIR2_BIT;
-    StepsCounter2 = -StepsCounter2;
-  }
-
-  move.StepAdd[0] = StepAdd1;
-  move.StepsCounter[0] = StepsCounter1;
-  move.StepAddInc[0] = StepAddInc1;
-  move.StepAdd[1] = StepAdd2;
-  move.StepsCounter[1] = StepsCounter2;
-  move.StepAddInc[1] = StepAddInc2;
-  move.Command = COMMAND_MOTOR_MOVE;
-
   // Spin here until there's space in the fifo
   while(!FIFOEmpty)
   ;
 
-  CommandFIFO[0] = move;
+  FIFO_DelayCounter[0] = 0; // No delay for motor moves
+  FIFO_DirBits[0] = 0;
+
+  // First, set the direction bits
+  if (StepsCounter1 < 0)
+  {
+    FIFO_DirBits[0] = FIFO_DirBits[0] | DIR1_BIT;
+    StepsCounter1 = -StepsCounter1;
+  }
+  if (StepsCounter2 < 0)
+  {
+    FIFO_DirBits[0] = FIFO_DirBits[0] | DIR2_BIT;
+    StepsCounter2 = -StepsCounter2;
+  }
+
+  FIFO_StepAdd[0][0] = StepAdd1;
+  FIFO_StepsCounter[0][0] = StepsCounter1;
+  FIFO_StepAddInc[0][0] = StepAddInc1;
+  FIFO_StepAdd[1][0] = StepAdd2;
+  FIFO_StepsCounter[1][0] = StepsCounter2;
+  FIFO_StepAddInc[1][0] = StepAddInc2;
+  FIFO_Command[0] = COMMAND_MOTOR_MOVE;
 
   /* For debugging step motion , uncomment the next line */
   /*
@@ -1452,7 +1498,7 @@ void parse_HM_packet (void)
     INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
     // Create our output values to print back to the PC
-    if ((CurrentCommand.DelayCounter == 0) && (CurrentCommand.Command == COMMAND_NONE))
+    if ((CurrentCommand_DelayCounter == 0) && (CurrentCommand_Command == COMMAND_NONE))
     {
       CommandExecuting = 0;
     }
@@ -1871,7 +1917,22 @@ static void process_SM(
   ;
 
   // Now, quick copy over the computed command data to the command fifo
-  CommandFIFO[0] = move;
+  FIFO_Command[0] = move.Command;
+  FIFO_StepAdd[0][0] = move.StepAdd[0];
+  FIFO_StepAdd[1][0] = move.StepAdd[1];
+  FIFO_StepAddInc[0][0] = move.StepAddInc[0];
+  FIFO_StepAddInc[1][0] = move.StepAddInc[1];
+  FIFO_StepsCounter[0][0] = move.StepsCounter[0];
+  FIFO_StepsCounter[1][0] = move.StepsCounter[1];
+  FIFO_DirBits[0] = move.DirBits;
+  FIFO_DelayCounter[0] = move.DelayCounter;
+  FIFO_ServoPosition[0] = move.ServoPosition;
+  FIFO_ServoRPn[0] = move.ServoRPn;
+  FIFO_ServoChannel[0] = move.ServoChannel;
+  FIFO_ServoRate[0] = move.ServoRate;
+  FIFO_SEState[0] = move.SEState;
+  FIFO_SEPower[0] = move.SEPower;
+  /// CommandFIFO[0] = move;
     
   FIFOEmpty = FALSE;
 }
@@ -1891,37 +1952,37 @@ void process_EStop(BOOL printResult)
   // If there is a command waiting in the FIFO and it is a move command
   // or the current command is a move command, then remember that for later.
   if (
-      (!FIFOEmpty && CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+      (!FIFOEmpty && FIFO_Command[0] == COMMAND_MOTOR_MOVE)
       || 
-      CurrentCommand.Command == COMMAND_MOTOR_MOVE
+      CurrentCommand_Command == COMMAND_MOTOR_MOVE
   )
   {
     command_interrupted = 1;
   }
 
   // If the FIFO has a move command in it, remove it.
-  if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+  if (FIFO_Command[0] == COMMAND_MOTOR_MOVE)
   {
-    CommandFIFO[0].Command = COMMAND_NONE;
-    fifo_steps1 = CommandFIFO[0].StepsCounter[0];
-    fifo_steps2 = CommandFIFO[0].StepsCounter[1];
-    CommandFIFO[0].StepsCounter[0] = 0;
-    CommandFIFO[0].StepsCounter[1] = 0;
-    CommandFIFO[0].StepAddInc[0] = 0;
-    CommandFIFO[0].StepAddInc[1] = 0;
+    FIFO_Command[0] = COMMAND_NONE;
+    fifo_steps1 = FIFO_StepsCounter[0][0];
+    fifo_steps2 = FIFO_StepsCounter[1][0];
+    FIFO_StepsCounter[0][0] = 0;
+    FIFO_StepsCounter[1][0] = 0;
+    FIFO_StepAddInc[0][0] = 0;
+    FIFO_StepAddInc[1][0] = 0;
     FIFOEmpty = TRUE;
   }
 
   // If the current command is a move command, then stop the move.
-  if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+  if (CurrentCommand_Command == COMMAND_MOTOR_MOVE)
   {
-    CurrentCommand.Command = COMMAND_NONE;
-    remaining_steps1 = CurrentCommand.StepsCounter[0];
-    remaining_steps2 = CurrentCommand.StepsCounter[1];
-    CurrentCommand.StepsCounter[0] = 0;
-    CurrentCommand.StepsCounter[1] = 0;
-    CurrentCommand.StepAddInc[0] = 0;
-    CurrentCommand.StepAddInc[1] = 0;
+    CurrentCommand_Command = COMMAND_NONE;
+    remaining_steps1 = CurrentCommand_StepsCounter[0];
+    remaining_steps2 = CurrentCommand_StepsCounter[1];
+    CurrentCommand_StepsCounter[0] = 0;
+    CurrentCommand_StepsCounter[1] = 0;
+    CurrentCommand_StepAddInc[0] = 0;
+    CurrentCommand_StepAddInc[1] = 0;
   }
   
   // Stop the servo's motion
@@ -2526,10 +2587,10 @@ void parse_SE_packet(void)
       ;
 
     // Set up the motion queue command
-    CommandFIFO[0].SEPower = StoredEngraverPower;
-    CommandFIFO[0].DelayCounter = 0;
-    CommandFIFO[0].SEState = State;
-    CommandFIFO[0].Command = COMMAND_SE;
+    FIFO_SEPower[0] = StoredEngraverPower;
+    FIFO_DelayCounter[0] = 0;
+    FIFO_SEState[0] = State;
+    FIFO_Command[0] = COMMAND_SE;
 
     FIFOEmpty = FALSE;
   }
@@ -2556,20 +2617,20 @@ UINT8 process_QM(void)
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // Create our output values to print back to the PC
-  if (CurrentCommand.DelayCounter != 0) {
+  if (CurrentCommand_DelayCounter != 0) {
     CommandExecuting = 1;
   }
-  if (CurrentCommand.Command != COMMAND_NONE) {
+  if (CurrentCommand_Command != COMMAND_NONE) {
     CommandExecuting = 1;
   }
   if (FIFOEmpty == FALSE) {
     CommandExecuting = 1;
     FIFOStatus = 1;
   }
-  if (CommandExecuting && CurrentCommand.StepsCounter[0] != 0) {
+  if (CommandExecuting && CurrentCommand_StepsCounter[0] != 0) {
     Motor1Running = 1;
   }
-  if (CommandExecuting && CurrentCommand.StepsCounter[1] != 0) {
+  if (CommandExecuting && CurrentCommand_StepsCounter[1] != 0) {
     Motor2Running = 1;
   }
 
