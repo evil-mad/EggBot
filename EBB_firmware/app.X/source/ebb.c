@@ -234,10 +234,7 @@
 // 2.6.1 01/07/19 - Added "QG" general query command
 // 2.6.2 01/11/19 - Added "HM" Home Motor command
 // 2.6.3 05/24/19 - Changed default RC servo power down time from 15min to 60s
-// 2.6.4 07/23/19 - Added EE command to enable RB0 and PRG button to trigger EStop
-//                    behavior.
-//                  Updated ES command to stop servo motion and use limp timer
-//                    from EE command (unified EStop behavior)
+// 2.7.0 07/23/19 - A boatload of changes <LIST THEM>
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -262,7 +259,7 @@
 #define MAX_RC_DURATION         11890
 
 // Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     4
+#define COMMAND_FIFO_LENGTH     6
 
 typedef enum
 {
@@ -290,6 +287,8 @@ static volatile MoveCommandType CurrentCommand;
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 BOOL FIFOEmpty;
 
+#pragma udata FIFO=0x800
+MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
 #pragma udata
 /* These values hold the global step position of each axis */
 volatile static INT32 globalStepCounter1;
@@ -299,7 +298,6 @@ static unsigned char OutByte;
 static unsigned char TookStep;
 static unsigned char AllDone;
 static unsigned char i;
-MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
 
 unsigned int DemoModeActive;
 unsigned int comd_counter;

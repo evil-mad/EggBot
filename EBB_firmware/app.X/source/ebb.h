@@ -90,15 +90,13 @@ typedef struct
   UINT16          ServoRate;
   UINT8           SEState;
   UINT16          SEPower;
-} MoveCommandType;
+} MoveCommandType;  // 27 bytes
 
 // Define global things that depend on the board type
 #define STEP1_BIT (0x01)
 #define DIR1_BIT  (0x02)
 #define STEP2_BIT (0x04)
 #define DIR2_BIT  (0x08)
-
-#define NUMBER_OF_STEPPERS  2
 
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
