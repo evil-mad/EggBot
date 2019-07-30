@@ -132,6 +132,10 @@ extern UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
 
 extern unsigned int DemoModeActive;
 extern BOOL FIFOEmpty;
+extern UINT8 FIFODepth;
+extern UINT8 FIFOIn;
+extern UINT8 FIFOOut;
+
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;

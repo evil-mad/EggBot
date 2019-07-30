@@ -1599,11 +1599,11 @@ void parse_R_packet(void)
 // 1                  {1|0} turns on or off the 'ack' ("OK" at end of packets)
 void parse_CU_packet(void)
 {
-  unsigned char parameter_number;
-  signed int paramater_value;
+  unsigned char parameter_number = 0;
+  signed int parameter_value = 0;
 
   extract_number (kUCHAR, &parameter_number, kREQUIRED);
-  extract_number (kINT, &paramater_value, kREQUIRED);
+  extract_number (kINT, &parameter_value, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1611,27 +1611,49 @@ void parse_CU_packet(void)
     return;
   }
 
-  if (1 == parameter_number)
+  switch(parameter_number)
   {
-    if (0 == paramater_value || 1 == paramater_value)
-    {
-      g_ack_enable = paramater_value;
-    }
-    else
-    {
-      bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-  }
-  if (2 == parameter_number)
-  {
-    if (0 == paramater_value || 1 == paramater_value)
-    {
-      gLimitChecks = paramater_value;
-    }
-  else
-    {
-      bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
+    case 1:
+      if (0 == parameter_value || 1 == parameter_value)
+      {
+        g_ack_enable = parameter_value;
+      }
+      else
+      {
+        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      }
+      break;
+      
+    case 2:
+      if (0 == parameter_value || 1 == parameter_value)
+      {
+        gLimitChecks = parameter_value;
+      }
+      else
+      {
+        bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      }
+      break;
+      
+    case 3:
+      if (0 != parameter_value)
+      {
+        // Set the FIFODepth to parameter_value if parameter_value isn't zero
+        if (parameter_value > COMMAND_FIFO_LENGTH)
+        {
+          FIFODepth = COMMAND_FIFO_LENGTH;
+        }
+        else
+        {
+          FIFODepth = parameter_value;
+        }
+      }
+      // Always return FIFODepth and max FIFO depth
+      printf ((far rom char*)"%i,%i\r\n", FIFODepth, COMMAND_FIFO_LENGTH);
+      break;
+      
+    default:
+      break;
   }
   print_ack();
 }

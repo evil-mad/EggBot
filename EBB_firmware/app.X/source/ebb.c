@@ -296,6 +296,13 @@ static volatile UINT16      CurrentCommand_SEPower;
 //#pragma udata access fast_vars
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 BOOL FIFOEmpty;
+// How many elements of the FIFO will we be using?
+UINT8 FIFODepth = 1;
+// The next element of the FIFO to put a command into
+UINT8 FIFOIn = 0;
+// The FIFO command we are currently executing
+UINT8 FIFOOut = 0;
+
 
 #pragma udata FIFO=0x800
 /// MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
@@ -725,6 +732,9 @@ void EBB_Init(void)
   CurrentCommand_ServoRate = 0;
 
   FIFOEmpty = TRUE;
+  FIFODepth = 1;
+  FIFOIn = 0;
+  FIFOOut = 0;
 
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
