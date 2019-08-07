@@ -1638,18 +1638,18 @@ void parse_CU_packet(void)
     case 3:
       if (0 != parameter_value)
       {
-        // Set the FIFODepth to parameter_value if parameter_value isn't zero
+        // Set the FIFOSize to parameter_value if parameter_value isn't zero
         if (parameter_value > COMMAND_FIFO_LENGTH)
         {
-          FIFODepth = COMMAND_FIFO_LENGTH;
+          FIFOSize = COMMAND_FIFO_LENGTH;
         }
         else
         {
-          FIFODepth = parameter_value;
+          FIFOSize = parameter_value;
         }
       }
       // Always return FIFODepth and max FIFO depth
-      printf ((far rom char*)"%i,%i\r\n", FIFODepth, COMMAND_FIFO_LENGTH);
+      printf ((far rom char*)"%i,%i\r\n", FIFOSize, COMMAND_FIFO_LENGTH);
       break;
       
     default:

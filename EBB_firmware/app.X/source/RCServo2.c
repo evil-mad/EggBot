@@ -370,18 +370,17 @@ UINT8 RCServo2_Move(
 
       // Wait until we have a free spot in the FIFO, and add our new
       // command in
-      while(!FIFOEmpty)
-      ;
+      WaitForRoomInFIFO();
 
       // Now copy the values over into the FIFO element
-      FIFO_Command[0] = COMMAND_SERVO_MOVE;
-      FIFO_DelayCounter[0] = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      FIFO_ServoChannel[0] = Channel;
-      FIFO_ServoRPn[0] = RPn;
-      FIFO_ServoPosition[0] = Position;
-      FIFO_ServoRate[0] = Rate;
+      FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
+      FIFO_DelayCounter[FIFOIn] = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+      FIFO_ServoChannel[FIFOIn] = Channel;
+      FIFO_ServoRPn[FIFOIn] = RPn;
+      FIFO_ServoPosition[FIFOIn] = Position;
+      FIFO_ServoRate[FIFOIn] = Rate;
 
-      FIFOEmpty = FALSE;
+      FIFOInc();
     }
   }
   return Channel;

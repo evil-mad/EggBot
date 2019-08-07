@@ -131,14 +131,17 @@ extern UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
 
 
 extern unsigned int DemoModeActive;
-extern BOOL FIFOEmpty;
-extern UINT8 FIFODepth;
-extern UINT8 FIFOIn;
-extern UINT8 FIFOOut;
+extern volatile UINT8 FIFODepth;
+extern volatile UINT8 FIFOSize;
+extern volatile UINT8 FIFOIn;
+extern volatile UINT8 FIFOOut;
 
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
+
+void FIFOInc(void);
+void WaitForRoomInFIFO(void);
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
