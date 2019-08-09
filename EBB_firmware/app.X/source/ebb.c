@@ -375,291 +375,295 @@ void high_ISR(void)
     OutByte = FIFO_DirBits[FIFOOut];
     TookStep = FALSE;
     AllDone = TRUE;
-
-    // Note, you don't even need a command to delay. Any command can have
-    // a delay associated with it, if DelayCounter is != 0.
-    if (FIFO_DelayCounter[FIFOOut])
+    
+    if (FIFODepth)
     {
-      // Double check that things aren't way too big
-      if (FIFO_DelayCounter[FIFOOut] > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+
+      // Note, you don't even need a command to delay. Any command can have
+      // a delay associated with it, if DelayCounter is != 0.
+      if (FIFO_DelayCounter[FIFOOut])
       {
-        FIFO_DelayCounter[FIFOOut] = 0;
+        // Double check that things aren't way too big
+        if (FIFO_DelayCounter[FIFOOut] > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+        {
+          FIFO_DelayCounter[FIFOOut] = 0;
+        }
+        else {
+          FIFO_DelayCounter[FIFOOut]--;
+        }
       }
-      else {
-        FIFO_DelayCounter[FIFOOut]--;
-      }
-    }
 
-    if (FIFO_DelayCounter[FIFOOut])
-    {
-        AllDone = FALSE;
-    }
-
-    // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
-    //PORTDbits.RD1 = 0;
-
-    // Note: by not making this an else-if, we have our DelayCounter
-    // counting done at the same time as our motor move or servo move.
-    // This allows the delay time to start counting at the beginning of the
-    // command execution.
-    if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
-    {
-      // Only output DIR bits if we are actually doing something
-      if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut])
+      if (FIFO_DelayCounter[FIFOOut])
       {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-          {
-            Dir1IO = 1;
-          }
-          else
-          {
-            Dir1IO = 0;
-          }
-          if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-          {
-            Dir2IO = 1;
-          }
-          else
-          {
-            Dir2IO = 0;
-          }
-        }
-        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-        {
-          if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-          {
-            Dir1AltIO = 1;
-          }
-          else
-          {
-            Dir1AltIO = 0;
-          }
-          if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-          {
-            Dir2AltIO = 1;
-          }
-          else
-          {
-            Dir2AltIO = 0;
-          }
-        }
+          AllDone = FALSE;
+      }
 
-        // Only do this if there are steps left to take
-        if (FIFO_StepsCounter[0][FIFOOut])
+      // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
+      //PORTDbits.RD1 = 0;
+
+      // Note: by not making this an else-if, we have our DelayCounter
+      // counting done at the same time as our motor move or servo move.
+      // This allows the delay time to start counting at the beginning of the
+      // command execution.
+      if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
+      {
+        // Only output DIR bits if we are actually doing something
+        if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut])
         {
-          StepAcc[0] = StepAcc[0] + FIFO_StepAdd[0][FIFOOut];
-          if (StepAcc[0] & 0x80000000)
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
-            StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
-            OutByte = OutByte | STEP1_BIT;
-            TookStep = TRUE;
-            FIFO_StepsCounter[0][FIFOOut]--;
             if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
             {
-              globalStepCounter1--;
+              Dir1IO = 1;
             }
             else
             {
-              globalStepCounter1++;
+              Dir1IO = 0;
             }
-          }
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          FIFO_StepAdd[0][FIFOOut] += FIFO_StepAddInc[0][FIFOOut];
-          AllDone = FALSE;
-        }
-        if (FIFO_StepsCounter[1][FIFOOut])
-        {
-          StepAcc[1] = StepAcc[1] + FIFO_StepAdd[1][FIFOOut];
-          if (StepAcc[1] & 0x80000000)
-          {
-            StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
-            OutByte = OutByte | STEP2_BIT;
-            TookStep = TRUE;
-            FIFO_StepsCounter[1][FIFOOut]--;
             if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
             {
-              globalStepCounter2--;
+              Dir2IO = 1;
             }
             else
             {
-              globalStepCounter2++;
-            }
-          }
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          FIFO_StepAdd[1][FIFOOut] += FIFO_StepAddInc[1][FIFOOut];
-          AllDone = FALSE;
-        }
-
-        if (TookStep)
-        {
-          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-          {
-            if (OutByte & STEP1_BIT)
-            {
-              Step1IO = 1;
-            }
-            if (OutByte & STEP2_BIT)
-            {
-              Step2IO = 1;
+              Dir2IO = 0;
             }
           }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
-            if (OutByte & STEP1_BIT)
+            if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
             {
-              Step1AltIO = 1;
+              Dir1AltIO = 1;
             }
-            if (OutByte & STEP2_BIT)
+            else
             {
-              Step2AltIO = 1;
+              Dir1AltIO = 0;
+            }
+            if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
+            {
+              Dir2AltIO = 1;
+            }
+            else
+            {
+              Dir2AltIO = 0;
             }
           }
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          Delay1TCY();
-          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+
+          // Only do this if there are steps left to take
+          if (FIFO_StepsCounter[0][FIFOOut])
           {
-            Step1IO = 0;
-            Step2IO = 0;
+            StepAcc[0] = StepAcc[0] + FIFO_StepAdd[0][FIFOOut];
+            if (StepAcc[0] & 0x80000000)
+            {
+              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP1_BIT;
+              TookStep = TRUE;
+              FIFO_StepsCounter[0][FIFOOut]--;
+              if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
+              {
+                globalStepCounter1--;
+              }
+              else
+              {
+                globalStepCounter1++;
+              }
+            }
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            FIFO_StepAdd[0][FIFOOut] += FIFO_StepAddInc[0][FIFOOut];
+            AllDone = FALSE;
           }
-          else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+          if (FIFO_StepsCounter[1][FIFOOut])
           {
-            Step1AltIO = 0;
-            Step2AltIO = 0;
+            StepAcc[1] = StepAcc[1] + FIFO_StepAdd[1][FIFOOut];
+            if (StepAcc[1] & 0x80000000)
+            {
+              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP2_BIT;
+              TookStep = TRUE;
+              FIFO_StepsCounter[1][FIFOOut]--;
+              if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
+              {
+                globalStepCounter2--;
+              }
+              else
+              {
+                globalStepCounter2++;
+              }
+            }
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            FIFO_StepAdd[1][FIFOOut] += FIFO_StepAddInc[1][FIFOOut];
+            AllDone = FALSE;
+          }
+
+          if (TookStep)
+          {
+            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+            {
+              if (OutByte & STEP1_BIT)
+              {
+                Step1IO = 1;
+              }
+              if (OutByte & STEP2_BIT)
+              {
+                Step2IO = 1;
+              }
+            }
+            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+            {
+              if (OutByte & STEP1_BIT)
+              {
+                Step1AltIO = 1;
+              }
+              if (OutByte & STEP2_BIT)
+              {
+                Step2AltIO = 1;
+              }
+            }
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            Delay1TCY();
+            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+            {
+              Step1IO = 0;
+              Step2IO = 0;
+            }
+            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+            {
+              Step1AltIO = 0;
+              Step2AltIO = 0;
+            }
           }
         }
       }
-    }
-    // Check to see if we should change the state of the pen
-    else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
-    {
-      if (gUseRCPenServo)
+      // Check to see if we should change the state of the pen
+      else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
       {
-        // Precompute the channel, since we use it all over the place
-        UINT8 Channel = FIFO_ServoChannel[FIFOOut] - 1;
-
-        // This code below is the meat of the RCServo2_Move() function
-        // We have to manually write it in here rather than calling
-        // the function because a real function inside the ISR
-        // causes the compiler to generate enormous amounts of setup/teardown
-        // code and things run way too slowly.
-
-        // If the user is trying to turn off this channel's RC servo output
-        if (0 == FIFO_ServoPosition[FIFOOut])
+        if (gUseRCPenServo)
         {
-          // Turn off the PPS routing to the pin
-          *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
-          // Clear everything else out for this channel
-          gRC2Rate[Channel] = 0;
-          gRC2Target[Channel] = 0;
-          gRC2RPn[Channel] = 0;
-          gRC2Value[Channel] = 0;
+          // Precompute the channel, since we use it all over the place
+          UINT8 Channel = FIFO_ServoChannel[FIFOOut] - 1;
+
+          // This code below is the meat of the RCServo2_Move() function
+          // We have to manually write it in here rather than calling
+          // the function because a real function inside the ISR
+          // causes the compiler to generate enormous amounts of setup/teardown
+          // code and things run way too slowly.
+
+          // If the user is trying to turn off this channel's RC servo output
+          if (0 == FIFO_ServoPosition[FIFOOut])
+          {
+            // Turn off the PPS routing to the pin
+            *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
+            // Clear everything else out for this channel
+            gRC2Rate[Channel] = 0;
+            gRC2Target[Channel] = 0;
+            gRC2RPn[Channel] = 0;
+            gRC2Value[Channel] = 0;
+          }
+          else
+          {
+            // Otherwise, set all of the values that start this RC servo moving
+            gRC2Rate[Channel] = FIFO_ServoRate[FIFOOut];
+            gRC2Target[Channel] = FIFO_ServoPosition[FIFOOut];
+            gRC2RPn[Channel] = FIFO_ServoRPn[FIFOOut];
+            if (gRC2Value[Channel] == 0)
+            {
+              gRC2Value[Channel] = FIFO_ServoPosition[FIFOOut];
+            }
+          }
+        }
+
+        // If this servo is the pen servo (on g_servo2_RPn)
+        if (FIFO_ServoRPn[FIFOOut] == g_servo2_RPn)
+        {
+          // Then set its new state based on the new position
+          if (FIFO_ServoPosition[FIFOOut] == g_servo2_min)
+          {
+            PenState = PEN_UP;
+            SolenoidState = SOLENOID_OFF;
+            if (gUseSolenoid)
+            {
+              PenUpDownIO = 0;
+            }
+          }
+          else
+          {
+            PenState = PEN_DOWN;
+            SolenoidState = SOLENOID_ON;
+            if (gUseSolenoid)
+            {
+              PenUpDownIO = 1;
+            }
+          }
+        }
+      }
+      // Check to see if we should start or stop the engraver
+      else if (FIFO_Command[FIFOOut] == COMMAND_SE)
+      {
+        // Now act on the State of the SE command
+        if (FIFO_SEState[FIFOOut])
+        {
+          // Set RB3 to StoredEngraverPower
+          CCPR1L = FIFO_SEPower[FIFOOut] >> 2;
+          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
         }
         else
         {
-          // Otherwise, set all of the values that start this RC servo moving
-          gRC2Rate[Channel] = FIFO_ServoRate[FIFOOut];
-          gRC2Target[Channel] = FIFO_ServoPosition[FIFOOut];
-          gRC2RPn[Channel] = FIFO_ServoRPn[FIFOOut];
-          if (gRC2Value[Channel] == 0)
-          {
-            gRC2Value[Channel] = FIFO_ServoPosition[FIFOOut];
-          }
+          // Set RB3 to low by setting PWM duty cycle to zero
+          CCPR1L = 0;
+          CCP1CON = (CCP1CON & 0b11001111);
         }
+        AllDone = TRUE;
       }
-            
-      // If this servo is the pen servo (on g_servo2_RPn)
-      if (FIFO_ServoRPn[FIFOOut] == g_servo2_RPn)
-      {
-        // Then set its new state based on the new position
-        if (FIFO_ServoPosition[FIFOOut] == g_servo2_min)
-        {
-          PenState = PEN_UP;
-          SolenoidState = SOLENOID_OFF;
-          if (gUseSolenoid)
-          {
-            PenUpDownIO = 0;
-          }
-        }
-        else
-        {
-          PenState = PEN_DOWN;
-          SolenoidState = SOLENOID_ON;
-          if (gUseSolenoid)
-          {
-            PenUpDownIO = 1;
-          }
-        }
-      }
-    }
-    // Check to see if we should start or stop the engraver
-    else if (FIFO_Command[FIFOOut] == COMMAND_SE)
-    {
-      // Now act on the State of the SE command
-      if (FIFO_SEState[FIFOOut])
-      {
-        // Set RB3 to StoredEngraverPower
-        CCPR1L = FIFO_SEPower[FIFOOut] >> 2;
-        CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-      }
-      else
-      {
-        // Set RB3 to low by setting PWM duty cycle to zero
-        CCPR1L = 0;
-        CCP1CON = (CCP1CON & 0b11001111);
-      }
-      AllDone = TRUE;
-    }
-        
-    // If we're done with our current command, load in the next one, if there's more
-    if (AllDone && FIFO_DelayCounter[FIFOOut] == 0)
-    {
-      // "Erase" the current command from the FIFO
-      FIFO_Command[FIFOOut] = COMMAND_NONE;
 
-      // There should be at least one command in FIFODepth right now (the one we just finished)
-      if (FIFODepth)
+      // If we're done with our current command, load in the next one, if there's more
+      if (AllDone && FIFO_DelayCounter[FIFOOut] == 0)
       {
-        FIFODepth--;
-        FIFOOut++;
-        if (FIFOOut >= COMMAND_FIFO_LENGTH)
+        // "Erase" the current command from the FIFO
+        FIFO_Command[FIFOOut] = COMMAND_NONE;
+
+        // There should be at least one command in FIFODepth right now (the one we just finished)
+        if (FIFODepth)
         {
-          FIFOOut = 0;
+          FIFODepth--;
+          FIFOOut++;
+          if (FIFOOut >= COMMAND_FIFO_LENGTH)
+          {
+            FIFOOut = 0;
+          }
+        }
+        else 
+        {
+          // This should never happen - this is an error
+          while(1);
         }
       }
-      else 
-      {
-        // This should never happen - this is an error
-        while(1);
-      }
     }
-
+    
     // Check for button being pushed
     if (
       (!swProgram)
