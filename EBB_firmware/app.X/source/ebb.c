@@ -282,8 +282,8 @@ typedef enum
 
 //#pragma udata access fast_vars
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
-// How many elements of the FIFO will we be using?
-volatile UINT8 FIFOSize = 1;
+// How many elements of the FIFO will we be using by default?
+volatile UINT8 FIFOSize = 3;
 // The next element of the FIFO to put a command into
 volatile UINT8 FIFOIn = 0;
 // The FIFO command we are currently executing
@@ -356,6 +356,7 @@ void clear_StepCounters(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
+PORTCbits.RC6 = 1;
   //Check which interrupt flag caused the interrupt.
   //Service the interrupt
   //Clear the interrupt flag
@@ -378,6 +379,7 @@ void high_ISR(void)
     
     if (FIFODepth)
     {
+PORTCbits.RC7 = 1;
 
       // Note, you don't even need a command to delay. Any command can have
       // a delay associated with it, if DelayCounter is != 0.
@@ -647,20 +649,13 @@ void high_ISR(void)
         FIFO_Command[FIFOOut] = COMMAND_NONE;
 
         // There should be at least one command in FIFODepth right now (the one we just finished)
-        if (FIFODepth)
+        // Remove it
+        FIFOOut++;
+        if (FIFOOut >= COMMAND_FIFO_LENGTH)
         {
-          FIFODepth--;
-          FIFOOut++;
-          if (FIFOOut >= COMMAND_FIFO_LENGTH)
-          {
-            FIFOOut = 0;
-          }
+          FIFOOut = 0;
         }
-        else 
-        {
-          // This should never happen - this is an error
-          while(1);
-        }
+        FIFODepth--;
       }
     }
     
@@ -678,6 +673,8 @@ void high_ISR(void)
       ButtonPushed = TRUE;
     }
   }
+PORTCbits.RC6 = 0;
+PORTCbits.RC7 = 0;
 }
 
 // Init code
@@ -827,6 +824,10 @@ void EBB_Init(void)
     
   // Clear out global stepper positions
   parse_CS_packet();
+  
+// FOR DEBUG, MAKE THINGS OUTPUTS
+TRISCbits.TRISC6 = 0;
+TRISCbits.TRISC7 = 0;
 }
 
 // Wait until FIFODepth has gone below FIFOSize
