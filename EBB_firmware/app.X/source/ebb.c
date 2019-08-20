@@ -356,7 +356,6 @@ void clear_StepCounters(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
-PORTCbits.RC6 = 1;
   //Check which interrupt flag caused the interrupt.
   //Service the interrupt
   //Clear the interrupt flag
@@ -376,10 +375,11 @@ PORTCbits.RC6 = 1;
     OutByte = FIFO_DirBits[FIFOOut];
     TookStep = FALSE;
     AllDone = TRUE;
+PORTDbits.RD0 = 1;
     
     if (FIFODepth)
     {
-PORTCbits.RC7 = 1;
+PORTDbits.RD1 = 1;
 
       // Note, you don't even need a command to delay. Any command can have
       // a delay associated with it, if DelayCounter is != 0.
@@ -673,8 +673,8 @@ PORTCbits.RC7 = 1;
       ButtonPushed = TRUE;
     }
   }
-PORTCbits.RC6 = 0;
-PORTCbits.RC7 = 0;
+PORTDbits.RD0 = 0;
+PORTDbits.RD1 = 0;
 }
 
 // Init code
@@ -826,8 +826,8 @@ void EBB_Init(void)
   parse_CS_packet();
   
 // FOR DEBUG, MAKE THINGS OUTPUTS
-TRISCbits.TRISC6 = 0;
-TRISCbits.TRISC7 = 0;
+TRISDbits.TRISD0 = 0;
+TRISDbits.TRISD1 = 0;
 }
 
 // Wait until FIFODepth has gone below FIFOSize
@@ -1930,6 +1930,8 @@ static void process_SM(
   FIFO_ServoRate[FIFOIn] = move.ServoRate;
   FIFO_SEState[FIFOIn] = move.SEState;
   FIFO_SEPower[FIFOIn] = move.SEPower;
+  
+  FIFOInc();
 
 }
 
