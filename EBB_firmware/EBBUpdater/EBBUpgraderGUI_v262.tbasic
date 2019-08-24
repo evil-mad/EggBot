@@ -1,4 +1,4 @@
-Uses "UI"
+﻿Uses "UI"
 Uses "CONSOLE"
 Uses "COMM"
 Uses "WMI"
@@ -156,7 +156,7 @@ CallBack Function cbButton() As Long
             Next
 
             ' Check for no COM ports found
-            If LBound(Ports) = 0 And UBound(Ports) = 0 Then
+            If LBound(Ports) = 1 And UBound(Ports) = 1 Then
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No COM ports found on this computer. Click Exit." + Chr$(13) + Chr$(10)
             Else
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following ports:" + Chr$(13) + Chr$(10)
@@ -445,3 +445,4 @@ Function PIPlot(lTime As Long, lPower As Long, dTarget As Double, dSpeed As Doub
   gXPos = gXPos + 1
 
 End Function
+ 
