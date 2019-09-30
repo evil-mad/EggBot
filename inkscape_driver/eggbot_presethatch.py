@@ -17,8 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 """
-import inkex
 
+from lxml import etree
+
+from plot_utils_import import from_dependency_import # plotink
+inkex = from_dependency_import('ink_extensions.inkex')
 
 class PresetHatch(inkex.Effect):
     def __init__(self):
