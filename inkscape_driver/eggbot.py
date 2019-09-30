@@ -25,14 +25,23 @@ import gettext
 import math
 import time
 
-import cubicsuperpath
-import ebb_motion  # https://github.com/evil-mad/plotink    Requires version 0.2 or newer.
-import ebb_serial  # https://github.com/evil-mad/plotink
+from lxml import etree
+
+from plot_utils_import import from_dependency_import # plotink
+simplepath = from_dependency_import('ink_extensions.simplepath')
+simplestyle = from_dependency_import('ink_extensions.simplestyle')
+cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+simpletransform = from_dependency_import('ink_extensions.simpletransform')
+inkex = from_dependency_import('ink_extensions.inkex')
+exit_status = from_dependency_import('ink_extensions_utils.exit_status')
+message = from_dependency_import('ink_extensions_utils.message')
+ebb_serial = from_dependency_import('plotink.ebb_serial')  # Requires v 0.13 in plotink    https://github.com/evil-mad/plotink
+ebb_motion = from_dependency_import('plotink.ebb_motion')  # Requires v 0.16 in plotink
+plot_utils = from_dependency_import('plotink.plot_utils')  # Requires v 0.15 in plotink
+
 import eggbot_conf  # Some settings can be changed here.
-import inkex
-import plot_utils  # https://github.com/evil-mad/plotink
-import simplepath
-from simpletransform import applyTransformToPath, composeTransform, parseTransform
+
+
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400  # delay (ms) for the pen to go down before the next move
@@ -184,14 +193,14 @@ class EggBot(inkex.Effect):
         self.svg = self.document.getroot()
         self.CheckSVGforEggbotData()
 
-        if self.options.tab in ['"Help"', '"options"', '"timing"']:
+        if self.options.tab in ["Help", "options", "timing"]:
             pass
         else:
             self.serialPort = ebb_serial.openPort()
             if self.serialPort is None:
                 inkex.errormsg(gettext.gettext("Failed to connect to EggBot. :("))
 
-            if self.options.tab == '"splash"':
+            if self.options.tab == "splash":
                 self.allLayers = True
                 self.plotCurrentLayer = True
                 self.svgNodeCount = 0
@@ -200,7 +209,7 @@ class EggBot(inkex.Effect):
                 self.svgLayer = 12345  # indicate that we are plotting all layers.
                 self.plotToEggBot()
 
-            elif self.options.tab == '"resume"':
+            elif self.options.tab == "resume":
                 unused_button = ebb_motion.QueryPRGButton(self.serialPort)  # Query if button pressed
                 self.resumePlotSetup()
                 if self.resumeMode:
@@ -210,7 +219,7 @@ class EggBot(inkex.Effect):
                 else:
                     inkex.errormsg(gettext.gettext("Truly sorry, there does not seem to be any in-progress plot to resume."))
 
-            elif self.options.tab == '"layers"':
+            elif self.options.tab == "layers":
                 self.allLayers = False
                 self.plotCurrentLayer = False
                 self.LayersPlotted = 0
@@ -222,10 +231,10 @@ class EggBot(inkex.Effect):
                 if self.LayersPlotted == 0:
                     inkex.errormsg(gettext.gettext("Truly sorry, but I did not find any numbered layers to plot."))
 
-            elif self.options.tab == '"setup"':
+            elif self.options.tab == "setup":
                 self.setupCommand()
 
-            elif self.options.tab == '"manual"':
+            elif self.options.tab == "manual":
                 if self.options.manualType == "strip-data":
                     for node in self.svg.xpath('//svg:WCB', namespaces=inkex.NSS):
                         self.svg.remove(node)
@@ -430,7 +439,7 @@ class EggBot(inkex.Effect):
             if float(vinfo[2]) != 0 and float(vinfo[3]) != 0:
                 sx = self.svgWidth / float(vinfo[2])
                 sy = self.svgHeight / float(vinfo[3])
-                self.svgTransform = parseTransform('scale({0:f},{1:f}) translate({2:f},{3:f})'.format(sx, sy, -float(vinfo[0]), -float(vinfo[1])))
+                self.svgTransform = simpletransform.parseTransform('scale({0:f},{1:f}) translate({2:f},{3:f})'.format(sx, sy, -float(vinfo[0]), -float(vinfo[1])))
 
         self.ServoSetup()
         ebb_motion.sendEnableMotors(self.serialPort, 1)  # 16X microstepping
@@ -499,7 +508,7 @@ class EggBot(inkex.Effect):
                 continue
 
             # first apply the current matrix transform to this node's transform
-            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
+            mat_new = simpletransform.composeTransform(mat_current, simpletransform.parseTransform(node.get("transform")))
 
             if node.tag in [inkex.addNS('g', 'svg'), 'g']:
 
@@ -535,7 +544,7 @@ class EggBot(inkex.Effect):
                         y = float(node.get('y', '0'))
                         # Note: the transform has already been applied
                         if x != 0 or y != 0:
-                            mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
+                            mat_new2 = simpletransform.composeTransform(mat_new, simpletransform.parseTransform('translate({0:f},{1:f})'.format(x, y)))
                         else:
                             mat_new2 = mat_new
                         v = node.get('visibility', v)
@@ -947,7 +956,7 @@ class EggBot(inkex.Effect):
         p = cubicsuperpath.parsePath(d)
 
         # ...and apply the transformation to each point
-        applyTransformToPath(mat_transform, p)
+        simpletransform.applyTransformToPath(mat_transform, p)
 
         # p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
         # where the start-point is the last point in the previous segment.
@@ -1003,7 +1012,7 @@ class EggBot(inkex.Effect):
             if not self.resumeMode:  # or if we're resuming.
                 ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay)
                 if self.options.penUpDelay > 15:
-                    if self.options.tab != '"manual"':
+                    if self.options.tab != "manual":
                         time.sleep(float(self.options.penUpDelay - 10) / 1000.0)  # pause before issuing next command
                 self.bPenIsUp = True
 
@@ -1016,7 +1025,7 @@ class EggBot(inkex.Effect):
                     self.engraverOn()  # will check self.enableEngraver
                 ebb_motion.sendPenDown(self.serialPort, self.options.penDownDelay)
                 if self.options.penUpDelay > 15:
-                    if self.options.tab != '"manual"':
+                    if self.options.tab != "manual":
                         time.sleep(float(self.options.penDownDelay - 10) / 1000.0)  # pause before issuing next command
 
     def engraverOff(self):
