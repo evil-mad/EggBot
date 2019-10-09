@@ -85,7 +85,7 @@
 # Modifications are limited to recursivelyTraverseSvg and effect methods 
 
 # Current software version:
-# (v2.3.1, June 19, 2019)
+# (v2.3.2, September 29, 2019)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,26 +102,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import math
+from lxml import etree
 
-try:
-    from plot_utils_import import from_dependency_import # plotink
-    inkex = from_dependency_import('ink_extensions.inkex')
-    simplepath = from_dependency_import('ink_extensions.simplepath')
-    simpletransform = from_dependency_import('ink_extensions.simpletransform')
-    simplestyle = from_dependency_import('ink_extensions.simplestyle')
-    cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
-    cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
-    bezmisc = from_dependency_import('ink_extensions.bezmisc')
-except:
-    import inkex
-    import simplepath
-    import simpletransform
-    import simplestyle
-    import cubicsuperpath
-    import cspsubdiv
-    import bezmisc
-
-import plot_utils  # https://github.com/evil-mad/plotink
+from plot_utils_import import from_dependency_import # plotink
+inkex = from_dependency_import('ink_extensions.inkex')
+simplepath = from_dependency_import('ink_extensions.simplepath')
+simpletransform = from_dependency_import('ink_extensions.simpletransform')
+simplestyle = from_dependency_import('ink_extensions.simplestyle')
+cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
+bezmisc = from_dependency_import('ink_extensions.bezmisc')
+plot_utils = from_dependency_import('plotink.plot_utils')  # https://github.com/evil-mad/plotink
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
