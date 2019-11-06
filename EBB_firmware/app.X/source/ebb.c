@@ -234,6 +234,8 @@
 // 2.6.1 01/07/19 - Added "QG" general query command
 // 2.6.2 01/11/19 - Added "HM" Home Motor command
 // 2.6.3 05/24/19 - Changed default RC servo power down time from 15min to 60s
+// 2.6.4 11/05/19 - Fixed bug #124 (Math error in SM command for edge case 
+//                    input parameters)
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1680,168 +1682,188 @@ void parse_XM_packet (void)
 // In the future, making the FIFO more elements deep may be cool.
 // 
 static void process_SM(
-	UINT32 Duration,
-	INT32 A1Stp,
-	INT32 A2Stp
+  UINT32 Duration,
+  INT32 A1Stp,
+  INT32 A2Stp
 )
 {
-    UINT32 temp = 0;
-    UINT32 temp1 = 0;
-    UINT32 temp2 = 0;
-    UINT32 remainder = 0;
-    MoveCommandType move;
+  UINT32 temp = 0;
+  UINT32 temp1 = 0;
+  UINT32 temp2 = 0;
+  UINT32 remainder = 0;
+  MoveCommandType move;
 
-    // Uncomment the following printf() for debugging
-    //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
-    //        Duration,
-    //        A1Stp,
-    //        A2Stp
+  // Uncomment the following printf() for debugging
+  //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+  //        Duration,
+  //        A1Stp,
+  //        A2Stp
+  //    );
+
+  // Check for delay
+  if (A1Stp == 0 && A2Stp == 0)
+  {
+    move.Command = COMMAND_DELAY;
+    // This is OK because we only need to multiply the 3 byte Duration by
+    // 25, so it fits in 4 bytes OK.
+    move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+  }
+  else
+  {
+    move.DelayCounter = 0; // No delay for motor moves
+    move.DirBits = 0;
+
+    // Always enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+    RCServoPowerIO = RCSERVO_POWER_ON;
+    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+
+    // First, set the direction bits
+    if (A1Stp < 0)
+    {
+      move.DirBits = move.DirBits | DIR1_BIT;
+      A1Stp = -A1Stp;
+    }
+    if (A2Stp < 0)
+    {
+      move.DirBits = move.DirBits | DIR2_BIT;
+      A2Stp = -A2Stp;
+    }
+    // To compute StepAdd values from Duration.
+    // A1Stp is from 0x000001 to 0xFFFFFF.
+    // HIGH_ISR_TICKS_PER_MS = 25
+    // Duration is from 0x000001 to 0xFFFFFF.
+    // temp needs to be from 0x0001 to 0x7FFF.
+    // Temp is added to accumulator every 25KHz. So slowest step rate
+    // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+    // Fastest step rate is obviously 25KHz.
+    // If A1Stp is 1, then duration must be 763 or less.
+    // If A1Stp is 2, then duration must be 763 * 2 or less.
+    // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+
+//  // First check for duration to large.
+//  if (A1Stp < (0xFFFFFF/763)) 
+//  {
+//    if (duration > (A1Stp * 763)) 
+//    {
+//      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
+//      temp = 0;
+//      A1Stp = 0;
+//    }
+//  }
+    if (A1Stp != 0) 
+    {
+      if (A1Stp < 0x1FFFF) 
+      {
+        temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
+        temp = (A1Stp << 15)/temp1;
+        temp2 = (A1Stp << 15) % temp1;
+        /* Because it takes us about 5ms extra time to do this division,
+         * we only perform this extra step if our move is long enough to
+         * warrant it. That way, for really short moves (where the extra
+         * precision isn't necessary) we don't take up extra time. Without
+         * this optimization, our minimum move time is 20ms. With it, it
+         * drops down to about 15ms.
+         */
+        if (Duration > 30)
+        {
+          remainder = (temp2 << 16) / temp1;
+        }
+      }
+      else 
+      {
+        temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        remainder = 0;
+      }
+      if (temp > 0x8000) 
+      {
+        printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+        temp = 0x8000;
+      }
+      if (temp == 0 && A1Stp != 0) 
+      {
+        printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
+        temp = 1;
+      }
+      if (Duration > 30)
+      {
+        temp = (temp << 16) + remainder;
+      }
+      else
+      {
+        temp = (temp << 16);
+      }
+    }
+    else
+    {
+      temp = 0;
+    }
+
+    move.StepAdd[0] = temp;
+    move.StepsCounter[0] = A1Stp;
+    move.StepAddInc[0] = 0;
+
+    if (A2Stp != 0) 
+    {
+      if (A2Stp < 0x1FFFF) 
+      {
+        temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
+        temp = (A2Stp << 15)/temp1;
+        temp2 = (A2Stp << 15) % temp1; 
+        if (Duration > 30)
+        {
+          remainder = (temp2 << 16) / temp1;
+        }
+      }
+      else 
+      {
+        temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        remainder = 0;
+      }
+      if (temp > 0x8000) 
+      {
+        printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+        temp = 0x8000;
+      }
+      if (temp == 0 && A2Stp != 0) 
+      {
+        printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
+        temp = 1;
+      }
+      if (Duration > 30)
+      {
+        temp = (temp << 16) + remainder;
+      }
+      else
+      {
+        temp = (temp << 16);
+      }
+    }
+
+    move.StepAdd[1] = temp;
+    move.StepsCounter[1] = A2Stp;
+    move.StepAddInc[1] = 0;
+    move.Command = COMMAND_MOTOR_MOVE;
+
+    /* For debugging step motion , uncomment the next line */
+
+    //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+    //        move.StepAdd[0],
+    //        move.StepsCounter[0],
+    //        move.StepAdd[1],
+    //        move.StepsCounter[1]
     //    );
+  }
 
-	// Check for delay
-	if (A1Stp == 0 && A2Stp == 0)
-	{
-		move.Command = COMMAND_DELAY;
-        // This is OK because we only need to multiply the 3 byte Duration by
-        // 25, so it fits in 4 bytes OK.
-  		move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
-	}
-	else
-	{
-		move.DelayCounter = 0; // No delay for motor moves
-		move.DirBits = 0;
-		
-		// Always enable both motors when we want to move them
-		Enable1IO = ENABLE_MOTOR;
-		Enable2IO = ENABLE_MOTOR;
-        RCServoPowerIO = RCSERVO_POWER_ON;
-        gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+  // Spin here until there's space in the fifo
+  while(!FIFOEmpty)
+  ;
 
-		// First, set the direction bits
-		if (A1Stp < 0)
-		{
-			move.DirBits = move.DirBits | DIR1_BIT;
-			A1Stp = -A1Stp;
-		}
-		if (A2Stp < 0)
-		{
-			move.DirBits = move.DirBits | DIR2_BIT;
-			A2Stp = -A2Stp;
-		}
-        // To compute StepAdd values from Duration.
-        // A1Stp is from 0x000001 to 0xFFFFFF.
-        // HIGH_ISR_TICKS_PER_MS = 25
-        // Duration is from 0x000001 to 0xFFFFFF.
-        // temp needs to be from 0x0001 to 0x7FFF.
-        // Temp is added to accumulator every 25KHz. So slowest step rate
-        // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
-        // Fastest step rate is obviously 25KHz.
-        // If A1Stp is 1, then duration must be 763 or less.
-        // If A1Stp is 2, then duration must be 763 * 2 or less.
-        // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
-        
-        // First check for duration to large.
-//        if (A1Stp < (0xFFFFFF/763)) {
-//            if (duration > (A1Stp * 763)) {
-//                printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
-//                temp = 0;
-//                A1Stp = 0;
-//            }
-//        }
-        
-        if (A1Stp < 0x1FFFF) {
-            temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
-            temp = (A1Stp << 15)/temp1;
-            temp2 = (A1Stp << 15) % temp1;
-            /* Because it takes us about 5ms extra time to do this division,
-             * we only perform this extra step if our move is long enough to
-             * warrant it. That way, for really short moves (where the extra
-             * precision isn't necessary) we don't take up extra time. Without
-             * this optimization, our minimum move time is 20ms. With it, it
-             * drops down to about 15ms.
-             */
-            if (Duration > 30)
-            {
-                remainder = (temp2 << 16) / temp1;
-            }
-        }
-        else {
-            temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
-            remainder = 0;
-        }
-        if (temp > 0x8000) {
-            printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
-            temp = 0x8000;
-        }
-        if (temp == 0 && A1Stp != 0) {
-            printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
-            temp = 1;
-        }
-        if (Duration > 30)
-        {
-            temp = (temp << 16) + remainder;
-        }
-        else
-        {
-            temp = (temp << 16);
-        }
+  // Now, quick copy over the computed command data to the command fifo
+  CommandFIFO[0] = move;
 
-        move.StepAdd[0] = temp;
-        move.StepsCounter[0] = A1Stp;
-        move.StepAddInc[0] = 0;
-        
-        if (A2Stp < 0x1FFFF) {
-            temp = (A2Stp << 15)/temp1;
-            temp2 = (A2Stp << 15) % temp1; 
-            if (Duration > 30)
-            {
-                remainder = (temp2 << 16) / temp1;
-            }
-        }
-        else {
-            temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
-            remainder = 0;
-        }
-        if (temp > 0x8000) {
-            printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
-            temp = 0x8000;
-        }
-        if (temp == 0 && A2Stp != 0) {
-            printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
-            temp = 1;
-        }
-        if (Duration > 30)
-        {
-            temp = (temp << 16) + remainder;
-        }
-        else
-        {
-            temp = (temp << 16);
-        }
-        
-        move.StepAdd[1] = temp;
-        move.StepsCounter[1] = A2Stp;
-        move.StepAddInc[1] = 0;
-        move.Command = COMMAND_MOTOR_MOVE;
-        
-        /* For debugging step motion , uncomment the next line */
-        
-        //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-        //        move.StepAdd[0],
-        //        move.StepsCounter[0],
-        //        move.StepAdd[1],
-        //        move.StepsCounter[1]
-        //    );
-	}
-		
-	// Spin here until there's space in the fifo
-	while(!FIFOEmpty)
-	;
-
-    // Now, quick copy over the computed command data to the command fifo
-    CommandFIFO[0] = move;
-    
-	FIFOEmpty = FALSE;
+  FIFOEmpty = FALSE;
 }
 
 // E-Stop
