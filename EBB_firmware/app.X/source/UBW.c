@@ -92,13 +92,13 @@
 #include "UBW.h"
 #include "ebb.h"
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-	#include "RCServo2.h"
+  #include "RCServo2.h"
 #endif
 
 /** D E F I N E S ********************************************************/
 
-#define kUSART_TX_BUF_SIZE		10                // In bytes
-#define kUSART_RX_BUF_SIZE		10                // In bytes
+#define kUSART_TX_BUF_SIZE    10                // In bytes
+#define kUSART_RX_BUF_SIZE    10                // In bytes
 
 #define kISR_FIFO_A_DEPTH     3
 #define kISR_FIFO_D_DEPTH     3
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.4\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.6.5\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -3015,18 +3015,18 @@ void parse_QR_packet()
 // turns it on.
 void parse_SR_packet(void)
 {
-	unsigned long Value;
-    UINT8 State;
-    ExtractReturnType GotState;
+  unsigned long Value;
+  UINT8 State;
+  ExtractReturnType GotState;
 
-	extract_number(kULONG, &Value, kREQUIRED);
-	GotState = extract_number(kUCHAR, &State, kOPTIONAL);
+  extract_number(kULONG, &Value, kREQUIRED);
+  GotState = extract_number(kUCHAR, &State, kOPTIONAL);
 
-  	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
     gRCServoPoweroffCounterReloadMS = Value;
     

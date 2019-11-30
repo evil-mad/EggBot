@@ -236,6 +236,8 @@
 // 2.6.3 05/24/19 - Changed default RC servo power down time from 15min to 60s
 // 2.6.4 11/05/19 - Fixed bug #124 (Math error in SM command for edge case 
 //                    input parameters)
+// 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
+//                    after SP command, not also after stepper movement
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1013,127 +1015,126 @@ void fprint(float f)
 // axies velocities.
 void parse_AM_packet (void)
 {
-    UINT32 temp = 0;
-	UINT16 VelocityInital = 0;
-	UINT16 VelocityFinal = 0;
-	INT32 A1Steps = 0, A2Steps = 0;
-    UINT32 Duration = 0;
-    UINT32 Distance;
-    float distance_temp;
-    float accel_temp;
+  UINT32 temp = 0;
+  UINT16 VelocityInital = 0;
+  UINT16 VelocityFinal = 0;
+  INT32 A1Steps = 0, A2Steps = 0;
+  UINT32 Duration = 0;
+  UINT32 Distance;
+  float distance_temp;
+  float accel_temp;
 
-	// Extract each of the values.
-	extract_number (kULONG, &VelocityInital, kREQUIRED);
-	extract_number (kULONG, &VelocityFinal, kREQUIRED);
-	extract_number (kLONG, &A1Steps, kREQUIRED);
-	extract_number (kLONG, &A2Steps, kREQUIRED);
+  // Extract each of the values.
+  extract_number (kULONG, &VelocityInital, kREQUIRED);
+  extract_number (kULONG, &VelocityFinal, kREQUIRED);
+  extract_number (kLONG, &A1Steps, kREQUIRED);
+  extract_number (kLONG, &A2Steps, kREQUIRED);
 
-    // Check for too-fast step request (>25KHz)
-    if (VelocityInital > 25000)
-    {
-       printf((far rom char *)"!0 Err: <velocity_initial> larger than 25000.\n\r");
-       return;
-    }
-    if (VelocityFinal > 25000)
-    {
-       printf((far rom char *)"!0 Err: <velocity_final> larger than 25000.\n\r");
-       return;
-    }
-    if (VelocityInital < 4)
-    {
-       printf((far rom char *)"!0 Err: <velocity_initial> less than 4.\n\r");
-       return;
-    }
-    if (VelocityFinal < 4)
-    {
-       printf((far rom char *)"!0 Err: <velocity_final> less than 4.\n\r");
-       return;
-    }
-    
-    // Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
-    
-    // Compute total pen distance
+  // Check for too-fast step request (>25KHz)
+  if (VelocityInital > 25000)
+  {
+     printf((far rom char *)"!0 Err: <velocity_initial> larger than 25000.\n\r");
+     return;
+  }
+  if (VelocityFinal > 25000)
+  {
+     printf((far rom char *)"!0 Err: <velocity_final> larger than 25000.\n\r");
+     return;
+  }
+  if (VelocityInital < 4)
+  {
+     printf((far rom char *)"!0 Err: <velocity_initial> less than 4.\n\r");
+     return;
+  }
+  if (VelocityFinal < 4)
+  {
+     printf((far rom char *)"!0 Err: <velocity_final> less than 4.\n\r");
+     return;
+  }
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // Compute total pen distance
 //    fprint(ftemp);
-    Distance = (UINT32)(sqrt((float)((A1Steps * A1Steps) + (A2Steps * A2Steps))));
-    
+  Distance = (UINT32)(sqrt((float)((A1Steps * A1Steps) + (A2Steps * A2Steps))));
+
 // For debug
 //printf((far rom char *)"Distance= %lu\n\r", Distance);
-    
-    while(!FIFOEmpty);
 
-	CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
-	CommandFIFO[0].DirBits = 0;
-		
-    // Always enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+  while(!FIFOEmpty);
 
-    // First, set the direction bits
-    if (A1Steps < 0)
-    {
-        CommandFIFO[0].DirBits = DIR1_BIT;
-        A1Steps = -A1Steps;
-    }
-    if (A2Steps < 0)
-    {
-        CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
-        A2Steps = -A2Steps;
-    }
+  CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
+  CommandFIFO[0].DirBits = 0;
 
-    if (A1Steps > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
-       return;
-    }
-    if (A2Steps > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-       return;
-    }
+  // Always enable both motors when we want to move them
+  Enable1IO = ENABLE_MOTOR;
+  Enable2IO = ENABLE_MOTOR;
 
-    // To compute StepAdd values from Duration.
-    // A1Stp is from 0x000001 to 0xFFFFFF.
-    // HIGH_ISR_TICKS_PER_MS = 25
-    // Duration is from 0x000001 to 0xFFFFFF.
-    // temp needs to be from 0x0001 to 0x7FFF.
-    // Temp is added to accumulator every 25KHz. So slowest step rate
-    // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
-    // Fastest step rate is obviously 25KHz.
-    // If A1Stp is 1, then duration must be 763 or less.
-    // If A1Stp is 2, then duration must be 763 * 2 or less.
-    // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+  // First, set the direction bits
+  if (A1Steps < 0)
+  {
+    CommandFIFO[0].DirBits = DIR1_BIT;
+    A1Steps = -A1Steps;
+  }
+  if (A2Steps < 0)
+  {
+    CommandFIFO[0].DirBits = CommandFIFO[0].DirBits | DIR2_BIT;
+    A2Steps = -A2Steps;
+  }
+
+  if (A1Steps > 0xFFFFFF)
+  {
+   printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+   return;
+  }
+  if (A2Steps > 0xFFFFFF)
+  {
+    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+    return;
+  }
+
+  // To compute StepAdd values from Duration.
+  // A1Stp is from 0x000001 to 0xFFFFFF.
+  // HIGH_ISR_TICKS_PER_MS = 25
+  // Duration is from 0x000001 to 0xFFFFFF.
+  // temp needs to be from 0x0001 to 0x7FFF.
+  // Temp is added to accumulator every 25KHz. So slowest step rate
+  // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+  // Fastest step rate is obviously 25KHz.
+  // If A1Stp is 1, then duration must be 763 or less.
+  // If A1Stp is 2, then duration must be 763 * 2 or less.
+  // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
 
 //    Duration = 2000;
 //    Distance = 600;
 //    Acceleration = 200;
 //    VelocityInital = 100;
 //    VelocityFinal = 500;
-    
-    /* Compute StepAdd Axis 1 Initial */
+  
+  /* Compute StepAdd Axis 1 Initial */
 //    temp = ((UINT32)A1Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
 //printf((far rom char *)"VelocityInital = %d\n\r", VelocityInital);
 //printf((far rom char *)"Distance = %ld\n\r", Distance);
 //    temp = (UINT32)((float)A1Steps*(((float)VelocityInital * (float)0x80000000UL)/(float)25000)/(float)Distance);
-    distance_temp = ((float)VelocityInital * 85899.34592)/Distance;
+  distance_temp = ((float)VelocityInital * 85899.34592)/Distance;
 //printf((far rom char *)"distance_temp =");
 //fprint(distance_temp);
 //    ftemp = distance_temp * A1Steps;
 //    fprint(ftemp);
 //    temp = (UINT32)ftemp;
 
-
-    /* Amount to add to accumulator each 25KHz */
-    CommandFIFO[0].StepAdd[0] = (UINT32)(distance_temp * (float)A1Steps);
+  /* Amount to add to accumulator each 25KHz */
+  CommandFIFO[0].StepAdd[0] = (UINT32)(distance_temp * (float)A1Steps);
 
 // For debug
 //printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
 
-    /* Total number of steps for this axis for this move */
-    CommandFIFO[0].StepsCounter[0] = A1Steps;
+  /* Total number of steps for this axis for this move */
+  CommandFIFO[0].StepsCounter[0] = A1Steps;
 
 //    ftemp = (float)VelocityFinal * 2147483648.0;
 //    fprint(ftemp);
@@ -1147,20 +1148,20 @@ void parse_AM_packet (void)
 
 // For debug
 //printf((far rom char *)"SAxf = %lu\n\r", temp);
-    
-    /* Compute StepAddInc for axis 1 */
-    accel_temp = (((float)VelocityFinal * (float)VelocityFinal) - ((float)VelocityInital * (float)VelocityInital))/((float)Distance * (float)Distance * 2);
+
+  /* Compute StepAddInc for axis 1 */
+  accel_temp = (((float)VelocityFinal * (float)VelocityFinal) - ((float)VelocityInital * (float)VelocityInital))/((float)Distance * (float)Distance * 2);
 //    Accel1 = ((float)A1Steps * accel_temp);
 //printf((far rom char *)"accel_temp : ");
 //fprint(accel_temp);
 //    stemp = (INT32)((Accel1 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
 //    stemp = (INT32)(Accel1 * 343.59738);
-    //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
+  //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
 
-    /* Amount to add to StepAdd each 25KHz */
-    CommandFIFO[0].StepAddInc[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
+  /* Amount to add to StepAdd each 25KHz */
+  CommandFIFO[0].StepAddInc[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
 
-    /* Compute StepAdd Axis 2 Initial */
+  /* Compute StepAdd Axis 2 Initial */
 //    temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
 //    temp = (UINT32)((float)A2Steps*(((float)VelocityInital * (float)0x80000000)/(float)25000)/(float)Distance);
 
@@ -1176,132 +1177,130 @@ void parse_AM_packet (void)
 //    ftemp = ftemp * A2Steps;
 //    fprint(ftemp);
 //    temp = (UINT32)ftemp;
-    
+
 // For debug
 //printf((far rom char *)"SAyi = %lu\n\r", temp);
 
-    CommandFIFO[0].StepAdd[1] = (UINT32)(distance_temp * A2Steps);
-    CommandFIFO[0].StepsCounter[1] = A2Steps;
-    
-    /* Compute StepAddInc for axis 2 */
+  CommandFIFO[0].StepAdd[1] = (UINT32)(distance_temp * A2Steps);
+  CommandFIFO[0].StepsCounter[1] = A2Steps;
+
+  /* Compute StepAddInc for axis 2 */
 //    Accel2 = ((float)A2Steps * accel_temp);
 //printf((far rom char *)"Accel2 : ");
 //fprint(Accel2);
 //    stemp = (INT32)((Accel2 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
 //    stemp = (INT32)(((float)A2Steps * accel_temp) * 343.59738);
-    
-    CommandFIFO[0].StepAddInc[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
 
-    if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[0] == 0 && CommandFIFO[0].StepsCounter[0] > 0)
-    {
-       printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
-       return;
-    }
-    if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[1] == 0 && CommandFIFO[0].StepsCounter[1] > 0)
-    {
-       printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
-       return;
-    }
+  CommandFIFO[0].StepAddInc[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
 
-    CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
-    
-	FIFOEmpty = FALSE;
-    
-	print_ack();
+  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[0] == 0 && CommandFIFO[0].StepsCounter[0] > 0)
+  {
+     printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
+     return;
+  }
+  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[1] == 0 && CommandFIFO[0].StepsCounter[1] > 0)
+  {
+     printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
+     return;
+  }
+
+  CommandFIFO[0].Command = COMMAND_MOTOR_MOVE;
+
+  FIFOEmpty = FALSE;
+
+  print_ack();
 }
 
 // Low Level Move command
 // Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2><CR>
 void parse_LM_packet (void)
 {
-	UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
-    INT32 StepsCounter1, StepsCounter2 = 0;
-    MoveCommandType move;
-    
-    // Extract each of the values.
-	extract_number (kULONG, &StepAdd1, kREQUIRED);
-	extract_number (kLONG,  &StepsCounter1, kREQUIRED);
-	extract_number (kLONG, &StepAddInc1, kREQUIRED);
-	extract_number (kULONG, &StepAdd2, kREQUIRED);
-	extract_number (kLONG,  &StepsCounter2, kREQUIRED);
-	extract_number (kLONG, &StepAddInc2, kREQUIRED);
+  UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
+  INT32 StepsCounter1, StepsCounter2 = 0;
+  MoveCommandType move;
 
-    // Bail if we got a conversion error
-    if (error_byte)
-    {
-        return;
-    }
+  // Extract each of the values.
+  extract_number (kULONG, &StepAdd1, kREQUIRED);
+  extract_number (kLONG,  &StepsCounter1, kREQUIRED);
+  extract_number (kLONG, &StepAddInc1, kREQUIRED);
+  extract_number (kULONG, &StepAdd2, kREQUIRED);
+  extract_number (kLONG,  &StepsCounter2, kREQUIRED);
+  extract_number (kLONG, &StepAddInc2, kREQUIRED);
 
-    /* Quickly eliminate obvious invalid parameter combinations,
-     * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
-    if (
-        (
-            ((StepAdd1 == 0) && (StepAddInc1 == 0))
-            ||
-            (StepsCounter1 == 0)
-        )
-        &&
-        (
-            ((StepAdd2 == 0) && (StepAddInc2 == 0))
-            ||
-            (StepsCounter2 == 0)
-        )
-    )
-    {
-        return;
-    }
-    
-    move.DelayCounter = 0; // No delay for motor moves
-    move.DirBits = 0;
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-    // Always enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+  /* Quickly eliminate obvious invalid parameter combinations,
+   * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
+  if (
+      (
+          ((StepAdd1 == 0) && (StepAddInc1 == 0))
+          ||
+          (StepsCounter1 == 0)
+      )
+      &&
+      (
+          ((StepAdd2 == 0) && (StepAddInc2 == 0))
+          ||
+          (StepsCounter2 == 0)
+      )
+  )
+  {
+    return;
+  }
+  
+  move.DelayCounter = 0; // No delay for motor moves
+  move.DirBits = 0;
 
-    // First, set the direction bits
-    if (StepsCounter1 < 0)
-    {
-        move.DirBits = move.DirBits | DIR1_BIT;
-        StepsCounter1 = -StepsCounter1;
-    }
-    if (StepsCounter2 < 0)
-    {
-        move.DirBits = move.DirBits | DIR2_BIT;
-        StepsCounter2 = -StepsCounter2;
-    }
+  // Always enable both motors when we want to move them
+  Enable1IO = ENABLE_MOTOR;
+  Enable2IO = ENABLE_MOTOR;
 
-    move.StepAdd[0] = StepAdd1;
-    move.StepsCounter[0] = StepsCounter1;
-    move.StepAddInc[0] = StepAddInc1;
-    move.StepAdd[1] = StepAdd2;
-    move.StepsCounter[1] = StepsCounter2;
-    move.StepAddInc[1] = StepAddInc2;
-    move.Command = COMMAND_MOTOR_MOVE;
+  // First, set the direction bits
+  if (StepsCounter1 < 0)
+  {
+    move.DirBits = move.DirBits | DIR1_BIT;
+    StepsCounter1 = -StepsCounter1;
+  }
+  if (StepsCounter2 < 0)
+  {
+    move.DirBits = move.DirBits | DIR2_BIT;
+    StepsCounter2 = -StepsCounter2;
+  }
 
-	// Spin here until there's space in the fifo
-	while(!FIFOEmpty)
-	;
+  move.StepAdd[0] = StepAdd1;
+  move.StepsCounter[0] = StepsCounter1;
+  move.StepAddInc[0] = StepAddInc1;
+  move.StepAdd[1] = StepAdd2;
+  move.StepsCounter[1] = StepsCounter2;
+  move.StepAddInc[1] = StepAddInc2;
+  move.Command = COMMAND_MOTOR_MOVE;
 
-    CommandFIFO[0] = move;
+  // Spin here until there's space in the fifo
+  while(!FIFOEmpty)
+  ;
 
-    /* For debugging step motion , uncomment the next line */
-    /*
-     * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-            CommandFIFO[0].StepAdd[0],
-            CommandFIFO[0].StepsCounter[0],
-            CommandFIFO[0].StepAdd[1],
-            CommandFIFO[0].StepsCounter[1]
-        );
-     */
-		
-	FIFOEmpty = FALSE;
-    
-    if (g_ack_enable)
-    {
-    	print_ack();
-    }
+  CommandFIFO[0] = move;
+
+  /* For debugging step motion , uncomment the next line */
+  /*
+   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+          CommandFIFO[0].StepAdd[0],
+          CommandFIFO[0].StepsCounter[0],
+          CommandFIFO[0].StepAdd[1],
+          CommandFIFO[0].StepsCounter[1]
+      );
+   */
+
+  FIFOEmpty = FALSE;
+
+  if (g_ack_enable)
+  {
+    print_ack();
+  }
 }
 
 // The Stepper Motor command
@@ -1716,8 +1715,6 @@ static void process_SM(
     // Always enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
     // First, set the direction bits
     if (A1Stp < 0)
@@ -2053,45 +2050,45 @@ void parse_SP_packet(void)
 // to schedule an RC Servo change with the RCServo2_Move() function.
 //
 void process_SP(PenStateType NewState, UINT16 CommandDuration)
-{	
-    UINT16 Position;
-    UINT16 Rate;
+{
+  UINT16 Position;
+  UINT16 Rate;
 
-	if (NewState == PEN_UP)
-	{
-        Position = g_servo2_min;
-        Rate = g_servo2_rate_up;
-	}
-	else
-	{
-        Position = g_servo2_max;
-        Rate = g_servo2_rate_down;
-	}
+  if (NewState == PEN_UP)
+  {
+    Position = g_servo2_min;
+    Rate = g_servo2_rate_up;
+  }
+  else
+  {
+    Position = g_servo2_max;
+    Rate = g_servo2_rate_down;
+  }
 
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+  RCServoPowerIO = RCSERVO_POWER_ON;
+  gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
-    // Now schedule the movement with the RCServo2 function
-    RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
+  // Now schedule the movement with the RCServo2 function
+  RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }
 
 // Enable Motor
 // Usage: EM,<EnableAxis1>,<EnableAxis2><CR>
 // Everything after EnableAxis1 is optional
 // Each parameter can have a value of
-//		0 to disable that motor driver
+//    0 to disable that motor driver
 // FOR OLD DRIVER CHIP (A3967) - can do separate enables for each axis
-//		1 to enable the driver in 1/8th step mode
-//		2 to enable the driver in 1/4 step mode
-//		3 to enable the driver in 1/2 step mode
-//		4 to enable the driver in full step mode
+//    1 to enable the driver in 1/8th step mode
+//    2 to enable the driver in 1/4 step mode
+//    3 to enable the driver in 1/2 step mode
+//    4 to enable the driver in full step mode
 // FOR NEW DRIVER CHIP (A4988/A4983)
 // (only first parameter applies, and it applies to both drivers)
-//		1 to enable the driver in 1/16th step mode
-//		2 to enable the driver in 1/8 step mode
-//		3 to enable the driver in 1/4 step mode
-//		4 to enable the driver in 1/2 step mode
-//		5 to enable the driver in full step mode
+//    1 to enable the driver in 1/16th step mode
+//    2 to enable the driver in 1/8 step mode
+//    3 to enable the driver in 1/4 step mode
+//    4 to enable the driver in 1/2 step mode
+//    5 to enable the driver in full step mode
 // If you disable a motor, it goes 'limp' (we clear the ENABLE pin on that motor's
 // driver chip)
 // Note that when using 0 or 1 for a parameter, you can use both axis even
@@ -2101,127 +2098,119 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 // MSx lines.
 void parse_EM_packet(void)
 {
-	unsigned char EA1, EA2;
-	ExtractReturnType RetVal;
+  unsigned char EA1, EA2;
+  ExtractReturnType RetVal;
 
-	// Extract each of the values.
-	RetVal = extract_number (kUCHAR, &EA1, kREQUIRED);
-	if (kEXTRACT_OK == RetVal)
-	{
-		// Bail if we got a conversion error
-		if (error_byte)
-		{
-			return;
-		}
-		if (
-            (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-            ||
-            (DriverConfiguration == EXTERNAL_CONTROLS_DRIVERS)
-        )
-		{
-			if (EA1 > 0)
-			{
-				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-                {
-                    Enable1IO = ENABLE_MOTOR;
-                    RCServoPowerIO = RCSERVO_POWER_ON;
-                    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-                }
-				if (EA1 == 1)
-				{
-					MS1_IO = 1;
-					MS2_IO = 1;
-					MS3_IO = 1;
-				}
-				if (EA1 == 2)
-				{
-					MS1_IO = 1;
-					MS2_IO = 1;
-					MS3_IO = 0;
-				}
-				if (EA1 == 3)
-				{
-					MS1_IO = 0;
-					MS2_IO = 1;
-					MS3_IO = 0;
-				}
-				if (EA1 == 4)
-				{
-					MS1_IO = 1;
-					MS2_IO = 0;
-					MS3_IO = 0;
-				}				
-				if (EA1 == 5)
-				{
-					MS1_IO = 0;
-					MS2_IO = 0;
-					MS3_IO = 0;
-				}				
-			}
-			else
-			{
-				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-                {
-    				Enable1IO = DISABLE_MOTOR;
-                }
-			}
-		}
-        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-		{
-			if (EA1 > 0)
-			{
-				Enable1AltIO = ENABLE_MOTOR;
-                RCServoPowerIO = RCSERVO_POWER_ON;
-                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-			}
-			else
-			{
-				Enable1AltIO = DISABLE_MOTOR;
-			}
-		}
-	}
+  // Extract each of the values.
+  RetVal = extract_number (kUCHAR, &EA1, kREQUIRED);
+  if (kEXTRACT_OK == RetVal)
+  {
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+      return;
+    }
+    if (
+        (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        ||
+        (DriverConfiguration == EXTERNAL_CONTROLS_DRIVERS)
+    )
+    {
+      if (EA1 > 0)
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+            Enable1IO = ENABLE_MOTOR;
+        }
+        if (EA1 == 1)
+        {
+          MS1_IO = 1;
+          MS2_IO = 1;
+          MS3_IO = 1;
+        }
+        if (EA1 == 2)
+        {
+          MS1_IO = 1;
+          MS2_IO = 1;
+          MS3_IO = 0;
+        }
+        if (EA1 == 3)
+        {
+          MS1_IO = 0;
+          MS2_IO = 1;
+          MS3_IO = 0;
+        }
+        if (EA1 == 4)
+        {
+          MS1_IO = 1;
+          MS2_IO = 0;
+          MS3_IO = 0;
+        }
+        if (EA1 == 5)
+        {
+          MS1_IO = 0;
+          MS2_IO = 0;
+          MS3_IO = 0;
+        }
+      }
+      else
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+          Enable1IO = DISABLE_MOTOR;
+        }
+      }
+    }
+    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+    {
+      if (EA1 > 0)
+      {
+        Enable1AltIO = ENABLE_MOTOR;
+      }
+      else
+      {
+        Enable1AltIO = DISABLE_MOTOR;
+      }
+    }
+  }
 
-	RetVal = extract_number (kUCHAR, &EA2, kOPTIONAL);
-	if (kEXTRACT_OK == RetVal)
-	{
-		// Bail if we got a conversion error
-		if (error_byte)
-		{
-			return;
-		}
-		if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-		{
-			if (EA2 > 0)
-			{
-				Enable2IO = ENABLE_MOTOR;
-                RCServoPowerIO = RCSERVO_POWER_ON;
-                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-			}
-			else
-			{
-				Enable2IO = DISABLE_MOTOR;
-			}
-		}
+  RetVal = extract_number (kUCHAR, &EA2, kOPTIONAL);
+  if (kEXTRACT_OK == RetVal)
+  {
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+      return;
+    }
+    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+    {
+      if (EA2 > 0)
+      {
+        Enable2IO = ENABLE_MOTOR;
+      }
+      else
+      {
+        Enable2IO = DISABLE_MOTOR;
+      }
+    }
         else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-		{
-			if (EA2 > 0)
-			{
-				Enable2AltIO = ENABLE_MOTOR;
-                RCServoPowerIO = RCSERVO_POWER_ON;
-                gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-			}
-			else
-			{
-				Enable2AltIO = DISABLE_MOTOR;
-			}
-		}
-	}
+    {
+      if (EA2 > 0)
+      {
+        Enable2AltIO = ENABLE_MOTOR;
+      }
+      else
+      {
+        Enable2AltIO = DISABLE_MOTOR;
+      }
+    }
+  }
 
   // Always clear the step counts if motors are enabled/disabled or 
   // resolution is changed.
   clear_StepCounters();
   
-    print_ack();
+  print_ack();
 }
 
 // Node counter increment
