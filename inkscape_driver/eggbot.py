@@ -24,6 +24,7 @@
 import gettext
 import math
 import time
+import sys
 
 from lxml import etree
 
@@ -906,8 +907,11 @@ class EggBot(inkex.Effect):
 
         temp_num_string = 'x'
         string_pos = 1
-        current_layer_name = str_layer_name.encode('ascii', 'ignore').lstrip()  # remove leading whitespace
-
+        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
+            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
+        else:
+            current_layer_name = str(str_layer_name)
+        
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
         # digit characters only.
@@ -915,14 +919,14 @@ class EggBot(inkex.Effect):
         max_length = len(current_layer_name)
         if max_length > 0:
             while string_pos <= max_length:
-                if str.isdigit(current_layer_name[:string_pos]):
+                if current_layer_name[:string_pos].isdigit():
                     temp_num_string = current_layer_name[:string_pos]  # Store longest numeric string so far
                     string_pos += 1
                 else:
                     break
 
         self.plotCurrentLayer = False  # Temporarily assume that we aren't plotting the layer
-        if str.isdigit(temp_num_string):
+        if temp_num_string.isdigit():
             if self.svgLayer == int(float(temp_num_string)):
                 self.plotCurrentLayer = True  # We get to plot the layer!
                 self.LayersPlotted += 1
