@@ -3,7 +3,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.1, dated June 19, 2019.
+# Version 2.8.2, dated November 30, 2019.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -193,6 +193,11 @@ class EggBot(inkex.Effect):
 
         self.svg = self.document.getroot()
         self.CheckSVGforEggbotData()
+
+        # Input sanitization:
+        self.options.tab = self.options.tab.strip("\"")
+        self.options.setupType = self.options.setupType.strip("\"")
+        self.options.manualType = self.options.manualType.strip("\"")
 
         if self.options.tab in ["Help", "options", "timing"]:
             pass
