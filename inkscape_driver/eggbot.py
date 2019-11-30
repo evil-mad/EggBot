@@ -24,6 +24,7 @@
 import gettext
 import math
 import time
+import sys
 
 from lxml import etree
 
@@ -906,8 +907,11 @@ class EggBot(inkex.Effect):
 
         temp_num_string = 'x'
         string_pos = 1
-        current_layer_name = str_layer_name.lstrip()  # remove leading whitespace
-
+        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
+            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
+        else:
+            current_layer_name = str(str_layer_name)
+        
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
         # digit characters only.
