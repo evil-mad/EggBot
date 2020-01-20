@@ -6,7 +6,8 @@
         <group>
             <file>file:/D:/Projects/EggBot3-GH/EBB_firmware/app.X/source/UBW.c</file>
             <file>file:/D:/Projects/EggBot3-GH/EBB_firmware/app.X/source/ebb.c</file>
-            <file>file:/D:/Projects/EggBot3-GH/EBB_firmware/app.X/source/main.c</file>
+            <file>file:/D:/Projects/EggBot3-GH/EBB_firmware/app.X/source/RCServo2.c</file>
+            <file>file:/D:/Projects/EggBot3-GH/EBB_firmware/app.X/source/UBW.h</file>
         </group>
     </open-files>
 </project-private>
