@@ -1200,7 +1200,11 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This command asks the EBB if the PRG button has been pressed since the last QB query or not.</p>
-            <p> The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
+            <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
+            <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event.
+                B0 is normally pulled high, but if it is taken low,
+                then that registers as though the PRG button itself was pressed. 
+                This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
         </ul>
@@ -1333,7 +1337,7 @@ td {text-align: center}
                 
             <p><div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div>
                 This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. 
-                Otherwise it will be 0.</p>
+                Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.</p>
 
             <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div>
                 This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift
@@ -1662,7 +1666,7 @@ td {text-align: center}
               <code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of the servo when going down. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,13,<i>use_alt_pause</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.
+              <code>SC,13,<i>use_alt_prg</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.  See the description of <code><a href="#QB">QB</a></code> for more information.
             </li>
           </ul>
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
@@ -1672,7 +1676,7 @@ td {text-align: center}
             <ul>
               <li>Mode <code>SC,11,<i>servo_rate_up</i></code> added in v1.9.2</li>
               <li>Mode <code>SC,12,<i>servo_rate_down</i></code> added in v1.9.2</li>
-              <li>Mode <code>SC,13,<i>use_alt_pause</i></code> added in v2.0</li>
+              <li>Mode <code>SC,13,<i>use_alt_prg</i></code> added in v2.0</li>
               <li>Mode <code>SC,8,<i>maximum_S2_channels</i></code> added in v2.1.1</li>
               <li>Mode <code>SC,9,<i>S2_channel_duration_ms</i></code> added in v2.1.1</li>
               <li>Mode <code>SC,2,2</code> added in v2.2.2.</li>
