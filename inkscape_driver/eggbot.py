@@ -184,6 +184,11 @@ class EggBot(inkex.Effect):
         self.svg = self.document.getroot()
         self.CheckSVGforEggbotData()
 
+        # Input sanitization:
+        self.options.tab = self.options.tab.strip("\"")
+        self.options.setupType = self.options.setupType.strip("\"")
+        self.options.manualType = self.options.manualType.strip("\"")
+
         if self.options.tab in ['"Help"', '"options"', '"timing"']:
             pass
         else:
