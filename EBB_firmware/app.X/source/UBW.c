@@ -1613,7 +1613,7 @@ void parse_CU_packet(void)
 
   switch(parameter_number)
   {
-    case 1:
+    case 1:   // Turn on/off ACK ENABLE
       if (0 == parameter_value || 1 == parameter_value)
       {
         g_ack_enable = parameter_value;
@@ -1624,7 +1624,7 @@ void parse_CU_packet(void)
       }
       break;
       
-    case 2:
+    case 2:   // Turn on/off limit checks
       if (0 == parameter_value || 1 == parameter_value)
       {
         gLimitChecks = parameter_value;
@@ -1635,7 +1635,7 @@ void parse_CU_packet(void)
       }
       break;
       
-    case 3:
+    case 3:   // Set/read FIFO SIZE
       if (0 != parameter_value)
       {
         // Set the FIFOSize to parameter_value if parameter_value isn't zero

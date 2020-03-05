@@ -113,7 +113,7 @@ typedef struct
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 
 // Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     25
+#define COMMAND_FIFO_LENGTH     (25)
 
 ///extern MoveCommandType CommandFIFO[];
 extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];

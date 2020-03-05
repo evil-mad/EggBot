@@ -234,7 +234,11 @@
 // 2.6.1 01/07/19 - Added "QG" general query command
 // 2.6.2 01/11/19 - Added "HM" Home Motor command
 // 2.6.3 05/24/19 - Changed default RC servo power down time from 15min to 60s
-// 2.7.0 07/23/19 - A boatload of changes <LIST THEM>
+// 2.7.0 03/04/20 - A boatload of changes:
+//                - Maximum FIFO size increased from 1 to 25
+//                - CU,3 command added to read/write FIFO size
+//                - QG,2 command added to query current FIFO depth
+//                - Motion control commands re-written to use variable FIFO sizes
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -2428,9 +2432,11 @@ void parse_QC_packet(void)
 }
 
 // Query General
-// Usage: QG<CR>
+// Three forms of the command:
+// Form 1:
+// Usage: QG<CR> or QG,0<CR>
 // Returns: <status><NL><CR>
-// <status> is a single byte, printed as a decimal number "0" to "255".
+// <status> is a single byte, printed as a hexadecimal number from "00" to "FF".
 // Each bit in the byte represents the status of a single bit of information in the EBB.
 // Bit 1 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
 // Bit 2 : Motor2 status (0 = not moving, 1 = moving)
@@ -2441,9 +2447,29 @@ void parse_QC_packet(void)
 // Bit 7 : GPIO Pin RB2 state (0 = low, 1 = high)
 // Bit 8 : GPIO Pin RB5 state (0 = low, 1 = high)
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
+//
+// Form 2:
+// Usage: QG,1<CR>
+// Returns: <status>,<input_state><NL><CR>
+// <status> is exactly as in Form 1
+// <input_state> is for future expansion and will always be 0 for now
+//
+// Form 3:
+// Usage: QG,2<CR>
+// Returns: <status>,<input_state>,<queue_depth><NL><CR>
+// <status> is exactly as in Form 1
+// <input_state> is for future expansion and will always be 0 for now
+// <queue_depth> is an unsigned 2 byte integer representing how many motion commands are currently 
+//   sitting in the motion queue, waiting to be executed. This value will never be more than the
+//   <fifo_size> parameter set with the CU,3,<fifo_size> command or COMMAND_FIFO_LENGTH whichever 
+//   is smaller.
+//
 void parse_QG_packet(void)
 {
   UINT8 result = process_QM();
+  UINT8 param = 0;
+  
+  extract_number (kUCHAR, &param, kOPTIONAL);
 
   // process_QM() gives us the low 4 bits of our output result.
   result = result & 0x0F;
@@ -2465,7 +2491,18 @@ void parse_QG_packet(void)
     result = result | (1 << 7);
   }
 
-  printf ((far rom char*)"%02X\r\n", result);
+  if (param == 1)
+  {
+    printf ((far rom char*)"%02X,0\r\n", result);      
+  }
+  else if (param == 2)
+  {
+    printf ((far rom char*)"%02X,0,%u\r\n", result, FIFODepth);      
+  }
+  else
+  {
+    printf ((far rom char*)"%02X\r\n", result);      
+  }
     
   // Reset the button pushed flag
   if (ButtonPushed)
