@@ -24,6 +24,7 @@
 import gettext
 import math
 import time
+import sys
 
 import cubicsuperpath
 import ebb_motion  # https://github.com/evil-mad/plotink    Requires version 0.2 or newer.
@@ -902,7 +903,13 @@ class EggBot(inkex.Effect):
 
         temp_num_string = 'x'
         string_pos = 1
-        current_layer_name = str_layer_name.encode('ascii', 'ignore').lstrip()  # remove leading whitespace
+
+        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
+            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
+        else:
+            current_layer_name = str(str_layer_name)
+
+        current_layer_name.lstrip()  # Remove leading whitespace
 
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
