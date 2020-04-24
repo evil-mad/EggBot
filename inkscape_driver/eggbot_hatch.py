@@ -1065,7 +1065,7 @@ class Eggbot_Hatch(inkex.Effect):
             elif node.tag in [inkex.addNS('text', 'svg'), 'text']:
                 inkex.errormsg('Warning: unable to draw text, please convert it to a path first.')
                 pass
-            elif not isinstance(node.tag, basestring):
+            elif not isinstance(node.tag, str):
                 pass
             else:
                 inkex.errormsg('Warning: unable to hatch object <{0}>, please convert it to a path first.'.format(node.tag))
