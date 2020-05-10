@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="65">
   <projectmakefile>Makefile</projectmakefile>
-  <defaultConf>2</defaultConf>
+  <defaultConf>1</defaultConf>
   <confs>
     <conf name="46J50" type="2">
       <platformToolSN>noToolString</platformToolSN>

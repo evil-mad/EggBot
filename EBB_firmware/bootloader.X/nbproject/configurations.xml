@@ -58,9 +58,9 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.47</languageToolchainVersion>
+        <languageToolchainVersion>3.35</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -198,9 +198,9 @@
         <targetDevice>PIC18F45J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.47</languageToolchainVersion>
+        <languageToolchainVersion>3.35</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -337,7 +337,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.47</languageToolchainVersion>
+        <languageToolchainVersion>3.35</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
