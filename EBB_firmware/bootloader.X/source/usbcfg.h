@@ -65,6 +65,9 @@
 #elif defined(EBB_V11)
 	//#define USE_SELF_POWER_SENSE_IO	//See MCHPFSUSB Firmware User's Guide
    	//#define USE_USB_BUS_SENSE_IO		//(DS51679) for more details about these features.
+#elif defined(THREEBEEBEE_V10)
+	//#define USE_SELF_POWER_SENSE_IO	//See MCHPFSUSB Firmware User's Guide
+  //#define USE_USB_BUS_SENSE_IO		//(DS51679) for more details about these features.
 #elif defined(PIC18F46J50_PIM)
     //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board		
 

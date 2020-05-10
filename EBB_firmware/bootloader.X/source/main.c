@@ -117,7 +117,7 @@ project will have to be modified to make the BootPage section larger.
 #include "typedefs.h"                   
 #include "usb.h"                         
 #include "io_cfg.h"                     
-#if defined(EBB_V11)
+#if defined(EBB_V11) || defined(THREEBEEBEE_V10)
 	#include "Boot46J50Family.h"
 #elif defined(EBB_V10)
 	#include "Boot87J50Family.h"
@@ -153,7 +153,7 @@ project will have to be modified to make the BootPage section larger.
      #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
      #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
 //If using the YOUR_BOARD hardware platform (see usbcfg.h), uncomment below and add pragmas
-#elif defined(EBB_V11)
+#elif defined(EBB_V11) || defined(THREEBEEBEE_V10)
    	 #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
      #pragma config PLLDIV = 2           //Divide by 2 (8 MHz internal oscillator)
      #pragma config STVREN = ON          //stack overflow/underflow reset enabled
