@@ -325,6 +325,7 @@ void USBDriverService(void)
  *****************************************************************************/
 void USBSuspend(void)
 {
+#if 0 // disable USB suspend support
 	unsigned char UIESave;
 	unsigned char LEDSave;
 	
@@ -417,7 +418,7 @@ void USBSuspend(void)
 	//Primary oscillator and PLL should be running by now.
 
     /* End Modifiable Section */
-
+#endif
 }//end USBSuspend
 
 /******************************************************************************
@@ -437,6 +438,7 @@ void USBSuspend(void)
  *****************************************************************************/
 void USBWakeFromSuspend(void)
 {
+#if 0 // disable USB suspend/wake support
     /*
      * If using clock switching, this is the place to restore the
      * original clock frequency.
@@ -459,7 +461,7 @@ PLL to lock.
 ********************************************************************/
     // UIRbits.ACTVIF = 0;                      // Removed
     while(UIRbits.ACTVIF){UIRbits.ACTVIF = 0;}  // Added
-
+#endif
 }//end USBWakeFromSuspend
 
 //Commented out USBRemoteWakeup() function for HID bootloader use.  This feature

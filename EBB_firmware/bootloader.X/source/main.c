@@ -206,7 +206,6 @@ project will have to be modified to make the BootPage section larger.
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata access fast_vars
-near word led_count;
 near unsigned int pll_startup_counter;  // Used for software delay while pll is starting up
 
 #pragma udata
@@ -458,7 +457,6 @@ static void InitializeSystem(void)
 
   UserInit();                     // See Boot46J50Family.c.  Initializes the bootloader firmware state machine variables.
 
-  led_count = 0;                  // Initialize variable used to toggle LEDs
   mInitAllLEDs();                 // Init them off.
 
 #if defined(EBB_V10)
@@ -536,40 +534,29 @@ void USBTasks(void)
  *****************************************************************************/
 void BlinkUSBStatus(void)
 {
-  static unsigned char LEDState;
-  if(led_count == 0)
-  {
-    led_count = 10000U;
-  }
-  led_count--;
+  static word led_count = 0;
 
   #define mLED_Both_Off()         {mLED_1_Off();mLED_2_Off();}
   #define mLED_Both_On()          {mLED_1_On();mLED_2_On();}
   #define mLED_Only_1_On()        {mLED_1_On();mLED_2_Off();}
   #define mLED_Only_2_On()        {mLED_1_Off();mLED_2_On();}
 
-  if(usb_device_state < CONFIGURED_STATE)
+  if (usb_device_state < CONFIGURED_STATE)
   {
     mLED_Only_1_On();
   }
-  if(usb_device_state == CONFIGURED_STATE)
+  if (usb_device_state == CONFIGURED_STATE)
   {
-    if(led_count==0)
+    if(led_count >= 20000U)
     {
-      if (LEDState == 0)
-      {
-        mLED_Only_1_On();
-      }
-      if (LEDState == 3)
-      {
-        mLED_Only_2_On();
-      }
-      LEDState++;
-      if (LEDState > 3)
-      {
-        LEDState = 0;
-      }
-    }// end if
+      mLED_Only_1_On();
+    }
+    if(led_count >= 40000U)
+    {
+      mLED_Only_2_On();
+      led_count = 0U;
+    }
+    led_count++;
   }
 }//end BlinkUSBStatus
 

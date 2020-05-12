@@ -40,7 +40,7 @@
       </runprofile>
     </conf>
     <conf name="THREEBEEBEE" type="2">
-      <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>04D8:=&lt;pid>900A:=&lt;rev>0002:=&lt;man>Microchip Technology Inc.:=&lt;prod>PICkit 3:=&lt;sn>BUR101260159:=&lt;drv>x:=&lt;xpt>h:=end</platformToolSN>
+      <platformToolSN>:=MPLABComm-USB-Microchip:=&lt;vid>04D8:=&lt;pid>9018:=&lt;rev>0100:=&lt;man>Microchip Technology Incorporated:=&lt;prod>MPLAB Snap ICD:=&lt;sn>BUR182773928:=&lt;drv>x:=&lt;xpt>b:=end</platformToolSN>
       <languageToolchainDir>C:\MCC18\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>
