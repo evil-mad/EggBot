@@ -13,8 +13,8 @@ ifeq "${IGNORE_LOCAL}" "TRUE"
 else
 include Makefile
 # Include makefile containing local settings
-ifeq "$(wildcard nbproject/Makefile-local-45J50.mk)" "nbproject/Makefile-local-45J50.mk"
-include nbproject/Makefile-local-45J50.mk
+ifeq "$(wildcard nbproject/Makefile-local-THREEBEEBEE.mk)" "nbproject/Makefile-local-THREEBEEBEE.mk"
+include nbproject/Makefile-local-THREEBEEBEE.mk
 endif
 endif
 
@@ -25,7 +25,7 @@ MV=mv
 CP=cp 
 
 # Macros
-CND_CONF=45J50
+CND_CONF=THREEBEEBEE
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
 OUTPUT_SUFFIX=cof
@@ -88,10 +88,10 @@ FIXDEPS=fixDeps
 ifneq ($(INFORMATION_MESSAGE), )
 	@echo $(INFORMATION_MESSAGE)
 endif
-	${MAKE}  -f nbproject/Makefile-45J50.mk dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+	${MAKE}  -f nbproject/Makefile-THREEBEEBEE.mk dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
-MP_PROCESSOR_OPTION=18F45J50
-MP_PROCESSOR_OPTION_LD=18f45j50
+MP_PROCESSOR_OPTION=18F46J50
+MP_PROCESSOR_OPTION_LD=18f46j50
 MP_LINKER_DEBUG_OPTION=
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
@@ -106,7 +106,7 @@ ${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makef
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o.d 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/Boot46J50Family.o   source/Boot46J50Family.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/Boot46J50Family.o   source/Boot46J50Family.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/Boot46J50Family.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Boot46J50Family.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -114,7 +114,7 @@ ${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/hid.o.d 
 	@${RM} ${OBJECTDIR}/source/hid.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/hid.o   source/hid.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/hid.o   source/hid.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/hid.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/hid.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -122,7 +122,7 @@ ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -130,7 +130,7 @@ ${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usb9.o.d 
 	@${RM} ${OBJECTDIR}/source/usb9.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb9.o   source/usb9.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb9.o   source/usb9.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb9.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb9.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -138,7 +138,7 @@ ${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o.d 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbctrltrf.o   source/usbctrltrf.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbctrltrf.o   source/usbctrltrf.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbctrltrf.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbctrltrf.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -146,7 +146,7 @@ ${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdrv.o   source/usbdrv.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdrv.o   source/usbdrv.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdrv.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdrv.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -154,7 +154,7 @@ ${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdsc.o   source/usbdsc.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdsc.o   source/usbdsc.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdsc.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdsc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -162,7 +162,7 @@ ${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o.d 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbmmap.o   source/usbmmap.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -D__DEBUG  -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbmmap.o   source/usbmmap.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbmmap.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbmmap.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -171,7 +171,7 @@ ${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makef
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o.d 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/Boot46J50Family.o   source/Boot46J50Family.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/Boot46J50Family.o   source/Boot46J50Family.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/Boot46J50Family.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Boot46J50Family.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -179,7 +179,7 @@ ${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/hid.o.d 
 	@${RM} ${OBJECTDIR}/source/hid.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/hid.o   source/hid.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/hid.o   source/hid.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/hid.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/hid.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -187,7 +187,7 @@ ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/main.o   source/main.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -195,7 +195,7 @@ ${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usb9.o.d 
 	@${RM} ${OBJECTDIR}/source/usb9.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb9.o   source/usb9.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usb9.o   source/usb9.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb9.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb9.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -203,7 +203,7 @@ ${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o.d 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbctrltrf.o   source/usbctrltrf.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbctrltrf.o   source/usbctrltrf.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbctrltrf.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbctrltrf.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -211,7 +211,7 @@ ${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdrv.o   source/usbdrv.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdrv.o   source/usbdrv.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdrv.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdrv.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -219,7 +219,7 @@ ${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdsc.o   source/usbdsc.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbdsc.o   source/usbdsc.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdsc.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdsc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -227,7 +227,7 @@ ${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o.d 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DEBB_V11 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbmmap.o   source/usbmmap.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -p$(MP_PROCESSOR_OPTION) -DTHREEBEEBEE_V10 -I"." -ms -oa-  -I ${MP_CC_DIR}\\..\\h  -fo ${OBJECTDIR}/source/usbmmap.o   source/usbmmap.c 
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbmmap.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbmmap.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
@@ -236,13 +236,13 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    source/BootModified.rm18f45j50_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    source/BootModified.rm18f46j50_g.lkr
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f45j50_g.lkr"   -w -x -u_DEBUG -m"${DISTDIR}/bootlaoder.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"   -w -x -u_DEBUG -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/BootModified.rm18f45j50_g.lkr
+dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/BootModified.rm18f46j50_g.lkr
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f45j50_g.lkr"   -w  -m"${DISTDIR}/bootlaoder.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"   -w  -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 endif
 
 
@@ -255,8 +255,8 @@ endif
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
-	${RM} -r build/45J50
-	${RM} -r dist/45J50
+	${RM} -r build/THREEBEEBEE
+	${RM} -r dist/THREEBEEBEE
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl

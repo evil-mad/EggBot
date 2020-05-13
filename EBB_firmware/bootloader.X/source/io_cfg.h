@@ -118,6 +118,43 @@
 
 #define sw2                 PORTAbits.RA7
 
+#elif defined(THREEBEEBEE_V10)
+/** U S B ***********************************************************/
+//#define tris_usb_bus_sense  TRISAbits.TRISA7    // Input
+
+#if defined(USE_USB_BUS_SENSE_IO)
+#define usb_bus_sense       PORTAbits.RA7
+#else
+#define usb_bus_sense       1
+#endif
+
+#define self_power          0
+
+///** L E D ***********************************************************/
+// USB (GREEN) LED = RD3
+// USR (RED) LED = RD2
+#define mInitAllLEDs()      LATDbits.LATD3 = 0; LATDbits.LATD2 = 0; TRISDbits.TRISD3 = 0; TRISDbits.TRISD2 = 0;
+
+#define mLED_1              LATDbits.LATD3
+#define mLED_2              LATDbits.LATD2
+
+#define mLED_1_On()         mLED_1 = 1;
+#define mLED_2_On()         mLED_2 = 1;
+
+#define mLED_1_Off()        mLED_1 = 0;
+#define mLED_2_Off()        mLED_2 = 0;
+
+#define mLED_1_Toggle()     mLED_1 = !mLED_1;
+#define mLED_2_Toggle()     mLED_2 = !mLED_2;
+//
+///** S W I T C H *****************************************************/
+// PRG switch = RA7
+#define mInitAllSwitches()  TRISAbits.TRISA6=1;
+#define mInitSwitch2()      TRISAbits.TRISA6=1;
+
+#define sw2                 PORTAbits.RA6
+
+
 /********************************************************************/
 /********************************************************************/
 /********************************************************************/

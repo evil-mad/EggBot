@@ -31,102 +31,102 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Fritz Schlunder		04/12/08	Original.
- * Fritz Schlunder		01/23/09	Slight modifications for 
- *									MCHPFSUSB v2.4 release.
+ * Fritz Schlunder    04/12/08  Original.
+ * Fritz Schlunder    01/23/09  Slight modifications for 
+ *                              MCHPFSUSB v2.4 release.
  ********************************************************************/
 
 /** C O N S T A N T S **********************************************************/
 
-//Section defining the address range to erase for the erase device command, along with the valid programming range to be reported by the QUERY_DEVICE command.
-#define StartPageToErase				4		 //The 1024 byte page starting at address 0x1000 will be erased.
-#define ProgramMemStart					0x001000 //Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH 64 BYTE BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
-#define ConfigWordsSectionLength		0x08	//8 bytes worth of Configuration words on the PIC18F87J50 family devices
+// Section defining the address range to erase for the erase device command, along with the valid programming range to be reported by the QUERY_DEVICE command.
+#define StartPageToErase        4         // The 1024 byte page starting at address 0x1000 will be erased.
+#define ProgramMemStart         0x001000  // Beginning of application program memory (not occupied by bootloader).  **THIS VALUE MUST BE ALIGNED WITH 64 BYTE BLOCK BOUNDRY** Also, in order to work correctly, make sure the StartPageToErase is set to erase this section.
+#define ConfigWordsSectionLength		0x08  // 8 bytes worth of Configuration words on the PIC18F87J50 family devices
 
 //#if defined(__18F87J50)||defined(__18F67J50)
-//	#define MaxPageToEraseNoConfigs		126		 //Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
-//	#define MaxPageToEraseWithConfigs	127		 //Page 127 contains the flash configurations words on the PIC18F87J50.
-//	#define ProgramMemStopNoConfigs		0x01FC00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ProgramMemStopWithConfigs	0x01FFF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ConfigWordsStartAddress		0x01FFF8 //0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
+//  #define MaxPageToEraseNoConfigs   126       // Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
+//  #define MaxPageToEraseWithConfigs 127       // Page 127 contains the flash configurations words on the PIC18F87J50.
+//  #define ProgramMemStopNoConfigs   0x01FC00  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ProgramMemStopWithConfigs 0x01FFF8  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ConfigWordsStartAddress   0x01FFF8  // 0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
 //#elif defined(__18F86J55)||defined(__18F66J55)
-//	#define MaxPageToEraseNoConfigs		94		 //Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
-//	#define MaxPageToEraseWithConfigs	95		 //Page 127 contains the flash configurations words on the PIC18F87J50.
-//	#define ProgramMemStopNoConfigs		0x017C00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ProgramMemStopWithConfigs	0x017FF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ConfigWordsStartAddress		0x017FF8 //0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
+//  #define MaxPageToEraseNoConfigs   94        // Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
+//  #define MaxPageToEraseWithConfigs 95        // Page 127 contains the flash configurations words on the PIC18F87J50.
+//  #define ProgramMemStopNoConfigs   0x017C00  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ProgramMemStopWithConfigs 0x017FF8  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ConfigWordsStartAddress   0x017FF8  // 0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
 //#elif defined(__18F86J50)||defined(__18F66J50)
-//	#define MaxPageToEraseNoConfigs		62		 //Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
-//	#define MaxPageToEraseWithConfigs	63		 //Page 127 contains the flash configurations words on the PIC18F87J50.
-//	#define ProgramMemStopNoConfigs		0x00FC00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ProgramMemStopWithConfigs	0x00FFF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ConfigWordsStartAddress		0x00FFF8 //0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
+//  #define MaxPageToEraseNoConfigs   62        // Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
+//  #define MaxPageToEraseWithConfig  63        // Page 127 contains the flash configurations words on the PIC18F87J50.
+//  #define ProgramMemStopNoConfigs   0x00FC00  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ProgramMemStopWithConfigs 0x00FFF8  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ConfigWordsStartAddress   0x00FFF8  // 0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
 //#elif defined(__18F85J50)||defined(__18F65J50)
-//	#define MaxPageToEraseNoConfigs		30		 //Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
-//	#define MaxPageToEraseWithConfigs	31		 //Page 127 contains the flash configurations words on the PIC18F87J50.
-//	#define ProgramMemStopNoConfigs		0x007C00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ProgramMemStopWithConfigs	0x007FF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-//	#define ConfigWordsStartAddress		0x007FF8 //0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
+//  #define MaxPageToEraseNoConfigs   30        // Last page of flash on the PIC18F87J50, which does not contain the flash configuration words.
+//  #define MaxPageToEraseWithConfigs 31        // Page 127 contains the flash configurations words on the PIC18F87J50.
+//  #define ProgramMemStopNoConfigs   0x007C00  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ProgramMemStopWithConfigs 0x007FF8  // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+//  #define ConfigWordsStartAddress   0x007FF8  // 0xXXXF8 is CONFIG1L on PIC18F87J50 family devices
 //#endif
 
 
 #if defined(__18F24J50)||defined(__18F44J50)
-	#define MaxPageToEraseNoConfigs		14		 //Last page of flash, which does not contain the flash configuration words.
-	#define MaxPageToEraseWithConfigs	15		 //Page 127 contains the flash configurations words
-	#define ProgramMemStopNoConfigs		0x003C00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ProgramMemStopWithConfigs	0x003FF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ConfigWordsStartAddress		0x003FF8 //0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
+  #define MaxPageToEraseNoConfigs   14          // Last page of flash, which does not contain the flash configuration words.
+  #define MaxPageToEraseWithConfigs 15          // Page 127 contains the flash configurations words
+  #define ProgramMemStopNoConfigs   0x003C00    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ProgramMemStopWithConfigs 0x003FF8    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ConfigWordsStartAddress   0x003FF8    // 0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
 #elif defined(__18F25J50)||defined(__18F45J50)
-	#define MaxPageToEraseNoConfigs		30		 //Last page of flash, which does not contain the flash configuration words.
-	#define MaxPageToEraseWithConfigs	31		 //Page 31 contains the flash configurations words 
-	#define ProgramMemStopNoConfigs		0x007C00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ProgramMemStopWithConfigs	0x007FF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ConfigWordsStartAddress		0x007FF8 //0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
+  #define MaxPageToEraseNoConfigs   30          // Last page of flash, which does not contain the flash configuration words.
+  #define MaxPageToEraseWithConfigs 31          // Page 31 contains the flash configurations words 
+  #define ProgramMemStopNoConfigs   0x007C00    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ProgramMemStopWithConfigs 0x007FF8    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ConfigWordsStartAddress   0x007FF8    // 0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
 #elif defined(__18F26J50)||defined(__18F46J50)
-	#define MaxPageToEraseNoConfigs		62		 //Last page of flash, which does not contain the flash configuration words.
-	#define MaxPageToEraseWithConfigs	63		 //Page 63 contains the flash configurations words.
-	#define ProgramMemStopNoConfigs		0x00FC00 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ProgramMemStopWithConfigs	0x00FFF8 //**MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
-	#define ConfigWordsStartAddress		0x00FFF8 //0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
+  #define MaxPageToEraseNoConfigs   62          // Last page of flash, which does not contain the flash configuration words.
+  #define MaxPageToEraseWithConfigs 63          // Page 63 contains the flash configurations words.
+  #define ProgramMemStopNoConfigs   0x00FC00    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ProgramMemStopWithConfigs 0x00FFF8    // **MUST BE WORD ALIGNED (EVEN) ADDRESS.  This address does not get updated, but the one just below it does: IE: If AddressToStopPopulating = 0x200, 0x1FF is the last programmed address (0x200 not programmed)**	
+  #define ConfigWordsStartAddress   0x00FFF8    // 0xXXXF8 is CONFIG1L on PIC18F46J50 family devices
 #endif
 
-//Switch State Variable Choices
-#define	QUERY_DEVICE				0x02	//Command that the host uses to learn about the device (what regions can be programmed, and what type of memory is the region)
-#define	UNLOCK_CONFIG				0x03	//Note, this command is used for both locking and unlocking the config bits (see the "//Unlock Configs Command Definitions" below)
-#define ERASE_DEVICE				0x04	//Host sends this command to start an erase operation.  Firmware controls which pages should be erased.
-#define PROGRAM_DEVICE				0x05	//If host is going to send a full RequestDataBlockSize to be programmed, it uses this command.
-#define	PROGRAM_COMPLETE			0x06	//If host send less than a RequestDataBlockSize to be programmed, or if it wished to program whatever was left in the buffer, it uses this command.
-#define GET_DATA					0x07	//The host sends this command in order to read out memory from the device.  Used during verify (and read/export hex operations)
-#define	RESET_DEVICE				0x08	//Resets the microcontroller, so it can update the config bits (if they were programmed, and so as to leave the bootloader (and potentially go back into the main application)
+// Switch State Variable Choices
+#define QUERY_DEVICE                0x02        // Command that the host uses to learn about the device (what regions can be programmed, and what type of memory is the region)
+#define UNLOCK_CONFIG               0x03        // Note, this command is used for both locking and unlocking the config bits (see the "//Unlock Configs Command Definitions" below)
+#define ERASE_DEVICE                0x04        // Host sends this command to start an erase operation.  Firmware controls which pages should be erased.
+#define PROGRAM_DEVICE              0x05        // If host is going to send a full RequestDataBlockSize to be programmed, it uses this command.
+#define PROGRAM_COMPLETE            0x06        // If host send less than a RequestDataBlockSize to be programmed, or if it wished to program whatever was left in the buffer, it uses this command.
+#define GET_DATA                    0x07        // The host sends this command in order to read out memory from the device.  Used during verify (and read/export hex operations)
+#define RESET_DEVICE                0x08        // Resets the microcontroller, so it can update the config bits (if they were programmed, and so as to leave the bootloader (and potentially go back into the main application)
 
-//Unlock Configs Command Definitions
-#define UNLOCKCONFIG				0x00	//Sub-command for the ERASE_DEVICE command
-#define LOCKCONFIG					0x01	//Sub-command for the ERASE_DEVICE command
+// Unlock Configs Command Definitions
+#define UNLOCKCONFIG                0x00        // Sub-command for the ERASE_DEVICE command
+#define LOCKCONFIG                  0x01        // Sub-command for the ERASE_DEVICE command
 
-//Query Device Response "Types" 
-#define	TypeProgramMemory			0x01	//When the host sends a QUERY_DEVICE command, need to respond by populating a list of valid memory regions that exist in the device (and should be programmed)
-#define TypeEEPROM					0x02
-#define TypeConfigWords				0x03
-#define	TypeEndOfTypeList			0xFF	//Sort of serves as a "null terminator" like number, which denotes the end of the memory region list has been reached.
+// Query Device Response "Types" 
+#define TypeProgramMemory           0x01        // When the host sends a QUERY_DEVICE command, need to respond by populating a list of valid memory regions that exist in the device (and should be programmed)
+#define TypeEEPROM                  0x02
+#define TypeConfigWords             0x03
+#define TypeEndOfTypeList           0xFF        // Sort of serves as a "null terminator" like number, which denotes the end of the memory region list has been reached.
 
 
-//BootState Variable States
-#define	Idle						0x00
-#define NotIdle						0x01
+// BootState Variable States
+#define Idle                        0x00
+#define NotIdle                     0x01
 
-//OtherConstants
-#define InvalidAddress				0xFFFFFFFF
+// OtherConstants
+#define InvalidAddress        0xFFFFFFFF
 
-//Application and Microcontroller constants
-#define BytesPerAddressPIC18		0x01		//One byte per address.  PIC24 uses 2 bytes for each address in the hex file.
+// Application and Microcontroller constants
+#define BytesPerAddressPIC18        0x01        // One byte per address.  PIC24 uses 2 bytes for each address in the hex file.
 
-#define	TotalPacketSize				0x40
-#define WORDSIZE					0x02	//PIC18 uses 2 byte words, PIC24 uses 3 byte words.
-#define	FlashBlockSize				0x40	//For PIC18F87J50 family devices, a flash block is 64 bytes
-#define RequestDataBlockSize 		0x3A	//Number of data bytes in a standard request to the PC.  Must be an even number from 2-58 (0x02-0x3A).  Larger numbers make better use of USB bandwidth and 
-											//yeild shorter program/verify times, but require more micrcontroller RAM for buffer space.
-#define BufferSize 					0x40
-#define ErasePageSize				0x400	//Smallest erasable block is 1024 bytes
+#define TotalPacketSize             0x40
+#define WORDSIZE                    0x02        // PIC18 uses 2 byte words, PIC24 uses 3 byte words.
+#define FlashBlockSize              0x40        // For PIC18F87J50 family devices, a flash block is 64 bytes
+#define RequestDataBlockSize        0x3A        // Number of data bytes in a standard request to the PC.  Must be an even number from 2-58 (0x02-0x3A).  Larger numbers make better use of USB bandwidth and 
+                                                // yeild shorter program/verify times, but require more micrcontroller RAM for buffer space.
+#define BufferSize                  0x40
+#define ErasePageSize               0x400       // Smallest erasable block is 1024 bytes
 
 /** I N C L U D E S **********************************************************/
 #include <p18cxxx.h>
