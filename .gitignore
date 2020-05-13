@@ -2,3 +2,6 @@
 
 **/.DS_Store
 **/*.pyc
+*.err
+*.o
+*.d
