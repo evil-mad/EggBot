@@ -85,7 +85,7 @@
 # Modifications are limited to recursivelyTraverseSvg and effect methods 
 
 # Current software version:
-# (v2.3.1, June 19, 2019)
+# (v2.3.2, March 27, 2020)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -762,11 +762,11 @@ class Eggbot_Hatch(inkex.Effect):
                 for vertex in subpath:
                     if vertex[0] < self.xmin:
                         self.xmin = vertex[0]
-                    elif vertex[0] > self.xmax:
+                    if vertex[0] > self.xmax:
                         self.xmax = vertex[0]
                     if vertex[1] < self.ymin:
                         self.ymin = vertex[1]
-                    elif vertex[1] > self.ymax:
+                    if vertex[1] > self.ymax:
                         self.ymax = vertex[1]
 
     def recursivelyTraverseSvg(self, a_node_list, mat_current=None, parent_visibility='visible'):

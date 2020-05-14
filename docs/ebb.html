@@ -76,7 +76,7 @@ td {text-align: center}
         </p>
         <ul>
           <li>
-            The Inkscape-based drivers <a href="https://github.com/evil-mad/EggBot">for the EggBot</a>, <a href="https://github.com/evil-mad/wcb-ink">for the WaterColorBot</a>, and <a href="https://githukhb.com/evil-mad/axidraw">for AxiDraw</a> are written in python, and use this serial protocol. The codebases from those projects are excellent resources for getting started.       
+            The Inkscape-based drivers <a href="https://github.com/evil-mad/EggBot">for the EggBot</a>, <a href="https://github.com/evil-mad/wcb-ink">for the WaterColorBot</a>, and <a href="https://github.com/evil-mad/axidraw">for AxiDraw</a> are written in python, and use this serial protocol. The codebases from those projects are excellent resources for getting started.       
           </li>
           <li>
             The <a href="http://processing.org">Processing</a>-based program <a href="https://github.com/evil-mad/robopaint-rt">RoboPaint RT</a> is designed to control the WaterColorBot through a real-time interface. This program is written in Processing (Java), and serves as a good example of how to manage the EBB through Processing.
@@ -1200,7 +1200,11 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This command asks the EBB if the PRG button has been pressed since the last QB query or not.</p>
-            <p> The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
+            <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
+            <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event.
+                B0 is normally pulled high, but if it is taken low,
+                then that registers as though the PRG button itself was pressed. 
+                This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
         </ul>
@@ -1333,7 +1337,7 @@ td {text-align: center}
                 
             <p><div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div>
                 This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. 
-                Otherwise it will be 0.</p>
+                Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.</p>
 
             <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div>
                 This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift
@@ -1662,7 +1666,7 @@ td {text-align: center}
               <code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of the servo when going down. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,13,<i>use_alt_pause</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.
+              <code>SC,13,<i>use_alt_prg</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.  See the description of <code><a href="#QB">QB</a></code> for more information.
             </li>
           </ul>
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
@@ -1672,7 +1676,7 @@ td {text-align: center}
             <ul>
               <li>Mode <code>SC,11,<i>servo_rate_up</i></code> added in v1.9.2</li>
               <li>Mode <code>SC,12,<i>servo_rate_down</i></code> added in v1.9.2</li>
-              <li>Mode <code>SC,13,<i>use_alt_pause</i></code> added in v2.0</li>
+              <li>Mode <code>SC,13,<i>use_alt_prg</i></code> added in v2.0</li>
               <li>Mode <code>SC,8,<i>maximum_S2_channels</i></code> added in v2.1.1</li>
               <li>Mode <code>SC,9,<i>S2_channel_duration_ms</i></code> added in v2.1.1</li>
               <li>Mode <code>SC,2,2</code> added in v2.2.2.</li>
@@ -1893,14 +1897,14 @@ td {text-align: center}
         <h4><a name="SR"></a>"SR" &mdash; Set RC Servo power timeout value</h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>,<i>state</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>[,<i>state</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>v2.6.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span>Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>value</i> is a decimal unsigned long integer (32-bit) representing the number of milliseconds to wait after the last motor or servo move before shutting off power to the RC Servo (RB1).</li>
+              <li><i>value</i> is a decimal unsigned long integer (32-bit) representing the number of milliseconds to wait after the last servo move before shutting off power to the RC Servo (RB1).</li>
               <li><i>state</i> is value of either 0 or 1, and is optional. It represents an immediate new state for the servo power (1 = on, 0 = off).</li>
             </ul>
           </li>
@@ -1909,9 +1913,9 @@ td {text-align: center}
             <p>This command sets a new RC Servo power timeout value and optionally a new immediate power state.</p>
             <p>The <i>value</i> argument is in milliseconds.</p>
             <p>If <i>value</i> is 0, then the auto-poweroff feature is disabled and the power will not be turned off to the RC servo once applied.</p>
-            <p>On boot, the EBB will use a default value of 60 seconds. This means that 60 seconds after the last servo or stepper motion command, the RC servo power will be turned off.</p>
+            <p>On boot, the EBB will use a default value of 60 seconds. This means that 60 seconds after the last servo motion command, the RC servo power will be turned off.</p>
             <p>On boot, the power to the RC Servo (on pin RB1) will be off.</p>
-            <p>Whenever any command that moves the stepper motors or RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
+            <p>Whenever any command that moves the RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
             <p>Only EBB boards v2.5 and above have the necessary power switch hardware. On other versions of the EBB hardware, the power to the servo is always on.</p>
             <p>Pin RA3 of the MCU is used to control the RC Servo power. So from software version 2.6.0 and above, this pin is now dedicated to RC Servo power control and can't be easily used for other things.</p>
           </li>
@@ -1923,6 +1927,9 @@ td {text-align: center}
             <span style="font-weight: bold;">Version History:</span> 
             <li>Added in v2.6.0.</li>
             <li>Changed default power timeout value from 15 minutes to 60 seconds in v2.6.3.</li>
+            <li>Changed <code>SR</code> in v2.6.5 so that it no longer turned on power to the servo when stepper motor
+            motion was commanded. Instead, it only turns on power when a servo motion is commanded. From v2.6.0 to v2.6.4,
+            either stepper or servo motion would trigger power to the servo.</li>
           </li>
         </ul>
 

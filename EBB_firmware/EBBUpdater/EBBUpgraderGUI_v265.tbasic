@@ -1,0 +1,448 @@
+﻿Uses "UI"
+Uses "CONSOLE"
+Uses "COMM"
+Uses "WMI"
+Uses "OS"
+
+'---Constant declarations
+Begin ControlID
+  %ID_StartUpdateButton 
+  %ID_ExitButton 
+  %ID_CommandOutputTexBox
+  %IDC_TIMER
+End ControlID
+
+%TIMER_DELAY    = 100          '---Timer delay (in milliseconds, not very accurate below about 100)
+     
+Global hComm           As Long
+Global nBytes          As Long
+Global sBuffer         As String 
+Global gPortOpen       As Boolean
+Global pID             As Number
+Global vData()         As String
+Global nItems          As Long
+Global Counter         As Long
+Global Position        As Long
+Global ComputerName    As String   Value OS_GetComputerName
+Global Ports()         As String
+Global CountATI        As Long
+Global sHexFilename    As String
+Global sFirmwareNumber As String
+Global bConsole        As Boolean
+Global bUpdaterConsole As Boolean   
+Global sCommandLine    As String
+                                  
+' Replace the filename in the next two lines to change which HEX file gets programmed
+#BUNDLE File "HEX", ".\EBF_v265.hex", "", ReplaceExisting=1
+sFirmwareNumber = "2.6.5"
+                                 
+bConsole = TRUE  ' for normal printfs
+bUpdaterConsole = TRUE ' for mphidflash
+sHexFilename = "EBF_v" & Replace$(sFirmwareNumber, ".", "") & ".hex"
+#BUNDLE File "app", ".\mphidflash-1.6-win-32.exe", "", ReplaceExisting=1
+#BUNDLE Icon "WhiteEBBv20.ico"
+
+'------------------------------------------------------------------------------
+' Program start point
+'------------------------------------------------------------------------------
+Function TBMain() As Long
+  Local hDlg    As DWord   '---Used to store window handle of main dialog
+
+  gPortOpen = FALSE
+  '---Create a new dialog
+    hDlg = Dialog_New Pixels, 0, "EBB Update to frimware v" & sFirmwareNumber, -1, -1, 400, 400,
+                                                  %WS_DLGFRAME  | 
+                                                  %DS_CENTER    | 
+                                                  %WS_CAPTION   | 
+                                                  %WS_SYSMENU   | 
+                                                  %WS_OVERLAPPEDWINDOW
+
+  '---Set window minimum size
+    Dialog Set Minsize hDlg, 400, 400
+
+  '---Show dialog in modal mode
+  '---cbDialog function is the callback function handling dialog events
+  '---Application control will pass to dialog callback till dialog will exists 
+    Dialog Show Modal hDlg, Call cbDialog
+
+  '---If execution comes here it means main dialog as been destroyed
+  If (bConsole) Then Console_WriteLine "---Application finished ---"
+  
+End Function 
+
+'------------------------------------------------------------------------------
+' Callback procedure for main window
+'------------------------------------------------------------------------------
+CallBack Function cbDialog() As Long
+
+  'If (bConsole) Then Console_Writeline CBHNDL, CBCTL, CBCTLMSG, CBLPARAM, CBWPARAM
+  
+  Select Case CBMSG
+    
+    Case %WM_CREATE
+      If (bConsole) Then Console_WriteLine Time$, "Fired %WM_CREATE dialog message"
+
+    Case %WM_INITDIALOG
+      If (bConsole) Then Console_WriteLine Time$, "Fired %WM_INITDIALOG dialog message"
+      '---Add controls
+      Control Add Button,  CBHNDL, %ID_StartUpdateButton, "Start Update", 160,  10,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
+      Control Add Button,  CBHNDL, %ID_ExitButton, "Exit"               , 160, 350,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
+      
+      Control Add Textbox, CBHNDL, %ID_CommandOutputTexBox, ""          ,  10, 40,  380, 300, %ES_MULTILINE | %ES_AUTOVSCROLL | %WS_HSCROLL | %ES_AUTOHSCROLL | %WS_VSCROLL |%ES_READONLY 
+
+    Case %WM_COMMAND
+      'If (bConsole) Then Console_Writeline Time$, "Fired %WM_COMMAND dialog message", CBCTL
+ 
+    Case %WM_SIZE     '---The WM_SIZE message is sent to a window after its size has changed.
+      'If (bConsole) Then Console_Writeline Time$, "Fired %WM_SIZE dialog message", CBWPARAM, LOWRD(CBLPARAM), HIWRD(CBLPARAM)
+
+    Case %WM_SIZING   '---The WM_SIZING message is sent to a window that the user is resizing.
+      'If (bConsole) Then Console_Writeline Time$, "Fired %WM_SIZING dialog message", CBWPARAM, LOWRD(CBLPARAM), HIWRD(CBLPARAM)
+
+    Case %WM_MOVE
+      'If (bConsole) Then Console_Writeline Time$, "Fired %WM_MOVE dialog message", LO(Integer, CBLPARAM), HI(Integer, CBLPARAM)
+      
+    Case %WM_DESTROY
+      '---Do whatever needed just before dialog is destroyed.
+      If gPortOpen = TRUE Then  
+        gPortOpen = FALSE
+        COMM_Close(hComm)
+      End If
+      'If (bConsole) Then Console_Writeline Time$, "Fired %WM_DESTROY dialog message"
+
+    Case %WM_TIMER
+    
+      Select Case CBWPARAM
+        Case %IDC_TIMER                      
+''          If gPortOpen = TRUE Then  
+''            nBytes = COMM_Get(hComm, %COMM_RXQUE)
+''            COMM_Recv(hComm, nBytes, sBuffer)
+''            add_new_bytes(sBuffer, CBHNDL)
+''          EndIf
+        End Select
+
+  End Select
+
+End Function                 
+               
+'------------------------------------------------------------------------------
+' Callback procedure for button control
+'------------------------------------------------------------------------------
+CallBack Function cbButton() As Long                               
+  Local sComPort As String
+  Local sTemp As String
+  Local dFloat As Double
+
+  If CBMSG = %WM_COMMAND Then
+
+    Select Case CBCTLMSG
+      Case %BN_CLICKED
+        Select Case CBCTL  
+
+          Case %ID_StartUpdateButton    
+            Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Building a list of COM ports ..." + Chr$(13) + Chr$(10)
+            sBuffer = WMI_GetData(ComputerName, "", "", "", "Win32_PnPEntity", "", "Name" )
+              
+            nItems = Parse( sBuffer, vData(), $CRLF)
+            
+            ReDim Ports() 
+              
+            For Counter = 1 To nItems
+              Position = InStr(Ucase$(vData(Counter)),"(COM")
+              If Position Then
+                ReDim Preserve Ports(UBound(Ports)+1)
+                PortS(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
+              End If
+            Next
+
+            ' Check for no COM ports found
+            If LBound(Ports) = 1 And UBound(Ports) = 1 Then
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No COM ports found on this computer. Click Exit." + Chr$(13) + Chr$(10)
+            Else
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following ports:" + Chr$(13) + Chr$(10)
+              For Counter = LBound(Ports) To UBound(Ports)
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, Ports(Counter) + Chr$(13) + Chr$(10)
+              Next
+              For Counter = LBound(Ports) To UBound(Ports)
+                hComm = COMM_FreeFile
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Testing port " & Ports(Counter) & " ... "
+                COMM_Open("\\.\" & Ports(Counter), hComm)
+                If Err = 0 Then
+                  COMM_Set(hComm, %COMM_BAUD, 123)
+                  COMM_Print(hComm, "V" & Chr$(13))    
+                  Sleep 100
+                  nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                  
+                  COMM_Print(hComm, "V" & Chr$(13))    
+                  Sleep 100
+                  nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                  
+                  sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
+                  If LEFT$(sBuffer, 3) = "EBB" Then                                                           
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting update to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
+                    COMM_Print(hComm, "BL" & Chr$(13))
+                    Sleep 100
+                    COMM_Close(hComm)
+                    Sleep 2000        
+                    sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename   
+                    If (bConsole) Then Console_WriteLine sCommandLine
+                    If (bUpdaterConsole) Then
+                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
+                    Else
+                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_HIDE, %OS_SHELL_SYNC)   
+                    EndIf
+                    Sleep 2000 
+                    If (bConsole) Then Console_WriteLine("pID = " & pID)
+                    If pID = 0 Then
+                      COMM_Open("\\.\" & Ports(Counter), hComm)
+                      If Err = 0 Then
+                        COMM_Print(hComm, "V" & Chr$(13))          
+                        Sleep 200
+                        nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                        COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                        Sleep 200
+                        COMM_Print(hComm, "V" & Chr$(13))          
+                        Sleep 200
+                        nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                        COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                        sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
+                        If (RIGHT$(sBuffer,5) = sFirmwareNumber) Then
+                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Updated to version " & RIGHT$(sBuffer,5) & " successfully" + Chr$(13) + Chr$(10)
+                        Else
+                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB= " & RIGHT$(sBuffer,5) & " File= " & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
+                        EndIf
+                        COMM_Close(hComm)
+                      EndIf
+                    Else
+                      Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Programming EBB failed with an error." + Chr$(13) + Chr$(10)
+                    EndIf
+                  Else
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, " no EBB found" + Chr$(13) + Chr$(10)
+                    'If (bConsole) Then Console_WriteLine("...closing port " & "\\.\" & Ports(Counter))
+                    COMM_Close(hComm)    
+                  EndIf
+                Else
+                  Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Error: " & Err + Chr$(13) + Chr$(10)
+                End If
+              Next
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Click Exit (or click Start Upgrade again to update more EBBs)" + Chr$(13) + Chr$(10)
+            End If                                                                                                  
+            
+''          Case %ID_OpenCommButton
+''            If (bConsole) Then Console_Writeline Time$, "OpenCommButton clicked" 
+''            Control Get Text CBHNDL, %ID_ComPortTextBox To sComPort
+''            If (bConsole) Then Console_WriteLine("Opening COM" & sComPort)
+''            hComm = COMM_FreeFile
+''            COMM_Open("\\.\COM" & sComPort, hComm)
+  
+''            If Err = 0 Then
+''              COMM_Set(hComm, %COMM_BAUD, 921600)
+''              COMM_Set(hComm, %COMM_BYTE, 8)
+''              COMM_Set(hComm, %COMM_PARITY, FALSE)
+''              COMM_Set(hComm, %COMM_STOP, 0)
+''              If (bConsole) Then Console_WriteLine("...open ok.")
+''              gPortOpen = TRUE
+''              Dialog Set Timer CBHNDL, %IDC_TIMER, %TIMER_DELAY 
+''              write_to_com("debug level all", CBHNDL)
+''            Else
+''              If (bConsole) Then Console_WriteLine("Error: " & Err)
+''            End If            
+
+          Case %ID_ExitButton
+            If (bConsole) Then Console_WriteLine Time$, "CloseCommButton"
+            If gPortOpen = TRUE Then  
+              gPortOpen = FALSE
+              COMM_Close(hComm)
+            End If
+            If (bConsole) Then Console_WriteLine("port closed")
+            Dialog End CBHNDL
+            
+        End Select
+    End Select
+
+    '---If button callback does not return %TRUE, message is passed
+    '---to parent window
+    Function = %TRUE
+
+  End If    
+End Function
+
+' Take new string from com port, look for CR/LF
+' Then handle the line based on first character         
+Function add_new_bytes(sNewBytes As String, hndl As Long)
+   Local x     As Long
+   
+   For x = 1 To Len(sNewBytes)
+     sCurrentLine = sCurrentLine + Mid$(sNewBytes, x, 1)
+     If RIGHT$(sCurrentLine, 1) = Chr$(13) Then
+      ' We have a new line 
+      If LEFT$(sCurrentLine, 1) = "~" Then
+        handle_PI_line(sCurrentLine, hndl)
+      Else
+        handle_normal_line(sCurrentLine, hndl)
+      End If
+      sCurrentLine = ""
+     End If
+   Next x
+End Function
+
+Function handle_PI_line(sPILine As String, hndl As Long)
+  Local lTime As Long
+  Local lPower As Long
+  Local dTarget As Double
+  Local dSpeed As Double
+  Local dError As Double
+  Local dP As Double
+  Local dI As Double 
+  Local x As Double
+  
+  'If (bConsole) Then Console_Write sPILine
+  ' Ignore header ~,Time,Power,Target,Speed,Error,P,I
+  If LEFT$(sPILine, 3) <> "~,T" Then
+    ' We have a valid PI line, parse it
+    lTime = Val(Grab$(sPILine, ",", ",", 1))
+    lPower = Val(Grab$(sPILine, ",", ",", 2))
+    dTarget = Val(Grab$(sPILine, ",", ",", 3))
+    dSpeed = Val(Grab$(sPILine, ",", ",", 4))
+    dError = Val(Grab$(sPILine, ",", ",", 5))
+    dP = Val(Grab$(sPILine, ",", ",", 6))
+    dI = Val(Grab$(sPILine, ",", ",", 7))
+    
+    PIPlot(lTime, lPower, dTarget, dSpeed, dError, dP, dI)
+                                                      
+    'Update the live text boxes
+    Control Set Text hndl, %ID_LivePowerOutputTextBox, Str$(lPower)
+    Control Set Text hndl, %ID_LivePowerPercentTextBox, Str$((lPower/667) * 100)
+    Control Set Text hndl, %ID_LiveTargetOutputTextBox, Str$(dTarget)
+    Control Set Text hndl, %ID_LiveSpeedOutputTextBox, Str$(dSpeed)
+    Control Set Text hndl, %ID_LiveErrorOutputTextBox, Str$(dError)
+    Control Set Text hndl, %ID_LivePOutputTextBox, Str$(dP)
+    Control Set Text hndl, %ID_LiveIOutputTextBox, Str$(dI)
+    
+    'If (bConsole) Then Console_PrintLine(lTime & " : " & lPower & " : " & dTarget & " : " & dSPeed & " : " & dError & " : " & dP & " : " & dI) 
+  Else
+    ' We areat the beginning of a spin
+    gXPos = 1
+    ' Clear the canvas
+    Canvas_Clear() 
+    ' Erase the array
+    For x = 1 To %ARRAY_SIZE
+      gnTime(x) = 0
+      gnPower(x) = 0
+      gdTarget(x) = 0.0
+      gdSpeed(x) = 0.0
+      gdError(x) = 0.0
+      gdProportional(x) = 0.0
+      gdIntegral(x) = 0.0
+    Next x
+
+    ' Print the key for the graph
+    Canvas_Line((20,20),(40,20),%POWER_COLOR) 
+    Canvas_SetPos(45, 15)
+    Canvas_Print("Power")
+    Canvas_Line((20,40),(40,40),%TARGET_COLOR)
+    Canvas_SetPos(45, 35)
+    Canvas_Print("Target")
+    Canvas_Line((20,60),(40,60),%SPEED_COLOR)
+    Canvas_SetPos(45, 55)
+    Canvas_Print("Speed")
+    Canvas_Line((20,80),(40,80),%ERROR_COLOR)
+    Canvas_SetPos(45, 75)
+    Canvas_Print("Error")
+    Canvas_Line((20,100),(40,100),%P_COLOR)
+    Canvas_SetPos(45, 95)
+    Canvas_Print("P Term")
+    Canvas_Line((20,120),(40,120),%I_COLOR)
+    Canvas_SetPos(45, 115)
+    Canvas_Print("I Term")    
+    
+    ' Draw the '0' line for error and P and I terms
+    Canvas_Width(1)
+    Canvas_Line((0,190),(60000,190),&H000000)
+    Canvas_Width(3)
+                       
+    Canvas_SetView(0, 0)
+
+  End If
+  
+End Function
+
+Function handle_normal_line(sNormalLine As String, hndl As Long)
+  Control Append Text hndl, %ID_CommandOutputTexBox, sNormalLine + Chr$(13) + Chr$(10)
+  If (bConsole) Then Console_Write sNormalLine + Chr$(10)
+End Function    
+            
+' We need to write slowly so that we don't over-run the handle's one-byte buffer
+Function write_to_com(sLine As String, hndl As Long)
+  Local StartTime As Long
+  Local x As Long
+
+  sLine = sLine + Chr$(13)
+  
+  For x = 1 To Len(sLine)
+    StartTime = GetTickCount
+    While (StartTime + 10) > GetTickCount
+    Wend
+    COMM_Send(hComm, Mid$(sLine, x, 1))
+  Next x
+
+  Control Append Text hndl, %ID_CommandOutputTexBox, sLine + Chr$(10)
+
+  If (bConsole) Then Write sLine + Chr$(10)
+End Function   
+
+' Take what's in the array, and re-draw the canvas with it, taking into account 
+' scaling factor and axis labels                        
+Function RedrawCanvas()
+  Local XPos As DWord
+  
+  For XPos = 2 To 20000
+  ' We will plot lines for each variable, in different colors
+    Canvas_Line((gnTime(XPos - 1)/5, (380 - (gnPower(XPos - 1)/(667/380)))),  (gnTime(XPos)/5, (380 - (gnPower(XPos)/(667/380)))),  %POWER_COLOR)
+    Canvas_Line((gnTime(XPos - 1)/5, (380 - (gdTarget(XPos - 1)/(883/380)))), (gnTime(XPos)/5, (380 - (gdTarget(XPos)/(883/380)))), %TARGET_COLOR)
+    Canvas_Line((gnTime(XPos - 1)/5, (380 - (gdSpeed(XPos - 1)/(883/380)))),  (gnTime(XPos)/5, (380 - (gdSpeed(XPos)/(883/380)))),  %SPEED_COLOR)
+    Canvas_Line((gnTime(XPos - 1)/5, (190 - (gdError(XPos - 1)/(883/380)))),  (gnTime(XPos)/5, (190 - (gdError(XPos)/(883/380)))),  %ERROR_COLOR) 
+    Canvas_Line((gnTime(XPos - 1)/5, (190 - (gdProportional(XPos - 1)/(883/380)))),  (gnTime(XPos)/5, (190 - (gdProportional(XPos)/(883/380)))),  %P_COLOR) 
+    Canvas_Line((gnTime(XPos - 1)/5, (380 - (gdIntegral(XPos - 1)/(883/380)))),  (gnTime(XPos)/5, (380 - (gdIntegral(XPos)/(883/380)))),  %I_COLOR) 
+  Next
+
+End Function
+                        
+                        
+' Plot all the things
+' lPower runs from 0 to 667
+' dTarget runs from 0 to 833
+' dSpeed runs from 0 to 833
+' dError runs from -833 to +833
+Function PIPlot(lTime As Long, lPower As Long, dTarget As Double, dSpeed As Double, dError As Double, dP As Double, dI As Double)
+  
+  ' First store the raw data in the array
+  gnTime(gXPos) = lTime
+  gnPower(gXPos) = lPower
+  gdTarget(gXPos) = dTarget
+  gdSpeed(gXPos) = dSpeed
+  gdError(gXPos) = dError
+  gdProportional(gXPos) = dP
+  gdIntegral(gXPos) = dI
+  
+  ' We will plot lines for each variable, in different colors
+  If (gXPos > 1) Then
+    Canvas_Line((gnTime(gXPos - 1)/5, (380 - (gnPower(gxPos - 1)/(667/380)))),  (gnTime(gxPos)/5, (380 - (gnPower(gxPos)/(667/380)))),  %POWER_COLOR)
+    Canvas_Line((gnTime(gXPos - 1)/5, (380 - (gdTarget(gxPos - 1)/(883/380)))), (gnTime(gxPos)/5, (380 - (gdTarget(gxPos)/(883/380)))), %TARGET_COLOR)
+    Canvas_Line((gnTime(gXPos - 1)/5, (380 - (gdSpeed(gxPos - 1)/(883/380)))),  (gnTime(gxPos)/5, (380 - (gdSpeed(gxPos)/(883/380)))),  %SPEED_COLOR)
+    Canvas_Line((gnTime(gXPos - 1)/5, (190 - (gdError(gxPos - 1)/(883/380)))),  (gnTime(gxPos)/5, (190 - (gdError(gxPos)/(883/380)))),  %ERROR_COLOR) 
+    Canvas_Line((gnTime(gXPos - 1)/5, (190 - (gdProportional(gxPos - 1)/(883/380)))),  (gnTime(gxPos)/5, (190 - (gdProportional(gxPos)/(883/380)))),  %P_COLOR) 
+    Canvas_Line((gnTime(gXPos - 1)/5, (380 - (gdIntegral(gxPos - 1)/(883/380)))),  (gnTime(gxPos)/5, (380 - (gdIntegral(gxPos)/(883/380)))),  %I_COLOR) 
+  End If
+      
+  ' Scroll to the right if we need to
+  If ((gnTime(gXPos)/5) > 950) Then
+    Canvas_SetView((gnTime(gXPos)/5 - 950), 0)
+  End If
+  gXPos = gXPos + 1
+
+End Function
+ 

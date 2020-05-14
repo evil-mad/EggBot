@@ -24,6 +24,7 @@
 import gettext
 import math
 import time
+import sys
 
 import cubicsuperpath
 import ebb_motion  # https://github.com/evil-mad/plotink    Requires version 0.2 or newer.
@@ -184,14 +185,19 @@ class EggBot(inkex.Effect):
         self.svg = self.document.getroot()
         self.CheckSVGforEggbotData()
 
-        if self.options.tab in ['"Help"', '"options"', '"timing"']:
+        # Input sanitization:
+        self.options.tab = self.options.tab.strip("\"")
+        self.options.setupType = self.options.setupType.strip("\"")
+        self.options.manualType = self.options.manualType.strip("\"")
+
+        if self.options.tab in ["Help", "options", "timing"]:
             pass
         else:
             self.serialPort = ebb_serial.openPort()
             if self.serialPort is None:
                 inkex.errormsg(gettext.gettext("Failed to connect to EggBot. :("))
 
-            if self.options.tab == '"splash"':
+            if self.options.tab == "splash":
                 self.allLayers = True
                 self.plotCurrentLayer = True
                 self.svgNodeCount = 0
@@ -200,7 +206,7 @@ class EggBot(inkex.Effect):
                 self.svgLayer = 12345  # indicate that we are plotting all layers.
                 self.plotToEggBot()
 
-            elif self.options.tab == '"resume"':
+            elif self.options.tab == "resume":
                 unused_button = ebb_motion.QueryPRGButton(self.serialPort)  # Query if button pressed
                 self.resumePlotSetup()
                 if self.resumeMode:
@@ -210,7 +216,7 @@ class EggBot(inkex.Effect):
                 else:
                     inkex.errormsg(gettext.gettext("Truly sorry, there does not seem to be any in-progress plot to resume."))
 
-            elif self.options.tab == '"layers"':
+            elif self.options.tab == "layers":
                 self.allLayers = False
                 self.plotCurrentLayer = False
                 self.LayersPlotted = 0
@@ -222,10 +228,10 @@ class EggBot(inkex.Effect):
                 if self.LayersPlotted == 0:
                     inkex.errormsg(gettext.gettext("Truly sorry, but I did not find any numbered layers to plot."))
 
-            elif self.options.tab == '"setup"':
+            elif self.options.tab == "setup":
                 self.setupCommand()
 
-            elif self.options.tab == '"manual"':
+            elif self.options.tab == "manual":
                 if self.options.manualType == "strip-data":
                     for node in self.svg.xpath('//svg:WCB', namespaces=inkex.NSS):
                         self.svg.remove(node)
@@ -897,7 +903,13 @@ class EggBot(inkex.Effect):
 
         temp_num_string = 'x'
         string_pos = 1
-        current_layer_name = str_layer_name.encode('ascii', 'ignore').lstrip()  # remove leading whitespace
+
+        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
+            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
+        else:
+            current_layer_name = str(str_layer_name)
+
+        current_layer_name.lstrip()  # Remove leading whitespace
 
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
@@ -1003,7 +1015,7 @@ class EggBot(inkex.Effect):
             if not self.resumeMode:  # or if we're resuming.
                 ebb_motion.sendPenUp(self.serialPort, self.options.penUpDelay)
                 if self.options.penUpDelay > 15:
-                    if self.options.tab != '"manual"':
+                    if self.options.tab != "manual":
                         time.sleep(float(self.options.penUpDelay - 10) / 1000.0)  # pause before issuing next command
                 self.bPenIsUp = True
 
@@ -1016,7 +1028,7 @@ class EggBot(inkex.Effect):
                     self.engraverOn()  # will check self.enableEngraver
                 ebb_motion.sendPenDown(self.serialPort, self.options.penDownDelay)
                 if self.options.penUpDelay > 15:
-                    if self.options.tab != '"manual"':
+                    if self.options.tab != "manual":
                         time.sleep(float(self.options.penDownDelay - 10) / 1000.0)  # pause before issuing next command
 
     def engraverOff(self):

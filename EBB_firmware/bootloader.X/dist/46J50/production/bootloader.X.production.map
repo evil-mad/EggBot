@@ -1,5 +1,5 @@
 MPLINK 4.35, Linker
-Linker Map File - Created Sun Jul 28 17:17:05 2019
+Linker Map File - Created Wed May 13 20:45:26 2020
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -8,32 +8,32 @@ Linker Map File - Created Sun Jul 28 17:17:05 2019
              high_isr_scn       code   0x000008    program   0x000006
               low_isr_scn       code   0x000018    program   0x000006
                boot_entry       code   0x00001e    program   0x000010
-                   .cinit    romdata   0x000030    program   0x000002
-  .code_Boot46J50Family.o       code   0x000032    program   0x00038c
-       .code_usbctrltrf.o       code   0x0003be    program   0x0002e0
-             .code_usb9.o       code   0x00069e    program   0x000264
-           .code_usbdrv.o       code   0x000902    program   0x000214
-              .code_hid.o       code   0x000b16    program   0x0001d6
-             .code_main.o       code   0x000cec    program   0x0000f8
-        .romdata_usbdsc.o    romdata   0x000de4    program   0x0000c2
-                    .code       code   0x000ea6    program   0x000020
-          .code_usbmmap.o       code   0x000ec6    program   0x000000
-        .idata_usbdsc.o_i    romdata   0x000ec6    program   0x000000
-           .code_usbdsc.o       code   0x000ec6    program   0x000000
-        .romdata_usbdrv.o    romdata   0x000ec6    program   0x000000
-        .idata_usbdrv.o_i    romdata   0x000ec6    program   0x000000
-       .idata_usbmmap.o_i    romdata   0x000ec6    program   0x000000
-    .romdata_usbctrltrf.o    romdata   0x000ec6    program   0x000000
-    .idata_usbctrltrf.o_i    romdata   0x000ec6    program   0x000000
-       .romdata_usbmmap.o    romdata   0x000ec6    program   0x000000
-          .romdata_usb9.o    romdata   0x000ec6    program   0x000000
-          .idata_usb9.o_i    romdata   0x000ec6    program   0x000000
-          .romdata_main.o    romdata   0x000ec6    program   0x000000
-          .idata_main.o_i    romdata   0x000ec6    program   0x000000
-           .romdata_hid.o    romdata   0x000ec6    program   0x000000
-           .idata_hid.o_i    romdata   0x000ec6    program   0x000000
-.romdata_Boot46J50Family.o    romdata   0x000ec6    program   0x000000
-.idata_Boot46J50Family.o_i    romdata   0x000ec6    program   0x000000
+                   .cinit    romdata   0x000030    program   0x00000e
+  .code_Boot46J50Family.o       code   0x00003e    program   0x00038c
+       .code_usbctrltrf.o       code   0x0003ca    program   0x0002e0
+             .code_usb9.o       code   0x0006aa    program   0x000264
+              .code_hid.o       code   0x00090e    program   0x0001d6
+           .code_usbdrv.o       code   0x000ae4    program   0x000164
+             .code_main.o       code   0x000c48    program   0x0000e4
+        .romdata_usbdsc.o    romdata   0x000d2c    program   0x0000c2
+                    .code       code   0x000dee    program   0x000020
+    .romdata_usbctrltrf.o    romdata   0x000e0e    program   0x000000
+    .idata_usbctrltrf.o_i    romdata   0x000e0e    program   0x000000
+        .idata_usbdrv.o_i    romdata   0x000e0e    program   0x000000
+          .romdata_usb9.o    romdata   0x000e0e    program   0x000000
+          .idata_usb9.o_i    romdata   0x000e0e    program   0x000000
+        .romdata_usbdrv.o    romdata   0x000e0e    program   0x000000
+        .idata_usbdsc.o_i    romdata   0x000e0e    program   0x000000
+       .idata_usbmmap.o_i    romdata   0x000e0e    program   0x000000
+       .romdata_usbmmap.o    romdata   0x000e0e    program   0x000000
+          .romdata_main.o    romdata   0x000e0e    program   0x000000
+          .idata_main.o_i    romdata   0x000e0e    program   0x000002
+           .romdata_hid.o    romdata   0x000e0e    program   0x000000
+.romdata_Boot46J50Family.o    romdata   0x000e0e    program   0x000000
+           .code_usbdsc.o       code   0x000e10    program   0x000000
+          .code_usbmmap.o       code   0x000e10    program   0x000000
+           .idata_hid.o_i    romdata   0x000e10    program   0x000000
+.idata_Boot46J50Family.o_i    romdata   0x000e10    program   0x000000
       .config_fff8_main.o    romdata   0x00fff8    program   0x000001
       .config_fff9_main.o    romdata   0x00fff9    program   0x000001
       .config_fffa_main.o    romdata   0x00fffa    program   0x000001
@@ -42,25 +42,25 @@ Linker Map File - Created Sun Jul 28 17:17:05 2019
       .config_fffd_main.o    romdata   0x00fffd    program   0x000001
       .config_fffe_main.o    romdata   0x00fffe    program   0x000001
       .config_ffff_main.o    romdata   0x00ffff    program   0x000001
-                fast_vars      udata   0x000000       data   0x00005b
-                 .tmpdata      udata   0x00005b       data   0x000003
-                MATH_DATA      udata   0x00005e       data   0x000000
+                fast_vars      udata   0x000000       data   0x000059
+                 .tmpdata      udata   0x000059       data   0x000003
+                MATH_DATA      udata   0x00005c       data   0x000000
  .udata_Boot46J50Family.o      udata   0x000060       data   0x000080
       .udata_usbctrltrf.o      udata   0x0000e0       data   0x000004
-            .udata_main.o      udata   0x0000e4       data   0x000003
-         .idata_usbmmap.o      idata   0x0000e7       data   0x000000
-         .udata_usbmmap.o      udata   0x0000e7       data   0x000000
-          .idata_usbdsc.o      idata   0x0000e7       data   0x000000
-          .udata_usbdsc.o      udata   0x0000e7       data   0x000000
-          .idata_usbdrv.o      idata   0x0000e7       data   0x000000
-          .udata_usbdrv.o      udata   0x0000e7       data   0x000000
-      .idata_usbctrltrf.o      idata   0x0000e7       data   0x000000
-            .idata_usb9.o      idata   0x0000e7       data   0x000000
-            .udata_usb9.o      udata   0x0000e7       data   0x000000
-            .idata_main.o      idata   0x0000e7       data   0x000000
-             .idata_hid.o      idata   0x0000e7       data   0x000000
-             .udata_hid.o      udata   0x0000e7       data   0x000000
- .idata_Boot46J50Family.o      idata   0x0000e7       data   0x000000
+            .udata_main.o      udata   0x0000e4       data   0x000002
+            .idata_main.o      idata   0x0000e6       data   0x000002
+         .idata_usbmmap.o      idata   0x0000e8       data   0x000000
+         .udata_usbmmap.o      udata   0x0000e8       data   0x000000
+          .idata_usbdsc.o      idata   0x0000e8       data   0x000000
+          .udata_usbdsc.o      udata   0x0000e8       data   0x000000
+          .idata_usbdrv.o      idata   0x0000e8       data   0x000000
+          .udata_usbdrv.o      udata   0x0000e8       data   0x000000
+      .idata_usbctrltrf.o      idata   0x0000e8       data   0x000000
+            .idata_usb9.o      idata   0x0000e8       data   0x000000
+            .udata_usb9.o      udata   0x0000e8       data   0x000000
+             .idata_hid.o      idata   0x0000e8       data   0x000000
+             .udata_hid.o      udata   0x0000e8       data   0x000000
+ .idata_Boot46J50Family.o      idata   0x0000e8       data   0x000000
                   usbram4      udata   0x000400       data   0x0000a0
                    .stack      udata   0x000d00       data   0x000100
               SFR_BANKED0      udata   0x000ec6       data   0x00000e
@@ -84,174 +84,167 @@ Linker Map File - Created Sun Jul 28 17:17:05 2019
                             0x000000    0x000005      
                             0x000008    0x00000d      
                             0x000018    0x00002d      
-                            0x000030    0x000ec5      
+                            0x000030    0x000e0f      
                             0x00fff8    0x00ffff      
-            3776 out of 65538 program addresses used, program memory utilization is 5%
+            3594 out of 65538 program addresses used, program memory utilization is 5%
 
 
 
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-           BlinkUSBStatus   0x000d9a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-          ClassReqHandler   0x000ea4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-               ClearArray   0x000aec    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-               EraseFlash   0x0002cc    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-      HIDGetReportHandler   0x000be2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                HIDInitEP   0x000be6    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-              HIDRxReport   0x000c70    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-      HIDSetReportHandler   0x000be4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-              HIDTxReport   0x000c10    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                     Init   0x000cec    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-         InitializeSystem   0x000d40    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                LongDelay   0x00038e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                     Main   0x000d24    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                ProcessIO   0x00004a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        USBCheckBusStatus   0x000902    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-       USBCheckHIDRequest   0x000b16    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-       USBCheckStdRequest   0x00069e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-         USBCtrlEPService   0x0003be    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
- USBCtrlEPServiceComplete   0x0005da    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfInHandler   0x0004ce    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-     USBCtrlTrfOutHandler   0x0004a2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfRxService   0x000596    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-   USBCtrlTrfSetupHandler   0x000440    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfTxService   0x00050e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-         USBDriverService   0x00093a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBModuleDisable   0x00092c    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBModuleEnable   0x00091e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-  USBProtocolResetHandler   0x000a8a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-            USBSoftDetach   0x000936    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBStallHandler   0x000a66    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-  USBStdFeatureReqHandler   0x00083e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdGetDscHandler   0x000742    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-   USBStdGetStatusHandler   0x0007e2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdSetCfgHandler   0x0007ae    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-               USBSuspend   0x0009b2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-                 USBTasks   0x000d92    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-       USBWakeFromSuspend   0x000a56    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-               USB_CD_Ptr   0x000e9a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_SD_Ptr   0x000e9e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                 UserInit   0x000032    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-       WriteFlashSubBlock   0x0002f2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-       ___case_2_lbl00008   0x0000bc    program     static                          
-       ___case_3_lbl00011   0x00013e    program     static                          
-       ___case_4_lbl00015   0x000162    program     static                          
-       ___case_5_lbl00024   0x00017c    program     static                          
-       ___case_6_lbl00025   0x00023e    program     static                          
-       ___case_7_lbl00030   0x00024a    program     static                          
-       ___case_8_lbl00031   0x0002b8    program     static                          
-         ___else_lbl00010   0x000152    program     static                          
-         ___else_lbl00033   0x000094    program     static                          
-         ___else_lbl00039   0x000362    program     static                          
-          ___for_lbl00002   0x00008e    program     static                          
-          ___for_lbl00003   0x000092    program     static                          
-          ___for_lbl00004   0x00007a    program     static                          
-          ___for_lbl00012   0x000174    program     static                          
-          ___for_lbl00013   0x000178    program     static                          
-          ___for_lbl00014   0x000166    program     static                          
-          ___for_lbl00017   0x000236    program     static                          
-          ___for_lbl00018   0x00023a    program     static                          
-          ___for_lbl00022   0x0001b6    program     static                          
-          ___for_lbl00026   0x000294    program     static                          
-          ___for_lbl00027   0x000298    program     static                          
-          ___for_lbl00028   0x000272    program     static                          
-          ___for_lbl00042   0x0003b0    program     static                          
-          ___for_lbl00043   0x0003b4    program     static                          
-          ___for_lbl00046   0x00039a    program     static                          
-           ___if_lbl00005   0x000092    program     static                          
-           ___if_lbl00006   0x000d1c    program     static                          
-           ___if_lbl00007   0x00013c    program     static                          
-           ___if_lbl00009   0x00015e    program     static                          
-           ___if_lbl00009   0x000d20    program     static                          
-           ___if_lbl00014   0x000d3c    program     static                          
-           ___if_lbl00016   0x00019a    program     static                          
-           ___if_lbl00020   0x000224    program     static                          
-           ___if_lbl00021   0x000236    program     static                          
-           ___if_lbl00023   0x00023a    program     static                          
-           ___if_lbl00029   0x0002b6    program     static                          
-           ___if_lbl00032   0x0002c2    program     static                          
-           ___if_lbl00038   0x000364    program     static                          
-           ___if_lbl00040   0x00037e    program     static                          
+           BlinkUSBStatus   0x000cf2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+          ClassReqHandler   0x000dec    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+               ClearArray   0x000c1e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+               EraseFlash   0x0002d8    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+      HIDGetReportHandler   0x0009da    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                HIDInitEP   0x0009de    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+              HIDRxReport   0x000a68    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+      HIDSetReportHandler   0x0009dc    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+              HIDTxReport   0x000a08    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                     Init   0x000c48    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+         InitializeSystem   0x000c9c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                LongDelay   0x00039a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                     Main   0x000c80    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                ProcessIO   0x000056    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        USBCheckBusStatus   0x000ae4    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+       USBCheckHIDRequest   0x00090e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+       USBCheckStdRequest   0x0006aa    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+         USBCtrlEPService   0x0003ca    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+ USBCtrlEPServiceComplete   0x0005e6    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004da    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004ae    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfRxService   0x0005a2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+   USBCtrlTrfSetupHandler   0x00044c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfTxService   0x00051a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+         USBDriverService   0x000b1c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBModuleDisable   0x000b0e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBModuleEnable   0x000b00    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+USBPrepareForNextSetupTrf   0x00064a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+  USBProtocolResetHandler   0x000bbc    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+            USBSoftDetach   0x000b18    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBStallHandler   0x000b98    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+  USBStdFeatureReqHandler   0x00084a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdGetDscHandler   0x00074e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+   USBStdGetStatusHandler   0x0007ee    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdSetCfgHandler   0x0007ba    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+               USBSuspend   0x000b94    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+                 USBTasks   0x000cea    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+       USBWakeFromSuspend   0x000b96    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+               USB_CD_Ptr   0x000de2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_SD_Ptr   0x000de6    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                 UserInit   0x00003e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+       WriteFlashSubBlock   0x0002fe    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+       ___case_2_lbl00008   0x0000c8    program     static                          
+       ___case_3_lbl00011   0x00014a    program     static                          
+       ___case_4_lbl00015   0x00016e    program     static                          
+       ___case_5_lbl00024   0x000188    program     static                          
+       ___case_6_lbl00025   0x00024a    program     static                          
+       ___case_7_lbl00030   0x000256    program     static                          
+       ___case_8_lbl00031   0x0002c4    program     static                          
+         ___else_lbl00010   0x00015e    program     static                          
+         ___else_lbl00033   0x0000a0    program     static                          
+         ___else_lbl00039   0x00036e    program     static                          
+          ___for_lbl00002   0x00009a    program     static                          
+          ___for_lbl00003   0x00009e    program     static                          
+          ___for_lbl00004   0x000086    program     static                          
+          ___for_lbl00012   0x000180    program     static                          
+          ___for_lbl00013   0x000184    program     static                          
+          ___for_lbl00014   0x000172    program     static                          
+          ___for_lbl00017   0x000242    program     static                          
+          ___for_lbl00018   0x000246    program     static                          
+          ___for_lbl00022   0x0001c2    program     static                          
+          ___for_lbl00026   0x0002a0    program     static                          
+          ___for_lbl00027   0x0002a4    program     static                          
+          ___for_lbl00028   0x00027e    program     static                          
+          ___for_lbl00042   0x0003bc    program     static                          
+          ___for_lbl00043   0x0003c0    program     static                          
+          ___for_lbl00046   0x0003a6    program     static                          
+           ___if_lbl00005   0x00009e    program     static                          
+           ___if_lbl00006   0x000c78    program     static                          
+           ___if_lbl00007   0x000148    program     static                          
+           ___if_lbl00009   0x00016a    program     static                          
+           ___if_lbl00009   0x000c7c    program     static                          
+           ___if_lbl00014   0x000c98    program     static                          
+           ___if_lbl00016   0x0001a6    program     static                          
+           ___if_lbl00020   0x000230    program     static                          
+           ___if_lbl00021   0x000242    program     static                          
+           ___if_lbl00023   0x000246    program     static                          
+           ___if_lbl00029   0x0002c2    program     static                          
+           ___if_lbl00032   0x0002ce    program     static                          
+           ___if_lbl00038   0x000370    program     static                          
+           ___if_lbl00040   0x00038a    program     static                          
        ___return_lbl00000   0x000004    program     static                          
+       ___return_lbl00001   0x0002ce    program     static                          
        ___return_lbl00001   0x00000c    program     static                          
-       ___return_lbl00001   0x0002c2    program     static                          
        ___return_lbl00002   0x00001c    program     static                          
        ___return_lbl00003   0x00002c    program     static                          
-       ___return_lbl00004   0x000d22    program     static                          
-       ___return_lbl00010   0x000d3e    program     static                          
-       ___return_lbl00029   0x000a42    program     static                          
-       ___return_lbl00034   0x0002f0    program     static                          
-       ___return_lbl00035   0x000384    program     static                          
-       ___return_lbl00041   0x0003b4    program     static                          
-       ___return_lbl00042   0x000aea    program     static                          
-       ___return_lbl00045   0x000b0e    program     static                          
-   ___switchexit_lbl00006   0x0002c2    program     static                          
-        ___while_lbl00007   0x000d1c    program     static                          
-        ___while_lbl00008   0x000d20    program     static                          
-        ___while_lbl00011   0x000d26    program     static                          
-        ___while_lbl00012   0x000d3e    program     static                          
-        ___while_lbl00030   0x0009f2    program     static                          
-        ___while_lbl00031   0x000a02    program     static                          
-        ___while_lbl00033   0x000a2a    program     static                          
-        ___while_lbl00034   0x000a42    program     static                          
-        ___while_lbl00036   0x0002fe    program     static                          
-        ___while_lbl00037   0x000380    program     static                          
-        ___while_lbl00043   0x000ab8    program     static                          
-        ___while_lbl00044   0x000ac6    program     static                          
-        ___while_lbl00044   0x0003a2    program     static                          
-        ___while_lbl00045   0x0003b0    program     static                          
-        ___while_lbl00046   0x000b00    program     static                          
-        ___while_lbl00047   0x000b0e    program     static                          
-               __config_0   0x00fff8    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_1   0x00fff9    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_2   0x00fffa    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_3   0x00fffb    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_4   0x00fffc    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_5   0x00fffd    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_6   0x00fffe    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_7   0x00ffff    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                   __pa_0   0x000cd4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                   __pa_0   0x0008a4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_0   0x000646    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_1   0x0008c0    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_1   0x000660    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_2   0x0008d2    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_2   0x000670    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_3   0x0008e4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_3   0x00067e    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_4   0x000688    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_4   0x0008f4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_5   0x000690    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-               __tmplbl_0   0x000d14    program     static                          
-               __tmplbl_0   0x00018c    program     static                          
-               __tmplbl_1   0x000d04    program     static                          
-               __tmplbl_1   0x0001b2    program     static                          
-              __tmplbl_10   0x0009fe    program     static                          
-              __tmplbl_11   0x0009f8    program     static                          
-               __tmplbl_2   0x000d38    program     static                          
-               __tmplbl_2   0x0001f2    program     static                          
-               __tmplbl_3   0x0001cc    program     static                          
-               __tmplbl_3   0x000d32    program     static                          
-               __tmplbl_4   0x0001f0    program     static                          
-               __tmplbl_5   0x00030c    program     static                          
-               __tmplbl_6   0x000324    program     static                          
-            __zero_memory   0x000ea6    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              _boot_entry   0x00001e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                   _entry   0x000000    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                _high_isr   0x000008    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                 _low_isr   0x000018    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                    cfg01   0x000df6    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                compare_l   0x000ebc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-               device_dsc   0x000de4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                hid_rpt01   0x000e7d    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                   loop_h   0x000eb4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_l   0x000ebe    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                    sd000   0x000e1f    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd001   0x000e23    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd002   0x000e57    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-               zero_block   0x000eb4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+       ___return_lbl00004   0x000c7e    program     static                          
+       ___return_lbl00010   0x000c9a    program     static                          
+       ___return_lbl00034   0x0002fc    program     static                          
+       ___return_lbl00035   0x000c1c    program     static                          
+       ___return_lbl00035   0x000390    program     static                          
+       ___return_lbl00038   0x000c40    program     static                          
+       ___return_lbl00041   0x0003c0    program     static                          
+   ___switchexit_lbl00006   0x0002ce    program     static                          
+        ___while_lbl00007   0x000c78    program     static                          
+        ___while_lbl00008   0x000c7c    program     static                          
+        ___while_lbl00011   0x000c82    program     static                          
+        ___while_lbl00012   0x000c9a    program     static                          
+        ___while_lbl00036   0x000bea    program     static                          
+        ___while_lbl00036   0x00030a    program     static                          
+        ___while_lbl00037   0x000bf8    program     static                          
+        ___while_lbl00037   0x00038c    program     static                          
+        ___while_lbl00039   0x000c32    program     static                          
+        ___while_lbl00040   0x000c40    program     static                          
+        ___while_lbl00044   0x0003ae    program     static                          
+        ___while_lbl00045   0x0003bc    program     static                          
+               __config_0   0x00fff8    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_1   0x00fff9    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_2   0x00fffa    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_3   0x00fffb    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_4   0x00fffc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_5   0x00fffd    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_6   0x00fffe    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_7   0x00ffff    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                   __pa_0   0x000acc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                   __pa_0   0x0008b0    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_0   0x000652    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_1   0x0008cc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_1   0x00066c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_2   0x0008de    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_2   0x00067c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_3   0x0008f0    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_3   0x00068a    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x000694    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x000900    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_5   0x00069c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+               __tmplbl_0   0x000c70    program     static                          
+               __tmplbl_0   0x000198    program     static                          
+               __tmplbl_1   0x000c60    program     static                          
+               __tmplbl_1   0x0001be    program     static                          
+               __tmplbl_2   0x000c94    program     static                          
+               __tmplbl_2   0x0001fe    program     static                          
+               __tmplbl_3   0x0001d8    program     static                          
+               __tmplbl_3   0x000c8e    program     static                          
+               __tmplbl_4   0x0001fc    program     static                          
+               __tmplbl_5   0x000318    program     static                          
+               __tmplbl_6   0x000330    program     static                          
+            __zero_memory   0x000dee    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              _boot_entry   0x00001e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                   _entry   0x000000    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                _high_isr   0x000008    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                 _low_isr   0x000018    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                    cfg01   0x000d3e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                compare_l   0x000e04    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+               device_dsc   0x000d2c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                hid_rpt01   0x000dc5    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                   loop_h   0x000dfc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_l   0x000e06    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                    sd000   0x000d67    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd001   0x000d6b    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd002   0x000d9f    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+               zero_block   0x000dfc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -278,8 +271,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                   BAUDCTL   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               BAUDCTLbits   0x000f7e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                       BSR   0x000fe0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                BootState   0x000004       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        BufferedDataIndex   0x000006       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                BootState   0x000004       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        BufferedDataIndex   0x000006       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
                   CCP1CON   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               CCP1CONbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   CCP2CON   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -310,7 +303,7 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
              CTMUICONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CVRCON   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                CVRCONbits   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              CtrlTrfData   0x000418       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+              CtrlTrfData   0x000418       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
                    DMABCH   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                DMABCHbits   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    DMABCL   0x000f67       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -343,7 +336,7 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                    EECON1   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                EECON1bits   0x000fa6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    EECON2   0x000fa7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-         ErasePageTracker   0x000005       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+         ErasePageTracker   0x000005       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
                      FSR0   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     FSR0H   0x000fea       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     FSR0L   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -380,8 +373,7 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                  LATDbits   0x000f8c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      LATE   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  LATEbits   0x000f8d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 LEDState   0x0000e6       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-           MaxPageToErase   0x000000       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+           MaxPageToErase   0x000000       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
                    ODCON1   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ODCON1bits   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ODCON2   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -474,11 +466,11 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
               PWM1CONbits   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PWM2CON   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PWM2CONbits   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             PacketFromPC   0x000060       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-               PacketToPC   0x0000a0       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-    ProgramMemStopAddress   0x000001       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        ProgrammedPointer   0x000007       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        ProgrammingBuffer   0x00000a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+             PacketFromPC   0x000060       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+               PacketToPC   0x0000a0       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+    ProgramMemStopAddress   0x000001       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        ProgrammedPointer   0x000007       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        ProgrammingBuffer   0x00000a       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
                      RCON   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  RCONbits   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     RCREG   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -492,7 +484,7 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                 RCSTAbits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   REFOCON   0x000f3d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               REFOCONbits   0x000f3d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ROMptr   0x0000e4       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
+                   ROMptr   0x0000e4       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
                    RPINR1   0x000ee7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   RPINR12   0x000ef2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   RPINR13   0x000ef3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -576,7 +568,7 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                STATUSbits   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    STKPTR   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                STKPTRbits   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 SetupPkt   0x000410       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                 SetupPkt   0x000410       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
                     T0CON   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 T0CONbits   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     T1CON   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -688,240 +680,230 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                    WDTCON   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                WDTCONbits   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      WREG   0x000fe8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-          active_protocol   0x00004b       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-              bTRNIFCount   0x000056       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-   ctrl_trf_session_owner   0x000052       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-           ctrl_trf_state   0x000051       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                    ep0Bi   0x000404       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep0Bo   0x000400       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep1Bi   0x00040c       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep1Bo   0x000408       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-            hid_report_in   0x000460       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-           hid_report_out   0x000420       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-           hid_rpt_rx_len   0x00004c       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                idle_rate   0x00004a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                led_count   0x00004d       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                     pDst   0x0000e2       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                     pSrc   0x0000e0       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      pll_startup_counter   0x00004f       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-         short_pkt_status   0x000055       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-           usb_active_cfg   0x000059       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-             usb_alt_intf   0x00005a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-         usb_device_state   0x000057       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                 usb_stat   0x000058       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                   wCount   0x000053       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+          active_protocol   0x00004b       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+              bTRNIFCount   0x000054       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+   ctrl_trf_session_owner   0x000050       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+           ctrl_trf_state   0x00004f       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                    ep0Bi   0x000404       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep0Bo   0x000400       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep1Bi   0x00040c       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep1Bo   0x000408       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+            hid_report_in   0x000460       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+           hid_report_out   0x000420       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+           hid_rpt_rx_len   0x00004c       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                idle_rate   0x00004a       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                led_count   0x0000e6       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                     pDst   0x0000e2       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                     pSrc   0x0000e0       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      pll_startup_counter   0x00004d       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+         short_pkt_status   0x000053       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+           usb_active_cfg   0x000057       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+             usb_alt_intf   0x000058       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+         usb_device_state   0x000055       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                 usb_stat   0x000056       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                   wCount   0x000051       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
 
 
 
                               Symbols - Sorted by Address
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                   _entry   0x000000    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
+                   _entry   0x000000    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
        ___return_lbl00000   0x000004    program     static                          
-                _high_isr   0x000008    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
+                _high_isr   0x000008    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
        ___return_lbl00001   0x00000c    program     static                          
-                 _low_isr   0x000018    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
+                 _low_isr   0x000018    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
        ___return_lbl00002   0x00001c    program     static                          
-              _boot_entry   0x00001e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
+              _boot_entry   0x00001e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
        ___return_lbl00003   0x00002c    program     static                          
-                 UserInit   0x000032    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                ProcessIO   0x00004a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-          ___for_lbl00004   0x00007a    program     static                          
-          ___for_lbl00002   0x00008e    program     static                          
-           ___if_lbl00005   0x000092    program     static                          
-          ___for_lbl00003   0x000092    program     static                          
-         ___else_lbl00033   0x000094    program     static                          
-       ___case_2_lbl00008   0x0000bc    program     static                          
-           ___if_lbl00007   0x00013c    program     static                          
-       ___case_3_lbl00011   0x00013e    program     static                          
-         ___else_lbl00010   0x000152    program     static                          
-           ___if_lbl00009   0x00015e    program     static                          
-       ___case_4_lbl00015   0x000162    program     static                          
-          ___for_lbl00014   0x000166    program     static                          
-          ___for_lbl00012   0x000174    program     static                          
-          ___for_lbl00013   0x000178    program     static                          
-       ___case_5_lbl00024   0x00017c    program     static                          
-               __tmplbl_0   0x00018c    program     static                          
-           ___if_lbl00016   0x00019a    program     static                          
-               __tmplbl_1   0x0001b2    program     static                          
-          ___for_lbl00022   0x0001b6    program     static                          
-               __tmplbl_3   0x0001cc    program     static                          
-               __tmplbl_4   0x0001f0    program     static                          
-               __tmplbl_2   0x0001f2    program     static                          
-           ___if_lbl00020   0x000224    program     static                          
-          ___for_lbl00017   0x000236    program     static                          
-           ___if_lbl00021   0x000236    program     static                          
-           ___if_lbl00023   0x00023a    program     static                          
-          ___for_lbl00018   0x00023a    program     static                          
-       ___case_6_lbl00025   0x00023e    program     static                          
-       ___case_7_lbl00030   0x00024a    program     static                          
-          ___for_lbl00028   0x000272    program     static                          
-          ___for_lbl00026   0x000294    program     static                          
-          ___for_lbl00027   0x000298    program     static                          
-           ___if_lbl00029   0x0002b6    program     static                          
-       ___case_8_lbl00031   0x0002b8    program     static                          
-       ___return_lbl00001   0x0002c2    program     static                          
-           ___if_lbl00032   0x0002c2    program     static                          
-   ___switchexit_lbl00006   0x0002c2    program     static                          
-               EraseFlash   0x0002cc    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-       ___return_lbl00034   0x0002f0    program     static                          
-       WriteFlashSubBlock   0x0002f2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        ___while_lbl00036   0x0002fe    program     static                          
-               __tmplbl_5   0x00030c    program     static                          
-               __tmplbl_6   0x000324    program     static                          
-         ___else_lbl00039   0x000362    program     static                          
-           ___if_lbl00038   0x000364    program     static                          
-           ___if_lbl00040   0x00037e    program     static                          
-        ___while_lbl00037   0x000380    program     static                          
-       ___return_lbl00035   0x000384    program     static                          
-                LongDelay   0x00038e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-          ___for_lbl00046   0x00039a    program     static                          
-        ___while_lbl00044   0x0003a2    program     static                          
-        ___while_lbl00045   0x0003b0    program     static                          
-          ___for_lbl00042   0x0003b0    program     static                          
-       ___return_lbl00041   0x0003b4    program     static                          
-          ___for_lbl00043   0x0003b4    program     static                          
-         USBCtrlEPService   0x0003be    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-   USBCtrlTrfSetupHandler   0x000440    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-     USBCtrlTrfOutHandler   0x0004a2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfInHandler   0x0004ce    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfTxService   0x00050e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-      USBCtrlTrfRxService   0x000596    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
- USBCtrlEPServiceComplete   0x0005da    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_0   0x000646    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_1   0x000660    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_2   0x000670    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_3   0x00067e    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_4   0x000688    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   __pa_5   0x000690    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-       USBCheckStdRequest   0x00069e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdGetDscHandler   0x000742    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-      USBStdSetCfgHandler   0x0007ae    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-   USBStdGetStatusHandler   0x0007e2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-  USBStdFeatureReqHandler   0x00083e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_0   0x0008a4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_1   0x0008c0    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_2   0x0008d2    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_3   0x0008e4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                   __pa_4   0x0008f4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-        USBCheckBusStatus   0x000902    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBModuleEnable   0x00091e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBModuleDisable   0x00092c    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-            USBSoftDetach   0x000936    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-         USBDriverService   0x00093a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-               USBSuspend   0x0009b2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00030   0x0009f2    program     static                          
-              __tmplbl_11   0x0009f8    program     static                          
-              __tmplbl_10   0x0009fe    program     static                          
-        ___while_lbl00031   0x000a02    program     static                          
-        ___while_lbl00033   0x000a2a    program     static                          
-        ___while_lbl00034   0x000a42    program     static                          
-       ___return_lbl00029   0x000a42    program     static                          
-       USBWakeFromSuspend   0x000a56    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-          USBStallHandler   0x000a66    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-  USBProtocolResetHandler   0x000a8a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00043   0x000ab8    program     static                          
-        ___while_lbl00044   0x000ac6    program     static                          
-       ___return_lbl00042   0x000aea    program     static                          
-               ClearArray   0x000aec    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-        ___while_lbl00046   0x000b00    program     static                          
-       ___return_lbl00045   0x000b0e    program     static                          
-        ___while_lbl00047   0x000b0e    program     static                          
-       USBCheckHIDRequest   0x000b16    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-      HIDGetReportHandler   0x000be2    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-      HIDSetReportHandler   0x000be4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                HIDInitEP   0x000be6    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-              HIDTxReport   0x000c10    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-              HIDRxReport   0x000c70    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                   __pa_0   0x000cd4    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                     Init   0x000cec    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __tmplbl_1   0x000d04    program     static                          
-               __tmplbl_0   0x000d14    program     static                          
-           ___if_lbl00006   0x000d1c    program     static                          
-        ___while_lbl00007   0x000d1c    program     static                          
-           ___if_lbl00009   0x000d20    program     static                          
-        ___while_lbl00008   0x000d20    program     static                          
-       ___return_lbl00004   0x000d22    program     static                          
-                     Main   0x000d24    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-        ___while_lbl00011   0x000d26    program     static                          
-               __tmplbl_3   0x000d32    program     static                          
-               __tmplbl_2   0x000d38    program     static                          
-           ___if_lbl00014   0x000d3c    program     static                          
-       ___return_lbl00010   0x000d3e    program     static                          
-        ___while_lbl00012   0x000d3e    program     static                          
-         InitializeSystem   0x000d40    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                 USBTasks   0x000d92    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-           BlinkUSBStatus   0x000d9a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               device_dsc   0x000de4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    cfg01   0x000df6    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd000   0x000e1f    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd001   0x000e23    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                    sd002   0x000e57    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-                hid_rpt01   0x000e7d    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_CD_Ptr   0x000e9a    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-               USB_SD_Ptr   0x000e9e    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-          ClassReqHandler   0x000ea4    program     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdsc.c
-            __zero_memory   0x000ea6    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               zero_block   0x000eb4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_h   0x000eb4    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                compare_l   0x000ebc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   loop_l   0x000ebe    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
-               __config_0   0x00fff8    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_1   0x00fff9    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_2   0x00fffa    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_3   0x00fffb    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_4   0x00fffc    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_5   0x00fffd    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_6   0x00fffe    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-               __config_7   0x00ffff    program     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-           MaxPageToErase   0x000000       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-    ProgramMemStopAddress   0x000001       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                BootState   0x000004       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-         ErasePageTracker   0x000005       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        BufferedDataIndex   0x000006       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        ProgrammedPointer   0x000007       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-        ProgrammingBuffer   0x00000a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                idle_rate   0x00004a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-          active_protocol   0x00004b       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-           hid_rpt_rx_len   0x00004c       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                led_count   0x00004d       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-      pll_startup_counter   0x00004f       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-           ctrl_trf_state   0x000051       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-   ctrl_trf_session_owner   0x000052       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   wCount   0x000053       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-         short_pkt_status   0x000055       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-              bTRNIFCount   0x000056       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-         usb_device_state   0x000057       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                 usb_stat   0x000058       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-           usb_active_cfg   0x000059       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-             usb_alt_intf   0x00005a       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\hid.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usb9.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                  __tmp_0   0x00005b       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbdrv.c
-             PacketFromPC   0x000060       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-               PacketToPC   0x0000a0       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
-                     pSrc   0x0000e0       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                     pDst   0x0000e2       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
-                   ROMptr   0x0000e4       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                 LEDState   0x0000e6       data     static C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\main.c
-                    ep0Bo   0x000400       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep0Bi   0x000404       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep1Bo   0x000408       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                    ep1Bi   0x00040c       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-                 SetupPkt   0x000410       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-              CtrlTrfData   0x000418       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-           hid_report_out   0x000420       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
-            hid_report_in   0x000460       data     extern C:\Projects\EggBot-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                 UserInit   0x00003e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                ProcessIO   0x000056    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+          ___for_lbl00004   0x000086    program     static                          
+          ___for_lbl00002   0x00009a    program     static                          
+           ___if_lbl00005   0x00009e    program     static                          
+          ___for_lbl00003   0x00009e    program     static                          
+         ___else_lbl00033   0x0000a0    program     static                          
+       ___case_2_lbl00008   0x0000c8    program     static                          
+           ___if_lbl00007   0x000148    program     static                          
+       ___case_3_lbl00011   0x00014a    program     static                          
+         ___else_lbl00010   0x00015e    program     static                          
+           ___if_lbl00009   0x00016a    program     static                          
+       ___case_4_lbl00015   0x00016e    program     static                          
+          ___for_lbl00014   0x000172    program     static                          
+          ___for_lbl00012   0x000180    program     static                          
+          ___for_lbl00013   0x000184    program     static                          
+       ___case_5_lbl00024   0x000188    program     static                          
+               __tmplbl_0   0x000198    program     static                          
+           ___if_lbl00016   0x0001a6    program     static                          
+               __tmplbl_1   0x0001be    program     static                          
+          ___for_lbl00022   0x0001c2    program     static                          
+               __tmplbl_3   0x0001d8    program     static                          
+               __tmplbl_4   0x0001fc    program     static                          
+               __tmplbl_2   0x0001fe    program     static                          
+           ___if_lbl00020   0x000230    program     static                          
+           ___if_lbl00021   0x000242    program     static                          
+          ___for_lbl00017   0x000242    program     static                          
+           ___if_lbl00023   0x000246    program     static                          
+          ___for_lbl00018   0x000246    program     static                          
+       ___case_6_lbl00025   0x00024a    program     static                          
+       ___case_7_lbl00030   0x000256    program     static                          
+          ___for_lbl00028   0x00027e    program     static                          
+          ___for_lbl00026   0x0002a0    program     static                          
+          ___for_lbl00027   0x0002a4    program     static                          
+           ___if_lbl00029   0x0002c2    program     static                          
+       ___case_8_lbl00031   0x0002c4    program     static                          
+           ___if_lbl00032   0x0002ce    program     static                          
+       ___return_lbl00001   0x0002ce    program     static                          
+   ___switchexit_lbl00006   0x0002ce    program     static                          
+               EraseFlash   0x0002d8    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+       ___return_lbl00034   0x0002fc    program     static                          
+       WriteFlashSubBlock   0x0002fe    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        ___while_lbl00036   0x00030a    program     static                          
+               __tmplbl_5   0x000318    program     static                          
+               __tmplbl_6   0x000330    program     static                          
+         ___else_lbl00039   0x00036e    program     static                          
+           ___if_lbl00038   0x000370    program     static                          
+           ___if_lbl00040   0x00038a    program     static                          
+        ___while_lbl00037   0x00038c    program     static                          
+       ___return_lbl00035   0x000390    program     static                          
+                LongDelay   0x00039a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+          ___for_lbl00046   0x0003a6    program     static                          
+        ___while_lbl00044   0x0003ae    program     static                          
+        ___while_lbl00045   0x0003bc    program     static                          
+          ___for_lbl00042   0x0003bc    program     static                          
+       ___return_lbl00041   0x0003c0    program     static                          
+          ___for_lbl00043   0x0003c0    program     static                          
+         USBCtrlEPService   0x0003ca    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+   USBCtrlTrfSetupHandler   0x00044c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+     USBCtrlTrfOutHandler   0x0004ae    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfInHandler   0x0004da    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfTxService   0x00051a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+      USBCtrlTrfRxService   0x0005a2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+ USBCtrlEPServiceComplete   0x0005e6    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+USBPrepareForNextSetupTrf   0x00064a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_0   0x000652    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_1   0x00066c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_2   0x00067c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_3   0x00068a    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_4   0x000694    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   __pa_5   0x00069c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+       USBCheckStdRequest   0x0006aa    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdGetDscHandler   0x00074e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+      USBStdSetCfgHandler   0x0007ba    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+   USBStdGetStatusHandler   0x0007ee    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+  USBStdFeatureReqHandler   0x00084a    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_0   0x0008b0    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_1   0x0008cc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_2   0x0008de    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_3   0x0008f0    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+                   __pa_4   0x000900    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+       USBCheckHIDRequest   0x00090e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+      HIDGetReportHandler   0x0009da    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+      HIDSetReportHandler   0x0009dc    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                HIDInitEP   0x0009de    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+              HIDTxReport   0x000a08    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+              HIDRxReport   0x000a68    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                   __pa_0   0x000acc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+        USBCheckBusStatus   0x000ae4    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBModuleEnable   0x000b00    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBModuleDisable   0x000b0e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+            USBSoftDetach   0x000b18    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+         USBDriverService   0x000b1c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+               USBSuspend   0x000b94    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+       USBWakeFromSuspend   0x000b96    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+          USBStallHandler   0x000b98    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+  USBProtocolResetHandler   0x000bbc    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+        ___while_lbl00036   0x000bea    program     static                          
+        ___while_lbl00037   0x000bf8    program     static                          
+       ___return_lbl00035   0x000c1c    program     static                          
+               ClearArray   0x000c1e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+        ___while_lbl00039   0x000c32    program     static                          
+        ___while_lbl00040   0x000c40    program     static                          
+       ___return_lbl00038   0x000c40    program     static                          
+                     Init   0x000c48    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __tmplbl_1   0x000c60    program     static                          
+               __tmplbl_0   0x000c70    program     static                          
+        ___while_lbl00007   0x000c78    program     static                          
+           ___if_lbl00006   0x000c78    program     static                          
+        ___while_lbl00008   0x000c7c    program     static                          
+           ___if_lbl00009   0x000c7c    program     static                          
+       ___return_lbl00004   0x000c7e    program     static                          
+                     Main   0x000c80    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+        ___while_lbl00011   0x000c82    program     static                          
+               __tmplbl_3   0x000c8e    program     static                          
+               __tmplbl_2   0x000c94    program     static                          
+           ___if_lbl00014   0x000c98    program     static                          
+        ___while_lbl00012   0x000c9a    program     static                          
+       ___return_lbl00010   0x000c9a    program     static                          
+         InitializeSystem   0x000c9c    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                 USBTasks   0x000cea    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+           BlinkUSBStatus   0x000cf2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               device_dsc   0x000d2c    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    cfg01   0x000d3e    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd000   0x000d67    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd001   0x000d6b    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                    sd002   0x000d9f    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+                hid_rpt01   0x000dc5    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_CD_Ptr   0x000de2    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+               USB_SD_Ptr   0x000de6    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+          ClassReqHandler   0x000dec    program     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdsc.c
+            __zero_memory   0x000dee    program     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               zero_block   0x000dfc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_h   0x000dfc    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                compare_l   0x000e04    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   loop_l   0x000e06    program     static C:\MCC18\src\traditional\proc\p18F46J50.asm
+               __config_0   0x00fff8    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_1   0x00fff9    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_2   0x00fffa    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_3   0x00fffb    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_4   0x00fffc    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_5   0x00fffd    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_6   0x00fffe    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+               __config_7   0x00ffff    program     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+           MaxPageToErase   0x000000       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+    ProgramMemStopAddress   0x000001       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                BootState   0x000004       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+         ErasePageTracker   0x000005       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        BufferedDataIndex   0x000006       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        ProgrammedPointer   0x000007       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+        ProgrammingBuffer   0x00000a       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                idle_rate   0x00004a       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+          active_protocol   0x00004b       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+           hid_rpt_rx_len   0x00004c       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+      pll_startup_counter   0x00004d       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+           ctrl_trf_state   0x00004f       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+   ctrl_trf_session_owner   0x000050       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   wCount   0x000051       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+         short_pkt_status   0x000053       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+              bTRNIFCount   0x000054       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbdrv.c
+         usb_device_state   0x000055       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                 usb_stat   0x000056       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+           usb_active_cfg   0x000057       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+             usb_alt_intf   0x000058       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\hid.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                  __tmp_0   0x000059       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usb9.c
+             PacketFromPC   0x000060       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+               PacketToPC   0x0000a0       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\Boot46J50Family.c
+                     pSrc   0x0000e0       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                     pDst   0x0000e2       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbctrltrf.c
+                   ROMptr   0x0000e4       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                led_count   0x0000e6       data     static C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\main.c
+                    ep0Bo   0x000400       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep0Bi   0x000404       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep1Bo   0x000408       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                    ep1Bi   0x00040c       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+                 SetupPkt   0x000410       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+              CtrlTrfData   0x000418       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+           hid_report_out   0x000420       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
+            hid_report_in   0x000460       data     extern C:\Projects\EggBot2-GH\EBB_firmware\bootloader.X\source\usbmmap.c
                     RPOR0   0x000ec6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     RPOR1   0x000ec7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     RPOR2   0x000ec8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -961,10 +943,10 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                   RPINR24   0x000efe       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PPSCON   0x000eff       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                PPSCONbits   0x000eff       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                     UEP0   0x000f26       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UEP0bits   0x000f26       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 UEP1bits   0x000f27       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                     UEP0   0x000f26       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEP1   0x000f27       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 UEP1bits   0x000f27       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEP2   0x000f28       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UEP2bits   0x000f28       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEP3   0x000f29       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -979,8 +961,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                      UEP7   0x000f2d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UEP8bits   0x000f2e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEP8   0x000f2e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 UEP9bits   0x000f2f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEP9   0x000f2f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 UEP9bits   0x000f2f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     UEP10   0x000f30       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 UEP10bits   0x000f30       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 UEP11bits   0x000f31       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -995,28 +977,28 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                     UEP15   0x000f35       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   UIEbits   0x000f36       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                       UIE   0x000f36       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 UEIEbits   0x000f37       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UEIE   0x000f37       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                UADDRbits   0x000f38       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 UEIEbits   0x000f37       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     UADDR   0x000f38       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                UADDRbits   0x000f38       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UCFG   0x000f39       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UCFGbits   0x000f39       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PADCFG1bits   0x000f3c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PADCFG1   0x000f3c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              REFOCONbits   0x000f3d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   REFOCON   0x000f3d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              REFOCONbits   0x000f3d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    RTCCAL   0x000f3e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                RTCCALbits   0x000f3e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   RTCCFG   0x000f3f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                RTCCFGbits   0x000f3f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ODCON3   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   RTCCFG   0x000f3f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ODCON3bits   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ODCON2   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   ODCON3   0x000f40       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ODCON2bits   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ODCON1   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   ODCON2   0x000f41       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ODCON1bits   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               ANCON0bits   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   ODCON1   0x000f42       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ANCON0   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               ANCON0bits   0x000f48       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ANCON1bits   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ANCON1   0x000f49       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   DSWAKEL   0x000f4a       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1031,12 +1013,12 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                    DSGPR1   0x000f4f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   TCLKCON   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               TCLKCONbits   0x000f52       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               CVRCONbits   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CVRCON   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               CVRCONbits   0x000f53       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMSTATL   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PMSTATLbits   0x000f54       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  PMSTATH   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PMSTATHbits   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  PMSTATH   0x000f55       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PMELbits   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      PMEL   0x000f56       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      PMEH   0x000f57       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1045,14 +1027,14 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                   PMDIN2H   0x000f59       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PMDOUT2L   0x000f5a       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PMDOUT2H   0x000f5b       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              PMMODELbits   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMMODEL   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              PMMODELbits   0x000f5c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMMODEH   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PMMODEHbits   0x000f5d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PMCONL   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                PMCONLbits   0x000f5e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               PMCONHbits   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PMCONH   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               PMCONHbits   0x000f5f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UFRM   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     UFRML   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 UFRMLbits   0x000f60       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1060,38 +1042,38 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                 UFRMHbits   0x000f61       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                       UIR   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   UIRbits   0x000f62       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                     UEIR   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UEIRbits   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                USTATbits   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                     UEIR   0x000f63       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     USTAT   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                USTATbits   0x000f64       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      UCON   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  UCONbits   0x000f65       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                DMABCHbits   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    DMABCH   0x000f66       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    DMABCL   0x000f67       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              RXADDRHbits   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   RXADDRH   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              RXADDRHbits   0x000f68       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   RXADDRL   0x000f69       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               TXADDRHbits   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   TXADDRH   0x000f6a       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   TXADDRL   0x000f6b       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMDIN1L   0x000f6c       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMDIN1H   0x000f6d       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  PMADDRL   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PMDOUT1L   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 PMDOUT1H   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              PMADDRHbits   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  PMADDRL   0x000f6e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PMADDRH   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               CMSTATbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             CMSTATUSbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 CMSTATUS   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              PMADDRHbits   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 PMDOUT1H   0x000f6f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CMSTAT   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             SSP2CON2bits   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 CMSTATUS   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             CMSTATUSbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               CMSTATbits   0x000f70       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  SSP2CON2   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             SSP2CON2bits   0x000f71       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              SSP2CON1bits   0x000f72       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  SSP2CON1   0x000f72       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 SSP2STAT   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              SSP2STATbits   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 SSP2STAT   0x000f73       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSP2ADD   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               SSP2ADDbits   0x000f74       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSP2BUF   0x000f75       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1172,8 +1154,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                      PIR1   0x000f9e       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      IPR1   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  IPR1bits   0x000f9f       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 PIE2bits   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      PIE2   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 PIE2bits   0x000fa0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      PIR2   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PIR2bits   0x000fa1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      IPR2   0x000fa2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1192,105 +1174,105 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                    TXREG2   0x000fa9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    RCREG2   0x000faa       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    SPBRG2   0x000fab       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                RCSTAbits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               RCSTA1bits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     RCSTA   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    RCSTA1   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                TXSTAbits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               RCSTA1bits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                RCSTAbits   0x000fac       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                TXSTA1bits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    TXSTA1   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TXSTA   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                TXSTAbits   0x000fad       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    TXREG1   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TXREG   0x000fae       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     RCREG   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    RCREG1   0x000faf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   SPBRG1   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     SPBRG   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   SPBRG1   0x000fb0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              CTMUICONbits   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  CTMUICON   0x000fb1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              CTMUCONLbits   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  CTMUCONL   0x000fb2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 CTMUCONH   0x000fb3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              CTMUCONHbits   0x000fb3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 CTMUCONH   0x000fb3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               CCP2CONbits   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  CCP2CON   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  ECCP2CON   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  CCP2CON   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              ECCP2CONbits   0x000fb4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     CCPR2   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CCPR2L   0x000fb5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CCPR2H   0x000fb6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 ECCP2DEL   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PWM2CONbits   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PWM2CON   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 ECCP2DEL   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              ECCP2DELbits   0x000fb7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               ECCP2ASbits   0x000fb8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   ECCP2AS   0x000fb8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 PSTR2CON   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              PSTR2CONbits   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  CCP1CON   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             ECCP1CONbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 PSTR2CON   0x000fb9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               CCP1CONbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  CCP1CON   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  ECCP1CON   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   CCPR1L   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             ECCP1CONbits   0x000fba       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     CCPR1   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   CCPR1L   0x000fbb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    CCPR1H   0x000fbc       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             ECCP1DELbits   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 ECCP1DEL   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               PWM1CONbits   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PWM1CON   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             ECCP1DELbits   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 ECCP1DEL   0x000fbd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               ECCP1ASbits   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   ECCP1AS   0x000fbe       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              PSTR1CONbits   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  PSTR1CON   0x000fbf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-               WDTCONbits   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    WDTCON   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+               WDTCONbits   0x000fc0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ADCON1bits   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   ADCON1   0x000fc1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                ADCON0bits   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   ADCON0   0x000fc2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     ADRES   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADRESL   0x000fc3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    ADRESH   0x000fc4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  SSPCON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              SSPCON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  SSP1CON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
              SSP1CON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              SSPCON2bits   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  SSPCON2   0x000fc5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             SSP1CON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                 SSP1CON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               SSPCON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSPCON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                 SSP1CON1   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             SSP1CON1bits   0x000fc6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+             SSP1STATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  SSP1STAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               SSPSTATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSPSTAT   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-             SSP1STATbits   0x000fc7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    SSPADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                SSPADDbits   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              SSP1ADDbits   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSP1ADD   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              SSP1ADDbits   0x000fc8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    SSPBUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   SSP1BUF   0x000fc9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     T2CON   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 T2CONbits   0x000fca       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                       PR2   0x000fcb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      TMR2   0x000fcc       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                    T1CON   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 T1CONbits   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                    T1CON   0x000fcd       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TMR1L   0x000fce       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TMR1H   0x000fcf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                  RCONbits   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      RCON   0x000fd0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   CM2CON   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  CM2CON1   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              CM2CON1bits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                CM2CONbits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                   CM1CON   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  CM1CON1   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-              CM1CON1bits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              CM2CON1bits   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  CM2CON1   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   CM2CON   0x000fd1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                CM1CONbits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+              CM1CON1bits   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  CM1CON1   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                   CM1CON   0x000fd2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    OSCCON   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                OSCCONbits   0x000fd3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                    T0CON   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                 T0CONbits   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                    T0CON   0x000fd5       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TMR0L   0x000fd6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     TMR0H   0x000fd7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                STATUSbits   0x000fd8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1304,8 +1286,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                  POSTINC2   0x000fde       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     INDF2   0x000fdf       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                       BSR   0x000fe0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                    FSR1L   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      FSR1   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                    FSR1L   0x000fe1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     FSR1H   0x000fe2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PLUSW1   0x000fe3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PREINC1   0x000fe4       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1313,8 +1295,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                  POSTINC1   0x000fe6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     INDF1   0x000fe7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      WREG   0x000fe8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                    FSR0L   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      FSR0   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                    FSR0L   0x000fe9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                     FSR0H   0x000fea       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PLUSW0   0x000feb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   PREINC0   0x000fec       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1323,8 +1305,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                     INDF0   0x000fef       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               INTCON3bits   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   INTCON3   0x000ff0       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                  INTCON2   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
               INTCON2bits   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                  INTCON2   0x000ff1       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                INTCONbits   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    INTCON   0x000ff2       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                      PROD   0x000ff3       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
@@ -1335,8 +1317,8 @@ USBPrepareForNextSetupTrf   0x00063e    program     extern C:\Projects\EggBot-GH
                    TBLPTR   0x000ff6       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   TBLPTRH   0x000ff7       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                   TBLPTRU   0x000ff8       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
-                      PCL   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                        PC   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
+                      PCL   0x000ff9       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PCLATH   0x000ffa       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                    PCLATU   0x000ffb       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
                STKPTRbits   0x000ffc       data     extern C:\MCC18\src\traditional\proc\p18F46J50.asm
