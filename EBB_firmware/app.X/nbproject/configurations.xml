@@ -255,7 +255,7 @@
                         DD="dist/46J50/debug/bootloader.X.debug.cof">
           </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
-          <parseOnProdLoad>false</parseOnProdLoad>
+          <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
         <subordinates>
