@@ -15,15 +15,11 @@
             <sourceRootList/>
             <confList>
                 <confElem>
-                    <name>46J50</name>
+                    <name>EBB</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>45J50</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>THREEBEEBEE</name>
+                    <name>3BB</name>
                     <type>2</type>
                 </confElem>
             </confList>
