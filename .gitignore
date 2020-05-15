@@ -12,3 +12,6 @@
 EBB_firmware/app.X/nbproject/private/
 EBB_firmware/app.X/nbproject/Makefile-*
 EBB_firmware/app.X/nbproject/Package-*
+EBB_firmware/bootloader.X/nbproject/Makefile-*
+EBB_firmware/bootloader.X/nbproject/private/
+EBB_firmware/bootloader.X/nbproject/Package-*
