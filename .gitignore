@@ -6,3 +6,9 @@
 *.o
 *.d
 *.inc
+*.cof
+*.hex
+*.map
+EBB_firmware/app.X/nbproject/private/
+EBB_firmware/app.X/nbproject/Makefile-*
+EBB_firmware/app.X/nbproject/Package-*
