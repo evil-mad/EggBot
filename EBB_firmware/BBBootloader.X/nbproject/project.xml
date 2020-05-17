@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>EBBv11_BL</name>
+            <name>BBBootloader</name>
             <creation-uuid>45bcbe38-a1dc-4784-8063-a22d44e21a5f</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
