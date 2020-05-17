@@ -57,7 +57,7 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool></platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
@@ -108,7 +108,7 @@
         <property key="enable-ou" value="true"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories" value="."/>
-        <property key="optimization-master" value="Custom"/>
+        <property key="optimization-master" value="Enable all"/>
         <property key="preprocessor-macros" value="EBB_V11"/>
         <property key="procedural-abstraction-passes" value="0"/>
         <property key="storage-class" value="sca"/>
@@ -194,7 +194,7 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool></platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
@@ -245,7 +245,7 @@
         <property key="enable-ou" value="true"/>
         <property key="enable-ow" value="true"/>
         <property key="extra-include-directories" value="."/>
-        <property key="optimization-master" value="Custom"/>
+        <property key="optimization-master" value="Enable all"/>
         <property key="preprocessor-macros" value="THREEBEEBEE_V10"/>
         <property key="procedural-abstraction-passes" value="0"/>
         <property key="storage-class" value="sca"/>
