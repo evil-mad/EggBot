@@ -28,8 +28,8 @@
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>source/BL_rm18f46j50_g.lkr</itemPath>
       <itemPath>source/rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/BL_rm18f46j50_g.lkr</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
@@ -82,20 +82,20 @@
         <archiverTool>
         </archiverTool>
         <loading>
-          <makeArtifact PL="../bootloader.X"
+          <makeArtifact PL="../BBBootloader.X"
                         CT="1"
-                        CN="46J50"
-                        AC="true"
+                        CN="EBB"
+                        AC="false"
                         BL="true"
-                        WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
-                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
-                        OP="dist/46J50/production/bootloader.X.production.hex"
-                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
-                        FL="dist/46J50/production/bootloader.X.production.hex"
-                        PD="dist/46J50/production/bootloader.X.production.cof"
-                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+                        WD="../BBBootloader.X"
+                        BC="${MAKE}  -f Makefile CONF=EBB"
+                        DBC="${MAKE}  -f Makefile CONF=EBB TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/EBB&quot; &quot;dist/EBB&quot;"
+                        OP="dist/EBB/production/BBBootloader.X.production.hex"
+                        DOP="dist/EBB/debug/BBBootloader.X.debug.cof"
+                        FL="dist/EBB/production/BBBootloader.X.production.hex"
+                        PD="dist/EBB/production/BBBootloader.X.production.cof"
+                        DD="dist/EBB/debug/BBBootloader.X.debug.cof">
           </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <parseOnProdLoad>true</parseOnProdLoad>
@@ -239,21 +239,6 @@
         <archiverTool>
         </archiverTool>
         <loading>
-          <makeArtifact PL="../bootloader.X"
-                        CT="1"
-                        CN="46J50"
-                        AC="true"
-                        BL="false"
-                        WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
-                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
-                        OP="dist/46J50/production/bootloader.X.production.hex"
-                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
-                        FL="dist/46J50/production/bootloader.X.production.hex"
-                        PD="dist/46J50/production/bootloader.X.production.cof"
-                        DD="dist/46J50/debug/bootloader.X.debug.cof">
-          </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
@@ -362,16 +347,6 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </PICkit3PlatformTool>
-      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
     </conf>
     <conf name="ThreeBB_BL" type="2">
       <toolsSet>
@@ -395,20 +370,20 @@
         <archiverTool>
         </archiverTool>
         <loading>
-          <makeArtifact PL="../bootloader.X"
+          <makeArtifact PL="../BBBootloader.X"
                         CT="1"
-                        CN="46J50"
+                        CN="3BB"
                         AC="true"
                         BL="true"
-                        WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
-                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
-                        OP="dist/46J50/production/bootloader.X.production.hex"
-                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
-                        FL="dist/46J50/production/bootloader.X.production.hex"
-                        PD="dist/46J50/production/bootloader.X.production.cof"
-                        DD="dist/46J50/debug/bootloader.X.debug.cof">
+                        WD="../BBBootloader.X"
+                        BC="${MAKE}  -f Makefile CONF=3BB"
+                        DBC="${MAKE}  -f Makefile CONF=3BB TYPE_IMAGE=DEBUG_RUN"
+                        CC="rm -rf &quot;build/3BB&quot; &quot;dist/3BB&quot;"
+                        OP="dist/3BB/production/BBBootloader.X.production.hex"
+                        DOP="dist/3BB/debug/BBBootloader.X.debug.cof"
+                        FL="dist/3BB/production/BBBootloader.X.production.hex"
+                        PD="dist/3BB/production/BBBootloader.X.production.cof"
+                        DD="dist/3BB/debug/BBBootloader.X.debug.cof">
           </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <parseOnProdLoad>true</parseOnProdLoad>
@@ -536,7 +511,7 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.46</languageToolchainVersion>
         <platform>3</platform>
@@ -552,21 +527,6 @@
         <archiverTool>
         </archiverTool>
         <loading>
-          <makeArtifact PL="../bootloader.X"
-                        CT="1"
-                        CN="46J50"
-                        AC="true"
-                        BL="false"
-                        WD="../bootloader.X"
-                        BC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50"
-                        DBC="${MAKE} MAKE_OPTIONS=&quot; -j 8&quot; -f Makefile CONF=46J50 TYPE_IMAGE=DEBUG_RUN"
-                        CC="rm -rf &quot;build/46J50&quot; &quot;dist/46J50&quot;"
-                        OP="dist/46J50/production/bootloader.X.production.hex"
-                        DOP="dist/46J50/debug/bootloader.X.debug.cof"
-                        FL="dist/46J50/production/bootloader.X.production.hex"
-                        PD="dist/46J50/production/bootloader.X.production.cof"
-                        DD="dist/46J50/debug/bootloader.X.debug.cof">
-          </makeArtifact>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
@@ -675,16 +635,6 @@
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
       </PICkit3PlatformTool>
-      <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
-        <C18>
-        </C18>
-        <C18-AS>
-        </C18-AS>
-        <C18-LD>
-        </C18-LD>
-        <C18LanguageToolchain>
-        </C18LanguageToolchain>
-      </item>
     </conf>
   </confs>
 </configurationDescriptor>

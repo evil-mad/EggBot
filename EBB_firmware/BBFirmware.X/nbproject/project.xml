@@ -12,7 +12,7 @@
             <sourceEncoding>ISO-8859-1</sourceEncoding>
             <asminc-extensions/>
             <make-dep-projects>
-                <make-dep-project>../bootloader.X</make-dep-project>
+                <make-dep-project>../BBBootloader.X</make-dep-project>
             </make-dep-projects>
             <sourceRootList>
                 <sourceRootElem>source</sourceRootElem>
