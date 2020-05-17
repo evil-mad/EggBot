@@ -3,7 +3,7 @@
  *                EiBotBoard Firmware
  *
  *********************************************************************
- * FileName:        HardwareProfile_EBB_V13_and_above.h
+ * FileName:        HardwareProfile_EBB.h
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *

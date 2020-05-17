@@ -215,19 +215,7 @@ void main(void)
  *****************************************************************************/
 static void InitializeSystem(void)
 {
-  #if defined(BOARD_EBB_V10)
-    unsigned int pll_startup_counter = 600;
-    OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-    while(pll_startup_counter--);
-
-    //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-    //use the ANCONx registers to control this, which is different from other devices which
-    //use the ADCON1 register for this purpose.
-    WDTCONbits.ADSHR = 1;             // Select alternate SFR location to access ANCONx registers
-    ANCON0 = 0xFF;                    // Default all pins to digital
-    ANCON1 = 0xFF;                    // Default all pins to digital
-    WDTCONbits.ADSHR = 0;             // Select normal SFR locations
-  #elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+  #if defined(BOARD_EBB)
     unsigned int pll_startup_counter; //Used for software delay while pll is starting up
 
     //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices

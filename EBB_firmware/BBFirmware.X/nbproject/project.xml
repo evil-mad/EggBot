@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>EBF_EBBv13_and_above</name>
+            <name>BBFirmware</name>
             <creation-uuid>2957c519-265a-41e6-b2f2-fc8770f47c96</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
@@ -19,11 +19,19 @@
             </sourceRootList>
             <confList>
                 <confElem>
-                    <name>EBBv13_with_bootloader</name>
+                    <name>EBB_BL</name>
                     <type>2</type>
                 </confElem>
                 <confElem>
-                    <name>EBBv13_no_bootloader</name>
+                    <name>EBB_noBL</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>ThreeBB_BL</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>ThreeBB_noBL</name>
                     <type>2</type>
                 </confElem>
             </confList>

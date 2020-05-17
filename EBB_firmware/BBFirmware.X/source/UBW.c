@@ -94,7 +94,7 @@
 #include "HardwareProfile.h"
 #include "UBW.h"
 #include "ebb.h"
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+#if defined(BOARD_EBB)
   #include "RCServo2.h"
 #endif
 
@@ -154,16 +154,8 @@ const rom char st_OK[] = {"OK\r\n"};
 const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
-#if defined(BOARD_EBB_V10)
-  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1\r\n"};
-#elif defined(BOARD_EBB_V11)
-  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1\r\n"};
-#elif defined(BOARD_EBB_V12)
-  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
-#elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.7.0\r\n"};
-#elif defined(BOARD_UBW)
-  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
+#if defined(BOARD_EBB)
+  const rom char st_version[] = {"EBB Firmware Version 3.0.0\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -778,7 +770,7 @@ void UserInit(void)
   // Call the ebb init function to setup whatever it needs
   EBB_Init();
 
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+#if defined(BOARD_EBB)
   RCServo2_Init();
 #endif
 
@@ -1448,7 +1440,7 @@ void parse_packet(void)
     case ('S' * 256) + '2':
     {
       // S2 for RC Servo method 2
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
+#if defined(BOARD_EBB)
       RCServo2_S2_command();
 #endif
       break;
@@ -1749,16 +1741,8 @@ void parse_C_packet(void)
   TRISA = PA;
   TRISB = PB;
   TRISC = PC;
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   TRISD = PD;
   TRISE = PE;
-#endif
-#if defined(BOARD_EBB_V10)
-  TRISF = PF;
-  TRISG = PG;
-  TRISH = PH;
-  TRISJ = PJ;
-#endif
 
   print_ack ();
 }
@@ -1863,7 +1847,6 @@ void parse_O_packet(void)
   {
     LATC = Value;
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
@@ -1876,33 +1859,6 @@ void parse_O_packet(void)
   {
     LATE = Value;
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATF = Value;
-  }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATG = Value;
-  }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATH = Value;
-  }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATJ = Value;
-  }
-#endif
 
   print_ack ();
 }
@@ -1919,20 +1875,6 @@ void parse_O_packet(void)
 // The rest will be read in as zeros.
 void parse_I_packet(void)
 {
-#if defined(BOARD_EBB_V10)
-  printf (
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i\r\n", 
-    PORTA,
-    PORTB,
-    PORTC,
-    PORTD,
-    PORTE,
-    PORTF,
-    PORTG,
-    PORTH,
-    PORTJ
-  );
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   printf (
     (far rom char*)"I,%03i,%03i,%03i,%03i,%03i\r\n", 
     PORTA,
@@ -1941,14 +1883,6 @@ void parse_I_packet(void)
     PORTD,
     PORTE
   );
-#elif defined(BOARD_UBW)
-  printf (
-    (far rom char*)"I,%03i,%03i,%03i\r\n", 
-    PORTA,
-    PORTB,
-    PORTC
-  );
-#endif
 }
 
 // All we do here is just print out our version number
@@ -2115,7 +2049,6 @@ void parse_PD_packet(void)
       bitset (TRISC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     if (0 == direction)
@@ -2138,53 +2071,6 @@ void parse_PD_packet(void)
       bitset (TRISE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10) 
-  else if ('F' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr (TRISF, pin);
-    }
-    else
-    {
-      bitset (TRISF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr (TRISG, pin);
-    }
-    else
-    {
-      bitset (TRISG, pin)
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr (TRISH, pin);
-    }
-    else
-    {
-      bitset (TRISH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr (TRISJ, pin);
-    }
-    else
-    {
-      bitset (TRISJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2236,7 +2122,6 @@ void parse_PI_packet(void)
   {
     value = bittst (PORTC, pin);
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     value = bittst (PORTD, pin);
@@ -2245,25 +2130,6 @@ void parse_PI_packet(void)
   {
     value = bittst (PORTE, pin);
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    value = bittst (PORTF, pin);
-  }
-  else if ('G' == port)
-  {
-    value = bittst (PORTG, pin);
-  }
-  else if ('H' == port)
-  {
-    value = bittst (PORTH, pin);
-  }
-  else if ('J' == port)
-  {
-    value = bittst (PORTJ, pin);
-  }
-#endif
   else
   {
     bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2348,8 +2214,7 @@ void parse_PO_packet(void)
       bitset (LATC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  else if ('D' == port)
+ else if ('D' == port)
   {
     if (0 == value)
     {
@@ -2371,53 +2236,6 @@ void parse_PO_packet(void)
       bitset (LATE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    if (0 == value)
-    {
-      bitclr (LATF, pin);
-    }
-    else
-    {
-      bitset (LATF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == value)
-    {
-      bitclr (LATG, pin);
-    }
-    else
-    {
-      bitset (LATG, pin);
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == value)
-    {
-      bitclr (LATH, pin);
-    }
-    else
-    {
-      bitset (LATH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == value)
-    {
-      bitclr (LATJ, pin);
-    }
-    else
-    {
-      bitset (LATJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
