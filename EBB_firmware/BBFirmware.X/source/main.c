@@ -215,38 +215,36 @@ void main(void)
  *****************************************************************************/
 static void InitializeSystem(void)
 {
-  #if defined(BOARD_EBB)
-    unsigned int pll_startup_counter; //Used for software delay while pll is starting up
+  unsigned int pll_startup_counter; //Used for software delay while pll is starting up
 
-    //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-    //use the ANCONx registers to control this, which is different from other devices which
-    //use the ADCON1 register for this purpose.
-    ANCON0 = 0xFF;                  // Default all pins to digital
-    ANCON1 = 0xFF;                  // Default all pins to digital
+  //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
+  //use the ANCONx registers to control this, which is different from other devices which
+  //use the ADCON1 register for this purpose.
+  ANCON0 = 0xFF;                  // Default all pins to digital
+  ANCON1 = 0xFF;                  // Default all pins to digital
 
-    OSCCON = 0x60;  //Clock switch to primary clock source.  May not have been running
-                    //from this if the bootloader is called from the application firmware.
+  OSCCON = 0x60;  //Clock switch to primary clock source.  May not have been running
+                  //from this if the bootloader is called from the application firmware.
 
-    //On the PIC18F46J50 Family of USB microcontrollers, the PLL will not power up and be enabled
-    //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
-    //This allows the device to power up at a lower initial operating frequency, which can be
-    //advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
-    //operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
-    //power up the PLL.
-    #if defined(__18F24J50)||defined(__18F25J50)|| \
-        defined(__18F26J50)||defined(__18F44J50)|| \
-        defined(__18F45J50)||defined(__18F46J50) 
+  //On the PIC18F46J50 Family of USB microcontrollers, the PLL will not power up and be enabled
+  //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+  //This allows the device to power up at a lower initial operating frequency, which can be
+  //advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
+  //operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
+  //power up the PLL.
+  #if defined(__18F24J50)||defined(__18F25J50)|| \
+      defined(__18F26J50)||defined(__18F44J50)|| \
+      defined(__18F45J50)||defined(__18F46J50) 
 
-      OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-      pll_startup_counter = 600;
-      while(pll_startup_counter--);
-      //Device switches over automatically to PLL output after PLL is locked and ready.
-    #else
-      #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
-      //Also make sure the correct board is selected in usbcfg.h.  If 
-      //everything is correct, comment out the above "#error ..." line
-      //to suppress the error message.
-    #endif
+    OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+    pll_startup_counter = 600;
+    while(pll_startup_counter--);
+    //Device switches over automatically to PLL output after PLL is locked and ready.
+  #else
+    #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
+    //Also make sure the correct board is selected in usbcfg.h.  If 
+    //everything is correct, comment out the above "#error ..." line
+    //to suppress the error message.
   #endif
 
 //  The USB specifications require that USB peripheral devices must never source

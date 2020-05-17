@@ -94,9 +94,7 @@
 #include "HardwareProfile.h"
 #include "UBW.h"
 #include "ebb.h"
-#if defined(BOARD_EBB)
-  #include "RCServo2.h"
-#endif
+#include "RCServo2.h"
 
 /** D E F I N E S ********************************************************/
 
@@ -153,9 +151,11 @@ volatile unsigned int ChannelBit;
 const rom char st_OK[] = {"OK\r\n"};
 const rom char st_LFCR[] = {"\r\n"};
 
-/// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
+/// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)
   const rom char st_version[] = {"EBB Firmware Version 3.0.0\r\n"};
+#elif defined(BOARD_3BB)
+  const rom char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -643,21 +643,6 @@ void UserInit(void)
   // Make all of PORTC inputs
   LATC = 0x00;
   TRISC = 0xFF;
-  // Make all of PORTD and PORTE inputs too
-#if defined(BOARD_EBB_V10)
-  LATD = 0x00;
-  TRISD = 0xFF;
-  LATE = 0x00;
-  TRISE = 0xFF;
-  LATF = 0x00;
-  TRISF = 0xFF;
-  LATG = 0x00;
-  TRISG = 0xFF;
-  LATH = 0x00;
-  TRISH = 0xFF;
-  LATJ = 0x00;
-  TRISJ = 0xFF;
-#endif
 
   // Initalize LED I/Os to outputs
   mInitAllLEDs();
@@ -770,9 +755,7 @@ void UserInit(void)
   // Call the ebb init function to setup whatever it needs
   EBB_Init();
 
-#if defined(BOARD_EBB)
   RCServo2_Init();
-#endif
 
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
@@ -1440,9 +1423,7 @@ void parse_packet(void)
     case ('S' * 256) + '2':
     {
       // S2 for RC Servo method 2
-#if defined(BOARD_EBB)
       RCServo2_S2_command();
-#endif
       break;
     }
     case ('R' * 256) + 'M':
