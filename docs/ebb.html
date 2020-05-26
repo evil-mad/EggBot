@@ -1027,7 +1027,7 @@ td {text-align: center}
         <ul>
           <li>
             <span style="font-weight: bold;">Command:</span>
-            <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1,<i>Length2</i>,<i>Period2</i>,<i>Length3</i>,<i>Period3</i>]</i>&lt;CR&gt;</code>
+            <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1[,<i>Length2</i>,<i>Period2</i>[,<i>Length3</i>,<i>Period3</i>]]]</i>&lt;CR&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
@@ -1052,16 +1052,31 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command sets up the internal parameters for the <code>PG</code> command. The parameters come in pairs, and the first number in the pair represents the number of milliseconds that a pin (one of RB0, RB1, RB2 and RB3) goes high for, and the second number represents the number of milliseconds between rising edges for that pin. The first pair, for RB0, is required. The other three pairs (for RB1, RB2 and RB3) are optional.
+              This command sets up the internal parameters for the <code>PG</code> command. The parameters come in pairs, and the first number in the pair represents the number of milliseconds that a pin (one of RB0, RB1, RB2 and RB3) goes high for, and the second number represents the number of milliseconds between rising edges for that pin. The first pair, for pin RB0, is required. The other three pairs (for RB1, RB2 and RB3) are optional and any number of them (from zero to three) can be included. Pairs which are not included are simply treated as zeros and that pin is not used for output of pulses.
             </p>
             <p>
-              When the <code>PG,1</code> command is sent, any pairs from the <code>PC</code> command where neither value is zero and the Rate is greater than the Length will create pulses on that pin.
+              When the <code>PG,1</code> command is sent, any pairs from the <code>PC</code> command where both values are non-zero and the Rate is greater than the Length will create pulses on that pin.
             </p>
             <p>
               While the pulses are going, new <code>PC</code> commands can be sent, updating the pulse durations and repetition rates.
             </p>
             <p>
               This command is only available for pins RB0, RB1, RB2 and RB3. If you wish to leave a pin alone (i.e. not create pulses on it) just set its Length and Period values to zero.
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>PC,100,150\r</code> After sending a <code>PG,1</code> command, this Length and Period would causes RB0 to go high for 100 milliseconds, then low for 50 milliseconds, then high for 100 milliseconds, etc.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>PC,12,123,0,0,2000,10000\r</code> After sending a <code>PG,1</code> command, these parameters would cause pin RB0 to go high for a duration of 12 milliseconds, repeating every 123 milliseconds. Pin RB1 would be untouched. Pin RB2 would go high for 2 seconds every 10 seconds. And pin RB3 would be untouched (because the last pair of Length and Period are omitted and thus treated as 0,0).
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>PC,1,2,1,2,1,2,1,2\r</code> After sending a <code>S2,0,4</code> (to turn off RC servo output on pin RB1) and <code>PG,1</code> (to turn on pulse generation), these parameters would cause all four pins (RB0, RB1, RB2, and RB3) to output square waves with a 50% duty cycle and 500 Hz frequency.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Note:</span>
+            <p>
+              Due to a bug in all versions up to and including v2.6.5, it may take up to 64K milliseconds for new Length and Period values to take effect. Turning the pulses off and on again with <code>PG,0</code> then <code>PG,1</code> will not help.
             </p>
           </li>
         </ul>
@@ -1112,15 +1127,17 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 (and optionally on RB1, RB2 and RB3). It uses the parameters from the <code>PC</code> command to control the pulse width and repetition rate on each pin.
+              This command turns on (<code>PG,1</code>) or turns off (<code>PG,0</code>) the Pulse Generation on pin RB0 (and optionally on RB1, and/or RB2 and/or RB3). It uses the parameters from the <code>PC</code> command to control the pulse width and repetition rate on each pin. See the <code><a href="#PC">PC</a></code> &mdash; Pulse Configure command for complete details.
             </p>
             <p>
-              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have <code><a href="#S2">S2</a></code> RC Servo outputs or other outputs on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not
-              desire.
+              This command does not turn off any other commands. So if you want to use the Pulse Generation on pins that already have <code><a href="#S2">S2</a></code> RC Servo outputs or other outputs on them, be sure to turn those other outputs off yourself before starting the Pulse Generation, or the two signals will get mixed together and create outputs you do not desire.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>PD,C,3,0\r</code> This command would set pin PC3 (or Port C, pin 3) as a digital output.
+            <span style="font-weight: bold;">Example:</span> <code>PG,1\r</code> This command would turn on pulse generation as per the parameters specified in the latest <code>PC</code> command.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>PG,0\r</code> This command would turn off pulse generation on any pins (RB0, RB1, RB2 or RB3) which have non-zero Length and Period values from the latest <code>PC</code> command.
           </li>
         </ul>
 
