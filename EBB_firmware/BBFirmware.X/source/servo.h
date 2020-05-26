@@ -3,7 +3,7 @@
  *                EiBotBoard Firmware
  *
  *********************************************************************
- * FileName:        RCServo2.h
+ * FileName:        servo.h
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
@@ -48,8 +48,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef RCSERVO2_H
-#define RCSERVO2_H
+#ifndef SERVO_H
+#define SERVO_H
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 
@@ -57,6 +57,10 @@
 #define INITAL_RC2_SLOTS  8       // Inital number of RC2 slots (determines repeat rate of pulses)
 #define DEFAULT_EBB_SERVO_PORTB_PIN   1 // Note, this indicates a PortB pin number, not RPn number
 #define DEFAULT_EBB_SERVO_RPN (DEFAULT_EBB_SERVO_PORTB_PIN + 3) // RPn number for default pen up/down servo
+#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
+
+extern volatile unsigned long int gRCServoPoweroffCounterMS;
+extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 
 extern UINT8 gRC2msCounter;
 extern UINT16 gRC2Value[MAX_RC2_SERVOS];
@@ -73,8 +77,8 @@ extern UINT16 g_servo2_rate_up;
 extern UINT16 g_servo2_rate_down;
 extern UINT8 g_servo2_RPn;
 
-void RCServo2_Init(void);
-void RCServo2_S2_command(void);
-UINT8 RCServo2_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+void servo_Init(void);
+void servo_S2_command(void);
+UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
 
 #endif

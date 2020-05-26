@@ -1,0 +1,41 @@
+Updated list of todo items for EBB/3BB refactor
+
+* Refactor I/O initialization
+  - Make table of all I/O ports for each board, make I/O init smaller
+  - 
+
+* Factor out command parsing into its own file
+  - Make table based to shorten code?
+
+* Factor out ISRs into their own file
+
+* Create UART I/O low level code in own file
+
+* Factor out USB serial I/O into own file
+
+* Factor out motion control commands into own file
+
+* Factor out 'instant' commands into own file
+
+* Factor out FIFO code into own file
+
+* Put all RC Servo stuff into RCServo2.c, then rename to servo.c
+
+* Can the "old" servo stuff be completely removed and just use new RCServo2 code? (yes)
+
+* OK to remove all UBW "T" command and ISR/FIFO? (YES)
+* Remove QN, SN, NI, ND commands as well
+* Remove BO, BS, SS, RS, SI, RI, CI, RC, BC, TX, RX, CX
+
+* Break out command processing into own file (parse.c/h)
+
+* Convert all variable types to "Microchip" standard (UINT8, etc.)
+
+
+Code Size : RAM/Free, ROM/Free
+  EBB_BL
+    5/24  : 3461/315, 42794/22734
+
+
+  3BB_BL 
+    5/24  : 3461/315, 42794/22734

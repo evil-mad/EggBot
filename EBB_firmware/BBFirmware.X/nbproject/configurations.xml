@@ -15,10 +15,17 @@
       </logicalFolder>
       <itemPath>source/ebb.h</itemPath>
       <itemPath>source/HardwareProfile.h</itemPath>
-      <itemPath>source/RCServo2.h</itemPath>
-      <itemPath>source/UBW.h</itemPath>
       <itemPath>source/usb_config.h</itemPath>
       <itemPath>source/ebb_demo.h</itemPath>
+      <itemPath>source/init.h</itemPath>
+      <itemPath>source/isr.h</itemPath>
+      <itemPath>source/fifo.h</itemPath>
+      <itemPath>source/servo.h</itemPath>
+      <itemPath>source/parse.h</itemPath>
+      <itemPath>source/usbser.h</itemPath>
+      <itemPath>source/utility.h</itemPath>
+      <itemPath>source/analog.h</itemPath>
+      <itemPath>source/commands.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -43,19 +50,27 @@
       </logicalFolder>
       <itemPath>source/ebb.c</itemPath>
       <itemPath>source/main.c</itemPath>
-      <itemPath>source/RCServo2.c</itemPath>
-      <itemPath>source/UBW.c</itemPath>
       <itemPath>source/usb_descriptors.c</itemPath>
       <itemPath>source/ebb_demo.c</itemPath>
+      <itemPath>source/init.c</itemPath>
+      <itemPath>source/isr.c</itemPath>
+      <itemPath>source/fifo.c</itemPath>
+      <itemPath>source/servo.c</itemPath>
+      <itemPath>source/parse.c</itemPath>
+      <itemPath>source/usbser.c</itemPath>
+      <itemPath>source/utility.c</itemPath>
+      <itemPath>source/analog.c</itemPath>
+      <itemPath>source/commands.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
+      <itemPath>todo.txt</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>source</Elem>
+    <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -65,9 +80,9 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -224,7 +239,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -353,9 +368,9 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -512,7 +527,7 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
-        <languageToolchainVersion>3.46</languageToolchainVersion>
+        <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>

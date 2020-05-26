@@ -92,6 +92,15 @@
   //  final application design.
   #define CLOCK_FREQ 48000000
 
+  // How many stepper motors does this board support? (EBB has 2)
+  #define NUMBER_OF_STEPPERS  2
+
+  // Define global things that depend on the board type
+  #define STEP1_BIT (0x01)
+  #define DIR1_BIT  (0x02)
+  #define STEP2_BIT (0x04)
+  #define DIR2_BIT  (0x08)
+  
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */
   #define mInitAllLEDs()      LATDbits.LATD3 = 0; LATDbits.LATD2 = 0; TRISDbits.TRISD3 = 0; TRISDbits.TRISD2 = 0;
@@ -115,7 +124,7 @@
   #define Enable1IO_TRIS      TRISEbits.TRISE0
   #define Enable2IO           LATCbits.LATC1
   #define Enable2IO_TRIS      TRISCbits.TRISC1
-    // Alternate enables for external drivers
+  // Alternate enables for external drivers
   #define Enable1AltIO        LATDbits.LATD1
   #define Enable1AltIO_TRIS   TRISDbits.TRISD1
   #define Enable2AltIO        LATAbits.LATA1
@@ -214,6 +223,16 @@
   //  required in the stack provided demos.  They are not required in
   //  final application design.
   #define CLOCK_FREQ 48000000
+
+  // How many stepper motors does this board support? (3BB has 3)
+  #define NUMBER_OF_STEPPERS  3
+
+  // Define global things that depend on the board type
+  #define STEP1_BIT (0x01)
+  #define DIR1_BIT  (0x02)
+  #define STEP2_BIT (0x04)
+  #define DIR2_BIT  (0x08)
+
 
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */

@@ -3,7 +3,7 @@
  *                EiBotBoard Firmware
  *
  *********************************************************************
- * FileName:        RCServo2.c
+ * FileName:        servo.c
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
@@ -108,8 +108,16 @@
 #include "Compiler.h"
 #include "ebb.h"
 #include "UBW.h"
-#include "RCServo2.h"
+#include "servo.h"
 #include "HardwareProfile.h"
+#include "fifo.h"
+
+
+// RC servo variables
+// First the main array of data for each servo
+unsigned char g_RC_primed_ptr;
+unsigned char g_RC_next_ptr;
+unsigned char g_RC_timing_ptr;
 
 // Counts from 0 to gRC2SlotMS
 UINT8  gRC2msCounter;
@@ -138,8 +146,13 @@ UINT16 g_servo2_rate_up;
 UINT16 g_servo2_rate_down;
 UINT8  g_servo2_RPn;
 
+// Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
+volatile UINT32 gRCServoPoweroffCounterMS = 0;
+volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+
+
 /*
-The idea with RCServo2 is to use the ECCP2 module and timer 3.
+The idea with servo is to use the ECCP2 module and timer 3.
 We divide time into 24ms periods. Inside each 24ms period, we
 can fire up to 8 RC servo's pulses (slots). Each pulse can be between
 0ms and 3ms long, controlled entirely by the ECCP2 hardware,
@@ -149,7 +162,7 @@ We want to go from 0ms to 3ms so we can accomodate RC servos
 who need really short or really long pulses to reach the
 physical extremes of its motion.
 
-This RCServo2 method will only be available on the 18F45J50 based
+This servo method will only be available on the 18F45J50 based
 EggBotBoards, because it requires the PPS (peripheral pin select)
 facility to be possible.
 
@@ -172,7 +185,7 @@ The value in gRC2Pin is the PPS RPx pin number that this slot controls
  *
  * Put a call to this function inside the UserInit() call in UBW.c
  */
-void RCServo2_Init(void)
+void servo_Init(void)
 {
   unsigned char i;
 
@@ -226,7 +239,7 @@ void RCServo2_Init(void)
 // (which is considered an error.)
 // Remember, channels are from 1 through 8 (Normally - can be increased with 
 // SC,8 command). Channel 0 is the 'error' channel.
-UINT8 RCServo2_get_channel_from_RPn(UINT8 RPn)
+UINT8 servo_get_channel_from_RPn(UINT8 RPn)
 {
   UINT8 i;
 
@@ -264,7 +277,7 @@ UINT8 RCServo2_get_channel_from_RPn(UINT8 RPn)
 //    <delay> is the number of milliseconds to delay the start of the next command
 //      (optional, defaults to 0 = instant)
 
-void RCServo2_S2_command (void)
+void servo_S2_command (void)
 {
   UINT16 Duration = 0;
   UINT8 Pin = 0;
@@ -289,7 +302,7 @@ void RCServo2_S2_command (void)
     return;
   }
 
-  RCServo2_Move(Duration, Pin, Rate, Delay);
+  servo_Move(Duration, Pin, Rate, Delay);
 
   print_ack();
 }
@@ -312,7 +325,7 @@ void RCServo2_S2_command (void)
 // Another thing we do here is to make sure that the proper pin is an output,
 // And, if this is the first time we're starting up the channel, make sure that
 // it starts out low.
-UINT8 RCServo2_Move(
+UINT8 servo_Move(
   UINT16 Position,
   UINT8  RPn,
   UINT16 Rate,
@@ -325,7 +338,7 @@ UINT8 RCServo2_Move(
   // Get the channel that's already assigned to the RPn, or assign a new one
   // if possible. If this returns zero, then do nothing as we're out of
   // channels.
-  Channel = RCServo2_get_channel_from_RPn(RPn);
+  Channel = servo_get_channel_from_RPn(RPn);
 
   // Error out if there were no available channels left
   if (Channel == 0)
@@ -380,7 +393,7 @@ UINT8 RCServo2_Move(
       FIFO_ServoPosition[FIFOIn] = Position;
       FIFO_ServoRate[FIFOIn] = Rate;
 
-      FIFOInc();
+      fifo_Inc();
     }
   }
   return Channel;

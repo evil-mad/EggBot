@@ -254,7 +254,8 @@
 #include "ebb.h"
 #include "delays.h"
 #include "ebb_demo.h"
-#include "RCServo2.h"
+#include "servo.h"
+#include "fifo.h"
 
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
@@ -275,47 +276,6 @@ static void process_SM(
   INT32 A2Stp
 );
 
-typedef enum
-{
-  PIC_CONTROLS_DRIVERS = 0,
-  PIC_CONTROLS_EXTERNAL,
-  EXTERNAL_CONTROLS_DRIVERS
-} DriverConfigurationType;
-
-// Working registers
-
-//#pragma udata access fast_vars
-static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
-// How many elements of the FIFO will we be using by default?
-volatile UINT8 FIFOSize = 3;
-// The next element of the FIFO to put a command into
-volatile UINT8 FIFOIn = 0;
-// The FIFO command we are currently executing
-volatile UINT8 FIFOOut = 0;
-// The number of commands in the FIFO that are not done being executed yet
-volatile UINT8 FIFODepth = 0;
-
-
-#pragma udata FIFO=0x800
-/// MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
-// What used to be an array of structures is now separate arrays. Why? To
-// get around the 256 byte (1 bank)/variable limitation of C18/PIC18
-INT32           FIFO_StepAdd[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
-UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
-#pragma udata FIFO2=0x900
-UINT32          FIFO_StepsCounter[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
-UINT8           FIFO_DirBits[COMMAND_FIFO_LENGTH];
-UINT8           FIFO_ServoChannel[COMMAND_FIFO_LENGTH];
-#pragma udata FIFO3=0xA00
-UINT32          FIFO_DelayCounter[COMMAND_FIFO_LENGTH];   // NOT Milliseconds! In 25KHz units
-UINT16          FIFO_ServoPosition[COMMAND_FIFO_LENGTH];
-#pragma udata FIFO4=0xB00
-UINT16          FIFO_ServoRate[COMMAND_FIFO_LENGTH];
-INT32           FIFO_StepAddInc[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
-#pragma udata FIFO5=0xC00
-CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
-UINT8           FIFO_ServoRPn[COMMAND_FIFO_LENGTH];
-UINT8           FIFO_SEState[COMMAND_FIFO_LENGTH];
 
 #pragma udata
 
@@ -324,16 +284,14 @@ UINT8           FIFO_SEState[COMMAND_FIFO_LENGTH];
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
-static unsigned char OutByte;
-static unsigned char TookStep;
-static unsigned char AllDone;
 static unsigned char i;
 
 unsigned int DemoModeActive;
 unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
-static DriverConfigurationType DriverConfiguration;
+
+DriverConfigurationType DriverConfiguration;
 
 // track the latest state of the pen
 static PenStateType PenState;
@@ -355,508 +313,6 @@ BOOL gLimitChecks = TRUE;
 UINT8 process_QM(void);
 void clear_StepCounters(void);
 
-
-// ISR
-#pragma interrupt high_ISR
-void high_ISR(void)
-{
-  //Check which interrupt flag caused the interrupt.
-  //Service the interrupt
-  //Clear the interrupt flag
-  //Etc.
-  #if defined(USB_INTERRUPT)
-    USBDeviceTasks();
-  #endif
-
-  // 25KHz ISR fire
-  if (PIR1bits.TMR1IF)
-  {
-    // Clear the interrupt 
-    PIR1bits.TMR1IF = 0;
-    TMR1H = TIMER1_H_RELOAD;  //
-    TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
-
-    OutByte = FIFO_DirBits[FIFOOut];
-    TookStep = FALSE;
-    AllDone = TRUE;
-PORTDbits.RD0 = 1;
-    
-    if (FIFODepth)
-    {
-PORTDbits.RD1 = 1;
-
-      // Note, you don't even need a command to delay. Any command can have
-      // a delay associated with it, if DelayCounter is != 0.
-      if (FIFO_DelayCounter[FIFOOut])
-      {
-        // Double check that things aren't way too big
-        if (FIFO_DelayCounter[FIFOOut] > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-        {
-          FIFO_DelayCounter[FIFOOut] = 0;
-        }
-        else {
-          FIFO_DelayCounter[FIFOOut]--;
-        }
-      }
-
-      if (FIFO_DelayCounter[FIFOOut])
-      {
-          AllDone = FALSE;
-      }
-
-      // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
-      //PORTDbits.RD1 = 0;
-
-      // Note: by not making this an else-if, we have our DelayCounter
-      // counting done at the same time as our motor move or servo move.
-      // This allows the delay time to start counting at the beginning of the
-      // command execution.
-      if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
-      {
-        // Only output DIR bits if we are actually doing something
-        if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut])
-        {
-          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-          {
-            if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-            {
-              Dir1IO = 1;
-            }
-            else
-            {
-              Dir1IO = 0;
-            }
-            if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-            {
-              Dir2IO = 1;
-            }
-            else
-            {
-              Dir2IO = 0;
-            }
-          }
-          else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-          {
-            if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-            {
-              Dir1AltIO = 1;
-            }
-            else
-            {
-              Dir1AltIO = 0;
-            }
-            if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-            {
-              Dir2AltIO = 1;
-            }
-            else
-            {
-              Dir2AltIO = 0;
-            }
-          }
-
-          // Only do this if there are steps left to take
-          if (FIFO_StepsCounter[0][FIFOOut])
-          {
-            StepAcc[0] = StepAcc[0] + FIFO_StepAdd[0][FIFOOut];
-            if (StepAcc[0] & 0x80000000)
-            {
-              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
-              OutByte = OutByte | STEP1_BIT;
-              TookStep = TRUE;
-              FIFO_StepsCounter[0][FIFOOut]--;
-              if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-              {
-                globalStepCounter1--;
-              }
-              else
-              {
-                globalStepCounter1++;
-              }
-            }
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd[0][FIFOOut] += FIFO_StepAddInc[0][FIFOOut];
-            AllDone = FALSE;
-          }
-          if (FIFO_StepsCounter[1][FIFOOut])
-          {
-            StepAcc[1] = StepAcc[1] + FIFO_StepAdd[1][FIFOOut];
-            if (StepAcc[1] & 0x80000000)
-            {
-              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
-              OutByte = OutByte | STEP2_BIT;
-              TookStep = TRUE;
-              FIFO_StepsCounter[1][FIFOOut]--;
-              if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-              {
-                globalStepCounter2--;
-              }
-              else
-              {
-                globalStepCounter2++;
-              }
-            }
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd[1][FIFOOut] += FIFO_StepAddInc[1][FIFOOut];
-            AllDone = FALSE;
-          }
-
-          if (TookStep)
-          {
-            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-            {
-              if (OutByte & STEP1_BIT)
-              {
-                Step1IO = 1;
-              }
-              if (OutByte & STEP2_BIT)
-              {
-                Step2IO = 1;
-              }
-            }
-            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-            {
-              if (OutByte & STEP1_BIT)
-              {
-                Step1AltIO = 1;
-              }
-              if (OutByte & STEP2_BIT)
-              {
-                Step2AltIO = 1;
-              }
-            }
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-            {
-              Step1IO = 0;
-              Step2IO = 0;
-            }
-            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-            {
-              Step1AltIO = 0;
-              Step2AltIO = 0;
-            }
-          }
-        }
-      }
-      // Check to see if we should change the state of the pen
-      else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
-      {
-        if (gUseRCPenServo)
-        {
-          // Precompute the channel, since we use it all over the place
-          UINT8 Channel = FIFO_ServoChannel[FIFOOut] - 1;
-
-          // This code below is the meat of the RCServo2_Move() function
-          // We have to manually write it in here rather than calling
-          // the function because a real function inside the ISR
-          // causes the compiler to generate enormous amounts of setup/teardown
-          // code and things run way too slowly.
-
-          // If the user is trying to turn off this channel's RC servo output
-          if (0 == FIFO_ServoPosition[FIFOOut])
-          {
-            // Turn off the PPS routing to the pin
-            *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
-            // Clear everything else out for this channel
-            gRC2Rate[Channel] = 0;
-            gRC2Target[Channel] = 0;
-            gRC2RPn[Channel] = 0;
-            gRC2Value[Channel] = 0;
-          }
-          else
-          {
-            // Otherwise, set all of the values that start this RC servo moving
-            gRC2Rate[Channel] = FIFO_ServoRate[FIFOOut];
-            gRC2Target[Channel] = FIFO_ServoPosition[FIFOOut];
-            gRC2RPn[Channel] = FIFO_ServoRPn[FIFOOut];
-            if (gRC2Value[Channel] == 0)
-            {
-              gRC2Value[Channel] = FIFO_ServoPosition[FIFOOut];
-            }
-          }
-        }
-
-        // If this servo is the pen servo (on g_servo2_RPn)
-        if (FIFO_ServoRPn[FIFOOut] == g_servo2_RPn)
-        {
-          // Then set its new state based on the new position
-          if (FIFO_ServoPosition[FIFOOut] == g_servo2_min)
-          {
-            PenState = PEN_UP;
-            SolenoidState = SOLENOID_OFF;
-            if (gUseSolenoid)
-            {
-              PenUpDownIO = 0;
-            }
-          }
-          else
-          {
-            PenState = PEN_DOWN;
-            SolenoidState = SOLENOID_ON;
-            if (gUseSolenoid)
-            {
-              PenUpDownIO = 1;
-            }
-          }
-        }
-      }
-      // Check to see if we should start or stop the engraver
-      else if (FIFO_Command[FIFOOut] == COMMAND_SE)
-      {
-        // Now act on the State of the SE command
-        if (FIFO_SEState[FIFOOut])
-        {
-          // Set RB3 to StoredEngraverPower
-          CCPR1L = FIFO_SEPower[FIFOOut] >> 2;
-          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-        }
-        else
-        {
-          // Set RB3 to low by setting PWM duty cycle to zero
-          CCPR1L = 0;
-          CCP1CON = (CCP1CON & 0b11001111);
-        }
-        AllDone = TRUE;
-      }
-
-      // If we're done with our current command, load in the next one, if there's more
-      if (AllDone && FIFO_DelayCounter[FIFOOut] == 0)
-      {
-        // "Erase" the current command from the FIFO
-        FIFO_Command[FIFOOut] = COMMAND_NONE;
-
-        // There should be at least one command in FIFODepth right now (the one we just finished)
-        // Remove it
-        FIFOOut++;
-        if (FIFOOut >= COMMAND_FIFO_LENGTH)
-        {
-          FIFOOut = 0;
-        }
-        FIFODepth--;
-      }
-    }
-    
-    // Check for button being pushed
-    if (
-      (!swProgram)
-      ||
-      (
-        UseAltPause
-        &&
-        !PORTBbits.RB0
-      )
-    )
-    {
-      ButtonPushed = TRUE;
-    }
-  }
-PORTDbits.RD0 = 0;
-PORTDbits.RD1 = 0;
-}
-
-// Init code
-void EBB_Init(void)
-{
-  char i;
-
-  // Initialize all FIFO values
-  for(i=0; i < COMMAND_FIFO_LENGTH; i++)
-  {
-    FIFO_Command[i] = COMMAND_NONE;
-    FIFO_StepAdd[0][i] = 1;
-    FIFO_StepAdd[1][i] = 1;
-    FIFO_StepAddInc[0][i] = 0;
-    FIFO_StepAddInc[1][i] = 0;
-    FIFO_StepsCounter[0][i] = 0;
-    FIFO_StepsCounter[1][i] = 0;
-    FIFO_DirBits[i] = 0;
-    FIFO_DelayCounter[i] = 0;
-    FIFO_ServoPosition[i] = 0;
-    FIFO_ServoRPn[i] = 0;
-    FIFO_ServoChannel[i] = 0;
-    FIFO_ServoRate[i] = 0;
-    FIFO_SEState[i] = 0;
-    FIFO_SEPower[i] = 0;
-  }
-  
-  FIFOSize = 1;
-  FIFOIn = 0;
-  FIFOOut = 0;
-  FIFODepth = 0;
-  
-  // Set up TMR1 for our 25KHz High ISR for stepping
-  T1CONbits.RD16 = 1;       // Set 16 bit mode
-  T1CONbits.TMR1CS1 = 0;    // System clocked from Fosc/4
-  T1CONbits.TMR1CS0 = 0;
-  T1CONbits.T1CKPS1 = 0;    // Use 1:1 Prescale value
-  T1CONbits.T1CKPS0 = 0;
-  T1CONbits.T1OSCEN = 0;    // Don't use external osc
-  T1CONbits.T1SYNC = 0;
-  TMR1H = TIMER1_H_RELOAD;  //
-  TMR1L = TIMER1_L_RELOAD;  // Reload for 25Khz ISR fire
-
-  T1CONbits.TMR1ON = 1;     // Turn the timer on
-
-  IPR1bits.TMR1IP = 1;      // Use high priority interrupt
-  PIR1bits.TMR1IF = 0;      // Clear the interrupt
-  PIE1bits.TMR1IE = 1;      // Turn on the interrupt
-
-//  PORTA = 0;
-  RefRA0_IO_TRIS = INPUT_PIN;
-//  PORTB = 0;
-//  INTCON2bits.RBPU = 0;   // Turn on weak-pull ups for port B
-//  PORTC = 0;              // Start out low
-//  TRISC = 0x80;           // Make portC output except for PortC bit 7, USB bus sense
-//  PORTD = 0;
-//  TRISD = 0;
-//  PORTE = 0;
-//  TRISE = 0;
-
-  // And make sure to always use low priority for ADC
-  IPR1bits.ADIP = 0;
-
-  // Turn on AN0 (RA0) as analog input
-  AnalogConfigure(0,1);
-  // Turn on AN11 (V+) as analog input
-  AnalogConfigure(11,1);
-
-  MS1_IO = 1;
-  MS1_IO_TRIS = OUTPUT_PIN;
-  MS2_IO = 1;
-  MS2_IO_TRIS = OUTPUT_PIN;
-  MS3_IO  = 1;
-  MS3_IO_TRIS = OUTPUT_PIN;
-
-  Enable1IO = 1;
-  Enable1IO_TRIS = OUTPUT_PIN;
-  Enable2IO = 1;
-  Enable2IO_TRIS = OUTPUT_PIN;
-
-  Step1IO = 0;
-  Step1IO_TRIS = OUTPUT_PIN;
-  Dir1IO = 0;
-  Dir1IO_TRIS = OUTPUT_PIN;
-  Step2IO = 0;
-  Step2IO_TRIS = OUTPUT_PIN;
-  Dir2IO = 0;
-  Dir2IO_TRIS = OUTPUT_PIN;
-
-  // For bug in VUSB divider resistor, set RC7 as output and set high
-  // Wait a little while to charge up
-  // Then set back as an input
-  // The idea here is to get the schmidt trigger input RC7 high before
-  // we make it an input, thus getting it above the 2.65V ST threshold
-  // And allowing VUSB to keep the logic level on the pin high at 2.5V
-  #if defined(USE_USB_BUS_SENSE_IO)
-    tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
-    USB_BUS_SENSE = 1;
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    Delay1TCY();
-    tris_usb_bus_sense = INPUT_PIN;
-    USB_BUS_SENSE = 0;
-  #endif
-  gUseSolenoid = TRUE;
-  gUseRCPenServo = TRUE;
-
-  // Set up pen up/down direction as output
-  PenUpDownIO = 0;
-  PenUpDownIO_TRIS = OUTPUT_PIN;
-    
-  // Set up RC Servo power control to be off
-  RCServoPowerIO = RCSERVO_POWER_OFF;
-  RCServoPowerIO_TRIS = OUTPUT_PIN;
-
-  SolenoidState = SOLENOID_ON;
-  DriverConfiguration = PIC_CONTROLS_DRIVERS;
-  PenState = PEN_UP;
-  Layer = 0;
-  NodeCount = 0;
-  ButtonPushed = FALSE;
-  // Default RB0 to be an input, with the pull-up enabled, for use as alternate
-  // PAUSE button (just like PRG)
-  // Except for v1.1 hardware, use RB2
-  TRISBbits.TRISB0 = 1;
-  INTCON2bits.RBPU = 0; // Turn on all of PortB pull-ups
-  UseAltPause = TRUE;
-
-  TRISBbits.TRISB3 = 0;   // Make RB3 an output (for engraver)
-  PORTBbits.RB3 = 0;          // And make sure it starts out off
-    
-  // Clear out global stepper positions
-  parse_CS_packet();
-  
-// FOR DEBUG, MAKE THINGS OUTPUTS
-TRISDbits.TRISD0 = 0;
-TRISDbits.TRISD1 = 0;
-}
-
-// Wait until FIFODepth has gone below FIFOSize
-void WaitForRoomInFIFO(void)
-{
-  while(FIFODepth >= FIFOSize)
-    ;
-}
-
-// Wait until FIFODepth has gone to zero
-void WaitForEmptyFIFO(void)
-{
-  while(FIFODepth)
-    ;
-}
-
-void FIFOInc(void)
-{
-  FIFOIn++;
-  if (FIFOIn >= COMMAND_FIFO_LENGTH)
-  {
-    FIFOIn = 0;
-  }
-  FIFODepth++;
-}
 
 // Stepper (mode) Configure command
 // SC,1,0<CR> will use just solenoid output for pen up/down
@@ -906,7 +362,7 @@ void parse_SC_packet (void)
       gUseSolenoid = TRUE;
       gUseRCPenServo = FALSE;
       // Turn off RC signal on Pen Servo output
-      RCServo2_Move(0, g_servo2_RPn, 0, 0);
+      servo_Move(0, g_servo2_RPn, 0, 0);
     }
     // Use just RC servo
     else if (Para2 == 1)
@@ -1267,7 +723,7 @@ void parse_AM_packet (void)
 
   FIFO_Command[FIFOIn] = COMMAND_MOTOR_MOVE;
   
-  FIFOInc();
+  fifo_Inc();
     
   print_ack();
 }
@@ -1355,7 +811,7 @@ void parse_LM_packet (void)
       );
    */
 
-  FIFOInc();
+  fifo_Inc();
 
   if (g_ack_enable)
   {
@@ -1935,7 +1391,7 @@ static void process_SM(
   FIFO_SEState[FIFOIn] = move.SEState;
   FIFO_SEPower[FIFOIn] = move.SEPower;
   
-  FIFOInc();
+  fifo_Inc();
 
 }
 
@@ -2125,7 +1581,7 @@ void parse_SP_packet(void)
   {
     // if we are changing which pin the pen servo is on, we need to cancel
     // the servo output on the old channel first
-    RCServo2_Move(0, g_servo2_RPn, 0, 0);
+    servo_Move(0, g_servo2_RPn, 0, 0);
     // Now record the new RPn
     g_servo2_RPn = Pin + 3;
   }
@@ -2143,7 +1599,7 @@ void parse_SP_packet(void)
 //      next command in the motion control FIFO
 //
 // This function uses the g_servo2_min, max, rate_up, rate_down variables
-// to schedule an RC Servo change with the RCServo2_Move() function.
+// to schedule an RC Servo change with the servo_Move() function.
 //
 void process_SP(PenStateType NewState, UINT16 CommandDuration)
 {
@@ -2164,8 +1620,8 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
-  // Now schedule the movement with the RCServo2 function
-  RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
+  // Now schedule the movement with the servo function
+  servo_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }
 
 // Enable Motor
@@ -2626,7 +2082,7 @@ void parse_SE_packet(void)
     FIFO_SEState[FIFOIn] = State;
     FIFO_Command[FIFOIn] = COMMAND_SE;
 
-    FIFOInc();
+    fifo_Inc();
   }
     
   print_ack();

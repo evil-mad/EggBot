@@ -84,6 +84,8 @@
 
 #include "usb_config.h"
 #include "UBW.h"
+#include "init.h"
+#include "usbser.h"
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata
@@ -229,57 +231,47 @@ static void InitializeSystem(void)
   //On the PIC18F46J50 Family of USB microcontrollers, the PLL will not power up and be enabled
   //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
   //This allows the device to power up at a lower initial operating frequency, which can be
-  //advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
+  //advantageous when powered from a source which is not guaranteed to be adequate for 48MHz
   //operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
   //power up the PLL.
-  #if defined(__18F24J50)||defined(__18F25J50)|| \
-      defined(__18F26J50)||defined(__18F44J50)|| \
-      defined(__18F45J50)||defined(__18F46J50) 
 
-    OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-    pll_startup_counter = 600;
-    while(pll_startup_counter--);
-    //Device switches over automatically to PLL output after PLL is locked and ready.
-  #else
-    #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
-    //Also make sure the correct board is selected in usbcfg.h.  If 
-    //everything is correct, comment out the above "#error ..." line
-    //to suppress the error message.
-  #endif
+  OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+  pll_startup_counter = 600;
+  while(pll_startup_counter--);
 
-//  The USB specifications require that USB peripheral devices must never source
-//  current onto the Vbus pin.  Additionally, USB peripherals should not source
-//  current on D+ or D- when the host/hub is not actively powering the Vbus line.
-//  When designing a self powered (as opposed to bus powered) USB peripheral
-//  device, the firmware should make sure not to turn on the USB module and D+
-//  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
-//  firmware needs some means to detect when Vbus is being powered by the host.
-//  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
-//  can be used to detect when Vbus is high (host actively powering), or low
-//  (host is shut down or otherwise not supplying power).  The USB firmware
-//  can then periodically poll this I/O pin to know when it is okay to turn on
-//  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
-//  peripheral device, it is not possible to source current on D+ or D- when the
-//  host is not actively providing power on Vbus. Therefore, implementing this
-//  bus sense feature is optional.  This firmware can be made to use this bus
-//  sense feature by making sure "USE_USB_BUS_SENSE_IO" has been defined in the
-//  HardwareProfile.h file.    
+  //  The USB specifications require that USB peripheral devices must never source
+  //  current onto the Vbus pin.  Additionally, USB peripherals should not source
+  //  current on D+ or D- when the host/hub is not actively powering the Vbus line.
+  //  When designing a self powered (as opposed to bus powered) USB peripheral
+  //  device, the firmware should make sure not to turn on the USB module and D+
+  //  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
+  //  firmware needs some means to detect when Vbus is being powered by the host.
+  //  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
+  //  can be used to detect when Vbus is high (host actively powering), or low
+  //  (host is shut down or otherwise not supplying power).  The USB firmware
+  //  can then periodically poll this I/O pin to know when it is okay to turn on
+  //  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
+  //  peripheral device, it is not possible to source current on D+ or D- when the
+  //  host is not actively providing power on Vbus. Therefore, implementing this
+  //  bus sense feature is optional.  This firmware can be made to use this bus
+  //  sense feature by making sure "USE_USB_BUS_SENSE_IO" has been defined in the
+  //  HardwareProfile.h file.    
   #if defined(USE_USB_BUS_SENSE_IO)
     tris_usb_bus_sense = INPUT_PIN; // See HardwareProfile.h
   #endif
     
-//  If the host PC sends a GetStatus (device) request, the firmware must respond
-//  and let the host know if the USB peripheral device is currently bus powered
-//  or self powered.  See chapter 9 in the official USB specifications for details
-//  regarding this request.  If the peripheral device is capable of being both
-//  self and bus powered, it should not return a hard coded value for this request.
-//  Instead, firmware should check if it is currently self or bus powered, and
-//  respond accordingly.  If the hardware has been configured like demonstrated
-//  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
-//  currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
-//  is used for this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
-//  has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
-//  to it in HardwareProfile.h.
+  //  If the host PC sends a GetStatus (device) request, the firmware must respond
+  //  and let the host know if the USB peripheral device is currently bus powered
+  //  or self powered.  See chapter 9 in the official USB specifications for details
+  //  regarding this request.  If the peripheral device is capable of being both
+  //  self and bus powered, it should not return a hard coded value for this request.
+  //  Instead, firmware should check if it is currently self or bus powered, and
+  //  respond accordingly.  If the hardware has been configured like demonstrated
+  //  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
+  //  currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
+  //  is used for this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
+  //  has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
+  //  to it in HardwareProfile.h.
   #if defined(USE_SELF_POWER_SENSE_IO)
     tris_self_power = INPUT_PIN;  // See HardwareProfile.h
   #endif
@@ -340,11 +332,6 @@ void USBCBSuspend(void)
   //IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
   //cleared inside the usb_device.c file.  Clearing USBActivityIF here will cause 
   //things to not work as intended.
-
-
-  #if defined(__C30__)
-    USBSleepOnSuspend();
-  #endif
 }
 
 

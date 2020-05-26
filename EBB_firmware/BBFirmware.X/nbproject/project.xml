@@ -15,7 +15,7 @@
                 <make-dep-project>../BBBootloader.X</make-dep-project>
             </make-dep-projects>
             <sourceRootList>
-                <sourceRootElem>source</sourceRootElem>
+                <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -41,6 +41,7 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>breifly</word>
+            <word>microcontrollers</word>
             <word>paramters</word>
         </spellchecker-wordlist>
     </configuration>
