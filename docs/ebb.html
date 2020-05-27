@@ -1072,18 +1072,14 @@ td {text-align: center}
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>PC,1,2,1,2,1,2,1,2\r</code> After sending a <code>S2,0,4</code> (to turn off RC servo output on pin RB1) and <code>PG,1</code> (to turn on pulse generation), these parameters would cause all four pins (RB0, RB1, RB2, and RB3) to output square waves with a 50% duty cycle and 500 Hz frequency.
+          </li>
+          <li>
             <span style="font-weight: bold;">Version History:</span>
             <p>
               Version 2.6.6 and later : The bug preventing some <code>PC</code> changes from acting immediately is fixed and <code>PC/PG</code> work properly.
             </p>
             <p>
               Version 2.6.5 and before : There is a bug in the <code>PC/PG</code> functions which prevent some <code>PC</code> updates from taking effect immediately but instead requiring 64K milliseconds to elapse before the change takes effect.
-            </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Note:</span>
-            <p>
-              Due to a bug in all versions up to and including v2.6.5, it may take up to 64K milliseconds for new Length and Period values to take effect. Turning the pulses off and on again with <code>PG,0</code> then <code>PG,1</code> will not help.
             </p>
           </li>
         </ul>
