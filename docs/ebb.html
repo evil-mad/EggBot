@@ -1064,6 +1064,15 @@ td {text-align: center}
               This command is only available for pins RB0, RB1, RB2 and RB3. If you wish to leave a pin alone (i.e. not create pulses on it) just set its Length and Period values to zero.
             </p>
           </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>
+            <p>
+              Version 2.6.6 and later : The bug preventing some <code>PC</code> changes from acting immediately is fixed and <code>PC/PG</code> work properly.
+            </p>
+            <p>
+              Version 2.6.5 and before : There is a bug in the <code>PC/PG</code> functions which prevent some <code>PC</code> updates from taking effect immediately but instead requiring 64K milliseconds to elapse before the change takes effect.
+            </p>
+          </li>
         </ul>
 
         <hr class="short"/>

@@ -238,6 +238,8 @@
 //                    input parameters)
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
+// 2.6.6 05/26/20 - Fixed a bug with the PC/PG command which caused some changes
+//                    not to take effect for up to 64K more milliseconds.
 
 #include <p18cxxx.h>
 #include <usart.h>
