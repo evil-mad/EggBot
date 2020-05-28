@@ -1,5 +1,15 @@
 
 #include <GenericTypeDefs.h>
+#include "parse.h"
+#include "HardwareProfile.h"
+#include "ebb.h"
+#include "utility.h"
+#include "isr.h"
+#include "fifo.h"
+#include "Compiler.h"
+#include "servo.h"
+#include "math.h"
+
 
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
@@ -13,8 +23,8 @@ static void process_SM(
 );
 
 /* These values hold the global step position of each axis */
-volatile static INT32 globalStepCounter1;
-volatile static INT32 globalStepCounter2;
+volatile INT32 globalStepCounter1;
+volatile INT32 globalStepCounter2;
 
 
 

@@ -110,13 +110,10 @@
 #include "servo.h"
 #include "HardwareProfile.h"
 #include "fifo.h"
+#include "parse.h"
+#include "utility.h"
+#include "isr.h"
 
-
-// RC servo variables
-// First the main array of data for each servo
-unsigned char g_RC_primed_ptr;
-unsigned char g_RC_next_ptr;
-unsigned char g_RC_timing_ptr;
 
 // Counts from 0 to gRC2SlotMS
 UINT8  gRC2msCounter;
@@ -136,6 +133,11 @@ UINT8  gRC2Slots;
 UINT8  gRC2SlotMS;
 // Pointer into PPS output registers
 far ram UINT8 * gRC2RPORPtr;
+
+// Set TRUE to enable RC Servo output for pen up/down
+BOOL gUseRCPenServo;
+PenStateType PenState;
+
 
 // These are the min, max, up rate, down rate, and RPn for the Pen Servo
 // They can be changed by using SC,x commands.
@@ -294,7 +296,7 @@ void parse_SP_packet(void)
   UINT8 State = 0;
   UINT16 CommandDuration = 0;
   UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
-    ExtractReturnType Ret;
+  ExtractReturnType Ret;
 
   // Extract each of the values.
   extract_number (kUCHAR, &State, kREQUIRED);
@@ -398,7 +400,7 @@ void servo_S2_command (void)
 
   if (Pin > 24)
   {
-    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
@@ -485,6 +487,7 @@ UINT8 servo_Move(
       // command in
       WaitForRoomInFIFO();
 
+      /// TODO: Move this to FIFO function?
       // Now copy the values over into the FIFO element
       FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
       FIFO_DelayCounter[FIFOIn] = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;

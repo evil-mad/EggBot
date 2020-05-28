@@ -104,6 +104,9 @@ Description:
 #define USBDEVICE_H
 //DOM-IGNORE-END
 
+#include <GenericTypeDefs.h>
+#include <usb_common.h>
+
 /** DEFINITIONS ****************************************************/
 
 //USB_HANDLE is a pointer to an entry in the BDT.  This pointer can be used

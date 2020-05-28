@@ -8,6 +8,12 @@
 #ifndef STEPPER_H
 #define	STEPPER_H
 
+
+/* These values hold the global step position of each axis */
+extern volatile INT32 globalStepCounter1;
+extern volatile INT32 globalStepCounter2;
+
+
 void parse_SM_packet(void);
 void parse_AM_packet(void);
 void parse_LM_packet(void);

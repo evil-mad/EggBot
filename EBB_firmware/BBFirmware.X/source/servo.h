@@ -53,11 +53,20 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 
+typedef enum
+{
+  PEN_DOWN = 0,
+  PEN_UP
+} PenStateType;
+
 #define MAX_RC2_SERVOS    24      // This is 24 because there are 24 RPn pins
 #define INITAL_RC2_SLOTS  8       // Inital number of RC2 slots (determines repeat rate of pulses)
 #define DEFAULT_EBB_SERVO_PORTB_PIN   1 // Note, this indicates a PortB pin number, not RPn number
 #define DEFAULT_EBB_SERVO_RPN (DEFAULT_EBB_SERVO_PORTB_PIN + 3) // RPn number for default pen up/down servo
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
+
+// Set TRUE to enable RC Servo output for pen up/down
+extern BOOL gUseRCPenServo;
 
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
@@ -76,6 +85,9 @@ extern UINT8 gRC2SlotMS;
 extern UINT16 g_servo2_rate_up;
 extern UINT16 g_servo2_rate_down;
 extern UINT8 g_servo2_RPn;
+
+// track the latest state of the pen
+extern PenStateType PenState;
 
 void servo_Init(void);
 void parse_SP_packet(void);

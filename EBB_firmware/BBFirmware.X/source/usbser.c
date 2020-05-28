@@ -1,5 +1,11 @@
 
 #include <GenericTypeDefs.h>
+#include "usbser.h"
+#include "utility.h"
+#include "usb_config.h"
+#include "Usb\usb.h"
+#include "Usb\usb_function_cdc.h"
+#include "parse.h"
 
 // ROM strings
 const rom char st_OK[] = {"OK\r\n"};
@@ -8,21 +14,15 @@ const rom char st_LFCR[] = {"\r\n"};
 
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
-unsigned char g_TX_buf[kTX_BUF_SIZE];
+static unsigned char g_TX_buf[kTX_BUF_SIZE];
 
-unsigned char g_RX_command_buf[kRX_COMMAND_BUF_SIZE];
+static unsigned char g_RX_command_buf[kRX_COMMAND_BUF_SIZE];
 
 #pragma udata com_rx_buf = 0x300
 // USB Receiving buffer for commands as they come from PC
 unsigned char g_RX_buf[kRX_BUF_SIZE];
 
 #pragma udata
-
-// USART Receiving buffer for data coming from the USART
-unsigned char g_USART_RX_buf[kUSART_RX_BUF_SIZE];
-
-// USART Transmit buffer for data going to the USART
-unsigned char g_USART_TX_buf[kUSART_TX_BUF_SIZE];
 
 // Pointers to USB transmit (back to PC) buffer
 unsigned char g_TX_buf_in;
@@ -32,16 +32,33 @@ unsigned char g_TX_buf_out;
 unsigned char g_RX_buf_in;
 unsigned char g_RX_buf_out;
 
-// In and out pointers to our USART input buffer
-unsigned char g_USART_RX_buf_in;
-unsigned char g_USART_RX_buf_out;
 
-// In and out pointers to our USART output buffer
-unsigned char g_USART_TX_buf_in;
-unsigned char g_USART_TX_buf_out;
+void usbser_Init(void)
+{
+  UINT8 i;
+  
+  // Initialize USB TX and RX buffer management
+  g_RX_buf_in = 0;
+  g_RX_buf_out = 0;
+  g_TX_buf_in = 0;
+  g_TX_buf_out = 0;
 
-
-
+  for (i=0; i < kTX_BUF_SIZE; i++)
+  {
+    g_TX_buf[i] = 0;
+  }
+  for (i=0; i < kRX_COMMAND_BUF_SIZE; i++)
+  {
+    g_RX_command_buf[i] = 0;
+  }
+  for (i=0; i < kRX_BUF_SIZE; i++)
+  {
+    g_RX_buf[i] = 0;
+  }
+  
+  
+  
+}
 
 /******************************************************************************
  * Function:        void ProcessIO(void)

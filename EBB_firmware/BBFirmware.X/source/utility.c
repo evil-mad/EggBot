@@ -1,5 +1,16 @@
 
 #include <GenericTypeDefs.h>
+#include "usb_config.h"
+#include "Usb\usb.h"
+#include "Usb\usb_function_cdc.h"
+#include "HardwareProfile.h"
+#include "utility.h"
+#include <flash.h>
+#include "parse.h"
+
+
+#define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
+#define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 /// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)
@@ -8,6 +19,8 @@
   const rom char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
 #endif
 
+  
+  
 
 /******************************************************************************
  * Function:        void BlinkUSBStatus(void)
@@ -299,6 +312,65 @@ void populateDeviceStringWithName(void)
   // we copied over from Flash
   *(USB_SD_Ptr[2]) = 24 + (i * 2);
   *(USB_SD_Ptr[3]) = 2 + (i * 2);
+}
+
+// ST command : Set Tag
+// "ST,<new name><CR>"
+// <new name> is a 0 to 16 character ASCII string.
+// This string gets saved in FLASH, and is returned by the "QT" command, as
+// well as being appended to the USB name that shows up in the OS
+void parse_ST_packet()
+{
+  unsigned char name[FLASH_NAME_LENGTH+1];
+  UINT8 bytes = 0;
+  UINT8 i;
+
+  // Clear out our name array
+  for (i=0; i < FLASH_NAME_LENGTH+1; i++)
+  {
+    name[i] = 0x00;
+  }
+
+  bytes = extract_string(name, FLASH_NAME_LENGTH);
+
+  // We have reserved FLASH addresses 0xF800 to 0xFBFF (1024 bytes) for
+  // storing persistent variables like the EEB's name. Note that no wear-leveling
+  // is done, so it's not a good idea to change these values more than 10K times. :-)
+
+  EraseFlash(FLASH_NAME_ADDRESS, FLASH_NAME_ADDRESS + 0x3FF);
+
+  WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+
+  print_ack();
+}
+
+// QT command : Query Tag
+// "QT<CR>"
+// Prints out the 'tag' that was set with the "ST" command previously, if any
+void parse_QT_packet()
+{
+  unsigned char name[FLASH_NAME_LENGTH+1];    
+  UINT8 i;
+
+  // Clear out our name array
+  for (i=0; i < FLASH_NAME_LENGTH+1; i++)
+  {
+    name[i] = 0x00;
+  }
+
+  // We always read 16, knowing that any unused bytes will be set to zero
+  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+
+  // Only print it out if the first character is printable ASCII
+  if (name[0] >= 128 || name[0] < 32)
+  {
+    printf ((rom char far *)"\r\n");
+  }
+  else
+  {
+    printf ((rom char far *)"%s\r\n", name);
+  }
+  print_ack();
 }
 
 
