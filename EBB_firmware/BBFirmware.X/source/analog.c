@@ -1,4 +1,4 @@
-
+#include "parse.h"
 
 // This function turns on or off an analog channel
 // It is called from other pieces of code, not the user

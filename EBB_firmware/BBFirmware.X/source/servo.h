@@ -78,7 +78,10 @@ extern UINT16 g_servo2_rate_down;
 extern UINT8 g_servo2_RPn;
 
 void servo_Init(void);
+void parse_SP_packet(void);
 void servo_S2_command(void);
 UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+void process_SP(PenStateType NewState, UINT16 CommandDuration);
+
 
 #endif

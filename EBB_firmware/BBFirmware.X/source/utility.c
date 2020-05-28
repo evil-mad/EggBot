@@ -1,4 +1,5 @@
 
+#include <GenericTypeDefs.h>
 
 /// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)

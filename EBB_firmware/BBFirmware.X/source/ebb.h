@@ -51,6 +51,9 @@
 #ifndef EBB_H
 #define EBB_H
 
+
+#include <GenericTypeDefs.h>
+
 // These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
 #define DISABLE_MOTOR       1
@@ -79,10 +82,7 @@ extern BOOL gLimitChecks;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
-void parse_SM_packet(void);
-void parse_AM_packet(void);
 void parse_SC_packet(void);
-void parse_SP_packet(void);
 void parse_TP_packet(void);
 void parse_QP_packet(void);
 void parse_SN_packet(void);
@@ -92,17 +92,8 @@ void parse_ND_packet(void);
 void parse_SL_packet(void);
 void parse_QL_packet(void);
 void parse_QB_packet(void);
-void parse_EM_packet(void);
 void parse_QC_packet(void);
 void parse_QG_packet(void);
 void parse_SE_packet(void);
 void parse_RM_packet(void);
-void parse_QM_packet(void);
-void parse_ES_packet(void);
-void parse_XM_packet(void);
-void parse_QS_packet(void);
-void parse_CS_packet(void);
-void parse_LM_packet(void);
-void parse_HM_packet(void);
-void process_SP(PenStateType NewState, UINT16 CommandDuration);
 #endif

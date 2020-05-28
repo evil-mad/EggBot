@@ -1,3 +1,10 @@
+#include <p18cxxx.h>
+#include "parse.h"
+#include "utility.h"
+#include "fifo.h"
+#include "main.h"
+#include <flash.h>
+
 /** D E F I N E S ********************************************************/
 
 
@@ -116,9 +123,6 @@ void parse_CU_packet(void)
   }
   print_ack();
 }
-
-    return;
-  }
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
 // UBW version. The analog config value is eliminated, replaced with the "AC"

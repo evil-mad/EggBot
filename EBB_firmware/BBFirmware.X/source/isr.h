@@ -27,5 +27,8 @@
 #define kPR4_RELOAD             250               // For 1ms TMR4 tick
 
 
+void high_ISR(void);
+void low_ISR(void);
+
 #endif	/* ISR_H */
 

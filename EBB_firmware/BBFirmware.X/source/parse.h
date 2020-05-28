@@ -8,6 +8,8 @@
 #ifndef PARSE_H
 #define	PARSE_H
 
+#include <GenericTypeDefs.h>
+
 #define advance_RX_buf_out()              \
 {                                         \
   g_RX_buf_out++;                         \

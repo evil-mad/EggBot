@@ -9,6 +9,7 @@
 #define	FIFO_H
 
 #include "HardwareProfile.h"
+#include <GenericTypeDefs.h>
 
 // Maximum number of elements in the command FIFO
 #define COMMAND_FIFO_LENGTH     (25)

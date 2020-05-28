@@ -83,9 +83,10 @@
 /** I N C L U D E S **********************************************************/
 
 #include "usb_config.h"
-#include "UBW.h"
 #include "init.h"
 #include "usbser.h"
+#include "utility.h"
+#include "isr.h"
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata

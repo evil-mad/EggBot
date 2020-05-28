@@ -1,4 +1,5 @@
 
+#include <GenericTypeDefs.h>
 
 // ROM strings
 const rom char st_OK[] = {"OK\r\n"};

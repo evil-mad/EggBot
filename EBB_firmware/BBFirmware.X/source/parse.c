@@ -1,4 +1,6 @@
 
+#include <p18cxxx.h>
+#include <GenericTypeDefs.h>
 
 // This byte has each of its bits used as a separate error flag
 unsigned char error_byte;

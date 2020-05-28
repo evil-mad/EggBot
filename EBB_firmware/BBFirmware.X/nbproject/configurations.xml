@@ -26,6 +26,8 @@
       <itemPath>source/utility.h</itemPath>
       <itemPath>source/analog.h</itemPath>
       <itemPath>source/commands.h</itemPath>
+      <itemPath>source/stepper.h</itemPath>
+      <itemPath>source/main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -61,6 +63,7 @@
       <itemPath>source/utility.c</itemPath>
       <itemPath>source/analog.c</itemPath>
       <itemPath>source/commands.c</itemPath>
+      <itemPath>source/stepper.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

@@ -513,7 +513,7 @@ void low_ISR(void)
           gPulseCounters[i]++;
 
           // And check to see if we've reached the end of the rate
-          if (gPulseCounters[i] == gPulseRate[i])
+          if (gPulseCounters[i] >= gPulseRate[i])
           {
             // If so, start over from zero
             gPulseCounters[i] = 0;

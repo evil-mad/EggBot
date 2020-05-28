@@ -107,7 +107,6 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 #include "ebb.h"
-#include "UBW.h"
 #include "servo.h"
 #include "HardwareProfile.h"
 #include "fifo.h"
@@ -265,6 +264,107 @@ UINT8 servo_get_channel_from_RPn(UINT8 RPn)
 
   // We do not have room for another channel, so return an error
   return 0;
+}
+
+
+
+// Set Pen
+// Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
+// <State> is 0 (for goto servo_max) or 1 (for goto servo_min)
+// <Duration> is how long to wait before the next command in the motion control 
+//      FIFO should start. (defaults to 0mS)
+//      Note that the units of this parameter is either 1ms
+// <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
+//      RC Servo output to different PortB pins.
+// This is a command that the user can send from the PC to set the pen state.
+// Note that there is only one pen RC servo output - if you use the <PortB_Pin>
+// parameter, then that new pin becomes the pen RC servo output. This command
+// does not allow for multiple servo signals at the same time from port B pins.
+// Use the S2 command for that.
+//
+// This function will use the values for <serv_min>, <servo_max>,
+// <servo_rate_up> and <servo_rate_down> (SC,4 SC,5, SC,11, SC,10 commands)
+// when it schedules the servo command.
+// 
+// Internally, the parse_SP_packet() function makes a call to
+// process_SP() function to actually make the change in the servo output.
+//
+void parse_SP_packet(void)
+{
+  UINT8 State = 0;
+  UINT16 CommandDuration = 0;
+  UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+    ExtractReturnType Ret;
+
+  // Extract each of the values.
+  extract_number (kUCHAR, &State, kREQUIRED);
+  extract_number (kUINT, &CommandDuration, kOPTIONAL);
+  Ret = extract_number (kUCHAR, &Pin, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+    // Error check
+  if (Pin > 7)
+  {
+    Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+  }
+
+  if (State > 1)
+  {
+      State = 1;
+  }
+
+  // Set the PRn of the Pen Servo output
+  // Add 3 to get from PORTB pin number to RPn number
+  if (g_servo2_RPn != (Pin + 3))
+  {
+    // if we are changing which pin the pen servo is on, we need to cancel
+    // the servo output on the old channel first
+    servo_Move(0, g_servo2_RPn, 0, 0);
+    // Now record the new RPn
+    g_servo2_RPn = Pin + 3;
+  }
+
+  // Execute the servo state change
+  process_SP(State, CommandDuration);
+    
+  print_ack();
+}
+
+// Internal use function -
+// Perform a state change on the pen RC servo output. Move it up or move it down
+// <NewState> is either PEN_UP or PEN_DOWN.
+// <CommandDuration> is the number of milliseconds to wait before executing the
+//      next command in the motion control FIFO
+//
+// This function uses the g_servo2_min, max, rate_up, rate_down variables
+// to schedule an RC Servo change with the servo_Move() function.
+//
+void process_SP(PenStateType NewState, UINT16 CommandDuration)
+{
+  UINT16 Position;
+  UINT16 Rate;
+
+  if (NewState == PEN_UP)
+  {
+    Position = g_servo2_min;
+    Rate = g_servo2_rate_up;
+  }
+  else
+  {
+    Position = g_servo2_max;
+    Rate = g_servo2_rate_down;
+  }
+
+  RCServoPowerIO = RCSERVO_POWER_ON;
+  gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+
+  // Now schedule the movement with the servo function
+  servo_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }
 
 // Servo method 2 enable command
