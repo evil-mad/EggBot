@@ -4,19 +4,23 @@
 #include "isr.h"
 #include "HardwareProfile.h"
 #include "ebb.h"
+#include "fifo.h"
+#include "analog.h"
+#include "delays.h"
+#include "stepper.h"
+#include "servo.h"
+#include "solenoid.h"
+#include "commands.h"
 
 /// TODO: Move these into ISR function body?
 static unsigned char OutByte;
 static unsigned char TookStep;
 static unsigned char AllDone;
 
+static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
+
+
 // Used only in LowISR
-unsigned int D_tick_counter;
-unsigned int A_tick_counter;
-unsigned char A_cur_channel;
-unsigned char AnalogInitiate;
-volatile unsigned int AnalogEnabledChannels;
-volatile unsigned int ChannelBit;
 
 // ISR
 #pragma interrupt high_ISR
@@ -603,40 +607,6 @@ void low_ISR(void)
       ADCON0 = (A_cur_channel << 2) + 1;
       // And start the next conversion
       ADCON0bits.GO_DONE = 1;
-    }
-  }
-
-  // Do we have a TMR0 interrupt? (RC command)
-  // TMR0 is in 16 bit mode, and counts up to FFFF and overflows, generating
-  // this interrupt.
-  if (INTCONbits.TMR0IF)
-  {
-    // Turn off Timer0
-    T0CONbits.TMR0ON = 0;
-
-    // Clear the interrupt
-    INTCONbits.TMR0IF = 0;
-
-    // And disable it
-    INTCONbits.TMR0IE = 0;
-
-    // Only do our stuff if the pin is in the proper state
-    if (kTIMING == g_RC_state[g_RC_timing_ptr])
-    {
-      // All we need to do is clear the pin and change its state to kWAITING
-      if (g_RC_timing_ptr < 8)
-      {
-        bitclr (LATA, g_RC_timing_ptr & 0x7);
-      }
-      else if (g_RC_timing_ptr < 16)
-      {
-        bitclr (LATB, g_RC_timing_ptr & 0x7);
-      }
-      else
-      {
-        bitclr (LATC, g_RC_timing_ptr & 0x7);
-      }
-      g_RC_state[g_RC_timing_ptr] = kWAITING;
     }
   }
 }

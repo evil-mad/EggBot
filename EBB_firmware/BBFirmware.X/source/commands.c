@@ -3,14 +3,15 @@
 #include "utility.h"
 #include "fifo.h"
 #include "main.h"
-#include <flash.h>
+#include <stdio.h>
+#include "servo.h"
+#include "analog.h"
+#include "utility.h"
+#include "ebb.h"
+#include "init.h"
 
 /** D E F I N E S ********************************************************/
 
-
-
-#define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
-#define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 /** V A R I A B L E S ********************************************************/
 
@@ -25,30 +26,6 @@ unsigned int gPulseRate[4] = {0,0,0,0};
 unsigned int gPulseCounters[4] = {0,0,0,0};
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
-void parse_R_packet (void);     // R for resetting UBW
-void parse_C_packet (void);     // C for configuring I/O and analog pins
-void parse_CX_packet (void);    // CX For configuring serial port
-void parse_O_packet (void);     // O for output digital to pins
-void parse_I_packet (void);     // I for input digital from pins
-void parse_V_packet (void);     // V for printing version
-void parse_A_packet (void);     // A for requesting analog inputs
-void parse_PI_packet (void);    // PI for reading a single pin
-void parse_PO_packet (void);    // PO for setting a single pin state
-void parse_PD_packet (void);    // PD for setting a pin's direction
-void parse_MR_packet (void);    // MR for Memory Read
-void parse_MW_packet (void);    // MW for Memory Write
-void parse_CU_packet (void);    // CU configures UBW (system wide parameters)
-void parse_PG_packet (void);    // PG Pulse Go
-void parse_PC_packet (void);    // PC Pulse Configure
-void parse_BL_packet (void);    // BL Boot Load command
-void parse_CK_packet (void);    // CK ChecK command
-void parse_MR_packet (void);    // MR Motors Run command
-void parse_AC_packet (void);    // AC Analog Configure
-void parse_ST_packet (void);    // ST Set Tag command
-void parse_QT_packet (void);    // QT Query Tag command
-void parse_RB_packet (void);    // RB ReBoot command
-void parse_QR_packet (void);    // QR Query RC Servo power state
-void parse_SR_packet (void);    // SR Set RC Servo power timeout
 
 
 
@@ -263,8 +240,7 @@ void parse_A_packet(void)
     ChannelBit = ChannelBit << 1;
   }
 
-  // Add \r\n and terminating zero.
-  printf ((far rom char *)st_LFCR);
+  print_ack ();
 }
 
 // MW is for Memory Write
@@ -815,62 +791,4 @@ void parse_CK_packet()
 }
 
 
-// ST command : Set Tag
-// "ST,<new name><CR>"
-// <new name> is a 0 to 16 character ASCII string.
-// This string gets saved in FLASH, and is returned by the "QT" command, as
-// well as being appended to the USB name that shows up in the OS
-void parse_ST_packet()
-{
-  unsigned char name[FLASH_NAME_LENGTH+1];
-  UINT8 bytes = 0;
-  UINT8 i;
-
-  // Clear out our name array
-  for (i=0; i < FLASH_NAME_LENGTH+1; i++)
-  {
-    name[i] = 0x00;
-  }
-
-  bytes = extract_string(name, FLASH_NAME_LENGTH);
-
-  // We have reserved FLASH addresses 0xF800 to 0xFBFF (1024 bytes) for
-  // storing persistent variables like the EEB's name. Note that no wear-leveling
-  // is done, so it's not a good idea to change these values more than 10K times. :-)
-
-  EraseFlash(FLASH_NAME_ADDRESS, FLASH_NAME_ADDRESS + 0x3FF);
-
-  WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
-
-  print_ack();
-}
-
-// QT command : Query Tag
-// "QT<CR>"
-// Prints out the 'tag' that was set with the "ST" command previously, if any
-void parse_QT_packet()
-{
-  unsigned char name[FLASH_NAME_LENGTH+1];    
-  UINT8 i;
-
-  // Clear out our name array
-  for (i=0; i < FLASH_NAME_LENGTH+1; i++)
-  {
-    name[i] = 0x00;
-  }
-
-  // We always read 16, knowing that any unused bytes will be set to zero
-  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
-
-  // Only print it out if the first character is printable ASCII
-  if (name[0] >= 128 || name[0] < 32)
-  {
-    printf ((rom char far *)"\r\n");
-  }
-  else
-  {
-    printf ((rom char far *)"%s\r\n", name);
-  }
-  print_ack();
-}
 

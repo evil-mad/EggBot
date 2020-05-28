@@ -28,6 +28,7 @@
       <itemPath>source/commands.h</itemPath>
       <itemPath>source/stepper.h</itemPath>
       <itemPath>source/main.h</itemPath>
+      <itemPath>source/solenoid.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -64,6 +65,7 @@
       <itemPath>source/analog.c</itemPath>
       <itemPath>source/commands.c</itemPath>
       <itemPath>source/stepper.c</itemPath>
+      <itemPath>source/solenoid.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

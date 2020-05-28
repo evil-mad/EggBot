@@ -1,6 +1,15 @@
 
 #include <p18cxxx.h>
 #include <GenericTypeDefs.h>
+#include "parse.h"
+#include "usbser.h"
+#include "utility.h"
+#include <ctype.h>
+#include "stepper.h"
+#include <stdio.h>
+#include "commands.h"
+#include "servo.h"
+#include "ebb.h"
 
 // This byte has each of its bits used as a separate error flag
 unsigned char error_byte;
@@ -22,7 +31,7 @@ void parse_packet(void)
   unsigned char cmd2 = 0;
 
   // Always grab the first character (which is the first byte of the command)
-  cmd1 = toupper (g_RX_buf[g_RX_buf_out]);
+  cmd1 = toupper(g_RX_buf[g_RX_buf_out]);
   advance_RX_buf_out();
   command = cmd1;
 
@@ -43,12 +52,6 @@ void parse_packet(void)
       parse_LM_packet();
       break;
     }
-    case ('R' * 256) + 'X':
-    {
-      // For receiving serial
-      parse_RX_packet ();
-      break;
-    }
     case 'R':
     {
       // Reset command (resets everything to power-on state)
@@ -59,12 +62,6 @@ void parse_packet(void)
     {
       // Configure command (configure ports for Input or Output)
       parse_C_packet ();
-      break;
-    }
-    case ('C' * 256) + 'X':
-    {
-      // For configuring serial port
-      parse_CX_packet ();
       break;
     }
     case ('C' * 256) + 'U':
@@ -97,18 +94,6 @@ void parse_packet(void)
       parse_A_packet ();
       break;
     }
-    case 'T':
-    {
-      // For timed I/O
-      parse_T_packet ();
-      break;
-    }
-    case ('T' * 256) + 'X':
-    {
-      // For transmitting serial
-      parse_TX_packet ();
-      break;
-    }
     case ('P' * 256) + 'I':
     {
       // PI for reading a single pin
@@ -138,60 +123,6 @@ void parse_packet(void)
     {
       // MW for Memory Write
       parse_MW_packet ();
-      break;
-    }
-    case ('B' * 256) + 'O':
-    {
-      // MR for Fast Parallel Output
-      parse_BO_packet ();
-      break;
-    }
-    case ('R' * 256) + 'C':
-    {
-      // RC for RC servo output
-      parse_RC_packet ();
-      break;
-    }
-    case ('B' * 256) + 'C':
-    {
-      // BC for Fast Parallel Configure
-      parse_BC_packet ();
-      break;
-    }
-    case ('B' * 256) + 'S':
-    {
-      // BS for Fast Binary Stream output
-      parse_BS_packet ();
-      break;
-    }
-    case ('S' * 256) + 'S':
-    {
-      // SS for Send SPI
-      parse_SS_packet ();
-      break;
-    }
-    case ('R' * 256) + 'S':
-    {
-      // RS for Receive SPI
-      parse_RS_packet ();
-      break;
-    }
-    case ('S' * 256) + 'I':
-    {
-      // SI for Send I2C
-      parse_SI_packet ();
-      break;
-    }
-    case ('R' * 256) + 'I':
-    {
-      // RI for Receive I2C
-      parse_RI_packet ();
-      break;
-    }
-    case ('C' * 256) + 'I':
-    {
-      // CI for Configure I2C
-      parse_CI_packet ();
       break;
     }
     case ('P' * 256) + 'C':

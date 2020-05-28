@@ -58,11 +58,7 @@
 #define ENABLE_MOTOR        0
 #define DISABLE_MOTOR       1
 
-typedef enum
-{
-  PEN_DOWN = 0,
-  PEN_UP
-} PenStateType;
+
 
 /// TODO: Only for EBB, not 3BB
 typedef enum
@@ -79,6 +75,11 @@ extern unsigned int DemoModeActive;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
+extern UINT StoredEngraverPower;
+extern BOOL ButtonPushed;
+extern BOOL UseAltPause;
+extern unsigned long NodeCount;
+extern char Layer;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;

@@ -87,6 +87,9 @@
 #include "usbser.h"
 #include "utility.h"
 #include "isr.h"
+#include "usb_config.h"
+#include "Usb\usb.h"
+#include "Usb\usb_function_cdc.h"
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata

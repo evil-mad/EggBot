@@ -1,4 +1,10 @@
+#include <p18cxxx.h>
 #include "parse.h"
+
+unsigned char A_cur_channel;
+unsigned char AnalogInitiate;
+volatile unsigned int AnalogEnabledChannels;
+volatile unsigned int ChannelBit;
 
 // This function turns on or off an analog channel
 // It is called from other pieces of code, not the user

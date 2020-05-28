@@ -6,6 +6,15 @@
 #include <stdio.h>
 #include "HardwareProfile.h"
 #include "usbser.h"
+#include "analog.h"
+#include "utility.h"
+#include "parse.h"
+#include "isr.h"
+#include "delays.h"
+#include "solenoid.h"
+#include "servo.h"
+#include "ebb.h"
+#include "stepper.h"
 
 void UserInit(void)
 {
@@ -37,7 +46,7 @@ void UserInit(void)
   stdout = _H_USER;
 
   fifo_Init();
-  
+
   // Now init our registers
   // Initialize Timer4
   // The prescaler will be at 16
@@ -58,43 +67,16 @@ void UserInit(void)
     ISR_A_FIFO[i] = 0;
   }
 
-  // Initialize USB TX and RX buffer management
-  g_RX_buf_in = 0;
-  g_RX_buf_out = 0;
-  g_TX_buf_in = 0;
-  g_TX_buf_out = 0;
-
-  for (i=0; i < kTX_BUF_SIZE; i++)
-  {
-    g_TX_buf[i] = 0;
-  }
-  for (i=0; i < kRX_COMMAND_BUF_SIZE; i++)
-  {
-    g_RX_command_buf[i] = 0;
-  }
-  for (i=0; i < kRX_BUF_SIZE; i++)
-  {
-    g_RX_buf[i] = 0;
-  }
-
-  // And the USART TX and RX buffer management
-  g_USART_RX_buf_in = 0;
-  g_USART_RX_buf_out = 0;
-  g_USART_TX_buf_in = 0;
-  g_USART_TX_buf_out = 0;
-
-  // Clear out the RC servo output pointer values
-  g_RC_primed_ptr = 0;
-  g_RC_next_ptr = 0;
-  g_RC_timing_ptr = 0;
-
+  usbser_Init();
+  
+/// TODO: IS this for RCServo2, or can we get rid of it?
   // Enable TMR0 for our RC timing operation
-  T0CONbits.PSA = 1;        // Do NOT use the prescaler
-  T0CONbits.T0CS = 0;       // Use internal clock
-  T0CONbits.T08BIT = 0;     // 16 bit timer
-  INTCONbits.TMR0IF = 0;    // Clear the interrupt flag
-  INTCONbits.TMR0IE = 0;    // And clear the interrupt enable
-  INTCON2bits.TMR0IP = 0;   // Low priority
+//  T0CONbits.PSA = 1;        // Do NOT use the prescaler
+//  T0CONbits.T0CS = 0;       // Use internal clock
+//  T0CONbits.T08BIT = 0;     // 16 bit timer
+//  INTCONbits.TMR0IF = 0;    // Clear the interrupt flag
+//  INTCONbits.TMR0IE = 0;    // And clear the interrupt enable
+//  INTCON2bits.TMR0IP = 0;   // Low priority
 
   // Turn on band-gap
   ANCON1bits.VBGEN = 1;
@@ -150,11 +132,13 @@ void UserInit(void)
   TMR1L = TIMER1_L_RELOAD;  // Reload for 25Khz ISR fire
 
   T1CONbits.TMR1ON = 1;     // Turn the timer on
+ 
 
   IPR1bits.TMR1IP = 1;      // Use high priority interrupt
   PIR1bits.TMR1IF = 0;      // Clear the interrupt
   PIE1bits.TMR1IE = 1;      // Turn on the interrupt
 
+  
 //  PORTA = 0;
   RefRA0_IO_TRIS = INPUT_PIN;
 //  PORTB = 0;
@@ -237,12 +221,8 @@ void UserInit(void)
   RCServoPowerIO = RCSERVO_POWER_OFF;
   RCServoPowerIO_TRIS = OUTPUT_PIN;
 
-  SolenoidState = SOLENOID_ON;
-  DriverConfiguration = PIC_CONTROLS_DRIVERS;
-  PenState = PEN_UP;
-  Layer = 0;
-  NodeCount = 0;
-  ButtonPushed = FALSE;
+  solenoid_Init();
+  
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
   // Except for v1.1 hardware, use RB2

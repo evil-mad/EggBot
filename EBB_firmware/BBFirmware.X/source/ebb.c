@@ -5,9 +5,9 @@
 #include <ctype.h>
 #include <delays.h>
 #include <math.h>
+#include "usb_config.h"
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
-#include "usb_config.h"
 #include "HardwareProfile.h"
 #include "ebb.h"
 #include "delays.h"
@@ -18,12 +18,6 @@
 #include "utility.h"
 #include "stepper.h"
 
-typedef enum
-{
-  SOLENOID_OFF = 0,
-  SOLENOID_ON,
-  SOLENOID_PWM
-} SolenoidStateType;
 
 #pragma udata
 
@@ -31,24 +25,16 @@ static unsigned char i;
 
 unsigned int DemoModeActive;
 unsigned int comd_counter;
-static SolenoidStateType SolenoidState;
-static unsigned int SolenoidDelay;
 
 DriverConfigurationType DriverConfiguration;
 
-// track the latest state of the pen
-static PenStateType PenState;
 
-static unsigned long NodeCount;
-static char Layer;
-static BOOL ButtonPushed;
-static BOOL UseAltPause;
+unsigned long NodeCount;
+char Layer;
+BOOL ButtonPushed;
+BOOL UseAltPause;
 unsigned char QC_ms_timer;
-static UINT StoredEngraverPower;
-// Set TRUE to enable solenoid output for pen up/down
-BOOL gUseSolenoid;
-// Set TRUE to enable RC Servo output for pen up/down
-BOOL gUseRCPenServo;
+UINT StoredEngraverPower;
 
 // Stepper (mode) Configure command
 // SC,1,0<CR> will use just solenoid output for pen up/down

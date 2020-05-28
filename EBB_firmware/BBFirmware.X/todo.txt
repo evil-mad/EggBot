@@ -4,6 +4,10 @@ Updated list of todo items for EBB/3BB refactor
   - Make table of all I/O ports for each board, make I/O init smaller
   - 
 
+* Remove analog conversions from low ISR, instead, make them simple and blocking
+
+* Pull out pulse commands to own files
+
 * Factor out command parsing into its own file
   - Make table based to shorten code?
 

@@ -5,7 +5,6 @@
 // Working registers
 
 //#pragma udata access fast_vars
-static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 // How many elements of the FIFO will we be using by default?
 volatile UINT8 FIFOSize = 3;
 // The next element of the FIFO to put a command into
@@ -14,6 +13,9 @@ volatile UINT8 FIFOIn = 0;
 volatile UINT8 FIFOOut = 0;
 // The number of commands in the FIFO that are not done being executed yet
 volatile UINT8 FIFODepth = 0;
+
+volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
+
 
 
 #pragma udata FIFO=0x800
