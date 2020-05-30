@@ -37,8 +37,10 @@ void parse_CK_packet(void);    // CK ChecK command
 void parse_MR_packet(void);    // MR Motors Run command
 void parse_AC_packet(void);    // AC Analog Configure
 void parse_RB_packet(void);    // RB ReBoot command
+#if defined(BOARD_EBB)
 void parse_QR_packet(void);    // QR Query RC Servo power state
 void parse_SR_packet(void);    // SR Set RC Servo power timeout
+#endif
 
 #endif	/* COMMANDS_H */
 

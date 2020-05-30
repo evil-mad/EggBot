@@ -17,7 +17,8 @@ static unsigned char OutByte;
 static unsigned char TookStep;
 static unsigned char AllDone;
 
-static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
+// Accumulators (at 25Khz) used to determine when to take a step
+static UINT32 StepAcc[NUMBER_OF_STEPPERS];
 
 
 // Used only in LowISR
@@ -80,8 +81,13 @@ PORTDbits.RD1 = 1;
       if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
       {
         // Only output DIR bits if we are actually doing something
+#if defined(BOARD_3BB)
+        if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut] || FIFO_StepsCounter[2][FIFOOut])
+#elif defined(BOARD_EBB)
         if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut])
+#endif
         {
+          // Always true for 3BB
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
             if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
@@ -100,7 +106,18 @@ PORTDbits.RD1 = 1;
             {
               Dir2IO = 0;
             }
+#if defined(BOARD_3BB)
+            if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
+            {
+              Dir3IO = 1;
+            }
+            else
+            {
+              Dir3IO = 0;
+            }
+#endif
           }
+#if defined(BOARD_EBB)
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
             if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
@@ -120,7 +137,8 @@ PORTDbits.RD1 = 1;
               Dir2AltIO = 0;
             }
           }
-
+#endif
+          
           // Only do this if there are steps left to take
           if (FIFO_StepsCounter[0][FIFOOut])
           {
@@ -166,7 +184,30 @@ PORTDbits.RD1 = 1;
             FIFO_StepAdd[1][FIFOOut] += FIFO_StepAddInc[1][FIFOOut];
             AllDone = FALSE;
           }
-
+#if defined(BOARD_3BB)
+          if (FIFO_StepsCounter[2][FIFOOut])
+          {
+            StepAcc[2] = StepAcc[2] + FIFO_StepAdd[2][FIFOOut];
+            if (StepAcc[2] & 0x80000000)
+            {
+              StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP3_BIT;
+              TookStep = TRUE;
+              FIFO_StepsCounter[2][FIFOOut]--;
+              if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
+              {
+                globalStepCounter3--;
+              }
+              else
+              {
+                globalStepCounter3++;
+              }
+            }
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            FIFO_StepAdd[2][FIFOOut] += FIFO_StepAddInc[2][FIFOOut];
+            AllDone = FALSE;
+          }
+#endif
           if (TookStep)
           {
             if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -179,7 +220,14 @@ PORTDbits.RD1 = 1;
               {
                 Step2IO = 1;
               }
+#if defined(BOARD_3BB)
+              if (OutByte & STEP3_BIT)
+              {
+                Step3IO = 1;
+              }
+#endif
             }
+#if defined(BOARD_EBB)
             else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
             {
               if (OutByte & STEP1_BIT)
@@ -191,20 +239,7 @@ PORTDbits.RD1 = 1;
                 Step2AltIO = 1;
               }
             }
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
+#endif
             Delay1TCY();
             Delay1TCY();
             Delay1TCY();
@@ -222,15 +257,21 @@ PORTDbits.RD1 = 1;
             {
               Step1IO = 0;
               Step2IO = 0;
+#if defined(BOARD_3BB)
+              Step3IO = 0;
+#endif
             }
+#if defined(BOARD_EBB)
             else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
             {
               Step1AltIO = 0;
               Step2AltIO = 0;
             }
+#endif
           }
         }
       }
+#if defined(BOARD_EBB)
       // Check to see if we should change the state of the pen
       else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
       {
@@ -293,6 +334,7 @@ PORTDbits.RD1 = 1;
           }
         }
       }
+#endif
       // Check to see if we should start or stop the engraver
       else if (FIFO_Command[FIFOOut] == COMMAND_SE)
       {
@@ -540,6 +582,8 @@ void low_ISR(void)
       QC_ms_timer--;
     }
 
+    /// TODO: Refactor this into something nicer?
+#if defined(BOARD_EBB)
     // Software timer for RCServo power control
     if (gRCServoPoweroffCounterMS)
     {
@@ -550,7 +594,7 @@ void low_ISR(void)
         RCServoPowerIO = RCSERVO_POWER_OFF;
       }
     }
-
+#endif
   } // end of 1ms interrupt
 
   // Do we have an analog interrupt?

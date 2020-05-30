@@ -19,12 +19,16 @@
 static void process_SM(
   UINT32 Duration,
   INT32 A1Stp,
-  INT32 A2Stp
+  INT32 A2Stp,
+  INT32 A3Stp
 );
 
 /* These values hold the global step position of each axis */
 volatile INT32 globalStepCounter1;
 volatile INT32 globalStepCounter2;
+#if defined(BOARD_3BB)
+volatile INT32 globalStepCounter3;
+#endif
 
 
 
@@ -72,6 +76,8 @@ void parse_EM_packet(void)
     {
       return;
     }
+/// TODO: Come back and fix this for 3BB
+#if defined(BOARD_EBB)
     if (
       (DriverConfiguration == PIC_CONTROLS_DRIVERS)
       ||
@@ -138,6 +144,7 @@ void parse_EM_packet(void)
         Enable1AltIO = DISABLE_MOTOR;
       }
     }
+#endif
   }
 
   RetVal = extract_number (kUCHAR, &EA2, kOPTIONAL);
@@ -148,6 +155,7 @@ void parse_EM_packet(void)
     {
       return;
     }
+#if defined(BOARD_EBB)
     if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
     {
       if (EA2 > 0)
@@ -174,6 +182,7 @@ void parse_EM_packet(void)
         Enable2AltIO = DISABLE_MOTOR;
       }
     }
+#endif
   }
 
   // Always clear the step counts if motors are enabled/disabled or 
@@ -202,13 +211,14 @@ void parse_RM_packet(void)
 void parse_SM_packet (void)
 {
   UINT32 Duration = 0;
-  INT32 A1Steps = 0, A2Steps = 0;
+  INT32 A1Steps = 0, A2Steps = 0, A3Steps = 0;
   INT32 Steps = 0;
 
   // Extract each of the values.
   extract_number (kULONG, &Duration, kREQUIRED);
   extract_number (kLONG, &A1Steps, kREQUIRED);
   extract_number (kLONG, &A2Steps, kOPTIONAL);
+  extract_number (kLONG, &A3Steps, kOPTIONAL);
 
   if (gLimitChecks)
   {
@@ -279,11 +289,35 @@ void parse_SM_packet (void)
       printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
       return;
     }
+
+    if (A3Steps > 0) 
+    {
+      Steps = A3Steps;
+    }
+    else {
+      Steps = -A3Steps;
+    }    
+
+    if (Steps > 0xFFFFFF) 
+    {
+      printf((far rom char *)"!0 Err: <axis3> larger than 16777215 steps.\n\r");
+      return;
+    }
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      printf((far rom char *)"!0 Err: <axis3> step rate > 25K steps/second.\n\r");
+      return;
+    }
+    if ((Duration/1311) >= Steps && Steps != 0) 
+    {
+      printf((far rom char *)"!0 Err: <axis3> step rate < 1.31Hz.\n\r");
+      return;
+    }
   }
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_SM(Duration, A1Steps, A2Steps);
+  process_SM(Duration, A1Steps, A2Steps, A3Steps);
 
   if (g_ack_enable)
   {
@@ -357,11 +391,14 @@ void parse_AM_packet (void)
   FIFO_DirBits[FIFOIn] = 0;
 
   // Always enable both motors when we want to move them
+/// TODO: Fix this for 3BB motor enable
+#if defined(BOARD_EBB)
   Enable1IO = ENABLE_MOTOR;
   Enable2IO = ENABLE_MOTOR;
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-
+#endif
+  
   // First, set the direction bits
   if (A1Steps < 0)
   {
@@ -537,14 +574,16 @@ void parse_LM_packet (void)
   {
     return;
   }
-    
-
+  
+/// TODO: Get this to work for 3BB motor enable as well  
+#if defined(BOARD_EBB)
   // Always enable both motors when we want to move them
   Enable1IO = ENABLE_MOTOR;
   Enable2IO = ENABLE_MOTOR;
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-
+#endif
+  
   // Spin here until there's space in the fifo
   WaitForRoomInFIFO();
 
@@ -700,7 +739,8 @@ void parse_HM_packet (void)
       {
         XSteps = Steps2;
       }
-      process_SM(Duration, XSteps, Steps2);
+      /// TODO: Add 3rd axis?
+      process_SM(Duration, XSteps, Steps2, 0);
       // Update both steps count for final move
       Steps1 = Steps1 - XSteps;
       Steps2 = 0;
@@ -741,7 +781,8 @@ void parse_HM_packet (void)
       {
         XSteps = Steps1;
       }
-      process_SM(Duration, Steps1, XSteps);
+      /// TODO: add 3rd axis?
+      process_SM(Duration, Steps1, XSteps, 0);
       // Update both steps count for final move
       Steps2 = Steps2 - XSteps;
       Steps1 = 0;
@@ -762,7 +803,8 @@ void parse_HM_packet (void)
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_SM(Duration, Steps1, Steps2);
+  /// TODO: Add 3rd axis?
+  process_SM(Duration, Steps1, Steps2, 0);
 
   if (g_ack_enable)
   {
@@ -864,7 +906,8 @@ void parse_XM_packet (void)
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_SM(Duration, A1Steps, A2Steps);
+  /// TODO: Make into 3rd axis?
+  process_SM(Duration, A1Steps, A2Steps, 0);
 
   print_ack();
 }
@@ -883,7 +926,8 @@ void parse_XM_packet (void)
 static void process_SM(
   UINT32 Duration,
   INT32 A1Stp,
-  INT32 A2Stp
+  INT32 A2Stp,
+  INT32 A3Stp
 )
 {
   UINT32 temp = 0;
@@ -912,12 +956,15 @@ static void process_SM(
     move.DelayCounter = 0; // No delay for motor moves
     move.DirBits = 0;
 
+/// TODO: Get this to work for 3BB as well
+#if defined(BOARD_EBB)
     // Always enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
     RCServoPowerIO = RCSERVO_POWER_ON;
     gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-
+#endif
+    
     // First, set the direction bits
     if (A1Stp < 0)
     {
@@ -929,6 +976,12 @@ static void process_SM(
       move.DirBits = move.DirBits | DIR2_BIT;
       A2Stp = -A2Stp;
     }
+    if (A3Stp < 0)
+    {
+      move.DirBits = move.DirBits | DIR3_BIT;
+      A3Stp = -A3Stp;
+    }
+
     // To compute StepAdd values from Duration.
     // A1Stp is from 0x000001 to 0xFFFFFF.
     // HIGH_ISR_TICKS_PER_MS = 25
@@ -1031,7 +1084,53 @@ static void process_SM(
     move.StepsCounter[1] = A2Stp;
     move.StepAddInc[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
+     
+#if defined(BOARD_3BB)
+    if (A3Stp < 0x1FFFF) 
+    {
+      temp = (A3Stp << 15)/temp1;
+      temp2 = (A3Stp << 15) % temp1; 
+      if (Duration > 30)
+      {
+        remainder = (temp2 << 16) / temp1;
+      }
+    }
+    else 
+    {
+      temp = (((A3Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+      remainder = 0;
+    }
+    if (temp > 0x8000) 
+    {
+      printf((far rom char *)"Major malfunction Axis3 StepCounter too high : %lu\n\r", temp);
+      temp = 0x8000;
+    }
+    if (temp == 0 && A3Stp != 0) 
+    {
+      printf((far rom char *)"Major malfunction Axis3 StepCounter zero\n\r");
+      temp = 1;
+    }
+    if (Duration > 30)
+    {
+      temp = (temp << 16) + remainder;
+    }
+    else
+    {
+      temp = (temp << 16);
+    }
         
+    move.StepAdd[2] = temp;
+    move.StepsCounter[2] = A3Stp;
+    move.StepAddInc[2] = 0;
+    move.Command = COMMAND_MOTOR_MOVE;
+#elif defined(BOARD_EBB)
+    move.StepAdd[2] = 0;
+    move.StepsCounter[2] = 0;
+    move.StepAddInc[2] = 0;
+    move.Command = COMMAND_MOTOR_MOVE;
+#endif
+    
+    
     /* For debugging step motion , uncomment the next line */
 
     //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
@@ -1047,13 +1146,22 @@ static void process_SM(
 
   // Now, quick copy over the computed command data to the command fifo
   FIFO_Command[FIFOIn] = move.Command;
+
   FIFO_StepAdd[0][FIFOIn] = move.StepAdd[0];
-  FIFO_StepAdd[1][FIFOIn] = move.StepAdd[1];
   FIFO_StepAddInc[0][FIFOIn] = move.StepAddInc[0];
-  FIFO_StepAddInc[1][FIFOIn] = move.StepAddInc[1];
   FIFO_StepsCounter[0][FIFOIn] = move.StepsCounter[0];
+
+  FIFO_StepAdd[1][FIFOIn] = move.StepAdd[1];
+  FIFO_StepAddInc[1][FIFOIn] = move.StepAddInc[1];
   FIFO_StepsCounter[1][FIFOIn] = move.StepsCounter[1];
+#if defined(BOARD_3BB)
+  FIFO_StepAdd[2][FIFOIn] = move.StepAdd[2];
+  FIFO_StepAddInc[2][FIFOIn] = move.StepAddInc[2];
+  FIFO_StepsCounter[2][FIFOIn] = move.StepsCounter[2];
+#endif
+  
   FIFO_DirBits[FIFOIn] = move.DirBits;
+
   FIFO_DelayCounter[FIFOIn] = move.DelayCounter;
   FIFO_ServoPosition[FIFOIn] = move.ServoPosition;
   FIFO_ServoRPn[FIFOIn] = move.ServoRPn;

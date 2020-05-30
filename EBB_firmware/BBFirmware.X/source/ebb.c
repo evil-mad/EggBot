@@ -101,6 +101,7 @@ void parse_SC_packet (void)
     // Send a new command to set the state of the servo/solenoid
     process_SP(PenState, 0);
   }
+#if defined(BOARD_EBB)
   // Check for command to switch between built-in drivers and external drivers
   else if (Para1 == 2)
   {
@@ -159,6 +160,7 @@ void parse_SC_packet (void)
       Enable2AltIO_TRIS = INPUT_PIN;
      }
   }
+#endif
   // Set <min_servo> for Servo2 method
   else if (Para1 == 4)
   {

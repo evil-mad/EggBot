@@ -11,12 +11,14 @@
 #include "HardwareProfile.h"
 #include <GenericTypeDefs.h>
 
-// Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     (25)
-
-#define kISR_FIFO_A_DEPTH       3
-#define kISR_FIFO_D_DEPTH       3
-
+// Bits used within the OutByte to keep track of what direction and step bits need to be at the end of the ISR
+// (Not tied to physical pins at all)
+#define STEP1_BIT (0x01)
+#define DIR1_BIT  (0x02)
+#define STEP2_BIT (0x04)
+#define DIR2_BIT  (0x08)
+#define STEP3_BIT (0x10)
+#define DIR3_BIT  (0x20)
 
 /* Enum that lists each type of command that can be put in the motion control FIFO */
 typedef enum

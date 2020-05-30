@@ -147,10 +147,11 @@ UINT16 g_servo2_rate_up;
 UINT16 g_servo2_rate_down;
 UINT8  g_servo2_RPn;
 
+#if defined(BOARD_EBB)
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS = 0;
 volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
-
+#endif
 
 /*
 The idea with servo is to use the ECCP2 module and timer 3.
@@ -231,7 +232,9 @@ void servo_Init(void)
   g_servo2_rate_up = 400;
   g_servo2_rate_down = 400;
   process_SP(PEN_UP, 0);            // Start servo up
+#if defined(BOARD_EBB)
   RCServoPowerIO = RCSERVO_POWER_OFF;
+#endif
 }
 
 // Return the current channel that is associated with the PPS output pin
@@ -362,9 +365,11 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
     Rate = g_servo2_rate_down;
   }
 
+#if defined(BOARD_EBB)
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-
+#endif
+  
   // Now schedule the movement with the servo function
   servo_Move(Position, g_servo2_RPn, Rate, CommandDuration);
 }

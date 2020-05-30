@@ -140,7 +140,9 @@ void UserInit(void)
 
   
 //  PORTA = 0;
+#if defined(BOARD_EBB)
   RefRA0_IO_TRIS = INPUT_PIN;
+#endif
 //  PORTB = 0;
 //  INTCON2bits.RBPU = 0;   // Turn on weak-pull ups for port B
 //  PORTC = 0;              // Start out low
@@ -153,11 +155,14 @@ void UserInit(void)
   // And make sure to always use low priority for ADC
   IPR1bits.ADIP = 0;
 
+#if defined(BOARD_EBB)
   // Turn on AN0 (RA0) as analog input
   AnalogConfigure(0,1);
+#endif
   // Turn on AN11 (V+) as analog input
   AnalogConfigure(11,1);
 
+#if defined(BOARD_EBB)
   MS1_IO = 1;
   MS1_IO_TRIS = OUTPUT_PIN;
   MS2_IO = 1;
@@ -169,7 +174,13 @@ void UserInit(void)
   Enable1IO_TRIS = OUTPUT_PIN;
   Enable2IO = 1;
   Enable2IO_TRIS = OUTPUT_PIN;
+#elif defined(BOARD_3BB)
+  /// TODO: Default EN low (ENABLE), later, set to high (DISABLE) when normal enable code working for 3BB
+  EnableIO = 0;
+  EnableIO_TRIS = OUTPUT_PIN;
 
+#endif
+  
   Step1IO = 0;
   Step1IO_TRIS = OUTPUT_PIN;
   Dir1IO = 0;
@@ -178,7 +189,13 @@ void UserInit(void)
   Step2IO_TRIS = OUTPUT_PIN;
   Dir2IO = 0;
   Dir2IO_TRIS = OUTPUT_PIN;
-
+#if defined(BOARD_3BB)
+  Step3IO = 0;
+  Step3IO_TRIS = OUTPUT_PIN;
+  Dir3IO = 0;
+  Dir3IO_TRIS = OUTPUT_PIN;
+#endif
+  
   // For bug in VUSB divider resistor, set RC7 as output and set high
   // Wait a little while to charge up
   // Then set back as an input
@@ -213,6 +230,7 @@ void UserInit(void)
   gUseSolenoid = TRUE;
   gUseRCPenServo = TRUE;
 
+#if defined(BOARD_EBB)
   // Set up pen up/down direction as output
   PenUpDownIO = 0;
   PenUpDownIO_TRIS = OUTPUT_PIN;
@@ -220,7 +238,8 @@ void UserInit(void)
   // Set up RC Servo power control to be off
   RCServoPowerIO = RCSERVO_POWER_OFF;
   RCServoPowerIO_TRIS = OUTPUT_PIN;
-
+#endif
+  
   solenoid_Init();
   
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate

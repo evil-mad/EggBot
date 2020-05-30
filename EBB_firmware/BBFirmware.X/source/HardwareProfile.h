@@ -90,17 +90,14 @@
   //  initialization functions for the board.  These definitions are only
   //  required in the stack provided demos.  They are not required in
   //  final application design.
-  #define CLOCK_FREQ 48000000
+  #define CLOCK_FREQ        48000000
 
   // How many stepper motors does this board support? (EBB has 2)
-  #define NUMBER_OF_STEPPERS  2
+  #define NUMBER_OF_STEPPERS      2
 
-  // Define global things that depend on the board type
-  #define STEP1_BIT (0x01)
-  #define DIR1_BIT  (0x02)
-  #define STEP2_BIT (0x04)
-  #define DIR2_BIT  (0x08)
-  
+  // Maximum size of command FIFO (based on number of steppers)
+  #define COMMAND_FIFO_LENGTH     25
+
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */
   #define mInitAllLEDs()      LATDbits.LATD3 = 0; LATDbits.LATD2 = 0; TRISDbits.TRISD3 = 0; TRISDbits.TRISD2 = 0;
@@ -208,9 +205,9 @@
   #endif
 
   #define USE_USB_BUS_SENSE_IO
-  #define tris_usb_bus_sense  TRISCbits.TRISC7    // Input
+  #define tris_usb_bus_sense  TRISAbits.TRISA7    // Input
   #if defined(USE_USB_BUS_SENSE_IO)
-    #define USB_BUS_SENSE       PORTCbits.RC7
+    #define USB_BUS_SENSE       PORTAbits.RA7
   #else
     #define USB_BUS_SENSE       1
   #endif
@@ -222,17 +219,13 @@
   //  initialization functions for the board.  These definitions are only
   //  required in the stack provided demos.  They are not required in
   //  final application design.
-  #define CLOCK_FREQ 48000000
+  #define CLOCK_FREQ        48000000
 
   // How many stepper motors does this board support? (3BB has 3)
-  #define NUMBER_OF_STEPPERS  3
+  #define NUMBER_OF_STEPPERS      3
 
-  // Define global things that depend on the board type
-  #define STEP1_BIT (0x01)
-  #define DIR1_BIT  (0x02)
-  #define STEP2_BIT (0x04)
-  #define DIR2_BIT  (0x08)
-
+  // Maximum size of command FIFO (based on number of steppers)
+  #define COMMAND_FIFO_LENGTH     18
 
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */
@@ -241,62 +234,31 @@
   #define mLED_2              LATDbits.LATD2
 
   /** S W I T C H *****************************************************/
-  #define mInitSwitch()       TRISAbits.TRISA7 = INPUT_PIN;
-  #define swProgram           PORTAbits.RA7
-
-  /** R E F   A N A L O G   I N P U T *********************************/
-  #define RefRA0_IO_TRIS      TRISAbits.TRISA0
+  #define mInitSwitch()       TRISAbits.TRISA6 = INPUT_PIN;
+  #define swProgram           PORTAbits.RA6
 
   /** P E N   U P  D O W N *******************************************/
   #define PenUpDownIO         LATBbits.LATB4
   #define PEN_UP_DOWN_RPN     7
   #define PenUpDownIO_TRIS    TRISBbits.TRISB4
 
-  /** D R I V E R   E N A B L E **************************************/
-  #define Enable1IO           LATEbits.LATE0
-  #define Enable1IO_TRIS      TRISEbits.TRISE0
-  #define Enable2IO           LATCbits.LATC1
-  #define Enable2IO_TRIS      TRISCbits.TRISC1
-    // Alternate enables for external drivers
-  #define Enable1AltIO        LATDbits.LATD1
-  #define Enable1AltIO_TRIS   TRISDbits.TRISD1
-  #define Enable2AltIO        LATAbits.LATA1
-  #define Enable2AltIO_TRIS   TRISAbits.TRISA1
-
-  /** D R I V E R   M I C R O S T E P ********************************/
-  #define MS1_IO              LATEbits.LATE2
-  #define MS1_IO_TRIS         TRISEbits.TRISE2
-  #define MS2_IO              LATEbits.LATE1
-  #define MS2_IO_TRIS         TRISEbits.TRISE1
-  #define MS3_IO              LATAbits.LATA6
-  #define MS3_IO_TRIS         TRISAbits.TRISA6
+/** D R I V E R   E N A B L E **************************************/
+  #define EnableIO            LATEbits.LATE2
+  #define EnableIO_TRIS       TRISEbits.TRISE2
 
   /** S T E P  A N D  D I R ******************************************/
   #define Step1IO             LATDbits.LATD6
   #define Step1IO_TRIS        TRISDbits.TRISD6
   #define Dir1IO              LATDbits.LATD7
   #define Dir1IO_TRIS         TRISDbits.TRISD7
-  #define Step2IO             LATDbits.LATD4
-  #define Step2IO_TRIS        TRISDbits.TRISD4
-  #define Dir2IO              LATDbits.LATD5
-  #define Dir2IO_TRIS         TRISDbits.TRISD5
-  // Alternate STEP/DIR for external drivers
-  #define Step1AltIO          LATCbits.LATC6
-  #define Step1AltIO_TRIS     TRISCbits.TRISC6
-  #define Dir1AltIO           LATCbits.LATC2
-  #define Dir1AltIO_TRIS      TRISCbits.TRISC2
-  #define Step2AltIO          LATAbits.LATA5
-  #define Step2AltIO_TRIS     TRISAbits.TRISA5
-  #define Dir2AltIO           LATAbits.LATA2
-  #define Dir2AltIO_TRIS      TRISAbits.TRISA2
-
-  /** R C   S E R V O  ************************************************/
-
-  #define RCServoPowerIO_TRIS TRISAbits.TRISA3
-  #define RCServoPowerIO      LATAbits.LATA3
-  #define RCServoPowerIO_PORT PORTAbits.RA3
-  #define RCSERVO_POWER_ON    1
-  #define RCSERVO_POWER_OFF   0
+  #define Step2IO             LATAbits.LATA2
+  #define Step2IO_TRIS        TRISAbits.TRISA2
+  #define Dir2IO              LATAbits.LATA3
+  #define Dir2IO_TRIS         TRISAbits.TRISA3
+  #define Step3IO             LATDbits.LATD4
+  #define Step3IO_TRIS        TRISDbits.TRISD4
+  #define Dir3IO              LATDbits.LATD5
+  #define Dir3IO_TRIS         TRISDbits.TRISD5
 
   /** G E N E R I C ***************************************************/
 

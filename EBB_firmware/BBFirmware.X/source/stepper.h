@@ -12,7 +12,9 @@
 /* These values hold the global step position of each axis */
 extern volatile INT32 globalStepCounter1;
 extern volatile INT32 globalStepCounter2;
-
+#if defined(BOARD_3BB)
+extern volatile INT32 globalStepCounter3;
+#endif
 
 void parse_SM_packet(void);
 void parse_AM_packet(void);

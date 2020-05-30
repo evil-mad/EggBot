@@ -701,6 +701,7 @@ void parse_RB_packet()
   Reset();
 }
 
+#if defined(BOARD_EBB)
 // QR Query RC Servo power state command
 // Example: "RR<CR>"
 // Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>" 
@@ -711,6 +712,7 @@ void parse_QR_packet()
   printf ((far rom char *)"%1u\r\n", RCServoPowerIO_PORT);
   print_ack();
 }
+#endif
 
 // SR Set RC Servo power timeout
 // Example: "SR,<new_time_ms>,<new_power_state><CR><LF>"
@@ -723,6 +725,7 @@ void parse_QR_packet()
 // <new_power_state> is an optional parameter of either 0 or 1. It will
 // immediately affect the servo's power state, where 0 turns it off and 1 
 // turns it on.
+#if defined(BOARD_EBB)
 void parse_SR_packet(void)
 {
   unsigned long Value;
@@ -756,6 +759,7 @@ void parse_SR_packet(void)
 
   print_ack();
 }
+#endif
 
 // Just used for testing/debugging the packet parsing routines
 void parse_CK_packet()

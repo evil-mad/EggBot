@@ -68,8 +68,11 @@ typedef enum
 // Set TRUE to enable RC Servo output for pen up/down
 extern BOOL gUseRCPenServo;
 
+#if defined(BOARD_EBB)
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
+#endif
+
 
 extern UINT8 gRC2msCounter;
 extern UINT16 gRC2Value[MAX_RC2_SERVOS];

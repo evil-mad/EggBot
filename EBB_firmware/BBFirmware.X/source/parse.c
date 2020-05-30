@@ -317,6 +317,7 @@ void parse_packet(void)
       parse_RB_packet();
       break;
     }
+#if defined(BOARD_EBB)
     case ('Q' * 256) + 'R':
     {
       // QR is for Query RC Servo power state
@@ -329,6 +330,7 @@ void parse_packet(void)
       parse_SR_packet();
       break;
     }
+#endif
     case ('H' * 256) + 'M':
     {
       // HM is for Home Motor
