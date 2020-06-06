@@ -15,10 +15,16 @@
 #include "servo.h"
 #include "ebb.h"
 #include "stepper.h"
+#include "serial.h"
 
 void UserInit(void)
 {
   int  i, j;
+
+  DEBUG_INIT()
+#if defined(BOARD_3BB)
+  serial_Init();
+#endif
 
   // Make all of 3 digital inputs
   LATA = 0x00;
@@ -261,6 +267,7 @@ void UserInit(void)
   
   servo_Init();
 
+  
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 

@@ -228,7 +228,7 @@ static void InitializeSystem(void)
   //use the ADCON1 register for this purpose.
   ANCON0 = 0xFF;                  // Default all pins to digital
   ANCON1 = 0xFF;                  // Default all pins to digital
-
+  
   OSCCON = 0x60;  //Clock switch to primary clock source.  May not have been running
                   //from this if the bootloader is called from the application firmware.
 

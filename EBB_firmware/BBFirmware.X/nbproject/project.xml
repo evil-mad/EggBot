@@ -31,6 +31,10 @@
                     <type>2</type>
                 </confElem>
                 <confElem>
+                    <name>ThreeBB_BL_DEBUG</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
                     <name>ThreeBB_noBL</name>
                     <type>2</type>
                 </confElem>
