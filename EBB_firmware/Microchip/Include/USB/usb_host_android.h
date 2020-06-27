@@ -69,7 +69,7 @@ Change History
 #ifndef NUM_ANDROID_DEVICES_SUPPORTED
     /* Defines the number of concurrent Android devices this implementation is allowed to 
        talk to.  This definition is only used for implementations where the accessory is
-       the host and the Android device is the slave.  This is also most often defined to
+       the host and the Android device is the peripheral.  This is also most often defined to
        be 1.  If this is not defined by the user, a default of 1 is used. 
 
        This option is only used when compiling the source version of the library. This
