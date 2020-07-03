@@ -13,7 +13,6 @@ void solenoid_Init(void)
 {
   SolenoidState = SOLENOID_ON;
   DriverConfiguration = PIC_CONTROLS_DRIVERS;
-  PenState = PEN_UP;
   Layer = 0;
   NodeCount = 0;
   ButtonPushed = FALSE;

@@ -84,7 +84,6 @@ extern char Layer;
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
 void parse_SC_packet(void);
-void parse_TP_packet(void);
 void parse_QP_packet(void);
 void parse_SN_packet(void);
 void parse_QN_packet(void);

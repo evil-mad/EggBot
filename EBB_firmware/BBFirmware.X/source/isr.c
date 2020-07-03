@@ -275,6 +275,8 @@ PORTDbits.RD1 = 1;
       // Check to see if we should change the state of the pen
       else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
       {
+/// TODO: This needs to be updated to look at the position of Motor3, and 
+/// flip the solenoid output (RB4) if the motor position has moved past a threshold
         if (gUseRCPenServo)
         {
           // Precompute the channel, since we use it all over the place
@@ -314,7 +316,7 @@ PORTDbits.RD1 = 1;
         if (FIFO_ServoRPn[FIFOOut] == g_servo2_RPn)
         {
           // Then set its new state based on the new position
-          if (FIFO_ServoPosition[FIFOOut] == g_servo2_min)
+          if (FIFO_ServoPosition[FIFOOut] == gPenMinPosition)
           {
             PenState = PEN_UP;
             SolenoidState = SOLENOID_OFF;

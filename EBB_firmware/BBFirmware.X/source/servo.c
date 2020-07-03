@@ -101,6 +101,8 @@
  * commands are now just normal S2 commands in disguise.
  */
 
+/************** INCLUDES ******************************************************/
+
 #include <p18cxxx.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -113,7 +115,23 @@
 #include "parse.h"
 #include "utility.h"
 #include "isr.h"
+#include "stepper.h"
 
+/************** MODULE DEFINES ************************************************/
+
+
+// Power on default value for gPenMoveDuration in milliseconds
+#define PEN_MOVE_DURATION_DEFAULT_MS  500
+
+#if defined(BOARD_EBB)
+#define DEFAULT_PEN_MAX_POSITION_SERVO    15302   // max = down (SC,5,15302)
+#define DEFAULT_PEN_MIN_POSITION_SERVO    22565   // min = up (SC,4,22565)
+#else
+#define DEFAULT_PEN_MAX_POSITION_STEPPER  (200*32/4)  // max = down (SC,5) - 1/4 turn from home
+#define DEFAULT_PEN_MIN_POSITION_STEPPER  (200*32/2)  // min = up (SC,4) - 1/2 turn from home
+#endif
+
+/************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
 // Counts from 0 to gRC2SlotMS
 UINT8  gRC2msCounter;
@@ -134,18 +152,19 @@ UINT8  gRC2SlotMS;
 // Pointer into PPS output registers
 far ram UINT8 * gRC2RPORPtr;
 
-// Set TRUE to enable RC Servo output for pen up/down
-BOOL gUseRCPenServo;
-PenStateType PenState;
+// Records the current pen state (up/down) in reality
+PenStateType gPenStateActual;
+
+// Records the pen state that the commands coming from the PC think the pen is in
+// (Prevents duplicate pen up or pen down commands.)
+static PenStateType PenStateCommand;
 
 
-// These are the min, max, up rate, down rate, and RPn for the Pen Servo
+// These are the min, max, and default duration values for SP pen move command
 // They can be changed by using SC,x commands.
-UINT16 g_servo2_max;
-UINT16 g_servo2_min;
-UINT16 g_servo2_rate_up;
-UINT16 g_servo2_rate_down;
-UINT8  g_servo2_RPn;
+INT16 gPenMaxPosition;
+INT16 gPenMinPosition;
+UINT16 gPenMoveDuration;
 
 #if defined(BOARD_EBB)
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
@@ -153,88 +172,29 @@ volatile UINT32 gRCServoPoweroffCounterMS = 0;
 volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 #endif
 
-/*
-The idea with servo is to use the ECCP2 module and timer 3.
-We divide time into 24ms periods. Inside each 24ms period, we
-can fire up to 8 RC servo's pulses (slots). Each pulse can be between
-0ms and 3ms long, controlled entirely by the ECCP2 hardware,
-so there is no jitter in the high time of the pulse.
+/************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-We want to go from 0ms to 3ms so we can accomodate RC servos
-who need really short or really long pulses to reach the
-physical extremes of its motion.
+static void PenHome(void);
+static UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+static UINT8 servo_get_channel_from_RPn(UINT8 RPn);
 
-This servo method will only be available on the 18F45J50 based
-EggBotBoards, because it requires the PPS (peripheral pin select)
-facility to be possible.
+/************** LOCAL FUNCTIONS ***********************************************/
 
-Timer3 will be configured to clock at Fosc/4 = 12MHz.
-At this rate, a 1ms high pulse would need a CCPR2 value of 12,000.
+// Perform all of the things necessary to initialize the pen position.
+// Not much to do when using a servo, but for a stepper Motor3 must be 
+// driven past the lowest position, limped, a pause, 
+// then a move from the home (lowest) position to the bottom position 
+// (gPenMaxPosition)
+// /// TODO : Once suitable mechanicals have been constructed, convert the
+// simplified code below over to what is talked about above (using hardstop
+// homing)
+static void PenHome(void)
+{  
+  gPenStateActual = PEN_DOWN;
+  PenStateCommand = PEN_DOWN;
 
-Variables:
-
-gRC2msCounter - counts from 0 to 2, in ms, to know when to fire each servo
-gRC2Ptr - index into gRC2Value and gRC2Pin arrays = next RC servo to fire
-gRC2Value - uint array of values (times) to load into Timer3
-gRC2Pin - what PPS pin is affected by this RC servo slot.
-gRC2RPORPtr - a RAM pointer into the RPORxx register
-
-If a slot's gRC2Value[] = 0, then that slot is disabled and its pin will be low.
-The value in gRC2Pin is the PPS RPx pin number that this slot controls
-
-/*
- * Module Init Function
- *
- * Put a call to this function inside the UserInit() call in UBW.c
- */
-void servo_Init(void)
-{
-  unsigned char i;
-
-  gRC2msCounter = 0;
-  gRC2Ptr = 0;
-
-  for (i=0; i < MAX_RC2_SERVOS; i++)
-  {
-    gRC2Value[i] = 0;
-    gRC2RPn[i] = 0;
-    gRC2Target[i] = 0;
-    gRC2Rate[i] = 0;
-  }
-  // Initialize the RPOR pointer
-  gRC2RPORPtr = &RPOR0;
-
-  // Set up TIMER3
-  T3CONbits.TMR3CS = 0b00;    // Use Fosc/4 as input
-  T3CONbits.T3CKPS = 0b00;    // Prescale is 1:1
-  T3CONbits.RD16 = 1;         // Enable 16 bit mode
-  TMR3H = 0;
-  TMR3L = 0;
-  T3CONbits.TMR3ON = 0;       // Keep timer off for now
-
-  TCLKCONbits.T3CCP1 = 1;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-  TCLKCONbits.T3CCP2 = 0;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-
-  CCP2CONbits.CCP2M = 0b1001; // Set EECP2 as compare, clear output on match
-
-  // We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
-  gRC2Slots = INITAL_RC2_SLOTS;
-
-  // We start out with 3ms slot duration because it's good for RC servos
-  gRC2SlotMS = 3;
-
-    // Start with some reasonable default values for min and max
-  g_servo2_max = 15302;           // max = down (SC,5,15302)
-  g_servo2_min = 22565;           // min = up (SC,4,22565)
-
-  g_servo2_RPn = DEFAULT_EBB_SERVO_RPN;   // Always start out with RP4 as the output (just for this test version of code)
-
-  g_servo2_rate_up = 400;
-  g_servo2_rate_down = 400;
-  process_SP(PEN_UP, 0);            // Start servo up
-#if defined(BOARD_EBB)
-  RCServoPowerIO = RCSERVO_POWER_OFF;
-#endif
+  // Execute a move from homed to the lower pen position
+  process_SM(500, 0, 0, gPenMaxPosition);
 }
 
 // Return the current channel that is associated with the PPS output pin
@@ -243,7 +203,7 @@ void servo_Init(void)
 // (which is considered an error.)
 // Remember, channels are from 1 through 8 (Normally - can be increased with 
 // SC,8 command). Channel 0 is the 'error' channel.
-UINT8 servo_get_channel_from_RPn(UINT8 RPn)
+static UINT8 servo_get_channel_from_RPn(UINT8 RPn)
 {
   UINT8 i;
 
@@ -271,149 +231,6 @@ UINT8 servo_get_channel_from_RPn(UINT8 RPn)
   return 0;
 }
 
-
-
-// Set Pen
-// Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
-// <State> is 0 (for goto servo_max) or 1 (for goto servo_min)
-// <Duration> is how long to wait before the next command in the motion control 
-//      FIFO should start. (defaults to 0mS)
-//      Note that the units of this parameter is either 1ms
-// <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
-//      RC Servo output to different PortB pins.
-// This is a command that the user can send from the PC to set the pen state.
-// Note that there is only one pen RC servo output - if you use the <PortB_Pin>
-// parameter, then that new pin becomes the pen RC servo output. This command
-// does not allow for multiple servo signals at the same time from port B pins.
-// Use the S2 command for that.
-//
-// This function will use the values for <serv_min>, <servo_max>,
-// <servo_rate_up> and <servo_rate_down> (SC,4 SC,5, SC,11, SC,10 commands)
-// when it schedules the servo command.
-// 
-// Internally, the parse_SP_packet() function makes a call to
-// process_SP() function to actually make the change in the servo output.
-//
-void parse_SP_packet(void)
-{
-  UINT8 State = 0;
-  UINT16 CommandDuration = 0;
-  UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
-  ExtractReturnType Ret;
-
-  // Extract each of the values.
-  extract_number (kUCHAR, &State, kREQUIRED);
-  extract_number (kUINT, &CommandDuration, kOPTIONAL);
-  Ret = extract_number (kUCHAR, &Pin, kOPTIONAL);
-
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-    // Error check
-  if (Pin > 7)
-  {
-    Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
-  }
-
-  if (State > 1)
-  {
-      State = 1;
-  }
-
-  // Set the PRn of the Pen Servo output
-  // Add 3 to get from PORTB pin number to RPn number
-  if (g_servo2_RPn != (Pin + 3))
-  {
-    // if we are changing which pin the pen servo is on, we need to cancel
-    // the servo output on the old channel first
-    servo_Move(0, g_servo2_RPn, 0, 0);
-    // Now record the new RPn
-    g_servo2_RPn = Pin + 3;
-  }
-
-  // Execute the servo state change
-  process_SP(State, CommandDuration);
-    
-  print_ack();
-}
-
-// Internal use function -
-// Perform a state change on the pen RC servo output. Move it up or move it down
-// <NewState> is either PEN_UP or PEN_DOWN.
-// <CommandDuration> is the number of milliseconds to wait before executing the
-//      next command in the motion control FIFO
-//
-// This function uses the g_servo2_min, max, rate_up, rate_down variables
-// to schedule an RC Servo change with the servo_Move() function.
-//
-void process_SP(PenStateType NewState, UINT16 CommandDuration)
-{
-  UINT16 Position;
-  UINT16 Rate;
-
-  if (NewState == PEN_UP)
-  {
-    Position = g_servo2_min;
-    Rate = g_servo2_rate_up;
-  }
-  else
-  {
-    Position = g_servo2_max;
-    Rate = g_servo2_rate_down;
-  }
-
-#if defined(BOARD_EBB)
-  RCServoPowerIO = RCSERVO_POWER_ON;
-  gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-#endif
-  
-  // Now schedule the movement with the servo function
-  servo_Move(Position, g_servo2_RPn, Rate, CommandDuration);
-}
-
-// Servo method 2 enable command
-// S2,<duration>,<output_pin>,<rate>,<delay><CR>
-//  will set RC output <channel> for <duration> on output pin <output_pin>
-//    <duration> can be 0 (output off) to 32,000 (3ms on time)
-//      (a 0 for <duration> de-allocates the channel for this output_pin)
-//    <output_pin> is an RPn pin number (0 through 24)
-//    <rate> is the rate to change (optional, defaults to 0 = instant)
-//    <delay> is the number of milliseconds to delay the start of the next command
-//      (optional, defaults to 0 = instant)
-
-void servo_S2_command (void)
-{
-  UINT16 Duration = 0;
-  UINT8 Pin = 0;
-  UINT16 Rate = 0;
-  UINT16 Delay = 0;
-
-  // Extract each of the values.
-  extract_number (kUINT, &Duration, kOPTIONAL);
-  extract_number (kUCHAR, &Pin, kOPTIONAL);
-  extract_number (kUINT, &Rate, kOPTIONAL);
-  extract_number (kUINT, &Delay, kOPTIONAL);
-
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  if (Pin > 24)
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-
-  servo_Move(Duration, Pin, Rate, Delay);
-
-  print_ack();
-}
-
 // Function to set up an RC Servo move. Takes Duration, RPn, and Rate
 // and adds them to the motion control fifo.
 // <Position> is the new target position for the servo, in 83uS units. So
@@ -432,7 +249,7 @@ void servo_S2_command (void)
 // Another thing we do here is to make sure that the proper pin is an output,
 // And, if this is the first time we're starting up the channel, make sure that
 // it starts out low.
-UINT8 servo_Move(
+static UINT8 servo_Move(
   UINT16 Position,
   UINT8  RPn,
   UINT16 Rate,
@@ -506,3 +323,263 @@ UINT8 servo_Move(
   }
   return Channel;
 }
+
+/************** GLOBAL FUNCTIONS **********************************************/
+
+/*
+The idea with servo is to use the ECCP2 module and timer 3.
+We divide time into 24ms periods. Inside each 24ms period, we
+can fire up to 8 RC servo's pulses (slots). Each pulse can be between
+0ms and 3ms long, controlled entirely by the ECCP2 hardware,
+so there is no jitter in the high time of the pulse.
+
+We want to go from 0ms to 3ms so we can accomodate RC servos
+who need really short or really long pulses to reach the
+physical extremes of its motion.
+
+This servo method will only be available on the 18F45J50 based
+EggBotBoards, because it requires the PPS (peripheral pin select)
+facility to be possible.
+
+Timer3 will be configured to clock at Fosc/4 = 12MHz.
+At this rate, a 1ms high pulse would need a CCPR2 value of 12,000.
+
+Variables:
+
+gRC2msCounter - counts from 0 to 2, in ms, to know when to fire each servo
+gRC2Ptr - index into gRC2Value and gRC2Pin arrays = next RC servo to fire
+gRC2Value - uint array of values (times) to load into Timer3
+gRC2Pin - what PPS pin is affected by this RC servo slot.
+gRC2RPORPtr - a RAM pointer into the RPORxx register
+
+If a slot's gRC2Value[] = 0, then that slot is disabled and its pin will be low.
+The value in gRC2Pin is the PPS RPx pin number that this slot controls
+
+/*
+ * Module Init Function
+ *
+ * Put a call to this function inside the UserInit() call in UBW.c
+ */
+void servo_Init(void)
+{
+  unsigned char i;
+
+  gRC2msCounter = 0;
+  gRC2Ptr = 0;
+  gPenMoveDuration = PEN_MOVE_DURATION_DEFAULT_MS;
+
+  for (i=0; i < MAX_RC2_SERVOS; i++)
+  {
+    gRC2Value[i] = 0;
+    gRC2RPn[i] = 0;
+    gRC2Target[i] = 0;
+    gRC2Rate[i] = 0;
+  }
+  // Initialize the RPOR pointer
+  gRC2RPORPtr = &RPOR0;
+
+  // Set up TIMER3
+  T3CONbits.TMR3CS = 0b00;    // Use Fosc/4 as input
+  T3CONbits.T3CKPS = 0b00;    // Prescale is 1:1
+  T3CONbits.RD16 = 1;         // Enable 16 bit mode
+  TMR3H = 0;
+  TMR3L = 0;
+  T3CONbits.TMR3ON = 0;       // Keep timer off for now
+
+  TCLKCONbits.T3CCP1 = 1;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+  TCLKCONbits.T3CCP2 = 0;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+
+  CCP2CONbits.CCP2M = 0b1001; // Set EECP2 as compare, clear output on match
+
+  // We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
+  gRC2Slots = INITAL_RC2_SLOTS;
+
+  // We start out with 3ms slot duration because it's good for RC servos
+  gRC2SlotMS = 3;
+
+  // Start with some reasonable default values for min and max pen positions
+#if defined(BOARD_EBB)
+  gPenMaxPosition = DEFAULT_PEN_MAX_POSITION_SERVO;
+  gPenMinPosition = DEFAULT_PEN_MIN_POSITION_SERVO;
+#else
+  gPenMaxPosition = DEFAULT_PEN_MAX_POSITION_STEPPER;
+  gPenMinPosition = DEFAULT_PEN_MIN_POSITION_STEPPER;
+#endif
+  
+  PenHome();
+  
+#if defined(BOARD_EBB)
+  RCServoPowerIO = RCSERVO_POWER_OFF;
+#endif
+}
+
+// Set Pen (modified for v3.0.0 and above firmware)
+// Usage: SP,<state>[,duration]<CR>
+// <state> is 0 (for goto servo_max) or 1 (for goto servo_min)
+// <duration> (optional) is the length of time this move should take in ms 
+//  (<duration> is a 16 bit unsigned int)
+//  (Note that the global <pen_move_duration> will be used if no parameter
+//   value is specified for <duration>.)
+//
+// This is a command that the user can send from the PC to set the pen state.
+//
+// Sending an SP command will get it inserted into the motion queue just like
+// any other motion command. The SP command will not begin until the previous
+// motion command has finished. Thus there will be no stepper movement during
+// the pen move. As soon as the SP move is complete, the next command in the 
+// motion queue will be executed.
+//
+// This function will use the values for <serv_min>, <servo_max>,
+// (SC,4 SC,5 commands) when it schedules the pen move for the destination
+// position.
+// 
+// Internally, the parse_SP_packet() function makes a call to
+// process_SP() function to actually make the change in the servo output.
+//
+void parse_SP_packet(void)
+{
+  UINT8 State = 0;
+  UINT16 CommandDuration = gPenMoveDuration;
+
+  // Extract each of the values.
+  extract_number (kUCHAR, &State, kREQUIRED);
+  extract_number (kUINT, &CommandDuration, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (State > 1)
+  {
+    State = 1;
+  }
+
+  // Execute the servo state change
+  process_SP(State, CommandDuration);
+    
+  print_ack();
+}
+
+// Toggle Pen
+// Usage: TP,<duration><CR>
+// Returns: OK<CR>
+// <duration> is optional, and defaults to 0mS
+// Just toggles state of pen arm, then delays for the optional <duration>
+// Duration is in units of 1ms
+void parse_TP_packet(void)
+{
+  UINT16 CommandDuration = gPenMoveDuration;
+
+  // Extract each of the values.
+  extract_number (kUINT, &CommandDuration, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (PenStateCommand == PEN_UP)
+  {
+    process_SP(PEN_DOWN, CommandDuration);
+  }
+  else
+  {
+    process_SP(PEN_UP, CommandDuration);
+  }
+
+  print_ack();
+}
+
+// Helper function :
+// Perform a state change on the pen. Move it up or move it down.
+// For 3BB, this will result in Motor3 moving to the new position.
+// For EBB, the 3rd stepper axis movement is mapped to RB1 as an RC servo pulse
+//
+// <NewState> is either PEN_UP or PEN_DOWN.
+// <CommandDuration> is the number of milliseconds that the move must take
+//  (Note: If <CommandDuration> is 0, then the global default value of
+//   gPenMoveDuration is used.)
+//
+// This function uses the gPenMinPosition and gPenMaxPosition as targets for the
+// pen's movement. It simply generates an process_SM() call to schedule the
+// move.
+void process_SP(PenStateType newState, UINT16 commandDuration)
+{
+  INT16 steps;
+  
+  if (commandDuration == 0)
+  {
+    commandDuration = gPenMoveDuration;
+  }
+  
+  // Only send a new command if the pen state is changing from what our last
+  // commanded state was. We don't want to send multiple relative moves commands
+  // in the same direction to the stepper as it will go out of bounds.
+  if (PenStateCommand != newState)
+  {
+    if (newState == PEN_UP)
+    {
+      steps = gPenMinPosition-gPenMaxPosition;
+    }
+    else
+    {
+      steps = -(gPenMinPosition-gPenMaxPosition);
+    }
+
+#if defined(BOARD_EBB)
+    RCServoPowerIO = RCSERVO_POWER_ON;
+    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+#endif
+  
+    // Use the process_SM() command to schedule the move
+    process_SM(commandDuration, 0, 0, steps);
+    
+    // Now that we've sent the move command off to the motion FIFO, record
+    // the new commanded pen state
+    PenStateCommand = newState;
+  }
+}
+
+// Servo method 2 enable command
+// S2,<duration>,<output_pin>,<rate>,<delay><CR>
+//  will set RC output <channel> for <duration> on output pin <output_pin>
+//    <duration> can be 0 (output off) to 32,000 (3ms on time)
+//      (a 0 for <duration> de-allocates the channel for this output_pin)
+//    <output_pin> is an RPn pin number (0 through 24)
+//    <rate> is the rate to change (optional, defaults to 0 = instant)
+//    <delay> is the number of milliseconds to delay the start of the next command
+//      (optional, defaults to 0 = instant)
+
+void servo_S2_command (void)
+{
+  UINT16 Duration = 0;
+  UINT8 Pin = 0;
+  UINT16 Rate = 0;
+  UINT16 Delay = 0;
+
+  // Extract each of the values.
+  extract_number (kUINT, &Duration, kOPTIONAL);
+  extract_number (kUCHAR, &Pin, kOPTIONAL);
+  extract_number (kUINT, &Rate, kOPTIONAL);
+  extract_number (kUINT, &Delay, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (Pin > 24)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  servo_Move(Duration, Pin, Rate, Delay);
+
+  print_ack();
+}
+

@@ -37,9 +37,8 @@ unsigned char QC_ms_timer;
 UINT StoredEngraverPower;
 
 // Stepper (mode) Configure command
-// SC,1,0<CR> will use just solenoid output for pen up/down
-// SC,1,1<CR> will use servo on RB1 for pen up/down
-// SC,1,2<CR> will use servo on RB1 for pen up/down, but with ECCP2 (PWM) in hardware (default)
+// SC,1,0<CR> will disable the solenoid (RB4) output for pen up/down
+// SC,1,1<CR> will enable the solenoid (RB4) output for pen up/down (default)
 // SC,2,0<CR> will make PIC control drivers (default)
 // SC,2,1<CR> will make PIC control external drivers using these pins
 //    ENABLE1 = RD1
@@ -49,15 +48,15 @@ UINT StoredEngraverPower;
 //    STEP2 = RA5
 //    DIR2 = RA2
 // SC,2,2<CR> will disconnect PIC from drivers and allow external step/dir source
-// SC,4,<servo2_min><CR> will set <servo2_min> as the minimum value for the servo (1 to 65535)
-// SC,5,<servo2_max><CR> will set <servo2_max> as the maximum value for the servo (1 to 65535)
-// SC,6,<servo_min><CR> will set <servo_min> as the minimum value for the servo (1 to 11890)
-// SC,7,<servo_max><CR> will set <servo_max> as the maximum value for the servo (1 to 11890)
+// FOR EBB
+// SC,4,<gPenMinPosition><CR> will set the minimum value for the pen servo (1 to 11890)
+// SC,5,<gPenMaxPosition><CR> will set the maximum value for the pen servo (1 to 11890)
+// FOR 3BB
+// SC,4,<gPenMinPosition><CR> will set the minimum value for the pen stepper (1 to 32767 in microsteps)
+// SC,5,<gPenMaxPosition><CR> will set the maximum value for the pen stepper (1 to 32767 in microsteps)
 // SC,8,<servo2_slots><CR> sets the number of slots for the servo2 system (1 to 24)
 // SC,9,<servo2_slotMS><CR> sets the number of ms in duration for each slot (1 to 6)
-// SC,10,<servo2_rate><CR> sets the rate of change for the servo (both up and down)
-// SC,11,<servo2_rate><CR> sets the pen up speed
-// SC,12,<servo2_rate><CR> sets the pen down speed
+// SC,10,<gPenMoveDuration><CR> set the new global default pen move duration in ms (16 bit uint)
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
 void parse_SC_packet (void)
@@ -75,31 +74,20 @@ void parse_SC_packet (void)
     return;
   }
 
-  // Check for command to select which (solenoid/servo) gets used for pen
+  // Check for command to enable/disable solenoid output (RB4) for pen up/down
   if (Para1 == 1)
   {
-    // Use just solenoid
+    // Disable use of solenoid output
     if (Para2 == 0)
     {
-      gUseSolenoid = TRUE;
-      gUseRCPenServo = FALSE;
-      // Turn off RC signal on Pen Servo output
-      servo_Move(0, g_servo2_RPn, 0, 0);
-    }
-    // Use just RC servo
-    else if (Para2 == 1)
-    {
       gUseSolenoid = FALSE;
-      gUseRCPenServo = TRUE;
+      /// TOTO: Turn off solenoid output here
     }
-    // Use solenoid AND servo (default)
     else
     {
       gUseSolenoid = TRUE;
-      gUseRCPenServo = TRUE;
+      /// TODO: Turn on solenoid output here (make sure RB4 is an output)
     }
-    // Send a new command to set the state of the servo/solenoid
-    process_SP(PenState, 0);
   }
 #if defined(BOARD_EBB)
   // Check for command to switch between built-in drivers and external drivers
@@ -161,15 +149,15 @@ void parse_SC_packet (void)
      }
   }
 #endif
-  // Set <min_servo> for Servo2 method
   else if (Para1 == 4)
   {
-    g_servo2_min = Para2;
+    // Set minimum position for pen
+    gPenMinPosition = (INT16)Para2;
   }
-  // Set <max_servo> for Servo2
   else if (Para1 == 5)
   {
-    g_servo2_max = Para2;
+    // Set maximum position for pen
+    gPenMaxPosition = (INT16)Para2;
   }
   // Set <gRC2Slots>
   else if (Para1 == 8)
@@ -190,18 +178,9 @@ void parse_SC_packet (void)
   }
   else if (Para1 == 10)
   {
-    g_servo2_rate_up = Para2;
-    g_servo2_rate_down = Para2;
+    gPenMoveDuration = Para2;
   }
-  else if (Para1 == 11)
-  {
-    g_servo2_rate_up = Para2;
-  }
-  else if (Para1 == 12)
-  {
-    g_servo2_rate_down = Para2;
-  }
-    else if (Para1 == 13)
+  else if (Para1 == 13)
   {
     if (Para2)
     {
@@ -255,42 +234,10 @@ void fprint(float f)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
-  printf((far rom char *)"%d\n\r", PenState);
+  printf((far rom char *)"%d\n\r", gPenStateActual);
 
   print_ack();
 }
-
-// Toggle Pen
-// Usage: TP,<duration><CR>
-// Returns: OK<CR>
-// <duration> is optional, and defaults to 0mS
-// Just toggles state of pen arm, then delays for the optional <duration>
-// Duration is in units of 1ms
-void parse_TP_packet(void)
-{
-  UINT16 CommandDuration = 0;
-
-  // Extract each of the values.
-  extract_number (kUINT, &CommandDuration, kOPTIONAL);
-
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  if (PenState == PEN_UP)
-  {
-    process_SP(PEN_DOWN, CommandDuration);
-  }
-  else
-  {
-    process_SP(PEN_UP, CommandDuration);
-  }
-
-  print_ack();
-}
-
 
 // Node counter increment
 // Usage: NI<CR>
@@ -449,7 +396,7 @@ void parse_QG_packet(void)
   // process_QM() gives us the low 4 bits of our output result.
   result = result & 0x0F;
 
-  if (PenState)
+  if (gPenStateActual)
   {
     result = result | (1 << 4);
   }

@@ -65,15 +65,15 @@ typedef enum
 #define DEFAULT_EBB_SERVO_RPN (DEFAULT_EBB_SERVO_PORTB_PIN + 3) // RPn number for default pen up/down servo
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
-// Set TRUE to enable RC Servo output for pen up/down
-extern BOOL gUseRCPenServo;
+extern UINT16 gPenMoveDuration;
 
 #if defined(BOARD_EBB)
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 #endif
 
-
+extern INT16 gPenMaxPosition;
+extern INT16 gPenMinPosition;
 extern UINT8 gRC2msCounter;
 extern UINT16 gRC2Value[MAX_RC2_SERVOS];
 extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
@@ -81,22 +81,16 @@ extern UINT8 gRC2Ptr;
 extern UINT16 gRC2Target[MAX_RC2_SERVOS];
 extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
 extern far ram UINT8 * gRC2RPORPtr;
-extern UINT16 g_servo2_max;
-extern UINT16 g_servo2_min;
 extern UINT8 gRC2Slots;
 extern UINT8 gRC2SlotMS;
-extern UINT16 g_servo2_rate_up;
-extern UINT16 g_servo2_rate_down;
-extern UINT8 g_servo2_RPn;
 
 // track the latest state of the pen
-extern PenStateType PenState;
+extern PenStateType gPenStateActual;
 
 void servo_Init(void);
 void parse_SP_packet(void);
 void servo_S2_command(void);
-UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
-
+void parse_TP_packet(void);
 
 #endif

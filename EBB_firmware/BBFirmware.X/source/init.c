@@ -234,7 +234,6 @@ void UserInit(void)
     USB_BUS_SENSE = 0;
   #endif
   gUseSolenoid = TRUE;
-  gUseRCPenServo = TRUE;
 
 #if defined(BOARD_EBB)
   // Set up pen up/down direction as output

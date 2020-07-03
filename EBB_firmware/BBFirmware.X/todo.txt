@@ -1,8 +1,31 @@
 Updated list of todo items for EBB/3BB refactor
 
+* From EBB issue #139 - make all return values consistent: repeat the command, then optional data, then a carriage return. 
+* From EBB issue #139 - make all commands two letters long
+* From EBB issue #139 - make all errors follow the above format (two character error code, followed by a fixed length text string describing the error, all semi-human readable)
+
+* Remove <servo_rate_up> and <servo_rate_down> as global SC command parameters
+* Added global <gPenMoveDuration> as global SC command parameter (for SP command)
+* Remove g_servo2_RPn (hard code to RP4)
+
+* On SC,4 and SC,5 check that Min is always a larger number than Max
+
 * Refactor I/O initialization
   - Make table of all I/O ports for each board, make I/O init smaller
   - 
+
+* Should we break out all "pen" functionality (SP, TP) into it's own file? Now that it's all stepper based, doesn't seem to fit in servo.c anymore
+
+* How to handle limping of pen stepper? At same time as others, or different command? Need to re-init to MAX position after turning power back on
+
+* Remove SC commands which allow for external stepper drivers 
+  - Remove from SC command 
+  - Remove from ISR
+
+* On EBB, RC Servo RB1 will ALWAYS be a pen output. No option to disable it.
+
+* Update all variable names to use common coding standard
+* Add section headers to all .c and .h files (defines, includes, variables, prototypes, etc.)
 
 * (3BB) Remove commands that don't make sense anymore, like RC Servo power control
 

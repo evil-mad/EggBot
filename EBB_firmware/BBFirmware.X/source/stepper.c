@@ -9,19 +9,12 @@
 #include "Compiler.h"
 #include "servo.h"
 #include "math.h"
+#include "stepper.h"
 
 
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
 #define OVERFLOW_MUL            (0x8000 / HIGH_ISR_TICKS_PER_MS)
-
-
-static void process_SM(
-  UINT32 Duration,
-  INT32 A1Stp,
-  INT32 A2Stp,
-  INT32 A3Stp
-);
 
 /* These values hold the global step position of each axis */
 volatile INT32 globalStepCounter1;
@@ -656,8 +649,8 @@ void parse_LM_packet (void)
 void parse_HM_packet (void)
 {
   UINT32 StepRate = 0;
-  INT32 Steps1 = 0, Steps2 = 0;
-  INT32 AbsSteps1 = 0, AbsSteps2 = 0;
+  INT32 Steps1 = 0, Steps2 = 0, Steps3 = 0;
+  INT32 AbsSteps1 = 0, AbsSteps2 = 0, AbsSteps3 = 0;
   UINT32 Duration = 0;
   UINT8 CommandExecuting = 1;
   INT32 XSteps = 0;
@@ -676,6 +669,7 @@ void parse_HM_packet (void)
   // Make a local copy of the things we care about. This is how far we need to move.
   Steps1 = -globalStepCounter1;
   Steps2 = -globalStepCounter2;
+  Steps3 = -globalStepCounter3;
 
   // Re-enable interrupts
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
@@ -697,15 +691,24 @@ void parse_HM_packet (void)
   {
     AbsSteps2 = Steps2;
   }
+  if (Steps3 < 0)
+  {
+    AbsSteps3 = -Steps3;
+  }
+  else
+  {
+    AbsSteps3 = Steps3;
+  }
     
   // Check for too many steps to step
-  if ((AbsSteps1 > 0xFFFFFF) || (AbsSteps2 > 0xFFFFFF))
+  if ((AbsSteps1 > 0xFFFFFF) || (AbsSteps2 > 0xFFFFFF) || (AbsSteps3 > 0xFFFFFF))
   {
-    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.\n\r");
+    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215 on at least one axis.\n\r");
     return;
   }
   
   // Compute duration based on step rate user requested. Take bigger step count to use for calculation
+/// TODO : UPdate this somehow to use third axis
   if (AbsSteps1 > AbsSteps2)
   {
     Duration = (AbsSteps1 * 1000) / StepRate;
@@ -804,7 +807,7 @@ void parse_HM_packet (void)
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   /// TODO: Add 3rd axis?
-  process_SM(Duration, Steps1, Steps2, 0);
+  process_SM(Duration, Steps1, Steps2, Steps3);
 
   if (g_ack_enable)
   {
@@ -923,12 +926,7 @@ void parse_XM_packet (void)
 //
 // In the future, making the FIFO more elements deep may be cool.
 // 
-static void process_SM(
-  UINT32 Duration,
-  INT32 A1Stp,
-  INT32 A2Stp,
-  INT32 A3Stp
-)
+void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
 {
   UINT32 temp = 0;
   UINT32 temp1 = 0;
@@ -944,7 +942,7 @@ static void process_SM(
   //    );
 
   // Check for delay
-  if (A1Stp == 0 && A2Stp == 0)
+  if (A1Stp == 0 && A2Stp == 0 && A3Stp == 0)
   {
     move.Command = COMMAND_DELAY;
     // This is OK because we only need to multiply the 3 byte Duration by
@@ -1085,7 +1083,6 @@ static void process_SM(
     move.StepAddInc[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
      
-#if defined(BOARD_3BB)
     if (A3Stp < 0x1FFFF) 
     {
       temp = (A3Stp << 15)/temp1;
@@ -1123,13 +1120,6 @@ static void process_SM(
     move.StepsCounter[2] = A3Stp;
     move.StepAddInc[2] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
-#elif defined(BOARD_EBB)
-    move.StepAdd[2] = 0;
-    move.StepsCounter[2] = 0;
-    move.StepAddInc[2] = 0;
-    move.Command = COMMAND_MOTOR_MOVE;
-#endif
-    
     
     /* For debugging step motion , uncomment the next line */
 
@@ -1154,11 +1144,10 @@ static void process_SM(
   FIFO_StepAdd[1][FIFOIn] = move.StepAdd[1];
   FIFO_StepAddInc[1][FIFOIn] = move.StepAddInc[1];
   FIFO_StepsCounter[1][FIFOIn] = move.StepsCounter[1];
-#if defined(BOARD_3BB)
+
   FIFO_StepAdd[2][FIFOIn] = move.StepAdd[2];
   FIFO_StepAddInc[2][FIFOIn] = move.StepAddInc[2];
   FIFO_StepsCounter[2][FIFOIn] = move.StepsCounter[2];
-#endif
   
   FIFO_DirBits[FIFOIn] = move.DirBits;
 
@@ -1376,6 +1365,7 @@ void clear_StepCounters(void)
   // Make a local copy of the things we care about
   globalStepCounter1 = 0;
   globalStepCounter2 = 0;
+  globalStepCounter3 = 0;
 
   // Re-enable interrupts
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
