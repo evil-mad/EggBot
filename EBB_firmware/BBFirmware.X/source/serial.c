@@ -115,6 +115,7 @@ void serial_Init(void)
   RCSTA2bits.SPEN = 1;
   TXSTA2bits.TXEN = 1;
   
+  /* Set up default general config settings */
   writeDatagram(1, GCONF, 0x000000C2);
   Delay100TCYx(100);
   readDatagram(1, GCONF);
@@ -127,7 +128,8 @@ void serial_Init(void)
   Delay100TCYx(100);
   readDatagram(3, GCONF);
   Delay100TCYx(100);
-
+  
+  /* Set up idle and run current levels */
   writeDatagram(1, IHOLD_RUN, 0x000021E1);
   Delay100TCYx(100);
   readDatagram(1, IHOLD_RUN);
@@ -140,6 +142,44 @@ void serial_Init(void)
   Delay100TCYx(100);
   readDatagram(3, IHOLD_RUN);
   Delay100TCYx(100);
+  
+  /* Set up default power-on stepper microstep resolutions */
+  
+  /* On boot, TMC2209 has the following values in CHOPCONF:
+   0x10010053
+   b0001 0000 0000 0001 0000 0000 1001 0111
+   
+   b31    0      : diss2vs : low side short protection disable : protection enabled
+   b30    0      : diss2g  : short to GND protection disable : protection enabled
+   b29    0      : dedge   : enable double edge step pulses : disabled
+   b28    1      : intpol  : interpoation to 256 microsteps : enabled
+   b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
+   b18:23 000000 : reserved
+   b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
+   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
+   b11:14 0000   : reserved
+   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
+   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
+   b0:3   0111   : toff    : TOFF off time and driver enable;
+   
+   Our default is 16x microstepping, so we are going to take the above default
+   and simply edit the microstep value:
+    
+   0x14010053
+   */
+  writeDatagram(1, CHOPCONF, 0x14010053);
+  Delay100TCYx(100);
+  readDatagram(1, CHOPCONF);
+  Delay100TCYx(100);
+  writeDatagram(2, CHOPCONF, 0x14010053);
+  Delay100TCYx(100);
+  readDatagram(2, CHOPCONF);
+  Delay100TCYx(100);
+  writeDatagram(3, CHOPCONF, 0x14010053);
+  Delay100TCYx(100);
+  readDatagram(3, CHOPCONF);
+  Delay100TCYx(100);
+  
 
 }
 

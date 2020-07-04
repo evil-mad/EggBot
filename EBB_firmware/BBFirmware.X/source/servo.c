@@ -127,8 +127,8 @@
 #define DEFAULT_PEN_MAX_POSITION_SERVO    15302   // max = down (SC,5,15302)
 #define DEFAULT_PEN_MIN_POSITION_SERVO    22565   // min = up (SC,4,22565)
 #else
-#define DEFAULT_PEN_MAX_POSITION_STEPPER  (200*32/4)  // max = down (SC,5) - 1/4 turn from home
-#define DEFAULT_PEN_MIN_POSITION_STEPPER  (200*32/2)  // min = up (SC,4) - 1/2 turn from home
+#define DEFAULT_PEN_MAX_POSITION_STEPPER  (200*16/4)  // max = down (SC,5) - 1/4 turn from home
+#define DEFAULT_PEN_MIN_POSITION_STEPPER  (200*16/2)  // min = up (SC,4) - 1/2 turn from home
 #endif
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
