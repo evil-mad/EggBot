@@ -5,9 +5,69 @@
 #include <usart.h>
 #include <delays.h>
 #include "TMC2209.h"
+#include "HardwareProfile.h"
+
+// Milliseconds between serial checks to see if drivers are online yet
+#define DRIVER_INIT_CHECK_PERIOD_MS 250
+
+// The number of 32-bit init values to send to the drivers over serial
+#define MAX_DRIVER_INIT_VALUES      4
+
+// Table of each address to send DriverInitTableValues to (coordinate with values)
+UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
+{
+  GSTAT,
+  GCONF,
+  IHOLD_RUN,
+  CHOPCONF
+};
+
+// Table of 32 values to send to drivers on init (coordinate with addresses)
+UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] = 
+{
+  /* Write a 1 to GSTAT's reset bit to clear it */
+  0x00000001,
+  
+  /* Set up default general config settings */
+  0x000000C2,     // GCONF
+
+  /* Set up idle and run current levels */
+  0x000021E1,     // IHOLD_RUN
+
+  /* Set up default power-on stepper microstep resolutions */
+  
+  /* On boot, TMC2209 has the following values in CHOPCONF:
+   0x10010053
+   b0001 0000 0000 0001 0000 0000 1001 0111
+   
+   b31    0      : diss2vs : low side short protection disable : protection enabled
+   b30    0      : diss2g  : short to GND protection disable : protection enabled
+   b29    0      : dedge   : enable double edge step pulses : disabled
+   b28    1      : intpol  : interpoation to 256 microsteps : enabled
+   b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
+   b18:23 000000 : reserved
+   b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
+   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
+   b11:14 0000   : reserved
+   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
+   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
+   b0:3   0111   : toff    : TOFF off time and driver enable;
+   
+   Our default is 16x microstepping, so we are going to take the above default
+   and simply edit the microstep value:
+    
+   0x14010053
+   */
+  0x14010053      // CHOPCONF
+};
+
+void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
+UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
+void CalcCRC(UINT8* datagram, UINT8 datagramLength);
+void InitDrivers(void);
 
 
-void calcCRC(UINT8* datagram, UINT8 datagramLength)
+void CalcCRC(UINT8* datagram, UINT8 datagramLength)
 {
   int i,j;
   UINT8* crc = datagram + (datagramLength-1); // CRC located in last byte of message
@@ -33,7 +93,7 @@ void calcCRC(UINT8* datagram, UINT8 datagramLength)
 }
 
 /* Create a 63 bit long datagram to send out to stepper drivers */
-void writeDatagram(UINT8 addr, UINT8 reg, UINT32 data)
+void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
 {
   UINT8 datagram[8];
   UINT8 i;
@@ -49,7 +109,7 @@ void writeDatagram(UINT8 addr, UINT8 reg, UINT32 data)
   datagram[4] = (data >> 16) & 0xFF;
   datagram[5] = (data >> 8) & 0xFF;
   datagram[6] = data & 0xFF;
-  calcCRC(&datagram[0], 8);
+  CalcCRC(&datagram[0], 8);
   
   // Send the full 64 bits out
   for (i=0; i < 8; i++)
@@ -60,12 +120,18 @@ void writeDatagram(UINT8 addr, UINT8 reg, UINT32 data)
 }
 
 /* Create a 32 bit long datagram to send out to stepper drivers requesting a
- * read of a particular register. Then read in the response from the driver. */
-UINT32 readDatagram(UINT8 addr, UINT8 reg)
+ * read of a particular register. Then read in the response from the driver.
+ * A timeout value of 500uS will be used - if the driver does not respond
+ * within that time, then the driver is not powered or something else is wrong
+ * and a value of 0x0000000 will be returned.
+ */
+UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
 {
   UINT8 datagram[8];
-  UINT8 i;
-  
+  UINT8 i, j;
+  UINT32 retval = 0;
+  volatile UINT8 dummy;
+
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -73,16 +139,132 @@ UINT32 readDatagram(UINT8 addr, UINT8 reg)
   }
   datagram[1] = addr;
   datagram[2] = reg & 0x7F;
-  calcCRC(&datagram[0], 4);
+  CalcCRC(&datagram[0], 4);
+  
+  // Clear and set CREN before every transaction to get rid of overrun error bit
+  // and clear out any bytes in the receive FIFO
+  dummy = RCREG2;
+  dummy = RCREG2;
+  RCSTA2bits.CREN = 0;
+  RCSTA2bits.CREN = 1;
   
   // Send the full 32 bits out
   for (i=0; i < 4; i++)
   {
     TXREG2 = datagram[i];
+    // Always read in the byte we just sent out so overrun bit doesn't get set
+    /// TODO: We could check this against what we just sent out and throw an error
+    /// if it's wrong. But what kind of error?
+DEBUG_A1_SET()
     while(!TXSTA2bits.TRMT);
+DEBUG_A1_CLEAR()
+    dummy = RCREG2;
   }
   
-  return 0;
+DEBUG_A0_SET()
+  // Zero out the datagram, as we'll reuse it for the reply
+  for (i=0; i < 8; i++)
+  {
+    datagram[i] = 0x00;
+  }
+
+  // Transmission of the last byte has finished
+  // Now immediately empty our UART's receive FIFO of any bytes in it
+  // Since it's a 2 deep FIFO, there will be 2 bytes in there (from the loopback
+  // during our send above)
+  if (PIR3bits.RC2IF)
+  {
+DEBUG_A5_SET()
+    dummy = RCREG2;
+DEBUG_A5_CLEAR()
+  }
+  if (PIR3bits.RC2IF)
+  {
+DEBUG_A5_SET()
+    dummy = RCREG2;
+DEBUG_A5_CLEAR()
+  }
+    
+  // This loop runs for about 500uS. During that time, any bytes that come
+  // from the driver chip are pulled in and stored. If none come in (because
+  // the driver isn't powered for example) then the loop finishes without seeing
+  // any bytes. The only danger here is that the driver takes more than the 
+  // total loop time to send all 8 bytes - in that case some of the last bytes
+  // would come after the loop was finished and would get missed. This situation
+  // is helped out because taking in bytes takes time, which extends the total
+  // duration of the loop
+  i=0;
+  for (j=0; j < 35; j++)
+  {
+DEBUG_A1_SET()
+    if (PIR3bits.RC2IF)
+    {
+DEBUG_A5_SET()
+      // Read out our data byte
+      datagram[i] = RCREG2;
+      i++;
+
+      // If we've got all of the datagram from the driver, then no point in
+      // doing more timing loop looking for more bytes. So break out.
+      if (i == 8)
+      {
+        // We have a full answer, so check to see if the CRC is correct, 
+        // and if it is, then copy the data over to the result value and 
+        // leave.
+        
+        /// TOOD: Is it necessary to check CRC every time here? What do we do
+        /// if we get an error? Higher level retries? Ugh.
+        
+        
+        /// TODO: There's got to be a faster way of doing this even on this PIC
+        retval = datagram[3];
+        retval = (retval << 8) | datagram[4];
+        retval = (retval << 8) | datagram[5];
+        retval = (retval << 8) | datagram[6];
+        
+DEBUG_A5_CLEAR()
+DEBUG_A1_CLEAR()
+        break;
+      }
+      // Check for framing error or overrun error bits
+DEBUG_A5_CLEAR()
+      // If we got a byte then extend our outer loop a bit
+      j=0;
+    }
+
+DEBUG_A1_CLEAR()  
+  
+    Delay10TCYx(4);
+  }
+
+DEBUG_A0_CLEAR()
+
+  return retval;
+}
+
+/*
+ * Walk through each of the values in the table that we want to send to the
+ * drivers, and send them out, with a little delay in between.
+ */
+void InitDrivers(void)
+{
+  UINT8 i;
+  
+  for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
+  {
+    // For now, we're going to send exactly the same thing to each of the three
+    // stepper drivers. This will need to change if we don't want exactly the
+    // same values going to all three.
+    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    Delay100TCYx(20);
+    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    Delay100TCYx(20);
+    WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    Delay100TCYx(20);
+  }
+  
+  // Enable the drivers by setting their enable pin low
+  EnableIO = 0;
 }
 
 /* Initialize EUSART2 to talk to the three TMC2209 stepper drivers.
@@ -114,73 +296,33 @@ void serial_Init(void)
   // And finally turn the UART on
   RCSTA2bits.SPEN = 1;
   TXSTA2bits.TXEN = 1;
-  
-  /* Set up default general config settings */
-  writeDatagram(1, GCONF, 0x000000C2);
-  Delay100TCYx(100);
-  readDatagram(1, GCONF);
-  Delay100TCYx(100);
-  writeDatagram(2, GCONF, 0x000000C2);
-  Delay100TCYx(100);
-  readDatagram(2, GCONF);
-  Delay100TCYx(100);  
-  writeDatagram(3, GCONF, 0x000000C2);
-  Delay100TCYx(100);
-  readDatagram(3, GCONF);
-  Delay100TCYx(100);
-  
-  /* Set up idle and run current levels */
-  writeDatagram(1, IHOLD_RUN, 0x000021E1);
-  Delay100TCYx(100);
-  readDatagram(1, IHOLD_RUN);
-  Delay100TCYx(100);
-  writeDatagram(2, IHOLD_RUN, 0x000021E1);
-  Delay100TCYx(100);
-  readDatagram(2, IHOLD_RUN);
-  Delay100TCYx(100);
-  writeDatagram(3, IHOLD_RUN, 0x000021E1);
-  Delay100TCYx(100);
-  readDatagram(3, IHOLD_RUN);
-  Delay100TCYx(100);
-  
-  /* Set up default power-on stepper microstep resolutions */
-  
-  /* On boot, TMC2209 has the following values in CHOPCONF:
-   0x10010053
-   b0001 0000 0000 0001 0000 0000 1001 0111
-   
-   b31    0      : diss2vs : low side short protection disable : protection enabled
-   b30    0      : diss2g  : short to GND protection disable : protection enabled
-   b29    0      : dedge   : enable double edge step pulses : disabled
-   b28    1      : intpol  : interpoation to 256 microsteps : enabled
-   b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
-   b18:23 000000 : reserved
-   b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
-   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
-   b11:14 0000   : reserved
-   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
-   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
-   b0:3   0111   : toff    : TOFF off time and driver enable;
-   
-   Our default is 16x microstepping, so we are going to take the above default
-   and simply edit the microstep value:
-    
-   0x14010053
-   */
-  writeDatagram(1, CHOPCONF, 0x14010053);
-  Delay100TCYx(100);
-  readDatagram(1, CHOPCONF);
-  Delay100TCYx(100);
-  writeDatagram(2, CHOPCONF, 0x14010053);
-  Delay100TCYx(100);
-  readDatagram(2, CHOPCONF);
-  Delay100TCYx(100);
-  writeDatagram(3, CHOPCONF, 0x14010053);
-  Delay100TCYx(100);
-  readDatagram(3, CHOPCONF);
-  Delay100TCYx(100);
-  
-
 }
 
-
+/*
+ * Called from main loop every time through. Main task here is to check to see
+ * if the stepper drivers just came on line (i.e. were just powered by 12V).
+ * If they did, then we need to intialize them ASAP. We do this by sending
+ * out a simple read request for a register on one of the driver chips. At an
+ * address that we know won't return all zeros for a reply. Then we see if
+ * anything comes back from the driver chip. If not, then they still aren't
+ * powered yet. If so, then they are, and if this is the first response since
+ * no response, then initialize them.
+ */
+void serial_Run(void)
+{
+  static UINT32 LastCheckTimeMS = 0;
+  UINT32 currentTimeMS = GetTick();
+  UINT32 result = 0;
+  
+  if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
+  {
+    LastCheckTimeMS = currentTimeMS;
+    
+    result = ReadDatagram(1, GSTAT);
+    
+    if (result & 0x00000001)
+    {
+      InitDrivers();
+    }
+  }
+}

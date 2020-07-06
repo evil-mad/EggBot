@@ -90,6 +90,7 @@
 #include "usb_config.h"
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
+#include "serial.h"
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata
@@ -196,6 +197,7 @@ void main(void)
     // Application-specific tasks.
     // Application related code may be added here, or in the ProcessIO() function.
     ProcessIO();
+    serial_Run();
   }//end while
 }//end main
 

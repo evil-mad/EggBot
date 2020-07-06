@@ -20,6 +20,8 @@ static unsigned char AllDone;
 // Accumulators (at 25Khz) used to determine when to take a step
 static UINT32 StepAcc[NUMBER_OF_STEPPERS];
 
+// Constantly incrimenting every 1ms in ISR global tick counter
+volatile UINT32 TickCounterMS = 0;
 
 // Used only in LowISR
 
@@ -597,6 +599,10 @@ void low_ISR(void)
       }
     }
 #endif
+    
+    // Keep track of global time
+    TickCounterMS++;
+    
   } // end of 1ms interrupt
 
   // Do we have an analog interrupt?

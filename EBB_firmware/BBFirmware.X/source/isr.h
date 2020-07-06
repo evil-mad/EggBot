@@ -8,6 +8,7 @@
 #ifndef ISR_H
 #define	ISR_H
 
+#include <GenericTypeDefs.h>
 
 
 // Reload value for TIMER1
@@ -26,6 +27,8 @@
 
 #define kPR4_RELOAD             250               // For 1ms TMR4 tick
 
+// Tick counter. Increments every 1ms in interrupt
+volatile extern UINT32 TickCounterMS;
 
 void high_ISR(void);
 void low_ISR(void);

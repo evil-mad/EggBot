@@ -93,6 +93,7 @@ BOOL SwitchIsPressed (void);    // Check to see if the user (PRG) switch is pres
 void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
 void populateDeviceStringWithName(void);
+UINT32 GetTick(void);
 void parse_ST_packet(void);    // ST Set Tag command
 void parse_QT_packet(void);    // QT Query Tag command
 

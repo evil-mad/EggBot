@@ -10,7 +10,7 @@
 
 /* Register addresses */
 #define GCONF         0x00
-#define GSTSAT        0x01
+#define GSTAT         0x01
 #define IFCNT         0x02
 #define SLAVECONF     0x03
 #define OTP_PROG      0x04

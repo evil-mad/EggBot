@@ -7,6 +7,7 @@
 #include "utility.h"
 #include <flash.h>
 #include "parse.h"
+#include "isr.h"
 
 
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
@@ -312,6 +313,31 @@ void populateDeviceStringWithName(void)
   // we copied over from Flash
   *(USB_SD_Ptr[2]) = 24 + (i * 2);
   *(USB_SD_Ptr[3]) = 2 + (i * 2);
+}
+
+/*
+ * Disables the 1Khz interrupt, grabs a copy of the 32-bit millisecond tick 
+ * counter, re-enables the interrupt, and returns the value. The reason we have
+ * to jump through this hoop just to read the time value is because this is an
+ * 8-bit processor, so copies of 32 bit values are not atomic. Thus, without
+ * the interrupt protection here, we could start to copy, then get interrupted
+ * which could change the tick counter, then finish the copy with a corrupted
+ * value.
+ */
+UINT32 GetTick(void)
+{
+  UINT32 retval = 0;
+  
+  // Disable the 1KHz interrupt
+  PIE3bits.TMR4IE = 0;
+  
+  // Grab a copy of the time
+  retval = TickCounterMS;
+  
+  // Re-enable the 1KHz interrupt
+  PIE3bits.TMR4IE = 1;
+
+  return(retval);
 }
 
 // ST command : Set Tag

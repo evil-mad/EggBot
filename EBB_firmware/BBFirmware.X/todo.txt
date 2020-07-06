@@ -10,6 +10,16 @@ Updated list of todo items for EBB/3BB refactor
 
 * On SC,4 and SC,5 check that Min is always a larger number than Max
 
+* Add IMMEDIATE/FIFO parameter to PO commands
+
+* Make sure you can set the FIFO depth to zero, which requires immediate execution of all commands (even motion control ones)
+
+* Make sure that if you change the FIFO size, and there are items in the FIFO, they do not get deleted. All commands must finish properly.
+  - If you have the fifo size set to 10, and you have 10 items in it, then set it to 0, those 10 commands can't get lost.
+
+* Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered via the 250ms poll)
+
+
 * Refactor I/O initialization
   - Make table of all I/O ports for each board, make I/O init smaller
   - 

@@ -21,24 +21,23 @@ void UserInit(void)
 {
   int  i, j;
 
-  DEBUG_INIT()
-#if defined(BOARD_3BB)
-  serial_Init();
-#endif
-
-  // Make all of 3 digital inputs
+  // Make all of PORTa inputs
   LATA = 0x00;
   TRISA = 0xFF;
-
-  // Turn off our own idea of how many analog channels to convert
-  AnalogEnabledChannels = 0;
-
   // Make all of PORTB inputs
   LATB = 0x00;
   TRISB = 0xFF;
   // Make all of PORTC inputs
   LATC = 0x00;
   TRISC = 0xFF;
+
+  DEBUG_INIT()          // This needs to be AFTER we make all pins inputs
+#if defined(BOARD_3BB)
+  serial_Init();
+#endif
+
+  // Turn off our own idea of how many analog channels to convert
+  AnalogEnabledChannels = 0;
 
   // Initialize LED I/Os to outputs
   mInitAllLEDs();
@@ -181,8 +180,8 @@ void UserInit(void)
   Enable2IO = 1;
   Enable2IO_TRIS = OUTPUT_PIN;
 #elif defined(BOARD_3BB)
-  /// TODO: Default EN low (ENABLE), later, set to high (DISABLE) when normal enable code working for 3BB
-  EnableIO = 0;
+  /// TODO: Default EN high (DISABLED), later, on driver init, set low
+  EnableIO = 1;
   EnableIO_TRIS = OUTPUT_PIN;
 
 #endif
