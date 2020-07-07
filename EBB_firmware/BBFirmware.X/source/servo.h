@@ -92,5 +92,6 @@ void parse_SP_packet(void);
 void servo_S2_command(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 void parse_TP_packet(void);
+void PenHome(void);
 
 #endif

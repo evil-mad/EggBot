@@ -11,6 +11,7 @@
 #include "servo.h"
 #include "solenoid.h"
 #include "commands.h"
+#include "utility.h"
 
 /// TODO: Move these into ISR function body?
 static unsigned char OutByte;
@@ -497,7 +498,7 @@ void low_ISR(void)
         INTCONbits.GIEH = 1;
       }
     }
-
+#if 0
     /// TODO: IS this necessary to have in ISR?
     // Only start analog conversions if there are channels enabled
     if (AnalogEnabledChannels)
@@ -529,7 +530,8 @@ void low_ISR(void)
         AnalogInitiate++;
       }
     }
-
+#endif
+    
     // Is Pulse Mode on?
     if (gPulsesOn)
     {
@@ -610,7 +612,7 @@ void low_ISR(void)
   {
     // Clear the interrupt
     PIR1bits.ADIF = 0;
-
+#if 0
     // If we just had a calibration, means we just started, so clear things
     // out and begin our sequence.
     if (ADCON1bits.ADCAL)
@@ -660,5 +662,6 @@ void low_ISR(void)
       // And start the next conversion
       ADCON0bits.GO_DONE = 1;
     }
+#endif
   }
 }

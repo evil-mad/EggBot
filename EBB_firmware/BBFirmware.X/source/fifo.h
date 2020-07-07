@@ -53,7 +53,7 @@ extern volatile UINT8 FIFODepth;
 extern volatile UINT8 FIFOSize;
 extern volatile UINT8 FIFOIn;
 extern volatile UINT8 FIFOOut;
-extern volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
+//extern volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 
 ///extern MoveCommandType CommandFIFO[];
 extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];

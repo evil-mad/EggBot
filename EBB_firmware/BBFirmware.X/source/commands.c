@@ -209,40 +209,6 @@ void parse_V_packet(void)
   printf ((far rom char *)st_version);
 }
 
-// A is for read Analog inputs
-// Just print out the analog values for each of the
-// enabled channels.
-// Returned packet will look like 
-// "A,2:421,5:891,9:3921<CR>" if channels 2, 5 and 9
-// are enabled.
-void parse_A_packet(void)
-{
-  char channel = 0;
-  unsigned int ChannelBit = 0x0001;
-
-  // Put the beginning of the packet in place
-  printf ((far rom char *)"A");
-
-  // Sit and spin, waiting for one set of analog conversions to complete
-  while (PIE1bits.ADIE);
-
-  // Now print each analog value
-  for (channel = 0; channel < 16; channel++)
-  {
-    if (ChannelBit & AnalogEnabledChannels)
-    {
-      printf(
-        (far rom char *)",%02u:%04u"
-        ,channel
-        ,ISR_A_FIFO[channel]
-      );
-    }
-    ChannelBit = ChannelBit << 1;
-  }
-
-  print_ack ();
-}
-
 // MW is for Memory Write
 // "MW,<location>,<value><CR>"
 // <location> is a decimal value between 0 and 4096 indicating the RAM address to write to 

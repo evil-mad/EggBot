@@ -6,6 +6,7 @@
 #include <delays.h>
 #include "TMC2209.h"
 #include "HardwareProfile.h"
+#include "servo.h"
 
 // Milliseconds between serial checks to see if drivers are online yet
 #define DRIVER_INIT_CHECK_PERIOD_MS 250
@@ -323,6 +324,7 @@ void serial_Run(void)
     if (result & 0x00000001)
     {
       InitDrivers();
+      PenHome();
     }
   }
 }

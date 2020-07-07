@@ -342,13 +342,9 @@ void parse_QB_packet(void)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
 {
-  // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
-  // mainline code accessing at the same time, we will just wait for
-  // the cycle of ADC readings to finish before we spit out our value.
-  while (PIE1bits.ADIE);
-
   // Print out our results
-  printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+  /// TODO: update this for EBB for analogConvert())
+//  printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
 
   print_ack();
 }

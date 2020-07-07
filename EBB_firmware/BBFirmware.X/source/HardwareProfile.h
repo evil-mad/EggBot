@@ -227,6 +227,10 @@
   // Maximum size of command FIFO (based on number of steppers)
   #define COMMAND_FIFO_LENGTH     18
 
+  // The ADC channel number for the SCALED_V+ input on 3BB
+  // Allows us to see what V+ motor voltage has been aplied to the board
+  #define SCALED_V_ADC_CHAN       11
+
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */
   #define mInitAllLEDs()      LATDbits.LATD3 = 0; LATDbits.LATD2 = 0; TRISDbits.TRISD3 = 0; TRISDbits.TRISD2 = 0;

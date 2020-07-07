@@ -14,7 +14,7 @@ volatile UINT8 FIFOOut = 0;
 // The number of commands in the FIFO that are not done being executed yet
 volatile UINT8 FIFODepth = 0;
 
-volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
+//volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 
 
 

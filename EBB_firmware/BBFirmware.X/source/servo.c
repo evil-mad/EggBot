@@ -174,28 +174,11 @@ volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-static void PenHome(void);
 static UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
 static UINT8 servo_get_channel_from_RPn(UINT8 RPn);
 
 /************** LOCAL FUNCTIONS ***********************************************/
 
-// Perform all of the things necessary to initialize the pen position.
-// Not much to do when using a servo, but for a stepper Motor3 must be 
-// driven past the lowest position, limped, a pause, 
-// then a move from the home (lowest) position to the bottom position 
-// (gPenMaxPosition)
-// /// TODO : Once suitable mechanicals have been constructed, convert the
-// simplified code below over to what is talked about above (using hardstop
-// homing)
-static void PenHome(void)
-{  
-  gPenStateActual = PEN_DOWN;
-  PenStateCommand = PEN_DOWN;
-
-  // Execute a move from homed to the lower pen position
-  process_SM(500, 0, 0, gPenMaxPosition);
-}
 
 // Return the current channel that is associated with the PPS output pin
 // RPn. If there is no channel yet assigned for this RPn, then pick the
@@ -406,8 +389,6 @@ void servo_Init(void)
   gPenMinPosition = DEFAULT_PEN_MIN_POSITION_STEPPER;
 #endif
   
-  PenHome();
-  
 #if defined(BOARD_EBB)
   RCServoPowerIO = RCSERVO_POWER_OFF;
 #endif
@@ -583,3 +564,19 @@ void servo_S2_command (void)
   print_ack();
 }
 
+// Perform all of the things necessary to initialize the pen position.
+// Not much to do when using a servo, but for a stepper Motor3 must be 
+// driven past the lowest position, limped, a pause, 
+// then a move from the home (lowest) position to the bottom position 
+// (gPenMaxPosition)
+// /// TODO : Once suitable mechanicals have been constructed, convert the
+// simplified code below over to what is talked about above (using hardstop
+// homing)
+void PenHome(void)
+{  
+  gPenStateActual = PEN_DOWN;
+  PenStateCommand = PEN_DOWN;
+
+  // Execute a move from homed to the lower pen position
+  process_SM(500, 0, 0, gPenMaxPosition);
+}

@@ -19,6 +19,13 @@ Updated list of todo items for EBB/3BB refactor
 
 * Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered via the 250ms poll)
 
+* Use periodic (250ms) ADC conversions of SCALED_V+ input to determine when to initialize stepper drivers
+* Perform ADC offset calibration whenever power has been applied to motor drivers
+* Perform ADC offset calibration at boot (init)
+
+* Remove ADC interrupt and automatic sequencing.
+* Add internal ADC command to convert any ADC channel in blocking fashion
+* Convert AC and A commands to use blocking convert
 
 * Refactor I/O initialization
   - Make table of all I/O ports for each board, make I/O init smaller
@@ -78,3 +85,4 @@ Code Size : RAM/Free, ROM/Free
 
   3BB_BL 
     5/24  : 3461/315, 42794/22734
+    6/6   : 3305/471, 43407/22121

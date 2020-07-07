@@ -36,9 +36,6 @@ void UserInit(void)
   serial_Init();
 #endif
 
-  // Turn off our own idea of how many analog channels to convert
-  AnalogEnabledChannels = 0;
-
   // Initialize LED I/Os to outputs
   mInitAllLEDs();
   // Initialize switch as an input
@@ -52,8 +49,7 @@ void UserInit(void)
 
   fifo_Init();
 
-  // Now init our registers
-  // Initialize Timer4
+  // Initialize Timer4 (1ms ISR for Serv2, timing, and pulse commands)
   // The prescaler will be at 16
   T4CONbits.T4CKPS1 = 1;
   T4CONbits.T4CKPS0 = 1;
@@ -64,13 +60,6 @@ void UserInit(void)
   T4CONbits.T4OUTPS0 = 0;
   // Set our reload value
   PR4 = kPR4_RELOAD;
-
-  // Set up the Analog to Digital converter
-  // Clear out the FIFO data
-  for (i = 0; i < 16; i++)
-  {
-    ISR_A_FIFO[i] = 0;
-  }
 
   usbser_Init();
   
@@ -83,22 +72,12 @@ void UserInit(void)
 //  INTCONbits.TMR0IE = 0;    // And clear the interrupt enable
 //  INTCON2bits.TMR0IP = 0;   // Low priority
 
-  // Turn on band-gap
-  ANCON1bits.VBGEN = 1;
-
-  // Set up ADCON1 options
-  // A/D Result right justified
-  // Normal A/D (no calibration)
-  // Acq time = 20 Tad (?)
-  // Tad = Fosc/64
-  ADCON1 = 0b10111110;
-
   // Enable interrupt priorities
-  RCONbits.IPEN = 1;
-  T4CONbits.TMR4ON = 0;
+  RCONbits.IPEN = 1;          // Enable both high and low interrupt priorities
+  T4CONbits.TMR4ON = 0;       // Disable Timer4 (??)
 
-  PIE3bits.TMR4IE = 1;
-  IPR3bits.TMR4IP = 0;
+  PIE3bits.TMR4IE = 1;        // Turn on Timer4 match interrupt enable
+  IPR3bits.TMR4IP = 0;        // Timer4 interrupt priority = LOW
 
   // Initialize all FIFO values
   for(i=0; i < COMMAND_FIFO_LENGTH; i++)
@@ -157,15 +136,12 @@ void UserInit(void)
 //  PORTE = 0;
 //  TRISE = 0;
 
-  // And make sure to always use low priority for ADC
-  IPR1bits.ADIP = 0;
-
 #if defined(BOARD_EBB)
   // Turn on AN0 (RA0) as analog input
   AnalogConfigure(0,1);
 #endif
   // Turn on AN11 (V+) as analog input
-  AnalogConfigure(11,1);
+  AnalogConfigure(SCALED_V_ADC_CHAN,1);
 
 #if defined(BOARD_EBB)
   MS1_IO = 1;
@@ -258,13 +234,10 @@ void UserInit(void)
     
   // Clear out global stepper positions
   parse_CS_packet();
-  
-  // FOR DEBUG, MAKE THINGS OUTPUTS
-  TRISDbits.TRISD0 = 0;
-  TRISDbits.TRISD1 = 0;
-  
+    
   servo_Init();
-
+  
+  analog_Init();
   
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on

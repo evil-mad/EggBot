@@ -23,7 +23,6 @@ void parse_C_packet(void);     // C for configuring I/O and analog pins
 void parse_O_packet(void);     // O for output digital to pins
 void parse_I_packet(void);     // I for input digital from pins
 void parse_V_packet(void);     // V for printing version
-void parse_A_packet(void);     // A for requesting analog inputs
 void parse_PI_packet(void);    // PI for reading a single pin
 void parse_PO_packet(void);    // PO for setting a single pin state
 void parse_PD_packet(void);    // PD for setting a pin's direction

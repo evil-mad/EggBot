@@ -18,6 +18,10 @@ extern volatile unsigned int ChannelBit;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void AnalogConfigure (unsigned char Channel, unsigned char Enable);
+void parse_A_packet(void);     // A for requesting analog inputs
+UINT16 analogConvert(UINT8 channel);
+void analogCalibrate(void);
+void analog_Init(void);
 
 #endif	/* ANALOG_H */
 
