@@ -19,6 +19,10 @@ Updated list of todo items for EBB/3BB refactor
 
 * Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered via the 250ms poll)
 
+* Old "A" command now named "RA" (Read Analog)
+
+* Make command parsing use a lookup table rather than a huge switch/case
+
 * Use periodic (250ms) ADC conversions of SCALED_V+ input to determine when to initialize stepper drivers
 * Perform ADC offset calibration whenever power has been applied to motor drivers
 * Perform ADC offset calibration at boot (init)

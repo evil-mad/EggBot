@@ -7,6 +7,7 @@
 #include "TMC2209.h"
 #include "HardwareProfile.h"
 #include "servo.h"
+#include "analog.h"
 
 // Milliseconds between serial checks to see if drivers are online yet
 #define DRIVER_INIT_CHECK_PERIOD_MS 250
@@ -313,18 +314,25 @@ void serial_Run(void)
 {
   static UINT32 LastCheckTimeMS = 0;
   UINT32 currentTimeMS = GetTick();
-  UINT32 result = 0;
+  UINT16 currentVPlusVoltage;
+  static UINT16 lastVPlusVoltage = 0;
   
   if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
   {
     LastCheckTimeMS = currentTimeMS;
     
-    result = ReadDatagram(1, GSTAT);
+    currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
     
-    if (result & 0x00000001)
+    if (
+      (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
+      && 
+      (currentVPlusVoltage > V_PLUS_VOLTAGE_POWERED)
+    )
     {
       InitDrivers();
+      analogCalibrate();
       PenHome();
     }
+    lastVPlusVoltage = currentVPlusVoltage;
   }
 }

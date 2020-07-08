@@ -607,12 +607,12 @@ void low_ISR(void)
     
   } // end of 1ms interrupt
 
+#if 0
   // Do we have an analog interrupt?
   if (PIR1bits.ADIF)
   {
     // Clear the interrupt
     PIR1bits.ADIF = 0;
-#if 0
     // If we just had a calibration, means we just started, so clear things
     // out and begin our sequence.
     if (ADCON1bits.ADCAL)
@@ -662,6 +662,6 @@ void low_ISR(void)
       // And start the next conversion
       ADCON0bits.GO_DONE = 1;
     }
-#endif
   }
+#endif
 }

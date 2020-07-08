@@ -34,7 +34,6 @@ void parse_PC_packet(void);    // PC Pulse Configure
 void parse_BL_packet(void);    // BL Boot Load command
 void parse_CK_packet(void);    // CK ChecK command
 void parse_MR_packet(void);    // MR Motors Run command
-void parse_AC_packet(void);    // AC Analog Configure
 void parse_RB_packet(void);    // RB ReBoot command
 #if defined(BOARD_EBB)
 void parse_QR_packet(void);    // QR Query RC Servo power state

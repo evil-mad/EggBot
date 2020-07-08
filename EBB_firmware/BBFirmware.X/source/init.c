@@ -16,6 +16,7 @@
 #include "ebb.h"
 #include "stepper.h"
 #include "serial.h"
+#include "analog.h"
 
 void UserInit(void)
 {
@@ -137,13 +138,6 @@ void UserInit(void)
 //  TRISE = 0;
 
 #if defined(BOARD_EBB)
-  // Turn on AN0 (RA0) as analog input
-  AnalogConfigure(0,1);
-#endif
-  // Turn on AN11 (V+) as analog input
-  AnalogConfigure(SCALED_V_ADC_CHAN,1);
-
-#if defined(BOARD_EBB)
   MS1_IO = 1;
   MS1_IO_TRIS = OUTPUT_PIN;
   MS2_IO = 1;
@@ -237,7 +231,7 @@ void UserInit(void)
     
   servo_Init();
   
-  analog_Init();
+  analogInit();
   
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on

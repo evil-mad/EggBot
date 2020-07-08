@@ -10,6 +10,7 @@
 #include "commands.h"
 #include "servo.h"
 #include "ebb.h"
+#include "analog.h"
 
 // This byte has each of its bits used as a separate error flag
 unsigned char error_byte;
@@ -88,10 +89,10 @@ void parse_packet(void)
       parse_V_packet ();
       break;
     }
-    case 'A':
+    case ('A' * 256) + 'R':
     {
-      // Analog command
-      parse_A_packet ();
+      // Analog Read
+      parseARPacket();
       break;
     }
     case ('P' * 256) + 'I':
@@ -272,7 +273,7 @@ void parse_packet(void)
     case ('A' * 256) + 'C':
     {
       // AC for Analog Configure
-      parse_AC_packet();
+      parseACPacket();
       break;
     }
     case ('E' * 256) + 'S':

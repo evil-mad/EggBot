@@ -2,17 +2,14 @@
 #include "parse.h"
 #include "analog.h"
 #include <stdio.h>
+#include "HardwareProfile.h"
 
-unsigned char A_cur_channel;
-unsigned char AnalogInitiate;
-volatile unsigned int AnalogEnabledChannels;
-volatile unsigned int ChannelBit;
-
-
+// Bit field keeping track of which ADC channels are enabled
+UINT16 AnalogEnabledChannels;
 
 // This function turns on or off an analog channel
 // It is called from other pieces of code, not the user
-void AnalogConfigure(unsigned char Channel, unsigned char Enable)
+void analogConfigure(UINT8 Channel, UINT8 Enable)
 {
   if (Channel > 16)
   {
@@ -21,7 +18,7 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
 
   if (Enable)
   {
-    AnalogEnabledChannels |= ((unsigned int)0x0001 << Channel);
+    AnalogEnabledChannels |= ((UINT16)0x0001 << Channel);
     // Make sure to turn this analog input on
     if (Channel < 8)
     {
@@ -39,7 +36,7 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
   }
   else
   {
-    AnalogEnabledChannels &= ~((unsigned int)0x0001 << Channel);
+    AnalogEnabledChannels &= ~((UINT16)0x0001 << Channel);
     // Make sure to turn this analog input off
     if (Channel < 8)
     {
@@ -62,7 +59,18 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
  */
 UINT16 analogConvert(UINT8 channel)
 {
+  UINT16 result;
   
+  // Set which ADC channel we want to convert
+  ADCON0 = (channel << 2) + 1;
+  // And start the next conversion
+  ADCON0bits.GO_DONE = 1;
+  // Wait until the conversion is complete
+  while(ADCON0bits.GO_DONE);
+  // Read out the freshly converted result
+  result = (UINT16)ADRESL | ((UINT16)ADRESH << 8);
+
+  return(result);
 }
 
 /*
@@ -70,9 +78,15 @@ UINT16 analogConvert(UINT8 channel)
  */
 void analogCalibrate(void)
 {
-  
+  // Set calibration to happen on next conversion
+  ADCON1bits.ADCAL = 1;
+  // And start the calibration
+  ADCON0bits.GO_DONE = 1;
+  // Wait until the calibration is complete
+  while(ADCON0bits.GO_DONE);
+  // Disable calibration
+  ADCON1bits.ADCAL = 0;
 }
-
 
 // Analog Configure
 // "AC,<channel>,<enable><CR>"
@@ -82,9 +96,9 @@ void analogCalibrate(void)
 // To turn off a particular analog channel, use the AC command to disable it.
 // Once enabled, that channel will be converted at the normal ADC conversion
 // rate and will show up in A packets.
-void parse_AC_packet(void)
+void parseACPacket(void)
 {
-  unsigned char Channel, Enable;
+  UINT8 Channel, Enable;
 
   // Extract each of the two values.
   extract_number (kUCHAR, &Channel, kREQUIRED);
@@ -96,58 +110,50 @@ void parse_AC_packet(void)
     return;
   }
 
-  AnalogConfigure(Channel, Enable);
+  analogConfigure(Channel, Enable);
     
   print_ack ();
 }
 
-// A is for read Analog inputs
+// AR is for Read Analog inputs
 // Just print out the analog values for each of the
 // enabled channels.
 // Returned packet will look like 
-// "A,2:421,5:891,9:3921<CR>" if channels 2, 5 and 9
+// "AR,2:421,5:891,9:3921<CR>" if channels 2, 5 and 9
 // are enabled.
-void parse_A_packet(void)
+void parseARPacket(void)
 {
-  char channel = 0;
-  unsigned int ChannelBit = 0x0001;
+  UINT8 channel = 0;
+  UINT16 ChannelBit = 0x0001;
 
   // Put the beginning of the packet in place
-  printf ((far rom char *)"A");
+  printf ((far rom char *)"AR");
 
-  // Sit and spin, waiting for one set of analog conversions to complete
-  while (PIE1bits.ADIE);
-
-  // Now print each analog value
+  // Walk through each channel, and if it is enabled, convert it and print it
   for (channel = 0; channel < 16; channel++)
   {
     if (ChannelBit & AnalogEnabledChannels)
     {
-/// TODO: Perform a conversions
-/// then print it out
-//      printf(
-//        (far rom char *)",%02u:%04u"
-//        ,channel
-//        ,ISR_A_FIFO[channel]
-//      );
+      printf(
+        (far rom char *)",%02u:%04u"
+        ,channel
+        ,analogConvert(channel)
+      );
     }
     ChannelBit = ChannelBit << 1;
   }
+  printf ((far rom char *)"\r");
 
   print_ack ();
 }
 
-void analog_Init(void)
+void analogInit(void)
 {  
-  // Turn off our own idea of how many analog channels to convert
+  // Start out with no analog channels enabled
   AnalogEnabledChannels = 0;
 
-   // Set up the Analog to Digital converter
-  // Clear out the FIFO data
-  //for (i = 0; i < 16; i++)
-  //{
-  //  ISR_A_FIFO[i] = 0;
-  //}
+  // Set up the Analog to Digital converter
+
   // Turn on band-gap
   ANCON1bits.VBGEN = 1;
 
@@ -158,9 +164,15 @@ void analog_Init(void)
   // Tad = Fosc/64
   ADCON1 = 0b10111110;
 
-  // And make sure to always use low priority for ADC
-  IPR1bits.ADIP = 0;
-
   // Make sure it's on!
   ADCON0bits.ADON = 1;
+  
+  analogCalibrate();
+
+#if defined(BOARD_EBB)
+  // Turn on AN0 (RA0) as analog input
+  analogConfigure(0,1);
+#endif
+  // Turn on AN11 (V+) as analog input
+  analogConfigure(SCALED_V_ADC_CHAN,1);
 }
