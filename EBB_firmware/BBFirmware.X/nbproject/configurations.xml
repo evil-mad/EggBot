@@ -380,7 +380,7 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
@@ -586,7 +586,7 @@
         <makeCustomizationPostStep></makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
-        <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
+        <makeCustomizationNormalizeHexFile>true</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <C18>
         <property key="code-model" value="ms"/>
@@ -594,7 +594,7 @@
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
         <property key="enable-ob" value="false"/>
         <property key="enable-od" value="false"/>
         <property key="enable-om" value="true"/>

@@ -740,7 +740,9 @@ void parse_SR_packet(void)
  * CK,127,255,FF,32767,65535,FFFF,16777215,FFFFFF,2147483647,4294967295,FFFFFFFF,G,g
  * CK,-127,255,FF,-32767,65535,FFFF,16777215,FFFFFF,-2147483647,4294967295,FFFFFFFF,!,!
  * 
+ * CK,-127,255,FF,-32767,65535,FFFF,16777215,FFFFFF,-2147483647,4294967295,!,!
  */
+/// TODO: To save some flash space, maybe not include this function in production builds?
 void parse_CK_packet()
 {
   UINT8  UInt8;

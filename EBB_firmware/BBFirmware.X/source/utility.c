@@ -418,6 +418,7 @@ void utilityRun(void)
   
   if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
   {
+    DEBUG_A0_SET()
     LastCheckTimeMS = currentTimeMS;
     
     currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
@@ -428,10 +429,13 @@ void utilityRun(void)
       (currentVPlusVoltage > V_PLUS_VOLTAGE_POWERED)
     )
     {
+      DEBUG_A1_SET()
       serialInitDrivers();
       analogCalibrate();    // Because our voltage situation may have changed
       servoPenHome();       // The drivers were limped, so home the pen
+      DEBUG_A1_CLEAR()
     }
     lastVPlusVoltage = currentVPlusVoltage;
+    DEBUG_A0_CLEAR()
   }
 }

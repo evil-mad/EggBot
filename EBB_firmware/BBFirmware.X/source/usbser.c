@@ -11,15 +11,16 @@
 const rom char st_OK[] = {"OK\r\n"};
 const rom char st_LFCR[] = {"\r\n"};
 
-
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
 static unsigned char g_TX_buf[kTX_BUF_SIZE];
 
+// Buffer for data received in one chunk from USB stack (from PC))
 static unsigned char g_RX_command_buf[kRX_COMMAND_BUF_SIZE];
 
 #pragma udata com_rx_buf = 0x300
-// USB Receiving buffer for commands as they come from PC
+// As transferred from g_RX_command_buf[], each command is put here
+// and then parsed when end of line is reached
 unsigned char g_RX_buf[kRX_BUF_SIZE];
 
 #pragma udata
@@ -124,7 +125,7 @@ void ProcessIO(void)
   // Pull in some new data if there is new data to pull in
   // And we aren't waiting for the current move to finish
 
-  rx_bytes = getsUSBUSART((char *)g_RX_command_buf, 64);
+  rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);
 
   if (rx_bytes > 0)
   {

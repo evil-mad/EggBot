@@ -12,6 +12,10 @@ Updated list of todo items for EBB/3BB refactor
 
 * Add IMMEDIATE/FIFO parameter to PO commands
 
+* To save on RAM, eleminate the last_command[] buffer system (not needed when computers talk to *BB)
+
+* Possible optomization - make extract_number() set the ReturnValue to zero on entry so that calling functions don't have to do it. Then go through and elemninate any initalized values on passed in paratmers to the function.
+
 * Make sure you can set the FIFO depth to zero, which requires immediate execution of all commands (even motion control ones)
 
 * Make sure that if you change the FIFO size, and there are items in the FIFO, they do not get deleted. All commands must finish properly.
