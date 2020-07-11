@@ -45,8 +45,8 @@ void parse_CU_packet(void)
   unsigned char parameter_number = 0;
   signed int parameter_value = 0;
 
-  extract_number (kUCHAR, &parameter_number, kREQUIRED);
-  extract_number (kINT, &parameter_value, kOPTIONAL);
+  extract_number (kUINT8, &parameter_number, kREQUIRED);
+  extract_number (kINT16, &parameter_value, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -116,11 +116,11 @@ void parse_C_packet(void)
   unsigned char PA, PB, PC, PD, PE;
 
   // Extract each of the four values.
-  extract_number (kUCHAR, &PA, kREQUIRED);
-  extract_number (kUCHAR, &PB, kREQUIRED);
-  extract_number (kUCHAR, &PC, kREQUIRED);
-  extract_number (kUCHAR, &PD, kREQUIRED);
-  extract_number (kUCHAR, &PE, kREQUIRED);
+  extract_number (kUINT8, &PA, kREQUIRED);
+  extract_number (kUINT8, &PB, kREQUIRED);
+  extract_number (kUINT8, &PC, kREQUIRED);
+  extract_number (kUINT8, &PD, kREQUIRED);
+  extract_number (kUINT8, &PE, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -147,31 +147,31 @@ void parse_O_packet(void)
   ExtractReturnType RetVal;
 
   // Extract each of the values.
-  RetVal = extract_number (kUCHAR,  &Value, kREQUIRED);
+  RetVal = extract_number (kUINT8,  &Value, kREQUIRED);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATA = Value;
   }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
+  RetVal = extract_number (kUINT8,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATB = Value;
   }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
+  RetVal = extract_number (kUINT8,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATC = Value;
   }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
+  RetVal = extract_number (kUINT8,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATD = Value;
   }
-  RetVal = extract_number (kUCHAR,  &Value, kOPTIONAL);
+  RetVal = extract_number (kUINT8,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
   {
@@ -218,8 +218,8 @@ void parse_MW_packet(void)
   unsigned int location;
   unsigned char value;
 
-  extract_number (kUINT, &location, kREQUIRED);
-  extract_number (kUCHAR, &value, kREQUIRED);
+  extract_number (kUINT16, &location, kREQUIRED);
+  extract_number (kUINT8, &value, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -246,7 +246,7 @@ void parse_MR_packet(void)
   unsigned int location;
   unsigned char value;
 
-  extract_number (kUINT, &location, kREQUIRED);
+  extract_number (kUINT16, &location, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -279,8 +279,8 @@ void parse_PD_packet(void)
   unsigned char direction;
 
   extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
-  extract_number (kUCHAR, &pin, kREQUIRED);
-  extract_number (kUCHAR, &direction, kREQUIRED);
+  extract_number (kUINT8, &pin, kREQUIRED);
+  extract_number (kUINT8, &direction, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -377,7 +377,7 @@ void parse_PI_packet(void)
   unsigned char value = 0;
 
   extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
-  extract_number (kUCHAR, &pin, kREQUIRED);
+  extract_number (kUINT8, &pin, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -444,8 +444,8 @@ void parse_PO_packet(void)
   unsigned char value;
 
   extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
-  extract_number (kUCHAR, &pin, kREQUIRED);
-  extract_number (kUCHAR, &value, kREQUIRED);
+  extract_number (kUINT8, &pin, kREQUIRED);
+  extract_number (kUINT8, &value, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -544,8 +544,8 @@ void parse_PC_packet (void)
   unsigned char i;
   ExtractReturnType RetVal1, RetVal2;
 
-  extract_number(kUINT, &Length, kREQUIRED);
-  extract_number(kUINT, &Rate, kREQUIRED);
+  extract_number(kUINT16, &Length, kREQUIRED);
+  extract_number(kUINT16, &Rate, kREQUIRED);
   if (error_byte) 
   { 
     return;
@@ -558,8 +558,8 @@ void parse_PC_packet (void)
   // And now loop for the other 3
   for (i = 0; i < 3; i++)
   {
-    RetVal1 = extract_number(kUINT, &Length, kOPTIONAL);
-    RetVal2 = extract_number(kUINT, &Rate, kOPTIONAL);
+    RetVal1 = extract_number(kUINT16, &Length, kOPTIONAL);
+    RetVal2 = extract_number(kUINT16, &Rate, kOPTIONAL);
     if (error_byte)
     { 
       return;
@@ -589,7 +589,7 @@ void parse_PG_packet (void)
 {
   unsigned char Value;
 
-  extract_number(kUCHAR, &Value, kREQUIRED);
+  extract_number(kUINT8, &Value, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -698,8 +698,8 @@ void parse_SR_packet(void)
   UINT8 State;
   ExtractReturnType GotState;
 
-  extract_number(kULONG, &Value, kREQUIRED);
-  GotState = extract_number(kUCHAR, &State, kOPTIONAL);
+  extract_number(kUINT32, &Value, kREQUIRED);
+  GotState = extract_number(kUINT8, &State, kOPTIONAL);
 
     // Bail if we got a conversion error
   if (error_byte)
@@ -727,35 +727,63 @@ void parse_SR_packet(void)
 }
 #endif
 
-// Just used for testing/debugging the packet parsing routines
+/*
+ * CK - For testing that parameter input routines work properly
+ * 
+ * This function reads in one parameter for every type of input that the
+ * extract_number() function can read in. Use it to test that all values
+ * are properly parsed and returned.
+ * 
+ * Sample test lines:
+ * CK,1,1,1,1,1,1,1,1,1,1,1,1,1
+ * CK,0,0,0,0,0,0,0,0,0,0,0,0,0
+ * CK,127,255,FF,32767,65535,FFFF,16777215,FFFFFF,2147483647,4294967295,FFFFFFFF,G,g
+ * CK,-127,255,FF,-32767,65535,FFFF,16777215,FFFFFF,-2147483647,4294967295,FFFFFFFF,!,!
+ * 
+ */
 void parse_CK_packet()
 {
-  unsigned char UByte;
-  signed char SByte;
-  unsigned int UInt;
-  signed int SInt;
-  unsigned long ULong;
-  signed long SLong;
-  unsigned char UChar;
-  unsigned char UCaseChar;
+  UINT8  UInt8;
+  INT8   SInt8;
+  UINT8  HInt8;
+  UINT16 UInt16;
+  INT16  SInt16;
+  UINT16 HInt16;
+  UINT24 UInt24;
+  UINT24 HInt24;
+  UINT32 UInt32;
+  INT32  SInt32;
+  UINT32 HInt32;
+  UINT8  UChar;
+  UINT8  UCaseChar;
 
-  extract_number(kCHAR, &SByte, kREQUIRED);
-  extract_number(kUCHAR, &UByte, kREQUIRED);
-  extract_number(kINT, &SInt, kREQUIRED);
-  extract_number(kUINT, &UInt, kREQUIRED);
-  extract_number(kLONG, &SLong, kREQUIRED);
-  extract_number(kULONG, &ULong, kREQUIRED);
+  extract_number(kINT8, &SInt8, kREQUIRED);
+  extract_number(kUINT8, &UInt8, kREQUIRED);
+  extract_number(kHEX8, &HInt8, kREQUIRED);
+  extract_number(kINT16, &SInt16, kREQUIRED);
+  extract_number(kUINT16, &UInt16, kREQUIRED);
+  extract_number(kHEX16, &HInt16, kREQUIRED);
+  extract_number(kUINT24, &UInt24, kREQUIRED);
+  extract_number(kHEX24, &HInt24, kREQUIRED);  
+  extract_number(kINT32, &SInt32, kREQUIRED);
+  extract_number(kUINT32, &UInt32, kREQUIRED);
+  extract_number(kHEX32, &HInt32, kREQUIRED);
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
-  printf ((rom char far *)"Param1=%d\r\n", SByte);
-  printf ((rom char far *)"Param2=%d\r\n", UByte);
-  printf ((rom char far *)"Param3=%d\r\n", SInt);
-  printf ((rom char far *)"Param4=%u\r\n", UInt);
-  printf ((rom char far *)"Param5=%ld\r\n", SLong);
-  printf ((rom char far *)"Param6=%lu\r\n", ULong);
-  printf ((rom char far *)"Param7=%c\r\n", UChar);
-  printf ((rom char far *)"Param8=%c\r\n", UCaseChar);
+  printf ((rom char far *)"kINT8   =%d\r\n", SInt8);
+  printf ((rom char far *)"kUINT8  =%u\r\n", UInt8);
+  printf ((rom char far *)"kHEX8   =%X\r\n", HInt8);
+  printf ((rom char far *)"kINT16  =%d\r\n", SInt16);
+  printf ((rom char far *)"kUINT16 =%u\r\n", UInt16);
+  printf ((rom char far *)"kHEX16  =%X\r\n", HInt16);
+  printf ((rom char far *)"kUINT24 =%Hu\r\n", UInt24);
+  printf ((rom char far *)"kHEX24  =%HX\r\n", HInt24);
+  printf ((rom char far *)"kINT32  =%ld\r\n", SInt32);
+  printf ((rom char far *)"kUINT32 =%lu\r\n", UInt32);
+  printf ((rom char far *)"kHEX32  =%lX\r\n", HInt32);
+  printf ((rom char far *)"kASCII_CHAR=%c\r\n", UChar);
+  printf ((rom char far *)"kUCASE_ASCII_CHAR=%c\r\n", UCaseChar);
 
   print_ack();
 }

@@ -197,7 +197,7 @@ void main(void)
     // Application-specific tasks.
     // Application related code may be added here, or in the ProcessIO() function.
     ProcessIO();
-    serial_Run();
+    utilityRun();
   }//end while
 }//end main
 

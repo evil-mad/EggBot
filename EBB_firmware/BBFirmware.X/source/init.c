@@ -34,7 +34,7 @@ void UserInit(void)
 
   DEBUG_INIT()          // This needs to be AFTER we make all pins inputs
 #if defined(BOARD_3BB)
-  serial_Init();
+  serialInit();
 #endif
 
   // Initialize LED I/Os to outputs

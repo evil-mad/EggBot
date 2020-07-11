@@ -8,10 +8,15 @@
 #include <flash.h>
 #include "parse.h"
 #include "isr.h"
-
+#include "analog.h"
+#include "serial.h"
+#include "servo.h"
 
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
+
+// Milliseconds between serial checks to see if drivers are online yet
+#define DRIVER_INIT_CHECK_PERIOD_MS 250
 
 /// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)
@@ -20,8 +25,6 @@
   const rom char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
 #endif
 
-  
-  
 
 /******************************************************************************
  * Function:        void BlinkUSBStatus(void)
@@ -399,4 +402,36 @@ void parse_QT_packet()
   print_ack();
 }
 
-
+/*
+ * Called from main loop every time through. Main task here is to check to see
+ * if the stepper drivers just came on line (i.e. were just powered by 12V).
+ * If they did, then we need to initialize them ASAP. We perform the check by
+ * reading the voltage on the SCALED_V+ net each time, and seeing when it goes
+ * above 5.5V. At that point we know we can init the drivers.
+ */
+void utilityRun(void)
+{
+  static UINT32 LastCheckTimeMS = 0;
+  UINT32 currentTimeMS = GetTick();
+  UINT16 currentVPlusVoltage;
+  static UINT16 lastVPlusVoltage = 0;
+  
+  if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
+  {
+    LastCheckTimeMS = currentTimeMS;
+    
+    currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
+    
+    if (
+      (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
+      && 
+      (currentVPlusVoltage > V_PLUS_VOLTAGE_POWERED)
+    )
+    {
+      serialInitDrivers();
+      analogCalibrate();    // Because our voltage situation may have changed
+      servoPenHome();       // The drivers were limped, so home the pen
+    }
+    lastVPlusVoltage = currentVPlusVoltage;
+  }
+}

@@ -65,8 +65,8 @@ void parse_SC_packet (void)
   unsigned int Para2 = 0;
 
   // Extract each of the values.
-  extract_number (kUCHAR, &Para1, kREQUIRED);
-  extract_number (kUINT, &Para2, kREQUIRED);
+  extract_number (kUINT8, &Para1, kREQUIRED);
+  extract_number (kUINT16, &Para2, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -269,7 +269,7 @@ void parse_SN_packet(void)
   unsigned long Temp;
   ExtractReturnType RetVal;
 
-  RetVal = extract_number (kULONG, &Temp, kREQUIRED);
+  RetVal = extract_number (kUINT32, &Temp, kREQUIRED);
   if (kEXTRACT_OK == RetVal)
   {
     NodeCount = Temp;
@@ -293,7 +293,7 @@ void parse_QN_packet(void)
 void parse_SL_packet(void)
 {
   // Extract each of the values.
-  extract_number (kUCHAR, &Layer, kREQUIRED);
+  extract_number (kUINT8, &Layer, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -387,7 +387,7 @@ void parse_QG_packet(void)
   UINT8 result = process_QM();
   UINT8 param = 0;
   
-  extract_number (kUCHAR, &param, kOPTIONAL);
+  extract_number (kUINT8, &param, kOPTIONAL);
 
   // process_QM() gives us the low 4 bits of our output result.
   result = result & 0x0F;
@@ -452,9 +452,9 @@ void parse_SE_packet(void)
   ExtractReturnType PowerExtract;
 
   // Extract each of the values.
-  extract_number (kUCHAR, &State, kREQUIRED);
-  PowerExtract = extract_number (kUINT, &Power, kOPTIONAL);
-  extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
+  extract_number (kUINT8, &State, kREQUIRED);
+  PowerExtract = extract_number (kUINT16, &Power, kOPTIONAL);
+  extract_number (kUINT8, &SEUseMotionQueue, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)

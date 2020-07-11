@@ -423,8 +423,8 @@ void parse_SP_packet(void)
   UINT16 CommandDuration = gPenMoveDuration;
 
   // Extract each of the values.
-  extract_number (kUCHAR, &State, kREQUIRED);
-  extract_number (kUINT, &CommandDuration, kOPTIONAL);
+  extract_number (kUINT8, &State, kREQUIRED);
+  extract_number (kUINT16, &CommandDuration, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -454,7 +454,7 @@ void parse_TP_packet(void)
   UINT16 CommandDuration = gPenMoveDuration;
 
   // Extract each of the values.
-  extract_number (kUINT, &CommandDuration, kOPTIONAL);
+  extract_number (kUINT16, &CommandDuration, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -542,10 +542,10 @@ void servo_S2_command (void)
   UINT16 Delay = 0;
 
   // Extract each of the values.
-  extract_number (kUINT, &Duration, kOPTIONAL);
-  extract_number (kUCHAR, &Pin, kOPTIONAL);
-  extract_number (kUINT, &Rate, kOPTIONAL);
-  extract_number (kUINT, &Delay, kOPTIONAL);
+  extract_number (kUINT16, &Duration, kOPTIONAL);
+  extract_number (kUINT8, &Pin, kOPTIONAL);
+  extract_number (kUINT16, &Rate, kOPTIONAL);
+  extract_number (kUINT16, &Delay, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -572,7 +572,7 @@ void servo_S2_command (void)
 // /// TODO : Once suitable mechanicals have been constructed, convert the
 // simplified code below over to what is talked about above (using hardstop
 // homing)
-void PenHome(void)
+void servoPenHome(void)
 {  
   gPenStateActual = PEN_DOWN;
   PenStateCommand = PEN_DOWN;

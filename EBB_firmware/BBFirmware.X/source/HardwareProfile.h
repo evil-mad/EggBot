@@ -228,8 +228,12 @@
   #define COMMAND_FIFO_LENGTH     18
 
   // The ADC channel number for the SCALED_V+ input on 3BB
-  // Allows us to see what V+ motor voltage has been aplied to the board
+  // Allows us to see what V+ motor voltage has been apPlied to the board
   #define SCALED_V_ADC_CHAN       11
+
+  // ADC counts (out of 1024) that represent 5.5V on SCALED_V+ ADC input
+  // since 5.5V is the minimum our drivers need in order to work
+  #define V_PLUS_VOLTAGE_POWERED   378 
 
   /** L E D ***********************************************************/
   /* On EBB v13 and above, LED1 (USB) = RD3, LED2 (USR) = RD2, SW = RA7 */

@@ -101,8 +101,8 @@ void parseACPacket(void)
   UINT8 Channel, Enable;
 
   // Extract each of the two values.
-  extract_number (kUCHAR, &Channel, kREQUIRED);
-  extract_number (kUCHAR, &Enable, kREQUIRED);
+  extract_number (kUINT8, &Channel, kREQUIRED);
+  extract_number (kUINT8, &Enable, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)

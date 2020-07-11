@@ -33,15 +33,21 @@
 #define kOPTIONAL TRUE
 
 // Enum for extract_num() function parameter
+// NOTE: C18 supports UINT24 type, but not INT24, so it does not appear here
 typedef enum {
-  kCHAR          // One byte, signed
- ,kUCHAR         // One byte, unsigned
- ,kINT           // Two bytes, signed
- ,kUINT          // Two bytes, unsigned
- ,kASCII_CHAR    // ASCII character, read in as byte
- ,kUCASE_ASCII_CHAR  // ASCII character, must be uppercase
- ,kLONG          // Four bytes, signed
- ,kULONG         // Four bytes, unsigned
+  kINT8,           // One byte, signed
+  kUINT8,          // One byte, unsigned
+  kHEX8,           // One byte (two characters) of hex
+  kINT16,          // Two bytes, signed
+  kUINT16,         // Two bytes, unsigned
+  kHEX16,          // Two bytes (four characters) of hex
+  kUINT24,         // Three bytes, unsigned
+  kHEX24,          // Three bytes (six characters) of hex
+  kINT32,          // Four bytes, signed
+  kUINT32,         // Four bytes, unsigned
+  kHEX32,          // Four bytes (eight characters) of hex
+  kASCII_CHAR,     // ASCII character, read in as byte
+  kUCASE_ASCII_CHAR  // ASCII character, must be uppercase
 } ExtractType;
 
 typedef enum {
@@ -52,7 +58,7 @@ typedef enum {
  ,kEXTRACT_INVALID_TYPE
 } ExtractReturnType;
 
-extern unsigned char error_byte;
+extern UINT8 error_byte;
 extern BOOL g_ack_enable;
 
 

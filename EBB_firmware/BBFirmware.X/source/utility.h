@@ -96,6 +96,7 @@ void populateDeviceStringWithName(void);
 UINT32 GetTick(void);
 void parse_ST_packet(void);    // ST Set Tag command
 void parse_QT_packet(void);    // QT Query Tag command
+void utilityRun(void);  
 
 #endif	/* UTILITY_H */
 

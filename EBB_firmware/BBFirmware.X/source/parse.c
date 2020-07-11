@@ -11,6 +11,7 @@
 #include "servo.h"
 #include "ebb.h"
 #include "analog.h"
+#include "serial.h"
 
 // This byte has each of its bits used as a separate error flag
 unsigned char error_byte;
@@ -18,6 +19,9 @@ unsigned char error_byte;
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
 BOOL g_ack_enable;
 
+
+static INT8 extractHexDigits(UINT32 * acc, UINT8 digits);
+static INT8 extractDecDigits(UINT32 * acc, UINT8 digits);
 
 // Look at the new packet, see what command it is, and 
 // route it appropriately. We come in knowing that
@@ -338,6 +342,20 @@ void parse_packet(void)
       parse_HM_packet();
       break;
     }
+    case ('D' * 256) + 'R':
+    {
+      // HM is for Read Serial
+      parseDRPacket();
+      break;
+    }
+    case ('D' * 256) + 'W':
+    {
+      // WS is for Write Serial
+      parseDWPacket();
+      break;
+    }
+    
+    
     default:
     {
       if (0 == cmd2)
@@ -460,11 +478,11 @@ UINT8 extract_string (
 ExtractReturnType extract_number(
   ExtractType Type, 
   void * ReturnValue, 
-  unsigned char Required
+  UINT8 Required
 )
 {
-  unsigned long ULAccumulator;
-  signed long Accumulator;
+  UINT32 ULAccumulator;
+  INT32 Accumulator;
   BOOL Negative = FALSE;
 
   // Check to see if we're already at the end
@@ -489,7 +507,7 @@ ExtractReturnType extract_number(
   }
 
   // Move to the next character
-  advance_RX_buf_out ();
+  advance_RX_buf_out();
 
   // Check for end of command
   if (kCR == g_RX_buf[g_RX_buf_out])
@@ -514,11 +532,13 @@ ExtractReturnType extract_number(
   {
     // It's an error if we see a negative sign on an unsigned value
     if (
-      (kUCHAR == Type)
+      (kUINT8 == Type)
       ||
-      (kUINT == Type)
+      (kUINT16 == Type)
       ||
-      (kULONG == Type)
+      (kUINT32 == Type)
+      ||
+      (kHEX32 == Type)
     )
     {
       bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -528,32 +548,65 @@ ExtractReturnType extract_number(
     {
       Negative = TRUE;
       // Move to the next character
-      advance_RX_buf_out ();
+      advance_RX_buf_out();
     }
   }
 
-  // If we need to get a digit, go do that
-  if (
-    (kASCII_CHAR != Type)
-    &&
-    (kUCASE_ASCII_CHAR != Type)
-  )
+  // Read in the digits of the number
+  switch(Type)
   {
-    extract_digit(&ULAccumulator, 10);
-  }
-  else
-  {
-    // Otherwise just copy the byte
-    ULAccumulator = g_RX_buf[g_RX_buf_out];
+    case kINT8:
+    case kUINT8:
+      extractDecDigits(&ULAccumulator, 3);
+      break;
+      
+    case kINT16:
+    case kUINT16:
+      extractDecDigits(&ULAccumulator, 5);
+      break;
+    
+    case kUINT24:
+      extractDecDigits(&ULAccumulator, 8);
+      break;
 
-    // Force uppercase if that's what type we have
-    if (kUCASE_ASCII_CHAR == Type)
-    {
-      ULAccumulator = toupper (ULAccumulator);
-    }
+    case kINT32:
+    case kUINT32:
+      extractDecDigits(&ULAccumulator, 10);
+      break;
+    
+    case kHEX8:
+      extractHexDigits(&ULAccumulator, 2);
+      break;
+      
+    case kHEX16:
+      extractHexDigits(&ULAccumulator, 4);
+      break;
 
-    // Move to the next character
-    advance_RX_buf_out ();
+    case kHEX24:
+      extractHexDigits(&ULAccumulator, 6);
+      break;
+
+    case kHEX32:
+      extractHexDigits(&ULAccumulator, 8);
+      break;
+
+    case kASCII_CHAR:
+    case kUCASE_ASCII_CHAR:
+      // just copy the byte
+      ULAccumulator = g_RX_buf[g_RX_buf_out];
+
+      // Force uppercase if that's what type we have
+      if (kUCASE_ASCII_CHAR == Type)
+      {
+        ULAccumulator = toupper(ULAccumulator);
+      }
+
+      // Move to the next character
+      advance_RX_buf_out();
+      break;
+   
+    default:
+      break;
   }
 
   // Range check absolute values
@@ -561,21 +614,21 @@ ExtractReturnType extract_number(
   {
     if (
       (
-        kCHAR == Type
+        kINT8 == Type
         &&
-        (ULAccumulator > (unsigned long)128)
+        (ULAccumulator > (UINT32)0x80)
       )
       ||
       (
-        kINT == Type
+        kINT16 == Type
         &&
-        (ULAccumulator > (unsigned long)32768)
+        (ULAccumulator > (UINT32)0x8000)
       )
       ||
       (
-        kLONG == Type
+        kINT32 == Type
         &&
-        (ULAccumulator > (unsigned long)0x80000000L)
+        (ULAccumulator > (UINT32)0x80000000L)
       )
     )
     {
@@ -594,33 +647,39 @@ ExtractReturnType extract_number(
   {
     if (
       (
-        kCHAR == Type
+        kINT8 == Type
         &&
-        (ULAccumulator > (unsigned long)127)
+        (ULAccumulator > (UINT32)0x7F)
       )
       ||
       (
-        kUCHAR == Type
+        kUINT8 == Type
         &&
-        (ULAccumulator > (unsigned long)255)
+        (ULAccumulator > (UINT32)0xFF)
       )
       ||
       (
-        kINT == Type
+        kINT16 == Type
         &&
-        (ULAccumulator > (unsigned long)32767)
+        (ULAccumulator > (UINT32)0x7FFF)
       )
       ||
       (
-        kUINT == Type
+        kUINT16 == Type
         &&
-        (ULAccumulator > (unsigned long)65535)
+        (ULAccumulator > (UINT32)0xFFFF)
       )
       ||
       (
-        kLONG == Type
+        kUINT24 == Type
         &&
-        (ULAccumulator > (unsigned long)0x7FFFFFFFL)
+        (ULAccumulator > (UINT32)0xFFFFFFL)
+      )
+      ||
+      (
+        kINT32 == Type
+        &&
+        (ULAccumulator > (UINT32)0x7FFFFFFFL)
       )
     )
     {
@@ -628,7 +687,7 @@ ExtractReturnType extract_number(
       return (kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
     }
 
-    if (kULONG != Type)
+    if (kUINT32 != Type)
     {
       Accumulator = ULAccumulator;
     }
@@ -637,25 +696,32 @@ ExtractReturnType extract_number(
   // If all went well, then copy the result
   switch (Type)
   {
-    case kCHAR:
-      *(signed char *)ReturnValue = (signed char)Accumulator;
+    case kINT8:
+      *(INT8 *)ReturnValue = (INT8)Accumulator;
       break;
-    case kUCHAR:
+    case kUINT8:
+    case kHEX8:
     case kASCII_CHAR:
     case kUCASE_ASCII_CHAR:
-      *(unsigned char *)ReturnValue = (unsigned char)Accumulator;
+      *(UINT8 *)ReturnValue = (UINT8)Accumulator;
       break;
-    case kINT:
-      *(signed int *)ReturnValue = (signed int)Accumulator;
+    case kINT16:
+      *(INT16 *)ReturnValue = (INT16)Accumulator;
       break;
-    case kUINT:
-      *(unsigned int *)ReturnValue = (unsigned int)Accumulator;
+    case kUINT16:
+    case kHEX16:
+      *(UINT16 *)ReturnValue = (UINT16)Accumulator;
       break;
-    case kLONG:
-      *(signed long *)ReturnValue = Accumulator;
+    case kUINT24:
+    case kHEX24:
+      *(UINT24 *)ReturnValue = (UINT24)Accumulator;
       break;
-    case kULONG:
-      *(unsigned long *)ReturnValue = ULAccumulator;
+    case kINT32:
+      *(INT32 *)ReturnValue = Accumulator;
+      break;
+    case kUINT32:
+    case kHEX32:
+      *(UINT32 *)ReturnValue = ULAccumulator;
       break;
     default:
       return (kEXTRACT_INVALID_TYPE);
@@ -669,27 +735,73 @@ ExtractReturnType extract_number(
 // powers of ten as well. If you hit a non-numerical
 // char, then return FALSE, otherwise return TRUE.
 // Store result as you go in *acc.
-signed char extract_digit(unsigned long * acc, unsigned char digits)
+static INT8 extractDecDigits(UINT32 * acc, UINT8 digits)
 {
-  unsigned char val;
-  unsigned char digit_cnt;
+  UINT8 val;
+  UINT32 result = 0;
+  BOOL returnVal = TRUE;
 
-  *acc = 0;
-
-  for (digit_cnt = 0; digit_cnt < digits; digit_cnt++)
+  while(digits)
   {
     val = g_RX_buf[g_RX_buf_out];
     if ((val >= 48) && (val <= 57))
     {
-      *acc = (*acc * 10) + (val - 48);
+      result = (result * 10) + (val - 48);
       // Move to the next character
-      advance_RX_buf_out ();
+      advance_RX_buf_out();
     }
     else
     {
-      return (FALSE);
+      returnVal = FALSE;
+      break;
     }
+    digits--;
   }
-  return (TRUE);
+  *acc = result;
+  return(returnVal);
 }
+
+// Loop 'digits' number of times, looking at the
+// byte in input_buffer index *ptr, and if it is
+// a hex digit, adding it to acc. If you hit a non-hex
+// character, then return FALSE, otherwise return TRUE.
+// Store result as you go in *acc.
+static INT8 extractHexDigits(UINT32 * acc, UINT8 digits)
+{
+  UINT8 val;
+  UINT32 result = 0;
+  BOOL returnVal = TRUE;
+  
+  while(digits)
+  {
+    val = g_RX_buf[g_RX_buf_out];
+    // Convert from lowercase 'a-f' to uppercase 'A-F'
+    if ((val >= 97) && (val <= 102))
+    {
+      val -= 32;
+    }
+    // Is it a number from 0-9?
+    if ((val >= '0') && (val <= '9'))
+    {
+      result = (result << 4) | (val - '0');
+      // Move to the next character
+      advance_RX_buf_out();
+    }
+    else if ((val >= 'A') && (val <= 'F'))
+    {
+      result = (result << 4) | (val - 55);
+      // Move to the next character
+      advance_RX_buf_out();
+    }
+    else
+    {
+      returnVal = FALSE;
+      break;
+    }
+    digits--;
+  }
+  *acc = result;
+  return(returnVal);
+}
+
 

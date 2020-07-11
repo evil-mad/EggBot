@@ -8,9 +8,7 @@
 #include "HardwareProfile.h"
 #include "servo.h"
 #include "analog.h"
-
-// Milliseconds between serial checks to see if drivers are online yet
-#define DRIVER_INIT_CHECK_PERIOD_MS 250
+#include "parse.h"
 
 // The number of 32-bit init values to send to the drivers over serial
 #define MAX_DRIVER_INIT_VALUES      4
@@ -66,7 +64,6 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
 UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
 void CalcCRC(UINT8* datagram, UINT8 datagramLength);
-void InitDrivers(void);
 
 
 void CalcCRC(UINT8* datagram, UINT8 datagramLength)
@@ -248,7 +245,7 @@ DEBUG_A0_CLEAR()
  * Walk through each of the values in the table that we want to send to the
  * drivers, and send them out, with a little delay in between.
  */
-void InitDrivers(void)
+void serialInitDrivers(void)
 {
   UINT8 i;
   
@@ -273,7 +270,7 @@ void InitDrivers(void)
  * Then send the first set of UART commands which set up the drivers
  * with the options we need to have at boot time for things to run.
  * The UART RX pin is on RP11 (RC0), and the TX pin is RP12 (RC1). */
-void serial_Init(void)
+void serialInit(void)
 {
   DEBUG_INIT()
   
@@ -301,38 +298,97 @@ void serial_Init(void)
 }
 
 /*
- * Called from main loop every time through. Main task here is to check to see
- * if the stepper drivers just came on line (i.e. were just powered by 12V).
- * If they did, then we need to intialize them ASAP. We do this by sending
- * out a simple read request for a register on one of the driver chips. At an
- * address that we know won't return all zeros for a reply. Then we see if
- * anything comes back from the driver chip. If not, then they still aren't
- * powered yet. If so, then they are, and if this is the first response since
- * no response, then initialize them.
+ * DR command (Driver Read)
+ * 
+ * "DR,<driver_number>,<register_address><CR>"
+ * <driver_number> is 1, 2 or 3 and tells which driver to read from
+ * <register_address> is 0 to 127 and tells which register to read from
+ * 
+ * This command replies with:
+ * "DR,<register_value><CR>"
+ * <register_value> is a 32 bit unsigned int expressed in hex with 0x on the front
  */
-void serial_Run(void)
+void parseDRPacket(void)
 {
-  static UINT32 LastCheckTimeMS = 0;
-  UINT32 currentTimeMS = GetTick();
-  UINT16 currentVPlusVoltage;
-  static UINT16 lastVPlusVoltage = 0;
-  
-  if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
+  UINT8 driverNumber = 0;
+  UINT8 registerAddress = 0;
+  UINT32 registerValue = 0;
+
+  // Extract each of the values.
+  extract_number (kUINT8, &driverNumber, kOPTIONAL);
+  extract_number (kUINT8, &registerAddress, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
   {
-    LastCheckTimeMS = currentTimeMS;
-    
-    currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
-    
-    if (
-      (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
-      && 
-      (currentVPlusVoltage > V_PLUS_VOLTAGE_POWERED)
-    )
-    {
-      InitDrivers();
-      analogCalibrate();
-      PenHome();
-    }
-    lastVPlusVoltage = currentVPlusVoltage;
+    return;
   }
+
+  if (driverNumber > 3)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  if (registerAddress > 0x7F)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  registerValue = ReadDatagram(driverNumber, registerAddress);
+  
+  printf((far rom char *)"DR,%08lX\r", registerValue);
+
+  print_ack();
+}
+
+/*
+ * DW command (Driver Write)
+ * 
+ * "DW,<driver_number>,<register_address>,<register_value><CR>"
+ * <driver_number> is 1, 2 or 3 and tells which driver to write to
+ * <register_address> is 0 to 127 and tells which register to write to
+ * <register_value> is a 32 bit unsigned integer value and is what is written to
+ *   the register
+ * 
+ * This command replies with:
+ * "DW,<CR>"
+ */
+void parseDWPacket(void)
+{
+  UINT8 driverNumber = 0;
+  UINT8 registerAddress = 0;
+  UINT32 registerValue = 0;
+
+  // Extract each of the values.
+  extract_number (kUINT8, &driverNumber, kREQUIRED);
+  extract_number (kUINT8, &registerAddress, kREQUIRED);
+  extract_number (kHEX32, &registerValue, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (driverNumber > 3)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  if (registerAddress > 0x7F)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  WriteDatagram(driverNumber, registerAddress, registerValue);
+  
+  printf((far rom char *)"DW\r");
+
+  print_ack();
+  
+
 }

@@ -61,7 +61,7 @@ void parse_EM_packet(void)
   ExtractReturnType RetVal;
 
   // Extract each of the values.
-  RetVal = extract_number (kUCHAR, &EA1, kREQUIRED);
+  RetVal = extract_number (kUINT8, &EA1, kREQUIRED);
   if (kEXTRACT_OK == RetVal)
   {
     // Bail if we got a conversion error
@@ -140,7 +140,7 @@ void parse_EM_packet(void)
 #endif
   }
 
-  RetVal = extract_number (kUCHAR, &EA2, kOPTIONAL);
+  RetVal = extract_number (kUINT8, &EA2, kOPTIONAL);
   if (kEXTRACT_OK == RetVal)
   {
     // Bail if we got a conversion error
@@ -208,10 +208,10 @@ void parse_SM_packet (void)
   INT32 Steps = 0;
 
   // Extract each of the values.
-  extract_number (kULONG, &Duration, kREQUIRED);
-  extract_number (kLONG, &A1Steps, kREQUIRED);
-  extract_number (kLONG, &A2Steps, kOPTIONAL);
-  extract_number (kLONG, &A3Steps, kOPTIONAL);
+  extract_number (kUINT32, &Duration, kREQUIRED);
+  extract_number (kINT32, &A1Steps, kREQUIRED);
+  extract_number (kINT32, &A2Steps, kOPTIONAL);
+  extract_number (kINT32, &A3Steps, kOPTIONAL);
 
   if (gLimitChecks)
   {
@@ -338,10 +338,10 @@ void parse_AM_packet (void)
   float accel_temp;
 
   // Extract each of the values.
-  extract_number (kULONG, &VelocityInital, kREQUIRED);
-  extract_number (kULONG, &VelocityFinal, kREQUIRED);
-  extract_number (kLONG, &A1Steps, kREQUIRED);
-  extract_number (kLONG, &A2Steps, kREQUIRED);
+  extract_number (kUINT32, &VelocityInital, kREQUIRED);
+  extract_number (kUINT32, &VelocityFinal, kREQUIRED);
+  extract_number (kINT32, &A1Steps, kREQUIRED);
+  extract_number (kINT32, &A2Steps, kREQUIRED);
 
   // Check for too-fast step request (>25KHz)
   if (VelocityInital > 25000)
@@ -536,12 +536,12 @@ void parse_LM_packet (void)
   INT32 StepsCounter1, StepsCounter2 = 0;
     
   // Extract each of the values.
-  extract_number (kULONG, &StepAdd1, kREQUIRED);
-  extract_number (kLONG,  &StepsCounter1, kREQUIRED);
-  extract_number (kLONG, &StepAddInc1, kREQUIRED);
-  extract_number (kULONG, &StepAdd2, kREQUIRED);
-  extract_number (kLONG,  &StepsCounter2, kREQUIRED);
-  extract_number (kLONG, &StepAddInc2, kREQUIRED);
+  extract_number (kUINT32, &StepAdd1, kREQUIRED);
+  extract_number (kINT32,  &StepsCounter1, kREQUIRED);
+  extract_number (kINT32, &StepAddInc1, kREQUIRED);
+  extract_number (kUINT32, &StepAdd2, kREQUIRED);
+  extract_number (kINT32,  &StepsCounter2, kREQUIRED);
+  extract_number (kINT32, &StepAddInc2, kREQUIRED);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -656,7 +656,7 @@ void parse_HM_packet (void)
   INT32 XSteps = 0;
 
   // Extract the step rate.
-  extract_number (kULONG, &StepRate, kREQUIRED);
+  extract_number (kUINT32, &StepRate, kREQUIRED);
 
   // Wait until FIFO is completely empty
   WaitForEmptyFIFO();
@@ -830,9 +830,9 @@ void parse_XM_packet (void)
   INT32 Steps = 0;
 
   // Extract each of the values.
-  extract_number (kULONG, &Duration, kREQUIRED);
-  extract_number (kLONG, &ASteps, kREQUIRED);
-  extract_number (kLONG, &BSteps, kREQUIRED);
+  extract_number (kUINT32, &Duration, kREQUIRED);
+  extract_number (kINT32, &ASteps, kREQUIRED);
+  extract_number (kINT32, &BSteps, kREQUIRED);
 
   // Check for invalid duration
   if (Duration == 0) 
