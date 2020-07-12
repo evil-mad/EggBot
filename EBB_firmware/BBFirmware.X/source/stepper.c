@@ -55,7 +55,7 @@ void clear_StepCounters(void);
 // Note that the MSx lines do not come to any headers, so even when an external
 // source is controlling the drivers, the PIC still needs to control the
 // MSx lines.
-void parse_EM_packet(void)
+void parseEMCommand(void)
 {
   unsigned char EA1, EA2;
   ExtractReturnType RetVal;
@@ -187,7 +187,7 @@ void parse_EM_packet(void)
 
 // RM command
 // For Run Motor - allows completely independent running of the two stepper motors
-void parse_RM_packet(void)
+void parseRMCommand(void)
 {
 }
 
@@ -201,7 +201,7 @@ void parse_RM_packet(void)
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
-void parse_SM_packet (void)
+void parseSMCommand(void)
 {
   UINT32 Duration = 0;
   INT32 A1Steps = 0, A2Steps = 0, A3Steps = 0;
@@ -326,7 +326,7 @@ void parse_SM_packet (void)
 // <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
 // Note that the two velocities are of the combined move - i.e. the tip of the pen, not the individual
 // axies velocities.
-void parse_AM_packet (void)
+void parseAMCommand(void)
 {
   UINT32 temp = 0;
   UINT16 VelocityInital = 0;
@@ -530,7 +530,7 @@ void parse_AM_packet (void)
 
 // Low Level Move command
 // Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2><CR>
-void parse_LM_packet (void)
+void parseLMCommand(void)
 {
   UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
   INT32 StepsCounter1, StepsCounter2 = 0;
@@ -646,7 +646,7 @@ void parse_LM_packet (void)
 //
 // TODO: This code can't handle steps counts above 4,294,967 in either axis. Is
 // there a way to allow it to handle steps counts up to 16,777,215 easily?
-void parse_HM_packet (void)
+void parseHMCommand(void)
 {
   UINT32 StepRate = 0;
   INT32 Steps1 = 0, Steps2 = 0, Steps3 = 0;
@@ -822,7 +822,7 @@ void parse_HM_packet (void)
 // This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
 // machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
 // Axis2 = <axisA_steps> - <axisB_steps>.
-void parse_XM_packet (void)
+void parseXMCommand(void)
 {
   UINT32 Duration = 0;
   INT32 A1Steps = 0, A2Steps = 0;
@@ -1247,7 +1247,7 @@ void process_EStop(BOOL printResult)
 //                         axis1 and axis2.
 // It will return 0,0,0,0,0 if no SM command was executing at the time, and no SM
 // command was in the FIFO.
-void parse_ES_packet(void)
+void parseESCommand(void)
 {
   process_EStop(TRUE);
 }
@@ -1302,7 +1302,7 @@ UINT8 process_QM(void)
 // As of version 2.4.4, there is now a fourth parameter at the end of the reply packet.
 // QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status>,<FIFOStatus><CR>
 // Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
-void parse_QM_packet(void)
+void parseQMCommand(void)
 {
   UINT8 CommandExecuting = 0;
   UINT8 Motor1Running = 0;
@@ -1338,7 +1338,7 @@ void parse_QM_packet(void)
 // where:
 //   <global_step1_position>: signed 32 bit value, current global motor 1 step position
 //   <global_step2_position>: signed 32 bit value, current global motor 2 step position
-void parse_QS_packet(void)
+void parseQSCommand(void)
 {
   INT32 step1, step2;
 
@@ -1376,7 +1376,7 @@ void clear_StepCounters(void)
 // CS takes no parameters, so usage is just CS<CR>
 // QS returns:
 // OK<CR>
-void parse_CS_packet(void)
+void parseCSCommand(void)
 {
   clear_StepCounters();
   

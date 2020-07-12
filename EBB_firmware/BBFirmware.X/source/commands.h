@@ -18,27 +18,27 @@ extern unsigned int gPulseRate[4];
 extern unsigned int gPulseCounters[4];
 
 
-void parse_R_packet(void);     // R for resetting UBW
-void parse_C_packet(void);     // C for configuring I/O and analog pins
-void parse_O_packet(void);     // O for output digital to pins
-void parse_I_packet(void);     // I for input digital from pins
-void parse_V_packet(void);     // V for printing version
-void parse_PI_packet(void);    // PI for reading a single pin
-void parse_PO_packet(void);    // PO for setting a single pin state
-void parse_PD_packet(void);    // PD for setting a pin's direction
-void parse_MR_packet(void);    // MR for Memory Read
-void parse_MW_packet(void);    // MW for Memory Write
-void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
-void parse_PG_packet(void);    // PG Pulse Go
-void parse_PC_packet(void);    // PC Pulse Configure
-void parse_BL_packet(void);    // BL Boot Load command
-void parseT1Packet(void);     // T1 Test command for input parameters
-void parseT2Packet(void);     // T1 Test command for input parameters
-void parse_MR_packet(void);    // MR Motors Run command
-void parse_RB_packet(void);    // RB ReBoot command
+void parseRSCommand(void);     // R for resetting UBW
+void parseCBCommand(void);     // C for configuring I/O and analog pins
+void parseODCommand(void);     // O for output digital to pins
+void parseIDCommand(void);     // I for input digital from pins
+void parseVRCommand(void);     // V for printing version
+void parsePICommand(void);    // PI for reading a single pin
+void parsePOCommand(void);    // PO for setting a single pin state
+void parsePDCommand(void);    // PD for setting a pin's direction
+void parseMRCommand(void);    // MR for Memory Read
+void parseMWCommand(void);    // MW for Memory Write
+void parseCUCommand(void);    // CU configures UBW (system wide parameters)
+void parsePGCommand(void);    // PG Pulse Go
+void parsePCCommand(void);    // PC Pulse Configure
+void parseBLCommand(void);    // BL Boot Load command
+void parseT1Command(void);     // T1 Test command for input parameters
+void parseT2Command(void);     // T1 Test command for input parameters
+void parseMRCommand(void);    // MR Motors Run command
+void parseRBCommand(void);    // RB ReBoot command
 #if defined(BOARD_EBB)
-void parse_QR_packet(void);    // QR Query RC Servo power state
-void parse_SR_packet(void);    // SR Set RC Servo power timeout
+void parseQR_packet(void);    // QR Query RC Servo power state
+void parseSR_packet(void);    // SR Set RC Servo power timeout
 #endif
 
 #endif	/* COMMANDS_H */

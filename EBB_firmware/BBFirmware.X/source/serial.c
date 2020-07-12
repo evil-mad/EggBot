@@ -303,7 +303,7 @@ void serialInit(void)
  * "DR,<register_value><CR>"
  * <register_value> is a 32 bit unsigned int expressed in hex with 0x on the front
  */
-void parseDRPacket(void)
+void parseDRCommand(void)
 {
   UINT8 driverNumber = 0;
   UINT8 registerAddress = 0;
@@ -350,7 +350,7 @@ void parseDRPacket(void)
  * This command replies with:
  * "DW,<CR>"
  */
-void parseDWPacket(void)
+void parseDWCommand(void)
 {
   UINT8 driverNumber = 0;
   UINT8 registerAddress = 0;

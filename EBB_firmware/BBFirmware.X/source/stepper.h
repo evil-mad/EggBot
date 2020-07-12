@@ -13,16 +13,16 @@ extern volatile INT32 globalStepCounter1;
 extern volatile INT32 globalStepCounter2;
 extern volatile INT32 globalStepCounter3;
 
-void parse_SM_packet(void);
-void parse_AM_packet(void);
-void parse_LM_packet(void);
-void parse_HM_packet(void);
-void parse_XM_packet(void);
-void parse_EM_packet(void);
-void parse_QM_packet(void);
-void parse_ES_packet(void);
-void parse_QS_packet(void);
-void parse_CS_packet(void);
+void parseSMCommand(void);
+void parseAMCommand(void);
+void parseLMCommand(void);
+void parseHMCommand(void);
+void parseXMCommand(void);
+void parseEMCommand(void);
+void parseQMCommand(void);
+void parseESCommand(void);
+void parseQSCommand(void);
+void parseCSCommand(void);
 UINT8 process_QM(void);
 void process_SM(
   UINT32 Duration,

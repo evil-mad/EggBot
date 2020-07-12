@@ -23,369 +23,112 @@ BOOL g_ack_enable;
 static INT8 extractHexDigits(UINT32 * acc, UINT8 digits);
 static INT8 extractDecDigits(UINT32 * acc, UINT8 digits);
 
-// Look at the new packet, see what command it is, and 
-// route it appropriately. We come in knowing that
-// our packet is in g_RX_buf[], and that the beginning
-// of the packet is at g_RX_buf_out, and the end (CR) is at
-// g_RX_buf_in. Note that because of buffer wrapping,
-// g_RX_buf_in may be less than g_RX_buf_out.
-void parse_packet(void)
+typedef struct {
+  UINT8 c1;
+  UINT8 c2;
+  void (*func)(void);
+} far rom parse_t;
+
+far rom parse_t commandTable[] = 
 {
-  unsigned int command = 0;
-  unsigned char cmd1 = 0;
-  unsigned char cmd2 = 0;
+  {'L', 'M', parseLMCommand},
+  {'R', 'S', parseRSCommand},
+  {'C', 'B', parseCBCommand},
+  {'C', 'U', parseCUCommand},
+  {'O', 'D', parseODCommand},
+  {'I', 'D', parseIDCommand},
+  {'V', 'R', parseVRCommand},
+  {'A', 'R', parseARCommand},
+  {'P', 'I', parsePICommand},
+  {'P', 'O', parsePOCommand},
+  {'P', 'D', parsePDCommand},
+  {'M', 'R', parseMRCommand},
+  {'M', 'W', parseMWCommand},
+  {'P', 'C', parsePCCommand},
+  {'P', 'G', parsePGCommand},
+  {'S', 'M', parseSMCommand},
+  {'A', 'M', parseAMCommand},
+  {'S', 'P', parseSPCommand},
+  {'T', 'P', parseTPCommand},
+  {'Q', 'P', parseQPCommand},
+  {'E', 'M', parseEMCommand},
+  {'S', 'C', parseSCCommand},
+  {'S', 'N', parseSNCommand},
+  {'Q', 'N', parseQNCommand},
+  {'S', 'L', parseSLCommand},
+  {'Q', 'L', parseQLCommand},
+  {'Q', 'B', parseQBCommand},
+  {'N', 'I', parseNICommand},
+  {'N', 'D', parseNDCommand},
+  {'B', 'L', parseBLCommand},
+  {'T', '1', parseT1Command},
+  {'T', '2', parseT2Command},
+  {'Q', 'C', parseQCCommand},
+  {'Q', 'G', parseQGCommand},
+  {'S', 'E', parseSECommand},
+  {'S', '2', parseS2Command},
+  {'R', 'M', parseRMCommand},
+  {'Q', 'M', parseQMCommand},
+  {'A', 'C', parseACCommand},
+  {'E', 'S', parseESCommand},
+  {'X', 'M', parseXMCommand},
+  {'Q', 'S', parseQSCommand},
+  {'C', 'S', parseCSCommand},
+  {'S', 'T', parseSTCommand},
+  {'Q', 'T', parseQTCommand},
+  {'R', 'B', parseRBCommand},
+#if defined(BOARD_EBB)
+  {'Q', 'R', parseQRCommand},
+  {'S', 'R', parseSRCommand},
+#endif
+  {'H', 'M', parseHMCommand},
+  {'D', 'R', parseDRCommand},
+  {'D', 'W', parseDWCommand},
+  {0x00, 0x00, NULL},             // Table terminator. Must have c1=0x00
+};
+
+
+/*
+ *  Look at the new packet, see what command it is, and 
+ * route it appropriately. We come in knowing that
+ * our packet is in g_RX_buf[], and that the beginning
+ * of the packet is at g_RX_buf_out, and the end (CR) is at
+ * g_RX_buf_in. To make parsing simpler, ALL commands are exactly two characters
+ * long.
+ */
+void parsePacket(void)
+{
+  UINT16 command;
+  UINT16 testCommand;
+  UINT8 i;
 
   // Always grab the first character (which is the first byte of the command)
-  cmd1 = toupper(g_RX_buf[g_RX_buf_out]);
+  command = toupper(g_RX_buf[g_RX_buf_out]);
   advance_RX_buf_out();
-  command = cmd1;
+  command = (command << 8) | toupper (g_RX_buf[g_RX_buf_out]);
+  advance_RX_buf_out();
 
-  // Only grab second one if it is not a comma
-  if (g_RX_buf[g_RX_buf_out] != ',' && g_RX_buf[g_RX_buf_out] != kCR)
+  // Now 'command' is equal to two bytes of our command
+  i = 0;
+  while (commandTable[i].c1 != 0x00)
   {
-    cmd2 = toupper (g_RX_buf[g_RX_buf_out]);
-    advance_RX_buf_out();
-    command = ((unsigned int)(cmd1) << 8) + cmd2;
+    testCommand = ((UINT16)commandTable[i].c1 << 8) | commandTable[i].c2;
+    if (command == testCommand)
+    {
+      commandTable[i].func();
+      break;
+    }
+    i++;
   }
-
-  // Now 'command' is equal to one or two bytes of our command
-  switch (command)
+  if (commandTable[i].c1 == 0x00)
   {
-    case ('L' * 256) + 'M':
-    {
-      // Low Level Move
-      parse_LM_packet();
-      break;
-    }
-    case 'R':
-    {
-      // Reset command (resets everything to power-on state)
-      parse_R_packet ();
-      break;
-    }
-    case 'C':
-    {
-      // Configure command (configure ports for Input or Output)
-      parse_C_packet ();
-      break;
-    }
-    case ('C' * 256) + 'U':
-    {
-      // For configuring UBW
-      parse_CU_packet ();
-      break;
-    }
-    case 'O':
-    {
-      // Output command (tell the ports to output something)
-      parse_O_packet ();
-      break;
-    }
-    case 'I':
-    {
-      // Input command (return the current status of the ports)
-      parse_I_packet ();
-      break;
-    }
-    case 'V':
-    {
-      // Version command
-      parse_V_packet ();
-      break;
-    }
-    case ('A' * 256) + 'R':
-    {
-      // Analog Read
-      parseARPacket();
-      break;
-    }
-    case ('P' * 256) + 'I':
-    {
-      // PI for reading a single pin
-      parse_PI_packet ();
-      break;
-    }
-    case ('P' * 256) + 'O':
-    {
-      // PO for setting a single pin
-      parse_PO_packet ();
-      break;
-    }
-
-    case ('P' * 256) + 'D':
-    {
-      // PD for setting a pin's direction
-      parse_PD_packet ();
-      break;
-    }
-    case ('M' * 256) + 'R':
-    {
-      // MR for Memory Read
-      parse_MR_packet ();
-      break;
-    }
-    case ('M' * 256) + 'W':
-    {
-      // MW for Memory Write
-      parse_MW_packet ();
-      break;
-    }
-    case ('P' * 256) + 'C':
-    {
-      // PC for pulse configure
-      parse_PC_packet();
-      break;
-    }
-    case ('P' * 256) + 'G':
-    {
-      // PG for pulse go command
-      parse_PG_packet();
-      break;
-    }
-    case ('S' * 256) + 'M':
-    {
-      // SM for stepper motor
-      parse_SM_packet ();
-      break;
-    }
-    case ('A' * 256) + 'M':
-    {
-      // AM for Accelerated Motion
-      parse_AM_packet ();
-      break;
-    }
-    case ('S' * 256) + 'P':
-    {
-      // SP for set pen
-      parse_SP_packet ();
-      break;
-    }
-    case ('T' * 256) + 'P':
-    {
-      // TP for toggle pen
-      parse_TP_packet ();
-      break;
-    }
-    case ('Q' * 256) + 'P':
-    {
-      // QP for query pen
-      parse_QP_packet ();
-      break;
-    }
-    case ('E' * 256) + 'M':
-    {
-      // EM for enable motors
-      parse_EM_packet();
-      break;
-    }
-    case ('S' * 256) + 'C':
-    {
-      // SC for stepper mode configure
-      parse_SC_packet();
-      break;
-    }
-    case ('S' * 256) + 'N':
-    {
-      // SN for Clear Node count
-      parse_SN_packet();
-      break;
-    }
-    case ('Q' * 256) + 'N':
-    {
-      // QN for Query Node count
-      parse_QN_packet();
-      break;
-    }
-    case ('S' * 256) + 'L':
-    {
-      // SL for Set Layer
-      parse_SL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'L':
-    {
-      // QL for Query Layer count
-      parse_QL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'B':
-    {
-      // QL for Query Button (program)
-      parse_QB_packet();
-      break;
-    }
-    case ('N' * 256) + 'I':
-    {
-      // NI for Node count Increment
-      parse_NI_packet();
-      break;
-    }
-    case ('N' * 256) + 'D':
-    {
-      // ND Node count Decrement
-      parse_ND_packet();
-      break;
-    }
-    case ('B' * 256) + 'L':
-    {
-      // BL for Boot Load
-      parse_BL_packet();
-      break;
-    }
-    case ('T' * 256) + '1':
-    {
-      // T1 for test
-      parseT1Packet();
-      break;
-    }
-    case ('T' * 256) + '2':
-    {
-      // T2 for test
-      parseT2Packet();
-      break;
-    }
-    case ('Q' * 256) + 'C':
-    {
-      // QC for Query Current
-      parse_QC_packet();
-      break;
-    }
-    case ('Q' * 256) + 'G':
-    {
-      // QG for Query General
-      parse_QG_packet();
-      break;
-    }
-    case ('S' * 256) + 'E':
-    {
-      // SE for Set Engraver
-      parse_SE_packet();
-      break;
-    }
-    case ('S' * 256) + '2':
-    {
-      // S2 for RC Servo method 2
-      servo_S2_command();
-      break;
-    }
-    case ('R' * 256) + 'M':
-    {
-      // RM for Run Motor
-      parse_RM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'M':
-    {
-      // QM for Query Motor
-      parse_QM_packet();
-      break;
-    }
-    case ('A' * 256) + 'C':
-    {
-      // AC for Analog Configure
-      parseACPacket();
-      break;
-    }
-    case ('E' * 256) + 'S':
-    {
-      // ES for E-Stop
-      parse_ES_packet();
-      break;
-    }
-    case ('X' * 256) + 'M':
-    {
-      // XM for X motor move
-      parse_XM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'S':
-    {
-      // QP for Query Step position
-      parse_QS_packet();
-      break;
-    }
-    case ('C' * 256) + 'S':
-    {
-      // CS for Clear Step position
-      parse_CS_packet();
-      break;
-    }
-    case ('S' * 256) + 'T':
-    {
-      // ST for Set Tag
-      parse_ST_packet();
-      break;
-    }
-    case ('Q' * 256) + 'T':
-    {
-      // QT for Query Tag
-      parse_QT_packet();
-      break;
-    }
-    case ('R' * 256) + 'B':
-    {
-      // RB for ReBoot
-      parse_RB_packet();
-      break;
-    }
-#if defined(BOARD_EBB)
-    case ('Q' * 256) + 'R':
-    {
-      // QR is for Query RC Servo power state
-      parse_QR_packet();
-      break;
-    }
-    case ('S' * 256) + 'R':
-    {
-      // SR is for Set RC Servo power timeout
-      parse_SR_packet();
-      break;
-    }
-#endif
-    case ('H' * 256) + 'M':
-    {
-      // HM is for Home Motor
-      parse_HM_packet();
-      break;
-    }
-    case ('D' * 256) + 'R':
-    {
-      // HM is for Read Serial
-      parseDRPacket();
-      break;
-    }
-    case ('D' * 256) + 'W':
-    {
-      // WS is for Write Serial
-      parseDWPacket();
-      break;
-    }
-    
-    
-    default:
-    {
-      if (0 == cmd2)
-      {
-        // Send back 'unknown command' error
-        printf (
-           (far rom char *)"!8 Err: Unknown command '%c:%2X'\r\n"
-          ,cmd1
-          ,cmd1
-        );
-      }
-      else
-      {
-        // Send back 'unknown command' error
-        printf (
-           (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'\r\n"
-          ,cmd1
-          ,cmd2
-          ,cmd1
-          ,cmd2
-        );
-      }
-      break;
-    }
+    // Send back 'unknown command' error
+    printf (
+       (far rom char *)"!8 Err: Unknown command '%c%c:%4X'\r\n"
+      ,(UINT8)(command >> 8)
+      ,(UINT8)command
+      ,command
+    );
   }
 
   // Double check that our output pointer is now at the ending <CR>

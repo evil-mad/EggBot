@@ -10,8 +10,8 @@
 
 void serialInitDrivers(void);
 void serialInit(void);
-void parseDRPacket(void);
-void parseDWPacket(void);
+void parseDRCommand(void);
+void parseDWCommand(void);
 
 #endif	/* SERIAL_H */
 

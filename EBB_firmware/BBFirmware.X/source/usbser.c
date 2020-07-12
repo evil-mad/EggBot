@@ -137,7 +137,7 @@ void ProcessIO(void)
         // Now, if we've gotten a full command (user send <CR>) then
         // go call the code that deals with that command, and then
         // keep parsing. (This allows multiple small commands per packet)
-        parse_packet();
+        parsePacket();
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
       }

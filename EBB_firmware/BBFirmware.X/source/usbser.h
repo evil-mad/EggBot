@@ -24,7 +24,7 @@ extern const rom char st_OK[];
 extern const rom char st_LFCR[];
 
 void usbser_Init(void);
-void parse_packet (void);       // Take a full packet and dispatch it to the right function
+void parsePacket (void);       // Take a full packet and dispatch it to the right function
 signed char extract_digit (unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void ProcessIO(void);
 int _user_putc (char c);

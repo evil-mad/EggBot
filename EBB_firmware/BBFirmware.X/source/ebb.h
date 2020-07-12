@@ -83,17 +83,17 @@ extern char Layer;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
-void parse_SC_packet(void);
-void parse_QP_packet(void);
-void parse_SN_packet(void);
-void parse_QN_packet(void);
-void parse_NI_packet(void);
-void parse_ND_packet(void);
-void parse_SL_packet(void);
-void parse_QL_packet(void);
-void parse_QB_packet(void);
-void parse_QC_packet(void);
-void parse_QG_packet(void);
-void parse_SE_packet(void);
-void parse_RM_packet(void);
+void parseSCCommand(void);
+void parseQPCommand(void);
+void parseSNCommand(void);
+void parseQNCommand(void);
+void parseNICommand(void);
+void parseNDCommand(void);
+void parseSLCommand(void);
+void parseQLCommand(void);
+void parseQBCommand(void);
+void parseQCCommand(void);
+void parseQGCommand(void);
+void parseSECommand(void);
+void parseRMCommand(void);
 #endif

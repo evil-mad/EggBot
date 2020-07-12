@@ -30,7 +30,7 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 
 
 // Return all I/Os to their default power-on values
-void parse_R_packet(void)
+void parseRSCommand(void)
 {
   UserInit();
   print_ack();
@@ -40,7 +40,7 @@ void parse_R_packet(void)
 // "CU,<parameter_number>,<paramter_value><CR>"
 // <paramter_number> <parameter_value>
 // 1                  {1|0} turns on or off the 'ack' ("OK" at end of packets)
-void parse_CU_packet(void)
+void parseCUCommand(void)
 {
   unsigned char parameter_number = 0;
   signed int parameter_value = 0;
@@ -111,7 +111,7 @@ void parse_CU_packet(void)
 //
 // NOTE: it is up to the user to tell the proper port direction bits to be
 // inputs for the analog channels they wish to use.
-void parse_C_packet(void)
+void parseCBCommand(void)
 {
   unsigned char PA, PB, PC, PD, PE;
 
@@ -141,7 +141,7 @@ void parse_C_packet(void)
 
 // Outputs values to the ports pins that are set up as outputs.
 // Example "O,121,224,002<CR>"
-void parse_O_packet(void)
+void parseODCommand(void)
 {
   unsigned char Value;
   ExtractReturnType RetVal;
@@ -191,7 +191,7 @@ void parse_O_packet(void)
 // And that Port C bits 0,1,2 are used for
 //  User1 LED, User2 LED and Program switch respectively.
 // The rest will be read in as zeros.
-void parse_I_packet(void)
+void parseIDCommand(void)
 {
   printf (
     (far rom char*)"I,%03i,%03i,%03i,%03i,%03i\r\n", 
@@ -204,7 +204,7 @@ void parse_I_packet(void)
 }
 
 // All we do here is just print out our version number
-void parse_V_packet(void)
+void parseVRCommand(void)
 {
   printf ((far rom char *)st_version);
 }
@@ -213,7 +213,7 @@ void parse_V_packet(void)
 // "MW,<location>,<value><CR>"
 // <location> is a decimal value between 0 and 4096 indicating the RAM address to write to 
 // <value> is a decimal value between 0 and 255 that is the value to write
-void parse_MW_packet(void)
+void parseMWCommand(void)
 {
   unsigned int location;
   unsigned char value;
@@ -241,7 +241,7 @@ void parse_MW_packet(void)
 // <location> is a decimal value between 0 and 4096 indicating the RAM address to read from 
 // The UBW will then send a "MR,<value><CR>" packet back to the PC
 // where <value> is the byte value read from the address
-void parse_MR_packet(void)
+void parseMRCommand(void)
 {
   unsigned int location;
   unsigned char value;
@@ -272,7 +272,7 @@ void parse_MR_packet(void)
 // <port> is "A", "B", "C" and indicates the port
 // <pin> is a number between 0 and 7 and indicates which pin to change direction on
 // <direction> is "1" for input, "0" for output
-void parse_PD_packet(void)
+void parsePDCommand(void)
 {
   unsigned char port;
   unsigned char pin;
@@ -370,7 +370,7 @@ void parse_PD_packet(void)
 // The command returns a "PI,<value><CR>" packet,
 // where <value> is the value (0 or 1 for digital)
 // value for that pin.
-void parse_PI_packet(void)
+void parsePICommand(void)
 {
   unsigned char port;
   unsigned char pin;
@@ -437,7 +437,7 @@ void parse_PI_packet(void)
 // <port> is "A", "B", "C" and indicates the port
 // <pin> is a number between 0 and 7 and indicates which pin to write out the value to
 // <value> is "1" or "0" and indicates the state to change the pin to
-void parse_PO_packet(void)
+void parsePOCommand(void)
 {
   unsigned char port;
   unsigned char pin;
@@ -538,7 +538,7 @@ void parse_PO_packet(void)
 //
 // Usage:
 // PC,<RB0_Len>,<RB0_Rate>,<RB1_Len>,<RB1_Rate>,...,<RB3_Len>,<RB3_Rate><CR>
-void parse_PC_packet (void)
+void parsePCCommand(void)
 {
   unsigned int Length, Rate;
   unsigned char i;
@@ -585,7 +585,7 @@ void parse_PC_packet (void)
 // Usage:
 // PG,1<CR>   Start pulses, or load latest set of paramters and use them
 // PG,0<CR>   Stop pulses
-void parse_PG_packet (void)
+void parsePGCommand(void)
 {
   unsigned char Value;
 
@@ -637,7 +637,7 @@ void LongDelay(void)
 
 // BL command : simply jump to the bootloader
 // Example: "BL<CR>"
-void parse_BL_packet()
+void parseBLCommand()
 {
   // First, kill interrupts though
   INTCONbits.GIEH = 0;  // Turn high priority interrupts on
@@ -653,7 +653,7 @@ void parse_BL_packet()
 
 // RB ReBoot command : simply jump to the reset vector
 // Example: "RB<CR>"
-void parse_RB_packet()
+void parseRBCommand()
 {
   // First, kill interrupts though
   INTCONbits.GIEH = 0;  // Turn high priority interrupts on
@@ -673,7 +673,7 @@ void parse_RB_packet()
 // Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>" 
 // 0 = power to RC servo off
 // 1 = power to RC servo on
-void parse_QR_packet()
+void parseQRCommand()
 {
   printf ((far rom char *)"%1u\r\n", RCServoPowerIO_PORT);
   print_ack();
@@ -692,7 +692,7 @@ void parse_QR_packet()
 // immediately affect the servo's power state, where 0 turns it off and 1 
 // turns it on.
 #if defined(BOARD_EBB)
-void parse_SR_packet(void)
+void parseSRCommand(void)
 {
   unsigned long Value;
   UINT8 State;
@@ -742,7 +742,7 @@ void parse_SR_packet(void)
  * 
  */
 /// TODO: To save some flash space, maybe not include this function in production builds?
-void parseT1Packet()
+void parseT1Command()
 {
   UINT8  UInt8;
   INT8   SInt8;
@@ -789,7 +789,7 @@ void parseT1Packet()
  * 
  */
 /// TODO: To save some flash space, maybe not include this function in production builds?
-void parseT2Packet()
+void parseT2Command()
 {
   UINT24 UInt24;
   UINT24 HInt24;

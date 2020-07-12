@@ -6,8 +6,11 @@ NOTES:
   - Maybe latest USB stack with XC8 compiler would solve this problem? (probably not worth the effort)
   - For now, just note the limitation and make sure to stay within the 64 byte limits
 
+* Perform RAM analysis, block by block, see where there are holes and map out all usage
+
 * From EBB issue #139 - make all return values consistent: repeat the command, then optional data, then a carriage return. 
-* From EBB issue #139 - make all commands two letters long
+* From EBB issue #139 - make all commands two letters long 
+  - (DONE)
 * From EBB issue #139 - make all errors follow the above format (two character error code, followed by a fixed length text string describing the error, all semi-human readable)
 
 * Remove <servo_rate_up> and <servo_rate_down> as global SC command parameters
@@ -18,11 +21,13 @@ NOTES:
 
 * Add IMMEDIATE/FIFO parameter to PO commands (maybe not, based on Windell discussion)
 
-* *BB code needs to boot and run even if USB isn't present at boot. If only 9V is there, still need to execute and run normal loop (DONE)
+* *BB code needs to boot and run even if USB isn't present at boot. If only 9V is there, still need to execute and run normal loop 
+  - (DONE)
 
 * Create simple PC application to hammer *BB with USB commands and measure throughput - use during development to tune changes for maximum command throughput
 
 * To save on RAM, eleminate the last_command[] buffer system (not needed when computers talk to *BB)
+  - (DONE)
 
 * Possible optomization - make extract_number() set the ReturnValue to zero on entry so that calling functions don't have to do it. Then go through and elemninate any initalized values on passed in paratmers to the function.
 
@@ -37,20 +42,31 @@ NOTES:
   - Note that we may want to change to using HLVDIN as a true analog watchdog input (with interrupt) on v1.1 3BB version (would require new code)
 
 * Old "A" command now named "RA" (Read Analog)
+  - (DONE)
 
 * Make command parsing use a lookup table rather than a huge switch/case
+  - (DONE) - didn't save much RAM or ROM, but is much easier to maintain
 
-* Use periodic (250ms) ADC conversions of SCALED_V+ input to determine when to initialize stepper drivers
+* Use ADC conversions of SCALED_V+ input every time through main() to determine when to initialize stepper drivers
+  - (DONE)
+
 * Perform ADC offset calibration whenever power has been applied to motor drivers
+  - (DONE)
+
 * Perform ADC offset calibration at boot (init)
+  - (DONE)
 
 * Remove ADC interrupt and automatic sequencing.
+  - (DONE) ADC only converts on user command now
+
 * Add internal ADC command to convert any ADC channel in blocking fashion
+  - (DONE)
+
 * Convert AC and A commands to use blocking convert
+  - (DONE)
 
 * Refactor I/O initialization
   - Make table of all I/O ports for each board, make I/O init smaller
-  - 
 
 * Should we break out all "pen" functionality (SP, TP) into it's own file? Now that it's all stepper based, doesn't seem to fit in servo.c anymore
 
@@ -63,20 +79,25 @@ NOTES:
 * On EBB, RC Servo RB1 will ALWAYS be a pen output. No option to disable it.
 
 * Update all variable names to use common coding standard
+
 * Add section headers to all .c and .h files (defines, includes, variables, prototypes, etc.)
 
 * (3BB) Remove commands that don't make sense anymore, like RC Servo power control
 
 * Remove analog conversions from low ISR, instead, make them simple and blocking
+  - (DONE)
 
 * Pull out pulse commands to own files
 
 * Factor out command parsing into its own file
   - Make table based to shorten code?
+    - (DONE) didn't shorten code much
 
 * Factor out ISRs into their own file
+  - (DONE)
 
 * Create UART I/O low level code in own file
+  - (DONE)
 
 * Factor out USB serial I/O into own file
 

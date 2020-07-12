@@ -96,7 +96,7 @@ void analogCalibrate(void)
 // To turn off a particular analog channel, use the AC command to disable it.
 // Once enabled, that channel will be converted at the normal ADC conversion
 // rate and will show up in A packets.
-void parseACPacket(void)
+void parseACCommand(void)
 {
   UINT8 Channel, Enable;
 
@@ -121,7 +121,7 @@ void parseACPacket(void)
 // Returned packet will look like 
 // "AR,2:421,5:891,9:3921<CR>" if channels 2, 5 and 9
 // are enabled.
-void parseARPacket(void)
+void parseARCommand(void)
 {
   UINT8 channel = 0;
   UINT16 ChannelBit = 0x0001;

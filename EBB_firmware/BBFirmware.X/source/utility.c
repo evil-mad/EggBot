@@ -349,7 +349,7 @@ UINT32 GetTick(void)
 // <new name> is a 0 to 16 character ASCII string.
 // This string gets saved in FLASH, and is returned by the "QT" command, as
 // well as being appended to the USB name that shows up in the OS
-void parse_ST_packet()
+void parseSTCommand()
 {
   unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 bytes = 0;
@@ -377,7 +377,7 @@ void parse_ST_packet()
 // QT command : Query Tag
 // "QT<CR>"
 // Prints out the 'tag' that was set with the "ST" command previously, if any
-void parse_QT_packet()
+void parseQTCommand()
 {
   unsigned char name[FLASH_NAME_LENGTH+1];    
   UINT8 i;

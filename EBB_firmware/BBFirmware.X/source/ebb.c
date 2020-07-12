@@ -59,7 +59,7 @@ UINT StoredEngraverPower;
 // SC,10,<gPenMoveDuration><CR> set the new global default pen move duration in ms (16 bit uint)
 // SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
-void parse_SC_packet (void)
+void parseSCCommand(void)
 {
   unsigned char Para1 = 0;
   unsigned int Para2 = 0;
@@ -232,7 +232,7 @@ void fprint(float f)
 // Query Pen
 // Usage: QP<CR>
 // Returns: 0 for down, 1 for up, then OK<CR>
-void parse_QP_packet(void)
+void parseQPCommand(void)
 {
   printf((far rom char *)"%d\n\r", gPenStateActual);
 
@@ -241,7 +241,7 @@ void parse_QP_packet(void)
 
 // Node counter increment
 // Usage: NI<CR>
-void parse_NI_packet(void)
+void parseNICommand(void)
 {
   if (NodeCount < 0xFFFFFFFEL)
   {
@@ -252,7 +252,7 @@ void parse_NI_packet(void)
 
 // Node counter Decrement
 // Usage: ND<CR>
-void parse_ND_packet(void)
+void parseNDCommand(void)
 {
   if (NodeCount)
   {
@@ -264,7 +264,7 @@ void parse_ND_packet(void)
 // Set Node counter
 // Usage: SN,<value><CR>
 // <value> is a 4 byte unsigned value
-void parse_SN_packet(void)
+void parseSNCommand(void)
 {
   unsigned long Temp;
   ExtractReturnType RetVal;
@@ -281,7 +281,7 @@ void parse_SN_packet(void)
 // Usage: QN<CR>
 // Returns: <NodeCount><CR>
 // OK<CR>
-void parse_QN_packet(void)
+void parseQNCommand(void)
 {
   printf ((far rom char*)"%010lu\r\n", NodeCount);
 
@@ -290,7 +290,7 @@ void parse_QN_packet(void)
 
 // Set Layer
 // Usage: SL,<NewLayer><CR>
-void parse_SL_packet(void)
+void parseSLCommand(void)
 {
   // Extract each of the values.
   extract_number (kUINT8, &Layer, kREQUIRED);
@@ -308,7 +308,7 @@ void parse_SL_packet(void)
 // Usage: QL<CR>
 // Returns: <Layer><CR>
 // OK<CR>
-void parse_QL_packet(void)
+void parseQLCommand(void)
 {
   printf ((far rom char*)"%03i\r\n", Layer);
 
@@ -319,7 +319,7 @@ void parse_QL_packet(void)
 // Usage: QB<CR>
 // Returns: <HasButtonBeenPushedSinceLastQB><CR> (0 or 1)
 // OK<CR>
-void parse_QB_packet(void)
+void parseQBCommand(void)
 {
   printf ((far rom char*)"%1i\r\n", ButtonPushed);
   if (ButtonPushed)
@@ -340,7 +340,7 @@ void parse_QB_packet(void)
 // and a value of 2.79V-ADC (870 counts) = 31.4V on V+
 // REF_RA0 comes in on AN0 (RA0)
 // V+ comes in on AN11 (RC2)
-void parse_QC_packet(void)
+void parseQCCommand(void)
 {
   // Print out our results
   /// TODO: update this for EBB for analogConvert())
@@ -382,7 +382,7 @@ void parse_QC_packet(void)
 //   <fifo_size> parameter set with the CU,3,<fifo_size> command or COMMAND_FIFO_LENGTH whichever 
 //   is smaller.
 //
-void parse_QG_packet(void)
+void parseQGCommand(void)
 {
   UINT8 result = process_QM();
   UINT8 param = 0;
@@ -444,7 +444,7 @@ void parse_QG_packet(void)
 // Timer3 and ECCP2 is RC servo2 output
 // Timer4 is 1ms ISR
 
-void parse_SE_packet(void)
+void parseSECommand(void)
 {
   UINT8 State = 0;
   UINT16 Power = 0;

@@ -414,10 +414,10 @@ void servo_Init(void)
 // (SC,4 SC,5 commands) when it schedules the pen move for the destination
 // position.
 // 
-// Internally, the parse_SP_packet() function makes a call to
+// Internally, the parseSPCommand() function makes a call to
 // process_SP() function to actually make the change in the servo output.
 //
-void parse_SP_packet(void)
+void parseSPCommand(void)
 {
   UINT8 State = 0;
   UINT16 CommandDuration = gPenMoveDuration;
@@ -449,7 +449,7 @@ void parse_SP_packet(void)
 // <duration> is optional, and defaults to 0mS
 // Just toggles state of pen arm, then delays for the optional <duration>
 // Duration is in units of 1ms
-void parse_TP_packet(void)
+void parseTPCommand(void)
 {
   UINT16 CommandDuration = gPenMoveDuration;
 
@@ -534,7 +534,7 @@ void process_SP(PenStateType newState, UINT16 commandDuration)
 //    <delay> is the number of milliseconds to delay the start of the next command
 //      (optional, defaults to 0 = instant)
 
-void servo_S2_command (void)
+void parseS2Command(void)
 {
   UINT16 Duration = 0;
   UINT8 Pin = 0;

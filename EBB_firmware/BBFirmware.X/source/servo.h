@@ -88,10 +88,10 @@ extern UINT8 gRC2SlotMS;
 extern PenStateType gPenStateActual;
 
 void servo_Init(void);
-void parse_SP_packet(void);
-void servo_S2_command(void);
+void parseSPCommand(void);
+void parseS2Command(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
-void parse_TP_packet(void);
+void parseTPCommand(void);
 void servoPenHome(void);
 
 #endif

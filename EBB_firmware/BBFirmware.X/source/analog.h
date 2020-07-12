@@ -10,8 +10,8 @@
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void analogConfigure (UINT8 Channel, UINT8 Enable);
-void parseARPacket(void);
-void parseACPacket(void);
+void parseARCommand(void);
+void parseACCommand(void);
 UINT16 analogConvert(UINT8 channel);
 void analogCalibrate(void);
 void analogInit(void);

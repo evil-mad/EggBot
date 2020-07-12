@@ -228,7 +228,7 @@ void UserInit(void)
   PORTBbits.RB3 = 0;          // And make sure it starts out off
     
   // Clear out global stepper positions
-  parse_CS_packet();
+  parseCSCommand();
     
   servo_Init();
   
