@@ -88,7 +88,7 @@ Updated list of todo items for EBB/3BB refactor
 * Convert all variable types to "Microchip" standard (UINT8, etc.)
 
 
-Code Size : RAM/Free, ROM/Free
+Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
   EBB_BL
     5/24  : 3461/315, 42794/22734
 
@@ -97,3 +97,5 @@ Code Size : RAM/Free, ROM/Free
     5/24  : 3461/315, 42794/22734
     7/6   : 3305/471, 43407/22121
     7/8   : 3271/505, 44213/21315
+(switched to free version of C18 compiler's optomizations)
+    8/12  : 3213/563, 85%, 58203/7325, 89%
