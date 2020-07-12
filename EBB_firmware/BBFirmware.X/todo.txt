@@ -10,7 +10,9 @@ Updated list of todo items for EBB/3BB refactor
 
 * On SC,4 and SC,5 check that Min is always a larger number than Max
 
-* Add IMMEDIATE/FIFO parameter to PO commands
+* Add IMMEDIATE/FIFO parameter to PO commands (maybe not, based on Windell discussion)
+
+* *BB code needs to boot and run even if USB isn't present at boot. If only 9V is there, still need to execute and run normal loop
 
 * To save on RAM, eleminate the last_command[] buffer system (not needed when computers talk to *BB)
 

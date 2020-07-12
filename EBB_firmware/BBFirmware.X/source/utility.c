@@ -418,7 +418,6 @@ void utilityRun(void)
   
   if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
   {
-    DEBUG_A0_SET()
     LastCheckTimeMS = currentTimeMS;
     
     currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
@@ -426,16 +425,31 @@ void utilityRun(void)
     if (
       (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
       && 
-      (currentVPlusVoltage > V_PLUS_VOLTAGE_POWERED)
+      (currentVPlusVoltage >= V_PLUS_VOLTAGE_POWERED)
     )
     {
-      DEBUG_A1_SET()
+      // Because getting these bytes of config data into the drivers is really
+      // important (otherwise they will consume a ton of current and make the 
+      // motors super hot), we'll send it three times here.
+      serialInitDrivers();
+      serialInitDrivers();
       serialInitDrivers();
       analogCalibrate();    // Because our voltage situation may have changed
+      // Enable the drivers by setting their enable pin low
+      DEBUG_A0_CLEAR()
+      EnableIO = 0;      
       servoPenHome();       // The drivers were limped, so home the pen
-      DEBUG_A1_CLEAR()
+    }
+    else if (
+      (lastVPlusVoltage > V_PLUS_VOLTAGE_POWERED) 
+      && 
+      (currentVPlusVoltage <= V_PLUS_VOLTAGE_POWERED)
+    )
+    {
+      DEBUG_A0_SET()
+      // Disable the drivers so they don't consume tons of power the next time we get 9V
+      EnableIO = 1;
     }
     lastVPlusVoltage = currentVPlusVoltage;
-    DEBUG_A0_CLEAR()
   }
 }

@@ -160,7 +160,7 @@ DEBUG_A1_CLEAR()
     dummy = RCREG2;
   }
   
-DEBUG_A0_SET()
+//DEBUG_A0_SET()
   // Zero out the datagram, as we'll reuse it for the reply
   for (i=0; i < 8; i++)
   {
@@ -236,7 +236,7 @@ DEBUG_A1_CLEAR()
     Delay10TCYx(4);
   }
 
-DEBUG_A0_CLEAR()
+//DEBUG_A0_CLEAR()
 
   return retval;
 }
@@ -261,9 +261,6 @@ void serialInitDrivers(void)
     WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValues[i]);
     Delay100TCYx(20);
   }
-  
-  // Enable the drivers by setting their enable pin low
-  EnableIO = 0;
 }
 
 /* Initialize EUSART2 to talk to the three TMC2209 stepper drivers.
@@ -272,8 +269,6 @@ void serialInitDrivers(void)
  * The UART RX pin is on RP11 (RC0), and the TX pin is RP12 (RC1). */
 void serialInit(void)
 {
-  DEBUG_INIT()
-  
   // Set up initial states
   LATCbits.LATC0 = 1;
   LATCbits.LATC1 = 1;
@@ -389,6 +384,4 @@ void parseDWPacket(void)
   printf((far rom char *)"DW\r");
 
   print_ack();
-  
-
 }

@@ -151,6 +151,7 @@ void UserInit(void)
   Enable2IO_TRIS = OUTPUT_PIN;
 #elif defined(BOARD_3BB)
   /// TODO: Default EN high (DISABLED), later, on driver init, set low
+  DEBUG_A0_SET()
   EnableIO = 1;
   EnableIO_TRIS = OUTPUT_PIN;
 
