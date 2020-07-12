@@ -1,5 +1,11 @@
 Updated list of todo items for EBB/3BB refactor
 
+NOTES:
+  - Current USB stack does not appear to be happy with commands from PC > 64 bytes in length (total)
+  - Current USB stack does not appear to be happy with printf() data going back to PC > 64 bytes in length (total)
+  - Maybe latest USB stack with XC8 compiler would solve this problem? (probably not worth the effort)
+  - For now, just note the limitation and make sure to stay within the 64 byte limits
+
 * From EBB issue #139 - make all return values consistent: repeat the command, then optional data, then a carriage return. 
 * From EBB issue #139 - make all commands two letters long
 * From EBB issue #139 - make all errors follow the above format (two character error code, followed by a fixed length text string describing the error, all semi-human readable)
@@ -12,7 +18,9 @@ Updated list of todo items for EBB/3BB refactor
 
 * Add IMMEDIATE/FIFO parameter to PO commands (maybe not, based on Windell discussion)
 
-* *BB code needs to boot and run even if USB isn't present at boot. If only 9V is there, still need to execute and run normal loop
+* *BB code needs to boot and run even if USB isn't present at boot. If only 9V is there, still need to execute and run normal loop (DONE)
+
+* Create simple PC application to hammer *BB with USB commands and measure throughput - use during development to tune changes for maximum command throughput
 
 * To save on RAM, eleminate the last_command[] buffer system (not needed when computers talk to *BB)
 
@@ -24,6 +32,9 @@ Updated list of todo items for EBB/3BB refactor
   - If you have the fifo size set to 10, and you have 10 items in it, then set it to 0, those 10 commands can't get lost.
 
 * Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered via the 250ms poll)
+  - This feature has been implemented by using the SCALED_V+ ADC input, and checking it every time through main(), and if it goes above/below 6.5V then we enable and reinit drivers or disable them.
+  - Considered (DONE) for now
+  - Note that we may want to change to using HLVDIN as a true analog watchdog input (with interrupt) on v1.1 3BB version (would require new code)
 
 * Old "A" command now named "RA" (Read Analog)
 

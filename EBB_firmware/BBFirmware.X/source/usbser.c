@@ -33,7 +33,6 @@ unsigned char g_TX_buf_out;
 unsigned char g_RX_buf_in;
 unsigned char g_RX_buf_out;
 
-
 void usbser_Init(void)
 {
   UINT16 i;
@@ -56,9 +55,6 @@ void usbser_Init(void)
   {
     g_RX_buf[i] = 0;
   }
-  
-  
-  
 }
 
 /******************************************************************************
@@ -88,11 +84,9 @@ void usbser_Init(void)
  *****************************************************************************/
 void ProcessIO(void)
 {
-  static char last_command[64] = {0};
   static BOOL in_esc = FALSE;
   static char esc_sequence[3] = {0};
   static BOOL in_cr = FALSE;
-  static BYTE last_fifo_size;
   unsigned char tst_char;
   static unsigned char button_state = 0;
   static unsigned int button_ctr = 0;
@@ -103,15 +97,6 @@ void ProcessIO(void)
 
   BlinkUSBStatus();
 
-#if defined(BUILD_WITH_DEMO)    
-  /* Demo code, for playing back array of points so we can run without PC.*/
-
-  // Check for start of playback
-  if (!swProgram)
-  {
-  }
-#endif
-  
   // Bail from here if we're not 'plugged in' to a PC or we're suspended
   if(
     (USBDeviceState < CONFIGURED_STATE)
@@ -124,9 +109,7 @@ void ProcessIO(void)
 
   // Pull in some new data if there is new data to pull in
   // And we aren't waiting for the current move to finish
-
   rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);
-
   if (rx_bytes > 0)
   {
     for(byte_cnt = 0; byte_cnt < rx_bytes; byte_cnt++)
@@ -154,12 +137,7 @@ void ProcessIO(void)
         // Now, if we've gotten a full command (user send <CR>) then
         // go call the code that deals with that command, and then
         // keep parsing. (This allows multiple small commands per packet)
-        // Copy the new command over into the 'up-arrow' buffer
-        for (i=0; i<g_RX_buf_in; i++)
-        {
-          last_command[i] = g_RX_buf[i];
-        }
-        parse_packet ();
+        parse_packet();
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
       }
@@ -180,34 +158,8 @@ void ProcessIO(void)
         esc_sequence[1] == 0
       )
       {
+        /// TODO: What is this for?
         esc_sequence[1] = 91;
-      }
-      else if (
-        in_esc == TRUE 
-        && 
-        tst_char == 65 
-        &&
-        esc_sequence[0] == 27 
-        && 
-        esc_sequence[1] == 91
-      )
-      {
-        esc_sequence[0] = 0;
-        esc_sequence[1] = 0;
-        esc_sequence[2] = 0;
-        in_esc = FALSE;
-
-        // We got an up arrow (d27, d91, d65) and now copy over last command
-        for (i = 0; g_RX_buf[i] != kCR; i++)
-        {
-          g_RX_buf[i] = last_command[i];
-        }
-        g_RX_buf_in = i;
-        g_RX_buf[g_RX_buf_in] = 0;
-
-        // Also send 'down arrow' to counter act the affect of the up arrow
-        printf((far rom char *)"\x1b[B\x1b[1K\x1b[0G");
-        printf((far rom char *)"%s", g_RX_buf);
       }
       else if (tst_char == 8 && g_RX_buf_in > 0)
       {

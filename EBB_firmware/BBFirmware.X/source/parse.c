@@ -232,10 +232,16 @@ void parse_packet(void)
       parse_BL_packet();
       break;
     }
-    case ('C' * 256) + 'K':
+    case ('T' * 256) + '1':
     {
-      // CL for Check
-      parse_CK_packet();
+      // T1 for test
+      parseT1Packet();
+      break;
+    }
+    case ('T' * 256) + '2':
+    {
+      // T2 for test
+      parseT2Packet();
       break;
     }
     case ('Q' * 256) + 'C':

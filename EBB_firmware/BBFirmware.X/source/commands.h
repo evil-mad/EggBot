@@ -32,7 +32,8 @@ void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
 void parse_PG_packet(void);    // PG Pulse Go
 void parse_PC_packet(void);    // PC Pulse Configure
 void parse_BL_packet(void);    // BL Boot Load command
-void parse_CK_packet(void);    // CK ChecK command
+void parseT1Packet(void);     // T1 Test command for input parameters
+void parseT2Packet(void);     // T1 Test command for input parameters
 void parse_MR_packet(void);    // MR Motors Run command
 void parse_RB_packet(void);    // RB ReBoot command
 #if defined(BOARD_EBB)

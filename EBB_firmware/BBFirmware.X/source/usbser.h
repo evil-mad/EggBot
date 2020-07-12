@@ -10,7 +10,7 @@
 
 #define kTX_BUF_SIZE          64        // In bytes
 #define kRX_BUF_SIZE          255       // In bytes
-#define kRX_COMMAND_BUF_SIZE  10        // In bytes
+#define kRX_COMMAND_BUF_SIZE  64        // In bytes (must be 64)
 
 #define kCR                     0x0D
 #define kLF                     0x0A

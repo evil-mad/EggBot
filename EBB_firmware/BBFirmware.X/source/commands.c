@@ -728,22 +728,21 @@ void parse_SR_packet(void)
 #endif
 
 /*
- * CK - For testing that parameter input routines work properly
+ * T1 - For testing that parameter input routines work properly
  * 
- * This function reads in one parameter for every type of input that the
- * extract_number() function can read in. Use it to test that all values
- * are properly parsed and returned.
+ * This function (along with T2) reads in one parameter for every type of input 
+ * that the extract_number() function can read in. Use it to test that all 
+ * values are properly parsed and returned.
  * 
  * Sample test lines:
- * CK,1,1,1,1,1,1,1,1,1,1,1,1,1
- * CK,0,0,0,0,0,0,0,0,0,0,0,0,0
- * CK,127,255,FF,32767,65535,FFFF,16777215,FFFFFF,2147483647,4294967295,FFFFFFFF,G,g
- * CK,-127,255,FF,-32767,65535,FFFF,16777215,FFFFFF,-2147483647,4294967295,FFFFFFFF,!,!
+ * T1,1,1,1,1,1,1,1,1
+ * T1,0,0,0,0,0,0,0,0
+ * T1,127,255,FF,32767,65535,FFFF,G,g
+ * T1,-127,255,FF,-32767,65535,FFFF,!,!
  * 
- * CK,-127,255,FF,-32767,65535,FFFF,16777215,FFFFFF,-2147483647,4294967295,!,!
  */
 /// TODO: To save some flash space, maybe not include this function in production builds?
-void parse_CK_packet()
+void parseT1Packet()
 {
   UINT8  UInt8;
   INT8   SInt8;
@@ -751,11 +750,6 @@ void parse_CK_packet()
   UINT16 UInt16;
   INT16  SInt16;
   UINT16 HInt16;
-  UINT24 UInt24;
-  UINT24 HInt24;
-  UINT32 UInt32;
-  INT32  SInt32;
-  UINT32 HInt32;
   UINT8  UChar;
   UINT8  UCaseChar;
 
@@ -765,11 +759,6 @@ void parse_CK_packet()
   extract_number(kINT16, &SInt16, kREQUIRED);
   extract_number(kUINT16, &UInt16, kREQUIRED);
   extract_number(kHEX16, &HInt16, kREQUIRED);
-  extract_number(kUINT24, &UInt24, kREQUIRED);
-  extract_number(kHEX24, &HInt24, kREQUIRED);  
-  extract_number(kINT32, &SInt32, kREQUIRED);
-  extract_number(kUINT32, &UInt32, kREQUIRED);
-  extract_number(kHEX32, &HInt32, kREQUIRED);
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
@@ -779,16 +768,46 @@ void parse_CK_packet()
   printf ((rom char far *)"kINT16  =%d\r\n", SInt16);
   printf ((rom char far *)"kUINT16 =%u\r\n", UInt16);
   printf ((rom char far *)"kHEX16  =%X\r\n", HInt16);
-  printf ((rom char far *)"kUINT24 =%Hu\r\n", UInt24);
-  printf ((rom char far *)"kHEX24  =%HX\r\n", HInt24);
-  printf ((rom char far *)"kINT32  =%ld\r\n", SInt32);
-  printf ((rom char far *)"kUINT32 =%lu\r\n", UInt32);
-  printf ((rom char far *)"kHEX32  =%lX\r\n", HInt32);
   printf ((rom char far *)"kASCII_CHAR=%c\r\n", UChar);
   printf ((rom char far *)"kUCASE_ASCII_CHAR=%c\r\n", UCaseChar);
 
   print_ack();
 }
 
+/*
+ * T2 - For testing that parameter input routines work properly
+ * 
+ * This function (along with T1) reads in one parameter for every type of input 
+ * that the extract_number() function can read in. Use it to test that all 
+ * values are properly parsed and returned.
+ * 
+ * Sample test lines:
+ * T2,1,1,1,1,1
+ * T2,0,0,0,0,0
+ * T2,16777215,FFFFFF,2147483647,4294967295,FFFFFFFF
+ * T2,16777215,FFFFFF,-2147483647,4294967295,FFFFFFFF
+ * 
+ */
+/// TODO: To save some flash space, maybe not include this function in production builds?
+void parseT2Packet()
+{
+  UINT24 UInt24;
+  UINT24 HInt24;
+  UINT32 UInt32;
+  INT32  SInt32;
+  UINT32 HInt32;
 
+  extract_number(kUINT24, &UInt24, kREQUIRED);
+  extract_number(kHEX24, &HInt24, kREQUIRED);  
+  extract_number(kINT32, &SInt32, kREQUIRED);
+  extract_number(kUINT32, &UInt32, kREQUIRED);
+  extract_number(kHEX32, &HInt32, kREQUIRED);
 
+  printf ((rom char far *)"kUINT24 =%Hu\r\n", UInt24);
+  printf ((rom char far *)"kHEX24  =%HX\r\n", HInt24);
+  printf ((rom char far *)"kINT32  =%ld\r\n", SInt32);
+  printf ((rom char far *)"kUINT32 =%lu\r\n", UInt32);
+  printf ((rom char far *)"kHEX32  =%lX\r\n", HInt32);
+
+  print_ack();
+}
