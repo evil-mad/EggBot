@@ -297,10 +297,13 @@ void SerialInitDrivers(void)
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 
   // function to write it to a 1.
-  reg = ReadDatagram(1, OTP_READ);
-  if (!(reg & OTP_INTERNALSENSE_MASK))
+  for (i=1; i <= 3; i++)
   {
-    WriteOTP(1, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
+    reg = ReadDatagram(i, OTP_READ);
+    if (!(reg & OTP_INTERNALSENSE_MASK))
+    {
+      WriteOTP(i, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
+    }
   }
 }
 

@@ -17,7 +17,7 @@
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 // Milliseconds between serial checks to see if drivers are online yet
-#define DRIVER_INIT_CHECK_PERIOD_MS 10
+#define DRIVER_INIT_CHECK_PERIOD_MS 100
 
 /// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)
@@ -414,37 +414,44 @@ void parseQTCommand()
  */
 void utilityRun(void)
 {
+  static UINT32 LastCheckTimeMS = 0;
+  UINT32 currentTimeMS = GetTick(); 
   UINT16 currentVPlusVoltage;
   static UINT16 lastVPlusVoltage = 0;
 
-  currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
+  if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
+  {
+    LastCheckTimeMS = currentTimeMS;
+    
+    currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
 
-  if (
-    (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
-    && 
-    (currentVPlusVoltage >= V_PLUS_VOLTAGE_POWERED)
-  )
-  {
-    // Because getting these bytes of config data into the drivers is really
-    // important (otherwise they will consume a ton of current and make the 
-    // motors super hot), we'll send it three times here.
-    SerialInitDrivers();
-    SerialInitDrivers();
-    SerialInitDrivers();
-    Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
-    analogCalibrate();    // Because our voltage situation may have changed
-    // Enable the drivers by setting their enable pin low
-    EnableIO = 0;      
-    servoPenHome();       // The drivers were limped, so home the pen
+    if (
+      (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
+      && 
+      (currentVPlusVoltage >= V_PLUS_VOLTAGE_POWERED)
+    )
+    {
+      // Because getting these bytes of config data into the drivers is really
+      // important (otherwise they will consume a ton of current and make the 
+      // motors super hot), we'll send it three times here.
+      SerialInitDrivers();
+      SerialInitDrivers();
+      SerialInitDrivers();
+      Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
+      analogCalibrate();    // Because our voltage situation may have changed
+      // Enable the drivers by setting their enable pin low
+      EnableIO = 0;      
+      servoPenHome();       // The drivers were limped, so home the pen
+    }
+    else if (
+      (lastVPlusVoltage > V_PLUS_VOLTAGE_POWERED) 
+      && 
+      (currentVPlusVoltage <= V_PLUS_VOLTAGE_POWERED)
+    )
+    {
+      // Disable the drivers so they don't consume tons of power the next time we get 9V
+      EnableIO = 1;
+    }
+    lastVPlusVoltage = currentVPlusVoltage;
   }
-  else if (
-    (lastVPlusVoltage > V_PLUS_VOLTAGE_POWERED) 
-    && 
-    (currentVPlusVoltage <= V_PLUS_VOLTAGE_POWERED)
-  )
-  {
-    // Disable the drivers so they don't consume tons of power the next time we get 9V
-    EnableIO = 1;
-  }
-  lastVPlusVoltage = currentVPlusVoltage;
 }

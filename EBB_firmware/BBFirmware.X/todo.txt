@@ -134,4 +134,5 @@ Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
     7/6   : 3305/471, 43407/22121
     7/8   : 3271/505, 44213/21315
 (switched to free version of C18 compiler's optomizations)
-    8/12  : 3213/563, 85%, 58203/7325, 89%
+    7/12  : 3213/563, 85%, 58203/7325, 89%
+    7/13  : 3207/569, 85%, 57890/7638, 88%
