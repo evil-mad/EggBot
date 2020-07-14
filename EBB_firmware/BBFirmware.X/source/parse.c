@@ -82,8 +82,8 @@ far rom parse_t commandTable[] =
   {'S', 'R', parseSRCommand},
 #endif
   {'H', 'M', parseHMCommand},
-  {'D', 'R', parseDRCommand},
-  {'D', 'W', parseDWCommand},
+  {'D', 'R', ParseDRCommand},
+  {'D', 'W', ParseDWCommand},
   {0x00, 0x00, NULL},             // Table terminator. Must have c1=0x00
 };
 

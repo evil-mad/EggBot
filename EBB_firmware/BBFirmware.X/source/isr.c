@@ -22,7 +22,12 @@ static unsigned char AllDone;
 static UINT32 StepAcc[NUMBER_OF_STEPPERS];
 
 // Constantly incrimenting every 1ms in ISR global tick counter
-volatile UINT32 TickCounterMS = 0;
+volatile UINT32 TickCounterMS;
+
+// Constantly decrimenting until it reaches zero. Use in local functions for
+// short local delays from 1 to 255 milliseconds
+volatile UINT8 GlobalDelayMS;
+
 
 // Used only in LowISR
 
@@ -586,6 +591,12 @@ void low_ISR(void)
     if (QC_ms_timer)
     {
       QC_ms_timer--;
+    }
+    
+    // Global delay (for short local delays in functions)
+    if (GlobalDelayMS)
+    {
+      GlobalDelayMS--;
     }
 
     /// TODO: Refactor this into something nicer?

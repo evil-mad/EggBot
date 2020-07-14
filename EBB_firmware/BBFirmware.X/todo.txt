@@ -8,6 +8,10 @@ NOTES:
 
 * Perform RAM analysis, block by block, see where there are holes and map out all usage
 
+* Refactor motion FIFO to use a union to save RAM and increase size of FIFO
+
+* On driver init, read out OTP bit for internal sense resistor, and program that OTP bit if it's not right.
+
 * From EBB issue #139 - make all return values consistent: repeat the command, then optional data, then a carriage return. 
 * From EBB issue #139 - make all commands two letters long 
   - (DONE)

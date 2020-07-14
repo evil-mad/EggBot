@@ -8,10 +8,10 @@
 #ifndef SERIAL_H
 #define	SERIAL_H
 
-void serialInitDrivers(void);
-void serialInit(void);
-void parseDRCommand(void);
-void parseDWCommand(void);
+void SerialInitDrivers(void);
+void SerialInit(void);
+void ParseDRCommand(void);
+void ParseDWCommand(void);
 
 #endif	/* SERIAL_H */
 

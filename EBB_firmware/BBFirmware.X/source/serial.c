@@ -9,9 +9,20 @@
 #include "servo.h"
 #include "analog.h"
 #include "parse.h"
+#include "isr.h"
 
 // The number of 32-bit init values to send to the drivers over serial
 #define MAX_DRIVER_INIT_VALUES      4
+
+// Mask off all other bits in 32 bit word except the otp_internalSense bit from
+// OTP_READ register
+#define OTP_INTERNALSENSE_MASK      0x00000040UL
+
+// The 32 bit value to write into OTP_PROG register in order to cause the
+//   otp_internalSense bit to get set high
+// 0b0000 0000 0000 0000 1011 1101 0000 0110
+#define OTP_INTERNALSENSE_PROGRAM   0x0000BD06UL
+
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
 UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
@@ -64,7 +75,7 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
 UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
 void CalcCRC(UINT8* datagram, UINT8 datagramLength);
-
+void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask);
 
 void CalcCRC(UINT8* datagram, UINT8 datagramLength)
 {
@@ -90,6 +101,27 @@ void CalcCRC(UINT8* datagram, UINT8 datagramLength)
     } // for CRC bit
   } //
 }
+
+void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask)
+{
+  UINT8 i;
+  
+  // We will try writing it up to 10 times before giving up
+  for(i=0; i < 10; i++)
+  {
+    WriteDatagram(addr, OTP_PROG, data);
+    // Delay 10ms by waiting on ISR GlobalDelayMS
+    GlobalDelayMS = 10;
+    while (GlobalDelayMS);
+    
+    if (ReadDatagram(addr, OTP_READ) & mask)
+    {
+      // We have made it a 1, so we are done
+      break;
+    }
+  }
+}
+
 
 /* Create a 63 bit long datagram to send out to stepper drivers */
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
@@ -245,9 +277,10 @@ DEBUG_A1_CLEAR()
  * Walk through each of the values in the table that we want to send to the
  * drivers, and send them out, with a little delay in between.
  */
-void serialInitDrivers(void)
+void SerialInitDrivers(void)
 {
   UINT8 i;
+  UINT32 reg;
   
   for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
   {
@@ -261,13 +294,21 @@ void serialInitDrivers(void)
     WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValues[i]);
     Delay100TCYx(20);
   }
+  // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
+  // bit and needs to be high. If it is not high, then use the writeOPT() 
+  // function to write it to a 1.
+  reg = ReadDatagram(1, OTP_READ);
+  if (!(reg & OTP_INTERNALSENSE_MASK))
+  {
+    WriteOTP(1, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
+  }
 }
 
 /* Initialize EUSART2 to talk to the three TMC2209 stepper drivers.
  * Then send the first set of UART commands which set up the drivers
  * with the options we need to have at boot time for things to run.
  * The UART RX pin is on RP11 (RC0), and the TX pin is RP12 (RC1). */
-void serialInit(void)
+void SerialInit(void)
 {
   // Set up initial states
   LATCbits.LATC0 = 1;
@@ -303,7 +344,7 @@ void serialInit(void)
  * "DR,<register_value><CR>"
  * <register_value> is a 32 bit unsigned int expressed in hex with 0x on the front
  */
-void parseDRCommand(void)
+void ParseDRCommand(void)
 {
   UINT8 driverNumber = 0;
   UINT8 registerAddress = 0;
@@ -350,7 +391,7 @@ void parseDRCommand(void)
  * This command replies with:
  * "DW,<CR>"
  */
-void parseDWCommand(void)
+void ParseDWCommand(void)
 {
   UINT8 driverNumber = 0;
   UINT8 registerAddress = 0;

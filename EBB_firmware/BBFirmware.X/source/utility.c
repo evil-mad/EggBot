@@ -428,9 +428,9 @@ void utilityRun(void)
     // Because getting these bytes of config data into the drivers is really
     // important (otherwise they will consume a ton of current and make the 
     // motors super hot), we'll send it three times here.
-    serialInitDrivers();
-    serialInitDrivers();
-    serialInitDrivers();
+    SerialInitDrivers();
+    SerialInitDrivers();
+    SerialInitDrivers();
     Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
     analogCalibrate();    // Because our voltage situation may have changed
     // Enable the drivers by setting their enable pin low

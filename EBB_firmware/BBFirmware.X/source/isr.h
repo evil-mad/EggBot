@@ -29,6 +29,7 @@
 
 // Tick counter. Increments every 1ms in interrupt
 volatile extern UINT32 TickCounterMS;
+volatile extern UINT8 GlobalDelayMS;
 
 void high_ISR(void);
 void low_ISR(void);
