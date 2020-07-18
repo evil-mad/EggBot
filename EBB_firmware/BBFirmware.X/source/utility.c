@@ -405,53 +405,34 @@ void parseQTCommand()
 
 /*
  * Called from main loop every time through. Main task here is to check to see
- * if the stepper drivers just came on line (i.e. were just powered by 12V).
- * If they did, then we need to initialize them ASAP. We perform the check by
- * reading the voltage on the SCALED_V+ net each time, and seeing when it goes
- * above 6.5V. At that point we know we can init the drivers. Also watch for
- * it going below 6.5V - if so, disable drivers so they're not enabled on next
- * power on.
+ * if the stepper drivers just came on line (i.e. were just powered by 12V or
+ * were reset for some other reason like a power glitch on V+).
+ * If they did, then we need to initialize them ASAP.
+ * We do this by reading the GSTAT register and looking at bit 0, the 'reset'
+ * bit. If this bit is set, then it means that the IC has been reset somehow
+ * and needs to  be initialized. Calling SerialInitDrivers() clears this bit
+ * so we don't do it over and over. 
  */
 void utilityRun(void)
 {
   static UINT32 LastCheckTimeMS = 0;
   UINT32 currentTimeMS = GetTick(); 
-  UINT16 currentVPlusVoltage;
-  static UINT16 lastVPlusVoltage = 0;
-
+  
   if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
   {
     LastCheckTimeMS = currentTimeMS;
-    
-    currentVPlusVoltage = analogConvert(SCALED_V_ADC_CHAN);
 
-    if (
-      (lastVPlusVoltage < V_PLUS_VOLTAGE_POWERED) 
-      && 
-      (currentVPlusVoltage >= V_PLUS_VOLTAGE_POWERED)
-    )
+    if (SerialGetGSTATreset())
     {
-      // Because getting these bytes of config data into the drivers is really
-      // important (otherwise they will consume a ton of current and make the 
-      // motors super hot), we'll send it three times here.
-      SerialInitDrivers();
-      SerialInitDrivers();
       SerialInitDrivers();
       Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
-      analogCalibrate();    // Because our voltage situation may have changed
       // Enable the drivers by setting their enable pin low
       EnableIO = 0;      
       servoPenHome();       // The drivers were limped, so home the pen
     }
-    else if (
-      (lastVPlusVoltage > V_PLUS_VOLTAGE_POWERED) 
-      && 
-      (currentVPlusVoltage <= V_PLUS_VOLTAGE_POWERED)
-    )
-    {
-      // Disable the drivers so they don't consume tons of power the next time we get 9V
-      EnableIO = 1;
-    }
-    lastVPlusVoltage = currentVPlusVoltage;
+
+/// TODO: What do do here? How do we know when to disable the drivers? Maybe never?    
+    // Disable the drivers so they don't consume tons of power the next time we get 9V
+///      EnableIO = 1;
   }
 }

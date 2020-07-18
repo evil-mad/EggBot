@@ -77,6 +77,7 @@ far rom parse_t commandTable[] =
   {'S', 'T', parseSTCommand},
   {'Q', 'T', parseQTCommand},
   {'R', 'B', parseRBCommand},
+  {'S', 'S', ParseSSCommand},
 #if defined(BOARD_EBB)
   {'Q', 'R', parseQRCommand},
   {'S', 'R', parseSRCommand},

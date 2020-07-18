@@ -23,6 +23,9 @@
 // 0b0000 0000 0000 0000 1011 1101 0000 0110
 #define OTP_INTERNALSENSE_PROGRAM   0x0000BD06UL
 
+// 32-bit mask representing the 'reset' bit in the GSTAT register
+#define GSTAT_RESET_MASK            0x00000001UL
+
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
 UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
@@ -71,6 +74,11 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
    */
   0x14010053      // CHOPCONF
 };
+
+// Count the total number of framing errors seen
+static UINT8 FramingErrorCounter;
+// Count the total number of overrun errors seen
+static UINT8 OverrunErrorCounter;
 
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
 UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
@@ -224,10 +232,28 @@ DEBUG_A5_CLEAR()
   // would come after the loop was finished and would get missed. This situation
   // is helped out because taking in bytes takes time, which extends the total
   // duration of the loop
-  i=0;
-  for (j=0; j < 35; j++)
+  i = 0;
+  for (j = 0; j < 35; j++)
   {
 DEBUG_A1_SET()
+    // Check for framing errors or overrun errors and count them
+    if (RCSTA2bits.FERR)
+    {
+      if (FramingErrorCounter != 255)
+      {
+        FramingErrorCounter++;
+      }
+      break;
+    }
+    if (RCSTA2bits.OERR)
+    {
+      if (OverrunErrorCounter != 255)
+      {
+        OverrunErrorCounter++;
+      }
+      break;
+    }
+  
     if (PIR3bits.RC2IF)
     {
 DEBUG_A5_SET()
@@ -428,4 +454,46 @@ void ParseDWCommand(void)
   printf((far rom char *)"DW\r");
 
   print_ack();
+}
+
+/*
+ * SS command (Serial Stats)
+ * 
+ * "SS<CR>"
+ * 
+ * This command replies with:
+ * "SS,<FramingErrorCounter>,<OverrunErrorCounter><CR>"
+ * And then resets both values.
+ */
+void ParseSSCommand(void)
+{
+  printf((far rom char *)"SS,%u,%u\r", FramingErrorCounter, OverrunErrorCounter);
+  FramingErrorCounter = 0;
+  OverrunErrorCounter = 0;
+  
+  print_ack();
+}
+
+/*
+ * Read out the 'reset' bit (bit 0) of the GSTAT register on each driver,
+ * and return true if any of those bits are set.
+ */
+BOOL SerialGetGSTATreset(void)
+{
+  UINT32 gstatValue;
+  UINT8 i;
+  BOOL retval = FALSE;
+  
+  for (i=1; i <= 3; i++)
+  {
+    gstatValue = ReadDatagram(1, GSTAT);
+
+    if (gstatValue & GSTAT_RESET_MASK)
+    {
+      retval = TRUE;
+      break;
+    }
+  }
+  
+  return(retval);
 }

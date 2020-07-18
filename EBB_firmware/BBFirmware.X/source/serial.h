@@ -8,10 +8,18 @@
 #ifndef SERIAL_H
 #define	SERIAL_H
 
+#include <GenericTypeDefs.h>
+
+
 void SerialInitDrivers(void);
 void SerialInit(void);
 void ParseDRCommand(void);
 void ParseDWCommand(void);
+void ParseSSCommand(void);
+
+BOOL SerialGetGSTATreset(void);
+
 
 #endif	/* SERIAL_H */
 
+ 
