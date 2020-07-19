@@ -539,9 +539,9 @@ void parseSECommand(void)
     WaitForRoomInFIFO();
 
     // Set up the motion queue command
-    FIFO_SEPower[FIFOIn] = StoredEngraverPower;
-    FIFO_DelayCounter[FIFOIn] = 0;
-    FIFO_SEState[FIFOIn] = State;
+    FIFO_G1[FIFOIn].SEPower = StoredEngraverPower;
+    FIFO_G5[FIFOIn].DelayCounter = 0;
+    FIFO_G2[FIFOIn].SEState = State;
     FIFO_Command[FIFOIn] = COMMAND_SE;
 
     fifo_Inc();

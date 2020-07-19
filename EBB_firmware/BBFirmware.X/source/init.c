@@ -81,23 +81,20 @@ void UserInit(void)
   IPR3bits.TMR4IP = 0;        // Timer4 interrupt priority = LOW
 
   // Initialize all FIFO values
+  /// TODO : use memset() or something?
   for(i=0; i < COMMAND_FIFO_LENGTH; i++)
   {
     FIFO_Command[i] = COMMAND_NONE;
-    FIFO_StepAdd[0][i] = 1;
-    FIFO_StepAdd[1][i] = 1;
-    FIFO_StepAddInc[0][i] = 0;
-    FIFO_StepAddInc[1][i] = 0;
-    FIFO_StepsCounter[0][i] = 0;
-    FIFO_StepsCounter[1][i] = 0;
+    FIFO_StepAdd0[i] = 0;
+    FIFO_StepAdd1[i] = 0;
+    FIFO_G1[i].StepAdd2 = 0;
+    FIFO_G2[i].StepsCounter0 = 0;
+    FIFO_G3[i].StepsCounter1 = 0;
+    FIFO_G4[i].StepsCounter2 = 0;
+    FIFO_G5[i].StepAddInc0 = 0;
+    FIFO_StepAddInc1[i] = 0;
+    FIFO_StepAddInc2[i] = 0;
     FIFO_DirBits[i] = 0;
-    FIFO_DelayCounter[i] = 0;
-    FIFO_ServoPosition[i] = 0;
-    FIFO_ServoRPn[i] = 0;
-    FIFO_ServoChannel[i] = 0;
-    FIFO_ServoRate[i] = 0;
-    FIFO_SEState[i] = 0;
-    FIFO_SEPower[i] = 0;
   }
   
   FIFOSize = 1;

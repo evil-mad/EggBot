@@ -380,7 +380,6 @@ void parseAMCommand(void)
 
   WaitForRoomInFIFO();
 
-  FIFO_DelayCounter[FIFOIn] = 0; // No delay for motor moves
   FIFO_DirBits[FIFOIn] = 0;
 
   // Always enable both motors when we want to move them
@@ -445,13 +444,13 @@ void parseAMCommand(void)
   //temp = (UINT32)ftemp;
 
   /* Amount to add to accumulator each 25KHz */
-  FIFO_StepAdd[0][FIFOIn] = (UINT32)(distance_temp * (float)A1Steps);
+  FIFO_StepAdd0[FIFOIn] = (UINT32)(distance_temp * (float)A1Steps);
 
   // For debug
   //printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
 
   /* Total number of steps for this axis for this move */
-  FIFO_StepsCounter[0][FIFOIn] = A1Steps;
+  FIFO_G2[FIFOIn].StepsCounter0 = A1Steps;
 
   //ftemp = (float)VelocityFinal * 2147483648.0;
   //fprint(ftemp);
@@ -476,7 +475,7 @@ void parseAMCommand(void)
   //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
 
   /* Amount to add to StepAdd each 25KHz */
-  FIFO_StepAddInc[0][FIFOIn] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
+  FIFO_G5[FIFOIn].StepAddInc0 = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
 
   /* Compute StepAdd Axis 2 Initial */
   // temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
@@ -498,8 +497,8 @@ void parseAMCommand(void)
   // For debug
   //printf((far rom char *)"SAyi = %lu\n\r", temp);
 
-  FIFO_StepAdd[1][FIFOIn] = (UINT32)(distance_temp * A2Steps);
-  FIFO_StepsCounter[1][FIFOIn] = A2Steps;
+  FIFO_StepAdd1[FIFOIn] = (UINT32)(distance_temp * A2Steps);
+  FIFO_G3[FIFOIn].StepsCounter1 = A2Steps;
     
   /* Compute StepAddInc for axis 2 */
   //    Accel2 = ((float)A2Steps * accel_temp);
@@ -508,14 +507,14 @@ void parseAMCommand(void)
   //    stemp = (INT32)((Accel2 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
   //    stemp = (INT32)(((float)A2Steps * accel_temp) * 343.59738);
     
-  FIFO_StepAddInc[1][FIFOIn] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
+  FIFO_StepAddInc1[FIFOIn] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
 
-  if (VelocityInital != VelocityFinal && FIFO_StepAddInc[0][FIFOIn] == 0 && FIFO_StepsCounter[0][FIFOIn] > 0)
+  if (VelocityInital != VelocityFinal && FIFO_G5[FIFOIn].StepAddInc0 == 0 && FIFO_G2[FIFOIn].StepsCounter0 > 0)
   {
      printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
      return;
   }
-  if (VelocityInital != VelocityFinal && FIFO_StepAddInc[1][FIFOIn] == 0 && FIFO_StepsCounter[1][FIFOIn] > 0)
+  if (VelocityInital != VelocityFinal && FIFO_StepAddInc1[FIFOIn] == 0 && FIFO_G3[FIFOIn].StepsCounter1 > 0)
   {
      printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
      return;
@@ -580,7 +579,6 @@ void parseLMCommand(void)
   // Spin here until there's space in the fifo
   WaitForRoomInFIFO();
 
-  FIFO_DelayCounter[FIFOIn] = 0; // No delay for motor moves
   FIFO_DirBits[FIFOIn] = 0;
 
   // First, set the direction bits
@@ -595,12 +593,12 @@ void parseLMCommand(void)
     StepsCounter2 = -StepsCounter2;
   }
 
-  FIFO_StepAdd[0][FIFOIn] = StepAdd1;
-  FIFO_StepsCounter[0][FIFOIn] = StepsCounter1;
-  FIFO_StepAddInc[0][FIFOIn] = StepAddInc1;
-  FIFO_StepAdd[1][FIFOIn] = StepAdd2;
-  FIFO_StepsCounter[1][FIFOIn] = StepsCounter2;
-  FIFO_StepAddInc[1][FIFOIn] = StepAddInc2;
+  FIFO_StepAdd0[FIFOIn] = StepAdd1;
+  FIFO_G2[FIFOIn].StepsCounter0 = StepsCounter1;
+  FIFO_G5[FIFOIn].StepAddInc0 = StepAddInc1;
+  FIFO_StepAdd1[FIFOIn] = StepAdd2;
+  FIFO_G3[FIFOIn].StepsCounter1 = StepsCounter2;
+  FIFO_StepAddInc1[FIFOIn] = StepAddInc2;
   FIFO_Command[FIFOIn] = COMMAND_MOTOR_MOVE;
 
   /* For debugging step motion , uncomment the next line */
@@ -932,6 +930,7 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
   UINT32 temp1 = 0;
   UINT32 temp2 = 0;
   UINT32 remainder = 0;
+  /// TODO: Remove 'move' and just write directly to [FIFOIn] to save stack space
   MoveCommandType move;
 
   // Uncomment the following printf() for debugging
@@ -1137,27 +1136,19 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
   // Now, quick copy over the computed command data to the command fifo
   FIFO_Command[FIFOIn] = move.Command;
 
-  FIFO_StepAdd[0][FIFOIn] = move.StepAdd[0];
-  FIFO_StepAddInc[0][FIFOIn] = move.StepAddInc[0];
-  FIFO_StepsCounter[0][FIFOIn] = move.StepsCounter[0];
+  FIFO_StepAdd0[FIFOIn] = move.StepAdd[0];
+  FIFO_G5[FIFOIn].StepAddInc0 = move.StepAddInc[0];
+  FIFO_G2[FIFOIn].StepsCounter0 = move.StepsCounter[0];
 
-  FIFO_StepAdd[1][FIFOIn] = move.StepAdd[1];
-  FIFO_StepAddInc[1][FIFOIn] = move.StepAddInc[1];
-  FIFO_StepsCounter[1][FIFOIn] = move.StepsCounter[1];
+  FIFO_StepAdd1[FIFOIn] = move.StepAdd[1];
+  FIFO_StepAddInc1[FIFOIn] = move.StepAddInc[1];
+  FIFO_G3[FIFOIn].StepsCounter1 = move.StepsCounter[1];
 
-  FIFO_StepAdd[2][FIFOIn] = move.StepAdd[2];
-  FIFO_StepAddInc[2][FIFOIn] = move.StepAddInc[2];
-  FIFO_StepsCounter[2][FIFOIn] = move.StepsCounter[2];
+  FIFO_G1[FIFOIn].StepAdd2 = move.StepAdd[2];
+  FIFO_StepAddInc2[FIFOIn] = move.StepAddInc[2];
+  FIFO_G4[FIFOIn].StepsCounter2 = move.StepsCounter[2];
   
   FIFO_DirBits[FIFOIn] = move.DirBits;
-
-  FIFO_DelayCounter[FIFOIn] = move.DelayCounter;
-  FIFO_ServoPosition[FIFOIn] = move.ServoPosition;
-  FIFO_ServoRPn[FIFOIn] = move.ServoRPn;
-  FIFO_ServoChannel[FIFOIn] = move.ServoChannel;
-  FIFO_ServoRate[FIFOIn] = move.ServoRate;
-  FIFO_SEState[FIFOIn] = move.SEState;
-  FIFO_SEPower[FIFOIn] = move.SEPower;
   
   fifo_Inc();
 
@@ -1274,11 +1265,11 @@ UINT8 process_QM(void)
   {
     FIFOStatus = 1;
   }
-  if (CommandExecuting && FIFO_StepsCounter[0][FIFOOut] != 0) 
+  if (CommandExecuting && FIFO_G2[FIFOOut].StepsCounter0 != 0) 
   {
     Motor1Running = 1;
   }
-  if (CommandExecuting && FIFO_StepsCounter[1][FIFOOut] != 0) 
+  if (CommandExecuting && FIFO_G3[FIFOOut].StepsCounter1 != 0) 
   {
     Motor2Running = 1;
   }

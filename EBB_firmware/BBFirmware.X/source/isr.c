@@ -54,46 +54,16 @@ void high_ISR(void)
     OutByte = FIFO_DirBits[FIFOOut];
     TookStep = FALSE;
     AllDone = TRUE;
-PORTDbits.RD0 = 1;
+DEBUG_D0_SET()
     
     if (FIFODepth)
     {
-PORTDbits.RD1 = 1;
+DEBUG_D1_SET()
 
-      // Note, you don't even need a command to delay. Any command can have
-      // a delay associated with it, if DelayCounter is != 0.
-      if (FIFO_DelayCounter[FIFOOut])
-      {
-        // Double check that things aren't way too big
-        if (FIFO_DelayCounter[FIFOOut] > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-        {
-          FIFO_DelayCounter[FIFOOut] = 0;
-        }
-        else {
-          FIFO_DelayCounter[FIFOOut]--;
-        }
-      }
-
-      if (FIFO_DelayCounter[FIFOOut])
-      {
-          AllDone = FALSE;
-      }
-
-      // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
-      //PORTDbits.RD1 = 0;
-
-      // Note: by not making this an else-if, we have our DelayCounter
-      // counting done at the same time as our motor move or servo move.
-      // This allows the delay time to start counting at the beginning of the
-      // command execution.
       if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
       {
         // Only output DIR bits if we are actually doing something
-#if defined(BOARD_3BB)
-        if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut] || FIFO_StepsCounter[2][FIFOOut])
-#elif defined(BOARD_EBB)
-        if (FIFO_StepsCounter[0][FIFOOut] || FIFO_StepsCounter[1][FIFOOut])
-#endif
+        if (FIFO_G2[FIFOOut].StepsCounter0 || FIFO_G3[FIFOOut].StepsCounter1 || FIFO_G4[FIFOOut].StepsCounter2)
         {
           // Always true for 3BB
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -148,15 +118,15 @@ PORTDbits.RD1 = 1;
 #endif
           
           // Only do this if there are steps left to take
-          if (FIFO_StepsCounter[0][FIFOOut])
+          if (FIFO_G2[FIFOOut].StepsCounter0)
           {
-            StepAcc[0] = StepAcc[0] + FIFO_StepAdd[0][FIFOOut];
+            StepAcc[0] = StepAcc[0] + FIFO_StepAdd0[FIFOOut];
             if (StepAcc[0] & 0x80000000)
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
-              FIFO_StepsCounter[0][FIFOOut]--;
+              FIFO_G2[FIFOOut].StepsCounter0--;
               if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
               {
                 globalStepCounter1--;
@@ -167,18 +137,18 @@ PORTDbits.RD1 = 1;
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd[0][FIFOOut] += FIFO_StepAddInc[0][FIFOOut];
+            FIFO_StepAdd0[FIFOOut] += FIFO_G5[FIFOOut].StepAddInc0;
             AllDone = FALSE;
           }
-          if (FIFO_StepsCounter[1][FIFOOut])
+          if (FIFO_G3[FIFOOut].StepsCounter1)
           {
-            StepAcc[1] = StepAcc[1] + FIFO_StepAdd[1][FIFOOut];
+            StepAcc[1] = StepAcc[1] + FIFO_StepAdd1[FIFOOut];
             if (StepAcc[1] & 0x80000000)
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
-              FIFO_StepsCounter[1][FIFOOut]--;
+              FIFO_G3[FIFOOut].StepsCounter1--;
               if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
               {
                 globalStepCounter2--;
@@ -189,19 +159,18 @@ PORTDbits.RD1 = 1;
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd[1][FIFOOut] += FIFO_StepAddInc[1][FIFOOut];
+            FIFO_StepAdd1[FIFOOut] += FIFO_StepAddInc1[FIFOOut];
             AllDone = FALSE;
           }
-#if defined(BOARD_3BB)
-          if (FIFO_StepsCounter[2][FIFOOut])
+          if (FIFO_G4[FIFOOut].StepsCounter2)
           {
-            StepAcc[2] = StepAcc[2] + FIFO_StepAdd[2][FIFOOut];
+            StepAcc[2] = StepAcc[2] + FIFO_G1[FIFOOut].StepAdd2;
             if (StepAcc[2] & 0x80000000)
             {
               StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
               OutByte = OutByte | STEP3_BIT;
               TookStep = TRUE;
-              FIFO_StepsCounter[2][FIFOOut]--;
+              FIFO_G4[FIFOOut].StepsCounter2--;
               if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
               {
                 globalStepCounter3--;
@@ -212,10 +181,9 @@ PORTDbits.RD1 = 1;
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd[2][FIFOOut] += FIFO_StepAddInc[2][FIFOOut];
+            FIFO_G1[FIFOOut].StepAdd2 += FIFO_StepAddInc2[FIFOOut];
             AllDone = FALSE;
           }
-#endif
           if (TookStep)
           {
             if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -349,10 +317,10 @@ PORTDbits.RD1 = 1;
       else if (FIFO_Command[FIFOOut] == COMMAND_SE)
       {
         // Now act on the State of the SE command
-        if (FIFO_SEState[FIFOOut])
+        if (FIFO_G2[FIFOOut].SEState)
         {
           // Set RB3 to StoredEngraverPower
-          CCPR1L = FIFO_SEPower[FIFOOut] >> 2;
+          CCPR1L = FIFO_G1[FIFOOut].SEPower >> 2;
           CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
         }
         else
@@ -363,9 +331,34 @@ PORTDbits.RD1 = 1;
         }
         AllDone = TRUE;
       }
+      // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
+      // That's why this is not an elseif here.
+      if (
+        FIFO_Command[FIFOOut] == COMMAND_DELAY 
+        || 
+        FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE
+      )
+      {
+        if (FIFO_G2[FIFOOut].DelayCounter)
+        {
+          // Double check that things aren't way too big
+          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+          {
+            FIFO_G2[FIFOOut].DelayCounter = 0;
+          }
+          else {
+            FIFO_G2[FIFOOut].DelayCounter--;
+          }
+        }
+
+        if (FIFO_G2[FIFOOut].DelayCounter)
+        {
+            AllDone = FALSE;
+        }
+      }
 
       // If we're done with our current command, load in the next one, if there's more
-      if (AllDone && FIFO_DelayCounter[FIFOOut] == 0)
+      if (AllDone)
       {
         // "Erase" the current command from the FIFO
         FIFO_Command[FIFOOut] = COMMAND_NONE;
@@ -395,10 +388,9 @@ PORTDbits.RD1 = 1;
       ButtonPushed = TRUE;
     }
   }
-PORTDbits.RD0 = 0;
-PORTDbits.RD1 = 0;
+DEBUG_D0_CLEAR()
+DEBUG_D1_CLEAR()
 }
-
 
 #pragma interruptlow low_ISR
 void low_ISR(void)

@@ -24,11 +24,39 @@
 typedef enum
 {
   COMMAND_NONE = 0,
-  COMMAND_MOTOR_MOVE,
-  COMMAND_DELAY,
-  COMMAND_SERVO_MOVE,
-  COMMAND_SE
+  COMMAND_MOTOR_MOVE, // StepAdd(12), StepAddInc(12), StepsCounter(12), DirBits(1))
+  COMMAND_DELAY,      // DelayCounter
+  COMMAND_SERVO_MOVE, // ServoRPn, ServoChannel, ServoRate
+  COMMAND_SE          // SEState, SEPower
 } CommandType;
+
+typedef union {
+  INT32   StepAdd2;
+  UINT16  ServoPosition;
+  UINT16  SEPower;
+} StepGeneric1_t;
+
+typedef union {
+  UINT32  StepsCounter0;
+  UINT8   ServoRPn;
+  UINT32  DelayCounter;
+  UINT8   SEState;
+} StepGeneric2_t;
+
+typedef union {
+  UINT32  StepsCounter1;
+  UINT16  ServoRate;
+} StepGeneric3_t;
+
+typedef union {
+  UINT32  StepsCounter2;
+  UINT8   ServoChannel;
+} StepGeneric4_t;
+
+typedef union {
+  INT32   StepAddInc0;
+  UINT32  DelayCounter;
+} StepGeneric5_t;
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
@@ -53,23 +81,19 @@ extern volatile UINT8 FIFODepth;
 extern volatile UINT8 FIFOSize;
 extern volatile UINT8 FIFOIn;
 extern volatile UINT8 FIFOOut;
-//extern volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
 
-///extern MoveCommandType CommandFIFO[];
-extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
-extern INT32           FIFO_StepAdd[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
-extern INT32           FIFO_StepAddInc[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
-extern UINT32          FIFO_StepsCounter[NUMBER_OF_STEPPERS][COMMAND_FIFO_LENGTH];
+
+extern INT32           FIFO_StepAdd0[COMMAND_FIFO_LENGTH];
+extern INT32           FIFO_StepAdd1[COMMAND_FIFO_LENGTH];
+extern StepGeneric1_t  FIFO_G1[COMMAND_FIFO_LENGTH];  // (INT32) StepAdd2, (UINT16) FIFO_ServoPosition, (UINT16) FIFO_SEPower
+extern StepGeneric2_t  FIFO_G2[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCounter0, (UINT8) FIFO_ServoRPn, (UINT32) FIFO_DelayCounter, (UINT8) FIFO_SEState
+extern StepGeneric3_t  FIFO_G3[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) FIFO_ServoRate
+extern StepGeneric4_t  FIFO_G4[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) FIFO_ServoChannel
+extern StepGeneric5_t  FIFO_G5[COMMAND_FIFO_LENGTH];  // (INT32) StepAddInc0, (UINT32) FIFO_DelayCounter,
+extern INT32           FIFO_StepAddInc1[COMMAND_FIFO_LENGTH];
+extern INT32           FIFO_StepAddInc2[COMMAND_FIFO_LENGTH];
 extern UINT8           FIFO_DirBits[COMMAND_FIFO_LENGTH];
-extern UINT32          FIFO_DelayCounter[COMMAND_FIFO_LENGTH];   // NOT Milliseconds! In 25KHz units
-extern UINT16          FIFO_ServoPosition[COMMAND_FIFO_LENGTH];
-extern UINT8           FIFO_ServoRPn[COMMAND_FIFO_LENGTH];
-extern UINT8           FIFO_ServoChannel[COMMAND_FIFO_LENGTH];
-extern UINT16          FIFO_ServoRate[COMMAND_FIFO_LENGTH];
-extern UINT8           FIFO_SEState[COMMAND_FIFO_LENGTH];
-extern UINT16          FIFO_SEPower[COMMAND_FIFO_LENGTH];
-
-
+extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
 
 void fifo_Init(void);
 void fifo_Inc(void);

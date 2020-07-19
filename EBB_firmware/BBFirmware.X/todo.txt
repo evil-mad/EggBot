@@ -132,6 +132,10 @@ NOTES:
   - FramingErrorCounter and OverrunErrorCounter and SS command in serial.c
   - Input paramter test function
 
+* Work out which commands can have DelayValues, and how that interacts with the other code in the isr
+  - Does SE get a Delay value? If so, how to prevent SE from executing every time through ISR during delay?
+    - Convert COMMAND_SE to COMMAND_DELAY after SE command excecuted (in ISR)?
+
 
 Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
   EBB_BL
@@ -146,3 +150,4 @@ Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
     7/12  : 3213/563, 85%, 58203/7325, 89%
     7/13  : 3207/569, 85%, 57890/7638, 88%
     7/18  : 3207/569, 85%, 58058/7470, 89%
+    7/19  : 2973/803, 79%, 57706/7822, 88%  (After FIFO refactor)

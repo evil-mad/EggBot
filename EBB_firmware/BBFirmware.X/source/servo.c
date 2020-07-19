@@ -295,11 +295,11 @@ static UINT8 servo_Move(
       /// TODO: Move this to FIFO function?
       // Now copy the values over into the FIFO element
       FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
-      FIFO_DelayCounter[FIFOIn] = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      FIFO_ServoChannel[FIFOIn] = Channel;
-      FIFO_ServoRPn[FIFOIn] = RPn;
-      FIFO_ServoPosition[FIFOIn] = Position;
-      FIFO_ServoRate[FIFOIn] = Rate;
+      FIFO_G1[FIFOIn].ServoPosition = Position;
+      FIFO_G2[FIFOIn].ServoRPn = RPn;
+      FIFO_G3[FIFOIn].ServoRate = Rate;
+      FIFO_G4[FIFOIn].ServoChannel = Channel;
+      FIFO_G5[FIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
 
       fifo_Inc();
     }
