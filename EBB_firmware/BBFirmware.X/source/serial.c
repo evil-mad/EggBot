@@ -14,6 +14,20 @@
 // The number of 32-bit init values to send to the drivers over serial
 #define MAX_DRIVER_INIT_VALUES      4
 
+/* OTP (one Time Programmable) bit setup
+ * We need the drivers to be disabled in OTP memory so that when they are reset
+ * or boot up for the first time the motors are not consuming any current nor
+ * are they able to step. Then, once the CPU detects that the drivers are fresh
+ * from a reset, it can program them with the proper initialization values and
+ * from then on its OK to start stepping.
+ * 
+ * The en_SpreadCycle bit of GCONF needs to be cleared from OTP to use 
+ * StealthChop PWM. This is the factory default (OTP bits come cleared from the
+ * facory) so we don't have to change it.
+ * 
+ * OTP byte 1 bits 3,2,1 and 0 are the OTP_CHOPCONF3...0 bits and need to be
+ */
+
 // Mask off all other bits in 32 bit word except the otp_internalSense bit from
 // OTP_READ register
 #define OTP_INTERNALSENSE_MASK      0x00000040UL
@@ -30,26 +44,37 @@
 // Table of each address to send DriverInitTableValues to (coordinate with values)
 UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
 {
-  GSTAT,
   GCONF,
   IHOLD_RUN,
-  CHOPCONF
+  CHOPCONF,
+  GSTAT
 };
 
 // Table of 32 values to send to drivers on init (coordinate with addresses)
 UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] = 
 {
-  /* Write a 1 to GSTAT's reset bit to clear it */
-  0x00000001,
-  
   /* Set up default general config settings */
-  0x000000C2,     // GCONF
+
+  /* GCONF Setup:
+   * 0x000001C2
+   * 0b0000 0000 0000 0000 0000 0001 1100 0010
+   * 
+   * b9   0     : test_mode : 0 for normal operation
+   * b8   1     : multistep_filt : 1 means enable filter for TSTEP
+   * b7   1     : mstep_reg_select : 1 means microstep resolution selected by MSTEP register
+   * b6   1     : pdn_disable : 1 means PDN_UART input function disabled (set when using UART)
+   * b5   0     : index_step : 0 means INDEX output as selected by index_otpw (we don't use index)
+   * b4   0     : index_otpw : 0 means INDEX shows first microstep position of sequencer
+   * b3   0     : shaft : 0 means normal motor direction
+   * b2   0     : en_SpreadCycle : 0 means StealthChop PWM mode enabled
+   * b1   1     : internal_Rsense : 1 means use internal sense resistors
+   * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
+   */
+  0x000001C2,     // GCONF
 
   /* Set up idle and run current levels */
   0x000021E1,     // IHOLD_RUN
 
-  /* Set up default power-on stepper microstep resolutions */
-  
   /* On boot, TMC2209 has the following values in CHOPCONF:
    0x10010053
    b0001 0000 0000 0001 0000 0000 1001 0111
@@ -72,7 +97,10 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
     
    0x14010053
    */
-  0x14010053      // CHOPCONF
+  0x14010053,      // CHOPCONF
+
+  /* Write a 1 to GSTAT's reset bit to clear it */
+  0x00000001       // GSTAT
 };
 
 // Count the total number of framing errors seen
@@ -168,9 +196,13 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
 {
   UINT8 datagram[8];
   UINT8 i, j;
-  UINT32 retval = 0;
+  union {
+    UINT32  word;
+    UINT8   byte[4];
+  } retval;
   volatile UINT8 dummy;
-
+  retval.word = 0;
+  
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -182,48 +214,43 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   
   // Clear and set CREN before every transaction to get rid of overrun error bit
   // and clear out any bytes in the receive FIFO
-  dummy = RCREG2;
-  dummy = RCREG2;
   RCSTA2bits.CREN = 0;
   RCSTA2bits.CREN = 1;
   
   // Send the full 32 bits out
-  for (i=0; i < 4; i++)
-  {
-    TXREG2 = datagram[i];
-    // Always read in the byte we just sent out so overrun bit doesn't get set
-    /// TODO: We could check this against what we just sent out and throw an error
-    /// if it's wrong. But what kind of error?
-DEBUG_A1_SET()
-    while(!TXSTA2bits.TRMT);
-DEBUG_A1_CLEAR()
-    dummy = RCREG2;
-  }
+  // We play a little game here - we want there to be zero delays between 
+  // bytes even when stepping (i.e. little CPU time) so we send another
+  // byte as soon as the first one has started transmitting. But at the end,
+  // we need to wait for the final byte to completely be transmitted before
+  // reading in the dummy reads to 'eat' all four bytes we sent out.
+  // The NOPs are required according to the datasheet before reading TX2IF
+  TXREG2 = datagram[0];
+  Nop();
+  Nop();
+  while(!PIR3bits.TX2IF);
+  TXREG2 = datagram[1];
+  Nop();
+  Nop();
+  while(!PIR3bits.TX2IF);
+  // Always read in the byte we just sent out so overrun bit doesn't get set
+  dummy = RCREG2;           // Remove datagram[0] from RX buffer
+  TXREG2 = datagram[2];
+  Nop();
+  Nop();
+  while(!PIR3bits.TX2IF);
+  // Always read in the byte we just sent out so overrun bit doesn't get set
+  dummy = RCREG2;           // Remove datagram[1] from RX buffer
+  TXREG2 = datagram[3];
+  while(!TXSTA2bits.TRMT);
+  dummy = RCREG2;           // Remove datagram[3] from RX buffer
+  dummy = RCREG2;           // Remove datagram[4] from RX buffer
   
-//DEBUG_A0_SET()
   // Zero out the datagram, as we'll reuse it for the reply
   for (i=0; i < 8; i++)
   {
     datagram[i] = 0x00;
   }
 
-  // Transmission of the last byte has finished
-  // Now immediately empty our UART's receive FIFO of any bytes in it
-  // Since it's a 2 deep FIFO, there will be 2 bytes in there (from the loopback
-  // during our send above)
-  if (PIR3bits.RC2IF)
-  {
-DEBUG_A5_SET()
-    dummy = RCREG2;
-DEBUG_A5_CLEAR()
-  }
-  if (PIR3bits.RC2IF)
-  {
-DEBUG_A5_SET()
-    dummy = RCREG2;
-DEBUG_A5_CLEAR()
-  }
-    
   // This loop runs for about 500uS. During that time, any bytes that come
   // from the driver chip are pulled in and stored. If none come in (because
   // the driver isn't powered for example) then the loop finishes without seeing
@@ -235,7 +262,6 @@ DEBUG_A5_CLEAR()
   i = 0;
   for (j = 0; j < 35; j++)
   {
-DEBUG_A1_SET()
     // Check for framing errors or overrun errors and count them
     if (RCSTA2bits.FERR)
     {
@@ -256,7 +282,6 @@ DEBUG_A1_SET()
   
     if (PIR3bits.RC2IF)
     {
-DEBUG_A5_SET()
       // Read out our data byte
       datagram[i] = RCREG2;
       i++;
@@ -272,31 +297,21 @@ DEBUG_A5_SET()
         /// TOOD: Is it necessary to check CRC every time here? What do we do
         /// if we get an error? Higher level retries? Ugh.
         
-        
-        /// TODO: There's got to be a faster way of doing this even on this PIC
-        retval = datagram[3];
-        retval = (retval << 8) | datagram[4];
-        retval = (retval << 8) | datagram[5];
-        retval = (retval << 8) | datagram[6];
-        
-DEBUG_A5_CLEAR()
-DEBUG_A1_CLEAR()
+        retval.byte[0] = datagram[6];
+        retval.byte[1] = datagram[5];
+        retval.byte[2] = datagram[4];
+        retval.byte[3] = datagram[3];
         break;
       }
       // Check for framing error or overrun error bits
-DEBUG_A5_CLEAR()
       // If we got a byte then extend our outer loop a bit
       j=0;
     }
 
-DEBUG_A1_CLEAR()  
-  
     Delay10TCYx(4);
   }
 
-//DEBUG_A0_CLEAR()
-
-  return retval;
+  return retval.word;
 }
 
 /*
@@ -483,6 +498,15 @@ BOOL SerialGetGSTATreset(void)
   UINT32 gstatValue;
   UINT8 i;
   BOOL retval = FALSE;
+  
+  gstatValue = ReadDatagram(1, OTP_READ);
+  gstatValue = ReadDatagram(2, OTP_READ);
+  gstatValue = ReadDatagram(3, OTP_READ);
+
+  gstatValue = ReadDatagram(1, CHOPCONF);
+  gstatValue = ReadDatagram(2, CHOPCONF);
+  gstatValue = ReadDatagram(3, CHOPCONF);
+  
   
   for (i=1; i <= 3; i++)
   {

@@ -8,9 +8,10 @@ NOTES:
 
 * Perform RAM analysis, block by block, see where there are holes and map out all usage
 
-* Refactor motion FIFO to use a union to save RAM and increase size of FIFO
+* Refactor motion FIFO to re-use values based on command to save RAM and increase size of FIFO
 
 * On driver init, read out OTP bit for internal sense resistor, and program that OTP bit if it's not right.
+  - (DONE)
 
 * From EBB issue #139 - make all return values consistent: repeat the command, then optional data, then a carriage return. 
 * From EBB issue #139 - make all commands two letters long 
@@ -40,10 +41,10 @@ NOTES:
 * Make sure that if you change the FIFO size, and there are items in the FIFO, they do not get deleted. All commands must finish properly.
   - If you have the fifo size set to 10, and you have 10 items in it, then set it to 0, those 10 commands can't get lost.
 
-* Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered via the 250ms poll)
-  - This feature has been implemented by using the SCALED_V+ ADC input, and checking it every time through main(), and if it goes above/below 6.5V then we enable and reinit drivers or disable them.
-  - Considered (DONE) for now
-  - Note that we may want to change to using HLVDIN as a true analog watchdog input (with interrupt) on v1.1 3BB version (would require new code)
+* Force drivers to be DISABLED until a succecssful register read and subsiquent init, then ENABLE them (to prevent high current draw until we detect that the drivers are powered)
+  - Poll the drivers every 100ms looking for the 'reset' bit in GSTAT to be set 
+  - Note that we may want to change to using HLVDIN as a true analog watchdog input (with interrupt) on v1.1 3BB version (would require new code) - Windell says not a good plan
+  - Need to get OTP bits set such that TMC2209 outputs are disabled on powerup/reset
 
 * Old "A" command now named "RA" (Read Analog)
   - (DONE)
@@ -116,12 +117,20 @@ NOTES:
 * Can the "old" servo stuff be completely removed and just use new RCServo2 code? (yes)
 
 * OK to remove all UBW "T" command and ISR/FIFO? (YES)
+  - Done
+
 * Remove QN, SN, NI, ND commands as well
 * Remove BO, BS, SS, RS, SI, RI, CI, RC, BC, TX, RX, CX
 
 * Break out command processing into own file (parse.c/h)
 
 * Convert all variable types to "Microchip" standard (UINT8, etc.)
+
+* Make UART receive interrupt based? (try on branch first)
+
+* Create true 'debug' build, and in production build comment out
+  - FramingErrorCounter and OverrunErrorCounter and SS command in serial.c
+  - Input paramter test function
 
 
 Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
@@ -136,3 +145,4 @@ Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
 (switched to free version of C18 compiler's optomizations)
     7/12  : 3213/563, 85%, 58203/7325, 89%
     7/13  : 3207/569, 85%, 57890/7638, 88%
+    7/18  : 3207/569, 85%, 58058/7470, 89%
