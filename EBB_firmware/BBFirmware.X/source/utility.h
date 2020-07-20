@@ -94,9 +94,16 @@ void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
 void populateDeviceStringWithName(void);
 UINT32 GetTick(void);
-void parseSTCommand(void);    // ST Set Tag command
-void parseQTCommand(void);    // QT Query Tag command
+void ParseSTCommand(void);    // ST Set Tag command
+void ParseQTCommand(void);    // QT Query Tag command
+#if defined(DEBUG)
+void ParseSHCommand(void);    // SH print Stack Highwater
+#endif
 void utilityRun(void);  
+#if defined(DEBUG)
+void UtilityFillStack(void);
+void UtilityPrintStackHighWater(void);
+#endif
 
 #endif	/* UTILITY_H */
 

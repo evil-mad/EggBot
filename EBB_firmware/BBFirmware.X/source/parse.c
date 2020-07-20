@@ -74,8 +74,8 @@ far rom parse_t commandTable[] =
   {'X', 'M', parseXMCommand},
   {'Q', 'S', parseQSCommand},
   {'C', 'S', parseCSCommand},
-  {'S', 'T', parseSTCommand},
-  {'Q', 'T', parseQTCommand},
+  {'S', 'T', ParseSTCommand},
+  {'Q', 'T', ParseQTCommand},
   {'R', 'B', parseRBCommand},
   {'S', 'S', ParseSSCommand},
 #if defined(BOARD_EBB)
@@ -85,6 +85,9 @@ far rom parse_t commandTable[] =
   {'H', 'M', parseHMCommand},
   {'D', 'R', ParseDRCommand},
   {'D', 'W', ParseDWCommand},
+#if defined(DEBUG)
+  {'S', 'H', ParseSHCommand},
+#endif
   {0x00, 0x00, NULL},             // Table terminator. Must have c1=0x00
 };
 

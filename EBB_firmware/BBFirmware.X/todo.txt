@@ -136,6 +136,8 @@ NOTES:
   - Does SE get a Delay value? If so, how to prevent SE from executing every time through ISR during delay?
     - Convert COMMAND_SE to COMMAND_DELAY after SE command excecuted (in ISR)?
 
+* Perform stack analysis to see high water mark of stack usage
+
 
 Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
   EBB_BL
@@ -151,3 +153,4 @@ Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
     7/13  : 3207/569, 85%, 57890/7638, 88%
     7/18  : 3207/569, 85%, 58058/7470, 89%
     7/19  : 2973/803, 79%, 57706/7822, 88%  (After FIFO refactor)
+    7/19  : 3505/271, 93%, 57706/7882, 88%  (After going full 32 deep FIFO size)

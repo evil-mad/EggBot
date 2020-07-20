@@ -19,11 +19,7 @@
 /* These values hold the global step position of each axis */
 volatile INT32 globalStepCounter1;
 volatile INT32 globalStepCounter2;
-#if defined(BOARD_3BB)
 volatile INT32 globalStepCounter3;
-#endif
-
-
 
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 BOOL gLimitChecks = TRUE;
@@ -186,20 +182,21 @@ void parseEMCommand(void)
 }
 
 // RM command
-// For Run Motor - allows completely independent running of the two stepper motors
+// For Run Motor - allows completely independent running of the three stepper motors
+/// TODO : do we even need this?
 void parseRMCommand(void)
 {
 }
 
 
 // The Stepper Motor command
-// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
+// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<axis3_steps><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
 // <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
-// NOTE1: <axis2_steps> is optional and can be left off
-// If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
+// NOTE1: <axis2_steps> and <axis3_steps> are optional and can be left off
+// If the *BB can not make the move in the specified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
-// NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
+// NOTE2: If you specify zero steps for the the three axis values, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
 void parseSMCommand(void)
 {

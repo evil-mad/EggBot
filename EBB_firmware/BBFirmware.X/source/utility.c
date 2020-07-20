@@ -349,7 +349,7 @@ UINT32 GetTick(void)
 // <new name> is a 0 to 16 character ASCII string.
 // This string gets saved in FLASH, and is returned by the "QT" command, as
 // well as being appended to the USB name that shows up in the OS
-void parseSTCommand()
+void ParseSTCommand()
 {
   unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 bytes = 0;
@@ -377,7 +377,7 @@ void parseSTCommand()
 // QT command : Query Tag
 // "QT<CR>"
 // Prints out the 'tag' that was set with the "ST" command previously, if any
-void parseQTCommand()
+void ParseQTCommand()
 {
   unsigned char name[FLASH_NAME_LENGTH+1];    
   UINT8 i;
@@ -436,3 +436,39 @@ void utilityRun(void)
 ///      EnableIO = 1;
   }
 }
+
+#if defined(DEBUG)
+
+/* The stack is in RAM bank gpr13 from 0xDF to 0xD20.
+ * Fill everything except the lowest 0x1F with 0x55.
+ */
+static UINT8 * StackFillPtr;    // A module global scope so it won't be on the stack
+
+void UtilityFillStack(void)
+{
+  for (StackFillPtr = (UINT8*)0xDFF; StackFillPtr >= (UINT8*)0xD20; StackFillPtr--)
+  {
+    *StackFillPtr = 0x55;
+  }
+}
+
+void ParseSHCommand(void)
+{
+  UtilityPrintStackHighWater();
+}
+
+/* Stack starts at 0xD00, and grows up. So walk down from 0xDFF and find the first
+ * location which is not 0x55, which is the highest that the stack has crept up to.
+ */
+void UtilityPrintStackHighWater(void)
+{
+  for (StackFillPtr = (UINT8*)0xDFF; StackFillPtr >= (UINT8*)0xD20; StackFillPtr--)
+  {
+    if(*StackFillPtr != 0x55)
+    {
+      printf ((rom char far *)"StackHighWater = %p\r\n", StackFillPtr);
+      break;
+    }
+  }
+}
+#endif

@@ -166,6 +166,10 @@ void Remapped_Low_ISR (void)
  *****************************************************************************/
 void main(void)
 {
+#if defined(DEBUG)
+  UtilityFillStack();
+#endif
+
   InitializeSystem();
 
   while(1)
