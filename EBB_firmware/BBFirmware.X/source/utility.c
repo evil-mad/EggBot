@@ -17,7 +17,7 @@
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 // Milliseconds between serial checks to see if drivers are online yet
-#define DRIVER_INIT_CHECK_PERIOD_MS 100
+#define DRIVER_INIT_CHECK_PERIOD_MS 10000
 
 /// TODO: Update so that version number is a define in a header file
 #if defined(BOARD_EBB)

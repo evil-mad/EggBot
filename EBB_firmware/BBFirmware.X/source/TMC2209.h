@@ -18,7 +18,7 @@
 #define IOIN          0x06
 #define FACTORY_CONF  0x07
 
-#define IHOLD_RUN     0x10
+#define IHOLD_IRUN    0x10
 #define TPOWERDOWN    0x11
 #define TSTEP         0x12
 #define TPWMTHRS      0x13

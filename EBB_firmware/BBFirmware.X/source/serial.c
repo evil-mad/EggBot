@@ -23,7 +23,7 @@
  * 
  * The en_SpreadCycle bit of GCONF needs to be cleared from OTP to use 
  * StealthChop PWM. This is the factory default (OTP bits come cleared from the
- * facory) so we don't have to change it.
+ * factory) so we don't have to change it.
  * 
  * OTP byte 1 bits 3,2,1 and 0 are the OTP_CHOPCONF3...0 bits and need to be
  */
@@ -37,6 +37,15 @@
 // 0b0000 0000 0000 0000 1011 1101 0000 0110
 #define OTP_INTERNALSENSE_PROGRAM   0x0000BD06UL
 
+// Mask off all other bits in 32 bit word except the low bit of OTP_IHOLD which 
+// we want set.
+#define OTP_IHOLD_LOW_BIT_MASK      0x00200000UL
+
+// The 32 bit value to write into OTP_PROG register in order to cause the
+//   OTP_IHOLD low bit bit (OTP byte 2, bit 5) to get set high
+// 0b0000 0000 0000 0000 1011 1101 0000 0110
+#define OTP_IHOLD_LOW_BIT_PROGRAM   0x0000BD25UL
+
 // 32-bit mask representing the 'reset' bit in the GSTAT register
 #define GSTAT_RESET_MASK            0x00000001UL
 
@@ -45,7 +54,7 @@
 UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
 {
   GCONF,
-  IHOLD_RUN,
+  IHOLD_IRUN,
   CHOPCONF,
   GSTAT
 };
@@ -70,7 +79,7 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
    * b1   1     : internal_Rsense : 1 means use internal sense resistors
    * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
    */
-  0x000001C2,     // GCONF
+//  0x000001C2,     // GCONF
 
   /* Set up idle and run current levels */
   0x000021E1,     // IHOLD_RUN
@@ -97,7 +106,7 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
     
    0x14010053
    */
-  0x14010053,      // CHOPCONF
+//  0x14010053,      // CHOPCONF
 
   /* Write a 1 to GSTAT's reset bit to clear it */
   0x00000001       // GSTAT
@@ -165,6 +174,11 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
   UINT8 datagram[8];
   UINT8 i;
   
+  // Turn on the TX pin
+  TXSTA2bits.TXEN = 1;
+
+  Delay10TCYx(4);
+
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -184,6 +198,11 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
     TXREG2 = datagram[i];
     while(!TXSTA2bits.TRMT);
   }
+
+  Delay10TCYx(4);
+
+  // Turn off the TX pin
+  TXSTA2bits.TXEN = 0;
 }
 
 /* Create a 32 bit long datagram to send out to stepper drivers requesting a
@@ -203,6 +222,10 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   volatile UINT8 dummy;
   retval.word = 0;
   
+  // Turn on the TX pin
+  TXSTA2bits.TXEN = 1;
+  Delay10TCYx(4);
+
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -311,6 +334,10 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
     Delay10TCYx(4);
   }
 
+  // Turn off the TX pin
+  Delay10TCYx(4);
+  TXSTA2bits.TXEN = 0;
+
   return retval.word;
 }
 
@@ -345,6 +372,11 @@ void SerialInitDrivers(void)
     {
       WriteOTP(i, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
     }
+    reg = ReadDatagram(i, OTP_READ);
+    if (!(reg & OTP_IHOLD_LOW_BIT_MASK))
+    {
+      WriteOTP(i, OTP_IHOLD_LOW_BIT_PROGRAM, OTP_IHOLD_LOW_BIT_MASK);
+    }
   }
 }
 
@@ -356,7 +388,7 @@ void SerialInit(void)
 {
   // Set up initial states
   LATCbits.LATC0 = 1;
-  LATCbits.LATC1 = 1;
+  LATCbits.LATC1 = 0;
   // Set up I/O directions
   TRISCbits.TRISC0 = INPUT_PIN;
   TRISCbits.TRISC1 = OUTPUT_PIN;
@@ -374,7 +406,7 @@ void SerialInit(void)
   SPBRG2 = 103;
   // And finally turn the UART on
   RCSTA2bits.SPEN = 1;
-  TXSTA2bits.TXEN = 1;
+//  TXSTA2bits.TXEN = 1;
 }
 
 /*
@@ -507,6 +539,13 @@ BOOL SerialGetGSTATreset(void)
   gstatValue = ReadDatagram(2, CHOPCONF);
   gstatValue = ReadDatagram(3, CHOPCONF);
   
+  gstatValue = ReadDatagram(1, GCONF);
+  gstatValue = ReadDatagram(2, GCONF);
+  gstatValue = ReadDatagram(3, GCONF);
+  
+  gstatValue = ReadDatagram(1, IHOLD_IRUN);
+  gstatValue = ReadDatagram(2, IHOLD_IRUN);
+  gstatValue = ReadDatagram(3, IHOLD_IRUN);
   
   for (i=1; i <= 3; i++)
   {
