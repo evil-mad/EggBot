@@ -422,6 +422,8 @@ void utilityRun(void)
   {
     LastCheckTimeMS = currentTimeMS;
 
+    SerialTurnOnTX();
+    
     if (SerialGetGSTATreset())
     {
       SerialInitDrivers();
@@ -430,6 +432,8 @@ void utilityRun(void)
       EnableIO = 0;      
       servoPenHome();       // The drivers were limped, so home the pen
     }
+    
+    SerialTurnOffTX();
 
 /// TODO: What do do here? How do we know when to disable the drivers? Maybe never?    
     // Disable the drivers so they don't consume tons of power the next time we get 9V

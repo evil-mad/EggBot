@@ -79,7 +79,7 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
    * b1   1     : internal_Rsense : 1 means use internal sense resistors
    * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
    */
-//  0x000001C2,     // GCONF
+  0x000001C2,     // GCONF
 
   /* Set up idle and run current levels */
   0x000021E1,     // IHOLD_RUN
@@ -106,7 +106,7 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
     
    0x14010053
    */
-//  0x14010053,      // CHOPCONF
+  0x14010053,      // CHOPCONF
 
   /* Write a 1 to GSTAT's reset bit to clear it */
   0x00000001       // GSTAT
@@ -158,7 +158,6 @@ void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask)
     // Delay 10ms by waiting on ISR GlobalDelayMS
     GlobalDelayMS = 10;
     while (GlobalDelayMS);
-    
     if (ReadDatagram(addr, OTP_READ) & mask)
     {
       // We have made it a 1, so we are done
@@ -174,11 +173,6 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
   UINT8 datagram[8];
   UINT8 i;
   
-  // Turn on the TX pin
-  TXSTA2bits.TXEN = 1;
-
-  Delay10TCYx(4);
-
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -198,11 +192,6 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
     TXREG2 = datagram[i];
     while(!TXSTA2bits.TRMT);
   }
-
-  Delay10TCYx(4);
-
-  // Turn off the TX pin
-  TXSTA2bits.TXEN = 0;
 }
 
 /* Create a 32 bit long datagram to send out to stepper drivers requesting a
@@ -222,10 +211,6 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   volatile UINT8 dummy;
   retval.word = 0;
   
-  // Turn on the TX pin
-  TXSTA2bits.TXEN = 1;
-  Delay10TCYx(4);
-
   datagram[0] = 0x05;
   if (addr > 3)
   {
@@ -234,11 +219,6 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   datagram[1] = addr;
   datagram[2] = reg & 0x7F;
   CalcCRC(&datagram[0], 4);
-  
-  // Clear and set CREN before every transaction to get rid of overrun error bit
-  // and clear out any bytes in the receive FIFO
-  RCSTA2bits.CREN = 0;
-  RCSTA2bits.CREN = 1;
   
   // Send the full 32 bits out
   // We play a little game here - we want there to be zero delays between 
@@ -255,19 +235,20 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   Nop();
   Nop();
   while(!PIR3bits.TX2IF);
-  // Always read in the byte we just sent out so overrun bit doesn't get set
-  dummy = RCREG2;           // Remove datagram[0] from RX buffer
   TXREG2 = datagram[2];
   Nop();
   Nop();
   while(!PIR3bits.TX2IF);
-  // Always read in the byte we just sent out so overrun bit doesn't get set
-  dummy = RCREG2;           // Remove datagram[1] from RX buffer
   TXREG2 = datagram[3];
   while(!TXSTA2bits.TRMT);
-  dummy = RCREG2;           // Remove datagram[3] from RX buffer
-  dummy = RCREG2;           // Remove datagram[4] from RX buffer
-  
+
+  // Clear CREN, empty RX FIFO and set CREN before we start to receive real 
+  // bytes from 2209s to clear out overrun/framing error bits
+  RCSTA2bits.CREN = 0;
+  dummy = RCREG2;
+  dummy = RCREG2;
+  RCSTA2bits.CREN = 1;
+
   // Zero out the datagram, as we'll reuse it for the reply
   for (i=0; i < 8; i++)
   {
@@ -334,11 +315,21 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
     Delay10TCYx(4);
   }
 
-  // Turn off the TX pin
-  Delay10TCYx(4);
-  TXSTA2bits.TXEN = 0;
-
   return retval.word;
+}
+
+void SerialTurnOnTX(void)
+{
+  // Turn on the TX pin
+  TXSTA2bits.TXEN = 1;
+  Delay10TCYx(10);
+}
+
+void SerialTurnOffTX(void)
+{
+  // Turn off the TX pin
+  Delay10TCYx(10);
+  TXSTA2bits.TXEN = 0;  
 }
 
 /*
@@ -372,7 +363,6 @@ void SerialInitDrivers(void)
     {
       WriteOTP(i, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
     }
-    reg = ReadDatagram(i, OTP_READ);
     if (!(reg & OTP_IHOLD_LOW_BIT_MASK))
     {
       WriteOTP(i, OTP_IHOLD_LOW_BIT_PROGRAM, OTP_IHOLD_LOW_BIT_MASK);
@@ -406,7 +396,6 @@ void SerialInit(void)
   SPBRG2 = 103;
   // And finally turn the UART on
   RCSTA2bits.SPEN = 1;
-//  TXSTA2bits.TXEN = 1;
 }
 
 /*
