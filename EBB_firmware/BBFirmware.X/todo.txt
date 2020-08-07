@@ -138,6 +138,9 @@ NOTES:
 
 * Perform stack analysis to see high water mark of stack usage
 
+* When entering bootloader make sure to disable 2209s
+
+* Maybe don't need to enable/disable UART TX now that we've got INT1 monitoring SCALED_V+?
 
 Code Size : RAM/Free, %RAM used, ROM/Free, %ROM used
   EBB_BL

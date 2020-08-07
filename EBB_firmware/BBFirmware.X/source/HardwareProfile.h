@@ -251,9 +251,13 @@
   #define PEN_UP_DOWN_RPN     7
   #define PenUpDownIO_TRIS    TRISBbits.TRISB4
 
-/** D R I V E R   E N A B L E **************************************/
+  /** D R I V E R   E N A B L E **************************************/
   #define EnableIO            LATEbits.LATE2
   #define EnableIO_TRIS       TRISEbits.TRISE2
+
+  /** S C A L E D   V+ ***********************************************/
+  #define ScalaedVPlusIO      PORTCbits.RC2
+  #define ScaledVPlusIO_TRIS  TRISCbits.TRISC2
 
   /** S T E P  A N D  D I R ******************************************/
   #define Step1IO             LATDbits.LATD6

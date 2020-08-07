@@ -88,6 +88,9 @@
 
 extern const rom char st_version[];
 
+// Flag set from ISR indicating that we need to initialize the 2209s
+extern volatile BOOL DriversNeedInit;
+
 void BlinkUSBStatus (void);     // Handles blinking the USB status LED
 BOOL SwitchIsPressed (void);    // Check to see if the user (PRG) switch is pressed
 void SetPinTRISFromRPn (char Pin, char State);

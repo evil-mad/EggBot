@@ -415,29 +415,26 @@ void ParseQTCommand()
  */
 void utilityRun(void)
 {
-  static UINT32 LastCheckTimeMS = 0;
-  UINT32 currentTimeMS = GetTick(); 
-  
-  if ((currentTimeMS - LastCheckTimeMS) > DRIVER_INIT_CHECK_PERIOD_MS)
+  if (DriversNeedInit && ScalaedVPlusIO)
   {
-    LastCheckTimeMS = currentTimeMS;
-
     SerialTurnOnTX();
     
     if (SerialGetGSTATreset())
     {
+      DriversNeedInit = FALSE;
       SerialInitDrivers();
       Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
       // Enable the drivers by setting their enable pin low
+      // Note that we override this enable pin to leave Motor1 and Motor2
+      // disabled via UART values in SerialInitDrivers because we don't want 
+      // them to move or have power right after being initialized. However,
+      // we must set EnableIO low here so that the servo stepper can begin to
+      // move home.
       EnableIO = 0;      
       servoPenHome();       // The drivers were limped, so home the pen
     }
     
     SerialTurnOffTX();
-
-/// TODO: What do do here? How do we know when to disable the drivers? Maybe never?    
-    // Disable the drivers so they don't consume tons of power the next time we get 9V
-///      EnableIO = 1;
   }
 }
 

@@ -174,5 +174,5 @@ void analogInit(void)
   analogConfigure(0,1);
 #endif
   // Turn on AN11 (V+) as analog input
-  analogConfigure(SCALED_V_ADC_CHAN,1);
+  //analogConfigure(SCALED_V_ADC_CHAN,1);
 }

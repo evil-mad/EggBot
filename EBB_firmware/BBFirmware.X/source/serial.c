@@ -51,7 +51,7 @@
 
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
-UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
+static const rom UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
 {
   GCONF,
   IHOLD_IRUN,
@@ -60,7 +60,8 @@ UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
 };
 
 // Table of 32 values to send to drivers on init (coordinate with addresses)
-UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] = 
+// (Used with X and Y steppers - Motor1 and Motor2)
+static const rom UINT32 DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] = 
 {
   /* Set up default general config settings */
 
@@ -81,8 +82,82 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
    */
   0x000001C2,     // GCONF
 
-  /* Set up idle and run current levels */
-  0x000021E1,     // IHOLD_RUN
+  /* Set up idle and run current levels
+   b20:31  0000 0000 000
+   b16:19  0 0100 : IHOLDDELAY : How slowly to ramp current down after TPOWERDOWN 
+   b13:15  000
+   b8:12   1 0000 : IRUN : Motor run current
+   b5:7    000
+   b0:4    0 1000 : IHOLD : Motor hold current
+    
+   0000 0000 0000 0100 0000 0100 0000 0001
+   0    0    0    4    0    4    0    1
+   */
+  0x00000A06,     // IHOLD_RUN
+
+  /* On boot, TMC2209 has the following values in CHOPCONF:
+   0x10010053
+   b0001 0000 0000 0001 0000 0000 1001 0111
+   
+   b31    0      : diss2vs : low side short protection disable : protection enabled
+   b30    0      : diss2g  : short to GND protection disable : protection enabled
+   b29    0      : dedge   : enable double edge step pulses : disabled
+   b28    1      : intpol  : interpoation to 256 microsteps : enabled
+   b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
+   b18:23 000000 : reserved
+   b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
+   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
+   b11:14 0000   : reserved
+   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
+   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
+   b0:3   0111   : toff    : TOFF off time and driver enable;
+   
+   Our default is 16x microstepping, so we are going to take the above default
+   and simply edit the microstep value:
+    
+   0x14010053
+   */
+  0x14010053,      // CHOPCONF
+
+  /* Write a 1 to GSTAT's reset bit to clear it */
+  0x00000001       // GSTAT
+};
+
+// Table of 32 values to send to drivers on init (coordinate with addresses)
+// (Used for the pen up/down motor - Motor3)
+static const rom UINT32 DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] = 
+{
+  /* Set up default general config settings */
+
+  /* GCONF Setup:
+   * 0x000001C2
+   * 0b0000 0000 0000 0000 0000 0001 1100 0010
+   * 
+   * b9   0     : test_mode : 0 for normal operation
+   * b8   1     : multistep_filt : 1 means enable filter for TSTEP
+   * b7   1     : mstep_reg_select : 1 means microstep resolution selected by MSTEP register
+   * b6   1     : pdn_disable : 1 means PDN_UART input function disabled (set when using UART)
+   * b5   0     : index_step : 0 means INDEX output as selected by index_otpw (we don't use index)
+   * b4   0     : index_otpw : 0 means INDEX shows first microstep position of sequencer
+   * b3   0     : shaft : 0 means normal motor direction
+   * b2   0     : en_SpreadCycle : 0 means StealthChop PWM mode enabled
+   * b1   1     : internal_Rsense : 1 means use internal sense resistors
+   * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
+   */
+  0x000001C2,     // GCONF
+
+  /* Set up idle and run current levels
+   b20:31  0000 0000 000
+   b16:19  0 0100 : IHOLDDELAY : How slowly to ramp current down after TPOWERDOWN 
+   b13:15  000
+   b8:12   0 0100 : IRUN : Motor run current
+   b5:7    000
+   b0:4    0 0001 : IHOLD : Motor hold current
+    
+   0000 0000 0000 0100 0000 0100 0000 0001
+   0    0    0    4    0    4    0    1
+   */
+  0x00000401,     // IHOLD_RUN
 
   /* On boot, TMC2209 has the following values in CHOPCONF:
    0x10010053
@@ -116,6 +191,8 @@ UINT32 DriverInitTableValues[MAX_DRIVER_INIT_VALUES] =
 static UINT8 FramingErrorCounter;
 // Count the total number of overrun errors seen
 static UINT8 OverrunErrorCounter;
+// Flag set from ISR indicating that we need to initialize the 2209s
+volatile BOOL DriversNeedInit;
 
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
 UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
@@ -346,11 +423,11 @@ void SerialInitDrivers(void)
     // For now, we're going to send exactly the same thing to each of the three
     // stepper drivers. This will need to change if we don't want exactly the
     // same values going to all three.
-    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
     Delay100TCYx(20);
-    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
     Delay100TCYx(20);
-    WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValues[i]);
+    WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
     Delay100TCYx(20);
   }
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
@@ -363,10 +440,6 @@ void SerialInitDrivers(void)
     {
       WriteOTP(i, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
     }
-    if (!(reg & OTP_IHOLD_LOW_BIT_MASK))
-    {
-      WriteOTP(i, OTP_IHOLD_LOW_BIT_PROGRAM, OTP_IHOLD_LOW_BIT_MASK);
-    }
   }
 }
 
@@ -376,6 +449,9 @@ void SerialInitDrivers(void)
  * The UART RX pin is on RP11 (RC0), and the TX pin is RP12 (RC1). */
 void SerialInit(void)
 {
+  // Start out by calling for a driver init
+  DriversNeedInit = TRUE;
+    
   // Set up initial states
   LATCbits.LATC0 = 1;
   LATCbits.LATC1 = 0;

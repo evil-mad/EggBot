@@ -231,6 +231,24 @@ void UserInit(void)
   
   analogInit();
   
+  // Initialize INT1 to map to RP13 (RC2) which is SCALED_V+.
+  RPINR1 = 13;
+  ScaledVPlusIO_TRIS = INPUT_PIN;
+  
+  // Set IN1 to be a low priority interrupt and turn it on for either rising
+  // or falling edge, whatever state RC2 is currently not in
+  INTCON3bits.INT1IP = 0;
+  if (ScalaedVPlusIO)
+  {
+    INTCON2bits.INTEDG1 = 0;
+  }
+  else
+  {
+    INTCON2bits.INTEDG1 = 1;
+  }
+  INTCON3bits.INT1IF = 0;     // Clear the flag
+  INTCON3bits.INT1IE = 1;     // Turn on the interrupt
+  
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 

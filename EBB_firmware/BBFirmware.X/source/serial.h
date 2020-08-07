@@ -10,7 +10,6 @@
 
 #include <GenericTypeDefs.h>
 
-
 void SerialInitDrivers(void);
 void SerialInit(void);
 void ParseDRCommand(void);

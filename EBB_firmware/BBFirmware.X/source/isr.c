@@ -398,6 +398,29 @@ void low_ISR(void)
   unsigned int i;
   signed int RC2Difference = 0;
 
+  // Did we get an edge on SCALED_V+? (i.e. 2209 power went away or came back?)
+  if (INTCON3bits.INT1IF)
+  {
+    // Clear the interrupt
+    INTCON3bits.INT1IF = 0;
+    
+    // Set the interrupt to happen on the other edge
+    if (INTCON2bits.INTEDG1)
+    {
+      // We just got a rising edge, power has been applied, so init the drivers
+      DriversNeedInit = TRUE;
+      INTCON2bits.INTEDG1 = 0;
+      DEBUG_C7_SET();
+    }
+    else
+    {
+      // We got here because of a falling edge, so disable the motor drivers
+      EnableIO = 1;
+      INTCON2bits.INTEDG1 = 1;
+      DEBUG_C7_CLEAR();
+    }
+  }
+  
   // Do we have a Timer4 interrupt? (1ms rate)
   if (PIR3bits.TMR4IF)
   {
