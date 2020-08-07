@@ -513,8 +513,10 @@ void ParseDRCommand(void)
     return;
   }
 
+  SerialTurnOnTX();
   registerValue = ReadDatagram(driverNumber, registerAddress);
-  
+  SerialTurnOffTX();
+
   printf((far rom char *)"DR,%08lX\r", registerValue);
 
   print_ack();
@@ -561,7 +563,9 @@ void ParseDWCommand(void)
     return;
   }
 
+  SerialTurnOnTX();
   WriteDatagram(driverNumber, registerAddress, registerValue);
+  SerialTurnOffTX();
   
   printf((far rom char *)"DW\r");
 
@@ -584,44 +588,4 @@ void ParseSSCommand(void)
   OverrunErrorCounter = 0;
   
   print_ack();
-}
-
-/*
- * Read out the 'reset' bit (bit 0) of the GSTAT register on each driver,
- * and return true if any of those bits are set.
- */
-BOOL SerialGetGSTATreset(void)
-{
-  UINT32 gstatValue;
-  UINT8 i;
-  BOOL retval = FALSE;
-  
-  gstatValue = ReadDatagram(1, OTP_READ);
-  gstatValue = ReadDatagram(2, OTP_READ);
-  gstatValue = ReadDatagram(3, OTP_READ);
-
-  gstatValue = ReadDatagram(1, CHOPCONF);
-  gstatValue = ReadDatagram(2, CHOPCONF);
-  gstatValue = ReadDatagram(3, CHOPCONF);
-  
-  gstatValue = ReadDatagram(1, GCONF);
-  gstatValue = ReadDatagram(2, GCONF);
-  gstatValue = ReadDatagram(3, GCONF);
-  
-  gstatValue = ReadDatagram(1, IHOLD_IRUN);
-  gstatValue = ReadDatagram(2, IHOLD_IRUN);
-  gstatValue = ReadDatagram(3, IHOLD_IRUN);
-  
-  for (i=1; i <= 3; i++)
-  {
-    gstatValue = ReadDatagram(1, GSTAT);
-
-    if (gstatValue & GSTAT_RESET_MASK)
-    {
-      retval = TRUE;
-      break;
-    }
-  }
-  
-  return(retval);
 }

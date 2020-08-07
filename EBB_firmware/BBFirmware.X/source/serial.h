@@ -17,7 +17,6 @@ void ParseDWCommand(void);
 void ParseSSCommand(void);
 void SerialTurnOnTX(void);
 void SerialTurnOffTX(void);
-BOOL SerialGetGSTATreset(void);
 
 
 #endif	/* SERIAL_H */

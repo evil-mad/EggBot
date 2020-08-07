@@ -419,20 +419,17 @@ void utilityRun(void)
   {
     SerialTurnOnTX();
     
-    if (SerialGetGSTATreset())
-    {
-      DriversNeedInit = FALSE;
-      SerialInitDrivers();
-      Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
-      // Enable the drivers by setting their enable pin low
-      // Note that we override this enable pin to leave Motor1 and Motor2
-      // disabled via UART values in SerialInitDrivers because we don't want 
-      // them to move or have power right after being initialized. However,
-      // we must set EnableIO low here so that the servo stepper can begin to
-      // move home.
-      EnableIO = 0;      
-      servoPenHome();       // The drivers were limped, so home the pen
-    }
+    DriversNeedInit = FALSE;
+    SerialInitDrivers();
+    Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
+    // Enable the drivers by setting their enable pin low
+    // Note that we override this enable pin to leave Motor1 and Motor2
+    // disabled via UART values in SerialInitDrivers because we don't want 
+    // them to move or have power right after being initialized. However,
+    // we must set EnableIO low here so that the servo stepper can begin to
+    // move home.
+    EnableIO = 0;      
+    servoPenHome();       // The drivers were limped, so home the pen
     
     SerialTurnOffTX();
   }
