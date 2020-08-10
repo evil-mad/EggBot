@@ -28,6 +28,7 @@ volatile UINT32 TickCounterMS;
 // short local delays from 1 to 255 milliseconds
 volatile UINT8 GlobalDelayMS;
 
+volatile UINT8 DriverInitDelayMS;
 
 // Used only in LowISR
 
@@ -401,24 +402,29 @@ void low_ISR(void)
   // Did we get an edge on SCALED_V+? (i.e. 2209 power went away or came back?)
   if (INTCON3bits.INT1IF)
   {
+    DEBUG_C7_SET();
     // Clear the interrupt
     INTCON3bits.INT1IF = 0;
     
-    // Set the interrupt to happen on the other edge
-    if (INTCON2bits.INTEDG1)
-    {
+    // Always disable the motors when we see DIAG trigger - either we just lost
+    // power, or we just got power. In either case we don't want the drivers to
+    // consume power.
+    EnableIO = 1;
+
+//    // Set the interrupt to happen on the other edge
+//    if (INTCON2bits.INTEDG1)
+//    {
       // We just got a rising edge, power has been applied, so init the drivers
       DriversNeedInit = TRUE;
-      INTCON2bits.INTEDG1 = 0;
-      DEBUG_C7_SET();
-    }
-    else
-    {
-      // We got here because of a falling edge, so disable the motor drivers
-      EnableIO = 1;
-      INTCON2bits.INTEDG1 = 1;
-      DEBUG_C7_CLEAR();
-    }
+      FIFONeedsInit = TRUE;
+//      INTCON2bits.INTEDG1 = 0;
+//    }
+//    else
+//    {
+//      INTCON2bits.INTEDG1 = 1;
+//      DEBUG_C7_CLEAR();
+//    }
+    DEBUG_C7_CLEAR();
   }
   
   // Do we have a Timer4 interrupt? (1ms rate)
@@ -614,6 +620,11 @@ void low_ISR(void)
       GlobalDelayMS--;
     }
 
+    // Global delay after DIAG rising edge before we take action in utlity_run())
+    if (DriverInitDelayMS)
+    {
+      DriverInitDelayMS--;
+    }
     /// TODO: Refactor this into something nicer?
 #if defined(BOARD_EBB)
     // Software timer for RCServo power control

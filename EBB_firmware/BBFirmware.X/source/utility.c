@@ -26,6 +26,10 @@
   const rom char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
 #endif
 
+// Flag set from ISR indicating that we need to initialize the 2209s
+volatile BOOL DriversNeedInit;
+
+volatile BOOL FIFONeedsInit;
 
 /******************************************************************************
  * Function:        void BlinkUSBStatus(void)
@@ -415,7 +419,13 @@ void ParseQTCommand()
  */
 void utilityRun(void)
 {
-  if (DriversNeedInit && ScalaedVPlusIO)
+  if (FIFONeedsInit)
+  {
+    fifo_Init();
+    FIFONeedsInit = FALSE;
+  }
+
+  if (DriversNeedInit && !DriverInitDelayMS && ScalaedVPlusIO)
   {
     SerialTurnOnTX();
     

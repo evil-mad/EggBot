@@ -191,8 +191,6 @@ static const rom UINT32 DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 static UINT8 FramingErrorCounter;
 // Count the total number of overrun errors seen
 static UINT8 OverrunErrorCounter;
-// Flag set from ISR indicating that we need to initialize the 2209s
-volatile BOOL DriversNeedInit;
 
 void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
 UINT32 ReadDatagram(UINT8 addr, UINT8 reg);

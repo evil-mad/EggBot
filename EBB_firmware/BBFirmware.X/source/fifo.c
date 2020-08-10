@@ -38,6 +38,29 @@ CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
 
 void fifo_Init(void)
 {
+  UINT8 i;
+
+  FIFOSize = 1;
+  FIFOIn = 0;
+  FIFOOut = 0;
+  FIFODepth = 0;
+  
+  // Initialize all FIFO values
+  /// TODO : use memset() or something?
+  for(i=0; i < COMMAND_FIFO_LENGTH; i++)
+  {
+    FIFO_Command[i] = COMMAND_NONE;
+    FIFO_StepAdd0[i] = 0;
+    FIFO_StepAdd1[i] = 0;
+    FIFO_G1[i].StepAdd2 = 0;
+    FIFO_G2[i].StepsCounter0 = 0;
+    FIFO_G3[i].StepsCounter1 = 0;
+    FIFO_G4[i].StepsCounter2 = 0;
+    FIFO_G5[i].StepAddInc0 = 0;
+    FIFO_StepAddInc1[i] = 0;
+    FIFO_StepAddInc2[i] = 0;
+    FIFO_DirBits[i] = 0;
+  }
 }
 
 // Wait until FIFODepth has gone below FIFOSize

@@ -79,28 +79,6 @@ void UserInit(void)
 
   PIE3bits.TMR4IE = 1;        // Turn on Timer4 match interrupt enable
   IPR3bits.TMR4IP = 0;        // Timer4 interrupt priority = LOW
-
-  // Initialize all FIFO values
-  /// TODO : use memset() or something?
-  for(i=0; i < COMMAND_FIFO_LENGTH; i++)
-  {
-    FIFO_Command[i] = COMMAND_NONE;
-    FIFO_StepAdd0[i] = 0;
-    FIFO_StepAdd1[i] = 0;
-    FIFO_G1[i].StepAdd2 = 0;
-    FIFO_G2[i].StepsCounter0 = 0;
-    FIFO_G3[i].StepsCounter1 = 0;
-    FIFO_G4[i].StepsCounter2 = 0;
-    FIFO_G5[i].StepAddInc0 = 0;
-    FIFO_StepAddInc1[i] = 0;
-    FIFO_StepAddInc2[i] = 0;
-    FIFO_DirBits[i] = 0;
-  }
-  
-  FIFOSize = 1;
-  FIFOIn = 0;
-  FIFOOut = 0;
-  FIFODepth = 0;
   
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
@@ -238,14 +216,21 @@ void UserInit(void)
   // Set IN1 to be a low priority interrupt and turn it on for either rising
   // or falling edge, whatever state RC2 is currently not in
   INTCON3bits.INT1IP = 0;
+//  if (ScalaedVPlusIO)
+//  {
+//    INTCON2bits.INTEDG1 = 0;
+//  }
+//  else
+//  {
+  // Always look for a rising edge on DIAG
+    INTCON2bits.INTEDG1 = 1;
+//  }
+  // If we already have V+ power, then trigger an immediate driver init
   if (ScalaedVPlusIO)
   {
-    INTCON2bits.INTEDG1 = 0;
+    DriversNeedInit = TRUE;
   }
-  else
-  {
-    INTCON2bits.INTEDG1 = 1;
-  }
+    
   INTCON3bits.INT1IF = 0;     // Clear the flag
   INTCON3bits.INT1IE = 1;     // Turn on the interrupt
   

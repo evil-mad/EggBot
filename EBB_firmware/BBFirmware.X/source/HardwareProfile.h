@@ -256,8 +256,8 @@
   #define EnableIO_TRIS       TRISEbits.TRISE2
 
   /** S C A L E D   V+ ***********************************************/
-  #define ScalaedVPlusIO      PORTCbits.RC2
-  #define ScaledVPlusIO_TRIS  TRISCbits.TRISC2
+  #define ScalaedVPlusIO      PORTEbits.RE0
+  #define ScaledVPlusIO_TRIS  TRISEbits.TRISE0
 
   /** S T E P  A N D  D I R ******************************************/
   #define Step1IO             LATDbits.LATD6

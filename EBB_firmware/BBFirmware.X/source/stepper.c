@@ -1148,7 +1148,6 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
   FIFO_DirBits[FIFOIn] = move.DirBits;
   
   fifo_Inc();
-
 }
 
 // Handle the EStop functionality: stop all motor motion in steppers and servo,

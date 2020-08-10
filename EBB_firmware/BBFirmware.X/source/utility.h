@@ -85,9 +85,9 @@
   #endif
 #endif
 
-
 extern const rom char st_version[];
 
+extern volatile BOOL FIFONeedsInit;
 // Flag set from ISR indicating that we need to initialize the 2209s
 extern volatile BOOL DriversNeedInit;
 
