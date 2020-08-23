@@ -1,0 +1,16 @@
+stm32g4xx_hal_rcc.c:1341:17:RCC_GetSysClockFreqFromPLLSource	0	static
+stm32g4xx_hal_rcc.c:217:19:HAL_RCC_DeInit	16	static
+stm32g4xx_hal_rcc.c:310:19:HAL_RCC_OscConfig	24	static
+stm32g4xx_hal_rcc.c:988:6:HAL_RCC_MCOConfig	40	static
+stm32g4xx_hal_rcc.c:1045:10:HAL_RCC_GetSysClockFreq	0	static
+stm32g4xx_hal_rcc.c:765:19:HAL_RCC_ClockConfig	24	static
+stm32g4xx_hal_rcc.c:1100:10:HAL_RCC_GetHCLKFreq	0	static
+stm32g4xx_hal_rcc.c:1111:10:HAL_RCC_GetPCLK1Freq	8	static
+stm32g4xx_hal_rcc.c:1123:10:HAL_RCC_GetPCLK2Freq	8	static
+stm32g4xx_hal_rcc.c:1136:6:HAL_RCC_GetOscConfig	0	static
+stm32g4xx_hal_rcc.c:1230:6:HAL_RCC_GetClockConfig	0	static
+stm32g4xx_hal_rcc.c:1265:6:HAL_RCC_EnableCSS	0	static
+stm32g4xx_hal_rcc.c:1279:6:HAL_RCC_EnableLSECSS	0	static
+stm32g4xx_hal_rcc.c:1290:6:HAL_RCC_DisableLSECSS	0	static
+stm32g4xx_hal_rcc.c:1317:13:HAL_RCC_CSSCallback	0	static
+stm32g4xx_hal_rcc.c:1300:6:HAL_RCC_NMI_IRQHandler	8	static
