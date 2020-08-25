@@ -1,29 +1,25 @@
 
-#include <GenericTypeDefs.h>
+//#include <GenericTypeDefs.h>
 #include "usbser.h"
-#include "utility.h"
-#include "usb_config.h"
-#include "Usb\usb.h"
-#include "Usb\usb_function_cdc.h"
-#include "parse.h"
+//#include "utility.h"
+//#include "usb_config.h"
+//#include "Usb\usb.h"
+//#include "Usb\usb_function_cdc.h"
+//#include "parse.h"
 
 // ROM strings
-const rom char st_OK[] = {"OK\r\n"};
-const rom char st_LFCR[] = {"\r\n"};
+const char st_OK[] = {"OK\r\n"};
+const char st_LFCR[] = {"\r\n"};
 
-#pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
 static unsigned char g_TX_buf[kTX_BUF_SIZE];
 
 // Buffer for data received in one chunk from USB stack (from PC))
 static unsigned char g_RX_command_buf[kRX_COMMAND_BUF_SIZE];
 
-#pragma udata com_rx_buf = 0x300
 // As transferred from g_RX_command_buf[], each command is put here
 // and then parsed when end of line is reached
 unsigned char g_RX_buf[kRX_BUF_SIZE];
-
-#pragma udata
 
 // Pointers to USB transmit (back to PC) buffer
 unsigned char g_TX_buf_in;
@@ -166,7 +162,7 @@ void ProcessIO(void)
         // Handle the backspace thing
         g_RX_buf_in--;
         g_RX_buf[g_RX_buf_in] = 0x00;
-        printf((far rom char *)" \b");
+        printf((char *)" \b");
       }
       else if (
         tst_char != kCR
@@ -202,24 +198,24 @@ void ProcessIO(void)
     if (bittst (error_byte, 0))
     {
       // Unused as of yet
-      printf ((far rom char *)"!0 \r\n");
+      printf ((char *)"!0 \r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_STEPS_TO_FAST))
     {
       // Unused as of yet
-      printf ((far rom char *)"!1 Err: Can't step that fast\r\n");
+      printf ((char *)"!1 Err: Can't step that fast\r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
     {
-      printf ((far rom char *)"!2 Err: TX Buffer overrun\r\n");
+      printf ((char *)"!2 Err: TX Buffer overrun\r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
     {
-      printf ((far rom char *)"!3 Err: RX Buffer overrun\r\n");
+      printf ((char *)"!3 Err: RX Buffer overrun\r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_MISSING_PARAMETER))
     {
-      printf ((far rom char *)"!4 Err: Missing parameter(s)\r\n");
+      printf ((char *)"!4 Err: Missing parameter(s)\r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_PRINTED_ERROR))
     {
@@ -228,23 +224,23 @@ void ProcessIO(void)
     }
     if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
     {
-      printf ((far rom char *)"!6 Err: Invalid paramter value\r\n");
+      printf ((char *)"!6 Err: Invalid paramter value\r\n");
     }
     if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
     {
-      printf ((far rom char *)"!7 Err: Extra parmater\r\n");
+      printf ((char *)"!7 Err: Extra parmater\r\n");
     }
     error_byte = 0;
   }
 
   // Go send any data that needs sending to PC
-  check_and_send_TX_data ();
+  check_and_send_TX_data();
 }
 
 // This is our replacement for the standard putc routine
 // This enables printf() and all related functions to print to
 // the USB output (i.e. to the PC) buffer
-int _user_putc (char c)
+int _user_putc(char c)
 {
   BYTE OldPtr = g_TX_buf_in;
 
@@ -269,7 +265,7 @@ int _user_putc (char c)
     g_TX_buf_in = 0;
   }
 
-  // Also check to see if we bumpted up against our output pointer
+  // Also check to see if we bumped up against our output pointer
   if (g_TX_buf_in == g_TX_buf_out)
   {
     bitset (error_byte, kERROR_BYTE_TX_BUF_OVERRUN);
@@ -279,7 +275,7 @@ int _user_putc (char c)
 
 // In this function, we check to see if we have anything to transmit. 
 // If so then we schedule the data for sending.
-void check_and_send_TX_data (void)
+void check_and_send_TX_data(void)
 {
   char temp;
 

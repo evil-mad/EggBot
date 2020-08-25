@@ -20,15 +20,15 @@ extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
 extern unsigned char g_RX_buf_out;
 extern unsigned char g_RX_buf_in;
-extern const rom char st_OK[];
-extern const rom char st_LFCR[];
+extern const char st_OK[];
+extern const char st_LFCR[];
 
 void usbser_Init(void);
-void parsePacket (void);       // Take a full packet and dispatch it to the right function
-signed char extract_digit (unsigned long * acc, unsigned char digits); // Pull a character out of the packet
+void parsePacket(void);       // Take a full packet and dispatch it to the right function
+signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void ProcessIO(void);
-int _user_putc (char c);
-void check_and_send_TX_data (void);
+int _user_putc(char c);
+void check_and_send_TX_data(void);
 
 #endif	/* USBSER_H */
 
