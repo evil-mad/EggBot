@@ -23,7 +23,11 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include <stdbool.h>
+#include "parse.h"
+#include "utility.h"
+#include "retarget.h"
+#include <stdio.h>
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,6 +36,18 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+
+// ROM strings
+const char st_OK[] = {"OK\r\n"};
+const char st_LFCR[] = {"\r\n"};
+
+// As each buffer is processed from the USB stack, each command is put here
+// and then parsed when end of line is reached
+uint8_t g_RX_buf[kRX_BUF_SIZE];
+
+// Pointers to USB receive (from PC) buffer
+uint8_t g_RX_buf_in;
+uint8_t g_RX_buf_out;
 
 /* USER CODE END PV */
 
@@ -153,9 +169,21 @@ USBD_CDC_ItfTypeDef USBD_Interface_fops_FS =
 static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 3 */
+  uint16_t i;
+
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
+
+  // Initialize USB TX and RX buffer management
+  g_RX_buf_in = 0;
+  g_RX_buf_out = 0;
+
+  for (i=0; i < kRX_BUF_SIZE; i++)
+  {
+    g_RX_buf[i] = 0;
+  }
+
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -262,8 +290,144 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  static bool in_cr = false;
+  static bool in_esc = false;
+  static uint8_t esc_sequence[3] = {0};
+  uint8_t byte_cnt;
+  uint8_t tst_char;
+
+  if (*Len > 0)
+  {
+    for(byte_cnt = 0; byte_cnt < *Len; byte_cnt++)
+    {
+      tst_char = Buf[byte_cnt];
+
+      // Check to see if we are in a CR/LF situation
+      if (
+        !in_cr
+        &&
+        (
+          kCR == tst_char
+          ||
+          kLF == tst_char
+        )
+      )
+      {
+        in_cr = true;
+        g_RX_buf[g_RX_buf_in] = kCR;
+        g_RX_buf_in++;
+
+        // At this point, we know we have a full packet
+        // of information from the PC to parse
+
+        // Now, if we've gotten a full command (user send <CR>) then
+        // go call the code that deals with that command, and then
+        // keep parsing. (This allows multiple small commands per packet)
+        parsePacket();
+
+        g_RX_buf_in = 0;
+        g_RX_buf_out = 0;
+      }
+      else if (tst_char == 27 && in_esc == false)
+      {
+        in_esc = true;
+        esc_sequence[0] = 27;
+        esc_sequence[1] = 0;
+        esc_sequence[2] = 0;
+      }
+      else if (
+        in_esc == true
+        &&
+        tst_char == 91
+        &&
+        esc_sequence[0] == 27
+        &&
+        esc_sequence[1] == 0
+      )
+      {
+        /// TODO: What is this for?
+        esc_sequence[1] = 91;
+      }
+      else if (tst_char == 8 && g_RX_buf_in > 0)
+      {
+        // Handle the backspace thing
+        g_RX_buf_in--;
+        g_RX_buf[g_RX_buf_in] = 0x00;
+        CDC_Transmit_FS((uint8_t*)" \b", 2);
+      }
+      else if (
+        tst_char != kCR
+        &&
+        tst_char != kLF
+        &&
+        tst_char >= 32
+      )
+      {
+        esc_sequence[0] = 0;
+        esc_sequence[1] = 0;
+        esc_sequence[2] = 0;
+        in_esc = false;
+
+        // Only add a byte if it is not a CR or LF
+        g_RX_buf[g_RX_buf_in] = tst_char;
+        in_cr = false;
+        g_RX_buf_in++;
+      }
+      // Check for buffer wraparound
+      if (kRX_BUF_SIZE == g_RX_buf_in)
+      {
+        bitset (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN);
+        g_RX_buf_in = 0;
+        g_RX_buf_out = 0;
+      }
+    }
+  }
+
+/// TODO: Make this into a function
+  // Check for any errors logged in error_byte that need to be sent out
+  if (error_byte)
+  {
+    if (bittst (error_byte, 0))
+    {
+      // Unused as of yet
+      printf ((char *)"!0 \r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_STEPS_TO_FAST))
+    {
+      // Unused as of yet
+      printf ((char *)"!1 Err: Can't step that fast\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
+    {
+      printf ((char *)"!2 Err: TX Buffer overrun\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
+    {
+      printf ((char *)"!3 Err: RX Buffer overrun\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_MISSING_PARAMETER))
+    {
+      printf ((char *)"!4 Err: Missing parameter(s)\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_PRINTED_ERROR))
+    {
+      // We don't need to do anything since something has already been printed out
+      //printf ((rom char *)"!5\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
+    {
+      printf ((char *)"!6 Err: Invalid paramter value\r\n");
+    }
+    if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
+    {
+      printf ((char *)"!7 Err: Extra parmater\r\n");
+    }
+    error_byte = 0;
+  }
+
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
   return (USBD_OK);
   /* USER CODE END 6 */
 }
@@ -284,7 +448,9 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0){
+  if (hcdc->TxState != 0)
+  {
+    bitset (error_byte, kERROR_BYTE_TX_BUF_OVERRUN);
     return USBD_BUSY;
   }
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
@@ -318,6 +484,27 @@ static int8_t CDC_TransmitCplt_FS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
+/**
+  * @brief  CDC_Transmit_FS
+  *         Data to send over USB IN endpoint are sent over CDC interface
+  *         through this function.
+  *         @note
+  *
+  *
+  * @param  Buf: Buffer of data to be sent
+  * @param  Len: Number of data to be sent (in bytes)
+  * @retval USBD_OK if all operations are OK else USBD_FAIL or USBD_BUSY
+  */
+uint8_t CDC_IsTxBusy(void)
+{
+  uint8_t result = USBD_OK;
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
+  if (hcdc->TxState != 0)
+  {
+    return USBD_BUSY;
+  }
+  return result;
+}
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

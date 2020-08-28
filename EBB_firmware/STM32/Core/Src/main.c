@@ -24,7 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
-#include "usbser.h"
+#include "retarget.h"
 
 /* USER CODE END Includes */
 
@@ -67,7 +67,6 @@ static void MX_GPIO_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-  uint8_t *buf = (uint8_t*)"hey there\n";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -90,7 +89,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USB_Device_Init();
   /* USER CODE BEGIN 2 */
-  usbser_Init();
+  RetargetInit();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -98,9 +97,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    ProcessIO();
-//    CDC_Transmit_FS(buf, strlen((const char*)buf));
-//    HAL_Delay(1000);
+//    BlinkUSBStatus();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
