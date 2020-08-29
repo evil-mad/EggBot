@@ -9,6 +9,7 @@
 #define	PARSE_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define advance_RX_buf_out()              \
 {                                         \
@@ -65,6 +66,7 @@ extern bool g_ack_enable;
 ExtractReturnType extract_number(ExtractType Type, void * ReturnValue, unsigned char Required);
 uint8_t extract_string(unsigned char * ReturnValue, uint8_t MaxBytes);
 void print_ack(void);
+void parsePacket(void);
 
 #endif	/* PARSE_H */
 

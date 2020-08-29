@@ -9,6 +9,7 @@
 #define	UTILITY_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define INPUT_PIN   1
 #define OUTPUT_PIN  0

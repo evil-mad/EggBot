@@ -4,12 +4,13 @@
 #include <ctype.h>
 //#include "stepper.h"
 #include <stdio.h>
-//#include "commands.h"
+#include "commands.h"
 //#include "servo.h"
 //#include "ebb.h"
 //#include "analog.h"
 //#include "serial.h"
 #include <stdbool.h>
+#include "usbd_cdc_if.h"
 
 // This byte has each of its bits used as a separate error flag
 uint8_t error_byte;
@@ -17,73 +18,73 @@ uint8_t error_byte;
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
 bool g_ack_enable;
 
-static uint8_t extractHexDigits(UINT32 * acc, UINT8 digits);
-static uint8_t extractDecDigits(UINT32 * acc, UINT8 digits);
+static bool extractHexDigits(uint32_t * acc, uint8_t digits);
+static bool extractDecDigits(uint32_t * acc, uint8_t digits);
 
 typedef struct {
-  UINT8 c1;
-  UINT8 c2;
+  uint8_t c1;
+  uint8_t c2;
   void (*func)(void);
 } const parse_t;
 
 const parse_t commandTable[] =
 {
-  {'L', 'M', parseLMCommand},
-  {'R', 'S', parseRSCommand},
-  {'C', 'B', parseCBCommand},
-  {'C', 'U', parseCUCommand},
-  {'O', 'D', parseODCommand},
-  {'I', 'D', parseIDCommand},
+//  {'L', 'M', parseLMCommand},
+//  {'R', 'S', parseRSCommand},
+//  {'C', 'B', parseCBCommand},
+//  {'C', 'U', parseCUCommand},
+//  {'O', 'D', parseODCommand},
+//  {'I', 'D', parseIDCommand},
   {'V', 'R', parseVRCommand},
-  {'A', 'R', parseARCommand},
-  {'P', 'I', parsePICommand},
-  {'P', 'O', parsePOCommand},
-  {'P', 'D', parsePDCommand},
-  {'M', 'R', parseMRCommand},
-  {'M', 'W', parseMWCommand},
-  {'P', 'C', parsePCCommand},
-  {'P', 'G', parsePGCommand},
-  {'S', 'M', parseSMCommand},
-  {'A', 'M', parseAMCommand},
-  {'S', 'P', parseSPCommand},
-  {'T', 'P', parseTPCommand},
-  {'Q', 'P', parseQPCommand},
-  {'E', 'M', parseEMCommand},
-  {'S', 'C', parseSCCommand},
-  {'S', 'N', parseSNCommand},
-  {'Q', 'N', parseQNCommand},
-  {'S', 'L', parseSLCommand},
-  {'Q', 'L', parseQLCommand},
-  {'Q', 'B', parseQBCommand},
-  {'N', 'I', parseNICommand},
-  {'N', 'D', parseNDCommand},
-  {'B', 'L', parseBLCommand},
-  {'T', '1', parseT1Command},
-  {'T', '2', parseT2Command},
-  {'Q', 'C', parseQCCommand},
-  {'Q', 'G', parseQGCommand},
-  {'S', 'E', parseSECommand},
-  {'S', '2', parseS2Command},
-  {'R', 'M', parseRMCommand},
-  {'Q', 'M', parseQMCommand},
-  {'A', 'C', parseACCommand},
-  {'E', 'S', parseESCommand},
-  {'X', 'M', parseXMCommand},
-  {'Q', 'S', parseQSCommand},
-  {'C', 'S', parseCSCommand},
-  {'S', 'T', ParseSTCommand},
-  {'Q', 'T', ParseQTCommand},
-  {'R', 'B', parseRBCommand},
-  {'S', 'S', ParseSSCommand},
-#if defined(BOARD_EBB)
-  {'Q', 'R', parseQRCommand},
-  {'S', 'R', parseSRCommand},
-#endif
-  {'H', 'M', parseHMCommand},
-  {'D', 'R', ParseDRCommand},
-  {'D', 'W', ParseDWCommand},
+//  {'A', 'R', parseARCommand},
+//  {'P', 'I', parsePICommand},
+//  {'P', 'O', parsePOCommand},
+//  {'P', 'D', parsePDCommand},
+//  {'M', 'R', parseMRCommand},
+//  {'M', 'W', parseMWCommand},
+//  {'P', 'C', parsePCCommand},
+//  {'P', 'G', parsePGCommand},
+//  {'S', 'M', parseSMCommand},
+//  {'A', 'M', parseAMCommand},
+//  {'S', 'P', parseSPCommand},
+//  {'T', 'P', parseTPCommand},
+//  {'Q', 'P', parseQPCommand},
+//  {'E', 'M', parseEMCommand},
+//  {'S', 'C', parseSCCommand},
+//  {'S', 'N', parseSNCommand},
+//  {'Q', 'N', parseQNCommand},
+//  {'S', 'L', parseSLCommand},
+//  {'Q', 'L', parseQLCommand},
+//  {'Q', 'B', parseQBCommand},
+//  {'N', 'I', parseNICommand},
+//  {'N', 'D', parseNDCommand},
+//  {'B', 'L', parseBLCommand},
+//  {'T', '1', parseT1Command},
+//  {'T', '2', parseT2Command},
+//  {'Q', 'C', parseQCCommand},
+//  {'Q', 'G', parseQGCommand},
+//  {'S', 'E', parseSECommand},
+//  {'S', '2', parseS2Command},
+//  {'R', 'M', parseRMCommand},
+//  {'Q', 'M', parseQMCommand},
+//  {'A', 'C', parseACCommand},
+//  {'E', 'S', parseESCommand},
+//  {'X', 'M', parseXMCommand},
+//  {'Q', 'S', parseQSCommand},
+//  {'C', 'S', parseCSCommand},
+//  {'S', 'T', ParseSTCommand},
+//  {'Q', 'T', ParseQTCommand},
+//  {'R', 'B', parseRBCommand},
+//  {'S', 'S', ParseSSCommand},
+//#if defined(BOARD_EBB)
+//  {'Q', 'R', parseQRCommand},
+//  {'S', 'R', parseSRCommand},
+//#endif
+//  {'H', 'M', parseHMCommand},
+//  {'D', 'R', ParseDRCommand},
+//  {'D', 'W', ParseDWCommand},
 #if defined(DEBUG)
-  {'S', 'H', ParseSHCommand},
+//  {'S', 'H', ParseSHCommand},
 #endif
   {0x00, 0x00, NULL},             // Table terminator. Must have c1=0x00
 };
@@ -99,9 +100,9 @@ const parse_t commandTable[] =
  */
 void parsePacket(void)
 {
-  UINT16 command;
-  UINT16 testCommand;
-  UINT8 i;
+  uint16_t command;
+  uint16_t testCommand;
+  uint8_t i;
 
   // Always grab the first character (which is the first byte of the command)
   command = toupper(g_RX_buf[g_RX_buf_out]);
@@ -113,7 +114,7 @@ void parsePacket(void)
   i = 0;
   while (commandTable[i].c1 != 0x00)
   {
-    testCommand = ((UINT16)commandTable[i].c1 << 8) | commandTable[i].c2;
+    testCommand = ((uint16_t)commandTable[i].c1 << 8) | commandTable[i].c2;
     if (command == testCommand)
     {
       commandTable[i].func();
@@ -125,9 +126,9 @@ void parsePacket(void)
   {
     // Send back 'unknown command' error
     printf (
-       (far rom char *)"!8 Err: Unknown command '%c%c:%4X'\r\n"
-      ,(UINT8)(command >> 8)
-      ,(UINT8)command
+       "!8 Err: Unknown command '%c%c:%4X'\r\n"
+      ,(uint8_t)(command >> 8)
+      ,(uint8_t)command
       ,command
     );
   }
@@ -157,7 +158,7 @@ void print_ack(void)
 {
   if (g_ack_enable)
   {
-    printf ((far rom char *)st_OK);
+    printf(st_OK);
   }
 }
 
@@ -166,12 +167,12 @@ void print_ack(void)
 // Copy over all bytes from g_RX_buf_out into ReturnValue until you hit
 // a comma or a CR or you've copied over MaxBytes characters. 
 // Return the number of bytes copied. Advance g_RX_buf_out as you go.
-UINT8 extract_string (
+uint8_t extract_string (
   unsigned char * ReturnValue, 
-  UINT8 MaxBytes
+  uint8_t MaxBytes
 )
 {
-  UINT8 bytes = 0;
+  uint8_t bytes = 0;
 
   // Always terminate the string
   *ReturnValue = 0x00;
@@ -186,7 +187,7 @@ UINT8 extract_string (
   // Check for comma where ptr points
   if (g_RX_buf[g_RX_buf_out] != ',')
   {
-    printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+    printf ("!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
     bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     return (0);
   }
@@ -228,12 +229,12 @@ UINT8 extract_string (
 ExtractReturnType extract_number(
   ExtractType Type, 
   void * ReturnValue, 
-  UINT8 Required
+  uint8_t Required
 )
 {
-  UINT32 ULAccumulator;
-  INT32 Accumulator;
-  BOOL Negative = FALSE;
+  uint32_t ULAccumulator;
+  int32_t Accumulator;
+  bool Negative = false;
 
   // Check to see if we're already at the end
   if (kCR == g_RX_buf[g_RX_buf_out])
@@ -250,7 +251,7 @@ ExtractReturnType extract_number(
   {
     if (0 == Required)
     {
-      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+      printf ("!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
       bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     }
     return (kEXTRACT_COMMA_MISSING);
@@ -296,7 +297,7 @@ ExtractReturnType extract_number(
     }
     else
     {
-      Negative = TRUE;
+      Negative = true;
       // Move to the next character
       advance_RX_buf_out();
     }
@@ -366,19 +367,19 @@ ExtractReturnType extract_number(
       (
         kINT8 == Type
         &&
-        (ULAccumulator > (UINT32)0x80)
+        (ULAccumulator > (uint32_t)0x80)
       )
       ||
       (
         kINT16 == Type
         &&
-        (ULAccumulator > (UINT32)0x8000)
+        (ULAccumulator > (uint32_t)0x8000)
       )
       ||
       (
         kINT32 == Type
         &&
-        (ULAccumulator > (UINT32)0x80000000L)
+        (ULAccumulator > (uint32_t)0x80000000L)
       )
     )
     {
@@ -399,37 +400,37 @@ ExtractReturnType extract_number(
       (
         kINT8 == Type
         &&
-        (ULAccumulator > (UINT32)0x7F)
+        (ULAccumulator > (uint32_t)0x7F)
       )
       ||
       (
         kUINT8 == Type
         &&
-        (ULAccumulator > (UINT32)0xFF)
+        (ULAccumulator > (uint32_t)0xFF)
       )
       ||
       (
         kINT16 == Type
         &&
-        (ULAccumulator > (UINT32)0x7FFF)
+        (ULAccumulator > (uint32_t)0x7FFF)
       )
       ||
       (
         kUINT16 == Type
         &&
-        (ULAccumulator > (UINT32)0xFFFF)
+        (ULAccumulator > (uint32_t)0xFFFF)
       )
       ||
       (
         kUINT24 == Type
         &&
-        (ULAccumulator > (UINT32)0xFFFFFFL)
+        (ULAccumulator > (uint32_t)0xFFFFFFL)
       )
       ||
       (
         kINT32 == Type
         &&
-        (ULAccumulator > (UINT32)0x7FFFFFFFL)
+        (ULAccumulator > (uint32_t)0x7FFFFFFFL)
       )
     )
     {
@@ -447,31 +448,31 @@ ExtractReturnType extract_number(
   switch (Type)
   {
     case kINT8:
-      *(INT8 *)ReturnValue = (INT8)Accumulator;
+      *(int8_t *)ReturnValue = (int8_t)Accumulator;
       break;
     case kUINT8:
     case kHEX8:
     case kASCII_CHAR:
     case kUCASE_ASCII_CHAR:
-      *(UINT8 *)ReturnValue = (UINT8)Accumulator;
+      *(uint8_t *)ReturnValue = (uint8_t)Accumulator;
       break;
     case kINT16:
-      *(INT16 *)ReturnValue = (INT16)Accumulator;
+      *(int16_t *)ReturnValue = (int16_t)Accumulator;
       break;
     case kUINT16:
     case kHEX16:
-      *(UINT16 *)ReturnValue = (UINT16)Accumulator;
+      *(uint16_t *)ReturnValue = (uint16_t)Accumulator;
       break;
-    case kUINT24:
-    case kHEX24:
-      *(UINT24 *)ReturnValue = (UINT24)Accumulator;
-      break;
+///    case kUINT24:
+///    case kHEX24:
+///      *(uint24_t *)ReturnValue = (uint24_t)Accumulator;
+///      break;
     case kINT32:
-      *(INT32 *)ReturnValue = Accumulator;
+      *(int32_t *)ReturnValue = Accumulator;
       break;
     case kUINT32:
     case kHEX32:
-      *(UINT32 *)ReturnValue = ULAccumulator;
+      *(uint32_t *)ReturnValue = ULAccumulator;
       break;
     default:
       return (kEXTRACT_INVALID_TYPE);
@@ -485,11 +486,11 @@ ExtractReturnType extract_number(
 // powers of ten as well. If you hit a non-numerical
 // char, then return FALSE, otherwise return TRUE.
 // Store result as you go in *acc.
-static INT8 extractDecDigits(UINT32 * acc, UINT8 digits)
+static bool extractDecDigits(uint32_t * acc, uint8_t digits)
 {
-  UINT8 val;
-  UINT32 result = 0;
-  BOOL returnVal = TRUE;
+  uint8_t val;
+  uint32_t result = 0;
+  bool returnVal = true;
 
   while(digits)
   {
@@ -502,7 +503,7 @@ static INT8 extractDecDigits(UINT32 * acc, UINT8 digits)
     }
     else
     {
-      returnVal = FALSE;
+      returnVal = false;
       break;
     }
     digits--;
@@ -516,11 +517,11 @@ static INT8 extractDecDigits(UINT32 * acc, UINT8 digits)
 // a hex digit, adding it to acc. If you hit a non-hex
 // character, then return FALSE, otherwise return TRUE.
 // Store result as you go in *acc.
-static INT8 extractHexDigits(UINT32 * acc, UINT8 digits)
+static bool extractHexDigits(uint32_t * acc, uint8_t digits)
 {
-  UINT8 val;
-  UINT32 result = 0;
-  BOOL returnVal = TRUE;
+  uint8_t val;
+  uint32_t result = 0;
+  bool returnVal = true;
   
   while(digits)
   {
@@ -545,7 +546,7 @@ static INT8 extractHexDigits(UINT32 * acc, UINT8 digits)
     }
     else
     {
-      returnVal = FALSE;
+      returnVal = false;
       break;
     }
     digits--;
@@ -554,5 +555,3 @@ static INT8 extractHexDigits(UINT32 * acc, UINT8 digits)
   return(returnVal);
 }
 
-
-#endif

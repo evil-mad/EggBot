@@ -31,7 +31,7 @@ unsigned char g_RX_buf_out;
 
 void usbser_Init(void)
 {
-  UINT16 i;
+  uint16_t i;
   
   // Initialize USB TX and RX buffer management
   g_RX_buf_in = 0;

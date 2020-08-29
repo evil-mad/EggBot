@@ -2,6 +2,6 @@ usbd_cdc_if.c:169:15:CDC_Init_FS	16	static
 usbd_cdc_if.c:195:15:CDC_DeInit_FS	4	static
 usbd_cdc_if.c:209:15:CDC_Control_FS	16	static
 usbd_cdc_if.c:290:15:CDC_Receive_FS	24	static
-usbd_cdc_if.c:449:9:CDC_Transmit_FS	24	static
-usbd_cdc_if.c:477:15:CDC_TransmitCplt_FS	32	static
-usbd_cdc_if.c:501:9:CDC_IsTxBusy	16	static
+usbd_cdc_if.c:446:9:CDC_Transmit_FS	24	static
+usbd_cdc_if.c:474:15:CDC_TransmitCplt_FS	32	static
+usbd_cdc_if.c:498:9:CDC_IsTxBusy	16	static

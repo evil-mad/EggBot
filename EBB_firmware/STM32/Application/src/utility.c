@@ -1,36 +1,34 @@
-
-#include <GenericTypeDefs.h>
-#include "usb_config.h"
-#include "Usb\usb.h"
-#include "Usb\usb_function_cdc.h"
-#include "HardwareProfile.h"
+//#include "usb_config.h"
+//#include "Usb\usb.h"
+//#include "Usb\usb_function_cdc.h"
+//#include "HardwareProfile.h"
 #include "utility.h"
-#include <flash.h>
+//#include <flash.h>
 #include "parse.h"
-#include "isr.h"
-#include "analog.h"
-#include "serial.h"
-#include "servo.h"
-#include <delays.h>
+//#include "isr.h"
+//#include "analog.h"
+//#include "serial.h"
+//#include "servo.h"
+//#include <delays.h>
 
+
+#if 0
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
 #define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
 
 // Milliseconds between serial checks to see if drivers are online yet
 #define DRIVER_INIT_CHECK_PERIOD_MS 10000
-
-/// TODO: Update so that version number is a define in a header file
-#if defined(BOARD_EBB)
-  const rom char st_version[] = {"EBB Firmware Version 3.0.0\r\n"};
-#elif defined(BOARD_3BB)
-  const rom char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
 #endif
 
+/// TODO: Update so that version number is a define in a header file
+const char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
+
 // Flag set from ISR indicating that we need to initialize the 2209s
-volatile BOOL DriversNeedInit;
+volatile bool DriversNeedInit;
 
-volatile BOOL FIFONeedsInit;
+volatile bool FIFONeedsInit;
 
+#if 0
 /******************************************************************************
  * Function:        void BlinkUSBStatus(void)
  *
@@ -479,4 +477,5 @@ void UtilityPrintStackHighWater(void)
     }
   }
 }
+#endif
 #endif

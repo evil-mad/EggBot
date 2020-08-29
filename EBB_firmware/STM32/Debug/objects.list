@@ -1,4 +1,6 @@
+"Application/Src/commands.o"
 "Application/Src/parse.o"
+"Application/Src/utility.o"
 "Core/Src/main.o"
 "Core/Src/retarget.o"
 "Core/Src/stm32g4xx_hal_msp.o"

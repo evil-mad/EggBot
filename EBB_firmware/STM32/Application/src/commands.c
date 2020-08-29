@@ -1,14 +1,12 @@
-#include <p18cxxx.h>
 #include "parse.h"
-#include "utility.h"
-#include "fifo.h"
-#include "main.h"
+//#include "fifo.h"
+//#include "main.h"
 #include <stdio.h>
-#include "servo.h"
-#include "analog.h"
+//#include "servo.h"
+//#include "analog.h"
 #include "utility.h"
-#include "ebb.h"
-#include "init.h"
+//#include "ebb.h"
+//#include "init.h"
 
 /** D E F I N E S ********************************************************/
 
@@ -17,18 +15,18 @@
 
   
 // Set to TRUE to turn Pulse Mode on
-unsigned char gPulsesOn = FALSE;
+uint8_t gPulsesOn = false;
 // For Pulse Mode, how long should each pulse be on for in ms?
-unsigned int gPulseLen[4] = {0,0,0,0};
+uint16_t gPulseLen[4] = {0,0,0,0};
 // For Pulse Mode, how many ms between rising edges of pulses?
-unsigned int gPulseRate[4] = {0,0,0,0};
+uint16_t gPulseRate[4] = {0,0,0,0};
 // For Pulse Mode, counters keeping track of where we are
-unsigned int gPulseCounters[4] = {0,0,0,0};
+uint16_t gPulseCounters[4] = {0,0,0,0};
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 
 
-
+#if 0
 // Return all I/Os to their default power-on values
 void parseRSCommand(void)
 {
@@ -203,11 +201,15 @@ void parseIDCommand(void)
   );
 }
 
+#endif
+
 // All we do here is just print out our version number
 void parseVRCommand(void)
 {
-  printf ((far rom char *)st_version);
+  printf (st_version);
 }
+
+#if 0
 
 // MW is for Memory Write
 // "MW,<location>,<value><CR>"
@@ -811,3 +813,4 @@ void parseT2Command()
 
   print_ack();
 }
+#endif
