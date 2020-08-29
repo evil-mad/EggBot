@@ -233,7 +233,7 @@ ExtractReturnType extract_number(
 )
 {
   uint32_t ULAccumulator;
-  int32_t Accumulator;
+  int32_t Accumulator = 0;
   bool Negative = false;
 
   // Check to see if we're already at the end

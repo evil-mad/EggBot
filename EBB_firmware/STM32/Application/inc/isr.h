@@ -8,9 +8,6 @@
 #ifndef ISR_H
 #define	ISR_H
 
-#include <GenericTypeDefs.h>
-
-
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
 // (normal CPU instruction rate of Fosc/4)
@@ -21,16 +18,16 @@
 // that happen after the timer fires but before we can reload the timer with new
 // values.
 // The values here are hand tuned for 25KHz ISR operation
-#define TIMER1_L_RELOAD (61)
-#define TIMER1_H_RELOAD (254)
+//#define TIMER1_L_RELOAD (61)
+//#define TIMER1_H_RELOAD (254)
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 
-#define kPR4_RELOAD             250               // For 1ms TMR4 tick
+//#define kPR4_RELOAD             250               // For 1ms TMR4 tick
 
 // Tick counter. Increments every 1ms in interrupt
-volatile extern UINT32 TickCounterMS;
-volatile extern UINT8 GlobalDelayMS;
-volatile extern UINT8 DriverInitDelayMS;
+volatile extern uint32_t TickCounterMS;
+volatile extern uint8_t GlobalDelayMS;
+volatile extern uint8_t DriverInitDelayMS;
 
 void high_ISR(void);
 void low_ISR(void);

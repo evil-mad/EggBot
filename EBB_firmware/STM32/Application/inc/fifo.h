@@ -8,8 +8,9 @@
 #ifndef FIFO_H
 #define	FIFO_H
 
+#include <stdbool.h>
+#include <stdint.h>
 #include "HardwareProfile.h"
-#include <GenericTypeDefs.h>
 
 // Bits used within the OutByte to keep track of what direction and step bits need to be at the end of the ISR
 // (Not tied to physical pins at all)
@@ -31,31 +32,31 @@ typedef enum
 } CommandType;
 
 typedef union {
-  INT32   StepAdd2;
-  UINT16  ServoPosition;
-  UINT16  SEPower;
+  int32_t   StepAdd2;
+  uint16_t  ServoPosition;
+  uint16_t  SEPower;
 } StepGeneric1_t;
 
 typedef union {
-  UINT32  StepsCounter0;
-  UINT8   ServoRPn;
-  UINT32  DelayCounter;
-  UINT8   SEState;
+  uint32_t  StepsCounter0;
+  uint8_t   ServoRPn;
+  uint32_t  DelayCounter;
+  uint8_t   SEState;
 } StepGeneric2_t;
 
 typedef union {
-  UINT32  StepsCounter1;
-  UINT16  ServoRate;
+  uint32_t  StepsCounter1;
+  uint16_t  ServoRate;
 } StepGeneric3_t;
 
 typedef union {
-  UINT32  StepsCounter2;
-  UINT8   ServoChannel;
+  uint32_t  StepsCounter2;
+  uint8_t   ServoChannel;
 } StepGeneric4_t;
 
 typedef union {
-  INT32   StepAddInc0;
-  UINT32  DelayCounter;
+  int32_t   StepAddInc0;
+  uint32_t  DelayCounter;
 } StepGeneric5_t;
 
 // This structure defines the elements of the move commands in the FIFO that
@@ -63,36 +64,36 @@ typedef union {
 typedef struct
 {
   CommandType     Command;
-  INT32           StepAdd[NUMBER_OF_STEPPERS];
-  INT32           StepAddInc[NUMBER_OF_STEPPERS];
-  UINT32          StepsCounter[NUMBER_OF_STEPPERS];
-  UINT8           DirBits;
-  UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
-  UINT16          ServoPosition;
-  UINT8           ServoRPn;
-  UINT8           ServoChannel;
-  UINT16          ServoRate;
-  UINT8           SEState;
-  UINT16          SEPower;
+  int32_t           StepAdd[NUMBER_OF_STEPPERS];
+  int32_t           StepAddInc[NUMBER_OF_STEPPERS];
+  uint32_t          StepsCounter[NUMBER_OF_STEPPERS];
+  uint8_t           DirBits;
+  uint32_t          DelayCounter;   // NOT Milliseconds! In 25KHz units
+  uint16_t          ServoPosition;
+  uint8_t           ServoRPn;
+  uint8_t           ServoChannel;
+  uint16_t          ServoRate;
+  uint8_t           SEState;
+  uint16_t          SEPower;
 } MoveCommandType;  // 27 bytes
 
 
-extern volatile UINT8 FIFODepth;
-extern volatile UINT8 FIFOSize;
-extern volatile UINT8 FIFOIn;
-extern volatile UINT8 FIFOOut;
+extern volatile uint8_t FIFODepth;
+extern volatile uint8_t FIFOSize;
+extern volatile uint8_t FIFOIn;
+extern volatile uint8_t FIFOOut;
 
 
-extern INT32           FIFO_StepAdd0[COMMAND_FIFO_LENGTH];
-extern INT32           FIFO_StepAdd1[COMMAND_FIFO_LENGTH];
+extern int32_t           FIFO_StepAdd0[COMMAND_FIFO_LENGTH];
+extern int32_t           FIFO_StepAdd1[COMMAND_FIFO_LENGTH];
 extern StepGeneric1_t  FIFO_G1[COMMAND_FIFO_LENGTH];  // (INT32) StepAdd2, (UINT16) FIFO_ServoPosition, (UINT16) FIFO_SEPower
 extern StepGeneric2_t  FIFO_G2[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCounter0, (UINT8) FIFO_ServoRPn, (UINT32) FIFO_DelayCounter, (UINT8) FIFO_SEState
 extern StepGeneric3_t  FIFO_G3[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) FIFO_ServoRate
 extern StepGeneric4_t  FIFO_G4[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) FIFO_ServoChannel
 extern StepGeneric5_t  FIFO_G5[COMMAND_FIFO_LENGTH];  // (INT32) StepAddInc0, (UINT32) FIFO_DelayCounter,
-extern INT32           FIFO_StepAddInc1[COMMAND_FIFO_LENGTH];
-extern INT32           FIFO_StepAddInc2[COMMAND_FIFO_LENGTH];
-extern UINT8           FIFO_DirBits[COMMAND_FIFO_LENGTH];
+extern int32_t           FIFO_StepAddInc1[COMMAND_FIFO_LENGTH];
+extern int32_t           FIFO_StepAddInc2[COMMAND_FIFO_LENGTH];
+extern uint8_t           FIFO_DirBits[COMMAND_FIFO_LENGTH];
 extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
 
 void fifo_Init(void);

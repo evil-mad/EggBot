@@ -1,5 +1,0 @@
-main.c:67:5:main	8	static
-main.c:110:6:SystemClock_Config	168	static
-main.c:165:13:MX_GPIO_Init	32	static
-main.c:192:6:Error_Handler	4	static
-main.c:208:6:assert_failed	16	static

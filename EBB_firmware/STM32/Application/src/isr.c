@@ -1,65 +1,48 @@
-
-
-#include <p18cxxx.h>
+#include "main.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include "isr.h"
 #include "HardwareProfile.h"
-#include "ebb.h"
+//#include "ebb.h"
 #include "fifo.h"
-#include "analog.h"
-#include "delays.h"
+//#include "analog.h"
+//#include "delays.h"
 #include "stepper.h"
-#include "servo.h"
-#include "solenoid.h"
+//#include "servo.h"
+//#include "solenoid.h"
 #include "commands.h"
 #include "utility.h"
 
 /// TODO: Move these into ISR function body?
-static unsigned char OutByte;
-static unsigned char TookStep;
-static unsigned char AllDone;
+static uint8_t OutByte;
+static bool TookStep;
+static bool AllDone;
 
 // Accumulators (at 25Khz) used to determine when to take a step
-static UINT32 StepAcc[NUMBER_OF_STEPPERS];
+static uint32_t StepAcc[NUMBER_OF_STEPPERS];
 
-// Constantly incrimenting every 1ms in ISR global tick counter
-volatile UINT32 TickCounterMS;
+// Constantly incrementing every 1ms in ISR global tick counter
+volatile uint32_t TickCounterMS;
 
-// Constantly decrimenting until it reaches zero. Use in local functions for
+// Constantly decrementing until it reaches zero. Use in local functions for
 // short local delays from 1 to 255 milliseconds
-volatile UINT8 GlobalDelayMS;
+volatile uint8_t GlobalDelayMS;
 
-volatile UINT8 DriverInitDelayMS;
+volatile uint8_t DriverInitDelayMS;
 
 // Used only in LowISR
 
 // ISR
-#pragma interrupt high_ISR
 void high_ISR(void)
 {
-  //Check which interrupt flag caused the interrupt.
-  //Service the interrupt
-  //Clear the interrupt flag
-  //Etc.
-  #if defined(USB_INTERRUPT)
-    USBDeviceTasks();
-  #endif
-
-  // 25KHz ISR fire
-  if (PIR1bits.TMR1IF)
-  {
-    // Clear the interrupt 
-    PIR1bits.TMR1IF = 0;
-    TMR1H = TIMER1_H_RELOAD;  //
-    TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
-
     OutByte = FIFO_DirBits[FIFOOut];
-    TookStep = FALSE;
-    AllDone = TRUE;
-DEBUG_D0_SET()
+    TookStep = false;
+    AllDone = true;
     
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+
     if (FIFODepth)
     {
-DEBUG_D1_SET()
 
       if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
       {
@@ -67,57 +50,31 @@ DEBUG_D1_SET()
         if (FIFO_G2[FIFOOut].StepsCounter0 || FIFO_G3[FIFOOut].StepsCounter1 || FIFO_G4[FIFOOut].StepsCounter2)
         {
           // Always true for 3BB
-          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
           {
-            if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-            {
-              Dir1IO = 1;
-            }
-            else
-            {
-              Dir1IO = 0;
-            }
-            if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-            {
-              Dir2IO = 1;
-            }
-            else
-            {
-              Dir2IO = 0;
-            }
-#if defined(BOARD_3BB)
-            if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
-            {
-              Dir3IO = 1;
-            }
-            else
-            {
-              Dir3IO = 0;
-            }
-#endif
+///            Dir1IO = 1;
           }
-#if defined(BOARD_EBB)
-          else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+          else
           {
-            if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
-            {
-              Dir1AltIO = 1;
-            }
-            else
-            {
-              Dir1AltIO = 0;
-            }
-            if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
-            {
-              Dir2AltIO = 1;
-            }
-            else
-            {
-              Dir2AltIO = 0;
-            }
+///            Dir1IO = 0;
           }
-#endif
-          
+          if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
+          {
+///            Dir2IO = 1;
+          }
+          else
+          {
+///            Dir2IO = 0;
+          }
+          if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
+          {
+///            Dir3IO = 1;
+          }
+          else
+          {
+///            Dir3IO = 0;
+          }
+
           // Only do this if there are steps left to take
           if (FIFO_G2[FIFOOut].StepsCounter0)
           {
@@ -126,7 +83,7 @@ DEBUG_D1_SET()
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
               OutByte = OutByte | STEP1_BIT;
-              TookStep = TRUE;
+              TookStep = true;
               FIFO_G2[FIFOOut].StepsCounter0--;
               if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
               {
@@ -139,7 +96,7 @@ DEBUG_D1_SET()
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
             FIFO_StepAdd0[FIFOOut] += FIFO_G5[FIFOOut].StepAddInc0;
-            AllDone = FALSE;
+            AllDone = false;
           }
           if (FIFO_G3[FIFOOut].StepsCounter1)
           {
@@ -148,7 +105,7 @@ DEBUG_D1_SET()
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
               OutByte = OutByte | STEP2_BIT;
-              TookStep = TRUE;
+              TookStep = true;
               FIFO_G3[FIFOOut].StepsCounter1--;
               if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
               {
@@ -161,7 +118,7 @@ DEBUG_D1_SET()
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
             FIFO_StepAdd1[FIFOOut] += FIFO_StepAddInc1[FIFOOut];
-            AllDone = FALSE;
+            AllDone = false;
           }
           if (FIFO_G4[FIFOOut].StepsCounter2)
           {
@@ -170,7 +127,7 @@ DEBUG_D1_SET()
             {
               StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
               OutByte = OutByte | STEP3_BIT;
-              TookStep = TRUE;
+              TookStep = true;
               FIFO_G4[FIFOOut].StepsCounter2--;
               if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
               {
@@ -183,137 +140,51 @@ DEBUG_D1_SET()
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
             FIFO_G1[FIFOOut].StepAdd2 += FIFO_StepAddInc2[FIFOOut];
-            AllDone = FALSE;
+            AllDone = false;
           }
           if (TookStep)
           {
-            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+            if (OutByte & STEP1_BIT)
             {
-              if (OutByte & STEP1_BIT)
-              {
-                Step1IO = 1;
-              }
-              if (OutByte & STEP2_BIT)
-              {
-                Step2IO = 1;
-              }
-#if defined(BOARD_3BB)
-              if (OutByte & STEP3_BIT)
-              {
-                Step3IO = 1;
-              }
-#endif
+///                Step1IO = 1;
             }
-#if defined(BOARD_EBB)
-            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+            if (OutByte & STEP2_BIT)
             {
-              if (OutByte & STEP1_BIT)
-              {
-                Step1AltIO = 1;
-              }
-              if (OutByte & STEP2_BIT)
-              {
-                Step2AltIO = 1;
-              }
+///                Step2IO = 1;
             }
-#endif
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            Delay1TCY();
-            if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+            if (OutByte & STEP3_BIT)
             {
-              Step1IO = 0;
-              Step2IO = 0;
-#if defined(BOARD_3BB)
-              Step3IO = 0;
-#endif
+///                Step3IO = 1;
             }
-#if defined(BOARD_EBB)
-            else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-            {
-              Step1AltIO = 0;
-              Step2AltIO = 0;
-            }
-#endif
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+            asm("NOP");
+
+///              Step1IO = 0;
+///              Step2IO = 0;
+///              Step3IO = 0;
           }
         }
       }
-#if defined(BOARD_EBB)
-      // Check to see if we should change the state of the pen
-      else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
-      {
-/// TODO: This needs to be updated to look at the position of Motor3, and 
-/// flip the solenoid output (RB4) if the motor position has moved past a threshold
-        if (gUseRCPenServo)
-        {
-          // Precompute the channel, since we use it all over the place
-          UINT8 Channel = FIFO_ServoChannel[FIFOOut] - 1;
-
-          // This code below is the meat of the servo_Move() function
-          // We have to manually write it in here rather than calling
-          // the function because a real function inside the ISR
-          // causes the compiler to generate enormous amounts of setup/teardown
-          // code and things run way too slowly.
-
-          // If the user is trying to turn off this channel's RC servo output
-          if (0 == FIFO_ServoPosition[FIFOOut])
-          {
-            // Turn off the PPS routing to the pin
-            *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
-            // Clear everything else out for this channel
-            gRC2Rate[Channel] = 0;
-            gRC2Target[Channel] = 0;
-            gRC2RPn[Channel] = 0;
-            gRC2Value[Channel] = 0;
-          }
-          else
-          {
-            // Otherwise, set all of the values that start this RC servo moving
-            gRC2Rate[Channel] = FIFO_ServoRate[FIFOOut];
-            gRC2Target[Channel] = FIFO_ServoPosition[FIFOOut];
-            gRC2RPn[Channel] = FIFO_ServoRPn[FIFOOut];
-            if (gRC2Value[Channel] == 0)
-            {
-              gRC2Value[Channel] = FIFO_ServoPosition[FIFOOut];
-            }
-          }
-        }
-
-        // If this servo is the pen servo (on g_servo2_RPn)
-        if (FIFO_ServoRPn[FIFOOut] == g_servo2_RPn)
-        {
-          // Then set its new state based on the new position
-          if (FIFO_ServoPosition[FIFOOut] == gPenMinPosition)
-          {
-            PenState = PEN_UP;
-            SolenoidState = SOLENOID_OFF;
-            if (gUseSolenoid)
-            {
-              PenUpDownIO = 0;
-            }
-          }
-          else
-          {
-            PenState = PEN_DOWN;
-            SolenoidState = SOLENOID_ON;
-            if (gUseSolenoid)
-            {
-              PenUpDownIO = 1;
-            }
-          }
-        }
-      }
-#endif
       // Check to see if we should start or stop the engraver
       else if (FIFO_Command[FIFOOut] == COMMAND_SE)
       {
@@ -321,16 +192,16 @@ DEBUG_D1_SET()
         if (FIFO_G2[FIFOOut].SEState)
         {
           // Set RB3 to StoredEngraverPower
-          CCPR1L = FIFO_G1[FIFOOut].SEPower >> 2;
-          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+///          CCPR1L = FIFO_G1[FIFOOut].SEPower >> 2;
+///          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
         }
         else
         {
           // Set RB3 to low by setting PWM duty cycle to zero
-          CCPR1L = 0;
-          CCP1CON = (CCP1CON & 0b11001111);
+///          CCPR1L = 0;
+///          CCP1CON = (CCP1CON & 0b11001111);
         }
-        AllDone = TRUE;
+        AllDone = true;
       }
       // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
       // That's why this is not an elseif here.
@@ -342,19 +213,19 @@ DEBUG_D1_SET()
       {
         if (FIFO_G2[FIFOOut].DelayCounter)
         {
-          // Double check that things aren't way too big
-          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-          {
-            FIFO_G2[FIFOOut].DelayCounter = 0;
-          }
-          else {
-            FIFO_G2[FIFOOut].DelayCounter--;
-          }
+///          // Double check that things aren't way too big
+///          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+///          {
+///            FIFO_G2[FIFOOut].DelayCounter = 0;
+///          }
+///          else {
+///            FIFO_G2[FIFOOut].DelayCounter--;
+///          }
         }
 
         if (FIFO_G2[FIFOOut].DelayCounter)
         {
-            AllDone = FALSE;
+            AllDone = false;
         }
       }
 
@@ -376,24 +247,22 @@ DEBUG_D1_SET()
     }
     
     // Check for button being pushed
-    if (
-      (!swProgram)
-      ||
-      (
-        UseAltPause
-        &&
-        !PORTBbits.RB0
-      )
-    )
-    {
-      ButtonPushed = TRUE;
-    }
-  }
-DEBUG_D0_CLEAR()
-DEBUG_D1_CLEAR()
+///    if (
+///      (!swProgram)
+///      ||
+///      (
+///        UseAltPause
+///        &&
+///        !PORTBbits.RB0
+///      )
+///    )
+///    {
+///      ButtonPushed = true;
+///    }
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 }
 
-#pragma interruptlow low_ISR
+#if 0
 void low_ISR(void)
 {
   unsigned int i;
@@ -702,3 +571,4 @@ void low_ISR(void)
   }
 #endif
 }
+#endif

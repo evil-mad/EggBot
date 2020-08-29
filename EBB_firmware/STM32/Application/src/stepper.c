@@ -1,14 +1,15 @@
 
-#include <GenericTypeDefs.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "parse.h"
 #include "HardwareProfile.h"
-#include "ebb.h"
+//#include "ebb.h"
 #include "utility.h"
 #include "isr.h"
 #include "fifo.h"
-#include "Compiler.h"
-#include "servo.h"
-#include "math.h"
+//#include "Compiler.h"
+//#include "servo.h"
+//#include "math.h"
 #include "stepper.h"
 
 
@@ -17,16 +18,17 @@
 #define OVERFLOW_MUL            (0x8000 / HIGH_ISR_TICKS_PER_MS)
 
 /* These values hold the global step position of each axis */
-volatile INT32 globalStepCounter1;
-volatile INT32 globalStepCounter2;
-volatile INT32 globalStepCounter3;
+volatile int32_t globalStepCounter1;
+volatile int32_t globalStepCounter2;
+volatile int32_t globalStepCounter3;
 
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
-BOOL gLimitChecks = TRUE;
+bool gLimitChecks = true;
 
 /* Local function definitions */
 void clear_StepCounters(void);
 
+#if 0
 // Enable Motor
 // Usage: EM,<EnableAxis1>,<EnableAxis2><CR>
 // Everything after EnableAxis1 is optional
@@ -1369,3 +1371,4 @@ void parseCSCommand(void)
   
   print_ack();
 }
+#endif

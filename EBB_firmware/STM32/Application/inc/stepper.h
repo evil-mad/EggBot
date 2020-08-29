@@ -8,10 +8,13 @@
 #ifndef STEPPER_H
 #define	STEPPER_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 /* These values hold the global step position of each axis */
-extern volatile INT32 globalStepCounter1;
-extern volatile INT32 globalStepCounter2;
-extern volatile INT32 globalStepCounter3;
+extern volatile int32_t globalStepCounter1;
+extern volatile int32_t globalStepCounter2;
+extern volatile int32_t globalStepCounter3;
 
 void parseSMCommand(void);
 void parseAMCommand(void);
@@ -23,12 +26,12 @@ void parseQMCommand(void);
 void parseESCommand(void);
 void parseQSCommand(void);
 void parseCSCommand(void);
-UINT8 process_QM(void);
+uint8_t process_QM(void);
 void process_SM(
-  UINT32 Duration,
-  INT32 A1Stp,
-  INT32 A2Stp,
-  INT32 A3Stp
+  uint32_t Duration,
+  int32_t A1Stp,
+  int32_t A2Stp,
+  int32_t A3Stp
 );
 
 #endif	/* STEPPER_H */
