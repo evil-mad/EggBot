@@ -1,6 +1,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "parse.h"
 #include "HardwareProfile.h"
 //#include "ebb.h"
@@ -190,6 +191,7 @@ void parseRMCommand(void)
 {
 }
 
+#endif
 
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<axis3_steps><CR>
@@ -202,9 +204,9 @@ void parseRMCommand(void)
 // pauses before raising or lowering the pen, for example.
 void parseSMCommand(void)
 {
-  UINT32 Duration = 0;
-  INT32 A1Steps = 0, A2Steps = 0, A3Steps = 0;
-  INT32 Steps = 0;
+  uint32_t Duration = 0;
+  int32_t A1Steps = 0, A2Steps = 0, A3Steps = 0;
+  int32_t Steps = 0;
 
   // Extract each of the values.
   extract_number (kUINT32, &Duration, kREQUIRED);
@@ -227,7 +229,7 @@ void parseSMCommand(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      printf("!0 Err: <move_duration> larger than 16777215 ms.\n\r");
       return;
     }
     // Check for too-fast step request (>25KHz)
@@ -242,19 +244,19 @@ void parseSMCommand(void)
     }
     if (Steps > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis1> larger than 16777215 steps.\n\r");
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis1> step rate > 25K steps/second.\n\r");
       return;
     }
     // And check for too slow
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis1> step rate < 1.31Hz.\n\r");
       return;
     }
 
@@ -268,17 +270,17 @@ void parseSMCommand(void)
 
     if (Steps > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis2> larger than 16777215 steps.\n\r");
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis2> step rate > 25K steps/second.\n\r");
       return;
     }
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis2> step rate < 1.31Hz.\n\r");
       return;
     }
 
@@ -292,17 +294,17 @@ void parseSMCommand(void)
 
     if (Steps > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <axis3> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis3> larger than 16777215 steps.\n\r");
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis3> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis3> step rate > 25K steps/second.\n\r");
       return;
     }
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis3> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis3> step rate < 1.31Hz.\n\r");
       return;
     }
   }
@@ -317,7 +319,7 @@ void parseSMCommand(void)
   }
 }
 
-
+#if 0
 // The Accelerated Motion command
 // Usage: SM,<inital_velocity>,<final_velocity>,<axis1_steps>,<axis2_steps><CR>
 // <inital_velocity> is a number from 1 to 10000 in steps/second indicating the initial velocity
@@ -912,6 +914,8 @@ void parseXMCommand(void)
   print_ack();
 }
 
+#endif
+
 // Main stepper move function. This is the reason EBB exists.
 // <Duration> is a 3 byte unsigned int, the number of mS that the move should take
 // <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
@@ -923,12 +927,12 @@ void parseXMCommand(void)
 //
 // In the future, making the FIFO more elements deep may be cool.
 // 
-void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
+void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
 {
-  UINT32 temp = 0;
-  UINT32 temp1 = 0;
-  UINT32 temp2 = 0;
-  UINT32 remainder = 0;
+  uint32_t temp = 0;
+  uint32_t temp1 = 0;
+  uint32_t temp2 = 0;
+  uint32_t remainder = 0;
   /// TODO: Remove 'move' and just write directly to [FIFOIn] to save stack space
   MoveCommandType move;
 
@@ -952,14 +956,11 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
     move.DelayCounter = 0; // No delay for motor moves
     move.DirBits = 0;
 
-/// TODO: Get this to work for 3BB as well
-#if defined(BOARD_EBB)
     // Always enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-#endif
+///    Enable1IO = ENABLE_MOTOR;
+///    Enable2IO = ENABLE_MOTOR;
+///    RCServoPowerIO = RCSERVO_POWER_ON;
+///    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
     
     // First, set the direction bits
     if (A1Stp < 0)
@@ -1018,16 +1019,16 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
     }
     else 
     {
-      temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+      temp = (((A1Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
     {
-      printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A1Stp != 0) {
-      printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
+      printf("Major malfunction Axis1 StepCounter zero\n\r");
       temp = 1;
     }
     if (Duration > 30)
@@ -1054,17 +1055,17 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
     }
     else 
     {
-      temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+      temp = (((A2Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
     {
-      printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A2Stp != 0) 
     {
-      printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
+      printf("Major malfunction Axis2 StepCounter zero\n\r");
       temp = 1;
     }
     if (Duration > 30)
@@ -1092,17 +1093,17 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
     }
     else 
     {
-      temp = (((A3Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+      temp = (((A3Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
     {
-      printf((far rom char *)"Major malfunction Axis3 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis3 StepCounter too high : %lu\n\r", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A3Stp != 0) 
     {
-      printf((far rom char *)"Major malfunction Axis3 StepCounter zero\n\r");
+      printf("Major malfunction Axis3 StepCounter zero\n\r");
       temp = 1;
     }
     if (Duration > 30)
@@ -1150,7 +1151,10 @@ void process_SM(UINT32 Duration, INT32 A1Stp, INT32 A2Stp, INT32 A3Stp)
   FIFO_DirBits[FIFOIn] = move.DirBits;
   
   fifo_Inc();
+  print_ack();
 }
+
+#if 0
 
 // Handle the EStop functionality: stop all motor motion in steppers and servo,
 // print out the interrupted state (if printResult == TRUE), and start the 

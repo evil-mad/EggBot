@@ -2,7 +2,7 @@
 #include "parse.h"
 #include "utility.h"
 #include <ctype.h>
-//#include "stepper.h"
+#include "stepper.h"
 #include <stdio.h>
 #include "commands.h"
 //#include "servo.h"
@@ -16,7 +16,7 @@
 uint8_t error_byte;
 
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
-bool g_ack_enable;
+bool g_ack_enable = true;
 
 static bool extractHexDigits(uint32_t * acc, uint8_t digits);
 static bool extractDecDigits(uint32_t * acc, uint8_t digits);
@@ -44,7 +44,7 @@ const parse_t commandTable[] =
 //  {'M', 'W', parseMWCommand},
 //  {'P', 'C', parsePCCommand},
 //  {'P', 'G', parsePGCommand},
-//  {'S', 'M', parseSMCommand},
+  {'S', 'M', parseSMCommand},
 //  {'A', 'M', parseAMCommand},
 //  {'S', 'P', parseSPCommand},
 //  {'T', 'P', parseTPCommand},
@@ -232,7 +232,7 @@ ExtractReturnType extract_number(
   uint8_t Required
 )
 {
-  uint32_t ULAccumulator;
+  uint32_t ULAccumulator = 0;
   int32_t Accumulator = 0;
   bool Negative = false;
 

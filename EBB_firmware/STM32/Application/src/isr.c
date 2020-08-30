@@ -52,27 +52,27 @@ void high_ISR(void)
           // Always true for 3BB
           if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
           {
-///            Dir1IO = 1;
+            HAL_GPIO_WritePin(Dir1IO_GPIO_Port, Dir1IO_Pin, GPIO_PIN_SET);
           }
           else
           {
-///            Dir1IO = 0;
+            HAL_GPIO_WritePin(Dir1IO_GPIO_Port, Dir1IO_Pin, GPIO_PIN_RESET);
           }
           if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
           {
-///            Dir2IO = 1;
+            HAL_GPIO_WritePin(Dir2IO_GPIO_Port, Dir2IO_Pin, GPIO_PIN_SET);
           }
           else
           {
-///            Dir2IO = 0;
+            HAL_GPIO_WritePin(Dir2IO_GPIO_Port, Dir2IO_Pin, GPIO_PIN_RESET);
           }
           if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
           {
-///            Dir3IO = 1;
+            HAL_GPIO_WritePin(Dir3IO_GPIO_Port, Dir3IO_Pin, GPIO_PIN_SET);
           }
           else
           {
-///            Dir3IO = 0;
+            HAL_GPIO_WritePin(Dir3IO_GPIO_Port, Dir3IO_Pin, GPIO_PIN_RESET);
           }
 
           // Only do this if there are steps left to take
@@ -146,42 +146,32 @@ void high_ISR(void)
           {
             if (OutByte & STEP1_BIT)
             {
-///                Step1IO = 1;
+              Step1IO_GPIO_Port->BSRR = (uint32_t)Step1IO_Pin;
             }
             if (OutByte & STEP2_BIT)
             {
-///                Step2IO = 1;
+              Step2IO_GPIO_Port->BSRR = (uint32_t)Step2IO_Pin;
             }
             if (OutByte & STEP3_BIT)
             {
-///                Step3IO = 1;
+              Step3IO_GPIO_Port->BSRR = (uint32_t)Step3IO_Pin;
             }
             asm("NOP");
             asm("NOP");
             asm("NOP");
             asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-
-///              Step1IO = 0;
-///              Step2IO = 0;
-///              Step3IO = 0;
+            if (OutByte & STEP1_BIT)
+            {
+              Step1IO_GPIO_Port->BRR = (uint32_t)Step1IO_Pin;
+            }
+            if (OutByte & STEP2_BIT)
+            {
+              Step2IO_GPIO_Port->BRR = (uint32_t)Step2IO_Pin;
+            }
+            if (OutByte & STEP3_BIT)
+            {
+              Step3IO_GPIO_Port->BRR = (uint32_t)Step3IO_Pin;
+            }
           }
         }
       }
@@ -213,14 +203,14 @@ void high_ISR(void)
       {
         if (FIFO_G2[FIFOOut].DelayCounter)
         {
-///          // Double check that things aren't way too big
-///          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-///          {
-///            FIFO_G2[FIFOOut].DelayCounter = 0;
-///          }
-///          else {
-///            FIFO_G2[FIFOOut].DelayCounter--;
-///          }
+          // Double check that things aren't way too big
+          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
+          {
+            FIFO_G2[FIFOOut].DelayCounter = 0;
+          }
+          else {
+            FIFO_G2[FIFOOut].DelayCounter--;
+          }
         }
 
         if (FIFO_G2[FIFOOut].DelayCounter)

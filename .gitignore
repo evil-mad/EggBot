@@ -15,3 +15,8 @@ EBB_firmware/BBFirmware.X/nbproject/Package-*
 EBB_firmware/BBBootloader.X/nbproject/Makefile-*
 EBB_firmware/BBBootloader.X/nbproject/private/
 EBB_firmware/BBBootloader.X/nbproject/Package-*
+*.su
+*.list
+*.bin
+*.elf
+*.mk

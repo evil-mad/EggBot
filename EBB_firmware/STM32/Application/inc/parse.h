@@ -30,8 +30,8 @@
 #define kERROR_BYTE_EXTRA_CHARACTERS        7
 #define kERROR_BYTE_UNKNOWN_COMMAND         8 // Part of command parser, not error handler
 
-#define kREQUIRED FALSE
-#define kOPTIONAL TRUE
+#define kREQUIRED false
+#define kOPTIONAL true
 
 // Enum for extract_num() function parameter
 // NOTE: C18 supports UINT24 type, but not INT24, so it does not appear here
