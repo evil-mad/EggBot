@@ -39,7 +39,8 @@ void high_ISR(void)
     TookStep = false;
     AllDone = true;
     
-    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+    LED1_GPIO_Port->BSRR = (uint32_t)LED1_Pin;
+//    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 
     if (FIFODepth)
     {
@@ -49,30 +50,29 @@ void high_ISR(void)
         // Only output DIR bits if we are actually doing something
         if (FIFO_G2[FIFOOut].StepsCounter0 || FIFO_G3[FIFOOut].StepsCounter1 || FIFO_G4[FIFOOut].StepsCounter2)
         {
-          // Always true for 3BB
           if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
           {
-            HAL_GPIO_WritePin(Dir1IO_GPIO_Port, Dir1IO_Pin, GPIO_PIN_SET);
+            Dir1IO_GPIO_Port->BSRR = (uint32_t)Dir1IO_Pin;
           }
           else
           {
-            HAL_GPIO_WritePin(Dir1IO_GPIO_Port, Dir1IO_Pin, GPIO_PIN_RESET);
+            Dir1IO_GPIO_Port->BRR = (uint32_t)Dir1IO_Pin;
           }
           if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
           {
-            HAL_GPIO_WritePin(Dir2IO_GPIO_Port, Dir2IO_Pin, GPIO_PIN_SET);
+            Dir2IO_GPIO_Port->BSRR = (uint32_t)Dir2IO_Pin;
           }
           else
           {
-            HAL_GPIO_WritePin(Dir2IO_GPIO_Port, Dir2IO_Pin, GPIO_PIN_RESET);
+            Dir2IO_GPIO_Port->BRR = (uint32_t)Dir2IO_Pin;
           }
           if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
           {
-            HAL_GPIO_WritePin(Dir3IO_GPIO_Port, Dir3IO_Pin, GPIO_PIN_SET);
+            Dir3IO_GPIO_Port->BSRR = (uint32_t)Dir3IO_Pin;
           }
           else
           {
-            HAL_GPIO_WritePin(Dir3IO_GPIO_Port, Dir3IO_Pin, GPIO_PIN_RESET);
+            Dir3IO_GPIO_Port->BRR = (uint32_t)Dir3IO_Pin;
           }
 
           // Only do this if there are steps left to take
@@ -249,7 +249,8 @@ void high_ISR(void)
 ///    {
 ///      ButtonPushed = true;
 ///    }
-    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+    LED1_GPIO_Port->BRR = (uint32_t)LED1_Pin;
+//    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 }
 
 #if 0
