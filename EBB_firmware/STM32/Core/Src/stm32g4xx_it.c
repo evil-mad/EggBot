@@ -221,9 +221,7 @@ void TIM6_DAC_IRQHandler(void)
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
 
   /* USER CODE END TIM6_DAC_IRQn 0 */
-//  HAL_TIM_IRQHandler(&htim6);
-  __HAL_TIM_CLEAR_IT(&htim6, TIM_IT_UPDATE);
-  high_ISR();
+  HAL_TIM_IRQHandler(&htim6);
   /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
   /* USER CODE END TIM6_DAC_IRQn 1 */

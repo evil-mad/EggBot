@@ -15,7 +15,7 @@ RM := rm -rf
 -include Drivers/STM32G4xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
--include Application/Src/subdir.mk
+-include Application/src/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -51,8 +51,8 @@ STM32.bin \
 all: STM32.elf secondary-outputs
 
 # Tool invocations
-STM32.elf: $(OBJS) $(USER_OBJS) D:\Projects\EggBot1-GH\EBB_firmware\STM32\STM32G474RETX_FLASH.ld
-	arm-none-eabi-gcc -o "STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Projects\EggBot1-GH\EBB_firmware\STM32\STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32.elf: $(OBJS) $(USER_OBJS) D:\Projects\EggBot6-GH\EBB_firmware\STM32\STM32G474RETX_FLASH.ld
+	arm-none-eabi-gcc -o "STM32.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\Projects\EggBot6-GH\EBB_firmware\STM32\STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

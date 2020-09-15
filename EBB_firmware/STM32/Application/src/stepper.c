@@ -934,7 +934,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   uint32_t temp2 = 0;
   uint32_t remainder = 0;
   /// TODO: Remove 'move' and just write directly to [FIFOIn] to save stack space
-  MoveCommandType move;
+  MoveCommandType move = {0};
 
   // Uncomment the following printf() for debugging
   //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
