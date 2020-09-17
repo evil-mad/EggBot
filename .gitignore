@@ -20,3 +20,4 @@ EBB_firmware/BBBootloader.X/nbproject/Package-*
 *.bin
 *.elf
 *.mk
+EBB_firmware/STM32/Debug/makefile
