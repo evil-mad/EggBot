@@ -1219,7 +1219,7 @@ td {text-align: center}
             <p>This command asks the EBB if the PRG button has been pressed since the last QB query or not.</p>
             <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
             <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event.
-                B0 is normally pulled high, but if it is taken low,
+                B0 is normally pulled high, but if it is taken low for longer than 40 microseconds,
                 then that registers as though the PRG button itself was pressed. 
                 This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
