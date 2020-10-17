@@ -48,6 +48,7 @@ td {text-align: center}
           <li><a href="#introduction">Introduction to the EBB firmware</a></li>
           <li><a href="#version_differences">Differences between versions</a></li>
           <li><a href="#updating">Updating firmware</a></li>
+          <li><a href="#states">Initial Pin States</a></li>
           <li><a href="#issues">Addressing issues</a></li>
           <li><a href="#additional_resources">Additional resources</a></li>
           <li><a href="#EBB_Command_Reference">Command reference</a></li>
@@ -146,6 +147,80 @@ td {text-align: center}
         <hr />
         <p />
 
+        <h2><a name="states"></a>Initial PortB Pin States</h2>
+        
+        <p>The three-pin headers next to the motor connector are labeled B1, B0, B2 and B3. There are also four un-populated three pin 
+        headers labeled B4, B5, B6 and B7. Each header has a ground pin (the one closest to the board edge), a 5V power pin (the center pin)
+        and a signal pin (the one furthest away from the board edge). All eight of these signal pins come from PortB on the microcontroller.
+        All eight have weak pull ups to 3.3V (can source between 80 and 400 uA) which are enabled any time the pin is an input.
+        </p>
+        <p>The exception to this is that on EBB boards v2.5 and above, the 5V power to the pen servo (RB1) is controlled by software,
+        and defaults to an off state on boot.</p>
+        <p>This table describes the state of each PortB pin on boot, and what the pin is used for by default (if anything):
+        </p>
+
+        <table border="1" cellpadding="2" cellspacing="2">
+          <tbody>
+                <tr style="font-weight:bold;">
+                    <td>Pin</td>
+                    <td>Default Direction</td>
+                    <td>Default State</td>
+                    <td>Purpose</td>
+                </tr>
+                <tr>
+                    <td>RB0</td>
+                    <td>Input</td>
+                    <td>Weak pull up</td>
+                    <td>Alternate PRG/Pause button input</td>
+                </tr>
+                <tr>
+                    <td>RB1</td>
+                    <td>Output</td>
+                    <td>RC Servo Pulses</td>
+                    <td>Pen lift servo output</td>
+                </tr>
+                <tr>
+                    <td>RB2</td>
+                    <td>Input</td>
+                    <td>Weak pull up</td>
+                    <td>GPIO and/or RC servo output</td>
+                </tr>
+                <tr>
+                    <td>RB3</td>
+                    <td>Output</td>
+                    <td>Low</td>
+                    <td>Engraver digital PWM output control</td>
+                </tr>
+                <tr>
+                    <td>RB4</td>
+                    <td>Output</td>
+                    <td>Low</td>
+                    <td>Alternate Pen Up/Down I/O (solenoid or laser control)</td>
+                </tr>
+                <tr>
+                    <td>RB5</td>
+                    <td>Input</td>
+                    <td>Weak pull up</td>
+                    <td>GPIO and/or RC servo output</td>
+                </tr>
+                <tr>
+                    <td>RB6</td>
+                    <td>Input</td>
+                    <td>Weak pull up</td>
+                    <td>GPIO and/or RC servo output</td>
+                </tr>
+                <tr>
+                    <td>RB7</td>
+                    <td>Input</td>
+                    <td>Weak pull up</td>
+                    <td>GPIO and/or RC servo output</td>
+                </tr>
+             </tbody>
+        </table>
+
+        <p />
+        <hr />
+        <p />
 
 
         <h2><a name="issues"></a>Addressing Issues</h2>
