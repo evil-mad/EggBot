@@ -1602,7 +1602,310 @@ td {text-align: center}
         </ul>
 
         <hr class="short" />    
-        
+
+
+        <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output</h4>
+
+        <ul>
+          <li>
+            <span style="font-weight: bold;">Command:</span> 
+            <code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue (with one exception; see below)</li>
+          <li>
+            <span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li><i>position</i>, a number in the range 0 to 65535.
+                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 &mu;s).</p>
+              </li>
+              <li><i>output_pin</i>, a number in the range 0 to 24.
+                <p>The physical RPx pin number to use for generating the servo pulses.<br></p>
+              </li>
+              <li>
+                <i>rate</i> (optional), a number in the range 0 to 65535.
+                <p>The rate at which to change to the new setting.</p>
+              </li>
+              <li>
+                <i>delay</i> (optional), a number in the range 0 to 65535.
+                <p>Delay before next command, milliseconds.</p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+              This command allows you to control the RC servo output system on the EBB, to configure generic RC servo outputs.
+            </p>
+            <p>
+              <b>Servo channels and time slices:</b> Including the pen-lift servo, there are (by default) eight software-defined RC servo 'channels', which have no physical meaning other than we can output up to 8 separate signals at once. These channels are internally assigned as you use the S2 command to create additional servo outputs, up to a maximum of 8 (this maximum can be changed with the SC,8,X command).
+            </p>
+            <p>
+              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins at once.
+            </p>
+            <p>
+              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
+            </p>
+            <p>
+              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be about 2.666 ms. A value of 0 for the <i>position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
+            </p>
+            <p>
+              The number of available channels is normally (by default) 8. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses. The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the RC,9 command.
+            </p>
+            <p>
+              <b>Delay:</b> The <i>delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
+            </p>
+            <p>
+              <b>Motion Queue:</b> In all cases but one, S2 commands are added to the motion queue, even if their <i>delay</i> parameters are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands. (The special command <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code> disables the servo output for <i>output_pin</i>  immediately and is not added to the queue.)
+            </p>
+            <p>
+              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms. The slew rate is completely independent of the <i>delay</i>.
+            </p>
+            <p>
+              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use the S2 command to manage their actions through one of the software-defined channels. If desired, you can use the S2 command to disable this channel, for example if you need access to all eight channels.
+            </p>
+            <p>
+              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
+            </p>
+            <p>
+            <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>output_pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
+            </p>
+          </li>
+          <li>
+            RPx vs pin number (and label on the board) table:<br>
+            <table border="1" cellpadding="2" cellspacing="2">
+              <tbody>
+                <tr>
+                  <td valign="top"><b>RPx</b><b><br>
+                    </b></td>
+                  <td valign="top">RP0<br>
+                  </td>
+                  <td valign="top">RP1<br>
+                  </td>
+                  <td valign="top">RP2<br>
+                  </td>
+                  <td valign="top">RP3<br>
+                  </td>
+                  <td valign="top">RP4<br>
+                  </td>
+                  <td valign="top">RP5<br>
+                  </td>
+                  <td valign="top">RP6<br>
+                  </td>
+                  <td valign="top">RP7<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><b>Pin</b><b><br>
+                    </b></td>
+                  <td valign="top">REF_RA0<br>
+                  </td>
+                  <td valign="top">RA1<br>
+                  </td>
+                  <td valign="top">RA5<br>
+                  </td>
+                  <td valign="top">RB0<br>
+                  </td>
+                  <td valign="top">RB1<br>
+                  </td>
+                  <td valign="top">RB2<br>
+                  </td>
+                  <td valign="top">RB3<br>
+                  </td>
+                  <td valign="top">RB4<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><b>Label</b><b><br>
+                    </b></td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">B0<br>
+                  </td>
+                  <td valign="top">B1<br>
+                  </td>
+                  <td valign="top">B2<br>
+                  </td>
+                  <td valign="top">B3<br>
+                  </td>
+                  <td valign="top">B4<br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table border="1" cellpadding="2" cellspacing="2" >
+              <tbody>
+                <tr>
+                  <td valign="top"><b>RPx</b><b><br>
+                    </b></td>
+                  <td valign="top">RP8<br>
+                  </td>
+                  <td valign="top">RP9<br>
+                  </td>
+                  <td valign="top">RP10<br>
+                  </td>
+                  <td valign="top">RP11<br>
+                  </td>
+                  <td valign="top">RP13<br>
+                  </td>
+                  <td valign="top">RP17<br>
+                  </td>
+                  <td valign="top">RP18<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><b>Pin</b><b><br>
+                    </b></td>
+                  <td valign="top">RB5<br>
+                  </td>
+                  <td valign="top">RB6<br>
+                  </td>
+                  <td valign="top">RB7<br>
+                  </td>
+                  <td valign="top">RC0<br>
+                  </td>
+                  <td valign="top">RC2<br>
+                  </td>
+                  <td valign="top">RC6<br>
+                  </td>
+                  <td valign="top">RC7<br>
+                  </td>
+                </tr>
+                <tr>
+                  <td valign="top"><b>Label</b><b><br>
+                    </b></td>
+                  <td valign="top">B5<br>
+                  </td>
+                  <td valign="top">B6<br>
+                  </td>
+                  <td valign="top">B7<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>S2,24000,6\r</code>
+            Use RP6 as a RC servo output, and set its on-time to 2 ms.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>S2,0,5\r</code> 
+            Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,100\r</code>
+            Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,10,50\r</code> 
+            Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>
+            This version of the S2 command is only for firmware versions v2.2.0 and newer
+          </li>
+        </ul>
+  
+        <hr class="short" />
+
+        <h4> "S2"  &mdash; General RC Servo Output (Legacy version)</h4>
+ 
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>S2,<i>channel</i>,<i>position</i>,<i>output_pin</i>[,<i>rate</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>S2,0&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li>
+                <i>channel</i>, a number in the range 0 to 8.
+                <p>A value of 1 through 7 chooses a software-defined channel.</p>
+                <p>A value of 0 disables all S2 outputs.</p>
+              </li>
+              <li>
+                <i>position</i>, a number in the range 0 to 32000.
+                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 ns).</p>
+              </li>
+              <li>
+                <i>output_pin</i>, a number in the range 0 to 24.
+                <p>The physical RPx pin number to assign this channel to.</p>
+              </li>
+              <li>
+                <i>rate</i> (optional), a number in the range 0 to 65535.
+                <p>The rate at which to change to the new setting.</p>
+              </li> 
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              This command allows you to control the RC servo output system on the EBB, to configures a generic RC servo output.
+            </p>
+            <p>
+              <b>Servo channels and time slices:</b> There are eight software-defined RC servo 'channels', which have no physical meaning other than we can (by default) output up to 8 separate signals at once.  The available channels are numbered 1 though 8. Channel 1 is normally used as the "pen lift" servo motor, controlled through the SP and TP commands.
+            </p>
+            <p>(A selection of <i>channel</i> equal to 0 is a special command, used to disable all S2 functionality.)</p>
+            <p>
+              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins. You can assign any channel to any RPx pin.
+            </p>
+            <p>
+              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
+            </p>
+            <p>
+              If the current channel is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be 2.666 ms. A value of 0 for <i>position</i> will produce zero length, without any pulse and disable servo output on the pin currently assigned to channel <i>channel</i>.
+            </p>
+            <p>
+              The number of available channels is normally (by default) 8. This can be reduced with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses.  The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the SC,9 command.
+            </p>
+            <p>
+              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms.
+            </p>
+            <p>
+              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use S2 channel 1. If you wish to to use SP and TP, then ignore channel 1 and start with channel 2. If you do not need the SP and TP commands, then you can use channels 1 through <i>maximum_S2_channels</i>.
+            </p>
+            <p>
+              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
+            </p>
+            <p>
+              <b>Disabling S2 servo outputs:</b> The special command <code>S2,0&lt;CR&gt;</code> will turn off all RC servo support (freeing up CPU time, if that's important to you).
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span>  <code>S2,3,24000,6\r</code>
+            Use RP6 as a RC servo output, and set its on-time to 2 ms, and using channel 3 of the RC system, including a <i>rate</i> argument of 6.
+            <li>
+              <span style="font-weight: bold;">Example:</span>  <code>S2,0\r</code>
+              Turn off all RC servo support.
+            </li>
+            <li>
+              <span style="font-weight: bold;">Example:</span>  <code>S2,3,0\r</code>
+              Turn off the output on whatever pin channel 3 was assigned to.
+            </li>
+            <li>
+              <span style="font-weight: bold;">Version History:</span>
+              This version of the S2 command is only for firmware versions prior to v2.2.0
+            </li>
+          </li>
+        </ul>
+
+        <hr class="short" />
+
+
         <h4><a name="SC"></a> "SC" &mdash; Stepper and Servo Mode Configure</h4>
 
         <ul>
@@ -2030,307 +2333,6 @@ td {text-align: center}
           <li>
             <span style="font-weight: bold;">Note:</span>
             If the "I" or "A" packet responses stop coming back after you've done a "T" command, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
-          </li>
-        </ul>
-
-        <hr class="short" />
-
-        <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output</h4>
-
-        <ul>
-          <li>
-            <span style="font-weight: bold;">Command:</span> 
-            <code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code>
-          </li>
-          <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
-          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue (with one exception; see below)</li>
-          <li>
-            <span style="font-weight: bold;">Arguments:</span>
-            <ul>
-              <li><i>position</i>, a number in the range 0 to 65535.
-                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 &mu;s).</p>
-              </li>
-              <li><i>output_pin</i>, a number in the range 0 to 24.
-                <p>The physical RPx pin number to use for generating the servo pulses.<br></p>
-              </li>
-              <li>
-                <i>rate</i> (optional), a number in the range 0 to 65535.
-                <p>The rate at which to change to the new setting.</p>
-              </li>
-              <li>
-                <i>delay</i> (optional), a number in the range 0 to 65535.
-                <p>Delay before next command, milliseconds.</p>
-              </li>
-            </ul>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Description:</span> 
-            <p>
-              This command allows you to control the RC servo output system on the EBB, to configure generic RC servo outputs.
-            </p>
-            <p>
-              <b>Servo channels and time slices:</b> Including the pen-lift servo, there are (by default) eight software-defined RC servo 'channels', which have no physical meaning other than we can output up to 8 separate signals at once. These channels are internally assigned as you use the S2 command to create additional servo outputs, up to a maximum of 8 (this maximum can be changed with the SC,8,X command).
-            </p>
-            <p>
-              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins at once.
-            </p>
-            <p>
-              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
-            </p>
-            <p>
-              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be about 2.666 ms. A value of 0 for the <i>position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
-            </p>
-            <p>
-              The number of available channels is normally (by default) 8. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses. The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the RC,9 command.
-            </p>
-            <p>
-              <b>Delay:</b> The <i>delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
-            </p>
-            <p>
-              <b>Motion Queue:</b> In all cases but one, S2 commands are added to the motion queue, even if their <i>delay</i> parameters are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands. (The special command <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code> disables the servo output for <i>output_pin</i>  immediately and is not added to the queue.)
-            </p>
-            <p>
-              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms. The slew rate is completely independent of the <i>delay</i>.
-            </p>
-            <p>
-              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use the S2 command to manage their actions through one of the software-defined channels. If desired, you can use the S2 command to disable this channel, for example if you need access to all eight channels.
-            </p>
-            <p>
-              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
-            </p>
-            <p>
-            <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>output_pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
-            </p>
-          </li>
-          <li>
-            RPx vs pin number (and label on the board) table:<br>
-            <table border="1" cellpadding="2" cellspacing="2">
-              <tbody>
-                <tr>
-                  <td valign="top"><b>RPx</b><b><br>
-                    </b></td>
-                  <td valign="top">RP0<br>
-                  </td>
-                  <td valign="top">RP1<br>
-                  </td>
-                  <td valign="top">RP2<br>
-                  </td>
-                  <td valign="top">RP3<br>
-                  </td>
-                  <td valign="top">RP4<br>
-                  </td>
-                  <td valign="top">RP5<br>
-                  </td>
-                  <td valign="top">RP6<br>
-                  </td>
-                  <td valign="top">RP7<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top"><b>Pin</b><b><br>
-                    </b></td>
-                  <td valign="top">REF_RA0<br>
-                  </td>
-                  <td valign="top">RA1<br>
-                  </td>
-                  <td valign="top">RA5<br>
-                  </td>
-                  <td valign="top">RB0<br>
-                  </td>
-                  <td valign="top">RB1<br>
-                  </td>
-                  <td valign="top">RB2<br>
-                  </td>
-                  <td valign="top">RB3<br>
-                  </td>
-                  <td valign="top">RB4<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top"><b>Label</b><b><br>
-                    </b></td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top">B0<br>
-                  </td>
-                  <td valign="top">B1<br>
-                  </td>
-                  <td valign="top">B2<br>
-                  </td>
-                  <td valign="top">B3<br>
-                  </td>
-                  <td valign="top">B4<br>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <table border="1" cellpadding="2" cellspacing="2" >
-              <tbody>
-                <tr>
-                  <td valign="top"><b>RPx</b><b><br>
-                    </b></td>
-                  <td valign="top">RP8<br>
-                  </td>
-                  <td valign="top">RP9<br>
-                  </td>
-                  <td valign="top">RP10<br>
-                  </td>
-                  <td valign="top">RP11<br>
-                  </td>
-                  <td valign="top">RP13<br>
-                  </td>
-                  <td valign="top">RP17<br>
-                  </td>
-                  <td valign="top">RP18<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top"><b>Pin</b><b><br>
-                    </b></td>
-                  <td valign="top">RB5<br>
-                  </td>
-                  <td valign="top">RB6<br>
-                  </td>
-                  <td valign="top">RB7<br>
-                  </td>
-                  <td valign="top">RC0<br>
-                  </td>
-                  <td valign="top">RC2<br>
-                  </td>
-                  <td valign="top">RC6<br>
-                  </td>
-                  <td valign="top">RC7<br>
-                  </td>
-                </tr>
-                <tr>
-                  <td valign="top"><b>Label</b><b><br>
-                    </b></td>
-                  <td valign="top">B5<br>
-                  </td>
-                  <td valign="top">B6<br>
-                  </td>
-                  <td valign="top">B7<br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                  <td valign="top"><br>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,24000,6\r</code>
-            Use RP6 as a RC servo output, and set its on-time to 2 ms.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,0,5\r</code> 
-            Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,100\r</code>
-            Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,10,50\r</code> 
-            Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
-            This version of the S2 command is only for firmware versions v2.2.0 and newer
-          </li>
-        </ul>
-  
-        <hr class="short" />
-
-        <h4> "S2"  &mdash; General RC Servo Output (Legacy version)</h4>
- 
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>S2,<i>channel</i>,<i>position</i>,<i>output_pin</i>[,<i>rate</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Command:</span> <code>S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li><span style="font-weight: bold;">Arguments:</span>
-            <ul>
-              <li>
-                <i>channel</i>, a number in the range 0 to 8.
-                <p>A value of 1 through 7 chooses a software-defined channel.</p>
-                <p>A value of 0 disables all S2 outputs.</p>
-              </li>
-              <li>
-                <i>position</i>, a number in the range 0 to 32000.
-                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 ns).</p>
-              </li>
-              <li>
-                <i>output_pin</i>, a number in the range 0 to 24.
-                <p>The physical RPx pin number to assign this channel to.</p>
-              </li>
-              <li>
-                <i>rate</i> (optional), a number in the range 0 to 65535.
-                <p>The rate at which to change to the new setting.</p>
-              </li> 
-            </ul>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Description:</span>
-            <p>
-              This command allows you to control the RC servo output system on the EBB, to configures a generic RC servo output.
-            </p>
-            <p>
-              <b>Servo channels and time slices:</b> There are eight software-defined RC servo 'channels', which have no physical meaning other than we can (by default) output up to 8 separate signals at once.  The available channels are numbered 1 though 8. Channel 1 is normally used as the "pen lift" servo motor, controlled through the SP and TP commands.
-            </p>
-            <p>(A selection of <i>channel</i> equal to 0 is a special command, used to disable all S2 functionality.)</p>
-            <p>
-              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins. You can assign any channel to any RPx pin.
-            </p>
-            <p>
-              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
-            </p>
-            <p>
-              If the current channel is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be 2.666 ms. A value of 0 for <i>position</i> will produce zero length, without any pulse and disable servo output on the pin currently assigned to channel <i>channel</i>.
-            </p>
-            <p>
-              The number of available channels is normally (by default) 8. This can be reduced with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses.  The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the SC,9 command.
-            </p>
-            <p>
-              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms.
-            </p>
-            <p>
-              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use S2 channel 1. If you wish to to use SP and TP, then ignore channel 1 and start with channel 2. If you do not need the SP and TP commands, then you can use channels 1 through <i>maximum_S2_channels</i>.
-            </p>
-            <p>
-              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
-            </p>
-            <p>
-              <b>Disabling S2 servo outputs:</b> The special command <code>S2,0&lt;CR&gt;</code> will turn off all RC servo support (freeing up CPU time, if that's important to you).
-            </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span>  <code>S2,3,24000,6\r</code>
-            Use RP6 as a RC servo output, and set its on-time to 2 ms, and using channel 3 of the RC system, including a <i>rate</i> argument of 6.
-            <li>
-              <span style="font-weight: bold;">Example:</span>  <code>S2,0\r</code>
-              Turn off all RC servo support.
-            </li>
-            <li>
-              <span style="font-weight: bold;">Example:</span>  <code>S2,3,0\r</code>
-              Turn off the output on whatever pin channel 3 was assigned to.
-            </li>
-            <li>
-              <span style="font-weight: bold;">Version History:</span>
-              This version of the S2 command is only for firmware versions prior to v2.2.0
-            </li>
           </li>
         </ul>
 
