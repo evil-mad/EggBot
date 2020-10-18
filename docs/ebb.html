@@ -2505,10 +2505,11 @@ td {text-align: center}
         </p>
         
         <p>All pins of PortB have weak pull ups to 3.3V, which can source between 80 and 400 μA, and are 
-        are enabled any time the pin is an input. All of PortB pins can be used for general purpose digital I/O 
-        (GPIO) as well as RC servo outputs, within the limits of <code><a href="#S2">S2</a></code>. With the 
+        are enabled any time the pin is an input. Pull ups are not available on the other (Port A, C, D, E)
+        GPIO pins. All of broken out I/O pins can be used for general purpose digital I/O 
+        (GPIO), and some can also be used as RC servo outputs, within the limits of <code><a href="#S2">S2</a></code>. With the 
         exceptions listed in the table below, all of the broken-out I/O pins are initially configured at boot 
-        as inputs with weak pull-ups to 3.3V.
+        as inputs. 
         </p>
         
         <p>Certain PortB signal pins are specially configured at boot time for typical applications,
@@ -2579,13 +2580,6 @@ td {text-align: center}
         <p />
         <hr />
         <p />
-
-
-
-
-
-
-
 
 
 
