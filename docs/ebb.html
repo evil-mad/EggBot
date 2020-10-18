@@ -2483,96 +2483,97 @@ td {text-align: center}
 
         <h2><a name="states"></a>Initial I/O pin configuration</h2>
         
-        <p>In addition to the stepper motor outputs,
-            many applications make use of one or more digital I/O pins.
+        <p>In addition to the stepper motor outputs, many applications make use of one or more digital I/O pins.
         </p>
-         <p>
-        The most accessible and commonly used of the I/O pins are those in PortB. The eight pins in PortB are
+        
+        <p>The most accessible and commonly used of the I/O pins are those in PortB. The eight pins in PortB are
         physically arranged into 3-pin "header connections", with ground, +5V power, and the "signal"
         I/O pin itself, from the edge of the board towards the center. Four of these connectors are located
         "below" the stepper motor terminals, and are labeled as B1, B0, B2, and B3, in order from the "bottom"
-        edge of the board towards the stepper terminals. These four connections are
-        pre-populated with header pins. Four additional connections, B4, B5, B6, and B7 are located on the
-        "bottom" edge of the board, and are not pre-populated with header pins.
+        edge of the board towards the stepper terminals. These four connections are pre-populated with header 
+        pins. Four additional connections, B4, B5, B6, and B7 are located on the "bottom" edge of the board, 
+        and are not pre-populated with header pins.
         </p>
-         <p>
-             On EBB boards v2.5 and above, the 5V power to the pen servo (RB1) is controlled by software,
+        
+        <p>On EBB boards v2.5 and above, the 5V power to the pen servo (RB1) is controlled by software,
         and defaults to an off state at reset; see the <code><a href="#SR">SR</a></code> command.
         </p>
-         <p>
-             In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include:
-        PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0.
+        
+        <p>In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include:
+        PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0. Every pin on PortB,
+        PortC and RA6 can source or sink up to 25mA each. All other pins can source or sink up to 4mA each.
         </p>
         
-         <p>All 24 of the broken out I/O pins of PortB have weak pull ups to 3.3V,
-             which can source between 80 and 400 μA, and are which are enabled any time the pin is an input.
-             All of these pins can be used for general purpose digital I/O (GPIO) as well as RC servo
-             outputs, within the limits of <code><a href="#S2">S2</a></code>. 
-             With the exceptions listed in the table below, all of the broken-out I/O pins
-        are initially configured at boot as inputs with weak pull-ups to 3.3V.
+        <p>All pins of PortB have weak pull ups to 3.3V, which can source between 80 and 400 μA, and are 
+        are enabled any time the pin is an input. All of PortB pins can be used for general purpose digital I/O 
+        (GPIO) as well as RC servo outputs, within the limits of <code><a href="#S2">S2</a></code>. With the 
+        exceptions listed in the table below, all of the broken-out I/O pins are initially configured at boot 
+        as inputs with weak pull-ups to 3.3V.
+        </p>
         
-        <p>
-        Certain PortB signal pins are specially configured at boot time for typical applications,
-        as summarized in the table below.</p>
+        <p>Certain PortB signal pins are specially configured at boot time for typical applications,
+        as summarized in the table below.
+        </p>
+        
         <p />
 
         <table border="1" cellpadding="2" cellspacing="2">
           <tbody>
-                <tr style="font-weight:bold;">
-                    <td>Pin</td>
-                    <td>Default Direction</td>
-                    <td>Default State</td>
-                    <td>Typical applicatoin</td>
-                </tr>
-                <tr>
-                    <td>RB0</td>
-                    <td>Input</td>
-                    <td>Weak pull up</td>
-                    <td>Alternate PRG/Pause button input; see <code><a href="#QB">QB</a></code></td>
-                </tr>
-                <tr>
-                    <td>RB1</td>
-                    <td>Output</td>
-                    <td>RC Servo Pulses</td>
-                    <td>Pen lift servo output; see <code><a href="#SC">SC</a></code>, <code><a href="#SP">SP</a></code></td>
-                </tr>
-                <tr>
-                    <td>RB2</td>
-                    <td>Input</td>
-                    <td>Weak pull up</td>
-                    <td>General</td>
-                </tr>
-                <tr>
-                    <td>RB3</td>
-                    <td>Output</td>
-                    <td>Low</td>
-                    <td>Engraver or laser PWM output control</td>
-                </tr>
-                <tr>
-                    <td>RB4</td>
-                    <td>Output</td>
-                    <td>Low</td>
-                    <td>Alternate Pen Up/Down I/O (solenoid or laser control)</td>
-                </tr>
-                <tr>
-                    <td>RB5</td>
-                    <td>Input</td>
-                    <td>Weak pull up</td>
-                    <td>General</td>
-                </tr>
-                <tr>
-                    <td>RB6</td>
-                    <td>Input</td>
-                    <td>Weak pull up</td>
-                    <td>General</td>
-                </tr>
-                <tr>
-                    <td>RB7</td>
-                    <td>Input</td>
-                    <td>Weak pull up</td>
-                    <td>General</td>
-                </tr>
-             </tbody>
+            <tr style="font-weight:bold;">
+              <td>Pin</td>
+              <td>Default Direction</td>
+              <td>Default State</td>
+              <td>Typical applicatoin</td>
+            </tr>
+            <tr>
+              <td>RB0</td>
+              <td>Input</td>
+              <td>Weak pull up</td>
+              <td>Alternate PRG/Pause button input; see <code><a href="#QB">QB</a></code></td>
+            </tr>
+            <tr>
+              <td>RB1</td>
+              <td>Output</td>
+              <td>RC Servo Pulses</td>
+              <td>Pen lift servo output; see <code><a href="#SC">SC</a></code>, <code><a href="#SP">SP</a></code></td>
+            </tr>
+            <tr>
+              <td>RB2</td>
+              <td>Input</td>
+              <td>Weak pull up</td>
+              <td>General</td>
+            </tr>
+            <tr>
+              <td>RB3</td>
+              <td>Output</td>
+              <td>Low</td>
+              <td>Engraver or laser PWM output control</td>
+            </tr>
+            <tr>
+              <td>RB4</td>
+              <td>Output</td>
+              <td>Low</td>
+              <td>Alternate Pen Up/Down I/O (solenoid or laser control)</td>
+            </tr>
+            <tr>
+              <td>RB5</td>
+              <td>Input</td>
+              <td>Weak pull up</td>
+              <td>General</td>
+            </tr>
+            <tr>
+              <td>RB6</td>
+              <td>Input</td>
+              <td>Weak pull up</td>
+              <td>General</td>
+            </tr>
+            <tr>
+              <td>RB7</td>
+              <td>Input</td>
+              <td>Weak pull up</td>
+              <td>General</td>
+            </tr>
+          </tbody>
         </table>
 
         <p />
