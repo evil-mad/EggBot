@@ -54,6 +54,12 @@
 #define APP_RX_DATA_SIZE  2048
 #define APP_TX_DATA_SIZE  2048
 
+#define kRX_BUF_SIZE          255       // In bytes
+
+#define kCR                     0x0D
+#define kLF                     0x0A
+
+
 /* USER CODE END EXPORTED_DEFINES */
 
 /**
@@ -95,6 +101,11 @@
 extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
+extern uint8_t g_RX_buf[kRX_BUF_SIZE];
+extern uint8_t g_RX_buf_out;
+extern uint8_t g_RX_buf_in;
+extern const char st_OK[];
+extern const char st_LFCR[];
 
 /* USER CODE END EXPORTED_VARIABLES */
 
@@ -110,6 +121,7 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
+uint8_t CDC_IsTxBusy(void);
 
 /* USER CODE END EXPORTED_FUNCTIONS */
 
