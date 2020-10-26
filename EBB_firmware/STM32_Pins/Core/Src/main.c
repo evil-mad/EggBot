@@ -26,6 +26,7 @@
 #include "usbd_cdc_if.h"
 #include "retarget.h"
 #include "isr.h"
+#include "debug.h"
 
 /* USER CODE END Includes */
 
@@ -129,12 +130,15 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   RetargetInit();
+  DebugInit();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    DEBUG_G0_SET();
+    DEBUG_G0_RESET();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -155,7 +159,7 @@ void SystemClock_Config(void)
 
   /** Configure the main internal regulator output voltage
   */
-  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
+  HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1_BOOST);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
@@ -166,7 +170,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
-  RCC_OscInitStruct.PLL.PLLN = 75;
+  RCC_OscInitStruct.PLL.PLLN = 85;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV6;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
@@ -725,6 +729,7 @@ static void MX_GPIO_Init(void)
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
@@ -735,19 +740,27 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, DIR1_Pin|DIR2_Pin|DIR3_Pin|SVO_EN_Pin
                           |EN_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : D9_Pin D10_Pin D11_Pin D7_Pin
-                           D0_Pin D1_Pin */
-  GPIO_InitStruct.Pin = D9_Pin|D10_Pin|D11_Pin|D7_Pin
-                          |D0_Pin|D1_Pin;
+  /*Configure GPIO pins : G9_Pin G10_Pin G11_Pin G7_Pin
+                           G0_Pin G1_Pin */
+  GPIO_InitStruct.Pin = G9_Pin|G10_Pin|G11_Pin|G7_Pin
+                          |G0_Pin|G1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : D6_Pin D8_Pin */
-  GPIO_InitStruct.Pin = D6_Pin|D8_Pin;
+  /*Configure GPIO pins : G6_Pin G8_Pin */
+  GPIO_InitStruct.Pin = G6_Pin|G8_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PG10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pins : STEP1_Pin STEP2_Pin STEP3_Pin USR_LED_Pin */
   GPIO_InitStruct.Pin = STEP1_Pin|STEP2_Pin|STEP3_Pin|USR_LED_Pin;
@@ -756,10 +769,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : D2_Pin D3_Pin D4_Pin D5_Pin
-                           D12_Pin */
-  GPIO_InitStruct.Pin = D2_Pin|D3_Pin|D4_Pin|D5_Pin
-                          |D12_Pin;
+  /*Configure GPIO pins : G2_Pin G3_Pin G4_Pin G5_Pin
+                           G12_Pin */
+  GPIO_InitStruct.Pin = G2_Pin|G3_Pin|G4_Pin|G5_Pin
+                          |G12_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

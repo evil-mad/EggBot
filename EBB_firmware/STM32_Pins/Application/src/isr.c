@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "isr.h"
 #include "HardwareProfile.h"
+#include "debug.h"
 //#include "ebb.h"
 #include "fifo.h"
 //#include "analog.h"
@@ -38,6 +39,8 @@ void high_ISR(void)
     OutByte = FIFO_DirBits[FIFOOut];
     TookStep = false;
     AllDone = true;
+
+DEBUG_G7_SET();
     
     if (FIFODepth)
     {
@@ -246,6 +249,7 @@ void high_ISR(void)
 ///    {
 ///      ButtonPushed = true;
 ///    }
+DEBUG_G7_RESET();
 }
 
 #if 0
