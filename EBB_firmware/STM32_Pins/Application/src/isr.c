@@ -44,7 +44,6 @@ DEBUG_G7_SET();
     
     if (FIFODepth)
     {
-
       if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
       {
         // Only output DIR bits if we are actually doing something
