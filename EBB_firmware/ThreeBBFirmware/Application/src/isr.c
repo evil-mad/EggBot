@@ -31,8 +31,6 @@ volatile uint8_t GlobalDelayMS;
 
 volatile uint8_t DriverInitDelayMS;
 
-// Used only in LowISR
-
 // ISR
 void high_ISR(void)
 {
