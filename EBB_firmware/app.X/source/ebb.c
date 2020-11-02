@@ -238,6 +238,7 @@
 //                    input parameters)
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
+// 2.6.6 11/01/20 - Added AC (Accumulator Clear) command
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -612,7 +613,19 @@ void high_ISR(void)
             }
             AllDone = TRUE;
         }
-        
+    else if (CurrentCommand.Command == COMMAND_CLEAR_ACCUMULATORS)
+    {
+      // Use the SEState to determine which accumulators to clear.
+      if (CurrentCommand.SEState & 0x01)
+      {
+        StepAcc[0] = 0;
+      }
+      if (CurrentCommand.SEState & 0x02)
+      {
+        StepAcc[1] = 0;
+      }
+      AllDone = TRUE;
+    }
 		// If we're done with our current command, load in the next one
 		if (AllDone && CurrentCommand.DelayCounter == 0)
 		{
@@ -1861,6 +1874,52 @@ static void process_SM(
   CommandFIFO[0] = move;
 
   FIFOEmpty = FALSE;
+}
+
+// Clear the Accumulators
+// Usage: CA,<axes><CR>
+// <axes> is an optional parameter. If not included, this command will clear both
+//   accumulators.
+// <axes> can be 0, 1, 2 or 3.
+// If it is 0, nothing happens.
+// If it is 1, only Motor 1's accumulator is cleared.
+// If it is 2, only Motor 2's accumulator is cleared.
+// If it is 3, both motor's accumulators are cleared.
+// This command is added to the motion queue so that it happens at a precise
+// time in the motion command stream.
+void parse_CA_packet (void)
+{
+	UINT8 Axes = 3;
+  MoveCommandType cmd;
+	
+	// Extract the single parameter
+	extract_number (kUCHAR, &Axes, kOPTIONAL);
+
+  if (Axes > 3)
+  {
+    Axes = 3;
+  }
+
+  // Set the command type
+  cmd.Command = COMMAND_CLEAR_ACCUMULATORS;
+  // Set the argument (we reuse the )
+  cmd.SEState = Axes;
+  // Always clear the delay counter (because it can have extra meaning)
+  cmd.DelayCounter = 0;
+
+  // Spin here until there's space in the FIFO
+  while(!FIFOEmpty)
+  ;
+
+  // Now, quick copy over the computed command data to the command FIFO
+  CommandFIFO[0] = cmd;
+  // Notify that ISR that there is at least one command ready to execute
+  FIFOEmpty = FALSE;
+
+  if (g_ack_enable)
+  {
+    print_ack();
+  }
 }
 
 // E-Stop
