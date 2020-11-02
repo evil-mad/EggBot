@@ -239,6 +239,8 @@
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
 // 2.6.6 11/01/20 - Added AC (Accumulator Clear) command
+//                  Now clear step accumulators on EM and CS commands
+//                  We don't allow StepAdd to go negative (like from LM command)
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -289,6 +291,8 @@ typedef enum
 static volatile MoveCommandType CurrentCommand;
 //#pragma udata access fast_vars
 static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
+// Temporary signed 32 bit value for ISR
+static INT32 TestStepAdd;
 BOOL FIFOEmpty;
 
 #pragma udata
@@ -344,6 +348,8 @@ void high_ISR(void)
     // 25KHz ISR fire
 	if (PIR1bits.TMR1IF)
 	{
+TRISDbits.TRISD0 = 0;
+LATDbits.LATD0 = 1;
 		// Clear the interrupt 
 		PIR1bits.TMR1IF = 0;
 		TMR1H = TIMER1_H_RELOAD;	//
@@ -433,17 +439,21 @@ void high_ISR(void)
 						OutByte = OutByte | STEP1_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[0]--;
-                        if (CurrentCommand.DirBits & DIR1_BIT)
-                        {
-                            globalStepCounter1--;
-                        }
-                        else
-                        {
-                            globalStepCounter1++;
-                        }	
+            if (CurrentCommand.DirBits & DIR1_BIT)
+            {
+                globalStepCounter1--;
+            }
+            else
+            {
+                globalStepCounter1++;
+            }	
 					}
-                    // For acceleration, we now add a bit to StepAdd each time through as well
-                    CurrentCommand.StepAdd[0] += CurrentCommand.StepAddInc[0];
+          // For acceleration, we now add a bit to StepAdd each time through as well
+          TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+          if (TestStepAdd > 0)
+          {
+            CurrentCommand.StepAdd[0] = TestStepAdd;
+          }
 					AllDone = FALSE;
 				}
 				if (CurrentCommand.StepsCounter[1])
@@ -455,17 +465,21 @@ void high_ISR(void)
 						OutByte = OutByte | STEP2_BIT;
 						TookStep = TRUE;
 						CurrentCommand.StepsCounter[1]--;
-                        if (CurrentCommand.DirBits & DIR2_BIT)
-                        {
-                            globalStepCounter2--;
-                        }
-                        else
-                        {
-                            globalStepCounter2++;
-                        }
-                    }
-                    // For acceleration, we now add a bit to StepAdd each time through as well
-                    CurrentCommand.StepAdd[1] += CurrentCommand.StepAddInc[1];
+            if (CurrentCommand.DirBits & DIR2_BIT)
+            {
+                globalStepCounter2--;
+            }
+            else
+            {
+                globalStepCounter2++;
+            }
+          }
+          // For acceleration, we now add a bit to StepAdd each time through as well
+          TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+          if (TestStepAdd > 0)
+          {
+            CurrentCommand.StepAdd[1] = TestStepAdd;
+          }
 					AllDone = FALSE;
 				}
 
@@ -632,6 +646,8 @@ void high_ISR(void)
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
+TRISDbits.TRISD1 = 0;
+LATDbits.LATD1 = 1;
                 CurrentCommand = CommandFIFO[0];
                 // Zero out command in FIFO
                 CommandFIFO[0].Command = COMMAND_NONE;
@@ -648,6 +664,7 @@ void high_ISR(void)
                 CommandFIFO[0].SEState = 0;
                 CommandFIFO[0].SEPower = 0;
 				FIFOEmpty = TRUE;
+LATDbits.LATD0 = 0;
 			}
             else {
                 CurrentCommand.DelayCounter = 0;
@@ -668,6 +685,7 @@ void high_ISR(void)
 			ButtonPushed = TRUE;
 		}
 	}
+LATDbits.LATD0 = 0;
 }
 
 // Init code
@@ -2155,6 +2173,8 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 // Note that the MSx lines do not come to any headers, so even when an external
 // source is controlling the drivers, the PIC still needs to control the
 // MSx lines.
+// As of 2.6.6 : We always clear out the step accumulators when the EM command
+//   is executed.
 void parse_EM_packet(void)
 {
   unsigned char EA1, EA2;
@@ -2672,9 +2692,13 @@ void clear_StepCounters(void)
     // Need to turn off high priority interrupts breifly here to read out value that ISR uses
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
-    // Make a local copy of the things we care about
+    // Clear out the global step counters
     globalStepCounter1 = 0;
     globalStepCounter2 = 0;
+    
+    // Clear both step accumulators as well
+    StepAcc[0] = 0;
+    StepAcc[1] = 0;
     
     // Re-enable interrupts
     INTCONbits.GIEH = 1;	// Turn high priority interrupts on
@@ -2685,6 +2709,7 @@ void clear_StepCounters(void)
 // CS takes no parameters, so usage is just CS<CR>
 // QS returns:
 // OK<CR>
+// Note, as of 2.6.6 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
   clear_StepCounters();
