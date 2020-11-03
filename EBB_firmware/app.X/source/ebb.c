@@ -345,11 +345,11 @@ void high_ISR(void)
 		USBDeviceTasks();
 	#endif
 
-    // 25KHz ISR fire
+  // 25KHz ISR fire
 	if (PIR1bits.TMR1IF)
 	{
-TRISDbits.TRISD0 = 0;
-LATDbits.LATD0 = 1;
+TRISDbits.TRISD1 = 0;
+LATDbits.LATD1 = 1;
 		// Clear the interrupt 
 		PIR1bits.TMR1IF = 0;
 		TMR1H = TIMER1_H_RELOAD;	//
@@ -359,37 +359,37 @@ LATDbits.LATD0 = 1;
 		TookStep = FALSE;
 		AllDone = TRUE;
 
-        // Note, you don't even need a command to delay. Any command can have
-        // a delay associated with it, if DelayCounter is != 0.
-        if (CurrentCommand.DelayCounter)
-        {
-            // Double check that things aren't way too big
-            if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-            {
-                CurrentCommand.DelayCounter = 0;
-            }
-            else {
-                CurrentCommand.DelayCounter--;
-            }            
-        }
+    // Note, you don't even need a command to delay. Any command can have
+    // a delay associated with it, if DelayCounter is != 0.
+    if (CurrentCommand.DelayCounter)
+    {
+      // Double check that things aren't way too big
+      if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+      {
+        CurrentCommand.DelayCounter = 0;
+      }
+      else {
+        CurrentCommand.DelayCounter--;
+      }            
+    }
 
-        if (CurrentCommand.DelayCounter)
-        {
-            AllDone = FALSE;
-        }
+    if (CurrentCommand.DelayCounter)
+    {
+      AllDone = FALSE;
+    }
 
-        // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
-        //PORTDbits.RD1 = 0;
+    // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
+    //PORTDbits.RD1 = 0;
 
-        // Note: by not making this an else-if, we have our DelayCounter
-        // counting done at the same time as our motor move or servo move.
-        // This allows the delay time to start counting at the beginning of the
-        // command execution.
-        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+    // Note: by not making this an else-if, we have our DelayCounter
+    // counting done at the same time as our motor move or servo move.
+    // This allows the delay time to start counting at the beginning of the
+    // command execution.
+    if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
 		{
-            // Only output DIR bits if we are actually doing something
+      // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
-            {
+      {
 				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 				{
 					if (CurrentCommand.DirBits & DIR1_BIT)
@@ -409,7 +409,7 @@ LATDbits.LATD0 = 1;
 						Dir2IO = 0;
 					}	
 				}
-                else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 				{
 					if (CurrentCommand.DirBits & DIR1_BIT)
 					{
@@ -441,11 +441,11 @@ LATDbits.LATD0 = 1;
 						CurrentCommand.StepsCounter[0]--;
             if (CurrentCommand.DirBits & DIR1_BIT)
             {
-                globalStepCounter1--;
+              globalStepCounter1--;
             }
             else
             {
-                globalStepCounter1++;
+              globalStepCounter1++;
             }	
 					}
           // For acceleration, we now add a bit to StepAdd each time through as well
@@ -467,11 +467,11 @@ LATDbits.LATD0 = 1;
 						CurrentCommand.StepsCounter[1]--;
             if (CurrentCommand.DirBits & DIR2_BIT)
             {
-                globalStepCounter2--;
+              globalStepCounter2--;
             }
             else
             {
-                globalStepCounter2++;
+              globalStepCounter2++;
             }
           }
           // For acceleration, we now add a bit to StepAdd each time through as well
@@ -482,7 +482,14 @@ LATDbits.LATD0 = 1;
           }
 					AllDone = FALSE;
 				}
-
+        // We want to allow for a one-ISR tick move, which requires us to check
+        // to see if the move has been completed here (to load the next command
+        // immediately rather than waiting for the next tick). This primarily gives
+        // us simpler math when figuring out how long moves will take.
+        if (CurrentCommand.StepsCounter[0] == 0 && CurrentCommand.StepsCounter[1] == 0)
+        {
+          AllDone = TRUE;
+        }
 				if (TookStep)
 				{
 					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -496,7 +503,7 @@ LATDbits.LATD0 = 1;
 							Step2IO = 1;
 						}
 					}
-                    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+          else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 					{
 						if (OutByte & STEP1_BIT)
 						{
@@ -546,87 +553,87 @@ LATDbits.LATD0 = 1;
 					}
 				}
 			}
-        }
-        // Check to see if we should change the state of the pen
+    }
+    // Check to see if we should change the state of the pen
 		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
 		{
-            if (gUseRCPenServo)
-            {
-                // Precompute the channel, since we use it all over the place
-                UINT8 Channel = CurrentCommand.ServoChannel - 1;
+      if (gUseRCPenServo)
+      {
+        // Precompute the channel, since we use it all over the place
+        UINT8 Channel = CurrentCommand.ServoChannel - 1;
 
-                // This code below is the meat of the RCServo2_Move() function
-                // We have to manually write it in here rather than calling
-                // the function because a real function inside the ISR
-                // causes the compiler to generate enormous amounts of setup/teardown
-                // code and things run way too slowly.
+        // This code below is the meat of the RCServo2_Move() function
+        // We have to manually write it in here rather than calling
+        // the function because a real function inside the ISR
+        // causes the compiler to generate enormous amounts of setup/teardown
+        // code and things run way too slowly.
 
-                // If the user is trying to turn off this channel's RC servo output
-                if (0 == CurrentCommand.ServoPosition)
-                {
-                    // Turn off the PPS routing to the pin
-                    *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
-                    // Clear everything else out for this channel
-                    gRC2Rate[Channel] = 0;
-                    gRC2Target[Channel] = 0;
-                    gRC2RPn[Channel] = 0;
-                    gRC2Value[Channel] = 0;
-                }
-                else
-                {
-                    // Otherwise, set all of the values that start this RC servo moving
-                    gRC2Rate[Channel] = CurrentCommand.ServoRate;
-                    gRC2Target[Channel] = CurrentCommand.ServoPosition;
-                    gRC2RPn[Channel] = CurrentCommand.ServoRPn;
-                    if (gRC2Value[Channel] == 0)
-                    {
-                        gRC2Value[Channel] = CurrentCommand.ServoPosition;
-                    }
-                }
-            }
+        // If the user is trying to turn off this channel's RC servo output
+        if (0 == CurrentCommand.ServoPosition)
+        {
+          // Turn off the PPS routing to the pin
+          *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
+          // Clear everything else out for this channel
+          gRC2Rate[Channel] = 0;
+          gRC2Target[Channel] = 0;
+          gRC2RPn[Channel] = 0;
+          gRC2Value[Channel] = 0;
+        }
+        else
+        {
+          // Otherwise, set all of the values that start this RC servo moving
+          gRC2Rate[Channel] = CurrentCommand.ServoRate;
+          gRC2Target[Channel] = CurrentCommand.ServoPosition;
+          gRC2RPn[Channel] = CurrentCommand.ServoRPn;
+          if (gRC2Value[Channel] == 0)
+          {
+            gRC2Value[Channel] = CurrentCommand.ServoPosition;
+          }
+        }
+      }
             
-            // If this servo is the pen servo (on g_servo2_RPn)
-            if (CurrentCommand.ServoRPn == g_servo2_RPn)
-            {
-                // Then set its new state based on the new position
-                if (CurrentCommand.ServoPosition == g_servo2_min)
-                {
-                    PenState = PEN_UP;
-                    SolenoidState = SOLENOID_OFF;
-                    if (gUseSolenoid)
-                    {
-                        PenUpDownIO = 0;
-                    }
-                }
-                else
-                {
-                    PenState = PEN_DOWN;
-                    SolenoidState = SOLENOID_ON;
-                    if (gUseSolenoid)
-                    {
-                        PenUpDownIO = 1;
-                    }
-                }
-            }
+      // If this servo is the pen servo (on g_servo2_RPn)
+      if (CurrentCommand.ServoRPn == g_servo2_RPn)
+      {
+        // Then set its new state based on the new position
+        if (CurrentCommand.ServoPosition == g_servo2_min)
+        {
+          PenState = PEN_UP;
+          SolenoidState = SOLENOID_OFF;
+          if (gUseSolenoid)
+          {
+            PenUpDownIO = 0;
+          }
+        }
+        else
+        {
+          PenState = PEN_DOWN;
+          SolenoidState = SOLENOID_ON;
+          if (gUseSolenoid)
+          {
+            PenUpDownIO = 1;
+          }
+        }
+      }
 		}
-        // Check to see if we should start or stop the engraver
+    // Check to see if we should start or stop the engraver
 		else if (CurrentCommand.Command == COMMAND_SE)
 		{
-            // Now act on the State of the SE command
-            if (CurrentCommand.SEState)
-            {
-                // Set RB3 to StoredEngraverPower
-                CCPR1L = CurrentCommand.SEPower >> 2;
-                CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-            }
-            else
-            {
-                // Set RB3 to low by setting PWM duty cycle to zero
-                CCPR1L = 0;
-                CCP1CON = (CCP1CON & 0b11001111);
-            }
-            AllDone = TRUE;
-        }
+      // Now act on the State of the SE command
+      if (CurrentCommand.SEState)
+      {
+        // Set RB3 to StoredEngraverPower
+        CCPR1L = CurrentCommand.SEPower >> 2;
+        CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+      }
+      else
+      {
+        // Set RB3 to low by setting PWM duty cycle to zero
+        CCPR1L = 0;
+        CCP1CON = (CCP1CON & 0b11001111);
+      }
+      AllDone = TRUE;
+    }
     else if (CurrentCommand.Command == COMMAND_CLEAR_ACCUMULATORS)
     {
       // Use the SEState to determine which accumulators to clear.
@@ -646,29 +653,29 @@ LATDbits.LATD0 = 1;
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
-TRISDbits.TRISD1 = 0;
-LATDbits.LATD1 = 1;
-                CurrentCommand = CommandFIFO[0];
-                // Zero out command in FIFO
-                CommandFIFO[0].Command = COMMAND_NONE;
-                CommandFIFO[0].StepAdd[0] = 0;
-                CommandFIFO[0].StepAdd[1] = 0;
-                CommandFIFO[0].StepsCounter[0] = 0;
-                CommandFIFO[0].StepsCounter[1] = 0;
-                CommandFIFO[0].DirBits = 0;
-                CommandFIFO[0].DelayCounter = 0;
-                CommandFIFO[0].ServoPosition = 0;
-                CommandFIFO[0].ServoRPn = 0;
-                CommandFIFO[0].ServoChannel = 0;
-                CommandFIFO[0].ServoRate = 0;
-                CommandFIFO[0].SEState = 0;
-                CommandFIFO[0].SEPower = 0;
+TRISDbits.TRISD0 = 0;
+LATDbits.LATD0 = 1;
+        CurrentCommand = CommandFIFO[0];
+        // Zero out command in FIFO
+        CommandFIFO[0].Command = COMMAND_NONE;
+        CommandFIFO[0].StepAdd[0] = 0;
+        CommandFIFO[0].StepAdd[1] = 0;
+        CommandFIFO[0].StepsCounter[0] = 0;
+        CommandFIFO[0].StepsCounter[1] = 0;
+        CommandFIFO[0].DirBits = 0;
+        CommandFIFO[0].DelayCounter = 0;
+        CommandFIFO[0].ServoPosition = 0;
+        CommandFIFO[0].ServoRPn = 0;
+        CommandFIFO[0].ServoChannel = 0;
+        CommandFIFO[0].ServoRate = 0;
+        CommandFIFO[0].SEState = 0;
+        CommandFIFO[0].SEPower = 0;
 				FIFOEmpty = TRUE;
 LATDbits.LATD0 = 0;
 			}
-            else {
-                CurrentCommand.DelayCounter = 0;
-            }
+      else {
+        CurrentCommand.DelayCounter = 0;
+      }
 		}
 		
 		// Check for button being pushed
@@ -685,7 +692,7 @@ LATDbits.LATD0 = 0;
 			ButtonPushed = TRUE;
 		}
 	}
-LATDbits.LATD0 = 0;
+LATDbits.LATD1 = 0;
 }
 
 // Init code
