@@ -238,8 +238,8 @@
 //                    input parameters)
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
-// 2.6.6 11/01/20 - Added AC (Accumulator Clear) command
-//                  Now clear step accumulators on EM and CS commands
+// 2.7.0 11/01/20 - Optional parameter <ClearAccs> added to all stepper motion commands
+//                  
 //                  We don't allow StepAdd to go negative (like from LM command)
 
 #include <p18cxxx.h>
@@ -277,7 +277,8 @@ typedef enum
 static void process_SM(
 	UINT32 Duration,
 	INT32 A1Stp,
-	INT32 A2Stp
+	INT32 A2Stp,
+  UINT8 ClearAccs
 );
 
 typedef enum
@@ -378,9 +379,6 @@ LATDbits.LATD1 = 1;
       AllDone = FALSE;
     }
 
-    // Not sure why this is here? For debugging? If so, then #ifdef it out for release build
-    //PORTDbits.RD1 = 0;
-
     // Note: by not making this an else-if, we have our DelayCounter
     // counting done at the same time as our motor move or servo move.
     // This allows the delay time to start counting at the beginning of the
@@ -432,6 +430,12 @@ LATDbits.LATD1 = 1;
 				// Only do this if there are steps left to take
 				if (CurrentCommand.StepsCounter[0])
 				{
+          // For acceleration, we now add a bit to StepAdd each time through as well
+          TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+          if (TestStepAdd > 0)
+          {
+            CurrentCommand.StepAdd[0] = TestStepAdd;
+          }
 					StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
 					if (StepAcc[0] & 0x80000000)
 					{
@@ -448,16 +452,16 @@ LATDbits.LATD1 = 1;
               globalStepCounter1++;
             }	
 					}
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
-          if (TestStepAdd > 0)
-          {
-            CurrentCommand.StepAdd[0] = TestStepAdd;
-          }
 					AllDone = FALSE;
 				}
 				if (CurrentCommand.StepsCounter[1])
 				{
+          // For acceleration, we now add a bit to StepAdd each time through as well
+          TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+          if (TestStepAdd > 0)
+          {
+            CurrentCommand.StepAdd[1] = TestStepAdd;
+          }
 					StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
 					if (StepAcc[1] & 0x80000000)
 					{
@@ -473,12 +477,6 @@ LATDbits.LATD1 = 1;
             {
               globalStepCounter2++;
             }
-          }
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
-          if (TestStepAdd > 0)
-          {
-            CurrentCommand.StepAdd[1] = TestStepAdd;
           }
 					AllDone = FALSE;
 				}
@@ -634,19 +632,7 @@ LATDbits.LATD1 = 1;
       }
       AllDone = TRUE;
     }
-    else if (CurrentCommand.Command == COMMAND_CLEAR_ACCUMULATORS)
-    {
-      // Use the SEState to determine which accumulators to clear.
-      if (CurrentCommand.SEState & 0x01)
-      {
-        StepAcc[0] = 0;
-      }
-      if (CurrentCommand.SEState & 0x02)
-      {
-        StepAcc[1] = 0;
-      }
-      AllDone = TRUE;
-    }
+
 		// If we're done with our current command, load in the next one
 		if (AllDone && CurrentCommand.DelayCounter == 0)
 		{
@@ -670,6 +656,22 @@ LATDbits.LATD0 = 1;
         CommandFIFO[0].ServoRate = 0;
         CommandFIFO[0].SEState = 0;
         CommandFIFO[0].SEPower = 0;
+        
+        // Take care of clearing the step accumulators for the next move if
+        // it's a motor move
+        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+        {
+          // Use the SEState to determine which accumulators to clear.
+          if (CurrentCommand.SEState & 0x01)
+          {
+            StepAcc[0] = 0;
+          }
+          if (CurrentCommand.SEState & 0x02)
+          {
+            StepAcc[1] = 0;
+          }
+        }
+
 				FIFOEmpty = TRUE;
 LATDbits.LATD0 = 0;
 			}
@@ -1045,12 +1047,13 @@ void fprint(float f)
 #endif
 
 // The Accelerated Motion command
-// Usage: SM,<inital_velocity>,<final_velocity>,<axis1_steps>,<axis2_steps><CR>
+// Usage: SM,<inital_velocity>,<final_velocity>,<axis1_steps>,<axis2_steps>,<ClearAccs><CR>
 // <inital_velocity> is a number from 1 to 10000 in steps/second indicating the initial velocity
 // <final_velocity> is a number from 1 to 10000 in steps/second indicating the final velocity
 // <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
 // Note that the two velocities are of the combined move - i.e. the tip of the pen, not the individual
 // axies velocities.
+// <ClearAccs> is an optional parameter.
 void parse_AM_packet (void)
 {
   UINT32 temp = 0;
@@ -1061,13 +1064,20 @@ void parse_AM_packet (void)
   UINT32 Distance;
   float distance_temp;
   float accel_temp;
+  UINT8 ClearAccs = 0;
 
   // Extract each of the values.
   extract_number (kULONG, &VelocityInital, kREQUIRED);
   extract_number (kULONG, &VelocityFinal, kREQUIRED);
   extract_number (kLONG, &A1Steps, kREQUIRED);
   extract_number (kLONG, &A2Steps, kREQUIRED);
+  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
+  if (ClearAccs > 3)
+  {
+    ClearAccs = 3;
+  }
+  
   // Check for too-fast step request (>25KHz)
   if (VelocityInital > 25000)
   {
@@ -1105,6 +1115,7 @@ void parse_AM_packet (void)
 
   while(!FIFOEmpty);
 
+  CommandFIFO[0].SEState = ClearAccs; 
   CommandFIFO[0].DelayCounter = 0; // No delay for motor moves
   CommandFIFO[0].DirBits = 0;
 
@@ -1250,12 +1261,15 @@ void parse_AM_packet (void)
 }
 
 // Low Level Move command
-// Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2><CR>
+// Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2>,<ClearAccs><CR>
+// <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
+// starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet (void)
 {
   UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
   INT32 StepsCounter1, StepsCounter2 = 0;
   MoveCommandType move;
+  UINT8 ClearAccs = 0;
 
   // Extract each of the values.
   extract_number (kULONG, &StepAdd1, kREQUIRED);
@@ -1264,6 +1278,7 @@ void parse_LM_packet (void)
   extract_number (kULONG, &StepAdd2, kREQUIRED);
   extract_number (kLONG,  &StepsCounter2, kREQUIRED);
   extract_number (kLONG, &StepAddInc2, kREQUIRED);
+  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1289,6 +1304,18 @@ void parse_LM_packet (void)
   {
     return;
   }
+  
+  if (ClearAccs > 3)
+  {
+    ClearAccs = 3;
+  }
+  
+  // TODO: What type of protections are needed here?
+  StepAdd1 = StepAdd1 - StepAddInc1/2;
+  StepAdd2 = StepAdd2 - StepAddInc2/2;
+  
+  // We are going to reuse SEState to hold the clear accumulators flag
+  move.SEState = ClearAccs;
   
   move.DelayCounter = 0; // No delay for motor moves
   move.DirBits = 0;
@@ -1342,7 +1369,7 @@ void parse_LM_packet (void)
 }
 
 // The Stepper Motor command
-// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps><CR>
+// Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<CleaAccs><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
 // <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
@@ -1354,12 +1381,14 @@ void parse_SM_packet (void)
 {
 	UINT32 Duration = 0;
 	INT32 A1Steps = 0, A2Steps = 0;
-    INT32 Steps = 0;
+  INT32 Steps = 0;
+  UINT8 ClearAccs = 0;
 
 	// Extract each of the values.
 	extract_number (kULONG, &Duration, kREQUIRED);
 	extract_number (kLONG, &A1Steps, kREQUIRED);
 	extract_number (kLONG, &A2Steps, kOPTIONAL);
+  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
     if (gLimitChecks)
     {
@@ -1419,11 +1448,15 @@ void parse_SM_packet (void)
            printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
            return;
         }
+        if (ClearAccs > 3)
+        {
+          ClearAccs = 0;
+        }
     }
 
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_SM(Duration, A1Steps, A2Steps);
+  	process_SM(Duration, A1Steps, A2Steps, ClearAccs);
 
     if (g_ack_enable)
     {
@@ -1549,7 +1582,7 @@ void parse_HM_packet (void)
       {
         XSteps = Steps2;
       }
-      process_SM(Duration, XSteps, Steps2);
+      process_SM(Duration, XSteps, Steps2, 3);
       // Update both steps count for final move
       Steps1 = Steps1 - XSteps;
       Steps2 = 0;
@@ -1590,7 +1623,7 @@ void parse_HM_packet (void)
       {
         XSteps = Steps1;
       }
-      process_SM(Duration, Steps1, XSteps);
+      process_SM(Duration, Steps1, XSteps, 3);
       // Update both steps count for final move
       Steps2 = Steps2 - XSteps;
       Steps1 = 0;
@@ -1611,7 +1644,7 @@ void parse_HM_packet (void)
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_SM(Duration, Steps1, Steps2);
+  process_SM(Duration, Steps1, Steps2, 3);
 
   if (g_ack_enable)
   {
@@ -1630,13 +1663,20 @@ void parse_XM_packet (void)
 {
 	UINT32 Duration = 0;
 	INT32 A1Steps = 0, A2Steps = 0;
-    INT32 ASteps = 0, BSteps = 0;
-    INT32 Steps = 0;
+  INT32 ASteps = 0, BSteps = 0;
+  INT32 Steps = 0;
+  UINT8 ClearAccs = 0;
 
 	// Extract each of the values.
 	extract_number (kULONG, &Duration, kREQUIRED);
 	extract_number (kLONG, &ASteps, kREQUIRED);
 	extract_number (kLONG, &BSteps, kREQUIRED);
+  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+  
+  if (ClearAccs > 3)
+  {
+    ClearAccs = 3;
+  }
 
     // Check for invalid duration
     if (Duration == 0) {
@@ -1702,7 +1742,7 @@ void parse_XM_packet (void)
 
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_SM(Duration, A1Steps, A2Steps);
+  	process_SM(Duration, A1Steps, A2Steps, ClearAccs);
 
 	print_ack();
 }
@@ -1712,6 +1752,7 @@ void parse_XM_packet (void)
 // <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
 //  <Duration> mS, as 3 byte signed values, where the sign determines the motor
 //  direction.
+// <ClearAccs> clears the accumulators (both if 3, none if 0)
 // This function waits until there is room in the 1-deep FIFO before placing
 // the data in the FIFO. The ISR then sees this data when it is done with its
 // current move, and starts this new move.
@@ -1721,7 +1762,8 @@ void parse_XM_packet (void)
 static void process_SM(
   UINT32 Duration,
   INT32 A1Stp,
-  INT32 A2Stp
+  INT32 A2Stp,
+  UINT8 ClearAccs
 )
 {
   UINT32 temp = 0;
@@ -1736,6 +1778,12 @@ static void process_SM(
   //        A1Stp,
   //        A2Stp
   //    );
+
+  if (ClearAccs > 3)
+  {
+    ClearAccs = 3;
+  }
+  move.SEState = ClearAccs;
 
   // Check for delay
   if (A1Stp == 0 && A2Stp == 0)
@@ -1899,52 +1947,6 @@ static void process_SM(
   CommandFIFO[0] = move;
 
   FIFOEmpty = FALSE;
-}
-
-// Clear the Accumulators
-// Usage: CA,<axes><CR>
-// <axes> is an optional parameter. If not included, this command will clear both
-//   accumulators.
-// <axes> can be 0, 1, 2 or 3.
-// If it is 0, nothing happens.
-// If it is 1, only Motor 1's accumulator is cleared.
-// If it is 2, only Motor 2's accumulator is cleared.
-// If it is 3, both motor's accumulators are cleared.
-// This command is added to the motion queue so that it happens at a precise
-// time in the motion command stream.
-void parse_CA_packet (void)
-{
-	UINT8 Axes = 3;
-  MoveCommandType cmd;
-	
-	// Extract the single parameter
-	extract_number (kUCHAR, &Axes, kOPTIONAL);
-
-  if (Axes > 3)
-  {
-    Axes = 3;
-  }
-
-  // Set the command type
-  cmd.Command = COMMAND_CLEAR_ACCUMULATORS;
-  // Set the argument (we reuse the )
-  cmd.SEState = Axes;
-  // Always clear the delay counter (because it can have extra meaning)
-  cmd.DelayCounter = 0;
-
-  // Spin here until there's space in the FIFO
-  while(!FIFOEmpty)
-  ;
-
-  // Now, quick copy over the computed command data to the command FIFO
-  CommandFIFO[0] = cmd;
-  // Notify that ISR that there is at least one command ready to execute
-  FIFOEmpty = FALSE;
-
-  if (g_ack_enable)
-  {
-    print_ack();
-  }
 }
 
 // E-Stop
@@ -2180,7 +2182,7 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 // Note that the MSx lines do not come to any headers, so even when an external
 // source is controlling the drivers, the PIC still needs to control the
 // MSx lines.
-// As of 2.6.6 : We always clear out the step accumulators when the EM command
+// As of 2.7.0 : We always clear out the step accumulators when the EM command
 //   is executed.
 void parse_EM_packet(void)
 {
@@ -2716,7 +2718,7 @@ void clear_StepCounters(void)
 // CS takes no parameters, so usage is just CS<CR>
 // QS returns:
 // OK<CR>
-// Note, as of 2.6.6 this also clears out the step accumulators as well
+// Note, as of 2.7.0 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
   clear_StepCounters();

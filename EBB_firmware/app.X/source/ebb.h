@@ -71,8 +71,7 @@ typedef enum
 	COMMAND_MOTOR_MOVE,
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
-  COMMAND_SE,
-  COMMAND_CLEAR_ACCUMULATORS
+  COMMAND_SE
 } CommandType;
 
 // This structure defines the elements of the move commands in the FIFO that
@@ -150,7 +149,6 @@ void parse_QS_packet(void);
 void parse_CS_packet(void);
 void parse_LM_packet(void);
 void parse_HM_packet(void);
-void parse_CA_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 #endif
