@@ -1261,23 +1261,23 @@ void parse_AM_packet (void)
 }
 
 // Low Level Move command
-// Usage: LM,<StepAdd1>,<StepsCounter1>,<StepAddInc1>,<StepAdd2>,<StepsCounter2>,<StepAddInc2>,<ClearAccs><CR>
+// Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Acel2>,<ClearAccs><CR>
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet (void)
 {
-  UINT32 StepAdd1, StepAddInc1, StepAdd2, StepAddInc2 = 0;
-  INT32 StepsCounter1, StepsCounter2 = 0;
+  UINT32 Rate1, Rate2 = 0;
+  INT32 Steps1, Steps2, Accel1, Accel2 = 0;
   MoveCommandType move;
   UINT8 ClearAccs = 0;
 
   // Extract each of the values.
-  extract_number (kULONG, &StepAdd1, kREQUIRED);
-  extract_number (kLONG,  &StepsCounter1, kREQUIRED);
-  extract_number (kLONG, &StepAddInc1, kREQUIRED);
-  extract_number (kULONG, &StepAdd2, kREQUIRED);
-  extract_number (kLONG,  &StepsCounter2, kREQUIRED);
-  extract_number (kLONG, &StepAddInc2, kREQUIRED);
+  extract_number (kULONG, &Rate1, kREQUIRED);
+  extract_number (kLONG,  &Steps1, kREQUIRED);
+  extract_number (kLONG, &Accel1, kREQUIRED);
+  extract_number (kULONG, &Rate2, kREQUIRED);
+  extract_number (kLONG,  &Steps2, kREQUIRED);
+  extract_number (kLONG, &Accel2, kREQUIRED);
   extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
@@ -1290,15 +1290,15 @@ void parse_LM_packet (void)
    * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
   if (
       (
-          ((StepAdd1 == 0) && (StepAddInc1 == 0))
+          ((Rate1 == 0) && (Accel1 == 0))
           ||
-          (StepsCounter1 == 0)
+          (Steps1 == 0)
       )
       &&
       (
-          ((StepAdd2 == 0) && (StepAddInc2 == 0))
+          ((Rate2 == 0) && (Accel2 == 0))
           ||
-          (StepsCounter2 == 0)
+          (Steps2 == 0)
       )
   )
   {
@@ -1310,9 +1310,25 @@ void parse_LM_packet (void)
     ClearAccs = 3;
   }
   
-  // TODO: What type of protections are needed here?
-  StepAdd1 = StepAdd1 - StepAddInc1/2;
-  StepAdd2 = StepAdd2 - StepAddInc2/2;
+  // Subtract off half of the Accel term from the Rate term before we add the
+  // move to the queue. Why? Because it makes the math cleaner (see LM command
+  // documentation)
+  if (Accel1 < 0)
+  {
+    Rate1 = Rate1 + ((-Accel1) >> 1);
+  }
+  else
+  {
+    Rate1 = Rate1 - (Accel1 >> 1);
+  }
+  if (Accel2 < 0)
+  {
+    Rate2 = Rate2 + ((-Accel2) >> 1);
+  }
+  else
+  {
+    Rate2 = Rate2 - (Accel2 >> 1);
+  }
   
   // We are going to reuse SEState to hold the clear accumulators flag
   move.SEState = ClearAccs;
@@ -1325,23 +1341,23 @@ void parse_LM_packet (void)
   Enable2IO = ENABLE_MOTOR;
 
   // First, set the direction bits
-  if (StepsCounter1 < 0)
+  if (Steps1 < 0)
   {
     move.DirBits = move.DirBits | DIR1_BIT;
-    StepsCounter1 = -StepsCounter1;
+    Steps1 = -Steps1;
   }
-  if (StepsCounter2 < 0)
+  if (Steps2 < 0)
   {
     move.DirBits = move.DirBits | DIR2_BIT;
-    StepsCounter2 = -StepsCounter2;
+    Steps2 = -Steps2;
   }
 
-  move.StepAdd[0] = StepAdd1;
-  move.StepsCounter[0] = StepsCounter1;
-  move.StepAddInc[0] = StepAddInc1;
-  move.StepAdd[1] = StepAdd2;
-  move.StepsCounter[1] = StepsCounter2;
-  move.StepAddInc[1] = StepAddInc2;
+  move.StepAdd[0] = Rate1;
+  move.StepsCounter[0] = Steps1;
+  move.StepAddInc[0] = Accel1;
+  move.StepAdd[1] = Rate2;
+  move.StepsCounter[1] = Steps2;
+  move.StepAddInc[1] = Accel2;
   move.Command = COMMAND_MOTOR_MOVE;
 
   // Spin here until there's space in the fifo
