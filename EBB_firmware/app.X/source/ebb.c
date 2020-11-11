@@ -238,6 +238,8 @@
 //                    input parameters)
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
+// 2.6.6 11/10/20 - Fixed bug where S2 command wouldn't turn power on to RB1
+//                    servo output if it had been turned off.
 
 #include <p18cxxx.h>
 #include <usart.h>
