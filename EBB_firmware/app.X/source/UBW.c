@@ -1161,6 +1161,12 @@ void parse_packet(void)
 	// Now 'command' is equal to one or two bytes of our command
 	switch (command)
 	{
+		case ('L' * 256) + 'T':
+		{
+			// Low Level Timed Move
+			parse_LT_packet();
+			break;
+		}
 		case ('L' * 256) + 'M':
 		{
 			// Low Level Move

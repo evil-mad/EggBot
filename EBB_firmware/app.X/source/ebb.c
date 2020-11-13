@@ -383,7 +383,11 @@ LATDbits.LATD1 = 1;
     // counting done at the same time as our motor move or servo move.
     // This allows the delay time to start counting at the beginning of the
     // command execution.
-    if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+    if (
+      (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+      || 
+      (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
+    )
 		{
       // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
@@ -427,66 +431,132 @@ LATDbits.LATD1 = 1;
 					}	
 				}
 
-				// Only do this if there are steps left to take
-				if (CurrentCommand.StepsCounter[0])
-				{
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
-          if (TestStepAdd > 0)
-          {
-            CurrentCommand.StepAdd[0] = TestStepAdd;
-          }
-					StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
-					if (StepAcc[0] & 0x80000000)
-					{
-						StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
-						OutByte = OutByte | STEP1_BIT;
-						TookStep = TRUE;
-						CurrentCommand.StepsCounter[0]--;
-            if (CurrentCommand.DirBits & DIR1_BIT)
-            {
-              globalStepCounter1--;
-            }
-            else
-            {
-              globalStepCounter1++;
-            }	
-					}
-					AllDone = FALSE;
-				}
-				if (CurrentCommand.StepsCounter[1])
-				{
-          // For acceleration, we now add a bit to StepAdd each time through as well
-          TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
-          if (TestStepAdd > 0)
-          {
-            CurrentCommand.StepAdd[1] = TestStepAdd;
-          }
-					StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
-					if (StepAcc[1] & 0x80000000)
-					{
-						StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
-						OutByte = OutByte | STEP2_BIT;
-						TookStep = TRUE;
-						CurrentCommand.StepsCounter[1]--;
-            if (CurrentCommand.DirBits & DIR2_BIT)
-            {
-              globalStepCounter2--;
-            }
-            else
-            {
-              globalStepCounter2++;
-            }
-          }
-					AllDone = FALSE;
-				}
-        // We want to allow for a one-ISR tick move, which requires us to check
-        // to see if the move has been completed here (to load the next command
-        // immediately rather than waiting for the next tick). This primarily gives
-        // us simpler math when figuring out how long moves will take.
-        if (CurrentCommand.StepsCounter[0] == 0 && CurrentCommand.StepsCounter[1] == 0)
+        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
         {
-          AllDone = TRUE;
+          // Has time run out for this command yet?
+          if (CurrentCommand.StepsCounter[0])
+          {
+            // Nope. So count this ISR tick, and then see if we need to take a step
+            CurrentCommand.StepsCounter[0]--;
+            if (CurrentCommand.StepsCounter[0] != 0)
+            {
+              AllDone = FALSE;
+            }
+
+            // Motor 1
+            
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+            if (TestStepAdd > 0)
+            {
+              CurrentCommand.StepAdd[0] = TestStepAdd;
+            }
+            StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
+            if (StepAcc[0] & 0x80000000)
+            {
+              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP1_BIT;
+              TookStep = TRUE;
+              if (CurrentCommand.DirBits & DIR1_BIT)
+              {
+                globalStepCounter1--;
+              }
+              else
+              {
+                globalStepCounter1++;
+              }	
+            }
+
+            // Motor 2
+            
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+            if (TestStepAdd > 0)
+            {
+              CurrentCommand.StepAdd[1] = TestStepAdd;
+            }
+            StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
+            if (StepAcc[1] & 0x80000000)
+            {
+              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP2_BIT;
+              TookStep = TRUE;
+              if (CurrentCommand.DirBits & DIR2_BIT)
+              {
+                globalStepCounter2--;
+              }
+              else
+              {
+                globalStepCounter2++;
+              }
+            }
+          }
+        }
+        else
+        {
+          // This only fires if the Command is COMMAND_MOTOR_MOVE
+          
+          // Only do this if there are steps left to take
+          if (CurrentCommand.StepsCounter[0])
+          {
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+            if (TestStepAdd > 0)
+            {
+              CurrentCommand.StepAdd[0] = TestStepAdd;
+            }
+            StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
+            if (StepAcc[0] & 0x80000000)
+            {
+              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP1_BIT;
+              TookStep = TRUE;
+              CurrentCommand.StepsCounter[0]--;
+              if (CurrentCommand.DirBits & DIR1_BIT)
+              {
+                globalStepCounter1--;
+              }
+              else
+              {
+                globalStepCounter1++;
+              }	
+            }
+            AllDone = FALSE;
+          }
+          if (CurrentCommand.StepsCounter[1])
+          {
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+            if (TestStepAdd > 0)
+            {
+              CurrentCommand.StepAdd[1] = TestStepAdd;
+            }
+            StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
+            if (StepAcc[1] & 0x80000000)
+            {
+              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+              OutByte = OutByte | STEP2_BIT;
+              TookStep = TRUE;
+              CurrentCommand.StepsCounter[1]--;
+              if (CurrentCommand.DirBits & DIR2_BIT)
+              {
+                globalStepCounter2--;
+              }
+              else
+              {
+                globalStepCounter2++;
+              }
+            }
+            AllDone = FALSE;
+          }
+          // We want to allow for a one-ISR tick move, which requires us to check
+          // to see if the move has been completed here (to load the next command
+          // immediately rather than waiting for the next tick). This primarily gives
+          // us simpler math when figuring out how long moves will take.
+          if (CurrentCommand.StepsCounter[0] == 0 && CurrentCommand.StepsCounter[1] == 0)
+          {
+            AllDone = TRUE;
+          }
         }
 				if (TookStep)
 				{
@@ -659,7 +729,11 @@ LATDbits.LATD0 = 1;
         
         // Take care of clearing the step accumulators for the next move if
         // it's a motor move
-        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+        if (
+          (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+          ||
+          (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
+        )
         {
           // Use the SEState to determine which accumulators to clear.
           if (CurrentCommand.SEState & 0x01)
@@ -1261,7 +1335,7 @@ void parse_AM_packet (void)
 }
 
 // Low Level Move command
-// Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Acel2>,<ClearAccs><CR>
+// Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet (void)
@@ -1384,6 +1458,138 @@ void parse_LM_packet (void)
   }
 }
 
+// Low Level Timed Move command
+// Usage: LT,<Intervals>,<Rate1>,<Accel1>,<Rate2>,<Accel2>,<ClearAccs><CR>
+//
+// This command is a modified version of the LM command. Instead of stepping for a certain number of steps
+// on each axis at a given rate (with an acceleration term for each as well), this command will step 
+// for a certain duration, no matter the step count. The rate and acceleration of each axis are still
+// specified separately.
+//
+// Note that <Intervsals> is a 32-bit unsigned int and is in units of ISR ticks.
+// <Accel1> and <Accel2> are 32 bit signed ints, and <Rate1> and <Rate2> are 32 bit signed ints. 
+// The sign of <Rate1> and <Rate2> determine the direction that the axis will move.
+// After the signs are taken into account for direction purposes, the Rate values
+// are converted to unsigned 31 bit numbers.
+//
+// <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
+// starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
+void parse_LT_packet (void)
+{
+  UINT32 Intervals = 0;
+  INT32 Rate1, Rate2, Accel1, Accel2 = 0;
+  MoveCommandType move;
+  UINT8 ClearAccs = 0;
+
+  // Extract each of the values.
+  extract_number (kULONG, &Intervals, kREQUIRED);
+  extract_number (kLONG,  &Rate1,     kREQUIRED);
+  extract_number (kLONG,  &Accel1,    kREQUIRED);
+  extract_number (kLONG,  &Rate2,     kREQUIRED);
+  extract_number (kLONG,  &Accel2,    kREQUIRED);
+  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  /* Eliminate obvious invalid parameter combinations,
+   * like LT,0,X,X,X,X,X. Or LT,X,0,X,0,X,X 
+   */
+  if (
+    (Intervals == 0)
+    ||
+    (
+      ((Rate1 == 0) && (Rate2 == 0))
+    )
+  )
+  {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+  
+  if (ClearAccs > 3)
+  {
+    ClearAccs = 3;
+  }
+  
+  // We are going to reuse SEState to hold the clear accumulators flag
+  move.SEState = ClearAccs;
+  
+  move.DelayCounter = 0; // No delay for motor moves
+  move.DirBits = 0;
+
+  // Always enable both motors when we want to move them
+  Enable1IO = ENABLE_MOTOR;
+  Enable2IO = ENABLE_MOTOR;
+
+  // First, set the direction bits
+  if (Rate1 < 0)
+  {
+    move.DirBits = move.DirBits | DIR1_BIT;
+    Rate1 = -Rate1;
+  }
+  if (Rate2 < 0)
+  {
+    move.DirBits = move.DirBits | DIR2_BIT;
+    Rate2 = -Rate2;
+  }
+
+  // Rates are now positive 31 bit integers.
+  
+  // Subtract off half of the Accel term from the Rate term before we add the
+  // move to the queue. Why? Because it makes the math cleaner (see LT command
+  // documentation)
+  if (Accel1 < 0)
+  {
+    Rate1 = Rate1 + ((-Accel1) >> 1);
+  }
+  else
+  {
+    Rate1 = Rate1 - (Accel1 >> 1);
+  }
+  if (Accel2 < 0)
+  {
+    Rate2 = Rate2 + ((-Accel2) >> 1);
+  }
+  else
+  {
+    Rate2 = Rate2 - (Accel2 >> 1);
+  }
+  
+  move.StepAdd[0] = Rate1;
+  move.StepsCounter[0] = Intervals;    // Overloading StepsCounter[0] for intervals
+  move.StepAddInc[0] = Accel1;
+  move.StepAdd[1] = Rate2;
+  move.StepsCounter[1] = 0;
+  move.StepAddInc[1] = Accel2;
+  move.Command = COMMAND_MOTOR_MOVE_TIMED;
+
+  // Spin here until there's space in the fifo
+  while(!FIFOEmpty)
+  ;
+
+  CommandFIFO[0] = move;
+
+  /* For debugging step motion , uncomment the next line */
+  /*
+   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+          CommandFIFO[0].StepAdd[0],
+          CommandFIFO[0].StepsCounter[0],
+          CommandFIFO[0].StepAdd[1],
+          CommandFIFO[0].StepsCounter[1]
+      );
+   */
+
+  FIFOEmpty = FALSE;
+
+  if (g_ack_enable)
+  {
+    print_ack();
+  }
+}
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<CleaAccs><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
