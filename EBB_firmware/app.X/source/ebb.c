@@ -212,11 +212,11 @@
 //                  special case just un-does the change for issue #71 for these
 //                  short moves)
 // 2.5.0 01/09/17 - Added LM (low level move) command to allow PC to do all math
-// 2.5.1 01/18/17 - Fixed LM command to take negative and positive StepAddIncs
+// 2.5.1 01/18/17 - Fixed LM command to take negative and positive Accel
 //                  Fixed 25KHz ISR to be much closer to 25KHz
 // 2.5.2 07/07/17 - Fixed issue #78 : detected and reject 0,0 for LM command
 //                  Fixed some uninitialized variables
-//                  LM StepAddInc parameter went to 32 bits signed from 16 bit signed
+//                  LM Accel parameter went to 32 bits signed from 16 bit signed
 // 2.5.3 07/09/17 - Fixed bug in LM command that would corrupt currently running
 //                    moves with new data.
 // 2.5.4 01/06/18 - Added ST (Set Tag), QT (Query Tag) commands.
@@ -390,7 +390,7 @@ LATDbits.LATD1 = 1;
     )
 		{
       // Only output DIR bits if we are actually doing something
-			if (CurrentCommand.StepsCounter[0] || CurrentCommand.StepsCounter[1])
+			if (CurrentCommand.Steps[0] || CurrentCommand.Steps[1])
       {
 				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 				{
@@ -434,11 +434,11 @@ LATDbits.LATD1 = 1;
         if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
         {
           // Has time run out for this command yet?
-          if (CurrentCommand.StepsCounter[0])
+          if (CurrentCommand.Steps[0])
           {
             // Nope. So count this ISR tick, and then see if we need to take a step
-            CurrentCommand.StepsCounter[0]--;
-            if (CurrentCommand.StepsCounter[0] != 0)
+            CurrentCommand.Steps[0]--;
+            if (CurrentCommand.Steps[0] != 0)
             {
               AllDone = FALSE;
             }
@@ -446,12 +446,12 @@ LATDbits.LATD1 = 1;
             // Motor 1
             
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+            TestStepAdd = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
             if (TestStepAdd > 0)
             {
-              CurrentCommand.StepAdd[0] = TestStepAdd;
+              CurrentCommand.Rate[0] = TestStepAdd;
             }
-            StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
+            StepAcc[0] = StepAcc[0] + CurrentCommand.Rate[0];
             if (StepAcc[0] & 0x80000000)
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
@@ -470,12 +470,12 @@ LATDbits.LATD1 = 1;
             // Motor 2
             
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+            TestStepAdd = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
             if (TestStepAdd > 0)
             {
-              CurrentCommand.StepAdd[1] = TestStepAdd;
+              CurrentCommand.Rate[1] = TestStepAdd;
             }
-            StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
+            StepAcc[1] = StepAcc[1] + CurrentCommand.Rate[1];
             if (StepAcc[1] & 0x80000000)
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
@@ -497,21 +497,21 @@ LATDbits.LATD1 = 1;
           // This only fires if the Command is COMMAND_MOTOR_MOVE
           
           // Only do this if there are steps left to take
-          if (CurrentCommand.StepsCounter[0])
+          if (CurrentCommand.Steps[0])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestStepAdd = CurrentCommand.StepAdd[0] + CurrentCommand.StepAddInc[0];
+            TestStepAdd = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
             if (TestStepAdd > 0)
             {
-              CurrentCommand.StepAdd[0] = TestStepAdd;
+              CurrentCommand.Rate[0] = TestStepAdd;
             }
-            StepAcc[0] = StepAcc[0] + CurrentCommand.StepAdd[0];
+            StepAcc[0] = StepAcc[0] + CurrentCommand.Rate[0];
             if (StepAcc[0] & 0x80000000)
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
-              CurrentCommand.StepsCounter[0]--;
+              CurrentCommand.Steps[0]--;
               if (CurrentCommand.DirBits & DIR1_BIT)
               {
                 globalStepCounter1--;
@@ -523,21 +523,21 @@ LATDbits.LATD1 = 1;
             }
             AllDone = FALSE;
           }
-          if (CurrentCommand.StepsCounter[1])
+          if (CurrentCommand.Steps[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestStepAdd = CurrentCommand.StepAdd[1] + CurrentCommand.StepAddInc[1];
+            TestStepAdd = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
             if (TestStepAdd > 0)
             {
-              CurrentCommand.StepAdd[1] = TestStepAdd;
+              CurrentCommand.Rate[1] = TestStepAdd;
             }
-            StepAcc[1] = StepAcc[1] + CurrentCommand.StepAdd[1];
+            StepAcc[1] = StepAcc[1] + CurrentCommand.Rate[1];
             if (StepAcc[1] & 0x80000000)
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
-              CurrentCommand.StepsCounter[1]--;
+              CurrentCommand.Steps[1]--;
               if (CurrentCommand.DirBits & DIR2_BIT)
               {
                 globalStepCounter2--;
@@ -553,7 +553,7 @@ LATDbits.LATD1 = 1;
           // to see if the move has been completed here (to load the next command
           // immediately rather than waiting for the next tick). This primarily gives
           // us simpler math when figuring out how long moves will take.
-          if (CurrentCommand.StepsCounter[0] == 0 && CurrentCommand.StepsCounter[1] == 0)
+          if (CurrentCommand.Steps[0] == 0 && CurrentCommand.Steps[1] == 0)
           {
             AllDone = TRUE;
           }
@@ -714,10 +714,10 @@ LATDbits.LATD0 = 1;
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
         CommandFIFO[0].Command = COMMAND_NONE;
-        CommandFIFO[0].StepAdd[0] = 0;
-        CommandFIFO[0].StepAdd[1] = 0;
-        CommandFIFO[0].StepsCounter[0] = 0;
-        CommandFIFO[0].StepsCounter[1] = 0;
+        CommandFIFO[0].Rate[0] = 0;
+        CommandFIFO[0].Rate[1] = 0;
+        CommandFIFO[0].Steps[0] = 0;
+        CommandFIFO[0].Steps[1] = 0;
         CommandFIFO[0].DirBits = 0;
         CommandFIFO[0].DelayCounter = 0;
         CommandFIFO[0].ServoPosition = 0;
@@ -779,9 +779,9 @@ void EBB_Init(void)
     // Initialize all Current Command values
     for (i = 0; i < NUMBER_OF_STEPPERS; i++)
     {
-        CurrentCommand.StepAdd[i] = 1;
-        CurrentCommand.StepsCounter[i] = 0;
-        CurrentCommand.StepAddInc[i] = 0;
+        CurrentCommand.Rate[i] = 1;
+        CurrentCommand.Steps[i] = 0;
+        CurrentCommand.Accel[i] = 0;
     }
     CurrentCommand.Command = COMMAND_NONE;
     CurrentCommand.DirBits = 0;
@@ -1251,13 +1251,13 @@ void parse_AM_packet (void)
 //    temp = (UINT32)ftemp;
 
   /* Amount to add to accumulator each 25KHz */
-  CommandFIFO[0].StepAdd[0] = (UINT32)(distance_temp * (float)A1Steps);
+  CommandFIFO[0].Rate[0] = (UINT32)(distance_temp * (float)A1Steps);
 
 // For debug
 //printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
 
   /* Total number of steps for this axis for this move */
-  CommandFIFO[0].StepsCounter[0] = A1Steps;
+  CommandFIFO[0].Steps[0] = A1Steps;
 
 //    ftemp = (float)VelocityFinal * 2147483648.0;
 //    fprint(ftemp);
@@ -1282,7 +1282,7 @@ void parse_AM_packet (void)
   //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
 
   /* Amount to add to StepAdd each 25KHz */
-  CommandFIFO[0].StepAddInc[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
+  CommandFIFO[0].Accel[0] = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
 
   /* Compute StepAdd Axis 2 Initial */
 //    temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
@@ -1304,8 +1304,8 @@ void parse_AM_packet (void)
 // For debug
 //printf((far rom char *)"SAyi = %lu\n\r", temp);
 
-  CommandFIFO[0].StepAdd[1] = (UINT32)(distance_temp * A2Steps);
-  CommandFIFO[0].StepsCounter[1] = A2Steps;
+  CommandFIFO[0].Rate[1] = (UINT32)(distance_temp * A2Steps);
+  CommandFIFO[0].Steps[1] = A2Steps;
 
   /* Compute StepAddInc for axis 2 */
 //    Accel2 = ((float)A2Steps * accel_temp);
@@ -1314,14 +1314,14 @@ void parse_AM_packet (void)
 //    stemp = (INT32)((Accel2 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
 //    stemp = (INT32)(((float)A2Steps * accel_temp) * 343.59738);
 
-  CommandFIFO[0].StepAddInc[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
+  CommandFIFO[0].Accel[1] = (INT32)(((float)A2Steps * accel_temp) * 3.435921);
 
-  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[0] == 0 && CommandFIFO[0].StepsCounter[0] > 0)
+  if (VelocityInital != VelocityFinal && CommandFIFO[0].Accel[0] == 0 && CommandFIFO[0].Steps[0] > 0)
   {
      printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
      return;
   }
-  if (VelocityInital != VelocityFinal && CommandFIFO[0].StepAddInc[1] == 0 && CommandFIFO[0].StepsCounter[1] > 0)
+  if (VelocityInital != VelocityFinal && CommandFIFO[0].Accel[1] == 0 && CommandFIFO[0].Steps[1] > 0)
   {
      printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
      return;
@@ -1336,22 +1336,43 @@ void parse_AM_packet (void)
 
 // Low Level Move command
 // Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
+//
+// Is for doing low level moves with optional acceleration. 
+//
+// <Rate1> and <Rate2> are a 32-bit unsigned ints, but we will generate an error if
+// the MSb is set, so they are only allowed to be 31 bit unsigned integers as parameters.
+// They are the values added to the accumulator every 25KHz.
+// <Steps1> and <Steps2> are signed 32-bit integers where the signs determine the 
+// direction of travel for that axis. Each axis will take <steps> steps and then stop.
+// Once both axis are done moving, the command is complete.
+// <Accel1> and <Accel2> are 32 bit signed ints. Their values are added to <Rate1>
+// and <Rate2> respectively every ISR tick.
+//
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet (void)
 {
-  UINT32 Rate1, Rate2 = 0;
-  INT32 Steps1, Steps2, Accel1, Accel2 = 0;
+  UINT32 Rate1 = 0;
+  UINT32 Rate2 = 0;
+  INT32 Steps1 = 0;
+  INT32 Steps2 = 0;
+  INT32 Accel1 = 0;
+  INT32 Accel2 = 0;
   MoveCommandType move;
   UINT8 ClearAccs = 0;
-
+#if 0
+  INT32 LocalTestStepAdd = 0;
+  INT32 LocalRate1 = 0;
+  INT32 LocalRate2 = 0;
+#endif
+  
   // Extract each of the values.
-  extract_number (kULONG, &Rate1, kREQUIRED);
-  extract_number (kLONG,  &Steps1, kREQUIRED);
-  extract_number (kLONG, &Accel1, kREQUIRED);
-  extract_number (kULONG, &Rate2, kREQUIRED);
-  extract_number (kLONG,  &Steps2, kREQUIRED);
-  extract_number (kLONG, &Accel2, kREQUIRED);
+  extract_number (kULONG, &Rate1,     kREQUIRED);
+  extract_number (kLONG,  &Steps1,    kREQUIRED);
+  extract_number (kLONG,  &Accel1,    kREQUIRED);
+  extract_number (kULONG, &Rate2,     kREQUIRED);
+  extract_number (kLONG,  &Steps2,    kREQUIRED);
+  extract_number (kLONG,  &Accel2,    kREQUIRED);
   extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
@@ -1363,19 +1384,24 @@ void parse_LM_packet (void)
   /* Quickly eliminate obvious invalid parameter combinations,
    * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
   if (
-      (
-          ((Rate1 == 0) && (Accel1 == 0))
-          ||
-          (Steps1 == 0)
-      )
-      &&
-      (
-          ((Rate2 == 0) && (Accel2 == 0))
-          ||
-          (Steps2 == 0)
-      )
+    (Rate1 & 0x80000000) 
+    ||
+    (Rate2 & 0x80000000) 
+    ||
+    (
+      ((Rate1 == 0) && (Accel1 == 0))
+      ||
+      (Steps1 == 0)
+    )
+    &&
+    (
+      ((Rate2 == 0) && (Accel2 == 0))
+      ||
+      (Steps2 == 0)
+    )
   )
   {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   
@@ -1426,12 +1452,12 @@ void parse_LM_packet (void)
     Steps2 = -Steps2;
   }
 
-  move.StepAdd[0] = Rate1;
-  move.StepsCounter[0] = Steps1;
-  move.StepAddInc[0] = Accel1;
-  move.StepAdd[1] = Rate2;
-  move.StepsCounter[1] = Steps2;
-  move.StepAddInc[1] = Accel2;
+  move.Rate[0] = Rate1;
+  move.Steps[0] = Steps1;
+  move.Accel[0] = Accel1;
+  move.Rate[1] = Rate2;
+  move.Steps[1] = Steps2;
+  move.Accel[1] = Accel2;
   move.Command = COMMAND_MOTOR_MOVE;
 
   // Spin here until there's space in the fifo
@@ -1439,17 +1465,41 @@ void parse_LM_packet (void)
   ;
 
   CommandFIFO[0] = move;
-
-  /* For debugging step motion , uncomment the next line */
-  /*
-   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-          CommandFIFO[0].StepAdd[0],
-          CommandFIFO[0].StepsCounter[0],
-          CommandFIFO[0].StepAdd[1],
-          CommandFIFO[0].StepsCounter[1]
+#if 0
+  // For debugging step motion , uncomment the next line
+  printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
+          CommandFIFO[0].Rate[0],  // Rate1 unsigned 31 bit
+          CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
+          CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
+          CommandFIFO[0].Rate[1],  // Rate2 unsigned 31 bit
+          CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
+          CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
       );
-   */
+  
+  // To test that our Rate = Rate + ((-Accel) >> 1) math works properly, we can
+  // also print out what happens after the first ISR tick, which we will
+  // simulate here.
+  LocalTestStepAdd = CommandFIFO[0].Rate[0] + CommandFIFO[0].Accel[0];
+  if (LocalTestStepAdd > 0)
+  {
+    LocalRate1 = LocalTestStepAdd;
+  }
+  LocalTestStepAdd = CommandFIFO[0].Rate[1] + CommandFIFO[0].Accel[1];
+  if (LocalTestStepAdd > 0)
+  {
+    LocalRate2 = LocalTestStepAdd;
+  }
 
+  printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
+          LocalRate1,              // Rate1 unsigned 31 bit into 32 bit signed
+          CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
+          CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
+          LocalRate2,              // Rate2 unsigned 31 bit into 32 bit signed
+          CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
+          CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
+      );
+#endif
+  
   FIFOEmpty = FALSE;
 
   if (g_ack_enable)
@@ -1559,12 +1609,12 @@ void parse_LT_packet (void)
     Rate2 = Rate2 - (Accel2 >> 1);
   }
   
-  move.StepAdd[0] = Rate1;
-  move.StepsCounter[0] = Intervals;    // Overloading StepsCounter[0] for intervals
-  move.StepAddInc[0] = Accel1;
-  move.StepAdd[1] = Rate2;
-  move.StepsCounter[1] = 0;
-  move.StepAddInc[1] = Accel2;
+  move.Rate[0] = Rate1;
+  move.Steps[0] = Intervals;    // Overloading StepsCounter[0] for intervals
+  move.Accel[0] = Accel1;
+  move.Rate[1] = Rate2;
+  move.Steps[1] = 0;
+  move.Accel[1] = Accel2;
   move.Command = COMMAND_MOTOR_MOVE_TIMED;
 
   // Spin here until there's space in the fifo
@@ -2105,9 +2155,9 @@ static void process_SM(
       temp = 0;
     }
 
-    move.StepAdd[0] = temp;
-    move.StepsCounter[0] = A1Stp;
-    move.StepAddInc[0] = 0;
+    move.Rate[0] = temp;
+    move.Steps[0] = A1Stp;
+    move.Accel[0] = 0;
 
     if (A2Stp != 0) 
     {
@@ -2146,9 +2196,9 @@ static void process_SM(
       }
     }
 
-    move.StepAdd[1] = temp;
-    move.StepsCounter[1] = A2Stp;
-    move.StepAddInc[1] = 0;
+    move.Rate[1] = temp;
+    move.Steps[1] = A2Stp;
+    move.Accel[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
 
     /* For debugging step motion , uncomment the next line */
@@ -2209,12 +2259,12 @@ void parse_ES_packet(void)
     if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
     {
         CommandFIFO[0].Command = COMMAND_NONE;
-        fifo_steps1 = CommandFIFO[0].StepsCounter[0];
-        fifo_steps2 = CommandFIFO[0].StepsCounter[1];
-        CommandFIFO[0].StepsCounter[0] = 0;
-        CommandFIFO[0].StepsCounter[1] = 0;
-        CommandFIFO[0].StepAddInc[0] = 0;
-        CommandFIFO[0].StepAddInc[1] = 0;
+        fifo_steps1 = CommandFIFO[0].Steps[0];
+        fifo_steps2 = CommandFIFO[0].Steps[1];
+        CommandFIFO[0].Steps[0] = 0;
+        CommandFIFO[0].Steps[1] = 0;
+        CommandFIFO[0].Accel[0] = 0;
+        CommandFIFO[0].Accel[1] = 0;
         FIFOEmpty = TRUE;
     }
 
@@ -2222,12 +2272,12 @@ void parse_ES_packet(void)
     if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
     {
     	CurrentCommand.Command = COMMAND_NONE;
-        remaining_steps1 = CurrentCommand.StepsCounter[0];
-        remaining_steps2 = CurrentCommand.StepsCounter[1];
-        CurrentCommand.StepsCounter[0] = 0;
-        CurrentCommand.StepsCounter[1] = 0;
-        CurrentCommand.StepAddInc[0] = 0;
-        CurrentCommand.StepAddInc[1] = 0;
+        remaining_steps1 = CurrentCommand.Steps[0];
+        remaining_steps2 = CurrentCommand.Steps[1];
+        CurrentCommand.Steps[0] = 0;
+        CurrentCommand.Steps[1] = 0;
+        CurrentCommand.Accel[0] = 0;
+        CurrentCommand.Accel[1] = 0;
     }
                 
     printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
@@ -2837,10 +2887,10 @@ UINT8 process_QM(void)
         CommandExecuting = 1;
         FIFOStatus = 1;
     }
-    if (CommandExecuting && CurrentCommand.StepsCounter[0] != 0) {
+    if (CommandExecuting && CurrentCommand.Steps[0] != 0) {
         Motor1Running = 1;
     }
-    if (CommandExecuting && CurrentCommand.StepsCounter[1] != 0) {
+    if (CommandExecuting && CurrentCommand.Steps[1] != 0) {
         Motor2Running = 1;
     }
 
