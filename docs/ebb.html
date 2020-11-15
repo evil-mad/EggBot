@@ -806,7 +806,7 @@ td {text-align: center}
             </p>
             <p>
 	         <b>Methods and consequences:</b> 
-	         Each axis has a separate 32 bit accumulator to control its timing. When the LM command is called, both accumulators are initialized to zero.
+	         Each axis has a separate 32 bit accumulator to control its timing.
 	         Then, every 40 &mu;s (when the 25 kHz ISR executes) a certain sequence of events happens for each channel:
 
 	         <ol>	         
@@ -901,7 +901,7 @@ td {text-align: center}
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            First added in v2.5.0 with partial functionality. This command should only be considered to be functional as of v2.5.3.
+            First added in v2.5.0 with partial functionality. This command should only be considered to be functional as of v2.5.3. As of the current version (2.6.5), there may be some remaining issues with the implementation, and we generally recommend the use of SM or XM instead.
           </li>
         </ul>
       
