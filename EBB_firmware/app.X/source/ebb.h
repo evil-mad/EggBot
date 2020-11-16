@@ -126,7 +126,6 @@ extern BOOL gLimitChecks;
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
 void parse_SM_packet(void);
-void parse_AM_packet(void);
 void parse_SC_packet(void);
 void parse_SP_packet(void);
 void parse_TP_packet(void);

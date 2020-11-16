@@ -1342,12 +1342,6 @@ void parse_packet(void)
 			parse_SM_packet ();
 			break;
 		}
-		case ('A' * 256) + 'M':
-		{
-			// AM for Accelerated Motion
-			parse_AM_packet ();
-			break;
-		}
 		case ('S' * 256) + 'P':
 		{
 			// SP for set pen
