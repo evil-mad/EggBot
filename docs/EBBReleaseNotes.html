@@ -33,7 +33,7 @@
           <a id="eggbot" class="anchor" href="#eggbot" aria-hidden="true">
           <span aria-hidden="true" class="octicon octicon-link"></span></a>EBB Release Notes
         </h1>
-        <p>This document details the version history of the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard).</p>
+        <p>This document details the version history of the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard) firmware.</p>
 
         <p />
         <hr />
@@ -338,6 +338,42 @@
             to move the servo (like SP), and will no longer apply power to the servo if the steppers are moved.</li>
           </ul>
         </p>
+
+
+        <h4>2.7.0 &mdash; 11/17/20</h4>
+        <p>
+          <ul>
+            <li>While investigating <a href="https://github.com/evil-mad/EggBot/issues/143">issue #143</a>,
+            we discovered some unexpected behavior due to issues in the prior implementation of the LM
+            command. The LM command has been rewritten to make computation easier and provide accurate
+            and consistent behavior that is also consistent with the documentation.
+            </li>
+            <li>Added optional "clear" parameter to LM command
+            </li>
+            <li>Added new LT command
+            </li>
+            <li>Added optional destination parameters to HM command
+            </li>
+            <li>Fixed a bug present in all motion commands that could lead to a 40 us dead "gap" between subsequent motion commands; motion commands can now be as short as a single 40 us "ISR" cycle.
+            </li>
+            <li>
+            In response to <a href="https://github.com/evil-mad/EggBot/issues/144">issue #144</a> the behavior of the S2 command has been modified so that it, like the SP command, counts as a "pen action"
+            that will reset servo power timeout. See the SR command for more.
+            </li>
+            
+            
+          </ul>
+        </p>
+
+
+
+
+
+
+
+
+
+
 
         <p/>
         <hr/>
