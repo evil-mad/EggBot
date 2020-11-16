@@ -808,7 +808,7 @@ ul.no_bullets {
           <ul>
             <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
             <li><i>Steps1</i> and <i>Steps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
-            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective Rate values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
             <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
           </ul>
@@ -980,7 +980,7 @@ ul.no_bullets {
             <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
             The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
             </li>
-            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective Rate values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
             <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
           </ul>
@@ -1036,8 +1036,8 @@ ul.no_bullets {
             <span style="font-weight: bold;">Example 2:</span> <code>LM,25000,33865471,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
           </li>
-          <span style="font-weight: bold;">Example 3:</span> <code>LM,12500,17179000,-687,8592000,687\r</code> 
-            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 75 steps on each axis. 
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LM,12500,17179000,-687,8592000,687\r</code> 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
