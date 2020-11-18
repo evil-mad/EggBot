@@ -112,10 +112,10 @@ typedef struct
 // values.
 // The values here are hand tuned for 25KHz ISR operation
 // 0xFFFF - 0x01E0 = 0xFE1F
-//#define TIMER1_L_RELOAD (61)  // 0x3D
-//#define TIMER1_H_RELOAD (254) // 0xFE
-#define TIMER1_L_RELOAD (0x3F)
-#define TIMER1_H_RELOAD (0xED)
+#define TIMER1_L_RELOAD (61)  // 0x3D
+#define TIMER1_H_RELOAD (254) // 0xFE
+//#define TIMER1_L_RELOAD (0x3F)
+//#define TIMER1_H_RELOAD (0xED)
 
 
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula

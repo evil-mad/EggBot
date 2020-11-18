@@ -392,7 +392,6 @@ LATDbits.LATD1 = 1;
       // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.Steps[0] || CurrentCommand.Steps[1])
       {
-#if 0
 				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 				{
 					if (CurrentCommand.DirBits & DIR1_BIT)
@@ -502,7 +501,6 @@ LATDbits.LATD1 = 1;
           }
         }
         else
-#endif
         {
           // This only fires if the Command is COMMAND_MOTOR_MOVE
           
@@ -510,15 +508,15 @@ LATDbits.LATD1 = 1;
           if (CurrentCommand.Steps[0])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-//            TestRate = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
-//            if (TestRate > 0)
-//            {
-//              CurrentCommand.Rate[0] = TestRate;
-//            }
-//            else
-//            {
-//              CurrentCommand.Rate[0] = 0x80000000;
-//            }
+            TestRate = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
+            if (TestRate > 0)
+            {
+              CurrentCommand.Rate[0] = TestRate;
+            }
+            else
+            {
+              CurrentCommand.Rate[0] = 0x80000000;
+            }
             StepAcc[0] = StepAcc[0] + CurrentCommand.Rate[0];
             if (StepAcc[0] & 0x80000000)
             {
@@ -540,15 +538,15 @@ LATDbits.LATD1 = 1;
           if (CurrentCommand.Steps[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-//            TestRate = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
-//            if (TestRate > 0)
-//            {
-//              CurrentCommand.Rate[1] = TestRate;
-//            }
-//            else
-//            {
-//              CurrentCommand.Rate[1] = 0x80000000;
-//            }
+            TestRate = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
+            if (TestRate > 0)
+            {
+              CurrentCommand.Rate[1] = TestRate;
+            }
+            else
+            {
+              CurrentCommand.Rate[1] = 0x80000000;
+            }
             StepAcc[1] = StepAcc[1] + CurrentCommand.Rate[1];
             if (StepAcc[1] & 0x80000000)
             {
@@ -571,13 +569,13 @@ LATDbits.LATD1 = 1;
           // to see if the move has been completed here (to load the next command
           // immediately rather than waiting for the next tick). This primarily gives
           // us simpler math when figuring out how long moves will take.
-//          if (CurrentCommand.Steps[0] == 0 && CurrentCommand.Steps[1] == 0)
-//          {
-//            TRISCbits.TRISC0 = 0;
-//            LATCbits.LATC0 = 1;
-//            AllDone = TRUE;
-//            LATCbits.LATC0 = 0;
-//          }
+          if (CurrentCommand.Steps[0] == 0 && CurrentCommand.Steps[1] == 0)
+          {
+            TRISCbits.TRISC0 = 0;
+            LATCbits.LATC0 = 1;
+            AllDone = TRUE;
+            LATCbits.LATC0 = 0;
+          }
         }
 				if (TookStep)
 				{
@@ -750,7 +748,6 @@ LATDbits.LATD0 = 1;
         
         // Take care of clearing the step accumulators for the next move if
         // it's a motor move
-#if 0
         if (
           (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
           ||
@@ -767,7 +764,6 @@ LATDbits.LATD0 = 1;
             StepAcc[1] = 0;
           }
         }
-#endif
 				FIFOEmpty = TRUE;
 LATDbits.LATD0 = 0;
 			}
