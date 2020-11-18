@@ -111,8 +111,13 @@ typedef struct
 // that happen after the timer fires but before we can reload the timer with new
 // values.
 // The values here are hand tuned for 25KHz ISR operation
-#define TIMER1_L_RELOAD (61)
-#define TIMER1_H_RELOAD (254)
+// 0xFFFF - 0x01E0 = 0xFE1F
+//#define TIMER1_L_RELOAD (61)  // 0x3D
+//#define TIMER1_H_RELOAD (254) // 0xFE
+#define TIMER1_L_RELOAD (0x3F)
+#define TIMER1_H_RELOAD (0xED)
+
+
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 
 
