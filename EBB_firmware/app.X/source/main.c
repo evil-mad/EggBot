@@ -169,8 +169,6 @@ void main(void)
 			USBDeviceAttach();
 		}
 		#endif
-    TRISAbits.TRISA1 = 0;
-    LATAbits.LATA1 = 1;
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.
         USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
@@ -187,8 +185,6 @@ void main(void)
         				  // execute (~50 instruction cycles) before it returns.
         #endif
     				  
-    LATAbits.LATA1 = 0;
-
 		// Application-specific tasks.
 		// Application related code may be added here, or in the ProcessIO() function.
         ProcessIO();        

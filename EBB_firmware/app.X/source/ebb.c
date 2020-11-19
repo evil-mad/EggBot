@@ -349,8 +349,6 @@ void high_ISR(void)
   // 25KHz ISR fire
 	if (PIR1bits.TMR1IF)
 	{
-TRISDbits.TRISD1 = 0;
-LATDbits.LATD1 = 1;
 		// Clear the interrupt 
 		PIR1bits.TMR1IF = 0;
 		TMR1H = TIMER1_H_RELOAD;	//
@@ -571,10 +569,7 @@ LATDbits.LATD1 = 1;
           // us simpler math when figuring out how long moves will take.
           if (CurrentCommand.Steps[0] == 0 && CurrentCommand.Steps[1] == 0)
           {
-            TRISCbits.TRISC0 = 0;
-            LATCbits.LATC0 = 1;
             AllDone = TRUE;
-            LATCbits.LATC0 = 0;
           }
         }
 				if (TookStep)
@@ -728,8 +723,6 @@ LATDbits.LATD1 = 1;
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
-TRISDbits.TRISD0 = 0;
-LATDbits.LATD0 = 1;
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
         CommandFIFO[0].Command = COMMAND_NONE;
@@ -765,7 +758,6 @@ LATDbits.LATD0 = 1;
           }
         }
 				FIFOEmpty = TRUE;
-LATDbits.LATD0 = 0;
 			}
       else {
         CurrentCommand.DelayCounter = 0;
@@ -786,7 +778,6 @@ LATDbits.LATD0 = 0;
 			ButtonPushed = TRUE;
 		}
 	}
-LATDbits.LATD1 = 0;
 }
 
 // Init code
