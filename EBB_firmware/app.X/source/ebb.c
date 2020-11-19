@@ -238,9 +238,24 @@
 //                    input parameters)
 // 2.6.5 11/29/19 - Changed SR command behavior so it only enables servo power
 //                    after SP command, not also after stepper movement
-// 2.7.0 11/01/20 - Optional parameter <ClearAccs> added to all stepper motion commands
-//                  
-//                  We don't allow StepAdd to go negative (like from LM command)
+// 2.6.6 11/10/20 - Fixed bug where S2 command wouldn't turn power on to RB1
+//                    servo output if it had been turned off.
+// 2.7.0 11/19/20 - Optional parameter <ClearAccs> added to all stepper motion 
+//                    commands
+//                  No longer allow Rate to go negative (like from LM command) 
+//                    inside ISR
+//                  Removed AM command
+//                  Added optional parameter <Clear> to all stepper motion 
+//                    commands to allow explicit zeroing of accumulators
+//                  Renamed internal parameters for some commands (LT/LM) for
+//                    clarity. Also queue structure members got renamed.
+//                  Added optional absolute position values to HM command
+//                  Added LT command, based on LM command
+//                  Updated math in LM command based on Kinematics analysis
+//                  Updated math in ISR (for LM/LT) based on Kinematics analysis
+//                  Fixed bug where negative accels could cause delays before 
+//                    last step.
+//                  EM command now always clears accumulators
 
 #include <p18cxxx.h>
 #include <usart.h>
