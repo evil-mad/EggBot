@@ -432,14 +432,6 @@ LATDbits.LATD1 = 1;
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
-              if (CurrentCommand.DirBits & DIR1_BIT)
-              {
-                globalStepCounter1--;
-              }
-              else
-              {
-                globalStepCounter1++;
-              }	
             }
 
             // Motor 2
@@ -456,14 +448,6 @@ LATDbits.LATD1 = 1;
               acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
-              if (CurrentCommand.DirBits & DIR2_BIT)
-              {
-                globalStepCounter2--;
-              }
-              else
-              {
-                globalStepCounter2++;
-              }
             }
           }
         }
@@ -487,14 +471,6 @@ LATDbits.LATD1 = 1;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
-              if (CurrentCommand.DirBits & DIR1_BIT)
-              {
-                globalStepCounter1--;
-              }
-              else
-              {
-                globalStepCounter1++;
-              }	
             }
             AllDone = FALSE;
           }
@@ -513,14 +489,6 @@ LATDbits.LATD1 = 1;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
-              if (CurrentCommand.DirBits & DIR2_BIT)
-              {
-                globalStepCounter2--;
-              }
-              else
-              {
-                globalStepCounter2++;
-              }
             }
             AllDone = FALSE;
           }
@@ -593,39 +561,32 @@ LATDbits.LATD1 = 1;
 							Step2AltIO = 1;
 						}
 					}
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
-					Delay1TCY();
+
+          // This next section not only counts the step(s) we are taking, but
+          // also acts as a delay to keep the step bit set for a little while.
+          // The code paths though here are approximately constant time.
+          if (CurrentCommand.DirBits & DIR1_BIT)
+          {
+            globalStepCounter1--;
+          }
+          else
+          {
+            globalStepCounter1++;
+          }    
+          if (CurrentCommand.DirBits & DIR2_BIT)
+          {
+            globalStepCounter2--;
+          }
+          else
+          {
+            globalStepCounter2++;
+          }
 					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 					{
 						Step1IO = 0;
 						Step2IO = 0;
 					}
-                    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+          else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
 					{
 						Step1AltIO = 0;
 						Step2AltIO = 0;
