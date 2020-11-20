@@ -306,7 +306,8 @@ typedef enum
 // Working registers
 static volatile MoveCommandType CurrentCommand;
 //#pragma udata access fast_vars
-static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
+union union32b4 acc_union[2];
+//static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
 // Temporary signed 32 bit value for ISR
 static INT32 TestRate;
 BOOL FIFOEmpty;
@@ -353,6 +354,8 @@ void clear_StepCounters(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
+TRISDbits.TRISD1 = 0;
+LATDbits.LATD1 = 1;
 	//Check which interrupt flag caused the interrupt.
 	//Service the interrupt
 	//Clear the interrupt flag
@@ -468,10 +471,10 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[0] = 0x80000000;
             }
-            StepAcc[0] = StepAcc[0] + CurrentCommand.Rate[0];
-            if (StepAcc[0] & 0x80000000)
+            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0];
+            if (acc_union[0].bytes.b4 & 0x80)
             {
-              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+              acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
               if (CurrentCommand.DirBits & DIR1_BIT)
@@ -496,10 +499,10 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[1] = 0x80000000;
             }
-            StepAcc[1] = StepAcc[1] + CurrentCommand.Rate[1];
-            if (StepAcc[1] & 0x80000000)
+            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1];
+            if (acc_union[1].bytes.b4 & 0x80)
             {
-              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+              acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
               if (CurrentCommand.DirBits & DIR2_BIT)
@@ -530,10 +533,10 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[0] = 0x80000000;
             }
-            StepAcc[0] = StepAcc[0] + CurrentCommand.Rate[0];
-            if (StepAcc[0] & 0x80000000)
+            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0];
+            if (acc_union[0].bytes.b4 & 0x80)
             {
-              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+              acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
@@ -560,10 +563,10 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[1] = 0x80000000;
             }
-            StepAcc[1] = StepAcc[1] + CurrentCommand.Rate[1];
-            if (StepAcc[1] & 0x80000000)
+            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1];
+            if (acc_union[1].bytes.b4 & 0x80)
             {
-              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+              acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
@@ -765,11 +768,11 @@ void high_ISR(void)
           // Use the SEState to determine which accumulators to clear.
           if (CurrentCommand.SEState & 0x01)
           {
-            StepAcc[0] = 0;
+            acc_union[0].value = 0;
           }
           if (CurrentCommand.SEState & 0x02)
           {
-            StepAcc[1] = 0;
+            acc_union[1].value = 0;
           }
         }
 				FIFOEmpty = TRUE;
@@ -793,6 +796,7 @@ void high_ISR(void)
 			ButtonPushed = TRUE;
 		}
 	}
+LATDbits.LATD1 = 0;
 }
 
 // Init code
@@ -2812,8 +2816,8 @@ void clear_StepCounters(void)
     globalStepCounter2 = 0;
     
     // Clear both step accumulators as well
-    StepAcc[0] = 0;
-    StepAcc[1] = 0;
+    acc_union[0].value = 0;
+    acc_union[1].value = 0;
     
     // Re-enable interrupts
     INTCONbits.GIEH = 1;	// Turn high priority interrupts on

@@ -75,6 +75,17 @@ typedef enum
   COMMAND_MOTOR_MOVE_TIMED
 } CommandType;
 
+// Byte union used for accumulator
+union union32b4 {
+  struct byte_map {
+      UINT8 b1; // Low byte
+      UINT8 b2;
+      UINT8 b3;
+      UINT8 b4; // High byte
+  } bytes;
+  UINT32 value;
+};
+
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
