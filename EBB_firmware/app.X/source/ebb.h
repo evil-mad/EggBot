@@ -75,12 +75,34 @@ typedef enum
   COMMAND_MOTOR_MOVE_TIMED
 } CommandType;
 
+// Byte union used for accumulator (unsigned))
+typedef union union32b4 {
+  struct byte_map {
+      UINT8 b1; // Low byte
+      UINT8 b2;
+      UINT8 b3;
+      UINT8 b4; // High byte
+  } bytes;
+  UINT32 value;
+} u32b4_t;
+
+// Byte union used for rate (signed)
+typedef union union32b4 {
+  struct byte_map {
+      UINT8 b1; // Low byte
+      UINT8 b2;
+      UINT8 b3;
+      UINT8 b4; // High byte
+  } bytes;
+  INT32 value;
+} uS32b4_t;
+
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {
   CommandType     Command;
-  INT32           Rate[NUMBER_OF_STEPPERS];
+  uS32b4_t        Rate[NUMBER_OF_STEPPERS];
   INT32           Accel[NUMBER_OF_STEPPERS];
   UINT32          Steps[NUMBER_OF_STEPPERS];
   UINT8           DirBits;
@@ -91,6 +113,7 @@ typedef struct
   UINT16          ServoRate;
   UINT8           SEState;
   UINT16          SEPower;
+  UINT8           Active[NUMBER_OF_STEPPERS];
 } MoveCommandType;
 
 // Define global things that depend on the board type
