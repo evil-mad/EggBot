@@ -51,6 +51,9 @@
 #ifndef EBB_H
 #define EBB_H
 
+// Enable this line to compile with a lot of debug prints for motion commands
+//#define DEBUG_VALUE_PRINT
+
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
 #define DISABLE_MOTOR       1

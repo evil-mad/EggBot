@@ -280,7 +280,7 @@
 #define MAX_RC_DURATION 11890
 
 // Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     4
+#define COMMAND_FIFO_LENGTH     1
 
 typedef enum
 {
@@ -1149,7 +1149,7 @@ void parse_LM_packet (void)
   INT32 Accel2 = 0;
   MoveCommandType move;
   UINT8 ClearAccs = 0;
-#if 0
+#if defined(DEBUG_VALUE_PRINT)
   INT32 LocalTestStepAdd = 0;
   INT32 LocalRate1 = 0;
   INT32 LocalRate2 = 0;
@@ -1170,13 +1170,19 @@ void parse_LM_packet (void)
     return;
   }
 
+  // Limit Rates to 0x7FFFFFFF
+  if (Rate1 >= 0x7FFFFFFF)
+  {
+    Rate1 = 0x7FFFFFFF;
+  }
+  if (Rate2 >= 0x7FFFFFFF)
+  {
+    Rate2 = 0x7FFFFFFF;
+  }
+
   /* Quickly eliminate obvious invalid parameter combinations,
    * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
   if (
-    (Rate1 & 0x80000000) 
-    ||
-    (Rate2 & 0x80000000) 
-    ||
     (
       ((Rate1 == 0) && (Accel1 == 0))
       ||
@@ -1254,7 +1260,7 @@ void parse_LM_packet (void)
   ;
 
   CommandFIFO[0] = move;
-#if 0
+#if defined(DEBUG_VALUE_PRINT)
   // For debugging step motion , uncomment the next line
   printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
           CommandFIFO[0].Rate[0].value,  // Rate1 unsigned 31 bit
@@ -1413,14 +1419,14 @@ void parse_LT_packet (void)
   CommandFIFO[0] = move;
 
   /* For debugging step motion , uncomment the next line */
-  /*
-   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-          CommandFIFO[0].StepAdd[0],
-          CommandFIFO[0].StepsCounter[0],
-          CommandFIFO[0].StepAdd[1],
-          CommandFIFO[0].StepsCounter[1]
-      );
-   */
+#if defined(DEBUG_VALUE_PRINT)
+   printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
+          CommandFIFO[0].Rate[0],
+          CommandFIFO[0].Steps[0],
+          CommandFIFO[0].Rate[1],
+          CommandFIFO[0].Steps[1]
+    );
+#endif
 
   FIFOEmpty = FALSE;
 
@@ -1448,8 +1454,8 @@ void parse_SM_packet (void)
 
 	// Extract each of the values.
 	extract_number (kULONG, &Duration, kREQUIRED);
-	extract_number (kLONG, &A1Steps, kREQUIRED);
-	extract_number (kLONG, &A2Steps, kOPTIONAL);
+	extract_number (kLONG,  &A1Steps,  kREQUIRED);
+	extract_number (kLONG,  &A2Steps,  kOPTIONAL);
   extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
 
     if (gLimitChecks)
@@ -1573,8 +1579,8 @@ void parse_HM_packet (void)
 
 	// Extract the step rate.
 	extract_number (kULONG, &StepRate, kREQUIRED);
-	extract_number (kULONG, &Pos1, kOPTIONAL);
-	extract_number (kULONG, &Pos2, kOPTIONAL);
+	extract_number (kLONG,  &Pos1,     kOPTIONAL);
+	extract_number (kLONG,  &Pos2,     kOPTIONAL);
 
   // StepRate can't be zero
   if (StepRate == 0)
@@ -1720,7 +1726,8 @@ void parse_HM_packet (void)
   {
     Duration = 10;
   }
-#if 1
+
+#if defined(DEBUG_VALUE_PRINT)
   printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
     Duration,
     Steps1,
@@ -1842,6 +1849,9 @@ void parse_XM_packet (void)
 // the data in the FIFO. The ISR then sees this data when it is done with its
 // current move, and starts this new move.
 //
+// Note that a Rate value of 0x8000000 is not allowed. The function will
+// subtract one if this value for Rate is seen due to step counts and duration.
+//
 // In the future, making the FIFO more elements deep may be cool.
 // 
 static void process_SM(
@@ -1858,12 +1868,14 @@ static void process_SM(
   MoveCommandType move;
 
   // Uncomment the following printf() for debugging
-  //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
-  //        Duration,
-  //        A1Stp,
-  //        A2Stp
-  //    );
-
+#if defined(DEBUG_VALUE_PRINT)
+  printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+          Duration,
+          A1Stp,
+          A2Stp
+      );
+#endif
+  
   if (ClearAccs > 3)
   {
     ClearAccs = 3;
@@ -1909,17 +1921,18 @@ static void process_SM(
     // If A1Stp is 1, then duration must be 763 or less.
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
-
-//  // First check for duration to large.
-//  if (A1Stp < (0xFFFFFF/763)) 
-//  {
-//    if (duration > (A1Stp * 763)) 
-//    {
-//      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
-//      temp = 0;
-//      A1Stp = 0;
-//    }
-//  }
+#if defined(DEBUG_VALUE_PRINT)
+  // First check for duration to large.
+  if (A1Stp < (0xFFFFFF/763)) 
+  {
+    if (Duration > (A1Stp * 763)) 
+    {
+      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
+      temp = 0;
+      A1Stp = 0;
+    }
+  }
+#endif
     if (A1Stp != 0) 
     {
       if (A1Stp < 0x1FFFF) 
@@ -1968,6 +1981,10 @@ static void process_SM(
       temp = 0;
     }
 
+    if (temp >= 0x7FFFFFFF)
+    {
+      temp = 0x7FFFFFFF;
+    }
     move.Rate[0].value = temp;
     move.Steps[0] = A1Stp;
     move.Accel[0] = 0;
@@ -2009,21 +2026,26 @@ static void process_SM(
       }
     }
 
+    if (temp >= 0x7FFFFFFF)
+    {
+      temp = 0x7FFFFFFF;
+    }
     move.Rate[1].value = temp;
     move.Steps[1] = A2Stp;
     move.Accel[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
 
     /* For debugging step motion , uncomment the next line */
-
-    //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
-    //        move.StepAdd[0],
-    //        move.StepsCounter[0],
-    //        move.StepAdd[1],
-    //        move.StepsCounter[1]
-    //    );
+#if defined(DEBUG_VALUE_PRINT)
+    printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
+            move.Rate[0],
+            move.Steps[0],
+            move.Rate[1],
+            move.Steps[1]
+        );
+#endif
   }
-
+  
   // Spin here until there's space in the fifo
   while(!FIFOEmpty)
   ;
@@ -2092,7 +2114,8 @@ void parse_ES_packet(void)
         CurrentCommand.Accel[0] = 0;
         CurrentCommand.Accel[1] = 0;
     }
-                
+
+#if defined(DEBUG_VALUE_PRINT)
     printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
             command_interrupted,
             fifo_steps1,
@@ -2100,6 +2123,7 @@ void parse_ES_packet(void)
             remaining_steps1,
             remaining_steps2
         );
+#endif
 	print_ack();
 }
 
@@ -2397,7 +2421,7 @@ void parse_NI_packet(void)
 	print_ack();
 }
 
-// Node counter Deccriment
+// Node counter Decrement
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
