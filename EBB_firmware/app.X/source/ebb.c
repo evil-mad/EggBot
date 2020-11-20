@@ -498,14 +498,14 @@ LATDbits.LATD1 = 1;
               }
             }
           }
-          // We want to allow for a one-ISR tick move, which requires us to check
-          // to see if the move has been completed here (to load the next command
-          // immediately rather than waiting for the next tick). This primarily gives
-          // us simpler math when figuring out how long moves will take.
-          if (CurrentCommand.Active[0] ||  CurrentCommand.Active[1])
-          {
-            AllDone = FALSE;
-          }
+        }
+        // We want to allow for a one-ISR tick move, which requires us to check
+        // to see if the move has been completed here (to load the next command
+        // immediately rather than waiting for the next tick). This primarily gives
+        // us simpler math when figuring out how long moves will take.
+        if (CurrentCommand.Active[0] ||  CurrentCommand.Active[1])
+        {
+          AllDone = FALSE;
         }
 				if (TookStep)
 				{
@@ -702,6 +702,8 @@ LATDbits.LATD1 = 1;
         CommandFIFO[0].ServoRate = 0;
         CommandFIFO[0].SEState = 0;
         CommandFIFO[0].SEPower = 0;
+        CommandFIFO[0].Active[0] = FALSE;
+        CommandFIFO[0].Active[1] = FALSE;
         
         // Take care of clearing the step accumulators for the next move if
         // it's a motor move
@@ -740,7 +742,8 @@ LATDbits.LATD1 = 1;
         }
 				FIFOEmpty = TRUE;
 			}
-      else {
+      else 
+      {
         CurrentCommand.DelayCounter = 0;
       }
 		}
