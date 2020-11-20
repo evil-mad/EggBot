@@ -571,21 +571,27 @@ LATDbits.LATD1 = 1;
           // This next section not only counts the step(s) we are taking, but
           // also acts as a delay to keep the step bit set for a little while.
           // The code paths though here are approximately constant time.
-          if (CurrentCommand.DirBits & DIR1_BIT)
+          if (OutByte & STEP1_BIT)
           {
-            globalStepCounter1--;
+            if (CurrentCommand.DirBits & DIR1_BIT)
+            {
+              globalStepCounter1--;
+            }
+            else
+            {
+              globalStepCounter1++;
+            }
           }
-          else
+          if (OutByte & STEP2_BIT)
           {
-            globalStepCounter1++;
-          }    
-          if (CurrentCommand.DirBits & DIR2_BIT)
-          {
-            globalStepCounter2--;
-          }
-          else
-          {
-            globalStepCounter2++;
+            if (CurrentCommand.DirBits & DIR2_BIT)
+            {
+              globalStepCounter2--;
+            }
+            else
+            {
+              globalStepCounter2++;
+            }
           }
 					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
 					{
@@ -687,6 +693,8 @@ LATDbits.LATD1 = 1;
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
+TRISDbits.TRISD0 = 0;
+LATDbits.LATD0 = 1;
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
         CommandFIFO[0].Command = COMMAND_NONE;
@@ -762,6 +770,7 @@ LATDbits.LATD1 = 1;
 			ButtonPushed = TRUE;
 		}
 	}
+LATDbits.LATD0 = 0;
 LATDbits.LATD1 = 0;
 }
 
