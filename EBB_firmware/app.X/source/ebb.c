@@ -404,18 +404,18 @@ LATDbits.LATD1 = 1;
     )
 		{
       // Only output DIR bits if we are actually doing something
-			if (CurrentCommand.Steps[0] || CurrentCommand.Steps[1])
+			if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
       {
         if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
         {
           // Has time run out for this command yet?
-          if (CurrentCommand.Steps[0])
+          if (CurrentCommand.Active[0])
           {
             // Nope. So count this ISR tick, and then see if we need to take a step
             CurrentCommand.Steps[0]--;
-            if (CurrentCommand.Steps[0] != 0)
+            if (CurrentCommand.Steps[0] == 0)
             {
-              AllDone = FALSE;
+              CurrentCommand.Active[0] = FALSE;
             }
 
             // Motor 1
@@ -456,7 +456,7 @@ LATDbits.LATD1 = 1;
           // This only fires if the Command is COMMAND_MOTOR_MOVE
           
           // Only do this if there are steps left to take
-          if (CurrentCommand.Steps[0])
+          if (CurrentCommand.Active[0])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
@@ -471,10 +471,13 @@ LATDbits.LATD1 = 1;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
+              if (CurrentCommand.Steps[0] == 0)
+              {
+                CurrentCommand.Active[0] = FALSE;
+              }
             }
-            AllDone = FALSE;
           }
-          if (CurrentCommand.Steps[1])
+          if (CurrentCommand.Active[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
             CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
@@ -489,16 +492,19 @@ LATDbits.LATD1 = 1;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
+              if (CurrentCommand.Steps[1] == 0)
+              {
+                CurrentCommand.Active[1] = FALSE;
+              }
             }
-            AllDone = FALSE;
           }
           // We want to allow for a one-ISR tick move, which requires us to check
           // to see if the move has been completed here (to load the next command
           // immediately rather than waiting for the next tick). This primarily gives
           // us simpler math when figuring out how long moves will take.
-          if (CurrentCommand.Steps[0] == 0 && CurrentCommand.Steps[1] == 0)
+          if (CurrentCommand.Active[0] ||  CurrentCommand.Active[1])
           {
-            AllDone = TRUE;
+            AllDone = FALSE;
           }
         }
 				if (TookStep)
@@ -713,6 +719,23 @@ LATDbits.LATD1 = 1;
           if (CurrentCommand.SEState & 0x02)
           {
             acc_union[1].value = 0;
+          }
+          // Set the "Active" flags for this move based on steps for each axis
+          if (CurrentCommand.Steps[0])
+          {
+            CurrentCommand.Active[0] = TRUE;
+          }
+          else
+          {
+            CurrentCommand.Active[0] = FALSE;
+          }
+          if (CurrentCommand.Steps[1])
+          {
+            CurrentCommand.Active[1] = TRUE;
+          }
+          else
+          {
+            CurrentCommand.Active[1] = FALSE;
           }
         }
 				FIFOEmpty = TRUE;

@@ -113,6 +113,7 @@ typedef struct
   UINT16          ServoRate;
   UINT8           SEState;
   UINT16          SEPower;
+  UINT8           Active[NUMBER_OF_STEPPERS];
 } MoveCommandType;
 
 // Define global things that depend on the board type
