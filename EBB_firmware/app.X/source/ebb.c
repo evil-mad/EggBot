@@ -406,45 +406,6 @@ LATDbits.LATD1 = 1;
       // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.Steps[0] || CurrentCommand.Steps[1])
       {
-				if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-				{
-					if (CurrentCommand.DirBits & DIR1_BIT)
-					{
-						Dir1IO = 1;
-					}
-					else
-					{
-						Dir1IO = 0;
-					}	
-					if (CurrentCommand.DirBits & DIR2_BIT)
-					{
-						Dir2IO = 1;
-					}
-					else
-					{
-						Dir2IO = 0;
-					}	
-				}
-        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-				{
-					if (CurrentCommand.DirBits & DIR1_BIT)
-					{
-						Dir1AltIO = 1;
-					}
-					else
-					{
-						Dir1AltIO = 0;
-					}	
-					if (CurrentCommand.DirBits & DIR2_BIT)
-					{
-						Dir2AltIO = 1;
-					}
-					else
-					{
-						Dir2AltIO = 0;
-					}	
-				}
-
         if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
         {
           // Has time run out for this command yet?
@@ -574,9 +535,27 @@ LATDbits.LATD1 = 1;
         }
 				if (TookStep)
 				{
-					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-					{
-						if (OutByte & STEP1_BIT)
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          {
+            // Set the dir bits
+            if (CurrentCommand.DirBits & DIR1_BIT)
+            {
+              Dir1IO = 1;
+            }
+            else
+            {
+              Dir1IO = 0;
+            }	
+            if (CurrentCommand.DirBits & DIR2_BIT)
+            {
+              Dir2IO = 1;
+            }
+            else
+            {
+              Dir2IO = 0;
+            }
+            // Set the step bits
+ 						if (OutByte & STEP1_BIT)
 						{
 							Step1IO = 1;
 						}
@@ -584,9 +563,27 @@ LATDbits.LATD1 = 1;
 						{
 							Step2IO = 1;
 						}
-					}
+          }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-					{
+          {
+            // Set the DIR Bits
+            if (CurrentCommand.DirBits & DIR1_BIT)
+            {
+              Dir1AltIO = 1;
+            }
+            else
+            {
+              Dir1AltIO = 0;
+            }	
+            if (CurrentCommand.DirBits & DIR2_BIT)
+            {
+              Dir2AltIO = 1;
+            }
+            else
+            {
+              Dir2AltIO = 0;
+            }
+            // Set the STEP bits
 						if (OutByte & STEP1_BIT)
 						{
 							Step1AltIO = 1;
