@@ -306,10 +306,8 @@ typedef enum
 // Working registers
 static volatile MoveCommandType CurrentCommand;
 //#pragma udata access fast_vars
-union union32b4 acc_union[2];
-//static UINT32 StepAcc[NUMBER_OF_STEPPERS] = {0,0};
-// Temporary signed 32 bit value for ISR
-static INT32 TestRate;
+// Accumulator for each axis
+static u32b4_t acc_union[2];
 BOOL FIFOEmpty;
 
 #pragma udata
@@ -462,16 +460,12 @@ LATDbits.LATD1 = 1;
             // Motor 1
             
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestRate = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
-            if (TestRate > 0)
+            CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+            if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
             {
-              CurrentCommand.Rate[0] = TestRate;
+              CurrentCommand.Rate[0].bytes.b4 += 0x80;
             }
-            else
-            {
-              CurrentCommand.Rate[0] = 0x80000000;
-            }
-            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0];
+            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
@@ -490,16 +484,12 @@ LATDbits.LATD1 = 1;
             // Motor 2
             
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestRate = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
-            if (TestRate > 0)
+            CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+            if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
             {
-              CurrentCommand.Rate[1] = TestRate;
+              CurrentCommand.Rate[1].bytes.b4 += 0x80;
             }
-            else
-            {
-              CurrentCommand.Rate[1] = 0x80000000;
-            }
-            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1];
+            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
               acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
@@ -524,16 +514,12 @@ LATDbits.LATD1 = 1;
           if (CurrentCommand.Steps[0])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestRate = CurrentCommand.Rate[0] + CurrentCommand.Accel[0];
-            if (TestRate > 0)
+            CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+            if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
             {
-              CurrentCommand.Rate[0] = TestRate;
+              CurrentCommand.Rate[0].bytes.b4 += 0x80;
             }
-            else
-            {
-              CurrentCommand.Rate[0] = 0x80000000;
-            }
-            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0];
+            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
@@ -554,16 +540,12 @@ LATDbits.LATD1 = 1;
           if (CurrentCommand.Steps[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            TestRate = CurrentCommand.Rate[1] + CurrentCommand.Accel[1];
-            if (TestRate > 0)
+            CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+            if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
             {
-              CurrentCommand.Rate[1] = TestRate;
+              CurrentCommand.Rate[1].bytes.b4 += 0x80;
             }
-            else
-            {
-              CurrentCommand.Rate[1] = 0x80000000;
-            }
-            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1];
+            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
               acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
@@ -744,8 +726,8 @@ LATDbits.LATD1 = 1;
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
         CommandFIFO[0].Command = COMMAND_NONE;
-        CommandFIFO[0].Rate[0] = 0;
-        CommandFIFO[0].Rate[1] = 0;
+        CommandFIFO[0].Rate[0].value = 0;
+        CommandFIFO[0].Rate[1].value = 0;
         CommandFIFO[0].Steps[0] = 0;
         CommandFIFO[0].Steps[1] = 0;
         CommandFIFO[0].DirBits = 0;
@@ -807,7 +789,7 @@ void EBB_Init(void)
     // Initialize all Current Command values
     for (i = 0; i < NUMBER_OF_STEPPERS; i++)
     {
-        CurrentCommand.Rate[i] = 1;
+        CurrentCommand.Rate[i].value = 1;
         CurrentCommand.Steps[i] = 0;
         CurrentCommand.Accel[i] = 0;
     }
@@ -1266,10 +1248,10 @@ void parse_LM_packet (void)
     Steps2 = -Steps2;
   }
 
-  move.Rate[0] = Rate1;
+  move.Rate[0].value = Rate1;
   move.Steps[0] = Steps1;
   move.Accel[0] = Accel1;
-  move.Rate[1] = Rate2;
+  move.Rate[1].value = Rate2;
   move.Steps[1] = Steps2;
   move.Accel[1] = Accel2;
   move.Command = COMMAND_MOTOR_MOVE;
@@ -1282,10 +1264,10 @@ void parse_LM_packet (void)
 #if 0
   // For debugging step motion , uncomment the next line
   printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-          CommandFIFO[0].Rate[0],  // Rate1 unsigned 31 bit
+          CommandFIFO[0].Rate[0].value,  // Rate1 unsigned 31 bit
           CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
           CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-          CommandFIFO[0].Rate[1],  // Rate2 unsigned 31 bit
+          CommandFIFO[0].Rate[1].value,  // Rate2 unsigned 31 bit
           CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
           CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
       );
@@ -1293,12 +1275,12 @@ void parse_LM_packet (void)
   // To test that our Rate = Rate + ((-Accel) >> 1) math works properly, we can
   // also print out what happens after the first ISR tick, which we will
   // simulate here.
-  LocalTestStepAdd = CommandFIFO[0].Rate[0] + CommandFIFO[0].Accel[0];
+  LocalTestStepAdd = CommandFIFO[0].Rate[0].value + CommandFIFO[0].Accel[0];
   if (LocalTestStepAdd > 0)
   {
     LocalRate1 = LocalTestStepAdd;
   }
-  LocalTestStepAdd = CommandFIFO[0].Rate[1] + CommandFIFO[0].Accel[1];
+  LocalTestStepAdd = CommandFIFO[0].Rate[1].value + CommandFIFO[0].Accel[1];
   if (LocalTestStepAdd > 0)
   {
     LocalRate2 = LocalTestStepAdd;
@@ -1423,10 +1405,10 @@ void parse_LT_packet (void)
     Rate2 = Rate2 - (Accel2 >> 1);
   }
   
-  move.Rate[0] = Rate1;
+  move.Rate[0].value = Rate1;
   move.Steps[0] = Intervals;    // Overloading StepsCounter[0] for intervals
   move.Accel[0] = Accel1;
-  move.Rate[1] = Rate2;
+  move.Rate[1].value = Rate2;
   move.Steps[1] = 0;
   move.Accel[1] = Accel2;
   move.Command = COMMAND_MOTOR_MOVE_TIMED;
@@ -1993,7 +1975,7 @@ static void process_SM(
       temp = 0;
     }
 
-    move.Rate[0] = temp;
+    move.Rate[0].value = temp;
     move.Steps[0] = A1Stp;
     move.Accel[0] = 0;
 
@@ -2034,7 +2016,7 @@ static void process_SM(
       }
     }
 
-    move.Rate[1] = temp;
+    move.Rate[1].value = temp;
     move.Steps[1] = A2Stp;
     move.Accel[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
