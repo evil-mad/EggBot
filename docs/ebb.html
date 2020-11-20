@@ -830,8 +830,8 @@ ul.no_bullets {
             The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it.
 	       Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
 	         <ol>
-    	     <li>A temporary variable is created: <i>New_Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
-    	     <li>If <i>New_Rate</i> > 0, then set <i>Rate</i> = <i>New_Rate</i>.</li>
+    	     <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
+    	     <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
     	     <li>The value of <i>Rate</i> is added to the Accumulator.</li>
     	     <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
               <ul>
@@ -849,9 +849,9 @@ ul.no_bullets {
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
             </p>
+
             <p>
 	        <b>Computing values:</b> 
-	        <p>
               The value of <i>Rate</i> can be computed from a motor step frequency <i>F</i>, in Hz, as:
             </p>
             <ul class="no_bullets">
@@ -1015,9 +1015,10 @@ ul.no_bullets {
 	         Once exception should be noted: Since there is no <i>Step</i> argument in this command to
 	         indicate the direction that each motor should turn, the input <i>Rate</i> arguments
 	         are given a sign. The sign of <i>Rate</i> indicates <i>only</i> which direction the 
-	         motor should turn. And, only its absolute value |<i>Rate</i>| affects the motor step
+	         motor should turn. Only its absolute value |<i>Rate</i>| is input to the routines
+	         that calculate and manage the motor step
 	         frequency. When using the formulas from the <code><a href="#LM">LM</a></code> command
-	         description, use only the unsigned value |<i>Rate</i>|.
+	         description, use the unsigned value |<i>Rate</i>|.
 	        </p>
           </li>
           <li>
