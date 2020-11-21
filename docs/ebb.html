@@ -807,7 +807,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
+            <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
             <li><i>Steps1</i> and <i>Steps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
             <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
             <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
@@ -845,7 +845,7 @@ ul.no_bullets {
             </ol>
           
             <p>
-             A restriction on the parameters is that motion must possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion, or no motion will occur.
+             A restriction on the parameters is that motion must be possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion, or no motion will occur.
             </p>
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
