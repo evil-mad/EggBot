@@ -754,9 +754,11 @@ ul.no_bullets {
                 The step rate at which the move should happen is specified as a parameter. If no destination position is specified, then the move is towards the Home position (0, 0).
             </p>
             <p>
-              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has a lot of steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
+              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has many steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
             </p>
-            <p>The command will wait until all previous motor motion ceases before beginning the home operation.</p>
+            <p>The command will wait until all previous motor motion ceases before executing. There is also a further delay,
+                 typically about 5 ms, between when the <code>HM</code> command begins execution and when its motion actually begins.
+            </p>
             <p>
               If either of the global step counter values or the distance to move is greater than 4,294,967, the command will error out. If you need to move a larger distance, multiple normal moves back to zero can be sent to accomplish the same thing.
             </p>
