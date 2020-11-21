@@ -273,6 +273,9 @@
 #include "ebb_demo.h"
 #include "RCServo2.h"
 
+// Define this to turn on some GPIO pin timing debug for the ISR
+//#define ISR_DEBUG
+
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
 #define OVERFLOW_MUL	(0x8000 / HIGH_ISR_TICKS_PER_MS)

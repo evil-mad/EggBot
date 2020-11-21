@@ -808,7 +808,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
-            <li><i>Steps1</i> and <i>Steps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
+            <li><i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
             <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
             <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
@@ -2766,11 +2766,11 @@ ul.no_bullets {
         <p>Because different move commands require different amounts of math to convert the move parameters
         into values suitable for the step ISR to process (via the motion queue), and because they take
         different paths through the step ISR code, each one has a slightly different effect on performance.
-        It turns out that SM and XM are basically identical in this regard, as are LM and LT. 
+        It turns out that LM and LT are very similar in this regard. 
         </p>
 
         <p>The following table shows the minimum move length in milliseconds which the EBB can sustain
-        indefinitely without inter-move step gaps. Both SM/XM and LM/LT command times are shown, along with 
+        indefinitely without inter-move step gaps. The SM, XM and LM/LT command times are shown, along with 
         two different step rates. The 25 KHz step rate is the worst case, but is very rarely seen in 
         typical workloads. A more typical 2.5 KHz step rate is also shown for comparison.
         </p>
@@ -2785,12 +2785,22 @@ ul.no_bullets {
               <td>Firmware <= 2.6.5</td>
             </tr>
             <tr>
-              <td>SM/XM 25 KHz</td>
+              <td>SM 25 KHz</td>
               <td>3</td>
               <td>4</td>
             </tr>
             <tr>
-              <td>SM/XM 2.5 KHz</td>
+              <td>SM 2.5 KHz</td>
+              <td>2</td>
+              <td>3</td>
+            </tr>
+            <tr>
+              <td>XM 25 KHz</td>
+              <td>3</td>
+              <td>5</td>
+            </tr>
+            <tr>
+              <td>XM 2.5 KHz</td>
               <td>2</td>
               <td>3</td>
             </tr>
