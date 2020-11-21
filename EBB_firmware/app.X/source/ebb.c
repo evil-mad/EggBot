@@ -240,9 +240,7 @@
 //                    after SP command, not also after stepper movement
 // 2.6.6 11/10/20 - Fixed bug where S2 command wouldn't turn power on to RB1
 //                    servo output if it had been turned off.
-// 2.7.0 11/19/20 - Optional parameter <ClearAccs> added to all stepper motion 
-//                    commands
-//                  No longer allow Rate to go negative (like from LM command) 
+// 2.7.0 11/19/20 - No longer allow Rate to go negative (like from LM command) 
 //                    inside ISR
 //                  Removed AM command
 //                  Added optional parameter <Clear> to all stepper motion 
@@ -256,6 +254,8 @@
 //                  Fixed bug where negative accels could cause delays before 
 //                    last step.
 //                  EM command now always clears accumulators
+//                  Reduced effective pulse width for step pulses down to
+//                    between 1.6 and 2.3 uS.
 
 #include <p18cxxx.h>
 #include <usart.h>
