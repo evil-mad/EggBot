@@ -352,8 +352,11 @@ void clear_StepCounters(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
-TRISDbits.TRISD1 = 0;
-LATDbits.LATD1 = 1;
+#if defined(ISR_DEBUG)
+  TRISDbits.TRISD1 = 0;
+  LATDbits.LATD1 = 1;
+#endif
+  
 	//Check which interrupt flag caused the interrupt.
 	//Service the interrupt
 	//Clear the interrupt flag
@@ -693,8 +696,10 @@ LATDbits.LATD1 = 1;
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
-TRISDbits.TRISD0 = 0;
-LATDbits.LATD0 = 1;
+#if defined(ISR_DEBUG)
+        TRISDbits.TRISD0 = 0;
+        LATDbits.LATD0 = 1;
+#endif
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
         CommandFIFO[0].Command = COMMAND_NONE;
@@ -770,8 +775,10 @@ LATDbits.LATD0 = 1;
 			ButtonPushed = TRUE;
 		}
 	}
-LATDbits.LATD0 = 0;
-LATDbits.LATD1 = 0;
+#if defined(ISR_DEBUG)
+  LATDbits.LATD0 = 0;
+  LATDbits.LATD1 = 0;
+#endif
 }
 
 // Init code
