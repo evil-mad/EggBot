@@ -347,24 +347,21 @@
             command. The LM command has been rewritten to make computation easier and provide accurate
             and consistent behavior that is also consistent with the documentation.
             </li>
-            <li>Added optional "clear" parameter to SM, XM, LM, and LT commands
+            <li>Bug fix: The "Rate" parameter in the LM command can no longer become negative during a move.
             </li>
-            <li>Added new LT (low-level timed move) command, based on updated LM command
+            <li>Added new LT (low-level timed move) command, based on updated LM command.
             </li>
-            <li>Added optional destination parameters (absolute step locations) to HM command
+            <li>Added optional "clear" parameter to SM, XM, LM, and LT commands.
             </li>
-            <li>The "Rate" parameter is now longer allowed to go negative. Only an issue with commands
-            like LM/LT which have Accel values which modify Rate as the move progresses.
+            <li>Added optional destination parameters (absolute step locations) to HM command.
             </li>
             <li>Optimized math and logic inside step ISR for faster minimum move lengths
             </li>
             <li>EM command now always clears accumulators
             </li>
-            <li>Added new LT (low-level timed move) command, based on updated LM command
+            <li>Reduced effective external step pulse times to between 1.6 uS and 2.3 uS (from 2.8 uS to 3.0 uS)
             </li>
-            <li>Reduced effective step pulse times to between 1.6 uS and 2.3 uS (from 2.8 uS to 3.0 uS)
-            </li>
-            <li>Fixed a bug present in all motion commands that could lead to a 40 us dead "gap" between subsequent motion commands; motion commands can now be as short as a single 40 us "ISR" cycle.
+            <li>Fixed a bug present in all motion commands that could lead to a 40 us dead "gap" between subsequent motion commands; individual motion commands can in priniciple now be as short as a single 40 us "ISR" cycle.
             </li>
             <li>Removed AM command.
             </li>

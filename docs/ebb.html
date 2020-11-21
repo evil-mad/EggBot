@@ -978,7 +978,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li><i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.</li>
-            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
+            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
             The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
             </li>
             <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
@@ -1448,7 +1448,9 @@ ul.no_bullets {
             <p>The returned status byte consists of the following status bits:</p>
             <p>
 
-            <table border="1" cellpadding="2" cellspacing="2"  >
+            <table border="1" cellpadding="2" cellspacing="2"  
+                    style="margin-left:10%;width:80%;">
+
               <tbody>
                     <tr style="font-weight:bold;">
                         <td style="text-align:left">Bit</td>
@@ -1818,7 +1820,8 @@ ul.no_bullets {
           </li>
           <li>
             RPx vs pin number (and label on the board) table:<br>
-            <table border="1" cellpadding="2" cellspacing="2">
+            <table border="1" cellpadding="2" cellspacing="2"
+                            style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
                   <td valign="top"><b>RPx</b><b><br>
@@ -1882,7 +1885,8 @@ ul.no_bullets {
                 </tr>
               </tbody>
             </table>
-            <table border="1" cellpadding="2" cellspacing="2" >
+            <table border="1" cellpadding="2" cellspacing="2" 
+                style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
                   <td valign="top"><b>RPx</b><b><br>
@@ -2662,7 +2666,9 @@ ul.no_bullets {
         
         <p />
 
-        <table border="1" cellpadding="2" cellspacing="2">
+        <table border="1" cellpadding="2" cellspacing="2"
+            style="margin-left:3%;width:94%;">
+
           <tbody>
             <tr style="font-weight:bold;">
               <td>Pin</td>
@@ -2698,7 +2704,7 @@ ul.no_bullets {
               <td>RB4</td>
               <td>Output</td>
               <td>Low</td>
-              <td>Alternate Pen Up/Down I/O (solenoid or laser control)</td>
+              <td>Alternate Pen Up/Down I/O (solenoid/laser)</td>
             </tr>
             <tr>
               <td>RB5</td>
@@ -2727,8 +2733,7 @@ ul.no_bullets {
 
         <h2><a name="performance"></a>Performance</h2>
         
-        <p>The EBB has some basic performance limits, and sometimes these limits change with different software
-        versions. This section aims to describe some of these limits in a way that will be useful to EBB users.
+        <p>The EBB has some basic performance limits, which do vary with new firmware releases.
         </p>
         
         <p>One performance aspect is the duration of the step pulses sent to the stepper driver chips. While
@@ -2737,82 +2742,58 @@ ul.no_bullets {
         step/dir driver electronics to drive much larger systems. In this case, the external drivers may have
         a minimum step pulse length, and so it can be important to know this timing information in that case.
         </p>
-        
-        <p>For EBB firmware versions 2.6.5 and below, the maximum step pulse with is 3.0 uS and the minimum 
-        is 2.8 uS.
-        </p>
-
-        <p>For EBB firmware versions 2.7.0 and above, the maximum step pulse with is 2.3 uS and the minimum 
-        is 1.6 uS.
-        </p>
-        
-        <p>Another important performance measure is the maximum rate of separate move commands that can be
-        streamed to the EBB. This rate is expressed as the shortest moves that can be sent to the EBB as
-        a continuous stream (all of the same move duration) such that there are no gaps between the last 
-        step of one move and the first step of the next move. If there is a gap, it is because the EBB
-        can't keep up with parsing and queuing moves at that move duration. 
+        <p style="padding-left:5%">
+        Output step pulse duration for external stepper drivers:
+        <ul style="padding-left:10%">      
+            <li>EBB firmware 2.7.0 and above: 1.6 - 2.3 &mu;s.</li>
+            <li>EBB firmware 2.6.5 and below: 2.8 - 3.0 &mu;s.</li>
+        </ul>
         </p>
         
-        <p>An interesting subtlety here is that because the EBB shares CPU time between the parsing of USB
-        command data and the generation of step pulses, and because the amount of CPU time used by the
-        step generation Interrupt Service Routine (ISR) depends on how many steps the move requires per
-        second, the worst case performance is seen when the step rates are highest. Because the step ISR
-        runs at 25 KHz, the EBB has a maximum step rate of 25 K steps/second. A sequence of moves with 25
-        KHz steps gives the USB and command parsing code the least amount of CPU cycles, thus showing the 
-        worst case performance in terms of commands/second since there is a fixed amount of work to do for
-        each command to parse it and get it move into the motion queue.
+        <p>Another important performance measure is the maximum rate at which sequential movement
+        commands can be
+        streamed to the EBB. This rate is expressed as the shortest move duration that can be sent
+        to the EBB as a continuous stream of identical motion commands, such that there
+        are no gaps between the last step of one move and the first step of the next move.
+        For a high enough sustained rate of sufficiently short movement commands, the EBB will not
+        be able to parse and queue each command prior to starting the subsequent move.
+        The available CPU time available for parsing and queueing commands does depend on the 
+        active step rate, as the EBB shares CPU time between command parsing and step generation.
         </p>
-        
-        <p>Because different move commands require different amounts of math to convert the move parameters
-        into values suitable for the step ISR to process (via the motion queue), and because they take
-        different paths through the step ISR code, each one has a slightly different effect on performance.
-        It turns out that LM and LT are very similar in this regard. 
-        </p>
-
-        <p>The following table shows the minimum move length in milliseconds which the EBB can sustain
-        indefinitely without inter-move step gaps. The SM, XM and LM/LT command times are shown, along with 
-        two different step rates. The 25 KHz step rate is the worst case, but is very rarely seen in 
-        typical workloads. A more typical 2.5 KHz step rate is also shown for comparison.
+        <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain
+        indefinitely without gaps, under different move commands. The worst case
+        values (highest sustained minimum move duration) were measured with step rates of approximately 
+        25 kHz on both motors &mdash; a condition rarely achieved in typical applications. 
+        The best case values
+        (lowest sustained minimum move duration) are for low step rates,
+        and was measured at 2.5 kHz. You may be able to sustain movement at these rates with higher motion
+        frequencies.
         </p>
         
         <p />
 
-        <table border="1" cellpadding="2" cellspacing="2">
+        <table border="1" cellpadding="2" cellspacing="2"
+            style="margin-left:10%;width:80%;">
           <tbody>
             <tr style="font-weight:bold;">
-              <td>Min Move Length (ms)</td>
-              <td>Firmware >= 2.7.0</td>
-              <td>Firmware <= 2.6.5</td>
+              <td>Command</td>
+              <td>Firmware &gt;= 2.7.0</td>
+              <td>Firmware &lt; 2.7.0</td>
             </tr>
             <tr>
-              <td>SM 25 KHz</td>
-              <td>3</td>
-              <td>4</td>
+              <td>SM</td>
+              <td>2-3 ms</td>
+              <td>3-4 ms</td>
             </tr>
             <tr>
-              <td>SM 2.5 KHz</td>
-              <td>2</td>
-              <td>3</td>
+              <td>XM</td>
+              <td>2-3 ms</td>
+              <td>3-5 ms</td>
             </tr>
             <tr>
-              <td>XM 25 KHz</td>
-              <td>3</td>
-              <td>5</td>
-            </tr>
-            <tr>
-              <td>XM 2.5 KHz</td>
-              <td>2</td>
-              <td>3</td>
-            </tr>
-            <tr>
-              <td>LM/LT 25 KHz</td>
-              <td>4</td>
-              <td>6</td>
-            </tr>
-            <tr>
-              <td>LM/LT 2.5 KHz</td>
-              <td>2</td>
-              <td>3</td>
+              <td>LM, LT </td>
+              <td>2-4 ms</td>
+              <td>3-6 ms</td>
             </tr>
           </tbody>
         </table>
