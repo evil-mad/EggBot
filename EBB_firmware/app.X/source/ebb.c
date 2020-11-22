@@ -273,9 +273,6 @@
 #include "ebb_demo.h"
 #include "RCServo2.h"
 
-// Define this to turn on some GPIO pin timing debug for the ISR
-//#define ISR_DEBUG
-
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
 #define OVERFLOW_MUL	(0x8000 / HIGH_ISR_TICKS_PER_MS)
@@ -355,7 +352,7 @@ void clear_StepCounters(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
-#if defined(ISR_DEBUG)
+#if defined(GPIO_DEBUG)
   TRISDbits.TRISD1 = 0;
   LATDbits.LATD1 = 1;
 #endif
@@ -699,7 +696,7 @@ void high_ISR(void)
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
-#if defined(ISR_DEBUG)
+#if defined(GPIO_DEBUG)
         TRISDbits.TRISD0 = 0;
         LATDbits.LATD0 = 1;
 #endif
@@ -761,6 +758,10 @@ void high_ISR(void)
       else 
       {
         CurrentCommand.DelayCounter = 0;
+#if defined(GPIO_DEBUG)
+  TRISAbits.TRISA1 = 0;
+  LATAbits.LATA1 = 1;
+#endif
       }
 		}
 		
@@ -778,7 +779,8 @@ void high_ISR(void)
 			ButtonPushed = TRUE;
 		}
 	}
-#if defined(ISR_DEBUG)
+#if defined(GPIO_DEBUG)
+  LATAbits.LATA1 = 0;
   LATDbits.LATD0 = 0;
   LATDbits.LATD1 = 0;
 #endif
