@@ -129,13 +129,14 @@ ul.no_bullets {
         <h2><a name="version_differences"></a>Differences between firmware versions</h2>
         
         <p>
-          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The EggBot, WaterColorBot and (more recently,) the AxiDraw. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
+          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot.
+          If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
         </p>
         <p>
-          That said, there have been <a href="EBBReleaseNotes.html">many smaller changes</a> in the code between the versions that ship preloaded on the EBB (which may be as low as v2.0.1) and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+          That said, there have been <a href="EBBReleaseNotes.html">many smaller changes</a> in the code between the versions that ship preloaded on the EBB and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
         <p>
-          That this documentation refers not only to different versions of the EBB firmware, but also in some cases to different versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
+          That this documentation refers not only to different versions of the EBB firmware, but also in some cases to legacy versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
         </p>
 
         <p />
@@ -773,7 +774,8 @@ ul.no_bullets {
             specify an exact step position, but is more difficult to use since the moves for the
             two axes may complete at different times.
              </p> <p>
-            This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.)
+            This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.) 
+            While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
             <p>
 	         <b>Methods and consequences:</b> 
@@ -947,7 +949,11 @@ ul.no_bullets {
             sequences of LT commands, followed by a <code><a href="#HM">HM</a></code> command, in order to
             both move quickly and end up at a specific location.
             </p> <p>
-            This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.)
+            This is a low-latency command where the input values are parsed and passed directly into motion control
+            FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command
+            throughput can be achieved.  While individual movement commands may be as short as a single 40 &mu;s
+            time interval, there are practical limits to the rate at which commands can be issued,
+            as discussed under <a href="#performance">Performance</a>.
             
             </p><p>
 	         <b>Methods and consequences:</b>
@@ -2196,14 +2202,12 @@ ul.no_bullets {
             </p>
             <p>
               The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move.
+              While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
             <p>
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
-            <p>
-              The EBB firmware can sustain moves of 3 ms or more continuously without any inter-move gaps in time.
-            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
@@ -2554,6 +2558,7 @@ ul.no_bullets {
               </p>
               <p>
                 The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25 kSteps/second. If the XM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move. Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.)
+                While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
               </p>
               <p>
                 Note that internally the EBB generates an ISR at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
@@ -2747,9 +2752,10 @@ ul.no_bullets {
             </tr>
           </tbody>
         </table>
-
+        <p>
         The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same
         data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and additional factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
+        </p>
         <p />
         <br />
         <p />

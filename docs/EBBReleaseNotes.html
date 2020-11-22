@@ -356,19 +356,21 @@
             </li>
             <li>Added optional destination parameters (absolute step locations) to HM command.
             </li>
-            <li>Optimized math and logic inside step ISR for faster minimum move lengths
+            <li>Optimized math and logic inside step ISR for shorter minimum move durations.
             </li>
-            <li>EM command now always clears accumulators
+            <li>EM command now always clears accumulators.
             </li>
-            <li>Reduced effective external step pulse times to between 1.6 &mu;s and 2.3 &mu;s (from 2.8 &mu;s to 3.0 &mu;s)
+            <li>Reduced effective external step pulse times to between 1.6 &mu;s and 2.3 &mu;s (from 2.8 &mu;s to 3.0 &mu;s).
             </li>
             <li>Fixed a bug present in all motion commands that could lead to a 40 &mu;s dead "gap" between subsequent motion commands; individual motion commands can (in principle) now be as short as a single 40 &mu;s "ISR" cycle.
             </li>
             <li>Removed AM command.
             </li>
             <li>In response to <a href="https://github.com/evil-mad/EggBot/issues/144">issue #144</a> the behavior of the S2 command has been modified so that it, like the SP command, counts as a "pen action"
-            that will reset servo power timeout. See the SR command for more.
+            that will reset servo power timeout. See the <a href="http://evil-mad.github.io/EggBot/ebb.html#SR">SR</a> command documentation for more information.
             </li>
+            <li>Added new "<a href="http://evil-mad.github.io/EggBot/ebb.html#performance">Performance</a>" section to documentation,
+            with much more detail about movement command performance under different conditions.
           </ul>
         </p>
 
