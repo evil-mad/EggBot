@@ -108,8 +108,8 @@
         <h4>v2.2.1  &mdash; 09/19/13</h4>
         <p>
           <ul>
-            <li>Expanded internal delay counter to 32 bits so we can have delays longer than 2.1s. Now up to 64K ms.</li>
-            <li>Fixed bug with all &lt;duration&gt; parameters, SM, SP, TP commands. Now in ms, defaults to 500ms, and actually works up to 64Kms.</li>
+            <li>Expanded internal delay counter to 32 bits so we can have delays longer than 2.1s. Now up to 64k ms.</li>
+            <li>Fixed bug with all &lt;duration&gt; parameters, SM, SP, TP commands. Now in ms, defaults to 500 ms, and actually works up to 64K ms.</li>
             <li>Fixed uninitialized data bug with command FIFO. We were seeing very long random delays first time SM,&lt;delay&gt;,0,0 was used.</li>
             <li>SP command was executing servo move at end of &lt;duration&gt;. It now starts servo move and &lt;duration&gt; delay at same time.</li>
             <li>Updated USB stack to Microchip MAL USB v2.9j</li>
@@ -130,7 +130,8 @@
             <li>Also updated the pins that are used for driving external step/dir/en drives. (See documentation)</li>
             <li>Updated SC,1,{0,1,2} documentation to match code and removed SC,14 which is not needed.</li>
             <li>Updated logic for EM command to use state of SC,2,{0,1,2} properly.</li>
-            <li>Added SC,14,{0,1} to switch between default of 1/25Khz units for SP and TP command &lt;duration&gt; parameters, and 1ms units</li>
+            <li>Added SC,14,{0,1} to switch between default of 1/(25 kHz) units for SP and TP command
+            &lt;duration&gt; parameters, and 1 ms units</li>
           </ul>
         </p>
 
@@ -147,7 +148,7 @@
             <li>Set initial 'position' of main servo to be 1mS to mimic behavior of v2.0.1 firmware.</li>
             <li>Updated license to BSD 3-clause</li>
             <li>
-              Changed SP and TP commands so that if no &lt;duration&gt; parameter is used, it does not default to 500mS delay, but rather 0mS. This should now work exactly as v2.0.1 when no parameter is used.
+              Changed SP and TP commands so that if no &lt;duration&gt; parameter is used, it does not default to 500 ms delay, but rather 0mS. This should now work exactly as v2.0.1 when no parameter is used.
             </li>
             <li>
               Tested v2.2.4 against v2.0.1 with Seleae Logic analyzer. Looked at several Inkscape plots. Confirmed that timing of steppers and servo are the same. Confirmed that all RB0 through RB7 outputs are the same between the two versions.
@@ -239,7 +240,7 @@
         <p>
           <ul>
             <li>Fixed LM command to take negative and positive StepAddIncs</li>
-            <li>Fixed 25KHz ISR to be much closer to 25KHz</li>
+            <li>Fixed 25 kHz ISR to be much closer to 25 kHz</li>
           </ul>
         </p>
         
@@ -283,8 +284,8 @@
             <li>In response to <a href="https://github.com/evil-mad/EggBot/issues/103">issue #103</a> the following commands were added:</li>
             <li>Added QR (Query RC Servo power state) command</li>
             <li>Added SR (Set RC Servo poweroff timeout value) command</li>
-            <li>In addition, for EBB v1.5s and above, the RC Servo's 5V power signal is now controlled by the firmware, to allow the servo
-            to power down after some amount of time (either set by the SR command or defaults to 1h), but power is restored upon any
+            <li>In addition, for EBB v1.5 and above, the RC Servo's 5 V power signal is now controlled by the firmware, to allow the servo
+            to power down after some amount of time (either set by the SR command or defaults to 1 hour), but power is restored upon any
             command using the motors or the servo.</li>
           </ul>
         </p>
@@ -294,8 +295,8 @@
           <ul>
             <li>In response to <a href="https://github.com/evil-mad/EggBot/issues/103">issue #103</a> the following commands were added:</li>
             <li>SR (Set RC Servo poweroff timeout value) command changed to be SR,<i>new_timeout</i>>,<i>new_state</i> where <i>new_state</i> is optional.</li>
-            <li>The default servo up time has been set to 22565 (1.878ms)</li>
-            <li>The default servo down time has been set to 15302 (1.274ms)</li>
+            <li>The default servo up time has been set to 22565 (1.878 ms)</li>
+            <li>The default servo down time has been set to 15302 (1.274 ms)</li>
             <li>The EBB will always send the servo to the up state on reset, and start with power off to the servo</li>
             <li>The default servo power off timeout is now 15 minutes</li>
           </ul>
@@ -359,9 +360,9 @@
             </li>
             <li>EM command now always clears accumulators
             </li>
-            <li>Reduced effective external step pulse times to between 1.6 uS and 2.3 uS (from 2.8 uS to 3.0 uS)
+            <li>Reduced effective external step pulse times to between 1.6 &mu;s and 2.3 &mu;s (from 2.8 &mu;s to 3.0 &mu;s)
             </li>
-            <li>Fixed a bug present in all motion commands that could lead to a 40 us dead "gap" between subsequent motion commands; individual motion commands can in priniciple now be as short as a single 40 us "ISR" cycle.
+            <li>Fixed a bug present in all motion commands that could lead to a 40 &mu;s dead "gap" between subsequent motion commands; individual motion commands can (in principle) now be as short as a single 40 &mu;s "ISR" cycle.
             </li>
             <li>Removed AM command.
             </li>

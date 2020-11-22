@@ -338,59 +338,7 @@ ul.no_bullets {
           </li>
         </ul>
 
-        <hr class="short" />    
-<!--
-        <h4><a name="AM"></a> "AM" &mdash; Accelerated stepper Move</h4>
-
-        <b>Important note:</b> Documentation for this command is preliminary and should not be relied upon.
-
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>AM,<i>initial_velocity</i>,<i>final_velocity</i>,<i>axis1</i>,<i>axis2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span>  v2.4.0 and newer</li>
-          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
-          <li>
-            <span style="font-weight: bold;">Arguments:</span> 
-            <ul>
-              <li><i>initial_velocity</i> is an integer in the range from 2 to 35355, giving initial velocity in steps per second. (See additional notes below.)</li>
-              <li><i>final_velocity</i> is an integer in the range from 2 to 35355, giving final velocity in steps per second. (See additional notes below.)</li>
-              <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16777215 to 16777215, giving movement distance in steps.</li>
-            </ul>
-
-            <li>
-              <span style="font-weight: bold;">Description:</span> 
-              <p>
-                Within certain bounds, this command can be used to draw a straight line between two points, while accelerating or decelerating.
-              </p>
-              <p>
-                Please be advised that velocity values below 200 steps per second are not recommended. Also, note that the maximum speed of either motor is 25,000 steps/second.
-              </p>
-              <p>
-                The input values of the initial and final velocity are speeds of a vector pointing between the initial position and the final position, distance (<i>axis1</i>, <i>axis2</i>) away.
-              </p> 
-              <p>
-                The sign of <i>axis1</i> and <i>axis2</i> represent the direction each motor should turn.
-              </p>
-              <p>
-                The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. Since the velocity input parameters for this function are velocity along the direction of motion (rather than per motor), it is up to the user to ensure that these maximum and minimum values will be respected both at the initial and final velocities.
-              </p>
-              <p>
-                As described in the <code><a href="#SM">SM</a></code> command documentation below, all EBB motion is 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated. For particularly slow moves &mdash; where the initial or final velocity on either axis is below 100 steps per second, the total time of the move may be noticeably different than expected. In extreme cases (e.g., <code>AM,1000,1000,10000,10\r</code>)
-                  one axis may completely finish its movement well before the other, giving a final velocity that is not in the correct direction.
-              </p>
-              <p>
-                This function may not accept (without producing an error) some values as parameter inputs that do not produce results as expected. Ensure that all parameter inputs are within the recommended values above.
-              </p>
-            </li>
-            <li>
-              <span style="font-weight: bold;">Example:</span>  <code>AM,400,4000,250,-500\r</code> Move axis1 by 250 steps and axis2 by -500 steps, starting at a velocity of 400 steps per second, and ending at a velocity of 4000 steps per second.
-            </li>
-          </li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.0</li>
-        </ul>
-
-        <hr class="short" />
--->
+        <hr class="short" /> 
         <h4><a name="BL"></a>"BL" &mdash; Enter Bootloader</h4>
    
         <ul>
@@ -2784,22 +2732,24 @@ ul.no_bullets {
             </tr>
             <tr>
               <td>SM</td>
-              <td>2-3 ms</td>
               <td>3-4 ms</td>
+              <td>4-7 ms</td>
             </tr>
             <tr>
               <td>XM</td>
-              <td>2-3 ms</td>
-              <td>3-5 ms</td>
+              <td>3-4 ms</td>
+              <td>4-6 ms</td>
             </tr>
             <tr>
               <td>LM, LT </td>
-              <td>2-4 ms</td>
-              <td>3-6 ms</td>
+              <td>3-5 ms</td>
+              <td>4-6 ms</td>
             </tr>
           </tbody>
         </table>
 
+        The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same
+        data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and other factors. Best practice is to try and use fewer, longer-duration movement commands (rather than a more, shorter commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
         <p />
         <br />
         <p />
