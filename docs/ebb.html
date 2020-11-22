@@ -2749,7 +2749,7 @@ ul.no_bullets {
         </table>
 
         The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same
-        data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and other factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
+        data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and additional factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
         <p />
         <br />
         <p />
@@ -2760,10 +2760,10 @@ ul.no_bullets {
           <b>Q1)</b> How can I calculate how long it will take to move from one RC servo position to another? Specifically in relation to the standard pen-arm servo that is activated with the SP,1 and SP,0 commands.
         </p>
         <p>
-          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24ms.
+          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24 ms.
         </p>
         <p>
-          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24ms periods to get from 10000 to 15000, or 1.2 seconds total.
+          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24 ms periods to get from 10000 to 15000, or 1.2 seconds total.
         </p>
         <p>
           Now, when you're using the SP,0 and SP,1 commands, the servo_min (defaults to 16000, or 1.33 ms) and servo_max (defaults to 20000, or 1.6 ms) get used as the positions. And the servo_rate_up and servo_rate_down get used as the rates. So the formula is as follows:
