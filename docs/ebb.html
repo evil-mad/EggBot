@@ -16,6 +16,11 @@
 
 <style>
 td {text-align: center}
+ul.no_bullets {
+  list-style-type: none; /* Remove bullets */
+  padding-left: 50px;
+  padding-bottom: 15px;
+}
 </style>
 
   </head>
@@ -55,7 +60,8 @@ td {text-align: center}
             <li><a href="#syntax">Syntax and conventions</a></li>
             <li><a href="#commands">List of commands</a></li>
           </ol>
-          <li><a href="#states">Initial Initial I/O pin configuration</a></li>
+          <li><a href="#states">Initial I/O pin configuration</a></li>
+          <li><a href="#performance">Performance</a></li>
           <li><a href="#faq">FAQ</a></li>
           <li><a href="#license">License</a></li>
         </ol>
@@ -123,13 +129,14 @@ td {text-align: center}
         <h2><a name="version_differences"></a>Differences between firmware versions</h2>
         
         <p>
-          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The EggBot, WaterColorBot and (more recently,) the AxiDraw. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
+          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot.
+          If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
         </p>
         <p>
-          That said, there have been many smaller changes in the code between the versions that ship preloaded on the EBB (which may be as low as v2.0.1) and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+          That said, there have been <a href="EBBReleaseNotes.html">many smaller changes</a> in the code between the versions that ship preloaded on the EBB and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
         <p>
-          Be aware that this documentation refers not only to different versions of the EBB firmware, but also in some cases to different versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
+          That this documentation refers not only to different versions of the EBB firmware, but also in some cases to legacy versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
         </p>
 
         <p />
@@ -220,9 +227,10 @@ td {text-align: center}
           <li><a href="#CS">CS</a> &mdash; Clear Step position</li>
           <li><a href="#EM">EM</a> &mdash; Enable Motors</li>
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
-          <li><a href="#HM">HM</a> &mdash; Home Move</li>
+          <li><a href="#HM">HM</a> &mdash; Home or Absolute Move</li>
           <li><a href="#I">I</a> &mdash; Input</li>
           <li><a href="#LM">LM</a> &mdash; Low-level Move</li>
+          <li><a href="#LT">LT</a> &mdash; Low-level Move, Time Limited</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
           <li><a href="#MW">MW</a> &mdash; Memory Write</li>
           <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
@@ -331,59 +339,7 @@ td {text-align: center}
           </li>
         </ul>
 
-        <hr class="short" />    
-<!--
-        <h4><a name="AM"></a> "AM" &mdash; Accelerated stepper Move</h4>
-
-        <b>Important note:</b> Documentation for this command is preliminary and should not be relied upon.
-
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>AM,<i>initial_velocity</i>,<i>final_velocity</i>,<i>axis1</i>,<i>axis2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span>  v2.4.0 and newer</li>
-          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue </li>
-          <li>
-            <span style="font-weight: bold;">Arguments:</span> 
-            <ul>
-              <li><i>initial_velocity</i> is an integer in the range from 2 to 35355, giving initial velocity in steps per second. (See additional notes below.)</li>
-              <li><i>final_velocity</i> is an integer in the range from 2 to 35355, giving final velocity in steps per second. (See additional notes below.)</li>
-              <li><i>axis1</i> and <i>axis2</i> are integers, each in the range from -16777215 to 16777215, giving movement distance in steps.</li>
-            </ul>
-
-            <li>
-              <span style="font-weight: bold;">Description:</span> 
-              <p>
-                Within certain bounds, this command can be used to draw a straight line between two points, while accelerating or decelerating.
-              </p>
-              <p>
-                Please be advised that velocity values below 200 steps per second are not recommended. Also, note that the maximum speed of either motor is 25,000 steps/second.
-              </p>
-              <p>
-                The input values of the initial and final velocity are speeds of a vector pointing between the initial position and the final position, distance (<i>axis1</i>, <i>axis2</i>) away.
-              </p> 
-              <p>
-                The sign of <i>axis1</i> and <i>axis2</i> represent the direction each motor should turn.
-              </p>
-              <p>
-                The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. Since the velocity input parameters for this function are velocity along the direction of motion (rather than per motor), it is up to the user to ensure that these maximum and minimum values will be respected both at the initial and final velocities.
-              </p>
-              <p>
-                As described in the <code><a href="#SM">SM</a></code> command documentation below, all EBB motion is 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated. For particularly slow moves &mdash; where the initial or final velocity on either axis is below 100 steps per second, the total time of the move may be noticeably different than expected. In extreme cases (e.g., <code>AM,1000,1000,10000,10\r</code>)
-                  one axis may completely finish its movement well before the other, giving a final velocity that is not in the correct direction.
-              </p>
-              <p>
-                This function may not accept (without producing an error) some values as parameter inputs that do not produce results as expected. Ensure that all parameter inputs are within the recommended values above.
-              </p>
-            </li>
-            <li>
-              <span style="font-weight: bold;">Example:</span>  <code>AM,400,4000,250,-500\r</code> Move axis1 by 250 steps and axis2 by -500 steps, starting at a velocity of 400 steps per second, and ending at a velocity of 4000 steps per second.
-            </li>
-          </li>
-          <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.0</li>
-        </ul>
-
-        <hr class="short" />
--->
+        <hr class="short" /> 
         <h4><a name="BL"></a>"BL" &mdash; Enter Bootloader</h4>
    
         <ul>
@@ -717,41 +673,49 @@ td {text-align: center}
     
         <hr class="short" />
 
-        <h4><a name="HM"></a>"HM" &mdash; Home Move</h4>
+        <h4><a name="HM"></a>"HM" &mdash; Home or Absolute Move</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>HM,<i>StepRate</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span><br/>
-            <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+          <li><span style="font-weight: bold;">Command:</span>
+          <code>HM,<i>StepFrequency</i>[,<i>Position1</i>,<i>Position2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span>  <code>OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
-          <li>
-            <span style="font-weight: bold;">Parameters:</span>
-            <p>
-              <i>StepRate</i> is an unsigned integers in the range from 2 to 25000. It represents the step rate, in steps per second, which the EBB should maintain during the movement.
-            </p>
-          </li>
+
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li> <i>StepFrequency</i> is an unsigned integer in the range from 2 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.</li>
+            <li> <i>Position1</i> and <i>Position2</i> (optional) are signed integers in the range of &plusmn;4,294,967. If provided, they represents the position, relative to home, that motor1 and motor 2 will travel to.</li>
+          </ul>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Use this command to return the motors from whatever their current position is, as defined by the global step counters, back to position 0,0. The value of the
-              step counters can be read with the <code><a href="#QS">QS</a></code> query. The step rate at which the homing should happen is specified as a parameter. 
+              This command will cause the two stepper motors to move from their current position, as defined by the global step counters, either to Home (0, 0) or to a new position that you specify relative to the Home position. It is worth noting that this is the only EBB motion command for which you can specify an absolute position to move to; all other motion commands are relative to the current position. This command is intended for "utility" moves, to or from a specific point, rather than for smooth or fast motion.
+            </p>
+            <p>The current position at any given moment is stored in the global step counters, and can be
+                read with the <code><a href="#QS">QS</a></code> query. This position <i>does not</i> refer to an absolute position in physical space, but rather the location where the motors were enabled.
+                The global step counters are reset to zero
+                whenever the motors are enabled, disabled, or have their microstep size changed (all via the <code>EM</code> command). The step counter can also be cleared directly by
+            the <code><a href="#CS">CS</a></code> command.
+                 </p>
+            <p>
+                The step rate at which the move should happen is specified as a parameter. If no destination position is specified, then the move is towards the Home position (0, 0).
             </p>
             <p>
-              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has a lot of steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
+              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has many steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
             </p>
-            <p>The command will wait until all previous motor motion ceases before beginning the home operation.</p>
-            <p>
-              If either of the global step counter values is greater than 4,294,967 the command will error out. If you need to home from further away than this, multiple normal moves back to zero can be sent to accomplish the same thing.
+            <p>The command will wait until all previous motor motion ceases before executing. There is also a further delay,
+                 typically about 5 ms, between when the <code>HM</code> command begins execution and when its motion actually begins.
             </p>
             <p>
-              When the motors are disabled, enabled, or the microstep size is changed (all via the <code>EM</code> command) the global step counters are zeroed.
+              If either of the global step counter values or the distance to move is greater than 4,294,967, the command will error out. If you need to move a larger distance, multiple normal moves back to zero can be sent to accomplish the same thing.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            Added in v2.6.2
+            Added in v2.6.2, with only the ability to move to the Home position. Expanded in v2.7.0 to
+            allow for moves to any arbitrary position with respect to home.
           </li>
         </ul>
     
@@ -782,130 +746,270 @@ td {text-align: center}
 
         <hr class="short" />
 
-        <h4><a name="LM"></a>"LM" &mdash; Low-level Move</h4>
+        <h4><a name="LM"></a>"LM" &mdash; Low-level Move, Step-limited</h4>
 
       <ul>
           <li><span style="font-weight: bold;">Command:</span> 
             <code>
-              LM,<i>RateTerm1</i>,<i>AxisSteps1</i>,<i>DeltaR1</i>,<i>RateTerm2</i>,<i>AxisSteps2</i>,<i>DeltaR2</i>&lt;CR&gt;</code>
+              LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.1 and above</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>RateTerm1</i> and <i>RateTerm2</i> are unsigned 31 bit integers in the range from 0 to 2147483648. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken.</li>
-            <li><i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 24 bit integers in the range from -8388607 to 8388607. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>AxisSteps</i> parameter controls the direction that the axis should turn.       </li>
-            <li><i>DeltaR1</i> and <i>DeltaR2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective RateTerm values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
+            <li><i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            </li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-            <b>Overview:</b> This low-level command causes one or both motors to move, and allows the option of applying a constant acceleration to one or both motors during their movement. This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.)
-            
+            <b>Overview:</b> This low-level command causes one or both motors to move for a given number of steps, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of steps have been made, and the command is complete when the both motors have reached their targets.
+            </p> <p>
+             This 
+            command, as compared to the similar <code><a href="#LT">LT</a></code> command, allows you to
+            specify an exact step position, but is more difficult to use since the moves for the
+            two axes may complete at different times.
+             </p> <p>
+            This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.) 
+            While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
             <p>
 	         <b>Methods and consequences:</b> 
-	         Each axis has a separate 32 bit accumulator to control its timing.
-	         Then, every 40 &mu;s (when the 25 kHz ISR executes) a certain sequence of events happens for each channel:
 
-	         <ol>	         
-              <li>Check to see if the total number of steps moved equals <i>AxisSteps</i>. If true, the move is complete for this axis, skip ahead
-              to the last item of this list (which checks whether the move is complete for both axes).
-	         
-              <li>The value of <i>RateTerm</i> is added to the accumulator.</li>
-              <li>If the new accumulator value is greater than or equal to 2^31 (2147483648 decimal; 0x80000000 hex), then:
-              
+	         Each axis has a separate 32 bit Accumulator to control its timing. When the <code>LM</code> command is called, the Accumulator may be initialized to zero or left alone, depending on the value of the <i>Clear</i> argument.
+            The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it.
+	       Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
+	         <ol>
+    	     <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
+    	     <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
+    	     <li>The value of <i>Rate</i> is added to the Accumulator.</li>
+    	     <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
+
               <ul>
               <li>The motor on that axis moves one step.</li>
-              <li>2^31 is subtracted from the accumulator for that axis. </li>
+              <li>2<sup>31</sup> is subtracted from the Accumulator for that axis. </li>
             </ul></li> 
-            
-            <li>The value of <i>DeltaR</i> value is added to <i>RateTerm</i>. Note that this occurs after (not before) <i>RateTerm</i> is added to the accumulator.</li>   
-            <li>If the move is complete for both axes, then we are done: exit the LM command.</li>
-            
-            
+              <li>Check to see if the total number of steps moved equals <i>Steps</i>.
+              If true, the move is complete for this axis; no further steps will be taken.</li>
+            <li>Check if the move is complete for both axes. If so, exit the LM command.</li>
             </ol>
-	         <p>
-	         For example, if the <i>RateTerm</i> value is 2147483648, then a step is taken every 40 &mu;s. If the <i>RateTerm</i> value is 1, then a step is taken every 85899 seconds. If the <i>RateTerm</i> value is 0, then no steps are taken on that axis. Each time a step is taken, the <i>AxisSteps</i> count for that axis is decremented. Once both move counters reach zero after a step has been taken, the move is complete. 
+          
+            <p>
+             A restriction on the parameters is that motion must be possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion, or no motion will occur.
             </p>
             <p>
-             A practical restriction on the parameters is that you must ensure that motion is possible on at least one axis. That is to say, you must ensure that both <i>AxisSteps</i> is nonzero <i>and</i> that either <i>RateTerm</i> or <i>DeltaR</i> are nonzero for at least one axis of motion, or no motion will occur.
+              Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
             </p>
-            <p>
-              Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis will (in most cases) finish stepping before the other. In extreme cases, one axis will finish moving well before the other, which can lead to (correct but) unintuitive behavior. Imagine for example that you have an XY movement command where both axes move the same distance, but the movement along axis 1 finishes in half the time of the movement along axis 2.  The apparent motion along this path will be a diagonal XY movement for the first half of the transit time, and then a straight movement along axis 2 for the second half of the transit time. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. If you don't want this to happen, be careful to compute your parameters correctly so that both axes step continuously throughout the whole move.
-            </p>
+
             <p>
 	        <b>Computing values:</b> 
-	            
-              The equation for computing <i>RateTerm</i> given a number of motion steps to travel (the <i>AxisSteps</i> value) and a duration of movement for that axis is as follows, where <i>T</i> is the total time duration in seconds:
+              The value of <i>Rate</i> can be computed from a motor step frequency <i>F</i>, in Hz, as:
             </p>
+            <ul class="no_bullets">
+              <li><i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s  &times; <i>F</i> , or</li>
+              <li><i>Rate</i> &asymp; 85,899.35 s &times; <i>F</i>.</li>
+            </ul>
+	        <p>In the case of constant velocity, where <i>Accel</i> is zero, the value of <i>Rate</i> can thus be computed from the number of steps and desired total travel time <i>t</i>, in seconds, as
+    	        <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s &times ( <i>Steps</i> / <i>t</i> ), or
+    	        <i>Rate</i> &asymp; 85,899.35 s &times; ( <i>Steps</i> / <i>t</i> ).
+    	        This computation (along with most of the others in the section) should be performed as a floating point operation, or at least with 64 bit precision, since <i>Steps</i> &times; 2<sup>31</sup> may take up to 63 bits.
+	        </p>
             <p>
-               <i>RateTerm</i> = (<i>AxisSteps</i> << 31)/(25 kHz * <i>T</i>)
+              The <i>Accel</i> value is added to <i>Rate</i> every 40 &mu;s. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. The theoretical final "velocity rate" after <i>T</i> intervals of 40 &mu;s each, starting with initial rate <i>Rate</i> is:</p>
+            <ul class="no_bullets">
+              <li><i>Rate</i><sub>Final</sub> = <i>Rate</i> + <i>Accel</i> &times; <i>T</i></li>
+            </ul>
+            <p>The value of <i>Accel</i> can be calculated from the initial value <i>Rate</i>,
+                its desired final value <i>Rate</i><sub>Final</sub>, and the number <i>T</i>
+                of 40 &mu;s intervals that the movement will take:
             </p>
+            <ul class="no_bullets">
+              <li><i>Accel</i> = ( <i>Rate</i><sub>Final</sub> - <i>Rate</i> ) / <i>T</i></li>
+            </ul>
             <p>
-              This division should be performed as a floating point operation, or at least as a 64 bit divide, since <i>AxisSteps</i> shifted left by 31 bits may take up to 63 bits.
+            If an LM command begins with a specified <i>Rate</i> and <i>Accel</i>,
+            as well as a (possibly unknown) initial Accumulator value <i>C</i><sub>0</sub>,
+            then the Accumulator value <i>C</i><sub>T</sub> after 
+            <i>T</i> intervals of 40 &mu;s each is given by:
             </p>
+            <ul class="no_bullets">
+              <li><i>C</i><sub>T</sub> = <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i>
+              + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup>
+              </li>
+            </ul>
             <p>
-              The equation for computing the RateTerm given a motor step rate <i>F</i> in Hz is:
+            (This formula may look familiar from elementary physics, as it has the form:
+            <i>x</i>(t) = <i>x</i><sub>0</sub> + <i>v</i><sub>0</sub><i>T</i>
+              + (1/2) <i>a</i><i>T</i><sup>2</sup>.)
+              The number of motor steps traveled along the axis during the command can be found
+              from this by dividing the Accumulator value <i>C</i><sub>T</sub> by 2<sup>31</sup>
+              and rounding down the result. Thus the step count after <i>T</i> intervals is given by:
             </p>
+            <ul class="no_bullets">
+              <li><i>Steps</i> = <span style="font-weight: bold;">Floor</span>( (
+              <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i>
+              + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup> ) / 2<sup>31</sup> ) 
+              </ul>
             <p>
-              <i>RateTerm</i> = (2^31 / 25 kHz) * <i>F</i>, which can be approximated as <i>RateTerm</i> = 85,899.35 s * <i>F</i>.
-            </p>
-            <p>
-              The <i>DeltaR</i> value is added to <i>RateTerm</i> every 40 &mu;s. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. 
-            </p>
-            <p>
-              To compute the DeltaR values, calculate the desired starting and ending step speed using the above RateTerm formula, then divide the difference up by the number of 25 kHz ISRs that will happen during the move. See the Move Time formula below to get the amount of time the move will take.
-            </p>
-            <p>
-              To compute the total time of a move involving acceleration/deceleration (where DeltaR is non-zero), use the average step rate. For example, if we have a starting step rate (in Hz) of <i>F1</i> and an ending step rate of <i>F2</i>, and the move is <i>AxisSteps</i> motor steps long, then the total move time in seconds is given by:
-            </p>
-            <p>
-              Move Time = <i>AxisSteps</i>/((<i>F1</i> + <i>F2</i>)/2) = 2 * <i>AxisSteps</i> / (<i>F1</i> + <i>F2</i>)
-            </p>
-          </li>
-          <li>
-              
-              <span style="font-weight: bold;">Example 1:</span>  Suppose that we wanted to start moving an axis at 45 steps/second, and end at 250 steps/second, and go for a total of 60 steps. By the above formulas, we know that our starting RateTerm is 3865470, our ending RateTerm is 21474836, and our Move Time is 60/((45 + 250)/2) = 0.4068 seconds. So we want to get from a RateTerm of 3865470 at the beginning of the move to a RateTerm of 21474836 at the end, so we need to add a total of (21474836 - 3865470) = 17609366 to our initial RateTerm over the course of the move. Because the move takes 0.4068 seconds, and we will be adding DeltaR to RateTerm 25000 times/second, we divide 17609366 by the total number of adds (0.4068 * 25000) to get 17609366/(0.4068 * 25000) = 1732. So if we use a DeltaR of 1732, then we will get from 45 steps/second to 250 steps/second in 0.4068 seconds and 60 steps. You would then use the following LM command:
+              This is a quadratic equation, and the exact movement time for a given number of
+              steps can be computed by solving for <i>T</i> using the quadratic formula.
 
-            <p>
-              <code>LM,3865470,60,1732,0,0,0</code>
+             If you already know the final speed, then the approximate movement time <i>t</i> in seconds can be found by dividing the number of steps by the average step frequency over the move:
             </p>
-            Notice that we're only using axis 1 in this example. You can of course use both axes at the same time, but you need to be careful that the times for each axis match up or you won't be drawing a straight line (since one axis would then finish before the other).
-
+            <ul class="no_bullets">
+              <li><i>t</i> &asymp; <i>Steps</i>  /  <i>F</i><sub>AVE</sub> = 
+              2 &times;  <i>Steps</i> / ( <i>F</i><sub>0</sub> + <i>F</i><sub><i>t</i></sub> )
+              </li>
+            </ul>
+            <p>Here, <i>F</i><sub>0</sub> and <i>F</i><sub><i>t</i></sub> are the initial and
+            final step frequencies <i>F</i> for the move. From this, we can also
+            calculate the approximate move duration <i>T</i> in terms of 40 &mu;s intervals,
+            using <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s  &times; <i>F</i> and 
+            <i>t</i> = 40 &mu;s &times; <i>T</i>:
+            
+            </p>
+            <ul class="no_bullets">
+              <li><i>T</i> &asymp; 2<sup>31</sup> &times; <i>Steps</i> / <i>R</i><sub>AVE</sub> = 
+              2<sup>32</sup> &times; <i>Steps</i> / ( <i>Rate</i> + <i>Rate</i><sub>Final</sub> )
+              </li>
+            </ul>
+            
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,3865481,1000,0,0,0,0\r</code> 
-            This simple example will move axis 1 at a constant speed of 45 steps/second for 1000 steps. Axis 2 does not move.
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+     We then have the following LM command:
+            <ul class="no_bullets">
+              <li><code>LM,3865471,60,1732,0,0,0</code></li>
+            </ul>
+            Notice that we are only using axis 1 in this example. You can of course use both axes at the same time, but you usually need to be careful that the times for each axis match up.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17179869,2,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> 
+            This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> 
             This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,10,0,85899346,2,0\r</code> 
-            This example will step both axis at a 1 ms/step rate, and axis 1 will step for 10 steps and axis 2 will step for 2 steps. Note that you normally don't want this - one normally prefers to have both axes stepping for the whole length of the move. This is a (poor, jerky) "constant-rate" move without acceleration or deceleration on either axis.
-
+            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,500,0,85899346,250,0\r</code> 
+            This example will step both axis at a 1 ms/step rate, and axis 1 will step for 500 steps and axis 2 will step for 250 steps. This is <i>usually</i> not what you want in practice; it's usually better if the moves for each axis terminate at the same time. This is a "constant-rate" move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 5:</span> <code>LM,17179869,6,0,57266231,20,0\r</code> 
+            <span style="font-weight: bold;">Example 5:</span> <code>LM,17180814,6,0,57266231,20,0\r</code> 
             This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
             <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> 
             This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179869,75,-687,8589934,75,687\r</code> 
+            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            First added in v2.5.0 with partial functionality. This command should only be considered to be functional as of v2.5.3. As of the current version (2.6.5), there may be some remaining issues with the implementation, and we generally recommend the use of SM or XM instead.
+            First added in v2.5.0 with partial functionality, and revised in v2.5.3.
+             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
+            This command should only be considered to be fully functional as of v2.7.0.
           </li>
         </ul>
       
         <hr class="short" />
+
+
+        <h4><a name="LT"></a>"LT" &mdash; Low-level Move, Time-limited</h4>
+
+      <ul>
+          <li><span style="font-weight: bold;">Command:</span> 
+            <code>
+              LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li><i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.</li>
+            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
+            The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
+            </li>
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+            <b>Overview:</b> This low-level command causes one or both motors to move for a given duration of time, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of time intervals has elapsed.
+             </p> <p>
+             This 
+            command, as compared to the similar <code><a href="#LM">LM</a></code> command, makes it
+            much easier to construct motion sequences that smoothly follow one another, but trades
+            off the ability to exactly specify a destination in the process. You may wish to use
+            sequences of LT commands, followed by a <code><a href="#HM">HM</a></code> command, in order to
+            both move quickly and end up at a specific location.
+            </p> <p>
+            This is a low-latency command where the input values are parsed and passed directly into motion control
+            FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command
+            throughput can be achieved.  While individual movement commands may be as short as a single 40 &mu;s
+            time interval, there are practical limits to the rate at which commands can be issued,
+            as discussed under <a href="#performance">Performance</a>.
+            
+            </p><p>
+	         <b>Methods and consequences:</b>
+	         The <code>LT</code> function is essentially
+	          identical to the <code><a href="#LM">LM</a></code> in every
+	         aspect of its operation
+	         <i>except</i> that it terminates after a set number of intervals rather than after
+	         a set number of steps. That is to say, in the sequence of operations executed every
+	         40 &mu;s, when the check is made to see if the move is complete,
+	         the time elapsed &mdash; not the step count &mdash; is checked.
+	         </p> <p>
+	         With that in mind, all of the formulas from the description of the
+	       <code><a href="#LM">LM</a></code> command, for computing step rates, acceleration,
+	       distance, and time are all still applicable when working with <code>LT</code>.
+	        </p> <p>
+	         Once exception should be noted: Since there is no <i>Step</i> argument in this command to
+	         indicate the direction that each motor should turn, the input <i>Rate</i> arguments
+	         are given a sign. The sign of <i>Rate</i> indicates <i>only</i> which direction the 
+	         motor should turn. Only its absolute value |<i>Rate</i>| is input to the routines
+	         that calculate and manage the motor step
+	         frequency. When using the formulas from the <code><a href="#LM">LM</a></code> command
+	         description, use the unsigned value |<i>Rate</i>|.
+	        </p>
+          </li>
+          <li>
+              
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+     We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
+            <ul class="no_bullets">
+              <li><code>LT,10169,3865471,1732,0,0,3</code></li>
+            </ul>
+            Since this command does not explicitly specify the number of steps to be traveled,
+            you may want to
+            carefully check your math, or use tools like <code><a href="#QS">QS</a></code> or 
+            <code><a href="#HM">HM</a></code> command following a move like this.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,25000,33865471,0,0,0\r</code> 
+            This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
+          </li>
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LM,12500,17179000,-687,8592000,687\r</code> 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.7.0.
+
+          </li>
+        </ul>
+      
+        <hr class="short" />
+
 
         <h4><a name="MR"></a>"MR" &mdash; Memory Read</h4>
 
@@ -1073,9 +1177,12 @@ td {text-align: center}
             <span style="font-weight: bold;">Example:</span> <code>PC,1,2,1,2,1,2,1,2\r</code> After sending a <code>S2,0,4</code> (to turn off RC servo output on pin RB1) and <code>PG,1</code> (to turn on pulse generation), these parameters would cause all four pins (RB0, RB1, RB2, and RB3) to output square waves with a 50% duty cycle and 500 Hz frequency.
           </li>
           <li>
-            <span style="font-weight: bold;">Note:</span>
+            <span style="font-weight: bold;">Version History:</span>
             <p>
-              Due to a bug in all versions up to and including v2.6.5, it may take up to 64K milliseconds for new Length and Period values to take effect. Turning the pulses off and on again with <code>PG,0</code> then <code>PG,1</code> will not help.
+              Version 2.6.6 and later : The bug preventing some <code>PC</code> changes from acting immediately is fixed and <code>PC/PG</code> work properly.
+            </p>
+            <p>
+              Version 2.6.5 and before : There is a bug in the <code>PC/PG</code> functions which prevent some <code>PC</code> updates from taking effect immediately but instead requiring 64K milliseconds to elapse before the change takes effect.
             </p>
           </li>
         </ul>
@@ -1305,7 +1412,9 @@ td {text-align: center}
             <p>The returned status byte consists of the following status bits:</p>
             <p>
 
-            <table border="1" cellpadding="2" cellspacing="2"  >
+            <table border="1" cellpadding="2" cellspacing="2"  
+                    style="margin-left:10%;width:80%;">
+
               <tbody>
                     <tr style="font-weight:bold;">
                         <td style="text-align:left">Bit</td>
@@ -1675,7 +1784,8 @@ td {text-align: center}
           </li>
           <li>
             RPx vs pin number (and label on the board) table:<br>
-            <table border="1" cellpadding="2" cellspacing="2">
+            <table border="1" cellpadding="2" cellspacing="2"
+                            style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
                   <td valign="top"><b>RPx</b><b><br>
@@ -1739,7 +1849,8 @@ td {text-align: center}
                 </tr>
               </tbody>
             </table>
-            <table border="1" cellpadding="2" cellspacing="2" >
+            <table border="1" cellpadding="2" cellspacing="2" 
+                style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
                   <td valign="top"><b>RPx</b><b><br>
@@ -2099,14 +2210,12 @@ td {text-align: center}
             </p>
             <p>
               The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move.
+              While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
             <p>
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
-            <p>
-              The EBB firmware can sustain moves of 3 ms or more continuously without any inter-move gaps in time.
-            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
@@ -2457,6 +2566,7 @@ td {text-align: center}
               </p>
               <p>
                 The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25 kSteps/second. If the XM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move. Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.)
+                While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
               </p>
               <p>
                 Note that internally the EBB generates an ISR at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
@@ -2478,8 +2588,6 @@ td {text-align: center}
         <p />
 
         <hr>
-
-
 
         <h2><a name="states"></a>Initial I/O pin configuration</h2>
         
@@ -2521,7 +2629,9 @@ td {text-align: center}
         
         <p />
 
-        <table border="1" cellpadding="2" cellspacing="2">
+        <table border="1" cellpadding="2" cellspacing="2"
+            style="margin-left:3%;width:94%;">
+
           <tbody>
             <tr style="font-weight:bold;">
               <td>Pin</td>
@@ -2557,7 +2667,7 @@ td {text-align: center}
               <td>RB4</td>
               <td>Output</td>
               <td>Low</td>
-              <td>Alternate Pen Up/Down I/O (solenoid or laser control)</td>
+              <td>Alternate Pen Up/Down I/O (solenoid/laser)</td>
             </tr>
             <tr>
               <td>RB5</td>
@@ -2584,16 +2694,90 @@ td {text-align: center}
         <br />
         <p />
 
+        <h2><a name="performance"></a>Performance</h2>
+        
+        <p>The EBB has some basic performance limits, which do vary with new firmware releases.
+        </p>
+        
+        <p>One performance aspect is the duration of the step pulses sent to the stepper driver chips. While
+        the pulses produced by the EBB firmware will always be long enough to guarantee proper operation
+        with the built-in drivers, it is possible to use some of the GPIO pins on the EBB to connect external
+        step/dir driver electronics to drive much larger systems. In this case, the external drivers may have
+        a minimum step pulse length, and so it can be important to know this timing information in that case.
+        </p>
+        <p style="padding-left:5%">
+        Output step pulse duration for external stepper drivers:
+        <ul style="padding-left:10%">      
+            <li>EBB firmware 2.7.0 and above: 1.6 - 2.3 &mu;s.</li>
+            <li>EBB firmware 2.6.5 and below: 2.8 - 3.0 &mu;s.</li>
+        </ul>
+        </p>
+        
+        <p>Another important performance measure is the maximum rate at which sequential movement
+        commands can be
+        streamed to the EBB. This rate is expressed as the shortest move duration that can be sent
+        to the EBB as a continuous stream of identical motion commands, such that there
+        are no gaps between the last step of one move and the first step of the next move.
+        For a high enough sustained rate of sufficiently short movement commands, the EBB will not
+        be able to parse and queue each command prior to starting the subsequent move.
+        The available CPU time available for parsing and queueing commands does depend on the 
+        active step rate, as the EBB shares CPU time between command parsing and step generation.
+        </p>
+        <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain
+        indefinitely without gaps, under different move commands. The worst case
+        values (highest sustained minimum move duration) were measured with step rates of approximately 
+        25 kHz on both motors &mdash; a condition rarely achieved in typical applications. 
+        The best case values
+        (lowest sustained minimum move duration) are for low step rates,
+        and was measured at 2.5 kHz. You may be able to sustain movement at these rates with higher motion
+        frequencies.
+        </p>
+        
+        <p />
+
+        <table border="1" cellpadding="2" cellspacing="2"
+            style="margin-left:10%;width:80%;">
+          <tbody>
+            <tr style="font-weight:bold;">
+              <td>Command</td>
+              <td>Firmware &gt;= 2.7.0</td>
+              <td>Firmware &lt; 2.7.0</td>
+            </tr>
+            <tr>
+              <td>SM</td>
+              <td>3-4 ms</td>
+              <td>4-7 ms</td>
+            </tr>
+            <tr>
+              <td>XM</td>
+              <td>3-4 ms</td>
+              <td>4-6 ms</td>
+            </tr>
+            <tr>
+              <td>LM, LT </td>
+              <td>3-5 ms</td>
+              <td>4-6 ms</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+        The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same
+        data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and additional factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
+        </p>
+        <p />
+        <br />
+        <p />
+
         <h2><a name="faq"></a>Frequently Asked Questions</h2>
 
         <p>
           <b>Q1)</b> How can I calculate how long it will take to move from one RC servo position to another? Specifically in relation to the standard pen-arm servo that is activated with the SP,1 and SP,0 commands.
         </p>
         <p>
-          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24ms.
+          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24 ms.
         </p>
         <p>
-          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24ms periods to get from 10000 to 15000, or 1.2 seconds total.
+          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24 ms periods to get from 10000 to 15000, or 1.2 seconds total.
         </p>
         <p>
           Now, when you're using the SP,0 and SP,1 commands, the servo_min (defaults to 16000, or 1.33 ms) and servo_max (defaults to 20000, or 1.6 ms) get used as the positions. And the servo_rate_up and servo_rate_down get used as the rates. So the formula is as follows:

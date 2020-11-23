@@ -169,7 +169,6 @@ void main(void)
 			USBDeviceAttach();
 		}
 		#endif
-
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.
         USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
@@ -186,7 +185,6 @@ void main(void)
         				  // execute (~50 instruction cycles) before it returns.
         #endif
     				  
-
 		// Application-specific tasks.
 		// Application related code may be added here, or in the ProcessIO() function.
         ProcessIO();        

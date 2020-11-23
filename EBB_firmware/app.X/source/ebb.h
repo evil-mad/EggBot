@@ -51,6 +51,12 @@
 #ifndef EBB_H
 #define EBB_H
 
+// Enable this line to compile with a lot of debug prints for motion commands
+//#define DEBUG_VALUE_PRINT
+
+// Define this to turn on some GPIO pin timing debug for stepper commands
+//#define GPIO_DEBUG
+
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
 #define DISABLE_MOTOR       1
@@ -71,17 +77,40 @@ typedef enum
 	COMMAND_MOTOR_MOVE,
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
-  COMMAND_SE
+  COMMAND_SE,
+  COMMAND_MOTOR_MOVE_TIMED
 } CommandType;
+
+// Byte union used for accumulator (unsigned))
+typedef union union32b4 {
+  struct byte_map {
+      UINT8 b1; // Low byte
+      UINT8 b2;
+      UINT8 b3;
+      UINT8 b4; // High byte
+  } bytes;
+  UINT32 value;
+} u32b4_t;
+
+// Byte union used for rate (signed)
+typedef union union32b4 {
+  struct byte_map {
+      UINT8 b1; // Low byte
+      UINT8 b2;
+      UINT8 b3;
+      UINT8 b4; // High byte
+  } bytes;
+  INT32 value;
+} uS32b4_t;
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {
   CommandType     Command;
-  INT32           StepAdd[NUMBER_OF_STEPPERS];
-  INT32           StepAddInc[NUMBER_OF_STEPPERS];
-  UINT32          StepsCounter[NUMBER_OF_STEPPERS];
+  uS32b4_t        Rate[NUMBER_OF_STEPPERS];
+  INT32           Accel[NUMBER_OF_STEPPERS];
+  UINT32          Steps[NUMBER_OF_STEPPERS];
   UINT8           DirBits;
   UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
   UINT16          ServoPosition;
@@ -90,6 +119,7 @@ typedef struct
   UINT16          ServoRate;
   UINT8           SEState;
   UINT16          SEPower;
+  UINT8           Active[NUMBER_OF_STEPPERS];
 } MoveCommandType;
 
 // Define global things that depend on the board type
@@ -110,8 +140,13 @@ typedef struct
 // that happen after the timer fires but before we can reload the timer with new
 // values.
 // The values here are hand tuned for 25KHz ISR operation
-#define TIMER1_L_RELOAD (61)
-#define TIMER1_H_RELOAD (254)
+// 0xFFFF - 0x01E0 = 0xFE1F
+#define TIMER1_L_RELOAD (61)  // 0x3D
+#define TIMER1_H_RELOAD (254) // 0xFE
+//#define TIMER1_L_RELOAD (0x3F)
+//#define TIMER1_H_RELOAD (0xED)
+
+
 #define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
 
 
@@ -125,7 +160,6 @@ extern BOOL gLimitChecks;
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
 void parse_SM_packet(void);
-void parse_AM_packet(void);
 void parse_SC_packet(void);
 void parse_SP_packet(void);
 void parse_TP_packet(void);
@@ -148,6 +182,7 @@ void parse_XM_packet(void);
 void parse_QS_packet(void);
 void parse_CS_packet(void);
 void parse_LM_packet(void);
+void parse_LT_packet(void);
 void parse_HM_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
