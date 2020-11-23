@@ -779,6 +779,7 @@ ul.no_bullets {
             </p>
             <p>
 	         <b>Methods and consequences:</b> 
+
 	         Each axis has a separate 32 bit Accumulator to control its timing. When the <code>LM</code> command is called, the Accumulator may be initialized to zero or left alone, depending on the value of the <i>Clear</i> argument.
             The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it.
 	       Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
@@ -787,6 +788,7 @@ ul.no_bullets {
     	     <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
     	     <li>The value of <i>Rate</i> is added to the Accumulator.</li>
     	     <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
+
               <ul>
               <li>The motor on that axis moves one step.</li>
               <li>2<sup>31</sup> is subtracted from the Accumulator for that axis. </li>
@@ -910,7 +912,9 @@ ul.no_bullets {
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            First added in v2.5.0 with partial functionality, and revised in v2.5.3. Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior. This command should only be considered to be fully functional as of v2.7.0.
+            First added in v2.5.0 with partial functionality, and revised in v2.5.3.
+             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
+            This command should only be considered to be fully functional as of v2.7.0.
           </li>
         </ul>
       
@@ -1000,6 +1004,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             Added in v2.7.0.
+
           </li>
         </ul>
       
