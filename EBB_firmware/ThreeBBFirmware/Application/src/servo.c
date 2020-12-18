@@ -49,76 +49,42 @@
  */
 
 /*
- * This module implements the RC Servo outputs, method 2
+ * This module implements the RC Servo outputs. The 3BB implements RC Servo
+ * outputs differently than the EBB. It uses dedicated timer channels instead of
+ * a single timer and an ISR to switch signals between outputs. Also, on the
+ * 3BB, there are only 6 possible RC servo outputs rather than 8 as on the EBB.
+ *
+ * 3BB Servo Outputs and Timer Channels
  * 
- * Started by Brian Schmalz (www.schmalzhaus.com) on 8/22/09
- * For the Egg Bot Firmware
- *
- * There are several parts of this file. It is written in a modular
- * way to ease incorporation into different UBW (www.schmalzhaus.com/UBW) 
- * hardware builds. Because we don't want to have any function calls in the ISR,
- * the part of the ISR that this module contributes is implemented as a big
- * macro. There is a section for the API calls (for other modules) to turn
- * on/off RC method 2 and to set values and configure outputs. Then there is the
- * user command section that handles parsing user input. This module (the .c and
- * .h files) should be able to be dropped into any UBW firmware that is 'module
- * aware' with minimal changes. There is also an init section that gets called
- * on bootup.
- *
- * MODULE THEORY
- *
- * The idea is that we want to generate between zero and eight RC servo outputs. 
- * We want a maximum of resolution in their timing, and a minimum of CPU and ISR
- * overhead. We want maximum flexibility with respect to which pins receive the
- * output pulses. This 'method 2' only works with PICs that have the PPS
- * (Peripheral Pin Select) hardware. Using this method, we will be able to
- * generate servo output pulses (positive going) on up to eight output pins
- * (selectable using PPS), with times from 0ms to 3ms, at a repetition rate of
- * 24ms. The resolution of the pulse will be 83ns (Fosc/4). So a value of 0 will
- * represent 0ms pulse, and 36000 will represent 3ms.
- *
- * On UBW firmware, TIMER1 generates an interrupt every 1ms. This interrupt is 
- * used to schedule the four RC servo outputs. Every 3 fires of this ISR, we
- * check to see if we need to set the next RC output pin. If so, we select the
- * proper pin using the PPS, set it high, record what state we are now in, and
- * then set up TMR3 and ECCP2 to fire after X 83ns ticks of TMR3. ECCP2 will
- * wait until TMR3 fires, then will set the output pin low. This method allows
- * us to choose any of the PPS pins as outputs, and only requires CPU time every
- * 3 ms to start off the pulses.
- *
- * As of version 2.2.0, we have changed the way that the S2 command works.
- * Under the hood, ALL servo commands are now handled by the motion engine
- * ISR. This means that the S2 command now simply fills in a data structure
- * and puts it in the motion queue. The motion engine ISR pulls it off the
- * queue and then 'executes' the command. (All it does there is transfer the
- * proper values to the data structures that the actual RC servo ISR uses to
- * update the various output pins for each servo pulse.) But the key here is
- * that the S2 command no longer takes effect immediately - RC servo commands
- * are now handled in the same way that SM commands are handled. Which means
- * they can be queued up and delays added, etc.
- *
- * The other effect of this change is that the normal SP pen up/pen down
- * commands are now just normal S2 commands in disguise.
+ * MCU Pin  Timer  Channel  Silk Screen
+ * ------------------------------------
+ * PC6      TIM8   CH1      P0
+ * PB4      TIM3   CH1      P1
+ * PB5      TIM3   CH2      P2
+ * PB6      TIM4   CH1      P3
+ * PB7      TIM4   CH2      P4
+ * PB9      TIM4   CH4      P5
  */
 
 /************** INCLUDES ******************************************************/
 
-#include <p18cxxx.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "ebb.h"
 #include "servo.h"
-#include "HardwareProfile.h"
-#include "fifo.h"
-#include "parse.h"
-#include "utility.h"
-#include "isr.h"
-#include "stepper.h"
+
+//#include "ebb.h"
+//#include "HardwareProfile.h"
+//#include "fifo.h"
+//#include "parse.h"
+//#include "utility.h"
+//#include "isr.h"
+//#include "stepper.h"
 
 /************** MODULE DEFINES ************************************************/
 
+#define MAX_RC2_SERVOS    6       // This is 6 because there are 6 timer channels dedicated to RC servo pulses
+#define INITAL_RC2_SLOTS  8       // Initial number of RC2 slots (determines repeat rate of pulses)
+#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
 // Power on default value for gPenMoveDuration in milliseconds
 #define PEN_MOVE_DURATION_DEFAULT_MS  500
@@ -133,6 +99,28 @@
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
+#if 0
+extern UINT16 gPenMoveDuration;
+
+extern volatile unsigned long int gRCServoPoweroffCounterMS;
+extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
+
+extern INT16 gPenMaxPosition;
+extern INT16 gPenMinPosition;
+extern UINT8 gRC2msCounter;
+extern UINT16 gRC2Value[MAX_RC2_SERVOS];
+extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
+extern UINT8 gRC2Ptr;
+extern UINT16 gRC2Target[MAX_RC2_SERVOS];
+extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
+extern far ram UINT8 * gRC2RPORPtr;
+extern UINT8 gRC2Slots;
+extern UINT8 gRC2SlotMS;
+
+// track the latest state of the pen
+extern PenStateType gPenStateActual;
+#end if
+
 // Counts from 0 to gRC2SlotMS
 UINT8  gRC2msCounter;
 // Current RC servo position in 83uS units for each channel
@@ -145,7 +133,7 @@ UINT16 gRC2Target[MAX_RC2_SERVOS];
 UINT16 gRC2Rate[MAX_RC2_SERVOS];
 // 
 UINT8  gRC2Ptr;
-// How many RC servos can we currently simultainously service (default 8)
+// How many RC servos can we currently simultaneously service (default 8)
 UINT8  gRC2Slots;
 // How many 1ms ISR ticks before switching to the next channel (default 3)
 UINT8  gRC2SlotMS;
