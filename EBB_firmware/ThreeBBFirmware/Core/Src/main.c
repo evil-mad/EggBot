@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020 Brian Schmalz.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -15,6 +15,28 @@
   *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
+  * Timer Use
+  * ----------
+  * TIM1    Not currently used
+  * TIM2    Not currently used (could be used for STEP1/STEP2/STEP3)
+  * TIM3    RC Servo outputs (CH1->P1, CH2->P2)
+  * TIM4    RC Servo outputs (CH1->P3, CH2->P4, CH3->P5)
+  * TIM5    Not currently used
+  * TIM6    Generates 100Khz "high_isr()" for step/dir pulse generation
+  * TIM7    Not currently used
+  * TIM8    RC Servo output (CH1->P0)
+  * TIM15   Not currently used
+  * TIM16   Not currently used
+  * TIM17   Not currently used
+  * TIM20   Not currently used
+  *
+  *
+  *
+  *
+  *
+  *
+  ******************************************************************************
+  *
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -676,7 +698,7 @@ static void MX_TIM8_Init(void)
 
   /* USER CODE END TIM8_Init 1 */
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 0;
+  htim8.Init.Prescaler = 52;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim8.Init.Period = 65535;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
