@@ -70,6 +70,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include "main.h"
 #include "servo.h"
 
 //#include "ebb.h"
@@ -83,7 +84,7 @@
 /************** MODULE DEFINES ************************************************/
 
 #define MAX_RC2_SERVOS    6       // This is 6 because there are 6 timer channels dedicated to RC servo pulses
-#define INITAL_RC2_SLOTS  8       // Initial number of RC2 slots (determines repeat rate of pulses)
+
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
 // Power on default value for gPenMoveDuration in milliseconds
@@ -99,49 +100,15 @@
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
-#if 0
-extern UINT16 gPenMoveDuration;
-
-extern volatile unsigned long int gRCServoPoweroffCounterMS;
-extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
-
-extern INT16 gPenMaxPosition;
-extern INT16 gPenMinPosition;
-extern UINT8 gRC2msCounter;
-extern UINT16 gRC2Value[MAX_RC2_SERVOS];
-extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
-extern UINT8 gRC2Ptr;
-extern UINT16 gRC2Target[MAX_RC2_SERVOS];
-extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
-extern far ram UINT8 * gRC2RPORPtr;
-extern UINT8 gRC2Slots;
-extern UINT8 gRC2SlotMS;
-
-// track the latest state of the pen
-extern PenStateType gPenStateActual;
-#end if
-
-// Counts from 0 to gRC2SlotMS
-UINT8  gRC2msCounter;
 // Current RC servo position in 83uS units for each channel
-UINT16 gRC2Value[MAX_RC2_SERVOS];
-// RPn pin associated with this channel
-UINT8  gRC2RPn[MAX_RC2_SERVOS];
+static uint16_t gRC2Value[MAX_RC2_SERVOS];
 // Target position for this channel in 83uS units
-UINT16 gRC2Target[MAX_RC2_SERVOS];
+static uint16_t gRC2Target[MAX_RC2_SERVOS];
 // Amount of change from Value to Target each 24ms
-UINT16 gRC2Rate[MAX_RC2_SERVOS];
-// 
-UINT8  gRC2Ptr;
-// How many RC servos can we currently simultaneously service (default 8)
-UINT8  gRC2Slots;
-// How many 1ms ISR ticks before switching to the next channel (default 3)
-UINT8  gRC2SlotMS;
-// Pointer into PPS output registers
-far ram UINT8 * gRC2RPORPtr;
+static uint16_t gRC2Rate[MAX_RC2_SERVOS];
 
 // Records the current pen state (up/down) in reality
-PenStateType gPenStateActual;
+static PenStateType gPenStateActual;
 
 // Records the pen state that the commands coming from the PC think the pen is in
 // (Prevents duplicate pen up or pen down commands.)
@@ -150,57 +117,24 @@ static PenStateType PenStateCommand;
 
 // These are the min, max, and default duration values for SP pen move command
 // They can be changed by using SC,x commands.
-INT16 gPenMaxPosition;
-INT16 gPenMinPosition;
-UINT16 gPenMoveDuration;
+static int16_t gPenMaxPosition;
+static uint16_t gPenMinPosition;
+static uint16_t gPenMoveDuration;
 
-#if defined(BOARD_EBB)
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
-volatile UINT32 gRCServoPoweroffCounterMS = 0;
-volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
-#endif
+volatile uint32_t gRCServoPoweroffCounterMS = 0;
+volatile uint32_t gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-static UINT8 servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
-static UINT8 servo_get_channel_from_RPn(UINT8 RPn);
+//static uint8_t servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+static void servo_SetChannel(uint8_t channel, uint16_t width);
 
 /************** LOCAL FUNCTIONS ***********************************************/
+#if 0
 
 
-// Return the current channel that is associated with the PPS output pin
-// RPn. If there is no channel yet assigned for this RPn, then pick the
-// next available one. If there are none available, then return channel 0
-// (which is considered an error.)
-// Remember, channels are from 1 through 8 (Normally - can be increased with 
-// SC,8 command). Channel 0 is the 'error' channel.
-static UINT8 servo_get_channel_from_RPn(UINT8 RPn)
-{
-  UINT8 i;
-
-  // Search through the existing channels, and see if our RPn is there
-  for (i=0; i < MAX_RC2_SERVOS; i++)
-  {
-    if (gRC2RPn[i] == RPn)
-    {
-      // Found it! Return the channel number
-      return (i + 1);
-    }
-  }
-
-  // We have not found it, so we need to allocate a new channel for this RPn
-  for (i=0; i < MAX_RC2_SERVOS; i++)
-  {
-    if (gRC2RPn[i] == 0)
-    {
-      // Found one that's free! Return the channel number
-      return (i + 1);
-    }
-  }
-
-  // We do not have room for another channel, so return an error
-  return 0;
-}
 
 // Function to set up an RC Servo move. Takes Duration, RPn, and Rate
 // and adds them to the motion control fifo.
@@ -296,6 +230,7 @@ static UINT8 servo_Move(
 }
 
 /************** GLOBAL FUNCTIONS **********************************************/
+#endif
 
 /*
 The idea with servo is to use the ECCP2 module and timer 3.
@@ -325,6 +260,7 @@ gRC2RPORPtr - a RAM pointer into the RPORxx register
 
 If a slot's gRC2Value[] = 0, then that slot is disabled and its pin will be low.
 The value in gRC2Pin is the PPS RPx pin number that this slot controls
+*/
 
 /*
  * Module Init Function
@@ -335,38 +271,15 @@ void servo_Init(void)
 {
   unsigned char i;
 
-  gRC2msCounter = 0;
-  gRC2Ptr = 0;
   gPenMoveDuration = PEN_MOVE_DURATION_DEFAULT_MS;
 
   for (i=0; i < MAX_RC2_SERVOS; i++)
   {
     gRC2Value[i] = 0;
-    gRC2RPn[i] = 0;
     gRC2Target[i] = 0;
     gRC2Rate[i] = 0;
   }
-  // Initialize the RPOR pointer
-  gRC2RPORPtr = &RPOR0;
 
-  // Set up TIMER3
-  T3CONbits.TMR3CS = 0b00;    // Use Fosc/4 as input
-  T3CONbits.T3CKPS = 0b00;    // Prescale is 1:1
-  T3CONbits.RD16 = 1;         // Enable 16 bit mode
-  TMR3H = 0;
-  TMR3L = 0;
-  T3CONbits.TMR3ON = 0;       // Keep timer off for now
-
-  TCLKCONbits.T3CCP1 = 1;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-  TCLKCONbits.T3CCP2 = 0;     // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-
-  CCP2CONbits.CCP2M = 0b1001; // Set EECP2 as compare, clear output on match
-
-  // We start out with 8 slots because that is good for RC servos (3ms * 8 = 24ms)
-  gRC2Slots = INITAL_RC2_SLOTS;
-
-  // We start out with 3ms slot duration because it's good for RC servos
-  gRC2SlotMS = 3;
 
   // Start with some reasonable default values for min and max pen positions
 #if defined(BOARD_EBB)
@@ -380,8 +293,38 @@ void servo_Init(void)
 #if defined(BOARD_EBB)
   RCServoPowerIO = RCSERVO_POWER_OFF;
 #endif
+
+  // JUST A TEST
+  servo_SetChannel(0, 10000);
+
 }
 
+// servo_SetChannel
+// This function sets the PWM width of any of the 6 RC servo channels (P0 to P5)
+// If width is zero, then the RC servo output on that channel is disabled and it is
+// available for GPIO or other uses. In this case, it will be set to be an output
+// and driven low (as a PWM width of 0 would normally do)
+// For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
+// The clock is 170Mhz, and a divider of 52 is used. So the full 65536 width of
+// the PMW pulse will be 20.05ms. And the PWM resolution is in units of 306ns.
+// If width is from 1 to 65535 then the pin will stay high for that number of
+// 306ns units.
+// channel is from 0 to 5
+static void servo_SetChannel(uint8_t channel, uint16_t width)
+{
+	switch (channel)
+	{
+	case 0:
+
+
+
+		break;
+	default:
+		break;
+	}
+}
+
+#if 0
 // Set Pen (modified for v3.0.0 and above firmware)
 // Usage: SP,<state>[,duration]<CR>
 // <state> is 0 (for goto servo_max) or 1 (for goto servo_min)
@@ -568,3 +511,5 @@ void servoPenHome(void)
   // Execute a move from homed to the lower pen position
   process_SM(500, 0, 0, gPenMaxPosition);
 }
+
+#endif
