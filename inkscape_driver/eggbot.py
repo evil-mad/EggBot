@@ -521,12 +521,10 @@ class EggBot(inkex.Effect):
                     if not self.allLayers:
                         self.DoWePlotLayer(self.sCurrentLayerName)
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
-                continue
-            if node.tag in [inkex.addNS('switch', 'svg'), 'switch']:
+            elif node.tag in [inkex.addNS('switch', 'svg'), 'switch']:
                 # Treat switch as a container element to plot
                 self.penUp()
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
-                continue
             elif node.tag in [inkex.addNS('use', 'svg'), 'use']:
 
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
