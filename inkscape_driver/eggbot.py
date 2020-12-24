@@ -3,7 +3,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.2, dated November 30, 2019.
+# Version 2.8.3, dated December 23, 2020.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,12 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# TODO: Add and honor advisory locking around device open/close for non Win32
-
 import gettext
 import math
 import time
-import sys
 
 from lxml import etree
 
@@ -524,7 +521,12 @@ class EggBot(inkex.Effect):
                     if not self.allLayers:
                         self.DoWePlotLayer(self.sCurrentLayerName)
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
-
+                continue
+            if node.tag in [inkex.addNS('switch', 'svg'), 'switch']:
+                # Treat switch as a container element to plot
+                self.penUp()
+                self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
+                continue
             elif node.tag in [inkex.addNS('use', 'svg'), 'use']:
 
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
@@ -851,19 +853,19 @@ class EggBot(inkex.Effect):
                                   inkex.addNS('flowRoot', 'svg'), 'flowRoot']:
                     if 'text' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw text; ' +
-                                                       'please convert it to a path first.  Consider using the ' +
-                                                       'Hershey Text extension which is located under the ' +
-                                                       '"Render" category of extensions.'))
+                            str(self.sCurrentLayerName) + '" unable to draw text; ' +
+                            'please convert it to a path first.  Consider using the ' +
+                            'Hershey Text extension which is located in the menu' +
+                            'under Extensions > Text.'))
                         self.warnings['text'] = 1
                     pass
                 elif node.tag in [inkex.addNS('image', 'svg'), 'image']:
                     if 'image' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw bitmap images; ' +
-                                                       'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
-                                                       'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
-                                                       'cause cut-and-paste operations to paste in bitmap copies.'))
+                            str(self.sCurrentLayerName) + '" unable to draw bitmap images; ' +
+                            'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
+                            'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
+                            'cause cut-and-paste operations to paste in bitmap copies.'))
                         self.warnings['image'] = 1
                     pass
                 elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
@@ -883,19 +885,14 @@ class EggBot(inkex.Effect):
                 elif node.tag in [inkex.addNS('color-profile', 'svg'), 'color-profile']:
                     # Gamma curves, color temp, etc. are not relevant to single color output
                     pass
-                elif not isinstance(node.tag, basestring):
-                    # This is likely an XML processing instruction such as an XML
-                    # comment.  lxml uses a function reference for such node tags
-                    # and as such the node tag is likely not a printable string.
-                    # Further, converting it to a printable string likely won't
-                    # be very useful.
+                elif node.tag in [inkex.addNS('foreignObject', 'svg'), 'foreignObject']:
                     pass
                 else:
                     if str(node.tag) not in self.warnings:
                         t = str(node.tag).split('}')
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw <' + str(t[-1]) +
-                                                       '> object, please convert it to a path first.'))
+                            str(self.sCurrentLayerName) + '" unable to draw <' + str(t[-1]) +
+                            '> object, please convert it to a path first.'))
                         self.warnings[str(node.tag)] = 1
                     pass
 
@@ -912,11 +909,10 @@ class EggBot(inkex.Effect):
 
         temp_num_string = 'x'
         string_pos = 1
-        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
-            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
-        else:
-            current_layer_name = str(str_layer_name)
-        
+
+        current_layer_name = str(str_layer_name)
+        current_layer_name.lstrip()  # Remove leading whitespace
+
         # Look at layer name.  Sample first character, then first two, and
         # so on, until the string ends or the string no longer consists of
         # digit characters only.
