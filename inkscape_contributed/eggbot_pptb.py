@@ -32,7 +32,6 @@
 import gettext
 
 import inkex
-import simplestyle
 from lxml import etree
 
 class EggBot_PostProcessTraceBitmap(inkex.Effect):
