@@ -32,7 +32,6 @@
 import gettext
 
 import inkex
-import simplestyle
 from lxml import etree
 
 class EggBot_PostProcessTraceBitmap(inkex.Effect):
@@ -112,7 +111,7 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
                     except:
                         parent.remove(node)
 
-        inkex.errormsg(gettext.gettext('Finished.  Created %d layers') % count)
+        inkex.utils.debug(gettext.gettext('Finished.  Created %d layers') % count)
 
 
 if __name__ == '__main__':
