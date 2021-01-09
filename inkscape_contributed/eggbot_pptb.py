@@ -25,31 +25,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# 8 January 2021
-# Python 3 and Inkscape 1.0 update by Scott VanRavenswaay ( scottvr at gmail dot com )
 
 import gettext
 
 import inkex
 import simplestyle
-from lxml import etree
+
 
 class EggBot_PostProcessTraceBitmap(inkex.Effect):
 
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.arg_parser.add_argument(
+        self.OptionParser.add_option(
                 "--outlineRegions", action="store", dest="outlineRegions",
-                type=inkex.Boolean, default=True,
+                type="inkbool", default=True,
                 help="Outline the regions with a stroked line of the same color as the region itself")
-        self.arg_parser.add_argument(
+        self.OptionParser.add_option(
                 "--fillRegions", action="store", dest="fillRegions",
-                type=inkex.Boolean, default=True,
+                type="inkbool", default=True,
                 help="Fill regions with color")
-        self.arg_parser.add_argument(
+        self.OptionParser.add_option(
                 "--removeImage", action="store", dest="removeImage",
-                type=inkex.Boolean, default=True,
+                type="inkbool", default=True,
                 help="Remove the traced bitmap image from the drawing")
 
     def effect(self):
@@ -63,8 +60,7 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
             stroke, fill, color = ('none', 'none', 'unknown')
 
             # Get the paths style attribute
-            style = dict(inkex.Style.parse_str(path.get('style', '')))
-
+            style = simplestyle.parseStyle(path.get('style', ''))
             # Obtain the fill color from the path's style attribute
             if 'fill' in style:
                 color = style['fill']
@@ -80,10 +76,10 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
             style['stroke'] = stroke
 
             # And change the style attribute for the path
-            path.set('style', inkex.Style.to_str(style))
+            path.set('style', simplestyle.formatStyle(style))
 
             # Create a group <g> element under the document root
-            layer = etree.SubElement(root, inkex.addNS('g', 'svg'))
+            layer = inkex.etree.SubElement(root, inkex.addNS('g', 'svg'))
 
             # Add Inkscape layer attributes to this new group
             count += 1
@@ -117,4 +113,4 @@ class EggBot_PostProcessTraceBitmap(inkex.Effect):
 
 if __name__ == '__main__':
     e = EggBot_PostProcessTraceBitmap()
-    e.run()
+    e.affect()
