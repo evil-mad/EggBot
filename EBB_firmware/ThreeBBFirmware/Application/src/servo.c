@@ -1,17 +1,15 @@
 /*********************************************************************
  *
- *                EiBotBoard Firmware
+ *                ThreeBotBoard Firmware
  *
  *********************************************************************
  * FileName:        servo.c
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
- * Based on original files by Microchip Inc. in MAL USB example.
- *
  * Software License Agreement
  *
- * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2020, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -54,6 +52,10 @@
  * a single timer and an ISR to switch signals between outputs. Also, on the
  * 3BB, there are only 6 possible RC servo outputs rather than 8 as on the EBB.
  *
+ * For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
+ * The clock is 170Mhz, and a divider of 52 is used. So the full 65536 width of
+ * the PMW pulse will be 20.05ms. And the PWM resolution is in units of 306ns.
+ *
  * 3BB Servo Outputs and Timer Channels
  * 
  * MCU Pin  Timer  Channel  Silk Screen
@@ -72,6 +74,7 @@
 #include <ctype.h>
 #include "main.h"
 #include "servo.h"
+#include "tim.h"
 
 //#include "ebb.h"
 //#include "HardwareProfile.h"
@@ -85,7 +88,7 @@
 
 #define MAX_RC2_SERVOS    6       // This is 6 because there are 6 timer channels dedicated to RC servo pulses
 
-#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
+#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (60s)
 
 // Power on default value for gPenMoveDuration in milliseconds
 #define PEN_MOVE_DURATION_DEFAULT_MS  500
@@ -128,37 +131,36 @@ volatile uint32_t gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-//static uint8_t servo_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+static uint8_t servo_Move(uint16_t Position, uint8_t Pin, uint16_t Rate, uint16_t Delay);
 static void servo_SetChannel(uint8_t channel, uint16_t width);
 
 /************** LOCAL FUNCTIONS ***********************************************/
-#if 0
 
-
-
-// Function to set up an RC Servo move. Takes Duration, RPn, and Rate
-// and adds them to the motion control fifo.
-// <Position> is the new target position for the servo, in 83uS units. So
-//      32,000 is 3ms. To turn off a servo output, use 0 for Duration.
-// <RPn> is the PPS RP# number for the pin that you want to use as the output
-//      (See schematic for a list of each RPn number for each GPIO pin.)
-// <Rate> is how quickly to move to the new position. Use 0 for instant change.
-//      Unit is 83uS of pulse width change every 24ms of time.
-// <Delay> is how many milliseconds after this command is excuted before the
-//      next command in the motion control FIFO is executed. 0 will run the next
-//      command immediatly.
-// This function will allocate a new channel for RPn if the pin is not already
-// assigned to a channel. It will return the channel number used when it
-// returns. If you send in 0 for Duration, the channel for RPn will be de-
-// allocated.
-// Another thing we do here is to make sure that the proper pin is an output,
-// And, if this is the first time we're starting up the channel, make sure that
-// it starts out low.
+/*
+ * Function to set up an RC Servo move. Takes Position, Pin, Rate and Delay
+ * and adds them to the motion control queue.
+ * <Position> is the new target position for the servo, in 83uS units. So
+ *     65535 is 20.05ms. To turn off a servo output, use 0 for Position.
+ * <Pin> is the RC Servo Pin number for the pin that you want to use as the output
+ *      (0 through 5)
+ * <Rate> is how quickly to move to the new position. Use 0 for instant change.
+ *      Unit is 83uS of pulse width change every 24ms of time.
+ * <Delay> is how many milliseconds after this command is excuted before the
+ *     next command in the motion control FIFO is executed. 0 will run the next
+ *     command immediatly.
+ * This function will allocate a new channel for RPn if the pin is not already
+ * assigned to a channel. It will return the channel number used when it
+ * returns. If you send in 0 for Duration, the channel for RPn will be de-
+ * allocated.
+ * Another thing we do here is to make sure that the proper pin is an output,
+ * And, if this is the first time we're starting up the channel, make sure that
+ * it starts out low.
+ */
 static UINT8 servo_Move(
-  UINT16 Position,
-  UINT8  RPn,
-  UINT16 Rate,
-  UINT16 Delay
+  uint16_t Position,
+  uint8_t Pin,
+  uint16_t Rate,
+  uint16_t Delay
 )
 {
   UINT8 i;
@@ -233,36 +235,6 @@ static UINT8 servo_Move(
 #endif
 
 /*
-The idea with servo is to use the ECCP2 module and timer 3.
-We divide time into 24ms periods. Inside each 24ms period, we
-can fire up to 8 RC servo's pulses (slots). Each pulse can be between
-0ms and 3ms long, controlled entirely by the ECCP2 hardware,
-so there is no jitter in the high time of the pulse.
-
-We want to go from 0ms to 3ms so we can accomodate RC servos
-who need really short or really long pulses to reach the
-physical extremes of its motion.
-
-This servo method will only be available on the 18F45J50 based
-EggBotBoards, because it requires the PPS (peripheral pin select)
-facility to be possible.
-
-Timer3 will be configured to clock at Fosc/4 = 12MHz.
-At this rate, a 1ms high pulse would need a CCPR2 value of 12,000.
-
-Variables:
-
-gRC2msCounter - counts from 0 to 2, in ms, to know when to fire each servo
-gRC2Ptr - index into gRC2Value and gRC2Pin arrays = next RC servo to fire
-gRC2Value - uint array of values (times) to load into Timer3
-gRC2Pin - what PPS pin is affected by this RC servo slot.
-gRC2RPORPtr - a RAM pointer into the RPORxx register
-
-If a slot's gRC2Value[] = 0, then that slot is disabled and its pin will be low.
-The value in gRC2Pin is the PPS RPx pin number that this slot controls
-*/
-
-/*
  * Module Init Function
  *
  * Put a call to this function inside the UserInit() call in UBW.c
@@ -294,9 +266,6 @@ void servo_Init(void)
   RCServoPowerIO = RCSERVO_POWER_OFF;
 #endif
 
-  // JUST A TEST
-  servo_SetChannel(0, 10000);
-
 }
 
 // servo_SetChannel
@@ -314,13 +283,27 @@ static void servo_SetChannel(uint8_t channel, uint16_t width)
 {
 	switch (channel)
 	{
-	case 0:
-
-
-
+		case 0:
+		{
+		  if (width != 0)
+		  {
+		    TIM8->CCR1 = width;
+		  }
+		  else
+		  {
+		    // Change this :
+		    // Turn off the timer for this I/O pin so it's just a GPIO output driven low
+		    TIM8->CCR1 = width;
+		  }
+      if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+      {
+        Error_Handler();
+      }
+    }
 		break;
-	default:
-		break;
+
+		default:
+		  break;
 	}
 }
 
@@ -455,15 +438,19 @@ void process_SP(PenStateType newState, UINT16 commandDuration)
   }
 }
 
-// Servo method 2 enable command
+#endif
+
+
+// RC Servo Output command
 // S2,<duration>,<output_pin>,<rate>,<delay><CR>
-//  will set RC output <channel> for <duration> on output pin <output_pin>
-//    <duration> can be 0 (output off) to 32,000 (3ms on time)
-//      (a 0 for <duration> de-allocates the channel for this output_pin)
-//    <output_pin> is an RPn pin number (0 through 24)
+//  will turn on RC pulses for <duration> on output pin <output_pin>
+//    <duration> can be 0 (output off) to 65535 (20.05ms, or 100% on time)
+//      (a 0 for <duration> sets the output pin to be a GPIO output pin and sets it low)
+//    <output_pin> is an RC Servo output pin number (0 through 5)
 //    <rate> is the rate to change (optional, defaults to 0 = instant)
 //    <delay> is the number of milliseconds to delay the start of the next command
 //      (optional, defaults to 0 = instant)
+// This command is added to the motion queue
 
 void parseS2Command(void)
 {
@@ -484,7 +471,7 @@ void parseS2Command(void)
     return;
   }
 
-  if (Pin > 24)
+  if (Pin > 5)
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
@@ -494,6 +481,8 @@ void parseS2Command(void)
 
   print_ack();
 }
+
+#if 0
 
 // Perform all of the things necessary to initialize the pen position.
 // Not much to do when using a servo, but for a stepper Motor3 must be 
