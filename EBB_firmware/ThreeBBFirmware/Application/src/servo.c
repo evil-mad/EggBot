@@ -53,8 +53,9 @@
  * 3BB, there are only 6 possible RC servo outputs rather than 8 as on the EBB.
  *
  * For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
- * The clock is 170Mhz, and a divider of 52 is used. So the full 65536 width of
- * the PMW pulse will be 20.05ms. And the PWM resolution is in units of 306ns.
+ * The clock is 170Mhz, and a divider of 51 is used (so there is a divide by 52).
+ * So the full 65536 width of the PMW pulse will be 20.05ms. And the PWM resolution
+ * is in units of 306ns.
  *
  * 3BB Servo Outputs and Timer Channels
  * 
@@ -67,6 +68,9 @@
  * PB7      TIM4   CH2      P4
  * PB9      TIM4   CH4      P5
  */
+
+/// TODO: Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized
+/// rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
 
 /************** INCLUDES ******************************************************/
 
