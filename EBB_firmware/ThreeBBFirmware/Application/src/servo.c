@@ -75,18 +75,18 @@
 #include "main.h"
 #include "servo.h"
 #include "tim.h"
+#include "parse.h"
+#include "utility.h"
 
 //#include "ebb.h"
 //#include "HardwareProfile.h"
 //#include "fifo.h"
-//#include "parse.h"
-//#include "utility.h"
 //#include "isr.h"
 //#include "stepper.h"
 
 /************** MODULE DEFINES ************************************************/
 
-#define MAX_RC2_SERVOS    6       // This is 6 because there are 6 timer channels dedicated to RC servo pulses
+#define MAX_SERVOS                              6  // This is 6 because there are 6 timer channels dedicated to RC servo pulses
 
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (60s)
 
@@ -103,19 +103,20 @@
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
+/// TODO: Update these wtih better names and proper units in comments
 // Current RC servo position in 83uS units for each channel
-static uint16_t gRC2Value[MAX_RC2_SERVOS];
+static uint16_t gRC2Value[MAX_SERVOS];
 // Target position for this channel in 83uS units
-static uint16_t gRC2Target[MAX_RC2_SERVOS];
+static uint16_t gRC2Target[MAX_SERVOS];
 // Amount of change from Value to Target each 24ms
-static uint16_t gRC2Rate[MAX_RC2_SERVOS];
+static uint16_t gRC2Rate[MAX_SERVOS];
 
 // Records the current pen state (up/down) in reality
-static PenStateType gPenStateActual;
+/// static PenStateType gPenStateActual;
 
 // Records the pen state that the commands coming from the PC think the pen is in
 // (Prevents duplicate pen up or pen down commands.)
-static PenStateType PenStateCommand;
+/// static PenStateType PenStateCommand;
 
 
 // These are the min, max, and default duration values for SP pen move command
@@ -131,108 +132,85 @@ volatile uint32_t gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-static uint8_t servo_Move(uint16_t Position, uint8_t Pin, uint16_t Rate, uint16_t Delay);
-static void servo_SetChannel(uint8_t channel, uint16_t width);
+static void servo_Move(uint16_t Duration, uint8_t Pin, uint16_t Rate, uint16_t Delay);
 
 /************** LOCAL FUNCTIONS ***********************************************/
 
 /*
  * Function to set up an RC Servo move. Takes Position, Pin, Rate and Delay
  * and adds them to the motion control queue.
- * <Position> is the new target position for the servo, in 83uS units. So
- *     65535 is 20.05ms. To turn off a servo output, use 0 for Position.
+ * <Duration> is the new target position for the servo, in 83uS units. So
+ *     65535 is 20.05ms. To turn off a servo output, use 0 for Duration.
  * <Pin> is the RC Servo Pin number for the pin that you want to use as the output
  *      (0 through 5)
  * <Rate> is how quickly to move to the new position. Use 0 for instant change.
  *      Unit is 83uS of pulse width change every 24ms of time.
- * <Delay> is how many milliseconds after this command is excuted before the
+ * <Delay> is how many milliseconds after this command is executed before the
  *     next command in the motion control FIFO is executed. 0 will run the next
- *     command immediatly.
+ *     command immediately.
  * This function will allocate a new channel for RPn if the pin is not already
  * assigned to a channel. It will return the channel number used when it
- * returns. If you send in 0 for Duration, the channel for RPn will be de-
- * allocated.
+ * returns. If you send in 0 for Duration, the channel for RPn will be deallocated.
  * Another thing we do here is to make sure that the proper pin is an output,
  * And, if this is the first time we're starting up the channel, make sure that
  * it starts out low.
  */
-static UINT8 servo_Move(
-  uint16_t Position,
-  uint8_t Pin,
+static void servo_Move(
+  uint16_t Duration,
+  uint8_t  Pin,
   uint16_t Rate,
   uint16_t Delay
 )
 {
-  UINT8 i;
-  UINT8 Channel;
-
-  // Get the channel that's already assigned to the RPn, or assign a new one
-  // if possible. If this returns zero, then do nothing as we're out of
-  // channels.
-  Channel = servo_get_channel_from_RPn(RPn);
-
-  // Error out if there were no available channels left
-  if (Channel == 0)
+  if (Pin >= MAX_SERVOS)
   {
-    return 0;
+    return;
   }
 
   // If Duration is zero, then caller wants to shut down this channel
-  if (0 == Position)
+  if (0 == Duration)
   {
-    // Turn off the PPS routing to the pin
-    *(gRC2RPORPtr + gRC2RPn[Channel - 1]) = 0;
-    gRC2Rate[Channel - 1] = 0;
-    gRC2Target[Channel - 1] = 0;
-    gRC2RPn[Channel - 1] = 0;
-    gRC2Value[Channel - 1] = 0;
+    gRC2Rate[Pin] = 0;
+    gRC2Target[Pin] = 0;
+    gRC2Value[Pin] = 0;
   }
   else
   {
-    // If we have a valid channel, and RPn, then make the move
-    if ((Channel - 1) < gRC2Slots && RPn <= 24)
-    {
-      // As a special case, if the pin is the same as the pin
-      // used for the solenoid, then turn off the solenoid function
-      // so that we can output PWM on that pin
-      if (RPn == PEN_UP_DOWN_RPN)
-      {
-        gUseSolenoid = FALSE;
-      }
+    // As a special case, if the pin is the same as the pin
+    // used for the solenoid, then turn off the solenoid function
+    // so that we can output PWM on that pin
+///    if (Pin == SERVO_PEN_UP_DOWN_SERVO_PIN)
+///    {
+///      gUseSolenoid = FALSE;
+///    }
 
-      // Is this the first time we've used this channel?
-      if (gRC2Value[Channel - 1] == 0)
-      {
-        // Make sure the pin is set as an output, or this won't do much good
-        SetPinTRISFromRPn(RPn, OUTPUT_PIN);
+    // Is this the first time we've used this channel?
+///    if (gRC2Value[Channel - 1] == 0)
+///    {
+///      // Make sure the pin is set as an output, or this won't do much good
+///    }
 
-        // For v2.1.5, found bug where if a pin is HIGH when we start doing
-        // RC output, the output is totally messed up. So make sure to set
-        // the pin low first.
-        SetPinLATFromRPn(RPn, 0);
-      }
+    // Wait until we have a free spot in the FIFO, and add our new
+    // command in
+///    WaitForRoomInFIFO();
 
-      // Wait until we have a free spot in the FIFO, and add our new
-      // command in
-      WaitForRoomInFIFO();
+    /// TODO: Move this to FIFO function?
+    // Now copy the values over into the FIFO element
+///    FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
+///    FIFO_G1[FIFOIn].ServoPosition = Position;
+///    FIFO_G2[FIFOIn].ServoRPn = RPn;
+///    FIFO_G3[FIFOIn].ServoRate = Rate;
+///    FIFO_G4[FIFOIn].ServoChannel = Channel;
+///    FIFO_G5[FIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
 
-      /// TODO: Move this to FIFO function?
-      // Now copy the values over into the FIFO element
-      FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
-      FIFO_G1[FIFOIn].ServoPosition = Position;
-      FIFO_G2[FIFOIn].ServoRPn = RPn;
-      FIFO_G3[FIFOIn].ServoRate = Rate;
-      FIFO_G4[FIFOIn].ServoChannel = Channel;
-      FIFO_G5[FIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-
-      fifo_Inc();
-    }
+///    fifo_Inc();
   }
-  return Channel;
+
+  /// Just for now, for testing
+  servo_SetOutput(Duration, Pin);
 }
 
-/************** GLOBAL FUNCTIONS **********************************************/
-#endif
+/************** PUBLIC FUNCTIONS **********************************************/
 
 /*
  * Module Init Function
@@ -245,13 +223,12 @@ void servo_Init(void)
 
   gPenMoveDuration = PEN_MOVE_DURATION_DEFAULT_MS;
 
-  for (i=0; i < MAX_RC2_SERVOS; i++)
+  for (i=0; i < MAX_SERVOS; i++)
   {
     gRC2Value[i] = 0;
     gRC2Target[i] = 0;
     gRC2Rate[i] = 0;
   }
-
 
   // Start with some reasonable default values for min and max pen positions
 #if defined(BOARD_EBB)
@@ -268,43 +245,136 @@ void servo_Init(void)
 
 }
 
-// servo_SetChannel
-// This function sets the PWM width of any of the 6 RC servo channels (P0 to P5)
-// If width is zero, then the RC servo output on that channel is disabled and it is
-// available for GPIO or other uses. In this case, it will be set to be an output
-// and driven low (as a PWM width of 0 would normally do)
-// For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
-// The clock is 170Mhz, and a divider of 52 is used. So the full 65536 width of
-// the PMW pulse will be 20.05ms. And the PWM resolution is in units of 306ns.
-// If width is from 1 to 65535 then the pin will stay high for that number of
-// 306ns units.
-// channel is from 0 to 5
-static void servo_SetChannel(uint8_t channel, uint16_t width)
+/*
+ * servo_SetOutput
+ * This function sets the PWM width of any of the 6 RC servo channels (P0 to P5)
+ * If width is zero, then the RC servo output on that channel is disabled and it is
+ * available for GPIO or other uses. In this case, it will be set to be an output
+ * and driven low (as a PWM width of 0 would normally do)
+ * For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
+ * The clock is 170Mhz, and a divider of 52 is used. So the full 65536 width of
+ * the PMW pulse will be 20.05ms. And the PWM resolution is in units of 306ns.
+ * If width is from 1 to 65535 then the pin will stay high for that number of
+ * 306ns units.
+ * <channel> is from 0 to 5, larger values will cause no change
+ * This function can be called in mainline or interrupt contexts.
+ */
+void servo_SetOutput(uint16_t duration, uint8_t pin)
 {
-	switch (channel)
+  switch (pin)
+  {
+	case 0:
 	{
-		case 0:
-		{
-		  if (width != 0)
-		  {
-		    TIM8->CCR1 = width;
-		  }
-		  else
-		  {
-		    // Change this :
-		    // Turn off the timer for this I/O pin so it's just a GPIO output driven low
-		    TIM8->CCR1 = width;
-		  }
+	  if (duration != 0)
+	  {
+	    TIM8->CCR1 = duration;
+	  }
+	  else
+	  {
+	    // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+	    TIM8->CCR1 = duration;
+	  }
+	  // TODO: Should this only get done if we don't already have the channel on? (to save time)
       if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
       {
         Error_Handler();
       }
-    }
-		break;
-
-		default:
-		  break;
+      break;
 	}
+    case 1:
+    {
+      if (duration != 0)
+      {
+        TIM3->CCR1 = duration;
+      }
+      else
+      {
+        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+        TIM3->CCR1 = duration;
+      }
+      // TODO: Should this only get done if we don't already have the channel on? (to save time)
+      if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      break;
+    }
+    case 2:
+    {
+      if (duration != 0)
+      {
+        TIM3->CCR2 = duration;
+      }
+      else
+      {
+        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+        TIM3->CCR2 = duration;
+      }
+      // TODO: Should this only get done if we don't already have the channel on? (to save time)
+      if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      break;
+    }
+    case 3:
+    {
+      if (duration != 0)
+      {
+        TIM4->CCR1 = duration;
+      }
+      else
+      {
+        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+        TIM4->CCR1 = duration;
+      }
+      // TODO: Should this only get done if we don't already have the channel on? (to save time)
+      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      break;
+    }
+    case 4:
+    {
+      if (duration != 0)
+      {
+        TIM4->CCR2 = duration;
+      }
+      else
+      {
+        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+        TIM4->CCR2 = duration;
+      }
+      // TODO: Should this only get done if we don't already have the channel on? (to save time)
+      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      break;
+    }
+    case 5:
+    {
+      if (duration != 0)
+      {
+        TIM4->CCR4 = duration;
+      }
+      else
+      {
+        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
+        TIM4->CCR4 = duration;
+      }
+      // TODO: Should this only get done if we don't already have the channel on? (to save time)
+      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      break;
+    }
+
+	default:
+	  break;
+  }
 }
 
 #if 0
@@ -441,27 +511,33 @@ void process_SP(PenStateType newState, UINT16 commandDuration)
 #endif
 
 
-// RC Servo Output command
-// S2,<duration>,<output_pin>,<rate>,<delay><CR>
-//  will turn on RC pulses for <duration> on output pin <output_pin>
-//    <duration> can be 0 (output off) to 65535 (20.05ms, or 100% on time)
-//      (a 0 for <duration> sets the output pin to be a GPIO output pin and sets it low)
-//    <output_pin> is an RC Servo output pin number (0 through 5)
-//    <rate> is the rate to change (optional, defaults to 0 = instant)
-//    <delay> is the number of milliseconds to delay the start of the next command
-//      (optional, defaults to 0 = instant)
-// This command is added to the motion queue
-
+/*
+ * RC Servo Output command
+ * S2,<duration>,<pin>,<rate>,<delay><CR>
+ * It will turn on/off RC pulses on pin <pin> for <duration>.
+ *    <duration> can be 0 (output off) to 65535 (20.05ms, or 100% on time)
+ *      A 0 for <duration> sets the output pin to be a GPIO output pin and sets it low.
+ *      16-bit unsigned integer
+ *    <pin> is an RC Servo output pin number (P0 through P5)
+ *      Values 0 through 5 are available, anything over will trigger error
+ *    <rate> is the rate to change (optional, defaults to 0 = instant)
+ *      /// TODO: Add details about units
+ *    <delay> is the number of milliseconds to delay the start of the next motion command
+ *      after this command begins. Gives the ability to 'overlap' servo moves with stepper
+ *      moves. (optional, defaults to 0 = instant)
+ *      16-bit unsigned integer
+ * This command is added to the motion queue.
+ */
 void parseS2Command(void)
 {
-  UINT16 Duration = 0;
-  UINT8 Pin = 0;
-  UINT16 Rate = 0;
-  UINT16 Delay = 0;
+  uint16_t Duration = 0;
+  uint8_t Pin = 0;
+  uint16_t Rate = 0;
+  uint16_t Delay = 0;
 
   // Extract each of the values.
-  extract_number (kUINT16, &Duration, kOPTIONAL);
-  extract_number (kUINT8, &Pin, kOPTIONAL);
+  extract_number(kUINT16, &Duration, kREQUIRED);
+  extract_number (kUINT8, &Pin, kREQUIRED);
   extract_number (kUINT16, &Rate, kOPTIONAL);
   extract_number (kUINT16, &Delay, kOPTIONAL);
 

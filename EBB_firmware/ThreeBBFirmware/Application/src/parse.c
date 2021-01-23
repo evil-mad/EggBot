@@ -5,7 +5,7 @@
 #include "stepper.h"
 #include <stdio.h>
 #include "commands.h"
-//#include "servo.h"
+#include "servo.h"
 //#include "ebb.h"
 //#include "analog.h"
 //#include "serial.h"
@@ -64,7 +64,7 @@ const parse_t commandTable[] =
 //  {'Q', 'C', parseQCCommand},
 //  {'Q', 'G', parseQGCommand},
 //  {'S', 'E', parseSECommand},
-//  {'S', '2', parseS2Command},
+  {'S', '2', parseS2Command},
 //  {'R', 'M', parseRMCommand},
 //  {'Q', 'M', parseQMCommand},
 //  {'A', 'C', parseACCommand},
