@@ -100,6 +100,7 @@ void populateDeviceStringWithName(void);
 uint32_t GetTick(void);
 void ParseSTCommand(void);    // ST Set Tag command
 void ParseQTCommand(void);    // QT Query Tag command
+void utility_SysTick(void);
 #if defined(DEBUG)
 void ParseSHCommand(void);    // SH print Stack Highwater
 #endif

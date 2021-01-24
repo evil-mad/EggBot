@@ -9,7 +9,7 @@
 //#include "analog.h"
 //#include "delays.h"
 #include "stepper.h"
-//#include "servo.h"
+#include "servo.h"
 //#include "solenoid.h"
 #include "commands.h"
 #include "utility.h"
@@ -31,7 +31,7 @@ volatile uint8_t GlobalDelayMS;
 
 volatile uint8_t DriverInitDelayMS;
 
-// ISR
+// ISR now at 100KHz
 void high_ISR(void)
 {
     OutByte = FIFO_DirBits[FIFOOut];
@@ -190,6 +190,13 @@ DEBUG_G7_SET();
         }
         AllDone = true;
       }
+      // Do we have an RC servo move?
+      else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
+      {
+        // Set up a new target and rate for one of the servos
+        servo_SetTarget(FIFO_G1[FIFOOut].ServoPosition, FIFO_G4[FIFOOut].ServoChannel, FIFO_G3[FIFOOut].ServoRate);
+        AllDone = true;
+      }
       // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
       // That's why this is not an elseif here.
       if (
@@ -233,6 +240,9 @@ DEBUG_G7_SET();
       }
     }
     
+    // Check to see if any targets have changed, and update their durations based on the rates
+  servo_ProcessTargets();
+
     // Check for button being pushed
 ///    if (
 ///      (!swProgram)

@@ -8,7 +8,7 @@
 //#include "isr.h"
 //#include "analog.h"
 //#include "serial.h"
-//#include "servo.h"
+#include "servo.h"
 //#include <delays.h>
 
 
@@ -479,3 +479,14 @@ void UtilityPrintStackHighWater(void)
 }
 #endif
 #endif
+
+/*
+ * ThreeBB code which needs to run every 1ms in SysTick interrupt context.
+ * Called from HAL SysTick.
+ */
+void utility_SysTick(void)
+{
+  servo_ProcessTargets();
+}
+
+
