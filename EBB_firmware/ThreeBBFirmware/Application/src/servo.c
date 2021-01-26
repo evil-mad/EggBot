@@ -9,7 +9,7 @@
  *
  * Software License Agreement
  *
- * Copyright (c) 2020, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -85,22 +85,25 @@
 #include "isr.h"
 #include "debug.h"
 
+
 /************** MODULE DEFINES ************************************************/
 
-#define MAX_SERVOS                              6  // This is 6 because there are 6 timer channels dedicated to RC servo pulses
+// This is 6 because there are 6 timer channels dedicated to RC servo pulses
+#define MAX_SERVOS                              6
 
-#define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (60s)
+// Number of milliseconds to default the RCServo power autotimeout (60s)
+#define RCSERVO_POWEROFF_DEFAULT_MS             (60ul*1000ul)
 
-// Power on default value for gPenMoveDuration in milliseconds
-#define PEN_MOVE_DURATION_DEFAULT_MS  500
+// Initialized default move time for RC Servo Pen moves in milliseconds
+#define PEN_DEFAULT_MOVE_DURATION_SERVO_MS      500
 
-#if defined(BOARD_EBB)
-#define DEFAULT_PEN_MAX_POSITION_SERVO    15302   // max = down (SC,5,15302)
-#define DEFAULT_PEN_MIN_POSITION_SERVO    22565   // min = up (SC,4,22565)
-#else
-#define DEFAULT_PEN_MAX_POSITION_STEPPER  (200*16/4)  // max = down (SC,5) - 1/4 turn from home
-#define DEFAULT_PEN_MIN_POSITION_STEPPER  (200*16/2)  // min = up (SC,4) - 1/2 turn from home
-#endif
+// Initialized default move rate for RC Servo Pen moves in Servo Time Units/20ms
+#define PEN_DEFAULT_RATE_SERVO                  500
+
+/// TODO: Update these for 3BB
+#define PEN_DEFAULT_MAX_POSITION_SERVO          15302   // max = down (SC,5,15302)
+#define PEN_DEFAULT_MIN_POSITION_SERVO          22565   // min = up (SC,4,22565)
+
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
@@ -113,19 +116,20 @@ static volatile uint16_t servo_Rate[MAX_SERVOS];
 // True when the servo 'channel' is enabled and controlling the pin
 static volatile bool servo_Enable[MAX_SERVOS];
 
-// Records the current pen state (up/down) in reality
-/// static PenStateType gPenStateActual;
+// Records the current pen state (up/down) in reality (i.e. after move is complete)
+static volatile PenStateType servo_PenActualState;
 
 // Records the pen state that the commands coming from the PC think the pen is in
 // (Prevents duplicate pen up or pen down commands.)
-/// static PenStateType PenStateCommand;
+static PenStateType servo_PenLastState;
 
+// Min and Max target positions for SP/TP RC Servo Pen commands
+static uint16_t servo_PenMaxPosition;
+static uint16_t servo_PenMinPosition;
 
-// These are the min, max, and default duration values for SP pen move command
-// They can be changed by using SC,x commands.
-static int16_t gPenMaxPosition;
-static uint16_t gPenMinPosition;
-static uint16_t gPenMoveDuration;
+// Duration and Rate values for SP/TP RC Servo Pen commands
+static uint16_t servo_PenDuration;
+static uint16_t servo_PenRate;
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile uint32_t gRCServoPoweroffCounterMS = 0;
@@ -134,7 +138,8 @@ volatile uint32_t gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
-static void servo_Move(uint16_t Duration, uint8_t Pin, uint16_t Rate, uint16_t Delay);
+static void servo_Move(uint16_t position, uint8_t pin, uint16_t rate, uint16_t delay);
+static void process_SP(PenStateType new_state, uint16_t delay);
 
 /************** LOCAL FUNCTIONS ***********************************************/
 
@@ -158,7 +163,7 @@ static void servo_Move(uint16_t Duration, uint8_t Pin, uint16_t Rate, uint16_t D
  * it starts out low.
  */
 static void servo_Move(
-  uint16_t duration,
+  uint16_t position,
   uint8_t  pin,
   uint16_t rate,
   uint16_t delay
@@ -181,15 +186,61 @@ static void servo_Move(
   // command in
   WaitForRoomInFIFO();
 
-  /// TODO: Move this to FIFO function?
+  /// TODO: Move this to a FIFO module function?
   // Now copy the values over into the FIFO element
   FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
-  FIFO_G1[FIFOIn].ServoPosition = duration;
+  FIFO_G1[FIFOIn].ServoPosition = position;
   FIFO_G3[FIFOIn].ServoRate = rate;
   FIFO_G4[FIFOIn].ServoChannel = pin;
   FIFO_G5[FIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
 
   fifo_Inc();
+}
+
+/*
+ *  Helper function :
+ * Perform a state change on the pen. Move it up or move it down.
+ * For 3BB, this will result in Motor3 moving to the new position.
+ * For EBB, the 3rd stepper axis movement is mapped to RB1 as an RC servo pulse
+ *
+ * <NewState> is either PEN_UP or PEN_DOWN.
+ * <CommandDuration> is the number of milliseconds that the move must take
+ *  (Note: If <CommandDuration> is 0, then the global default value of
+ *   gPenMoveDuration is used.)
+ *
+ * This function uses the gPenMinPosition and gPenMaxPosition as targets for the
+ * pen's movement. It simply generates an process_SM() call to schedule the
+ * move.
+ */
+static void process_SP(PenStateType new_state, uint16_t delay)
+{
+  if (delay == 0)
+  {
+    delay = servo_PenDuration;
+  }
+
+  // Only send a new command if the pen state is changing from what our last
+  // commanded state was. We don't want to send multiple relative moves commands
+  // in the same direction to the stepper as it will go out of bounds.
+  if (servo_PenLastState != new_state)
+  {
+    ///    RCServoPowerIO = RCSERVO_POWER_ON;
+    ///    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+
+    if (new_state == PEN_UP)
+    {
+      // Schedule the move on the motion queue
+      servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+    }
+    else
+    {
+      servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+    }
+
+    // Now that we've sent the move command off to the motion FIFO, record
+    // the new commanded pen state
+    servo_PenLastState = new_state;
+  }
 }
 
 /************** PUBLIC FUNCTIONS **********************************************/
@@ -203,7 +254,6 @@ void servo_Init(void)
 {
   unsigned char i;
 
-  gPenMoveDuration = PEN_MOVE_DURATION_DEFAULT_MS;
 
   for (i=0; i < MAX_SERVOS; i++)
   {
@@ -213,19 +263,13 @@ void servo_Init(void)
     servo_Target[i] = 0;
   }
 
-  // Start with some reasonable default values for min and max pen positions
-#if defined(BOARD_EBB)
-  gPenMaxPosition = DEFAULT_PEN_MAX_POSITION_SERVO;
-  gPenMinPosition = DEFAULT_PEN_MIN_POSITION_SERVO;
-#else
-  gPenMaxPosition = DEFAULT_PEN_MAX_POSITION_STEPPER;
-  gPenMinPosition = DEFAULT_PEN_MIN_POSITION_STEPPER;
-#endif
+  // Start out at init by loading default values for these module globals
+  servo_PenDuration = PEN_DEFAULT_MOVE_DURATION_SERVO_MS;
+  servo_PenMaxPosition = PEN_DEFAULT_MAX_POSITION_SERVO;
+  servo_PenMinPosition = PEN_DEFAULT_MIN_POSITION_SERVO;
+  servo_PenRate = PEN_DEFAULT_RATE_SERVO;
   
-#if defined(BOARD_EBB)
-  RCServoPowerIO = RCSERVO_POWER_OFF;
-#endif
-
+///  RCServoPowerIO = RCSERVO_POWER_OFF;
 }
 
 /*
@@ -408,38 +452,38 @@ void servo_SetOutput(uint16_t position, uint8_t pin)
   }
 }
 
-#if 0
-// Set Pen (modified for v3.0.0 and above firmware)
-// Usage: SP,<state>[,duration]<CR>
-// <state> is 0 (for goto servo_max) or 1 (for goto servo_min)
-// <duration> (optional) is the length of time this move should take in ms 
-//  (<duration> is a 16 bit unsigned int)
-//  (Note that the global <pen_move_duration> will be used if no parameter
-//   value is specified for <duration>.)
-//
-// This is a command that the user can send from the PC to set the pen state.
-//
-// Sending an SP command will get it inserted into the motion queue just like
-// any other motion command. The SP command will not begin until the previous
-// motion command has finished. Thus there will be no stepper movement during
-// the pen move. As soon as the SP move is complete, the next command in the 
-// motion queue will be executed.
-//
-// This function will use the values for <serv_min>, <servo_max>,
-// (SC,4 SC,5 commands) when it schedules the pen move for the destination
-// position.
-// 
-// Internally, the parseSPCommand() function makes a call to
-// process_SP() function to actually make the change in the servo output.
-//
+/*
+ * Set Pen
+ * Usage: SP,<state>[,duration]<CR>
+ * <state> is 0 (for goto servo_max) or 1 (for goto servo_min)
+ * <duration> (optional) is the length of time this move should take in ms
+ *  (<duration> is a 16 bit unsigned int)
+ *  (Note that the global <pen_move_duration> will be used if no parameter
+ *   value is specified for <duration>.)
+ *
+ * This is a command that the user can send from the PC to set the pen state.
+ *
+ * Sending an SP command will get it inserted into the motion queue just like
+ * any other motion command. The SP command will not begin until the previous
+ * motion command has finished. Thus there will be no stepper movement during
+ * the pen move. As soon as the SP move is complete, the next command in the
+ * motion queue will be executed.
+ *
+ * This function will use the values for <serv_min>, <servo_max>,
+ * (SC,4 SC,5 commands) when it schedules the pen move for the destination
+ * position.
+ *
+ * Internally, the parseSPCommand() function makes a call to
+ * process_SP() function to actually make the change in the servo output.
+ */
 void parseSPCommand(void)
 {
-  UINT8 State = 0;
-  UINT16 CommandDuration = gPenMoveDuration;
+  uint8_t state = 0;
+  uint16_t delay = servo_PenDuration;
 
   // Extract each of the values.
-  extract_number (kUINT8, &State, kREQUIRED);
-  extract_number (kUINT16, &CommandDuration, kOPTIONAL);
+  extract_number(kUINT8, &state, kREQUIRED);
+  extract_number(kUINT16, &delay, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -447,29 +491,31 @@ void parseSPCommand(void)
     return;
   }
 
-  if (State > 1)
+  if (state > 1)
   {
-    State = 1;
+    state = 1;
   }
 
   // Execute the servo state change
-  process_SP(State, CommandDuration);
+  process_SP(state, delay);
     
   print_ack();
 }
 
-// Toggle Pen
-// Usage: TP,<duration><CR>
-// Returns: OK<CR>
-// <duration> is optional, and defaults to 0mS
-// Just toggles state of pen arm, then delays for the optional <duration>
-// Duration is in units of 1ms
+/*
+ * Toggle Pen
+ * Usage: TP,<duration><CR>
+ * Returns: OK<CR>
+ * <duration> is optional, and defaults to 0mS
+ * Just toggles state of pen arm, then delays for the optional <duration>
+ * Duration is in units of 1ms
+ */
 void parseTPCommand(void)
 {
-  UINT16 CommandDuration = gPenMoveDuration;
+  uint16_t delay = servo_PenDuration;
 
   // Extract each of the values.
-  extract_number (kUINT16, &CommandDuration, kOPTIONAL);
+  extract_number(kUINT16, &delay, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -477,74 +523,22 @@ void parseTPCommand(void)
     return;
   }
 
-  if (PenStateCommand == PEN_UP)
+  if (servo_PenLastState == PEN_UP)
   {
-    process_SP(PEN_DOWN, CommandDuration);
+    process_SP(PEN_DOWN, delay);
   }
   else
   {
-    process_SP(PEN_UP, CommandDuration);
+    process_SP(PEN_UP, delay);
   }
 
   print_ack();
 }
-
-// Helper function :
-// Perform a state change on the pen. Move it up or move it down.
-// For 3BB, this will result in Motor3 moving to the new position.
-// For EBB, the 3rd stepper axis movement is mapped to RB1 as an RC servo pulse
-//
-// <NewState> is either PEN_UP or PEN_DOWN.
-// <CommandDuration> is the number of milliseconds that the move must take
-//  (Note: If <CommandDuration> is 0, then the global default value of
-//   gPenMoveDuration is used.)
-//
-// This function uses the gPenMinPosition and gPenMaxPosition as targets for the
-// pen's movement. It simply generates an process_SM() call to schedule the
-// move.
-void process_SP(PenStateType newState, UINT16 commandDuration)
-{
-  INT16 steps;
-  
-  if (commandDuration == 0)
-  {
-    commandDuration = gPenMoveDuration;
-  }
-  
-  // Only send a new command if the pen state is changing from what our last
-  // commanded state was. We don't want to send multiple relative moves commands
-  // in the same direction to the stepper as it will go out of bounds.
-  if (PenStateCommand != newState)
-  {
-    if (newState == PEN_UP)
-    {
-      steps = gPenMinPosition-gPenMaxPosition;
-    }
-    else
-    {
-      steps = -(gPenMinPosition-gPenMaxPosition);
-    }
-
-#if defined(BOARD_EBB)
-    RCServoPowerIO = RCSERVO_POWER_ON;
-    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
-#endif
-  
-    // Use the process_SM() command to schedule the move
-    process_SM(commandDuration, 0, 0, steps);
-    
-    // Now that we've sent the move command off to the motion FIFO, record
-    // the new commanded pen state
-    PenStateCommand = newState;
-  }
-}
-
-#endif
 
 
 /*
  * RC Servo Output command
- * S2,<duration>,<pin>,<rate>,<delay><CR>
+ * S2,<position>,<pin>,<rate>,<delay><CR>
  * It will turn on/off RC pulses on pin <pin> for <duration>.
  *    <duration> can be 0 (output off) to 65535 (20.05ms, or 100% on time)
  *      A 0 for <duration> sets the output pin to be a GPIO output pin and sets it low.
@@ -561,16 +555,16 @@ void process_SP(PenStateType newState, UINT16 commandDuration)
  */
 void parseS2Command(void)
 {
-  uint16_t duration = 0;
+  uint16_t position = 0;
   uint8_t pin = 0;
   uint16_t rate = 0;
   uint16_t delay = 0;
 
   // Extract each of the values.
-  extract_number(kUINT16, &duration, kREQUIRED);
-  extract_number (kUINT8, &pin, kREQUIRED);
-  extract_number (kUINT16, &rate, kOPTIONAL);
-  extract_number (kUINT16, &delay, kOPTIONAL);
+  extract_number(kUINT16, &position, kREQUIRED);
+  extract_number(kUINT8, &pin, kREQUIRED);
+  extract_number(kUINT16, &rate, kOPTIONAL);
+  extract_number(kUINT16, &delay, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -584,7 +578,7 @@ void parseS2Command(void)
     return;
   }
 
-  servo_Move(duration, pin, rate, delay);
+  servo_Move(position, pin, rate, delay);
 
   print_ack();
 }

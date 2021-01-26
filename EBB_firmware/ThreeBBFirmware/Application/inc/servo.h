@@ -60,7 +60,6 @@ typedef enum
 void servo_Init(void);
 void parseSPCommand(void);
 void parseS2Command(void);
-void process_SP(PenStateType NewState, uint16_t CommandDuration);
 void parseTPCommand(void);
 void servoPenHome(void);
 void servo_SetOutput(uint16_t duration, uint8_t pin);

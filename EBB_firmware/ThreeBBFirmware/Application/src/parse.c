@@ -1,15 +1,15 @@
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include "parse.h"
 #include "utility.h"
-#include <ctype.h>
 #include "stepper.h"
-#include <stdio.h>
 #include "commands.h"
 #include "servo.h"
 //#include "ebb.h"
 //#include "analog.h"
 //#include "serial.h"
-#include <stdbool.h>
 #include "usbd_cdc_if.h"
 
 // This byte has each of its bits used as a separate error flag
@@ -46,8 +46,8 @@ const parse_t commandTable[] =
 //  {'P', 'G', parsePGCommand},
   {'S', 'M', parseSMCommand},
 //  {'A', 'M', parseAMCommand},
-//  {'S', 'P', parseSPCommand},
-//  {'T', 'P', parseTPCommand},
+  {'S', 'P', parseSPCommand},
+  {'T', 'P', parseTPCommand},
 //  {'Q', 'P', parseQPCommand},
 //  {'E', 'M', parseEMCommand},
 //  {'S', 'C', parseSCCommand},
