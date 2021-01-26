@@ -83,6 +83,7 @@
 #include "utility.h"
 #include "fifo.h"
 #include "isr.h"
+#include "debug.h"
 
 /************** MODULE DEFINES ************************************************/
 
@@ -243,6 +244,9 @@ void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
     servo_Target[pin] = 0;
 
     /// TODO: Turn off PWM on this pin, make it a GPIO output and make it low
+
+    // For now, just set the output to zero immediately
+    servo_SetOutput(position, pin);
   }
   else
   {
@@ -610,9 +614,57 @@ void servoPenHome(void)
  * This function gets called every 1m from the SysTick handler
  * It's job is to walk through all servo outputs that are currently enabled
  * and see if any need their position updated to get closer to their target.
+ * Even though this function is called every 1ms, we only want to apply 'rate'
+ * change every 20ms (once per pulse).
  */
 void servo_ProcessTargets(void)
 {
+  static uint8_t ProcessTargetsCounter = 0;
+  uint8_t pin;
+  int32_t temp;
 
+  ProcessTargetsCounter++;
+  if (ProcessTargetsCounter >= 20)
+  {
+    ProcessTargetsCounter = 0;
+
+    for(pin=0; pin < MAX_SERVOS; pin++)
+    {
+      if (servo_Enable[pin])
+      {
+        if (servo_Target[pin] != servo_Position[pin])
+        {
+          DEBUG_G1_SET();
+          if ((servo_Position[pin] - servo_Target[pin]) > 0)
+          {
+            temp = servo_Position[pin] - servo_Rate[pin];
+            if (temp < servo_Target[pin])
+            {
+              servo_Position[pin] = servo_Target[pin];
+            }
+            else
+            {
+              servo_Position[pin] = temp;
+            }
+          }
+          else
+          {
+            temp = servo_Position[pin] + servo_Rate[pin];
+            if (temp > servo_Target[pin])
+            {
+              servo_Position[pin] = servo_Target[pin];
+            }
+            else
+            {
+              servo_Position[pin] = temp;
+            }
+          }
+
+          servo_SetOutput(servo_Position[pin], pin);
+          DEBUG_G1_RESET();
+        }
+      }
+    }
+  }
 }
 

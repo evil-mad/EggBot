@@ -138,14 +138,16 @@ int main(void)
   RetargetInit();
   DebugInit();
   servo_Init();
+  /// TODO: Add this to stepper.c init?
+  HAL_TIM_Base_Start_IT(&htim6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    DEBUG_G0_SET();
-    DEBUG_G0_RESET();
+///    DEBUG_G0_SET();
+///    DEBUG_G0_RESET();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

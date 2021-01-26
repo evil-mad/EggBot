@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "isr.h"
 #include "utility.h"
+#include "debug.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
