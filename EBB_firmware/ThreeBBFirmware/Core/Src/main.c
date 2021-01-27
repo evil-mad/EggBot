@@ -146,8 +146,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-///    DEBUG_G0_SET();
-///    DEBUG_G0_RESET();
+///    DEBUG_G1_SET();
+///    DEBUG_G1_RESET();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -487,6 +487,7 @@ void UtilityPrintStackHighWater(void)
 void utility_SysTick(void)
 {
   servo_ProcessTargets();
+  servo_CheckPenServoPowerTimeout();
 }
 
 

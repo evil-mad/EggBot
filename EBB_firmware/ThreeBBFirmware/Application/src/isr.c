@@ -193,11 +193,9 @@ void high_ISR(void)
       // Do we have an RC servo move?
       else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
       {
-DEBUG_G0_SET();
         // Set up a new target and rate for one of the servos
         servo_SetTarget(FIFO_G1[FIFOOut].ServoPosition, FIFO_G4[FIFOOut].ServoChannel, FIFO_G3[FIFOOut].ServoRate);
         AllDone = true;
-DEBUG_G0_RESET();
       }
       // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
       // That's why this is not an elseif here.

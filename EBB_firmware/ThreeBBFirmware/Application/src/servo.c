@@ -84,15 +84,19 @@
 #include "fifo.h"
 #include "isr.h"
 #include "debug.h"
+#include "main.h"
 
 
 /************** MODULE DEFINES ************************************************/
+
+// Macro to convert from floating point milliseconds to Servo Time Units (305ns)
+#define MS_TO_SERVO_TIME_UNITS(x)               (uint16_t)((65535.0f/20.05f) * (x))
 
 // This is 6 because there are 6 timer channels dedicated to RC servo pulses
 #define MAX_SERVOS                              6
 
 // Number of milliseconds to default the RCServo power autotimeout (60s)
-#define RCSERVO_POWEROFF_DEFAULT_MS             (60ul*1000ul)
+#define PEN_SERVO_POWER_COUNTER_DEFAULT_MS      (60ul*1000ul)
 
 // Initialized default move time for RC Servo Pen moves in milliseconds
 #define PEN_DEFAULT_MOVE_DURATION_SERVO_MS      500
@@ -100,9 +104,9 @@
 // Initialized default move rate for RC Servo Pen moves in Servo Time Units/20ms
 #define PEN_DEFAULT_RATE_SERVO                  500
 
-/// TODO: Update these for 3BB
-#define PEN_DEFAULT_MAX_POSITION_SERVO          15302   // max = down (SC,5,15302)
-#define PEN_DEFAULT_MIN_POSITION_SERVO          22565   // min = up (SC,4,22565)
+// Default min and max positions for RC Servo Pen. Can be changed by SC command
+#define PEN_DEFAULT_MAX_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(1.5) // SP,1
+#define PEN_DEFAULT_MIN_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(0.5) // SP,0
 
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
@@ -132,16 +136,37 @@ static uint16_t servo_PenDuration;
 static uint16_t servo_PenRate;
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
-volatile uint32_t gRCServoPoweroffCounterMS = 0;
-volatile uint32_t gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+volatile static uint32_t servo_PenServoPowerCounterMS = 0;
+volatile static uint32_t servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_COUNTER_DEFAULT_MS;
 
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
 
 static void servo_Move(uint16_t position, uint8_t pin, uint16_t rate, uint16_t delay);
-static void process_SP(PenStateType new_state, uint16_t delay);
+static void process_SP(PenStateType newState, uint16_t delay);
+static void PenServoPowerEnable(bool state);
 
 /************** LOCAL FUNCTIONS ***********************************************/
+
+/*
+ * Set a new state for the Pen Servo's 5V power connection via the SVO_EN pin
+ * <state> should be true to enable power to the Pen Servo, and false to disable it
+ */
+static void PenServoPowerEnable(bool state)
+{
+  if (state)
+  {
+    HAL_GPIO_WritePin(SVO_EN_GPIO_Port, SVO_EN_Pin, GPIO_PIN_SET);
+    DEBUG_G3_SET();
+    servo_PenServoPowerCounterMS = servo_PenServoPowerCounterReloadMS;
+  }
+  else
+  {
+    HAL_GPIO_WritePin(SVO_EN_GPIO_Port, SVO_EN_Pin, GPIO_PIN_RESET);
+    DEBUG_G3_RESET();
+    servo_PenServoPowerCounterMS = 0;
+  }
+}
 
 /*
  * Function to set up an RC Servo move. Takes Position, Pin, Rate and Delay
@@ -212,7 +237,7 @@ static void servo_Move(
  * pen's movement. It simply generates an process_SM() call to schedule the
  * move.
  */
-static void process_SP(PenStateType new_state, uint16_t delay)
+static void process_SP(PenStateType newState, uint16_t delay)
 {
   if (delay == 0)
   {
@@ -222,12 +247,11 @@ static void process_SP(PenStateType new_state, uint16_t delay)
   // Only send a new command if the pen state is changing from what our last
   // commanded state was. We don't want to send multiple relative moves commands
   // in the same direction to the stepper as it will go out of bounds.
-  if (servo_PenLastState != new_state)
+  if (servo_PenLastState != newState)
   {
-    ///    RCServoPowerIO = RCSERVO_POWER_ON;
-    ///    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+    PenServoPowerEnable(true);
 
-    if (new_state == PEN_UP)
+    if (newState == PEN_UP)
     {
       // Schedule the move on the motion queue
       servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
@@ -237,9 +261,9 @@ static void process_SP(PenStateType new_state, uint16_t delay)
       servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
     }
 
-    // Now that we've sent the move command off to the motion FIFO, record
+    // Now that we've sent the move command off to the motion queue record
     // the new commanded pen state
-    servo_PenLastState = new_state;
+    servo_PenLastState = newState;
   }
 }
 
@@ -662,3 +686,18 @@ void servo_ProcessTargets(void)
   }
 }
 
+/*
+ * Call this every 1ms from SysTick interrupt
+ * It checks to see if it is time to turn off power to the Pen Servo
+ */
+void servo_CheckPenServoPowerTimeout(void)
+{
+  if (servo_PenServoPowerCounterMS > 0)
+  {
+    servo_PenServoPowerCounterMS--;
+    if (servo_PenServoPowerCounterMS == 0)
+    {
+      PenServoPowerEnable(false);
+    }
+  }
+}

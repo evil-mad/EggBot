@@ -55,7 +55,7 @@ typedef enum
   PEN_UP
 } PenStateType;
 
-#define SERVO_PEN_UP_DOWN_SERVO_PIN   0   // TODO: Check this?
+#define SERVO_PEN_UP_DOWN_SERVO_PIN   1  // TODO: Check this?
 
 void servo_Init(void);
 void parseSPCommand(void);
@@ -65,5 +65,6 @@ void servoPenHome(void);
 void servo_SetOutput(uint16_t duration, uint8_t pin);
 void servo_SetTarget(uint16_t duration, uint8_t pin, uint16_t rate);
 void servo_ProcessTargets(void);
+void servo_CheckPenServoPowerTimeout(void);
 
 #endif
