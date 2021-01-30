@@ -515,7 +515,7 @@ void ParseDRCommand(void)
   registerValue = ReadDatagram(driverNumber, registerAddress);
   SerialTurnOffTX();
 
-  printf((far rom char *)"DR,%08lX\r", registerValue);
+  printf((far rom char *)"DR,%08lX\n", registerValue);
 
   print_ack();
 }
@@ -565,7 +565,7 @@ void ParseDWCommand(void)
   WriteDatagram(driverNumber, registerAddress, registerValue);
   SerialTurnOffTX();
   
-  printf((far rom char *)"DW\r");
+  printf((far rom char *)"DW\n");
 
   print_ack();
 }
@@ -581,7 +581,7 @@ void ParseDWCommand(void)
  */
 void ParseSSCommand(void)
 {
-  printf((far rom char *)"SS,%u,%u\r", FramingErrorCounter, OverrunErrorCounter);
+  printf((far rom char *)"SS,%u,%u\n", FramingErrorCounter, OverrunErrorCounter);
   FramingErrorCounter = 0;
   OverrunErrorCounter = 0;
   

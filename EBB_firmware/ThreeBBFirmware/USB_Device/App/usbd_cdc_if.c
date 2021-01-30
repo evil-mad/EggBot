@@ -38,8 +38,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 // ROM strings
-const char st_OK[] = {"OK\r\n"};
-const char st_LFCR[] = {"\r\n"};
+const char st_OK[] = {"OK\n"};
+const char st_LFCR[] = {"\n"};
 
 // As each buffer is processed from the USB stack, each command is put here
 // and then parsed when end of line is reached
@@ -390,37 +390,37 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     if (bittst (error_byte, 0))
     {
       // Unused as of yet
-      printf ((char *)"!0 \r\n");
+      printf ((char *)"!0 \n");
     }
     if (bittst (error_byte, kERROR_BYTE_STEPS_TO_FAST))
     {
       // Unused as of yet
-      printf ((char *)"!1 Err: Can't step that fast\r\n");
+      printf ((char *)"!1 Err: Can't step that fast\n");
     }
     if (bittst (error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
     {
-      printf ((char *)"!2 Err: TX Buffer overrun\r\n");
+      printf ((char *)"!2 Err: TX Buffer overrun\n");
     }
     if (bittst (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
     {
-      printf ((char *)"!3 Err: RX Buffer overrun\r\n");
+      printf ((char *)"!3 Err: RX Buffer overrun\n");
     }
     if (bittst (error_byte, kERROR_BYTE_MISSING_PARAMETER))
     {
-      printf ((char *)"!4 Err: Missing parameter(s)\r\n");
+      printf ((char *)"!4 Err: Missing parameter(s)\n");
     }
     if (bittst (error_byte, kERROR_BYTE_PRINTED_ERROR))
     {
       // We don't need to do anything since something has already been printed out
-      //printf ((rom char *)"!5\r\n");
+      //printf ((rom char *)"!5\n");
     }
     if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
     {
-      printf ((char *)"!6 Err: Invalid paramter value\r\n");
+      printf ((char *)"!6 Err: Invalid paramter value\n");
     }
     if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
     {
-      printf ((char *)"!7 Err: Extra parmater\r\n");
+      printf ((char *)"!7 Err: Extra parmater\n");
     }
     error_byte = 0;
   }

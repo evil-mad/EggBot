@@ -21,7 +21,7 @@
 #endif
 
 /// TODO: Update so that version number is a define in a header file
-const char st_version[] = {"3BB Firmware Version 3.0.0\r\n"};
+const char st_version[] = {"3BB Firmware Version 3.0.0\n"};
 
 // Flag set from ISR indicating that we need to initialize the 2209s
 volatile bool DriversNeedInit;
@@ -396,11 +396,11 @@ void ParseQTCommand()
   // Only print it out if the first character is printable ASCII
   if (name[0] >= 128 || name[0] < 32)
   {
-    printf ((rom char far *)"\r\n");
+    printf ((rom char far *)"\n");
   }
   else
   {
-    printf ((rom char far *)"%s\r\n", name);
+    printf ((rom char far *)"%s\n", name);
   }
   print_ack();
 }
@@ -472,7 +472,7 @@ void UtilityPrintStackHighWater(void)
   {
     if(*StackFillPtr != 0x55)
     {
-      printf ((rom char far *)"StackHighWater = %p\r\n", StackFillPtr);
+      printf ((rom char far *)"StackHighWater = %p\n", StackFillPtr);
       break;
     }
   }

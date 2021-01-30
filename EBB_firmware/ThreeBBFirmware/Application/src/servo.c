@@ -625,19 +625,19 @@ void servo_QPCommand(void)
 {
   if (servo_PenActualState == PEN_UP)
   {
-    printf("1\r\n");
+    printf("1\n");
   }
   else
   {
-    printf("0\r\n");
+    printf("0\n");
   }
   print_ack();
 }
 
 /*
  * QR Query RC Servo power state command
- * Example: "RR<CR>"
- * Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>"
+ * Example: "QR<CR>"
+ * Returns "0<LF>OK<LF>" or "1<LF>OK<LF>"
  * 0 = power to RC servo off
  * 1 = power to RC servo on
  */
@@ -645,11 +645,11 @@ void servo_QRCommand()
 {
   if (HAL_GPIO_ReadPin(SVO_EN_GPIO_Port, SVO_EN_Pin) == GPIO_PIN_SET)
   {
-    printf("1\r\n");
+    printf("1\n");
   }
   else
   {
-    printf("0u\r\n");
+    printf("0\n");
   }
   print_ack();
 }

@@ -229,7 +229,7 @@ void parseSMCommand(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf("!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      printf("!0 Err: <move_duration> larger than 16777215 ms.\n");
       return;
     }
     // Check for too-fast step request (>25KHz)
@@ -244,19 +244,19 @@ void parseSMCommand(void)
     }
     if (Steps > 0xFFFFFF) 
     {
-      printf("!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis1> larger than 16777215 steps.\n");
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf("!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis1> step rate > 25K steps/second.\n");
       return;
     }
     // And check for too slow
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf("!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis1> step rate < 1.31Hz.\n");
       return;
     }
 
@@ -270,17 +270,17 @@ void parseSMCommand(void)
 
     if (Steps > 0xFFFFFF) 
     {
-      printf("!0 Err: <axis2> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis2> larger than 16777215 steps.\n");
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf("!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis2> step rate > 25K steps/second.\n");
       return;
     }
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf("!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis2> step rate < 1.31Hz.\n");
       return;
     }
 
@@ -294,17 +294,17 @@ void parseSMCommand(void)
 
     if (Steps > 0xFFFFFF) 
     {
-      printf("!0 Err: <axis3> larger than 16777215 steps.\n\r");
+      printf("!0 Err: <axis3> larger than 16777215 steps.\n");
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf("!0 Err: <axis3> step rate > 25K steps/second.\n\r");
+      printf("!0 Err: <axis3> step rate > 25K steps/second.\n");
       return;
     }
     if ((Duration/1311) >= Steps && Steps != 0) 
     {
-      printf("!0 Err: <axis3> step rate < 1.31Hz.\n\r");
+      printf("!0 Err: <axis3> step rate < 1.31Hz.\n");
       return;
     }
   }
@@ -347,22 +347,22 @@ void parseAMCommand(void)
   // Check for too-fast step request (>25KHz)
   if (VelocityInital > 25000)
   {
-    printf((far rom char *)"!0 Err: <velocity_initial> larger than 25000.\n\r");
+    printf((far rom char *)"!0 Err: <velocity_initial> larger than 25000.\n");
     return;
   }
   if (VelocityFinal > 25000)
   {
-    printf((far rom char *)"!0 Err: <velocity_final> larger than 25000.\n\r");
+    printf((far rom char *)"!0 Err: <velocity_final> larger than 25000.\n");
     return;
   }
   if (VelocityInital < 4)
   {
-    printf((far rom char *)"!0 Err: <velocity_initial> less than 4.\n\r");
+    printf((far rom char *)"!0 Err: <velocity_initial> less than 4.\n");
     return;
   }
   if (VelocityFinal < 4)
   {
-    printf((far rom char *)"!0 Err: <velocity_final> less than 4.\n\r");
+    printf((far rom char *)"!0 Err: <velocity_final> less than 4.\n");
     return;
   }
     
@@ -377,7 +377,7 @@ void parseAMCommand(void)
   Distance = (UINT32)(sqrt((float)((A1Steps * A1Steps) + (A2Steps * A2Steps))));
     
   // For debug
-  //printf((far rom char *)"Distance= %lu\n\r", Distance);
+  //printf((far rom char *)"Distance= %lu\n", Distance);
 
   WaitForRoomInFIFO();
 
@@ -405,11 +405,11 @@ void parseAMCommand(void)
   }
 
   if (A1Steps > 0xFFFFFF) {
-    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n");
     return;
   }
   if (A2Steps > 0xFFFFFF) {
-    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n");
     return;
   }
 
@@ -434,8 +434,8 @@ void parseAMCommand(void)
     
   /* Compute StepAdd Axis 1 Initial */
   //temp = ((UINT32)A1Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
-  //printf((far rom char *)"VelocityInital = %d\n\r", VelocityInital);
-  //printf((far rom char *)"Distance = %ld\n\r", Distance);
+  //printf((far rom char *)"VelocityInital = %d\n", VelocityInital);
+  //printf((far rom char *)"Distance = %ld\n", Distance);
   //temp = (UINT32)((float)A1Steps*(((float)VelocityInital * (float)0x80000000UL)/(float)25000)/(float)Distance);
   distance_temp = ((float)VelocityInital * 85899.34592)/Distance;
   //printf((far rom char *)"distance_temp =");
@@ -448,7 +448,7 @@ void parseAMCommand(void)
   FIFO_StepAdd0[FIFOIn] = (UINT32)(distance_temp * (float)A1Steps);
 
   // For debug
-  //printf((far rom char *)"SAxi = %lu\n\r", CommandFIFO[0].StepAdd[0]);
+  //printf((far rom char *)"SAxi = %lu\n", CommandFIFO[0].StepAdd[0]);
 
   /* Total number of steps for this axis for this move */
   FIFO_G2[FIFOIn].StepsCounter0 = A1Steps;
@@ -464,7 +464,7 @@ void parseAMCommand(void)
   //temp = (UINT32)ftemp;
 
   // For debug
-  //printf((far rom char *)"SAxf = %lu\n\r", temp);
+  //printf((far rom char *)"SAxf = %lu\n", temp);
     
   /* Compute StepAddInc for axis 1 */
   accel_temp = (((float)VelocityFinal * (float)VelocityFinal) - ((float)VelocityInital * (float)VelocityInital))/((float)Distance * (float)Distance * 2);
@@ -473,7 +473,7 @@ void parseAMCommand(void)
   //fprint(accel_temp);
   //stemp = (INT32)((Accel1 * (float)0x8000 * (float)0x10000)/((float)25000 * (float)25000));
   //stemp = (INT32)(Accel1 * 343.59738);
-  //printf((far rom char *)"SAxinc = %ld\n\r", stemp);
+  //printf((far rom char *)"SAxinc = %ld\n", stemp);
 
   /* Amount to add to StepAdd each 25KHz */
   FIFO_G5[FIFOIn].StepAddInc0 = (INT32)(((float)A1Steps * accel_temp) * 3.435921);
@@ -482,8 +482,8 @@ void parseAMCommand(void)
   // temp = ((UINT32)A2Steps*(((UINT32)VelocityInital * (UINT32)0x8000)/(UINT32)25000)/(UINT32)Distance);
   // temp = (UINT32)((float)A2Steps*(((float)VelocityInital * (float)0x80000000)/(float)25000)/(float)Distance);
 
-  //printf((far rom char *)"VelocityInital = %d\n\r", VelocityInital);
-  //printf((far rom char *)"Distance = %ld\n\r", Distance);
+  //printf((far rom char *)"VelocityInital = %d\n", VelocityInital);
+  //printf((far rom char *)"Distance = %ld\n", Distance);
   //    temp = (UINT32)((float)A1Steps*(((float)VelocityInital * (float)0x80000000UL)/(float)25000)/(float)Distance);
   //    ftemp = (float)VelocityInital * 2147483648.0;
   //    fprint(ftemp);
@@ -496,7 +496,7 @@ void parseAMCommand(void)
   //    temp = (UINT32)ftemp;
     
   // For debug
-  //printf((far rom char *)"SAyi = %lu\n\r", temp);
+  //printf((far rom char *)"SAyi = %lu\n", temp);
 
   FIFO_StepAdd1[FIFOIn] = (UINT32)(distance_temp * A2Steps);
   FIFO_G3[FIFOIn].StepsCounter1 = A2Steps;
@@ -512,12 +512,12 @@ void parseAMCommand(void)
 
   if (VelocityInital != VelocityFinal && FIFO_G5[FIFOIn].StepAddInc0 == 0 && FIFO_G2[FIFOIn].StepsCounter0 > 0)
   {
-     printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n\r");
+     printf((far rom char *)"!0 Err: <axis1> acceleration value is 0.\n");
      return;
   }
   if (VelocityInital != VelocityFinal && FIFO_StepAddInc1[FIFOIn] == 0 && FIFO_G3[FIFOIn].StepsCounter1 > 0)
   {
-     printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n\r");
+     printf((far rom char *)"!0 Err: <axis2> acceleration value is 0.\n");
      return;
   }
 
@@ -604,7 +604,7 @@ void parseLMCommand(void)
 
   /* For debugging step motion , uncomment the next line */
   /*
-   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+   * printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n",
           CommandFIFO[0].StepAdd[0],
           CommandFIFO[0].StepsCounter[0],
           CommandFIFO[0].StepAdd[1],
@@ -702,7 +702,7 @@ void parseHMCommand(void)
   // Check for too many steps to step
   if ((AbsSteps1 > 0xFFFFFF) || (AbsSteps2 > 0xFFFFFF) || (AbsSteps3 > 0xFFFFFF))
   {
-    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215 on at least one axis.\n\r");
+    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215 on at least one axis.\n");
     return;
   }
   
@@ -715,7 +715,7 @@ void parseHMCommand(void)
     // Check for too fast 
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.\n");
       return;
     }
     // Check for too slow, on the non-primary axis
@@ -757,7 +757,7 @@ void parseHMCommand(void)
     // Check for too fast 
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.\n");
       return;
     }
     // Check for too slow, on the non-primary axis
@@ -797,7 +797,7 @@ void parseHMCommand(void)
   {
     Duration = 10;
   }
-  //printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
+  //printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n",
   //  Duration,
   //  Steps1,
   //  Steps2
@@ -856,24 +856,24 @@ void parseXMCommand(void)
   // Limit each parameter to just 3 bytes
   if (Duration > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+    printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n");
     return;
   }
   if (Steps > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n");
     return;
   }
   // Check for too fast
   if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
   {
-    printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+    printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n");
     return;
   }
   // And check for too slow
   if ((Duration/1311) >= Steps && Steps != 0)
   {
-    printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+    printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n");
     return;
   }
 
@@ -886,17 +886,17 @@ void parseXMCommand(void)
   }    
   if (Steps > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n");
     return;
   }
   if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
   {
-    printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+    printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n");
     return;
   }
   if ((Duration/1311) >= Steps && Steps != 0) 
   {
-    printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+    printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n");
     return;
   }
 
@@ -937,7 +937,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   MoveCommandType move = {0};
 
   // Uncomment the following printf() for debugging
-  //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+  //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n",
   //        Duration,
   //        A1Stp,
   //        A2Stp
@@ -994,7 +994,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     // First check for duration to large.
     //        if (A1Stp < (0xFFFFFF/763)) {
     //            if (duration > (A1Stp * 763)) {
-    //                printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", duration);
+    //                printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n", duration);
     //                temp = 0;
     //                A1Stp = 0;
     //            }
@@ -1024,11 +1024,11 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     }
     if (temp > 0x8000) 
     {
-      printf("Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis1 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A1Stp != 0) {
-      printf("Major malfunction Axis1 StepCounter zero\n\r");
+      printf("Major malfunction Axis1 StepCounter zero\n");
       temp = 1;
     }
     if (Duration > 30)
@@ -1060,12 +1060,12 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     }
     if (temp > 0x8000) 
     {
-      printf("Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis2 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A2Stp != 0) 
     {
-      printf("Major malfunction Axis2 StepCounter zero\n\r");
+      printf("Major malfunction Axis2 StepCounter zero\n");
       temp = 1;
     }
     if (Duration > 30)
@@ -1098,12 +1098,12 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     }
     if (temp > 0x8000) 
     {
-      printf("Major malfunction Axis3 StepCounter too high : %lu\n\r", temp);
+      printf("Major malfunction Axis3 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
     if (temp == 0 && A3Stp != 0) 
     {
-      printf("Major malfunction Axis3 StepCounter zero\n\r");
+      printf("Major malfunction Axis3 StepCounter zero\n");
       temp = 1;
     }
     if (Duration > 30)
@@ -1122,7 +1122,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     
     /* For debugging step motion , uncomment the next line */
 
-    //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n\r",
+    //printf((far rom char *)"SA1=%lu SC1=%lu SA2=%lu SC2=%lu\n",
     //        move.StepAdd[0],
     //        move.StepsCounter[0],
     //        move.StepAdd[1],
@@ -1215,7 +1215,7 @@ void process_EStop(BOOL printResult)
 #endif
   if (printResult)
   {
-    printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
+    printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n",
             command_interrupted,
             fifo_steps1,
             fifo_steps2,
@@ -1320,7 +1320,7 @@ void parseQMCommand(void)
     CommandExecuting = 1;
   }
 
-  printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  printf((far ROM char *)"QM,%i,%i,%i,%i\n", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
 }
 
 // QS command
@@ -1345,7 +1345,7 @@ void parseQSCommand(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 
-  printf((far ROM char *)"%li,%li\n\r", step1, step2);
+  printf((far ROM char *)"%li,%li\n", step1, step2);
   print_ack();
 }
 

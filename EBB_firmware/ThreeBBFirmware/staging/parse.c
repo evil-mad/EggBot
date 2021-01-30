@@ -128,7 +128,7 @@ void parsePacket(void)
   {
     // Send back 'unknown command' error
     printf (
-       (far rom char *)"!8 Err: Unknown command '%c%c:%4X'\r\n"
+       (far rom char *)"!8 Err: Unknown command '%c%c:%4X'\n"
       ,(UINT8)(command >> 8)
       ,(UINT8)command
       ,command
@@ -189,7 +189,7 @@ UINT8 extract_string (
   // Check for comma where ptr points
   if (g_RX_buf[g_RX_buf_out] != ',')
   {
-    printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+    printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\n", g_RX_buf[g_RX_buf_out]);
     bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     return (0);
   }
@@ -253,7 +253,7 @@ ExtractReturnType extract_number(
   {
     if (0 == Required)
     {
-      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\n", g_RX_buf[g_RX_buf_out]);
       bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     }
     return (kEXTRACT_COMMA_MISSING);

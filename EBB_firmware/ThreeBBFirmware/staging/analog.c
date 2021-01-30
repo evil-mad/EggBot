@@ -142,7 +142,7 @@ void parseARCommand(void)
     }
     ChannelBit = ChannelBit << 1;
   }
-  printf ((far rom char *)"\r");
+  printf ((far rom char *)"\n");
 
   print_ack ();
 }

@@ -10,7 +10,7 @@ ThreeBeeBee (3BB) Readme.txt file
     - Possibly find way to allow extend address space and/or pages used in the future without breaking things
       - Would we need to extract all existing data before update, then re-write it all after update?
     - Add commands for mass erasing entire EEPROM?
-  *  
+  * All strings will be terminated with just \n
 
 
 = Questions =

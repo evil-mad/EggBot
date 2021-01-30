@@ -90,7 +90,7 @@ void parseCUCommand(void)
         }
       }
       // Always return FIFODepth and max FIFO depth
-      printf ((far rom char*)"%i,%i\r\n", FIFOSize, COMMAND_FIFO_LENGTH);
+      printf ((far rom char*)"%i,%i\n", FIFOSize, COMMAND_FIFO_LENGTH);
       break;
       
     default:
@@ -192,7 +192,7 @@ void parseODCommand(void)
 void parseIDCommand(void)
 {
   printf (
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i\r\n", 
+    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i\n",
     PORTA,
     PORTB,
     PORTC,
@@ -264,7 +264,7 @@ void parseMRCommand(void)
 
   // Now send back the MR packet
   printf (
-    (far rom char *)"MR,%03u\r\n" 
+    (far rom char *)"MR,%03u\n"
     ,value
   );
 }
@@ -429,7 +429,7 @@ void parsePICommand(void)
 
   // Now send back our response
   printf(
-     (far rom char *)"PI,%1u\r\n" 
+     (far rom char *)"PI,%1u\n"
     ,value
   );
 }
@@ -705,14 +705,14 @@ void parseT1Command()
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
-  printf ((rom char far *)"kINT8   =%d\r\n", SInt8);
-  printf ((rom char far *)"kUINT8  =%u\r\n", UInt8);
-  printf ((rom char far *)"kHEX8   =%X\r\n", HInt8);
-  printf ((rom char far *)"kINT16  =%d\r\n", SInt16);
-  printf ((rom char far *)"kUINT16 =%u\r\n", UInt16);
-  printf ((rom char far *)"kHEX16  =%X\r\n", HInt16);
-  printf ((rom char far *)"kASCII_CHAR=%c\r\n", UChar);
-  printf ((rom char far *)"kUCASE_ASCII_CHAR=%c\r\n", UCaseChar);
+  printf ((rom char far *)"kINT8   =%d\n", SInt8);
+  printf ((rom char far *)"kUINT8  =%u\n", UInt8);
+  printf ((rom char far *)"kHEX8   =%X\n", HInt8);
+  printf ((rom char far *)"kINT16  =%d\n", SInt16);
+  printf ((rom char far *)"kUINT16 =%u\n", UInt16);
+  printf ((rom char far *)"kHEX16  =%X\n", HInt16);
+  printf ((rom char far *)"kASCII_CHAR=%c\n", UChar);
+  printf ((rom char far *)"kUCASE_ASCII_CHAR=%c\n", UCaseChar);
 
   print_ack();
 }
@@ -746,11 +746,11 @@ void parseT2Command()
   extract_number(kUINT32, &UInt32, kREQUIRED);
   extract_number(kHEX32, &HInt32, kREQUIRED);
 
-  printf ((rom char far *)"kUINT24 =%Hu\r\n", UInt24);
-  printf ((rom char far *)"kHEX24  =%HX\r\n", HInt24);
-  printf ((rom char far *)"kINT32  =%ld\r\n", SInt32);
-  printf ((rom char far *)"kUINT32 =%lu\r\n", UInt32);
-  printf ((rom char far *)"kHEX32  =%lX\r\n", HInt32);
+  printf ((rom char far *)"kUINT24 =%Hu\n", UInt24);
+  printf ((rom char far *)"kHEX24  =%HX\n", HInt24);
+  printf ((rom char far *)"kINT32  =%ld\n", SInt32);
+  printf ((rom char far *)"kUINT32 =%lu\n", UInt32);
+  printf ((rom char far *)"kHEX32  =%lXk\n", HInt32);
 
   print_ack();
 }

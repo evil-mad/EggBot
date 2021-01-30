@@ -201,13 +201,13 @@ void fprint(float f)
 
   if (f > 2147483648.0)
   {
-    printf((far rom char *)"f too big\n\r");
+    printf((far rom char *)"f too big\n);
   }
   else
   {
     if (f < -2147483648.0)
     {
-      printf((far rom char *)"f too small\n\r");
+      printf((far rom char *)"f too small\n");
     }
     else
     {
@@ -219,7 +219,7 @@ void fprint(float f)
       {
         pf = f;
       }
-      printf((far rom char *)"%ld.%04lu\n\r", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
+      printf((far rom char *)"%ld.%04lu\n", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
     }
   }
 }
@@ -234,7 +234,7 @@ void fprint(float f)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parseQPCommand(void)
 {
-  printf((far rom char *)"%d\n\r", gPenStateActual);
+  printf((far rom char *)"%d\n", gPenStateActual);
 
   print_ack();
 }
@@ -283,7 +283,7 @@ void parseSNCommand(void)
 // OK<CR>
 void parseQNCommand(void)
 {
-  printf ((far rom char*)"%010lu\r\n", NodeCount);
+  printf ((far rom char*)"%010lu\n", NodeCount);
 
   print_ack();
 }
@@ -310,7 +310,7 @@ void parseSLCommand(void)
 // OK<CR>
 void parseQLCommand(void)
 {
-  printf ((far rom char*)"%03i\r\n", Layer);
+  printf ((far rom char*)"%03i\n", Layer);
 
   print_ack();
 }
@@ -321,7 +321,7 @@ void parseQLCommand(void)
 // OK<CR>
 void parseQBCommand(void)
 {
-  printf ((far rom char*)"%1i\r\n", ButtonPushed);
+  printf ((far rom char*)"%1i\n", ButtonPushed);
   if (ButtonPushed)
   {
     ButtonPushed = FALSE;
@@ -344,7 +344,7 @@ void parseQCCommand(void)
 {
   // Print out our results
   /// TODO: update this for EBB for analogConvert())
-//  printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+//  printf ((far rom char*)"%04i,%04i\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
 
   print_ack();
 }
@@ -411,15 +411,15 @@ void parseQGCommand(void)
 
   if (param == 1)
   {
-    printf ((far rom char*)"%02X,0\r\n", result);      
+    printf ((far rom char*)"%02X,0\n", result);
   }
   else if (param == 2)
   {
-    printf ((far rom char*)"%02X,0,%u\r\n", result, FIFODepth);      
+    printf ((far rom char*)"%02X,0,%u\n", result, FIFODepth);
   }
   else
   {
-    printf ((far rom char*)"%02X\r\n", result);      
+    printf ((far rom char*)"%02X\n", result);
   }
     
   // Reset the button pushed flag
