@@ -5,79 +5,79 @@
 
 // Working registers
 
-// How many elements of the FIFO will we be using by default?
-volatile uint8_t FIFOSize = 3;
-// The next element of the FIFO to put a command into
-volatile uint8_t FIFOIn = 0;
-// The FIFO command we are currently executing
-volatile uint8_t FIFOOut = 0;
-// The number of commands in the FIFO that are not done being executed yet
-volatile uint8_t FIFODepth = 0;
+// How many elements of the queue will we be using by default?
+volatile uint8_t queueSize = 3;
+// The next element of the queue to put a command into
+volatile uint8_t queueIn = 0;
+// The queue command we are currently executing
+volatile uint8_t queueOut = 0;
+// The number of commands in the queue that are not done being executed yet
+volatile uint8_t queueDepth = 0;
 
-/// MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
+/// MoveCommandType Commandqueue[COMMAND_QUEUE_LENGTH];
 // What used to be an array of structures is now separate arrays. Why? To
 // get around the 256 byte (1 bank)/variable limitation of C18/PIC18
-int32_t           FIFO_StepAdd0[COMMAND_FIFO_LENGTH];
-int32_t           FIFO_StepAdd1[COMMAND_FIFO_LENGTH];
-StepGeneric1_t  FIFO_G1[COMMAND_FIFO_LENGTH];  // (INT32) StepAdd2, (UINT16) FIFO_ServoPosition, (UINT16) FIFO_SEPower
-StepGeneric2_t  FIFO_G2[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCounter0, (UINT8) FIFO_ServoRPn, (UINT8) FIFO_SEState
-StepGeneric3_t  FIFO_G3[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) FIFO_ServoRate, (UINT8) FIFO_ServoChannel
-StepGeneric4_t  FIFO_G4[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) FIFO_ServoChannel
-StepGeneric5_t  FIFO_G5[COMMAND_FIFO_LENGTH];  // (INT32) StepAddInc0, (UINT32) FIFO_DelayCounter,
-int32_t           FIFO_StepAddInc1[COMMAND_FIFO_LENGTH];
-int32_t           FIFO_StepAddInc2[COMMAND_FIFO_LENGTH];
-uint8_t           FIFO_DirBits[COMMAND_FIFO_LENGTH];
-CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
+int32_t           queue_StepAdd0[COMMAND_QUEUE_LENGTH];
+int32_t           queue_StepAdd1[COMMAND_QUEUE_LENGTH];
+StepGeneric1_t  queue_G1[COMMAND_QUEUE_LENGTH];  // (INT32) StepAdd2, (UINT16) queue_ServoPosition, (UINT16) queue_SEPower
+StepGeneric2_t  queue_G2[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCounter0, (UINT8) queue_ServoRPn, (UINT8) queue_SEState
+StepGeneric3_t  queue_G3[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) queue_ServoRate, (UINT8) queue_ServoChannel
+StepGeneric4_t  queue_G4[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) queue_ServoChannel
+StepGeneric5_t  queue_G5[COMMAND_QUEUE_LENGTH];  // (INT32) StepAddInc0, (UINT32) queue_DelayCounter,
+int32_t           queue_StepAddInc1[COMMAND_QUEUE_LENGTH];
+int32_t           queue_StepAddInc2[COMMAND_QUEUE_LENGTH];
+uint8_t           queue_DirBits[COMMAND_QUEUE_LENGTH];
+CommandType     queue_Command[COMMAND_QUEUE_LENGTH];
 
 
-void fifo_Init(void)
+void queue_Init(void)
 {
   uint8_t i;
 
-  FIFOSize = 1;
-  FIFOIn = 0;
-  FIFOOut = 0;
-  FIFODepth = 0;
+  queueSize = 1;
+  queueIn = 0;
+  queueOut = 0;
+  queueDepth = 0;
   
-  // Initialize all FIFO values
+  // Initialize all queue values
   /// TODO : use memset() or something?
-  for(i=0; i < COMMAND_FIFO_LENGTH; i++)
+  for(i=0; i < COMMAND_QUEUE_LENGTH; i++)
   {
-    FIFO_Command[i] = COMMAND_NONE;
-    FIFO_StepAdd0[i] = 0;
-    FIFO_StepAdd1[i] = 0;
-    FIFO_G1[i].StepAdd2 = 0;
-    FIFO_G2[i].StepsCounter0 = 0;
-    FIFO_G3[i].StepsCounter1 = 0;
-    FIFO_G4[i].StepsCounter2 = 0;
-    FIFO_G5[i].StepAddInc0 = 0;
-    FIFO_StepAddInc1[i] = 0;
-    FIFO_StepAddInc2[i] = 0;
-    FIFO_DirBits[i] = 0;
+    queue_Command[i] = COMMAND_NONE;
+    queue_StepAdd0[i] = 0;
+    queue_StepAdd1[i] = 0;
+    queue_G1[i].StepAdd2 = 0;
+    queue_G2[i].StepsCounter0 = 0;
+    queue_G3[i].StepsCounter1 = 0;
+    queue_G4[i].StepsCounter2 = 0;
+    queue_G5[i].StepAddInc0 = 0;
+    queue_StepAddInc1[i] = 0;
+    queue_StepAddInc2[i] = 0;
+    queue_DirBits[i] = 0;
   }
 }
 
-// Wait until FIFODepth has gone below FIFOSize
-void WaitForRoomInFIFO(void)
+// Wait until QueueDepth has gone below queueSize
+void WaitForRoomInQueue(void)
 {
-  while(FIFODepth >= FIFOSize)
+  while(queueDepth >= queueSize)
     ;
 }
 
-// Wait until FIFODepth has gone to zero
-void WaitForEmptyFIFO(void)
+// Wait until queueDepth has gone to zero
+void WaitForEmptyQueue(void)
 {
-  while(FIFODepth)
+  while(queueDepth)
     ;
 }
 
-void fifo_Inc(void)
+void queue_Inc(void)
 {
-  FIFOIn++;
-  if (FIFOIn >= COMMAND_FIFO_LENGTH)
+  queueIn++;
+  if (queueIn >= COMMAND_QUEUE_LENGTH)
   {
-    FIFOIn = 0;
+    queueIn = 0;
   }
-  FIFODepth++;
+  queueDepth++;
 }
 

@@ -11,6 +11,9 @@ ThreeBeeBee (3BB) Readme.txt file
       - Would we need to extract all existing data before update, then re-write it all after update?
     - Add commands for mass erasing entire EEPROM?
   * All strings will be terminated with just \n
+  * Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
+
+  
 
 
 = Questions =
@@ -29,4 +32,5 @@ ThreeBeeBee (3BB) Readme.txt file
   * All modules should have proper section breaks ( /**** LOCAL FUNCTIONS ****/, etc.)
   * All non-public functions should be marked static
   * All module varaibles should be marked static
+  * Change all 'FIFO' to 'queue'
 

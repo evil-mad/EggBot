@@ -34,20 +34,20 @@ volatile uint8_t DriverInitDelayMS;
 // ISR now at 100KHz
 void high_ISR(void)
 {
-    OutByte = FIFO_DirBits[FIFOOut];
+    OutByte = queue_DirBits[queueOut];
     TookStep = false;
     AllDone = true;
 
 ///DEBUG_G0_SET();
     
-    if (FIFODepth)
+    if (queueDepth)
     {
-      if (FIFO_Command[FIFOOut] == COMMAND_MOTOR_MOVE)
+      if (queue_Command[queueOut] == COMMAND_MOTOR_MOVE)
       {
         // Only output DIR bits if we are actually doing something
-        if (FIFO_G2[FIFOOut].StepsCounter0 || FIFO_G3[FIFOOut].StepsCounter1 || FIFO_G4[FIFOOut].StepsCounter2)
+        if (queue_G2[queueOut].StepsCounter0 || queue_G3[queueOut].StepsCounter1 || queue_G4[queueOut].StepsCounter2)
         {
-          if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
+          if (queue_DirBits[queueOut] & DIR1_BIT)
           {
             DIR1_GPIO_Port->BSRR = (uint32_t)DIR1_Pin;
           }
@@ -55,7 +55,7 @@ void high_ISR(void)
           {
             DIR1_GPIO_Port->BRR = (uint32_t)DIR1_Pin;
           }
-          if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
+          if (queue_DirBits[queueOut] & DIR2_BIT)
           {
             DIR2_GPIO_Port->BSRR = (uint32_t)DIR2_Pin;
           }
@@ -63,7 +63,7 @@ void high_ISR(void)
           {
             DIR2_GPIO_Port->BRR = (uint32_t)DIR2_Pin;
           }
-          if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
+          if (queue_DirBits[queueOut] & DIR3_BIT)
           {
             DIR3_GPIO_Port->BSRR = (uint32_t)DIR3_Pin;
           }
@@ -73,16 +73,16 @@ void high_ISR(void)
           }
 
           // Only do this if there are steps left to take
-          if (FIFO_G2[FIFOOut].StepsCounter0)
+          if (queue_G2[queueOut].StepsCounter0)
           {
-            StepAcc[0] = StepAcc[0] + FIFO_StepAdd0[FIFOOut];
+            StepAcc[0] = StepAcc[0] + queue_StepAdd0[queueOut];
             if (StepAcc[0] & 0x80000000)
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
               OutByte = OutByte | STEP1_BIT;
               TookStep = true;
-              FIFO_G2[FIFOOut].StepsCounter0--;
-              if (FIFO_DirBits[FIFOOut] & DIR1_BIT)
+              queue_G2[queueOut].StepsCounter0--;
+              if (queue_DirBits[queueOut] & DIR1_BIT)
               {
                 globalStepCounter1--;
               }
@@ -92,19 +92,19 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd0[FIFOOut] += FIFO_G5[FIFOOut].StepAddInc0;
+            queue_StepAdd0[queueOut] += queue_G5[queueOut].StepAddInc0;
             AllDone = false;
           }
-          if (FIFO_G3[FIFOOut].StepsCounter1)
+          if (queue_G3[queueOut].StepsCounter1)
           {
-            StepAcc[1] = StepAcc[1] + FIFO_StepAdd1[FIFOOut];
+            StepAcc[1] = StepAcc[1] + queue_StepAdd1[queueOut];
             if (StepAcc[1] & 0x80000000)
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
               OutByte = OutByte | STEP2_BIT;
               TookStep = true;
-              FIFO_G3[FIFOOut].StepsCounter1--;
-              if (FIFO_DirBits[FIFOOut] & DIR2_BIT)
+              queue_G3[queueOut].StepsCounter1--;
+              if (queue_DirBits[queueOut] & DIR2_BIT)
               {
                 globalStepCounter2--;
               }
@@ -114,19 +114,19 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_StepAdd1[FIFOOut] += FIFO_StepAddInc1[FIFOOut];
+            queue_StepAdd1[queueOut] += queue_StepAddInc1[queueOut];
             AllDone = false;
           }
-          if (FIFO_G4[FIFOOut].StepsCounter2)
+          if (queue_G4[queueOut].StepsCounter2)
           {
-            StepAcc[2] = StepAcc[2] + FIFO_G1[FIFOOut].StepAdd2;
+            StepAcc[2] = StepAcc[2] + queue_G1[queueOut].StepAdd2;
             if (StepAcc[2] & 0x80000000)
             {
               StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
               OutByte = OutByte | STEP3_BIT;
               TookStep = true;
-              FIFO_G4[FIFOOut].StepsCounter2--;
-              if (FIFO_DirBits[FIFOOut] & DIR3_BIT)
+              queue_G4[queueOut].StepsCounter2--;
+              if (queue_DirBits[queueOut] & DIR3_BIT)
               {
                 globalStepCounter3--;
               }
@@ -136,7 +136,7 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            FIFO_G1[FIFOOut].StepAdd2 += FIFO_StepAddInc2[FIFOOut];
+            queue_G1[queueOut].StepAdd2 += queue_StepAddInc2[queueOut];
             AllDone = false;
           }
           if (TookStep)
@@ -173,13 +173,13 @@ void high_ISR(void)
         }
       }
       // Check to see if we should start or stop the engraver
-      else if (FIFO_Command[FIFOOut] == COMMAND_SE)
+      else if (queue_Command[queueOut] == COMMAND_SE)
       {
         // Now act on the State of the SE command
-        if (FIFO_G2[FIFOOut].SEState)
+        if (queue_G2[queueOut].SEState)
         {
           // Set RB3 to StoredEngraverPower
-///          CCPR1L = FIFO_G1[FIFOOut].SEPower >> 2;
+///          CCPR1L = queue_G1[queueOut].SEPower >> 2;
 ///          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
         }
         else
@@ -191,33 +191,33 @@ void high_ISR(void)
         AllDone = true;
       }
       // Do we have an RC servo move?
-      else if (FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE)
+      else if (queue_Command[queueOut] == COMMAND_SERVO_MOVE)
       {
         // Set up a new target and rate for one of the servos
-        servo_SetTarget(FIFO_G1[FIFOOut].ServoPosition, FIFO_G4[FIFOOut].ServoChannel, FIFO_G3[FIFOOut].ServoRate);
+        servo_SetTarget(queue_G1[queueOut].ServoPosition, queue_G4[queueOut].ServoChannel, queue_G3[queueOut].ServoRate);
         AllDone = true;
       }
       // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
       // That's why this is not an elseif here.
       if (
-        FIFO_Command[FIFOOut] == COMMAND_DELAY 
+        queue_Command[queueOut] == COMMAND_DELAY
         || 
-        FIFO_Command[FIFOOut] == COMMAND_SERVO_MOVE
+        queue_Command[queueOut] == COMMAND_SERVO_MOVE
       )
       {
-        if (FIFO_G2[FIFOOut].DelayCounter)
+        if (queue_G2[queueOut].DelayCounter)
         {
           // Double check that things aren't way too big
-          if (FIFO_G2[FIFOOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
+          if (queue_G2[queueOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
           {
-            FIFO_G2[FIFOOut].DelayCounter = 0;
+            queue_G2[queueOut].DelayCounter = 0;
           }
           else {
-            FIFO_G2[FIFOOut].DelayCounter--;
+            queue_G2[queueOut].DelayCounter--;
           }
         }
 
-        if (FIFO_G2[FIFOOut].DelayCounter)
+        if (queue_G2[queueOut].DelayCounter)
         {
             AllDone = false;
         }
@@ -226,17 +226,17 @@ void high_ISR(void)
       // If we're done with our current command, load in the next one, if there's more
       if (AllDone)
       {
-        // "Erase" the current command from the FIFO
-        FIFO_Command[FIFOOut] = COMMAND_NONE;
+        // "Erase" the current command from the queue
+        queue_Command[queueOut] = COMMAND_NONE;
 
-        // There should be at least one command in FIFODepth right now (the one we just finished)
+        // There should be at least one command in queueDepth right now (the one we just finished)
         // Remove it
-        FIFOOut++;
-        if (FIFOOut >= COMMAND_FIFO_LENGTH)
+        queueOut++;
+        if (queueOut >= COMMAND_QUEUE_LENGTH)
         {
-          FIFOOut = 0;
+          queueOut = 0;
         }
-        FIFODepth--;
+        queueDepth--;
       }
     }
 
@@ -279,7 +279,7 @@ void low_ISR(void)
 //    {
       // We just got a rising edge, power has been applied, so init the drivers
       DriversNeedInit = TRUE;
-      FIFONeedsInit = TRUE;
+      queueNeedsInit = TRUE;
 //      INTCON2bits.INTEDG1 = 0;
 //    }
 //    else
@@ -524,7 +524,7 @@ void low_ISR(void)
     else
     {
       // Read out the value that we just converted, and store it.
-      ISR_A_FIFO[A_cur_channel] =
+      ISR_A_queue[A_cur_channel] =
         (unsigned int)ADRESL
         |
         ((unsigned int)ADRESH << 8);

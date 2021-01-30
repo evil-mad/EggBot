@@ -55,7 +55,17 @@
  * For every timer used in RC Servo signal generation, the frequency is 49.88 Hz.
  * The clock is 170Mhz, and a divider of 51 is used (so there is a divide by 52).
  * So the full 65536 width of the PMW pulse will be 20.05ms. And the PWM resolution
- * is in units of 306ns.
+ * is in units of 306ns. These are called Servo Time Units.
+ *
+ * Each RC servo move is placed into the motion queue so that it can be sequenced
+ * properly with the other motion commands. Once the motion ISR begins the RC servo
+ * move, it can happen either immediately (if the rate parameter is zero) or it
+ * will happen over a period of time as determined by the rate parameter.
+ *
+ * When the rate parameter is not zero for an RC servo move, the servo's position
+ * (PWM width) will be updated every 20ms from the SysTick ISR. Every 20ms, 'rate'
+ * will be added (or subtracted) from the current position until the target is
+ * achieved. The units for 'rate' are Servo Time Units per 20ms.
  *
  * 3BB Servo Outputs and Timer Channels
  * 
@@ -68,9 +78,6 @@
  * PB7      TIM4   CH2      P4
  * PB9      TIM4   CH4      P5
  */
-
-/// TODO: Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized
-/// rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
 
 /************** INCLUDES ******************************************************/
 
@@ -146,7 +153,7 @@ static uint16_t servo_PenMinPosition;
 static uint16_t servo_PenDuration;
 static uint16_t servo_PenRate;
 
-// Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
+// Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3)
 volatile static uint32_t servo_PenServoPowerCounterMS = 0;
 volatile static uint32_t servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_COUNTER_DEFAULT_MS;
 
@@ -178,23 +185,17 @@ static void PenServoPowerEnable(bool state)
 }
 
 /*
- * Function to set up an RC Servo move. Takes Position, Pin, Rate and Delay
- * and adds them to the motion control queue.
- * <Duration> is the new target position for the servo, in 83uS units. So
- *     65535 is 20.05ms. To turn off a servo output, use 0 for Duration.
- * <Pin> is the RC Servo Pin number for the pin that you want to use as the output
+ * Function to schedule an RC Servo move. Takes position, pin, rate and delay
+ * and adds the move to the motion control queue.
+ * <position> is the new target position for the servo, in Servo Time Units. So
+ *     65535 is 20.05ms. To turn off a servo output, use 0 for position.
+ * <pin> is the RC Servo Pin number for the pin that you want to use as the output
  *      (0 through 5)
- * <Rate> is how quickly to move to the new position. Use 0 for instant change.
- *      Unit is 83uS of pulse width change every 24ms of time.
- * <Delay> is how many milliseconds after this command is executed before the
- *     next command in the motion control FIFO is executed. 0 will run the next
- *     command immediately.
- * This function will allocate a new channel for RPn if the pin is not already
- * assigned to a channel. It will return the channel number used when it
- * returns. If you send in 0 for Duration, the channel for RPn will be deallocated.
- * Another thing we do here is to make sure that the proper pin is an output,
- * And, if this is the first time we're starting up the channel, make sure that
- * it starts out low.
+ * <rate> is how quickly to move to the new position. Use 0 for instant change.
+ *      Units are Servo Time Units per 20ms.
+ * <delay> is how many milliseconds after this command is executed before the
+ *     next command in the motion control queue is executed. 0 will run the next
+ *     command immediately. Note that <rate> and <delay> are independent.
  */
 static void servo_Move(
   uint16_t position,
@@ -216,35 +217,34 @@ static void servo_Move(
 ///      gUseSolenoid = FALSE;
 ///    }
 
-  // Wait until we have a free spot in the FIFO, and add our new
+  // Wait until we have at least one free spot in the queue, and add our new
   // command in
-  WaitForRoomInFIFO();
+  WaitForRoomInQueue();
 
-  /// TODO: Move this to a FIFO module function?
-  // Now copy the values over into the FIFO element
-  FIFO_Command[FIFOIn] = COMMAND_SERVO_MOVE;
-  FIFO_G1[FIFOIn].ServoPosition = position;
-  FIFO_G3[FIFOIn].ServoRate = rate;
-  FIFO_G4[FIFOIn].ServoChannel = pin;
-  FIFO_G5[FIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
+  /// TODO: Move this to a queue module function?
+  // Now copy the values over into the queue element
+  queue_Command[queueIn] = COMMAND_SERVO_MOVE;
+  queue_G1[queueIn].ServoPosition = position;
+  queue_G3[queueIn].ServoRate = rate;
+  queue_G4[queueIn].ServoChannel = pin;
+  queue_G5[queueIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
 
-  fifo_Inc();
+  queue_Inc();
 }
 
 /*
- *  Helper function :
+ * Pen move helper function
  * Perform a state change on the pen. Move it up or move it down.
- * For 3BB, this will result in Motor3 moving to the new position.
- * For EBB, the 3rd stepper axis movement is mapped to RB1 as an RC servo pulse
+ * At this point, this is limited to the pen servo for 3BB. The z-axis stepper
+ * will be controlled entirely by PC "SM" commands, not by 'pen' command here.
  *
  * <NewState> is either PEN_UP or PEN_DOWN.
  * <CommandDuration> is the number of milliseconds that the move must take
  *  (Note: If <CommandDuration> is 0, then the global default value of
- *   gPenMoveDuration is used.)
+ *   servo_PenDuration is used.)
  *
- * This function uses the gPenMinPosition and gPenMaxPosition as targets for the
- * pen's movement. It simply generates an process_SM() call to schedule the
- * move.
+ * This function uses the servo_PenMaxPosition and servo_PenMinPosition as targets for the
+ * pen's movement.
  */
 static void process_SP(PenStateType newState, uint16_t delay)
 {
@@ -271,7 +271,8 @@ static void process_SP(PenStateType newState, uint16_t delay)
     }
 
     // Now that we've sent the move command off to the motion queue record
-    // the new commanded pen state
+    // the new commanded pen state. This LastState also gets used to set the
+    // global current state once the move is complete.
     servo_PenLastState = newState;
   }
 }
@@ -310,6 +311,9 @@ void servo_Init(void)
  * servo_SetTarget()
  * This function updates the target position and rate for an RC servo output
  * It is called from the 100KHz motion ISR at the start of an RC servo 'move'
+ * <position> is the new target position for the servo output (PWM width)
+ * <pin> is the pin (0-5) to change
+ * <rate> is how quickly the move should happen
  */
 void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
 {

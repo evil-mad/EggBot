@@ -379,9 +379,9 @@ void parseAMCommand(void)
   // For debug
   //printf((far rom char *)"Distance= %lu\n", Distance);
 
-  WaitForRoomInFIFO();
+  WaitForRoomInQueue();
 
-  FIFO_DirBits[FIFOIn] = 0;
+  Queue_DirBits[queueIn] = 0;
 
   // Always enable both motors when we want to move them
 /// TODO: Fix this for 3BB motor enable
@@ -395,12 +395,12 @@ void parseAMCommand(void)
   // First, set the direction bits
   if (A1Steps < 0)
   {
-    FIFO_DirBits[FIFOIn] = DIR1_BIT;
+    queue_DirBits[queueIn] = DIR1_BIT;
     A1Steps = -A1Steps;
   }
   if (A2Steps < 0)
   {
-    FIFO_DirBits[FIFOIn] = FIFO_DirBits[FIFOIn] | DIR2_BIT;
+    queue_DirBits[queueIn] = queue_DirBits[queueIn] | DIR2_BIT;
     A2Steps = -A2Steps;
   }
 
@@ -578,9 +578,9 @@ void parseLMCommand(void)
 #endif
   
   // Spin here until there's space in the fifo
-  WaitForRoomInFIFO();
+  WaitForRoomInQueue();
 
-  FIFO_DirBits[FIFOIn] = 0;
+  queue_DirBits[queueIn] = 0;
 
   // First, set the direction bits
   if (StepsCounter1 < 0)
@@ -1131,26 +1131,26 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   }
 
   // Spin here until there's space in the fifo
-  WaitForRoomInFIFO();
+  WaitForRoomInQueue();
 
   // Now, quick copy over the computed command data to the command fifo
-  FIFO_Command[FIFOIn] = move.Command;
+  queue_Command[queueIn] = move.Command;
 
-  FIFO_StepAdd0[FIFOIn] = move.StepAdd[0];
-  FIFO_G5[FIFOIn].StepAddInc0 = move.StepAddInc[0];
-  FIFO_G2[FIFOIn].StepsCounter0 = move.StepsCounter[0];
+  queue_StepAdd0[queueIn] = move.StepAdd[0];
+  queue_G5[queueIn].StepAddInc0 = move.StepAddInc[0];
+  queue_G2[queueIn].StepsCounter0 = move.StepsCounter[0];
 
-  FIFO_StepAdd1[FIFOIn] = move.StepAdd[1];
-  FIFO_StepAddInc1[FIFOIn] = move.StepAddInc[1];
-  FIFO_G3[FIFOIn].StepsCounter1 = move.StepsCounter[1];
+  queue_StepAdd1[queueIn] = move.StepAdd[1];
+  queue_StepAddInc1[queueIn] = move.StepAddInc[1];
+  queue_G3[queueIn].StepsCounter1 = move.StepsCounter[1];
 
-  FIFO_G1[FIFOIn].StepAdd2 = move.StepAdd[2];
-  FIFO_StepAddInc2[FIFOIn] = move.StepAddInc[2];
-  FIFO_G4[FIFOIn].StepsCounter2 = move.StepsCounter[2];
+  queue_G1[queueIn].StepAdd2 = move.StepAdd[2];
+  queue_StepAddInc2[queueIn] = move.StepAddInc[2];
+  queue_G4[queueIn].StepsCounter2 = move.StepsCounter[2];
   
-  FIFO_DirBits[FIFOIn] = move.DirBits;
+  queue_DirBits[queueIn] = move.DirBits;
   
-  fifo_Inc();
+  queue_Inc();
   print_ack();
 }
 

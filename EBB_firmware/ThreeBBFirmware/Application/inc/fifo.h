@@ -5,8 +5,8 @@
  * Created on May 25, 2020, 2:29 PM
  */
 
-#ifndef FIFO_H
-#define	FIFO_H
+#ifndef QUEUE_H
+#define	QUEUE_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -21,7 +21,7 @@
 #define STEP3_BIT (0x10)
 #define DIR3_BIT  (0x20)
 
-/* Enum that lists each type of command that can be put in the motion control FIFO */
+/* Enum that lists each type of command that can be put in the motion control queue */
 typedef enum
 {
   COMMAND_NONE = 0,
@@ -59,7 +59,7 @@ typedef union {
   uint32_t  DelayCounter;
 } StepGeneric5_t;
 
-// This structure defines the elements of the move commands in the FIFO that
+// This structure defines the elements of the move commands in the queue that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {
@@ -78,28 +78,28 @@ typedef struct
 } MoveCommandType;  // 27 bytes
 
 
-extern volatile uint8_t FIFODepth;
-extern volatile uint8_t FIFOSize;
-extern volatile uint8_t FIFOIn;
-extern volatile uint8_t FIFOOut;
+extern volatile uint8_t queueDepth;
+extern volatile uint8_t queueSize;
+extern volatile uint8_t queueIn;
+extern volatile uint8_t queueOut;
 
 
-extern int32_t           FIFO_StepAdd0[COMMAND_FIFO_LENGTH];
-extern int32_t           FIFO_StepAdd1[COMMAND_FIFO_LENGTH];
-extern StepGeneric1_t  FIFO_G1[COMMAND_FIFO_LENGTH];  // (INT32) StepAdd2, (UINT16) FIFO_ServoPosition, (UINT16) FIFO_SEPower
-extern StepGeneric2_t  FIFO_G2[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCounter0, (UINT8) FIFO_ServoRPn, (UINT32) FIFO_DelayCounter, (UINT8) FIFO_SEState
-extern StepGeneric3_t  FIFO_G3[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) FIFO_ServoRate
-extern StepGeneric4_t  FIFO_G4[COMMAND_FIFO_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) FIFO_ServoChannel
-extern StepGeneric5_t  FIFO_G5[COMMAND_FIFO_LENGTH];  // (INT32) StepAddInc0, (UINT32) FIFO_DelayCounter,
-extern int32_t           FIFO_StepAddInc1[COMMAND_FIFO_LENGTH];
-extern int32_t           FIFO_StepAddInc2[COMMAND_FIFO_LENGTH];
-extern uint8_t           FIFO_DirBits[COMMAND_FIFO_LENGTH];
-extern CommandType     FIFO_Command[COMMAND_FIFO_LENGTH];
+extern int32_t           queue_StepAdd0[COMMAND_QUEUE_LENGTH];
+extern int32_t           queue_StepAdd1[COMMAND_QUEUE_LENGTH];
+extern StepGeneric1_t  queue_G1[COMMAND_QUEUE_LENGTH];  // (INT32) StepAdd2, (UINT16) FIFO_ServoPosition, (UINT16) FIFO_SEPower
+extern StepGeneric2_t  queue_G2[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCounter0, (UINT8) FIFO_ServoRPn, (UINT32) FIFO_DelayCounter, (UINT8) FIFO_SEState
+extern StepGeneric3_t  queue_G3[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCoutner1, (UINT16) FIFO_ServoRate
+extern StepGeneric4_t  queue_G4[COMMAND_QUEUE_LENGTH];  // (UINT32) StepsCoutner2, (UINT8) FIFO_ServoChannel
+extern StepGeneric5_t  queue_G5[COMMAND_QUEUE_LENGTH];  // (INT32) StepAddInc0, (UINT32) FIFO_DelayCounter,
+extern int32_t           queue_StepAddInc1[COMMAND_QUEUE_LENGTH];
+extern int32_t           queue_StepAddInc2[COMMAND_QUEUE_LENGTH];
+extern uint8_t           queue_DirBits[COMMAND_QUEUE_LENGTH];
+extern CommandType     queue_Command[COMMAND_QUEUE_LENGTH];
 
-void fifo_Init(void);
-void fifo_Inc(void);
-void WaitForRoomInFIFO(void);
-void WaitForEmptyFIFO(void);
+void queue_Init(void);
+void queue_Inc(void);
+void WaitForRoomInQueue(void);
+void WaitForEmptyQueue(void);
 
 #endif	/* FIFO_H */
 

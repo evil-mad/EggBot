@@ -536,7 +536,7 @@ void parseSECommand(void)
   else
   {
     // Trial: Spin here until there's space in the fifo
-    WaitForRoomInFIFO();
+    WaitForRoomInQueue();
 
     // Set up the motion queue command
     FIFO_G1[FIFOIn].SEPower = StoredEngraverPower;
