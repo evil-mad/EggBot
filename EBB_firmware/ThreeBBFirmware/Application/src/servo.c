@@ -136,8 +136,6 @@ static volatile uint16_t servo_Position[MAX_SERVOS];
 static volatile uint16_t servo_Target[MAX_SERVOS];
 // Amount of change (in 306uS units) applied to Position to get to Target each 20ms
 static volatile uint16_t servo_Rate[MAX_SERVOS];
-// True when the servo 'channel' is enabled and controlling the pin
-static volatile bool servo_Enable[MAX_SERVOS];
 
 // Records the current pen state (up/down) in reality (i.e. after move is complete)
 static volatile PenStateType servo_PenActualState;
@@ -291,7 +289,6 @@ void servo_Init(void)
   // Zero out all of the low level parameters for the servo outputs
   for (i=0; i < MAX_SERVOS; i++)
   {
-    servo_Enable[i] = false;
     servo_Position[i] = 0;
     servo_Rate[i] = 0;
     servo_Target[i] = 0;
@@ -317,41 +314,20 @@ void servo_Init(void)
  */
 void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
 {
-  // If duration is zero, then user wants to shut down this channel
-  if (0 == position && 0 == rate)
+  if (rate == 0)
   {
-    servo_Enable[pin] = false;
-    servo_Position[pin] = 0;
+    // If the rate is zero, this means that the new position should happen
+    // immediately and not wait for the next 20ms update in servo_ProcessoTargets()
     servo_Rate[pin] = 0;
-    servo_Target[pin] = 0;
-
+    servo_Target[pin] = position;
+    servo_Position[pin] = position;
     servo_SetOutput(position, pin);
   }
   else
   {
-    // Is this the first time we've used this channel?
-    if (servo_Enable[pin] == false)
-    {
-      // Make sure the pin is set as an output, or this won't do much good
-
-      // And turn on the PWM output for this pin
-      servo_Enable[pin] = true;
-    }
-
-    // If the rate is zero, this means that the new position should happen
-    // immediately and not wait for the next 20ms update in servo_ProcessoTargets()
-    if (rate == 0)
-    {
-      servo_Rate[pin] = 0;
-      servo_Target[pin] = position;
-      servo_Position[pin] = position;
-      servo_SetOutput(position, pin);
-    }
-    else
-    {
-      servo_Rate[pin] = rate;
-      servo_Target[pin] = position;
-    }
+    // Just update target and rate and let servo_ProcessTargets() take care of moving there
+    servo_Rate[pin] = rate;
+    servo_Target[pin] = position;
   }
 }
 
@@ -800,51 +776,48 @@ void servo_ProcessTargets(void)
   {
     ProcessTargetsCounter = 0;
 
-    for(pin=0; pin < MAX_SERVOS; pin++)
+    for (pin=0; pin < MAX_SERVOS; pin++)
     {
-      if (servo_Enable[pin])
+      if (servo_Target[pin] != servo_Position[pin])
       {
-        if (servo_Target[pin] != servo_Position[pin])
+        DEBUG_G1_SET();
+        if ((servo_Position[pin] - servo_Target[pin]) > 0)
         {
-          DEBUG_G1_SET();
-          if ((servo_Position[pin] - servo_Target[pin]) > 0)
+          temp = servo_Position[pin] - servo_Rate[pin];
+          if (temp < servo_Target[pin])
           {
-            temp = servo_Position[pin] - servo_Rate[pin];
-            if (temp < servo_Target[pin])
-            {
-              servo_Position[pin] = servo_Target[pin];
-            }
-            else
-            {
-              servo_Position[pin] = temp;
-            }
+            servo_Position[pin] = servo_Target[pin];
           }
           else
           {
-            temp = servo_Position[pin] + servo_Rate[pin];
-            if (temp > servo_Target[pin])
-            {
-              servo_Position[pin] = servo_Target[pin];
-            }
-            else
-            {
-              servo_Position[pin] = temp;
-            }
+            servo_Position[pin] = temp;
           }
-
-          servo_SetOutput(servo_Position[pin], pin);
-
-          // For special case of pen servo pin, if this move has now completed, then
-          // update the global pen status to be in the new position
-          if (pin == SERVO_PEN_UP_DOWN_SERVO_PIN)
-          {
-            if (servo_Position[pin] == servo_Target[pin])
-            {
-              servo_PenActualState = servo_PenLastState;
-            }
-          }
-          DEBUG_G1_RESET();
         }
+        else
+        {
+          temp = servo_Position[pin] + servo_Rate[pin];
+          if (temp > servo_Target[pin])
+          {
+            servo_Position[pin] = servo_Target[pin];
+          }
+          else
+          {
+            servo_Position[pin] = temp;
+          }
+        }
+
+        servo_SetOutput(servo_Position[pin], pin);
+
+        // For special case of pen servo pin, if this move has now completed, then
+        // update the global pen status to be in the new position
+        if (pin == SERVO_PEN_UP_DOWN_SERVO_PIN)
+        {
+          if (servo_Position[pin] == servo_Target[pin])
+          {
+            servo_PenActualState = servo_PenLastState;
+          }
+        }
+        DEBUG_G1_RESET();
       }
     }
   }
