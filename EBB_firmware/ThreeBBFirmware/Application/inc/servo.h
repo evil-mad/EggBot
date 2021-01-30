@@ -49,19 +49,13 @@
 #ifndef SERVO_H
 #define SERVO_H
 
-typedef enum
-{
-  PEN_DOWN = 0,
-  PEN_UP
-} PenStateType;
-
-#define SERVO_PEN_UP_DOWN_SERVO_PIN   1  // TODO: Check this?
-
 void servo_Init(void);
-void parseSPCommand(void);
-void parseS2Command(void);
-void parseTPCommand(void);
-void servoPenHome(void);
+void servo_SPCommand(void);
+void servo_S2Command(void);
+void servo_TPCommand(void);
+void servo_QPCommand(void);
+void servo_QRCommand(void);
+void servo_SRCommand(void);
 void servo_SetOutput(uint16_t duration, uint8_t pin);
 void servo_SetTarget(uint16_t duration, uint8_t pin, uint16_t rate);
 void servo_ProcessTargets(void);

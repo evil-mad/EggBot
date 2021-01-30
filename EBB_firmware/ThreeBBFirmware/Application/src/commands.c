@@ -669,65 +669,6 @@ void parseRBCommand()
   Reset();
 }
 
-#if defined(BOARD_EBB)
-// QR Query RC Servo power state command
-// Example: "RR<CR>"
-// Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>" 
-// 0 = power to RC servo off
-// 1 = power to RC servo on
-void parseQRCommand()
-{
-  printf ((far rom char *)"%1u\r\n", RCServoPowerIO_PORT);
-  print_ack();
-}
-#endif
-
-// SR Set RC Servo power timeout
-// Example: "SR,<new_time_ms>,<new_power_state><CR><LF>"
-// Returns "OK<CR><LF>"
-// <new_time_ms> is a 32-bit unsigned integer, representing the new RC servo 
-// poweroff timeout in milliseconds. This value is not saved across reboots.
-// It is the length of time the system will wait after any command that uses
-// the motors or servo before killing power to the RC servo.
-// Use a value of 0 for <new_time_ms> to completely disable the poweroff timer.
-// <new_power_state> is an optional parameter of either 0 or 1. It will
-// immediately affect the servo's power state, where 0 turns it off and 1 
-// turns it on.
-#if defined(BOARD_EBB)
-void parseSRCommand(void)
-{
-  unsigned long Value;
-  UINT8 State;
-  ExtractReturnType GotState;
-
-  extract_number(kUINT32, &Value, kREQUIRED);
-  GotState = extract_number(kUINT8, &State, kOPTIONAL);
-
-    // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  gRCServoPoweroffCounterReloadMS = Value;
-
-  // Check to see if <new_power_state> is there
-  if (GotState == kEXTRACT_OK)
-  {
-    // Yup, so set new power state
-    if (State)
-    {
-      RCServoPowerIO = RCSERVO_POWER_ON;
-    }
-    else
-    {
-      RCServoPowerIO = RCSERVO_POWER_OFF;
-    }
-  }
-
-  print_ack();
-}
-#endif
 
 /*
  * T1 - For testing that parameter input routines work properly

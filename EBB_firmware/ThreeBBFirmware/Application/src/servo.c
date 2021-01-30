@@ -87,7 +87,18 @@
 #include "main.h"
 
 
+/************** MODULE TYPEDEFS ************************************************/
+
+typedef enum
+{
+  PEN_DOWN = 0,
+  PEN_UP
+} PenStateType;
+
 /************** MODULE DEFINES ************************************************/
+
+// Which of the six RC servo outputs (P0-P5) is the pen lift servo on
+#define SERVO_PEN_UP_DOWN_SERVO_PIN             1
 
 // Macro to convert from floating point milliseconds to Servo Time Units (305ns)
 #define MS_TO_SERVO_TIME_UNITS(x)               (uint16_t)((65535.0f/20.05f) * (x))
@@ -157,13 +168,11 @@ static void PenServoPowerEnable(bool state)
   if (state)
   {
     HAL_GPIO_WritePin(SVO_EN_GPIO_Port, SVO_EN_Pin, GPIO_PIN_SET);
-    DEBUG_G3_SET();
     servo_PenServoPowerCounterMS = servo_PenServoPowerCounterReloadMS;
   }
   else
   {
     HAL_GPIO_WritePin(SVO_EN_GPIO_Port, SVO_EN_Pin, GPIO_PIN_RESET);
-    DEBUG_G3_RESET();
     servo_PenServoPowerCounterMS = 0;
   }
 }
@@ -278,7 +287,7 @@ void servo_Init(void)
 {
   unsigned char i;
 
-
+  // Zero out all of the low level parameters for the servo outputs
   for (i=0; i < MAX_SERVOS; i++)
   {
     servo_Enable[i] = false;
@@ -293,7 +302,8 @@ void servo_Init(void)
   servo_PenMinPosition = PEN_DEFAULT_MIN_POSITION_SERVO;
   servo_PenRate = PEN_DEFAULT_RATE_SERVO;
   
-///  RCServoPowerIO = RCSERVO_POWER_OFF;
+  // Always start out with servo power off
+  PenServoPowerEnable(false);
 }
 
 /*
@@ -500,7 +510,7 @@ void servo_SetOutput(uint16_t position, uint8_t pin)
  * Internally, the parseSPCommand() function makes a call to
  * process_SP() function to actually make the change in the servo output.
  */
-void parseSPCommand(void)
+void servo_SPCommand(void)
 {
   uint8_t state = 0;
   uint16_t delay = servo_PenDuration;
@@ -534,7 +544,7 @@ void parseSPCommand(void)
  * Just toggles state of pen arm, then delays for the optional <duration>
  * Duration is in units of 1ms
  */
-void parseTPCommand(void)
+void servo_TPCommand(void)
 {
   uint16_t delay = servo_PenDuration;
 
@@ -559,7 +569,6 @@ void parseTPCommand(void)
   print_ack();
 }
 
-
 /*
  * RC Servo Output command
  * S2,<position>,<pin>,<rate>,<delay><CR>
@@ -577,7 +586,7 @@ void parseTPCommand(void)
  *      16-bit unsigned integer
  * This command is added to the motion queue.
  */
-void parseS2Command(void)
+void servo_S2Command(void)
 {
   uint16_t position = 0;
   uint8_t pin = 0;
@@ -607,26 +616,85 @@ void parseS2Command(void)
   print_ack();
 }
 
-#if 0
-
-// Perform all of the things necessary to initialize the pen position.
-// Not much to do when using a servo, but for a stepper Motor3 must be 
-// driven past the lowest position, limped, a pause, 
-// then a move from the home (lowest) position to the bottom position 
-// (gPenMaxPosition)
-// /// TODO : Once suitable mechanicals have been constructed, convert the
-// simplified code below over to what is talked about above (using hardstop
-// homing)
-void servoPenHome(void)
-{  
-  gPenStateActual = PEN_DOWN;
-  PenStateCommand = PEN_DOWN;
-
-  // Execute a move from homed to the lower pen position
-  process_SM(500, 0, 0, gPenMaxPosition);
+/*
+ * Query Pen
+ * Usage: QP<CR>
+ * Returns: 0 for down, 1 for up, then OK<CR>
+ */
+void servo_QPCommand(void)
+{
+  if (servo_PenActualState == PEN_UP)
+  {
+    printf("1\r\n");
+  }
+  else
+  {
+    printf("0\r\n");
+  }
+  print_ack();
 }
 
-#endif
+/*
+ * QR Query RC Servo power state command
+ * Example: "RR<CR>"
+ * Returns "0<CR><LF>OK<CR><LF>" or "1<CR><LF>OK<CR><LF>"
+ * 0 = power to RC servo off
+ * 1 = power to RC servo on
+ */
+void servo_QRCommand()
+{
+  if (HAL_GPIO_ReadPin(SVO_EN_GPIO_Port, SVO_EN_Pin) == GPIO_PIN_SET)
+  {
+    printf("1\r\n");
+  }
+  else
+  {
+    printf("0u\r\n");
+  }
+  print_ack();
+}
+
+/*
+ * SR Set RC Servo power timeout
+ * Example: "SR,<new_time_ms>,<new_power_state><CR><LF>"
+ * Returns "OK<CR><LF>"
+ * <new_time_ms> is a 32-bit unsigned integer, representing the new RC servo
+ * poweroff timeout in milliseconds. This value is not saved across reboots.
+ * It is the length of time the system will wait after any command that uses
+ * the motors or servo before killing power to the RC servo.
+ * Use a value of 0 for <new_time_ms> to completely disable the poweroff timer.
+ * <new_power_state> is an optional parameter of either 0 or 1. It will
+ * immediately affect the servo's power state, where 0 turns it off and 1
+ * turns it on.
+ */
+void servo_SRCommand(void)
+{
+  uint32_t delay = 0;
+  uint8_t state = 0;
+  ExtractReturnType got_state;
+
+  extract_number(kUINT32, &delay, kREQUIRED);
+  got_state = extract_number(kUINT8, &state, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // Update the reload value for the power off timer
+  servo_PenServoPowerCounterReloadMS = delay;
+
+  // Did the user want to set the state?
+  if (got_state == kEXTRACT_OK)
+  {
+    // Yup, so set new power state
+    PenServoPowerEnable(state);
+  }
+
+  print_ack();
+}
+
 
 /*
  * This function gets called every 1m from the SysTick handler
@@ -679,6 +747,16 @@ void servo_ProcessTargets(void)
           }
 
           servo_SetOutput(servo_Position[pin], pin);
+
+          // For special case of pen servo pin, if this move has now completed, then
+          // update the global pen status to be in the new position
+          if (pin == SERVO_PEN_UP_DOWN_SERVO_PIN)
+          {
+            if (servo_Position[pin] == servo_Target[pin])
+            {
+              servo_PenActualState = servo_PenLastState;
+            }
+          }
           DEBUG_G1_RESET();
         }
       }

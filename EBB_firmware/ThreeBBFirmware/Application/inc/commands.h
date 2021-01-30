@@ -36,10 +36,6 @@ void parseVRCommand(void);     // VR for printing version
 //void parseT2Command(void);     // T1 Test command for input parameters
 //void parseMRCommand(void);     // MR Motors Run command
 //void parseRBCommand(void);     // RB ReBoot command
-//#if defined(BOARD_EBB)
-//void parseQR_packet(void);    // QR Query RC Servo power state
-//void parseSR_packet(void);    // SR Set RC Servo power timeout
-//#endif
 
 #endif	/* COMMANDS_H */
 
