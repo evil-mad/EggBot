@@ -102,6 +102,7 @@ typedef enum
   PEN_UP
 } PenStateType;
 
+
 /************** MODULE DEFINES ************************************************/
 
 // Which of the six RC servo outputs (P0-P5) is the pen lift servo on
@@ -116,10 +117,10 @@ typedef enum
 // Number of milliseconds to default the RCServo power autotimeout (60s)
 #define PEN_SERVO_POWER_COUNTER_DEFAULT_MS      (60ul*1000ul)
 
-// Initialized default move time for RC Servo Pen moves in milliseconds
-#define PEN_DEFAULT_MOVE_DURATION_SERVO_MS      500
+// Default delay before next motion queue command for RC Servo Pen moves (ms)
+#define PEN_DEFAULT_MOVE_DELAY_SERVO_MS         500
 
-// Initialized default move rate for RC Servo Pen moves in Servo Time Units/20ms
+// Default move rate for RC Servo Pen moves in Servo Time Units/20ms
 #define PEN_DEFAULT_RATE_SERVO                  500
 
 // Default min and max positions for RC Servo Pen. Can be changed by SC command
@@ -145,13 +146,11 @@ static volatile PenStateType servo_PenActualState;
 // (Prevents duplicate pen up or pen down commands.)
 static PenStateType servo_PenLastState;
 
-// Min and Max target positions for SP/TP RC Servo Pen commands
-static uint16_t servo_PenMaxPosition;
-static uint16_t servo_PenMinPosition;
-
-// Duration and Rate values for SP/TP RC Servo Pen commands
-static uint16_t servo_PenDuration;
-static uint16_t servo_PenRate;
+// Values used for SP/TP RC Servo Pen commands
+static uint16_t servo_PenMaxPosition;   // Max position (Servo Time Units)
+static uint16_t servo_PenMinPosition;   // Min position (Servo Time Units)
+static uint16_t servo_PenDelay;         // Delay before next motion command (ms)
+static uint16_t servo_PenRate;          // Rate for pen move (Servo Time Units/20ms)
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3)
 volatile static uint32_t servo_PenServoPowerCounterMS = 0;
@@ -163,6 +162,7 @@ volatile static uint32_t servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_CO
 static void servo_Move(uint16_t position, uint8_t pin, uint16_t rate, uint16_t delay);
 static void process_SP(PenStateType newState, uint16_t delay);
 static void PenServoPowerEnable(bool state);
+
 
 /************** LOCAL FUNCTIONS ***********************************************/
 
@@ -250,7 +250,7 @@ static void process_SP(PenStateType newState, uint16_t delay)
 {
   if (delay == 0)
   {
-    delay = servo_PenDuration;
+    delay = servo_PenDelay;
   }
 
   // Only send a new command if the pen state is changing from what our last
@@ -298,9 +298,9 @@ void servo_Init(void)
   }
 
   // Start out at init by loading default values for these module globals
-  servo_PenDuration = PEN_DEFAULT_MOVE_DURATION_SERVO_MS;
   servo_PenMaxPosition = PEN_DEFAULT_MAX_POSITION_SERVO;
   servo_PenMinPosition = PEN_DEFAULT_MIN_POSITION_SERVO;
+  servo_PenDelay = PEN_DEFAULT_MOVE_DELAY_SERVO_MS;
   servo_PenRate = PEN_DEFAULT_RATE_SERVO;
   
   // Always start out with servo power off
@@ -318,16 +318,13 @@ void servo_Init(void)
 void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
 {
   // If duration is zero, then user wants to shut down this channel
-  if (0 == position)
+  if (0 == position && 0 == rate)
   {
     servo_Enable[pin] = false;
     servo_Position[pin] = 0;
     servo_Rate[pin] = 0;
     servo_Target[pin] = 0;
 
-    /// TODO: Turn off PWM on this pin, make it a GPIO output and make it low
-
-    // For now, just set the output to zero immediately
     servo_SetOutput(position, pin);
   }
   else
@@ -368,119 +365,175 @@ void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
  * The clock is 170Mhz, and a divider of 52 is used. So the full 65535 width of
  * the PMW pulse will be 20.046ms (49.885Hz). And the PWM resolution is in units of 306ns.
  * If width is from 1 to 65534 then the pin will stay high for that number of
- * 306ns units.
- * <channel> is from 0 to 5, larger values will cause no change
+ * 306ns units, with a position of 65535 being high all the time.
+ * <pin> is from 0 to 5, larger values will cause no change
  * This function can be called in mainline or interrupt contexts.
  */
 void servo_SetOutput(uint16_t position, uint8_t pin)
 {
+  uint32_t oldPosition;
+
   switch (pin)
   {
-	case 0:
+	case 0: // Pin P0 is on Timer8 channel 1
 	{
-	  if (position != 0)
-	  {
-	    TIM8->CCR1 = position;
-	  }
-	  else
-	  {
-	    // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-	    TIM8->CCR1 = position;
-	  }
-	  // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+	  oldPosition = TIM8->CCR1;
+      TIM8->CCR1 = position;
+
+      if (position == 0)
       {
-        Error_Handler();
+	    // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P0_GPIO_Port, P0_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_1) != HAL_OK)
+        {
+          Error_Handler();
+        }
+	  }
+      else
+      {
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
 	}
-    case 1:
+    case 1: // Pin P1 is on Timer 3 channel 1
     {
-      if (position != 0)
+      oldPosition = TIM3->CCR1;
+      TIM3->CCR1 = position;
+
+      if (position == 0)
       {
-        TIM3->CCR1 = position;
+        // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P1_GPIO_Port, P1_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1) != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
       else
       {
-        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-        TIM3->CCR1 = position;
-      }
-      // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) != HAL_OK)
-      {
-        Error_Handler();
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
     }
-    case 2:
+    case 2: // Pin P2 is on Timer3 channel 2
     {
-      if (position != 0)
+      oldPosition = TIM3->CCR2;
+      TIM3->CCR2 = position;
+
+      if (position == 0)
       {
-        TIM3->CCR2 = position;
+        // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P2_GPIO_Port, P2_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_2) != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
       else
       {
-        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-        TIM3->CCR2 = position;
-      }
-      // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2) != HAL_OK)
-      {
-        Error_Handler();
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
     }
-    case 3:
+    case 3: // Pin P3 is on Timer4 channel 1
     {
-      if (position != 0)
+      oldPosition = TIM4->CCR1;
+      TIM4->CCR1 = position;
+
+      if (position == 0)
       {
-        TIM4->CCR1 = position;
+        // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P3_GPIO_Port, P3_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_1) != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
       else
       {
-        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-        TIM4->CCR1 = position;
-      }
-      // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
-      {
-        Error_Handler();
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
     }
-    case 4:
+    case 4: // Pin P4 is on Timer4 channel 2
     {
-      if (position != 0)
+      oldPosition = TIM4->CCR2;
+      TIM4->CCR2 = position;
+
+      if (position == 0)
       {
-        TIM4->CCR2 = position;
+        // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P4_GPIO_Port, P4_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_2) != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
       else
       {
-        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-        TIM4->CCR2 = position;
-      }
-      // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK)
-      {
-        Error_Handler();
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
     }
-    case 5:
+    case 5: // Pin P5 is on Timer4 channel 4
     {
-      if (position != 0)
+      oldPosition = TIM4->CCR4;
+      TIM4->CCR4 = position;
+
+      if (position == 0)
       {
-        TIM4->CCR4 = position;
+        // New position is 0, so set GPIO pin low and turn off PWM
+        HAL_GPIO_WritePin(P5_GPIO_Port, P5_Pin, GPIO_PIN_SET);
+        if (HAL_TIM_PWM_Stop(&htim4, TIM_CHANNEL_4) != HAL_OK)
+        {
+          Error_Handler();
+        }
       }
       else
       {
-        // TODO: Change this : Turn off the timer for this I/O pin so it's just a GPIO output driven low
-        TIM4->CCR4 = position;
-      }
-      // TODO: Should this only get done if we don't already have the channel on? (to save time)
-      if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4) != HAL_OK)
-      {
-        Error_Handler();
+        if (oldPosition == 0)
+        {
+          // New position is not zero, but old position was. Turn on PWM for this pin
+          if (HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_4) != HAL_OK)
+          {
+            Error_Handler();
+          }
+        }
       }
       break;
     }
@@ -494,30 +547,26 @@ void servo_SetOutput(uint16_t position, uint8_t pin)
  * Set Pen
  * Usage: SP,<state>[,duration]<CR>
  * <state> is 0 (for goto servo_max) or 1 (for goto servo_min)
- * <duration> (optional) is the length of time this move should take in ms
+ * <duration> (optional) is the length of time between when this move
+ *  begins and when the next move in the motion queue is started (ms)
  *  (<duration> is a 16 bit unsigned int)
- *  (Note that the global <pen_move_duration> will be used if no parameter
+ *  (Note that the global <servo_PenDuration> will be used if no parameter
  *   value is specified for <duration>.)
  *
  * This is a command that the user can send from the PC to set the pen state.
  *
  * Sending an SP command will get it inserted into the motion queue just like
- * any other motion command. The SP command will not begin until the previous
- * motion command has finished. Thus there will be no stepper movement during
- * the pen move. As soon as the SP move is complete, the next command in the
- * motion queue will be executed.
+ * any other motion command. The SP command will not begin until all previous
+ * motion command has finished.
  *
  * This function will use the values for <serv_min>, <servo_max>,
  * (SC,4 SC,5 commands) when it schedules the pen move for the destination
  * position.
- *
- * Internally, the parseSPCommand() function makes a call to
- * process_SP() function to actually make the change in the servo output.
  */
 void servo_SPCommand(void)
 {
   uint8_t state = 0;
-  uint16_t delay = servo_PenDuration;
+  uint16_t delay = servo_PenDelay;
 
   // Extract each of the values.
   extract_number(kUINT8, &state, kREQUIRED);
@@ -542,15 +591,16 @@ void servo_SPCommand(void)
 
 /*
  * Toggle Pen
- * Usage: TP,<duration><CR>
+ * Usage: TP,<delay><CR>
  * Returns: OK<CR>
- * <duration> is optional, and defaults to 0mS
- * Just toggles state of pen arm, then delays for the optional <duration>
- * Duration is in units of 1ms
+ * <delay> is optional, and defaults to 0mS. It represents the amount of time
+ *   after the RC servo command begins before the next motion queue command is
+ *   allowed to start.
+ * This command toggles state of pen arm, then delays for the optional <delay>
  */
 void servo_TPCommand(void)
 {
-  uint16_t delay = servo_PenDuration;
+  uint16_t delay = servo_PenDelay;
 
   // Extract each of the values.
   extract_number(kUINT16, &delay, kOPTIONAL);
@@ -583,7 +633,7 @@ void servo_TPCommand(void)
  *    <pin> is an RC Servo output pin number (P0 through P5)
  *      Values 0 through 5 are available, anything over will trigger error
  *    <rate> is the rate to change (optional, defaults to 0 = instant)
- *      /// TODO: Add details about units
+ *      Units for <rate> are Servo Time Units (or 306ns).
  *    <delay> is the number of milliseconds to delay the start of the next motion command
  *      after this command begins. Gives the ability to 'overlap' servo moves with stepper
  *      moves. (optional, defaults to 0 = instant)
@@ -697,6 +747,38 @@ void servo_SRCommand(void)
   }
 
   print_ack();
+}
+
+/*
+ * Sets new value for pen's maximum position value (used in SP/TP)
+ */
+void servo_SetPenMaxPosition(uint16_t position)
+{
+  servo_PenMaxPosition = position;
+}
+
+/*
+ * Sets new value for pen's minimum position value (used in SP/TP)
+ */
+void servo_SetPenMinPosition(uint16_t position)
+{
+  servo_PenMinPosition = position;
+}
+
+/*
+ * Sets new value for pen's delay - time before next motion command is allow to run
+ */
+void servo_SetPenDelay(uint16_t delay)
+{
+  servo_PenDelay = delay;
+}
+
+/*
+ * Sets new value for pen's rate - how fast it moves, in Servo Time Units/20ms
+ */
+void servo_SetPenRate(uint16_t rate)
+{
+  servo_PenRate = rate;
 }
 
 

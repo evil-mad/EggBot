@@ -58,6 +58,10 @@ void servo_QRCommand(void);
 void servo_SRCommand(void);
 void servo_SetOutput(uint16_t duration, uint8_t pin);
 void servo_SetTarget(uint16_t duration, uint8_t pin, uint16_t rate);
+void servo_SetPenMaxPosition(uint16_t position);
+void servo_SetPenMinPosition(uint16_t position);
+void servo_SetPenDelay(uint16_t delay);
+void servo_SetPenRate(uint16_t rate);
 void servo_ProcessTargets(void);
 void servo_CheckPenServoPowerTimeout(void);
 
