@@ -302,6 +302,9 @@ void servo_Init(void)
   
   // Always start out with servo power off
   PenServoPowerEnable(false);
+
+  // Initialize the pen to the up position on boot
+  process_SP(state, delay);
 }
 
 /*
@@ -554,14 +557,15 @@ void servo_SPCommand(void)
     return;
   }
 
-  if (state > 1)
+  if (state == 0)
   {
-    state = 1;
+    process_SP(PEN_DOWN, delay);
+  }
+  else
+  {
+    process_SP(PEN_UP, delay);
   }
 
-  // Execute the servo state change
-  process_SP(state, delay);
-    
   print_ack();
 }
 
