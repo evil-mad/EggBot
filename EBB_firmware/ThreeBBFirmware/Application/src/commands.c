@@ -1,19 +1,69 @@
+/*********************************************************************
+ *
+ *                ThreeBotBoard Firmware
+ *
+ *********************************************************************
+ * FileName:        commands.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+/************** INCLUDES ******************************************************/
+
+#include <stdio.h>
 #include "parse.h"
 //#include "fifo.h"
 //#include "main.h"
-#include <stdio.h>
-//#include "servo.h"
+#include "servo.h"
 //#include "analog.h"
 #include "utility.h"
 //#include "ebb.h"
 //#include "init.h"
+#include "commands.h"
 
-/** D E F I N E S ********************************************************/
+/************** MODULE DEFINES ************************************************/
 
 
-/** V A R I A B L E S ********************************************************/
+/************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
-  
 // Set to TRUE to turn Pulse Mode on
 uint8_t gPulsesOn = false;
 // For Pulse Mode, how long should each pulse be on for in ms?
@@ -23,7 +73,135 @@ uint16_t gPulseRate[4] = {0,0,0,0};
 // For Pulse Mode, counters keeping track of where we are
 uint16_t gPulseCounters[4] = {0,0,0,0};
 
-/** P R I V A T E  P R O T O T Y P E S ***************************************/
+/************** PRIVATE FUNCTION PROTOTYPES ***********************************/
+
+/************** PRIVATE FUNCTIONS *********************************************/
+
+/************** PUBLIC FUNCTIONS **********************************************/
+
+/*
+ * commands_SCCommand()
+ * Stepper/Servo (mode) Configure command
+ * SC,1,0<CR> will disable the solenoid (RB4) output for pen up/down
+ * SC,1,1<CR> will enable the solenoid (RB4) output for pen up/down (default)
+ * SC,2,0<CR> will make PIC control drivers (default)
+ * SC,2,1<CR> will make PIC control external drivers using these pins
+ *    ENABLE1 = RD1
+ *    ENABLE2 = RA1
+ *    STEP1 = RC6
+ *    DIR1 = RC2
+ *    STEP2 = RA5
+ *    DIR2 = RA2
+ * SC,2,2<CR> will disconnect PIC from drivers and allow external step/dir source
+ * FOR EBB
+ * SC,4,<gPenMinPosition><CR> will set the minimum value for the pen servo (1 to 11890)
+ * SC,5,<gPenMaxPosition><CR> will set the maximum value for the pen servo (1 to 11890)
+ * FOR 3BB
+ * SC,4,<gPenMinPosition><CR> will set the minimum value for the pen stepper (1 to 32767 in microsteps)
+ * SC,5,<gPenMaxPosition><CR> will set the maximum value for the pen stepper (1 to 32767 in microsteps)
+ * SC,8,<servo2_slots><CR> sets the number of slots for the servo2 system (1 to 24)
+ * SC,9,<servo2_slotMS><CR> sets the number of ms in duration for each slot (1 to 6)
+ * SC,10,<gPenMoveDuration><CR> set the new global default pen move duration in ms (16 bit uint)
+ * SC,13,1<CR> enables RB3 as parallel input to PRG button for pause detection
+ * SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
+ */
+void commands_SCCommand(void)
+{
+  uint8_t para1 = 0;
+  uint16_t para2 = 0;
+
+  // Extract each of the values.
+  extract_number (kUINT8, &para1, kREQUIRED);
+  extract_number (kUINT16, &para2, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+#if 0
+  // Check for command to enable/disable solenoid output (RB4) for pen up/down
+  if (Para1 == 1)
+  {
+    // Disable use of solenoid output
+    if (Para2 == 0)
+    {
+      gUseSolenoid = FALSE;
+      /// TOTO: Turn off solenoid output here
+    }
+    else
+    {
+      gUseSolenoid = TRUE;
+      /// TODO: Turn on solenoid output here (make sure RB4 is an output)
+    }
+  }
+#endif
+
+  // Set Pen RC Servo min position (pen up)
+  if (para1 == 4)
+  {
+    servo_SetPenMinPosition(para2);
+  }
+  // Set Pen RC servo max position (pen down)
+  if (para1 == 5)
+  {
+    servo_SetPenMaxPosition(para2);
+  }
+
+#if 0
+  // Set <gRC2Slots>
+  if (Para1 == 8)
+  {
+    if (Para2 > MAX_RC2_SERVOS)
+    {
+      Para2 = MAX_RC2_SERVOS;
+    }
+    gRC2Slots = Para2;
+  }
+  if (Para1 == 9)
+  {
+    if (Para2 > 6)
+    {
+      Para2 = 6;
+    }
+    gRC2SlotMS = Para2;
+  }
+#endif
+
+  // Set Pen RC servo rates - both going up and going down
+  if (para1 == 10)
+  {
+    servo_SetPenRateUp(para2);
+    servo_SetPenRateDown(para2);
+  }
+  // Set Pen RC servo rate - just going up
+  if (para1 == 11)
+  {
+    servo_SetPenRateUp(para2);
+  }
+  // Set Pen RC servo rate - just going down
+  if (para1 == 12)
+  {
+    servo_SetPenRateDown(para2);
+  }
+
+#if 0
+  if (Para1 == 13)
+  {
+    if (Para2)
+    {
+      UseAltPause = TRUE;
+    }
+    else
+    {
+      UseAltPause = FALSE;
+    }
+  }
+#endif
+
+  print_ack();
+}
 
 
 #if 0
@@ -204,9 +382,9 @@ void parseIDCommand(void)
 #endif
 
 // All we do here is just print out our version number
-void parseVRCommand(void)
+void commands_VRCommand(void)
 {
-  printf (st_version);
+  printf(st_version);
 }
 
 #if 0

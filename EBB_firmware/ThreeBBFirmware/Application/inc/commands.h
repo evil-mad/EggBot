@@ -17,12 +17,12 @@ extern uint16_t gPulseRate[4];
 // For Pulse Mode, counters keeping track of where we are
 extern uint16_t gPulseCounters[4];
 
-
+void commands_SCCommand(void);      // SC for Stepper/Servo Configure
 //void parseRSCommand(void);     // R for resetting UBW
 //void parseCBCommand(void);     // C for configuring I/O and analog pins
 //void parseODCommand(void);     // O for output digital to pins
 //void parseIDCommand(void);     // I for input digital from pins
-void parseVRCommand(void);     // VR for printing version
+void commands_VRCommand(void);      // VR for printing version
 //void parsePICommand(void);     // PI for reading a single pin
 //void parsePOCommand(void);     // PO for setting a single pin state
 //void parsePDCommand(void);     // PD for setting a pin's direction

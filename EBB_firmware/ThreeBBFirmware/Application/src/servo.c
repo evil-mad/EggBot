@@ -149,21 +149,22 @@ static PenStateType servo_PenLastState;
 static uint16_t servo_PenMaxPosition;   // Max position (Servo Time Units)
 static uint16_t servo_PenMinPosition;   // Min position (Servo Time Units)
 static uint16_t servo_PenDelay;         // Delay before next motion command (ms)
-static uint16_t servo_PenRate;          // Rate for pen move (Servo Time Units/20ms)
+static uint16_t servo_PenRateUp;        // Rate for pen move up (Servo Time Units/20ms)
+static uint16_t servo_PenRateDown;      // Rate for pen move down (Servo Time Units/20ms)
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3)
 volatile static uint32_t servo_PenServoPowerCounterMS;
 volatile static uint32_t servo_PenServoPowerCounterReloadMS;
 
 
-/************** LOCAL FUNCTION PROTOTYPES *************************************/
+/************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
 static void servo_Move(uint16_t position, uint8_t pin, uint16_t rate, uint16_t delay);
 static void process_SP(PenStateType newState, uint16_t delay);
 static void PenServoPowerEnable(bool state);
 
 
-/************** LOCAL FUNCTIONS ***********************************************/
+/************** PRIVATE FUNCTIONS *********************************************/
 
 /*
  * Set a new state for the Pen Servo's 5V power connection via the SVO_EN pin
@@ -262,11 +263,11 @@ static void process_SP(PenStateType newState, uint16_t delay)
     if (newState == PEN_UP)
     {
       // Schedule the move on the motion queue
-      servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+      servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRateUp, delay);
     }
     else
     {
-      servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+      servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRateDown, delay);
     }
 
     // Now that we've sent the move command off to the motion queue record
@@ -299,7 +300,8 @@ void servo_Init(void)
   servo_PenMaxPosition = PEN_DEFAULT_MAX_POSITION_SERVO;
   servo_PenMinPosition = PEN_DEFAULT_MIN_POSITION_SERVO;
   servo_PenDelay = PEN_DEFAULT_MOVE_DELAY_SERVO_MS;
-  servo_PenRate = PEN_DEFAULT_RATE_SERVO;
+  servo_PenRateUp = PEN_DEFAULT_RATE_SERVO;
+  servo_PenRateDown = PEN_DEFAULT_RATE_SERVO;
 
   servo_PenServoPowerCounterMS = 0;
   servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_COUNTER_DEFAULT_MS;
@@ -770,11 +772,19 @@ void servo_SetPenDelay(uint16_t delay)
 }
 
 /*
- * Sets new value for pen's rate - how fast it moves, in Servo Time Units/20ms
+ * Sets new value for pen's rate when going up - how fast it moves, in Servo Time Units/20ms
  */
-void servo_SetPenRate(uint16_t rate)
+void servo_SetPenRateUp(uint16_t rate)
 {
-  servo_PenRate = rate;
+  servo_PenRateUp = rate;
+}
+
+/*
+ * Sets new value for pen's rate when going down - how fast it moves, in Servo Time Units/20ms
+ */
+void servo_SetPenRateDown(uint16_t rate)
+{
+  servo_PenRateDown = rate;
 }
 
 
