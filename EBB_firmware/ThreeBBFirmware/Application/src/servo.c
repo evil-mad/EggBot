@@ -99,7 +99,8 @@
 typedef enum
 {
   PEN_DOWN = 0,
-  PEN_UP
+  PEN_UP,
+  PEN_UNKNOWN
 } PenStateType;
 
 
@@ -124,8 +125,8 @@ typedef enum
 #define PEN_DEFAULT_RATE_SERVO                  500
 
 // Default min and max positions for RC Servo Pen. Can be changed by SC command
-#define PEN_DEFAULT_MAX_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(1.5) // SP,1
-#define PEN_DEFAULT_MIN_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(0.5) // SP,0
+#define PEN_DEFAULT_MAX_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(1.33) // SP,0 (i.e. pen down)
+#define PEN_DEFAULT_MIN_POSITION_SERVO          MS_TO_SERVO_TIME_UNITS(1.00) // SP,1 (i.e. pen up)
 
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
@@ -151,8 +152,8 @@ static uint16_t servo_PenDelay;         // Delay before next motion command (ms)
 static uint16_t servo_PenRate;          // Rate for pen move (Servo Time Units/20ms)
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3)
-volatile static uint32_t servo_PenServoPowerCounterMS = 0;
-volatile static uint32_t servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_COUNTER_DEFAULT_MS;
+volatile static uint32_t servo_PenServoPowerCounterMS;
+volatile static uint32_t servo_PenServoPowerCounterReloadMS;
 
 
 /************** LOCAL FUNCTION PROTOTYPES *************************************/
@@ -261,11 +262,11 @@ static void process_SP(PenStateType newState, uint16_t delay)
     if (newState == PEN_UP)
     {
       // Schedule the move on the motion queue
-      servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+      servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
     }
     else
     {
-      servo_Move(servo_PenMinPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
+      servo_Move(servo_PenMaxPosition, SERVO_PEN_UP_DOWN_SERVO_PIN, servo_PenRate, delay);
     }
 
     // Now that we've sent the move command off to the motion queue record
@@ -299,12 +300,20 @@ void servo_Init(void)
   servo_PenMinPosition = PEN_DEFAULT_MIN_POSITION_SERVO;
   servo_PenDelay = PEN_DEFAULT_MOVE_DELAY_SERVO_MS;
   servo_PenRate = PEN_DEFAULT_RATE_SERVO;
-  
-  // Always start out with servo power off
-  PenServoPowerEnable(false);
+
+  servo_PenServoPowerCounterMS = 0;
+  servo_PenServoPowerCounterReloadMS = PEN_SERVO_POWER_COUNTER_DEFAULT_MS;
+
+  // By setting these to PEN_UNKNOWN, we force updates to the pen state/position
+  // no matter which direction is commanded first
+  servo_PenActualState = PEN_UNKNOWN;
+  servo_PenLastState = PEN_UNKNOWN;
 
   // Initialize the pen to the up position on boot
-  process_SP(state, delay);
+  process_SP(PEN_UP, 0);
+
+  // But also start out with servo power off
+  PenServoPowerEnable(false);
 }
 
 /*
@@ -325,6 +334,13 @@ void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
     servo_Target[pin] = position;
     servo_Position[pin] = position;
     servo_SetOutput(position, pin);
+
+    // For special case of pen servo pin update the global pen status to be
+    // in the new position
+    if (pin == SERVO_PEN_UP_DOWN_SERVO_PIN)
+    {
+      servo_PenActualState = servo_PenLastState;
+    }
   }
   else
   {
