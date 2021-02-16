@@ -34,7 +34,7 @@ volatile uint8_t DriverInitDelayMS;
 // ISR now at 100KHz
 void high_ISR(void)
 {
-    OutByte = queue_DirBits[queueOut];
+    OutByte = Queue[queueOut].Data.Stepper.DirBits;
     TookStep = false;
     AllDone = true;
 
@@ -42,12 +42,18 @@ void high_ISR(void)
     
     if (queueDepth)
     {
-      if (queue_Command[queueOut] == COMMAND_MOTOR_MOVE)
+      if (Queue[queueOut].Command == COMMAND_MOTOR_MOVE)
       {
         // Only output DIR bits if we are actually doing something
-        if (queue_G2[queueOut].StepsCounter0 || queue_G3[queueOut].StepsCounter1 || queue_G4[queueOut].StepsCounter2)
+        if (
+             Queue[queueOut].Data.Stepper.StepsCounter[0]
+             ||
+             Queue[queueOut].Data.Stepper.StepsCounter[1]
+             ||
+             Queue[queueOut].Data.Stepper.StepsCounter[2]
+        )
         {
-          if (queue_DirBits[queueOut] & DIR1_BIT)
+          if (Queue[queueOut].Data.Stepper.DirBits & DIR1_BIT)
           {
             DIR1_GPIO_Port->BSRR = (uint32_t)DIR1_Pin;
           }
@@ -55,7 +61,7 @@ void high_ISR(void)
           {
             DIR1_GPIO_Port->BRR = (uint32_t)DIR1_Pin;
           }
-          if (queue_DirBits[queueOut] & DIR2_BIT)
+          if (Queue[queueOut].Data.Stepper.DirBits & DIR2_BIT)
           {
             DIR2_GPIO_Port->BSRR = (uint32_t)DIR2_Pin;
           }
@@ -63,7 +69,7 @@ void high_ISR(void)
           {
             DIR2_GPIO_Port->BRR = (uint32_t)DIR2_Pin;
           }
-          if (queue_DirBits[queueOut] & DIR3_BIT)
+          if (Queue[queueOut].Data.Stepper.DirBits & DIR3_BIT)
           {
             DIR3_GPIO_Port->BSRR = (uint32_t)DIR3_Pin;
           }
@@ -73,16 +79,16 @@ void high_ISR(void)
           }
 
           // Only do this if there are steps left to take
-          if (queue_G2[queueOut].StepsCounter0)
+          if (Queue[queueOut].Data.Stepper.StepsCounter[0])
           {
-            StepAcc[0] = StepAcc[0] + queue_StepAdd0[queueOut];
+            StepAcc[0] = StepAcc[0] + Queue[queueOut].Data.Stepper.StepAdd[0];
             if (StepAcc[0] & 0x80000000)
             {
               StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
               OutByte = OutByte | STEP1_BIT;
               TookStep = true;
-              queue_G2[queueOut].StepsCounter0--;
-              if (queue_DirBits[queueOut] & DIR1_BIT)
+              Queue[queueOut].Data.Stepper.StepsCounter[0]--;
+              if (Queue[queueOut].Data.Stepper.DirBits & DIR1_BIT)
               {
                 globalStepCounter1--;
               }
@@ -92,19 +98,19 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            queue_StepAdd0[queueOut] += queue_G5[queueOut].StepAddInc0;
+            Queue[queueOut].Data.Stepper.StepAdd[0] += Queue[queueOut].Data.Stepper.StepAddInc[0];
             AllDone = false;
           }
-          if (queue_G3[queueOut].StepsCounter1)
+          if (Queue[queueOut].Data.Stepper.StepsCounter[1])
           {
-            StepAcc[1] = StepAcc[1] + queue_StepAdd1[queueOut];
+            StepAcc[1] = StepAcc[1] + Queue[queueOut].Data.Stepper.StepAdd[1];
             if (StepAcc[1] & 0x80000000)
             {
               StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
               OutByte = OutByte | STEP2_BIT;
               TookStep = true;
-              queue_G3[queueOut].StepsCounter1--;
-              if (queue_DirBits[queueOut] & DIR2_BIT)
+              Queue[queueOut].Data.Stepper.StepsCounter[1]--;
+              if (Queue[queueOut].Data.Stepper.DirBits & DIR2_BIT)
               {
                 globalStepCounter2--;
               }
@@ -114,19 +120,19 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            queue_StepAdd1[queueOut] += queue_StepAddInc1[queueOut];
+            Queue[queueOut].Data.Stepper.StepAdd[1] += Queue[queueOut].Data.Stepper.StepAddInc[1];
             AllDone = false;
           }
-          if (queue_G4[queueOut].StepsCounter2)
+          if (Queue[queueOut].Data.Stepper.StepsCounter[2])
           {
-            StepAcc[2] = StepAcc[2] + queue_G1[queueOut].StepAdd2;
+            StepAcc[2] = StepAcc[2] + Queue[queueOut].Data.Stepper.StepAdd[2];
             if (StepAcc[2] & 0x80000000)
             {
               StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
               OutByte = OutByte | STEP3_BIT;
               TookStep = true;
-              queue_G4[queueOut].StepsCounter2--;
-              if (queue_DirBits[queueOut] & DIR3_BIT)
+              Queue[queueOut].Data.Stepper.StepsCounter[2]--;
+              if (Queue[queueOut].Data.Stepper.DirBits & DIR3_BIT)
               {
                 globalStepCounter3--;
               }
@@ -136,7 +142,7 @@ void high_ISR(void)
               }
             }
             // For acceleration, we now add a bit to StepAdd each time through as well
-            queue_G1[queueOut].StepAdd2 += queue_StepAddInc2[queueOut];
+            Queue[queueOut].Data.Stepper.StepAdd[2] += Queue[queueOut].Data.Stepper.StepAddInc[2];
             AllDone = false;
           }
           if (TookStep)
@@ -173,10 +179,10 @@ void high_ISR(void)
         }
       }
       // Check to see if we should start or stop the engraver
-      else if (queue_Command[queueOut] == COMMAND_SE)
+      else if (Queue[queueOut].Command == COMMAND_SE)
       {
         // Now act on the State of the SE command
-        if (queue_G2[queueOut].SEState)
+        if (Queue[queueOut].Data.Engraver.SEState)
         {
           // Set RB3 to StoredEngraverPower
 ///          CCPR1L = queue_G1[queueOut].SEPower >> 2;
@@ -191,33 +197,33 @@ void high_ISR(void)
         AllDone = true;
       }
       // Do we have an RC servo move?
-      else if (queue_Command[queueOut] == COMMAND_SERVO_MOVE)
+      else if (Queue[queueOut].Command == COMMAND_SERVO_MOVE)
       {
-        // Set up a new target and rate for one of the servos
-        servo_SetTarget(queue_G1[queueOut].ServoPosition, queue_G4[queueOut].ServoChannel, queue_G3[queueOut].ServoRate);
+        // Set up a new target and rate for one of the servosb
+        servo_SetTarget(Queue[queueOut].Data.Servo.ServoPosition, Queue[queueOut].Data.Servo.ServoPin, Queue[queueOut].Data.Servo.ServoRate);
         AllDone = true;
       }
       // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
       // That's why this is not an elseif here.
       if (
-        queue_Command[queueOut] == COMMAND_DELAY
+        Queue[queueOut].Command == COMMAND_DELAY
         || 
-        queue_Command[queueOut] == COMMAND_SERVO_MOVE
+        Queue[queueOut].Command == COMMAND_SERVO_MOVE
       )
       {
-        if (queue_G2[queueOut].DelayCounter)
+        if (Queue[queueOut].DelayCounter)
         {
           // Double check that things aren't way too big
-          if (queue_G2[queueOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
+          if (Queue[queueOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
           {
-            queue_G2[queueOut].DelayCounter = 0;
+            Queue[queueOut].DelayCounter = 0;
           }
           else {
-            queue_G2[queueOut].DelayCounter--;
+            Queue[queueOut].DelayCounter--;
           }
         }
 
-        if (queue_G2[queueOut].DelayCounter)
+        if (Queue[queueOut].DelayCounter)
         {
             AllDone = false;
         }
@@ -227,7 +233,7 @@ void high_ISR(void)
       if (AllDone)
       {
         // "Erase" the current command from the queue
-        queue_Command[queueOut] = COMMAND_NONE;
+        Queue[queueOut].Command = COMMAND_NONE;
 
         // There should be at least one command in queueDepth right now (the one we just finished)
         // Remove it

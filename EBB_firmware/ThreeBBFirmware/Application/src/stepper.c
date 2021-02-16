@@ -954,7 +954,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   else
   {
     move.DelayCounter = 0; // No delay for motor moves
-    move.DirBits = 0;
+    move.Data.Stepper.DirBits = 0;
 
     // Always enable both motors when we want to move them
 ///    Enable1IO = ENABLE_MOTOR;
@@ -965,17 +965,17 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     // First, set the direction bits
     if (A1Stp < 0)
     {
-      move.DirBits = move.DirBits | DIR1_BIT;
+      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR1_BIT;
       A1Stp = -A1Stp;
     }
     if (A2Stp < 0)
     {
-      move.DirBits = move.DirBits | DIR2_BIT;
+      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR2_BIT;
       A2Stp = -A2Stp;
     }
     if (A3Stp < 0)
     {
-      move.DirBits = move.DirBits | DIR3_BIT;
+      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR3_BIT;
       A3Stp = -A3Stp;
     }
 
@@ -1040,9 +1040,9 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
 
-    move.StepAdd[0] = temp;
-    move.StepsCounter[0] = A1Stp;
-    move.StepAddInc[0] = 0;
+    move.Data.Stepper.StepAdd[0] = temp;
+    move.Data.Stepper.StepsCounter[0] = A1Stp;
+    move.Data.Stepper.StepAddInc[0] = 0;
 
     if (A2Stp < 0x1FFFF) 
     {
@@ -1077,9 +1077,9 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
         
-    move.StepAdd[1] = temp;
-    move.StepsCounter[1] = A2Stp;
-    move.StepAddInc[1] = 0;
+    move.Data.Stepper.StepAdd[1] = temp;
+    move.Data.Stepper.StepsCounter[1] = A2Stp;
+    move.Data.Stepper.StepAddInc[1] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
      
     if (A3Stp < 0x1FFFF) 
@@ -1115,9 +1115,9 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
         
-    move.StepAdd[2] = temp;
-    move.StepsCounter[2] = A3Stp;
-    move.StepAddInc[2] = 0;
+    move.Data.Stepper.StepAdd[2] = temp;
+    move.Data.Stepper.StepsCounter[2] = A3Stp;
+    move.Data.Stepper.StepAddInc[2] = 0;
     move.Command = COMMAND_MOTOR_MOVE;
     
     /* For debugging step motion , uncomment the next line */
@@ -1134,22 +1134,7 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   WaitForRoomInQueue();
 
   // Now, quick copy over the computed command data to the command fifo
-  queue_Command[queueIn] = move.Command;
-
-  queue_StepAdd0[queueIn] = move.StepAdd[0];
-  queue_G5[queueIn].StepAddInc0 = move.StepAddInc[0];
-  queue_G2[queueIn].StepsCounter0 = move.StepsCounter[0];
-
-  queue_StepAdd1[queueIn] = move.StepAdd[1];
-  queue_StepAddInc1[queueIn] = move.StepAddInc[1];
-  queue_G3[queueIn].StepsCounter1 = move.StepsCounter[1];
-
-  queue_G1[queueIn].StepAdd2 = move.StepAdd[2];
-  queue_StepAddInc2[queueIn] = move.StepAddInc[2];
-  queue_G4[queueIn].StepsCounter2 = move.StepsCounter[2];
-  
-  queue_DirBits[queueIn] = move.DirBits;
-  
+  Queue[queueIn] = move;
   queue_Inc();
   print_ack();
 }

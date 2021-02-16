@@ -223,11 +223,11 @@ static void servo_Move(
 
   /// TODO: Move this to a queue module function?
   // Now copy the values over into the queue element
-  queue_Command[queueIn] = COMMAND_SERVO_MOVE;
-  queue_G1[queueIn].ServoPosition = position;
-  queue_G3[queueIn].ServoRate = rate;
-  queue_G4[queueIn].ServoChannel = pin;
-  queue_G5[queueIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
+  Queue[queueIn].Command = COMMAND_SERVO_MOVE;
+  Queue[queueIn].Data.Servo.ServoPosition = position;
+  Queue[queueIn].Data.Servo.ServoRate = rate;
+  Queue[queueIn].Data.Servo.ServoPin = pin;
+  Queue[queueIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
 
   queue_Inc();
 }

@@ -65,7 +65,7 @@
   #define NUMBER_OF_STEPPERS      3
 
   // Maximum size of motion command queue
-  #define COMMAND_QUEUE_LENGTH     32
+  #define COMMAND_QUEUE_LENGTH     2510
 
   // The ADC channel number for the SCALED_V+ input on 3BB
   // Allows us to see what V+ motor voltage has been apPlied to the board
