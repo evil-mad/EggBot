@@ -927,14 +927,16 @@ void parseXMCommand(void)
 //
 // In the future, making the FIFO more elements deep may be cool.
 // 
-void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
+void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
 {
   uint32_t temp = 0;
   uint32_t temp1 = 0;
   uint32_t temp2 = 0;
   uint32_t remainder = 0;
-  /// TODO: Remove 'move' and just write directly to [FIFOIn] to save stack space
-  MoveCommandType move = {0};
+  uint8_t dirBits = 0;
+  int32_t stepAdd[NUMBER_OF_STEPPERS];
+  int32_t stepAddInc[NUMBER_OF_STEPPERS];
+  uint32_t stepsCounter[NUMBER_OF_STEPPERS];
 
   // Uncomment the following printf() for debugging
   //printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n",
@@ -943,18 +945,14 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
   //        A2Stp
   //    );
 
-  // Check for delay
-  if (A1Stp == 0 && A2Stp == 0 && A3Stp == 0)
+  // Check for delay (if no step counts)
+  if (a1Stp == 0 && a2Stp == 0 && a3Stp == 0)
   {
-    move.Command = COMMAND_DELAY;
-    // This is OK because we only need to multiply the 3 byte Duration by
-    // 25, so it fits in 4 bytes OK.
-    move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+    queue_AddDelayCommandToQueue(HIGH_ISR_TICKS_PER_MS * duration);
   }
   else
   {
-    move.DelayCounter = 0; // No delay for motor moves
-    move.Data.Stepper.DirBits = 0;
+    dirBits = 0;
 
     // Always enable both motors when we want to move them
 ///    Enable1IO = ENABLE_MOTOR;
@@ -963,20 +961,20 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
 ///    gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
     
     // First, set the direction bits
-    if (A1Stp < 0)
+    if (a1Stp < 0)
     {
-      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR1_BIT;
-      A1Stp = -A1Stp;
+      dirBits |= DIR1_BIT;
+      a1Stp = -a1Stp;
     }
-    if (A2Stp < 0)
+    if (a2Stp < 0)
     {
-      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR2_BIT;
-      A2Stp = -A2Stp;
+      dirBits |= DIR2_BIT;
+      a2Stp = -a2Stp;
     }
-    if (A3Stp < 0)
+    if (a3Stp < 0)
     {
-      move.Data.Stepper.DirBits = move.Data.Stepper.DirBits | DIR3_BIT;
-      A3Stp = -A3Stp;
+      dirBits |= DIR3_BIT;
+      a3Stp = -a3Stp;
     }
 
     // To compute StepAdd values from Duration.
@@ -1000,11 +998,11 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     //            }
     //        }
         
-    if (A1Stp < 0x1FFFF) 
+    if (a1Stp < 0x1FFFF)
     {
-      temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
-      temp = (A1Stp << 15)/temp1;
-      temp2 = (A1Stp << 15) % temp1;
+      temp1 = HIGH_ISR_TICKS_PER_MS * duration;
+      temp = (a1Stp << 15)/temp1;
+      temp2 = (a1Stp << 15) % temp1;
       /* Because it takes us about 5ms extra time to do this division,
        * we only perform this extra step if our move is long enough to
        * warrant it. That way, for really short moves (where the extra
@@ -1012,14 +1010,14 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
        * this optimization, our minimum move time is 20ms. With it, it
        * drops down to about 15ms.
        */
-      if (Duration > 30)
+      if (duration > 30)
       {
         remainder = (temp2 << 16) / temp1;
       }
     }
     else 
     {
-      temp = (((A1Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
+      temp = (((a1Stp/duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
@@ -1027,11 +1025,12 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       printf("Major malfunction Axis1 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
-    if (temp == 0 && A1Stp != 0) {
+    if (temp == 0 && a1Stp != 0)
+    {
       printf("Major malfunction Axis1 StepCounter zero\n");
       temp = 1;
     }
-    if (Duration > 30)
+    if (duration > 30)
     {
       temp = (temp << 16) + remainder;
     }
@@ -1040,22 +1039,22 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
 
-    move.Data.Stepper.StepAdd[0] = temp;
-    move.Data.Stepper.StepsCounter[0] = A1Stp;
-    move.Data.Stepper.StepAddInc[0] = 0;
+    stepAdd[0] = temp;
+    stepsCounter[0] = a1Stp;
+    stepAddInc[0] = 0;
 
-    if (A2Stp < 0x1FFFF) 
+    if (a2Stp < 0x1FFFF)
     {
-      temp = (A2Stp << 15)/temp1;
-      temp2 = (A2Stp << 15) % temp1; 
-      if (Duration > 30)
+      temp = (a2Stp << 15)/temp1;
+      temp2 = (a2Stp << 15) % temp1;
+      if (duration > 30)
       {
         remainder = (temp2 << 16) / temp1;
       }
     }
     else 
     {
-      temp = (((A2Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
+      temp = (((a2Stp/duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
@@ -1063,12 +1062,12 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       printf("Major malfunction Axis2 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
-    if (temp == 0 && A2Stp != 0) 
+    if (temp == 0 && a2Stp != 0)
     {
       printf("Major malfunction Axis2 StepCounter zero\n");
       temp = 1;
     }
-    if (Duration > 30)
+    if (duration > 30)
     {
       temp = (temp << 16) + remainder;
     }
@@ -1077,23 +1076,22 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
         
-    move.Data.Stepper.StepAdd[1] = temp;
-    move.Data.Stepper.StepsCounter[1] = A2Stp;
-    move.Data.Stepper.StepAddInc[1] = 0;
-    move.Command = COMMAND_MOTOR_MOVE;
+    stepAdd[1] = temp;
+    stepsCounter[1] = a2Stp;
+    stepAddInc[1] = 0;
      
-    if (A3Stp < 0x1FFFF) 
+    if (a3Stp < 0x1FFFF)
     {
-      temp = (A3Stp << 15)/temp1;
-      temp2 = (A3Stp << 15) % temp1; 
-      if (Duration > 30)
+      temp = (a3Stp << 15)/temp1;
+      temp2 = (a3Stp << 15) % temp1;
+      if (duration > 30)
       {
         remainder = (temp2 << 16) / temp1;
       }
     }
     else 
     {
-      temp = (((A3Stp/Duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
+      temp = (((a3Stp/duration) * (uint32_t)0x8000)/(uint32_t)HIGH_ISR_TICKS_PER_MS);
       remainder = 0;
     }
     if (temp > 0x8000) 
@@ -1101,12 +1099,12 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       printf("Major malfunction Axis3 StepCounter too high : %lu\n", temp);
       temp = 0x8000;
     }
-    if (temp == 0 && A3Stp != 0) 
+    if (temp == 0 && a3Stp != 0)
     {
       printf("Major malfunction Axis3 StepCounter zero\n");
       temp = 1;
     }
-    if (Duration > 30)
+    if (duration > 30)
     {
       temp = (temp << 16) + remainder;
     }
@@ -1115,10 +1113,9 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
       temp = (temp << 16);
     }
         
-    move.Data.Stepper.StepAdd[2] = temp;
-    move.Data.Stepper.StepsCounter[2] = A3Stp;
-    move.Data.Stepper.StepAddInc[2] = 0;
-    move.Command = COMMAND_MOTOR_MOVE;
+    stepAdd[2] = temp;
+    stepsCounter[2] = a3Stp;
+    stepAddInc[2] = 0;
     
     /* For debugging step motion , uncomment the next line */
 
@@ -1128,14 +1125,11 @@ void process_SM(uint32_t Duration, int32_t A1Stp, int32_t A2Stp, int32_t A3Stp)
     //        move.StepAdd[1],
     //        move.StepsCounter[1]
     //    );
+
+    // Add the stepper command to the motion queue
+    queue_AddStepperCommandToQueue(stepAdd, stepAddInc, stepsCounter, dirBits);
   }
 
-  // Spin here until there's space in the fifo
-  WaitForRoomInQueue();
-
-  // Now, quick copy over the computed command data to the command fifo
-  Queue[queueIn] = move;
-  queue_Inc();
   print_ack();
 }
 

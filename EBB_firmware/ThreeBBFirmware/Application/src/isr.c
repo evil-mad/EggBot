@@ -14,14 +14,6 @@
 #include "commands.h"
 #include "utility.h"
 
-/// TODO: Move these into ISR function body?
-static uint8_t OutByte;
-static bool TookStep;
-static bool AllDone;
-
-// Accumulators (at 25Khz) used to determine when to take a step
-static uint32_t StepAcc[NUMBER_OF_STEPPERS];
-
 // Constantly incrementing every 1ms in ISR global tick counter
 volatile uint32_t TickCounterMS;
 
@@ -34,217 +26,228 @@ volatile uint8_t DriverInitDelayMS;
 // ISR now at 100KHz
 void high_ISR(void)
 {
-    OutByte = Queue[queueOut].Data.Stepper.DirBits;
-    TookStep = false;
-    AllDone = true;
+  // Accumulators (at 25Khz) used to determine when to take a step
+  static uint32_t StepAcc[NUMBER_OF_STEPPERS];
+  static uint8_t OutByte;
+  static bool TookStep;
+  static bool AllDone;
+  static MoveCommandType move = {0};
+  TookStep = false;
+  AllDone = true;
 
 ///DEBUG_G0_SET();
-    
-    if (queueDepth)
+  // If we are not already processing a command, see if there are any
+  // waiting for us on the queue
+  if (move.Command == COMMAND_NONE)
+  {
+    if (queue_PullNextCommand(&move) == false)
     {
-      if (Queue[queueOut].Command == COMMAND_MOTOR_MOVE)
+      // Nope, queue is empty. So just mark that we do not have a command
+      // to process and be done
+      move.Command = COMMAND_NONE;
+      return;
+    }
+  }
+
+  if (move.Command == COMMAND_MOTOR_MOVE)
+  {
+    /// TODO: We only need to set up and output the DIR bits once, when we first start the move. No need to waste time after that.
+
+    // Only output DIR bits if we are actually doing something
+    if (
+         move.Data.Stepper.StepsCounter[0]
+         ||
+         move.Data.Stepper.StepsCounter[1]
+         ||
+         move.Data.Stepper.StepsCounter[2]
+    )
+    {
+      if (move.Data.Stepper.DirBits & DIR1_BIT)
       {
-        // Only output DIR bits if we are actually doing something
-        if (
-             Queue[queueOut].Data.Stepper.StepsCounter[0]
-             ||
-             Queue[queueOut].Data.Stepper.StepsCounter[1]
-             ||
-             Queue[queueOut].Data.Stepper.StepsCounter[2]
-        )
+        DIR1_GPIO_Port->BSRR = (uint32_t)DIR1_Pin;
+      }
+      else
+      {
+        DIR1_GPIO_Port->BRR = (uint32_t)DIR1_Pin;
+      }
+      if (move.Data.Stepper.DirBits & DIR2_BIT)
+      {
+        DIR2_GPIO_Port->BSRR = (uint32_t)DIR2_Pin;
+      }
+      else
+      {
+        DIR2_GPIO_Port->BRR = (uint32_t)DIR2_Pin;
+      }
+      if (move.Data.Stepper.DirBits & DIR3_BIT)
+      {
+        DIR3_GPIO_Port->BSRR = (uint32_t)DIR3_Pin;
+      }
+      else
+      {
+        DIR3_GPIO_Port->BRR = (uint32_t)DIR3_Pin;
+      }
+
+      OutByte = move.Data.Stepper.DirBits;
+
+      // Only do this if there are steps left to take
+      if (move.Data.Stepper.StepsCounter[0])
+      {
+        StepAcc[0] = StepAcc[0] + move.Data.Stepper.StepAdd[0];
+        if (StepAcc[0] & 0x80000000)
         {
-          if (Queue[queueOut].Data.Stepper.DirBits & DIR1_BIT)
+          StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
+          OutByte = OutByte | STEP1_BIT;
+          TookStep = true;
+          move.Data.Stepper.StepsCounter[0]--;
+          if (move.Data.Stepper.DirBits & DIR1_BIT)
           {
-            DIR1_GPIO_Port->BSRR = (uint32_t)DIR1_Pin;
+            globalStepCounter1--;
           }
           else
           {
-            DIR1_GPIO_Port->BRR = (uint32_t)DIR1_Pin;
+            globalStepCounter1++;
           }
-          if (Queue[queueOut].Data.Stepper.DirBits & DIR2_BIT)
+        }
+        // For acceleration, we now add a bit to StepAdd each time through as well
+        move.Data.Stepper.StepAdd[0] += move.Data.Stepper.StepAddInc[0];
+        AllDone = false;
+      }
+      if (move.Data.Stepper.StepsCounter[1])
+      {
+        StepAcc[1] = StepAcc[1] + move.Data.Stepper.StepAdd[1];
+        if (StepAcc[1] & 0x80000000)
+        {
+          StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
+          OutByte = OutByte | STEP2_BIT;
+          TookStep = true;
+          move.Data.Stepper.StepsCounter[1]--;
+          if (move.Data.Stepper.DirBits & DIR2_BIT)
           {
-            DIR2_GPIO_Port->BSRR = (uint32_t)DIR2_Pin;
+            globalStepCounter2--;
           }
           else
           {
-            DIR2_GPIO_Port->BRR = (uint32_t)DIR2_Pin;
+            globalStepCounter2++;
           }
-          if (Queue[queueOut].Data.Stepper.DirBits & DIR3_BIT)
+        }
+        // For acceleration, we now add a bit to StepAdd each time through as well
+        move.Data.Stepper.StepAdd[1] += move.Data.Stepper.StepAddInc[1];
+        AllDone = false;
+      }
+      if (move.Data.Stepper.StepsCounter[2])
+      {
+        StepAcc[2] = StepAcc[2] + move.Data.Stepper.StepAdd[2];
+        if (StepAcc[2] & 0x80000000)
+        {
+          StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
+          OutByte = OutByte | STEP3_BIT;
+          TookStep = true;
+          move.Data.Stepper.StepsCounter[2]--;
+          if (move.Data.Stepper.DirBits & DIR3_BIT)
           {
-            DIR3_GPIO_Port->BSRR = (uint32_t)DIR3_Pin;
+            globalStepCounter3--;
           }
           else
           {
-            DIR3_GPIO_Port->BRR = (uint32_t)DIR3_Pin;
-          }
-
-          // Only do this if there are steps left to take
-          if (Queue[queueOut].Data.Stepper.StepsCounter[0])
-          {
-            StepAcc[0] = StepAcc[0] + Queue[queueOut].Data.Stepper.StepAdd[0];
-            if (StepAcc[0] & 0x80000000)
-            {
-              StepAcc[0] = StepAcc[0] & 0x7FFFFFFF;
-              OutByte = OutByte | STEP1_BIT;
-              TookStep = true;
-              Queue[queueOut].Data.Stepper.StepsCounter[0]--;
-              if (Queue[queueOut].Data.Stepper.DirBits & DIR1_BIT)
-              {
-                globalStepCounter1--;
-              }
-              else
-              {
-                globalStepCounter1++;
-              }
-            }
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            Queue[queueOut].Data.Stepper.StepAdd[0] += Queue[queueOut].Data.Stepper.StepAddInc[0];
-            AllDone = false;
-          }
-          if (Queue[queueOut].Data.Stepper.StepsCounter[1])
-          {
-            StepAcc[1] = StepAcc[1] + Queue[queueOut].Data.Stepper.StepAdd[1];
-            if (StepAcc[1] & 0x80000000)
-            {
-              StepAcc[1] = StepAcc[1] & 0x7FFFFFFF;
-              OutByte = OutByte | STEP2_BIT;
-              TookStep = true;
-              Queue[queueOut].Data.Stepper.StepsCounter[1]--;
-              if (Queue[queueOut].Data.Stepper.DirBits & DIR2_BIT)
-              {
-                globalStepCounter2--;
-              }
-              else
-              {
-                globalStepCounter2++;
-              }
-            }
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            Queue[queueOut].Data.Stepper.StepAdd[1] += Queue[queueOut].Data.Stepper.StepAddInc[1];
-            AllDone = false;
-          }
-          if (Queue[queueOut].Data.Stepper.StepsCounter[2])
-          {
-            StepAcc[2] = StepAcc[2] + Queue[queueOut].Data.Stepper.StepAdd[2];
-            if (StepAcc[2] & 0x80000000)
-            {
-              StepAcc[2] = StepAcc[2] & 0x7FFFFFFF;
-              OutByte = OutByte | STEP3_BIT;
-              TookStep = true;
-              Queue[queueOut].Data.Stepper.StepsCounter[2]--;
-              if (Queue[queueOut].Data.Stepper.DirBits & DIR3_BIT)
-              {
-                globalStepCounter3--;
-              }
-              else
-              {
-                globalStepCounter3++;
-              }
-            }
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            Queue[queueOut].Data.Stepper.StepAdd[2] += Queue[queueOut].Data.Stepper.StepAddInc[2];
-            AllDone = false;
-          }
-          if (TookStep)
-          {
-            if (OutByte & STEP1_BIT)
-            {
-              STEP1_GPIO_Port->BSRR = (uint32_t)STEP1_Pin;
-            }
-            if (OutByte & STEP2_BIT)
-            {
-              STEP2_GPIO_Port->BSRR = (uint32_t)STEP2_Pin;
-            }
-            if (OutByte & STEP3_BIT)
-            {
-              STEP3_GPIO_Port->BSRR = (uint32_t)STEP3_Pin;
-            }
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            asm("NOP");
-            if (OutByte & STEP1_BIT)
-            {
-              STEP1_GPIO_Port->BRR = (uint32_t)STEP1_Pin;
-            }
-            if (OutByte & STEP2_BIT)
-            {
-              STEP2_GPIO_Port->BRR = (uint32_t)STEP2_Pin;
-            }
-            if (OutByte & STEP3_BIT)
-            {
-              STEP3_GPIO_Port->BRR = (uint32_t)STEP3_Pin;
-            }
+            globalStepCounter3++;
           }
         }
+        // For acceleration, we now add a bit to StepAdd each time through as well
+        move.Data.Stepper.StepAdd[2] += move.Data.Stepper.StepAddInc[2];
+        AllDone = false;
       }
-      // Check to see if we should start or stop the engraver
-      else if (Queue[queueOut].Command == COMMAND_SE)
+      if (TookStep)
       {
-        // Now act on the State of the SE command
-        if (Queue[queueOut].Data.Engraver.SEState)
+        if (OutByte & STEP1_BIT)
         {
-          // Set RB3 to StoredEngraverPower
-///          CCPR1L = queue_G1[queueOut].SEPower >> 2;
-///          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+          STEP1_GPIO_Port->BSRR = (uint32_t)STEP1_Pin;
         }
-        else
+        if (OutByte & STEP2_BIT)
         {
-          // Set RB3 to low by setting PWM duty cycle to zero
-///          CCPR1L = 0;
-///          CCP1CON = (CCP1CON & 0b11001111);
+          STEP2_GPIO_Port->BSRR = (uint32_t)STEP2_Pin;
         }
-        AllDone = true;
-      }
-      // Do we have an RC servo move?
-      else if (Queue[queueOut].Command == COMMAND_SERVO_MOVE)
-      {
-        // Set up a new target and rate for one of the servosb
-        servo_SetTarget(Queue[queueOut].Data.Servo.ServoPosition, Queue[queueOut].Data.Servo.ServoPin, Queue[queueOut].Data.Servo.ServoRate);
-        AllDone = true;
-      }
-      // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
-      // That's why this is not an elseif here.
-      if (
-        Queue[queueOut].Command == COMMAND_DELAY
-        || 
-        Queue[queueOut].Command == COMMAND_SERVO_MOVE
-      )
-      {
-        if (Queue[queueOut].DelayCounter)
+        if (OutByte & STEP3_BIT)
         {
-          // Double check that things aren't way too big
-          if (Queue[queueOut].DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
-          {
-            Queue[queueOut].DelayCounter = 0;
-          }
-          else {
-            Queue[queueOut].DelayCounter--;
-          }
+          STEP3_GPIO_Port->BSRR = (uint32_t)STEP3_Pin;
         }
-
-        if (Queue[queueOut].DelayCounter)
+        asm("NOP");
+        asm("NOP");
+        asm("NOP");
+        asm("NOP");
+        if (OutByte & STEP1_BIT)
         {
-            AllDone = false;
+          STEP1_GPIO_Port->BRR = (uint32_t)STEP1_Pin;
         }
-      }
-
-      // If we're done with our current command, load in the next one, if there's more
-      if (AllDone)
-      {
-        // "Erase" the current command from the queue
-        Queue[queueOut].Command = COMMAND_NONE;
-
-        // There should be at least one command in queueDepth right now (the one we just finished)
-        // Remove it
-        queueOut++;
-        if (queueOut >= COMMAND_QUEUE_LENGTH)
+        if (OutByte & STEP2_BIT)
         {
-          queueOut = 0;
+          STEP2_GPIO_Port->BRR = (uint32_t)STEP2_Pin;
         }
-        queueDepth--;
+        if (OutByte & STEP3_BIT)
+        {
+          STEP3_GPIO_Port->BRR = (uint32_t)STEP3_Pin;
+        }
       }
     }
+  }
+  // Check to see if we should start or stop the engraver
+  else if (move.Command == COMMAND_SE)
+  {
+    // Now act on the State of the SE command
+    if (move.Data.Engraver.SEState)
+    {
+      // Set RB3 to StoredEngraverPower
+///          CCPR1L = queue_G1[queueOut].SEPower >> 2;
+///          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+    }
+    else
+    {
+      // Set RB3 to low by setting PWM duty cycle to zero
+///          CCPR1L = 0;
+///          CCP1CON = (CCP1CON & 0b11001111);
+    }
+    AllDone = true;
+  }
+  // Do we have an RC servo move?
+  else if (move.Command == COMMAND_SERVO_MOVE)
+  {
+    // Set up a new target and rate for one of the servos
+    servo_SetTarget(move.Data.Servo.ServoPosition, move.Data.Servo.ServoPin, move.Data.Servo.ServoRate);
+    AllDone = true;
+  }
+  // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
+  // That's why this is not an elseif here.
+  if (
+    move.Command == COMMAND_DELAY
+    ||
+    move.Command == COMMAND_SERVO_MOVE
+  )
+  {
+    if (move.DelayCounter)
+    {
+      // Double check that things aren't way too big
+      if (move.DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
+      {
+        move.DelayCounter = 0;
+      }
+      else
+      {
+        move.DelayCounter--;
+      }
+    }
+
+    if (move.DelayCounter)
+    {
+      AllDone = false;
+    }
+  }
+
+  // If we're done with our current command, load in the next one, if there's more
+  if (AllDone)
+  {
+    // "Erase" the current command from the queue
+    move.Command = COMMAND_NONE;
+  }
+
 
     // Check for button being pushed
 ///    if (

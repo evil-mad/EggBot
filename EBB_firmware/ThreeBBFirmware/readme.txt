@@ -14,6 +14,10 @@ ThreeBeeBee (3BB) Readme.txt file
   * Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
   * Add support for solenoid output (?) tied to pen, but what about z-axis stepper?
   
+  -- BOARD --
+  * Switch USB connector to USB C
+    * Connect up USB C PD pins to Micro (where?) Use : 670-DX07S016JA1R1500CT-ND
+  
 
 
 = Questions =

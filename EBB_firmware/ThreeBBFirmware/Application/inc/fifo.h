@@ -94,18 +94,14 @@ typedef struct
   } Data;
 } MoveCommandType;  // 27 bytes
 
-
-extern volatile uint8_t queueDepth;
-extern volatile uint8_t queueSize;
-extern volatile uint8_t queueIn;
-extern volatile uint8_t queueOut;
-
-extern MoveCommandType     Queue[COMMAND_QUEUE_LENGTH];
-
 void queue_Init(void);
-void queue_Inc(void);
-void WaitForRoomInQueue(void);
-void WaitForEmptyQueue(void);
+void queue_WaitForRoom(void);
+void queue_WaitForEmpty(void);
+void queue_AddStepperCommandToQueue(int32_t stepAdd[NUMBER_OF_STEPPERS], int32_t stepAddInc[NUMBER_OF_STEPPERS], uint32_t stepsCounter[NUMBER_OF_STEPPERS], uint8_t dirBits);
+void queue_AddServoCommandToQueue(uint16_t position, uint8_t pin, uint16_t rate, uint32_t delay);
+void queue_AddEngraverCommandToQueue(uint8_t state, uint16_t power);
+void queue_AddDelayCommandToQueue(uint32_t delay);
+bool queue_PullNextCommand(MoveCommandType * move);
 
 #endif	/* FIFO_H */
 

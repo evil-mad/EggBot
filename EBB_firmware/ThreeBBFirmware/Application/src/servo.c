@@ -217,19 +217,8 @@ static void servo_Move(
 ///      gUseSolenoid = FALSE;
 ///    }
 
-  // Wait until we have at least one free spot in the queue, and add our new
-  // command in
-  WaitForRoomInQueue();
-
-  /// TODO: Move this to a queue module function?
-  // Now copy the values over into the queue element
-  Queue[queueIn].Command = COMMAND_SERVO_MOVE;
-  Queue[queueIn].Data.Servo.ServoPosition = position;
-  Queue[queueIn].Data.Servo.ServoRate = rate;
-  Queue[queueIn].Data.Servo.ServoPin = pin;
-  Queue[queueIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (uint32_t)delay;
-
-  queue_Inc();
+  // Put the stepper command on the motion queue
+  queue_AddServoCommandToQueue(position, pin, rate, HIGH_ISR_TICKS_PER_MS * (uint32_t)delay);
 }
 
 /*
