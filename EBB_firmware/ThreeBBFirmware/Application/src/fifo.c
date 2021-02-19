@@ -58,12 +58,14 @@
 /************** MODULE DEFINES ************************************************/
 
 // Maximum size of queue in elements
-#define QUEUE_SIZE          64
+#define DEFAULT_QUEUE_SIZE          64
+
+#define MAX_QUEUE_SIZE              100
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
 // How many elements of the queue will we be using by default?
-static volatile uint8_t QueueSize = QUEUE_SIZE;
+static volatile uint8_t QueueSize = DEFAULT_QUEUE_SIZE;
 // The next element of the queue to put a command into
 static volatile uint8_t QueueIn;
 // The queue command we are currently executing
@@ -72,7 +74,7 @@ static volatile uint8_t QueueOut;
 static volatile uint8_t QueueDepth;
 
 // The motion command queue
-static MoveCommandType Queue[COMMAND_QUEUE_LENGTH];
+static MoveCommandType Queue[MAX_QUEUE_SIZE];
 
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
@@ -85,7 +87,7 @@ static void incrementQueue(void);
 static void incrementQueue(void)
 {
   QueueIn++;
-  if (QueueIn >= COMMAND_QUEUE_LENGTH)
+  if (QueueIn >= MAX_QUEUE_SIZE)
   {
     QueueIn = 0;
   }
@@ -189,7 +191,7 @@ bool queue_PullNextCommand(MoveCommandType * move)
     *move = Queue[QueueOut];
 
     QueueOut++;
-    if (QueueOut >= COMMAND_QUEUE_LENGTH)
+    if (QueueOut >= MAX_QUEUE_SIZE)
     {
       QueueOut = 0;
     }

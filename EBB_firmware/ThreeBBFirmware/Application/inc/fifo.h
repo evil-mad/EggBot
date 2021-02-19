@@ -10,7 +10,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "HardwareProfile.h"
+#include "stepper.h"
 
 // Bits used within the OutByte to keep track of what direction and step bits need to be at the end of the ISR
 // (Not tied to physical pins at all)

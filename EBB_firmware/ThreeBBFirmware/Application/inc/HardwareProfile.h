@@ -61,11 +61,6 @@
   //  final application design.
 ///  #define CLOCK_FREQ        48000000
 
-  // How many stepper motors does this board support? (3BB has 3)
-  #define NUMBER_OF_STEPPERS      3
-
-  // Maximum size of motion command queue
-  #define COMMAND_QUEUE_LENGTH     2510
 
   // The ADC channel number for the SCALED_V+ input on 3BB
   // Allows us to see what V+ motor voltage has been apPlied to the board

@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// How many stepper motors does this board support? (3BB has 3)
+#define NUMBER_OF_STEPPERS      3
+
 /* These values hold the global step position of each axis */
 extern volatile int32_t globalStepCounter1;
 extern volatile int32_t globalStepCounter2;
