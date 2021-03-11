@@ -1,13 +1,65 @@
+/*********************************************************************
+ *
+ *                ThreeBotBoard Firmware
+ *
+ *********************************************************************
+ * FileName:        servo.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
 
-#include <p18cxxx.h>
+/*
+ * This module implements serial communication with the three TMC2209 stepper
+ * driver chips (for configuration and status).
+ */
+
+
+#include <stdio.h>
 #include "serial.h"
 #include "utility.h"
-#include <usart.h>
-#include <delays.h>
+#include "usart.h"
 #include "TMC2209.h"
 #include "HardwareProfile.h"
 #include "servo.h"
-#include "analog.h"
+//#include "analog.h"
 #include "parse.h"
 #include "isr.h"
 
@@ -51,7 +103,7 @@
 
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
-static const rom UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] = 
+static const uint8_t DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
 {
   GCONF,
   IHOLD_IRUN,
@@ -61,7 +113,7 @@ static const rom UINT8 DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
 
 // Table of 32 values to send to drivers on init (coordinate with addresses)
 // (Used with X and Y steppers - Motor1 and Motor2)
-static const rom UINT32 DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] = 
+static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
 {
   /* Set up default general config settings */
 
@@ -125,7 +177,7 @@ static const rom UINT32 DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
 
 // Table of 32 values to send to drivers on init (coordinate with addresses)
 // (Used for the pen up/down motor - Motor3)
-static const rom UINT32 DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] = 
+static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 {
   /* Set up default general config settings */
 
@@ -188,14 +240,17 @@ static const rom UINT32 DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 };
 
 // Count the total number of framing errors seen
-static UINT8 FramingErrorCounter;
+static uint8_t FramingErrorCounter;
 // Count the total number of overrun errors seen
-static UINT8 OverrunErrorCounter;
+static uint8_t OverrunErrorCounter;
 
-void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data);
-UINT32 ReadDatagram(UINT8 addr, UINT8 reg);
-void CalcCRC(UINT8* datagram, UINT8 datagramLength);
-void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask);
+void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data);
+uint32_t ReadDatagram(uint8_t addr, uint8_t reg);
+void CalcCRC(uint8_t* datagram, uint8_t datagramLength);
+void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask);
+
+
+#if 0
 
 void CalcCRC(UINT8* datagram, UINT8 datagramLength)
 {
@@ -587,3 +642,5 @@ void ParseSSCommand(void)
   
   print_ack();
 }
+
+#endif

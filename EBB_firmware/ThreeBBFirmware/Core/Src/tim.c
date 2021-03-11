@@ -33,9 +33,17 @@ TIM_HandleTypeDef htim8;
 /* TIM2 init function */
 void MX_TIM2_Init(void)
 {
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -57,15 +65,26 @@ void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 /* TIM3 init function */
 void MX_TIM3_Init(void)
 {
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
 
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 51;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -99,21 +118,31 @@ void MX_TIM3_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
   HAL_TIM_MspPostInit(&htim3);
 
 }
 /* TIM4 init function */
 void MX_TIM4_Init(void)
 {
+
+  /* USER CODE BEGIN TIM4_Init 0 */
+
+  /* USER CODE END TIM4_Init 0 */
+
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
 
+  /* USER CODE BEGIN TIM4_Init 1 */
+
+  /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 51;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -147,24 +176,33 @@ void MX_TIM4_Init(void)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.Pulse = 0;
   if (HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM4_Init 2 */
+
+  /* USER CODE END TIM4_Init 2 */
   HAL_TIM_MspPostInit(&htim4);
 
 }
 /* TIM6 init function */
 void MX_TIM6_Init(void)
 {
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 0;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -180,16 +218,27 @@ void MX_TIM6_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
 
 }
 /* TIM8 init function */
 void MX_TIM8_Init(void)
 {
+
+  /* USER CODE BEGIN TIM8_Init 0 */
+
+  /* USER CODE END TIM8_Init 0 */
+
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
+  /* USER CODE BEGIN TIM8_Init 1 */
+
+  /* USER CODE END TIM8_Init 1 */
   htim8.Instance = TIM8;
   htim8.Init.Prescaler = 51;
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -245,6 +294,9 @@ void MX_TIM8_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN TIM8_Init 2 */
+
+  /* USER CODE END TIM8_Init 2 */
   HAL_TIM_MspPostInit(&htim8);
 
 }

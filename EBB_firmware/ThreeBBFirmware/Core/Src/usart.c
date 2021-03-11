@@ -32,6 +32,13 @@ UART_HandleTypeDef huart1;
 void MX_LPUART1_UART_Init(void)
 {
 
+  /* USER CODE BEGIN LPUART1_Init 0 */
+
+  /* USER CODE END LPUART1_Init 0 */
+
+  /* USER CODE BEGIN LPUART1_Init 1 */
+
+  /* USER CODE END LPUART1_Init 1 */
   hlpuart1.Instance = LPUART1;
   hlpuart1.Init.BaudRate = 209700;
   hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -58,6 +65,9 @@ void MX_LPUART1_UART_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN LPUART1_Init 2 */
+
+  /* USER CODE END LPUART1_Init 2 */
 
 }
 /* USART1 init function */
@@ -65,6 +75,13 @@ void MX_LPUART1_UART_Init(void)
 void MX_USART1_UART_Init(void)
 {
 
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
   huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
@@ -92,6 +109,9 @@ void MX_USART1_UART_Init(void)
   {
     Error_Handler();
   }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
