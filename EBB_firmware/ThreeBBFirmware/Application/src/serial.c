@@ -240,9 +240,9 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 };
 
 // Count the total number of framing errors seen
-static uint8_t FramingErrorCounter;
+/// static uint8_t FramingErrorCounter;
 // Count the total number of overrun errors seen
-static uint8_t OverrunErrorCounter;
+/// static uint8_t OverrunErrorCounter;
 
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data);
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg);
@@ -250,13 +250,12 @@ void CalcCRC(uint8_t* datagram, uint8_t datagramLength);
 void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask);
 
 
-#if 0
 
-void CalcCRC(UINT8* datagram, UINT8 datagramLength)
+void CalcCRC(uint8_t * datagram, uint8_t datagramLength)
 {
-  int i,j;
-  UINT8* crc = datagram + (datagramLength-1); // CRC located in last byte of message
-  UINT8 currentByte;
+  uint8_t i,j;
+  uint8_t * crc = datagram + (datagramLength-1); // CRC located in last byte of message
+  uint8_t currentByte;
   *crc = 0;
   // Execute for all bytes of a message
   for (i=0; i<(datagramLength-1); i++) 
@@ -277,9 +276,9 @@ void CalcCRC(UINT8* datagram, UINT8 datagramLength)
   } //
 }
 
-void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask)
+void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask)
 {
-  UINT8 i;
+  uint8_t i;
   
   // We will try writing it up to 10 times before giving up
   for(i=0; i < 10; i++)
@@ -298,10 +297,10 @@ void WriteOTP(UINT8 addr, UINT32 data, UINT32 mask)
 
 
 /* Create a 63 bit long datagram to send out to stepper drivers */
-void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
+void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
 {
-  UINT8 datagram[8];
-  UINT8 i;
+  uint8_t datagram[8];
+  uint8_t i;
   
   datagram[0] = 0x05;
   if (addr > 3)
@@ -319,10 +318,11 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
   // Send the full 64 bits out
   for (i=0; i < 8; i++)
   {
-    TXREG2 = datagram[i];
-    while(!TXSTA2bits.TRMT);
+//    TXREG2 = datagram[i];
+//    while(!TXSTA2bits.TRMT);
   }
 }
+
 
 /* Create a 32 bit long datagram to send out to stepper drivers requesting a
  * read of a particular register. Then read in the response from the driver.
@@ -330,15 +330,15 @@ void WriteDatagram(UINT8 addr, UINT8 reg, UINT32 data)
  * within that time, then the driver is not powered or something else is wrong
  * and a value of 0x0000000 will be returned.
  */
-UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
+uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 {
-  UINT8 datagram[8];
-  UINT8 i, j;
+  uint8_t datagram[8];
+  uint8_t i, j;
   union {
-    UINT32  word;
-    UINT8   byte[4];
+    uint32_t  word;
+    uint8_t   byte[4];
   } retval;
-  volatile UINT8 dummy;
+///  volatile uint8_t dummy;
   retval.word = 0;
   
   datagram[0] = 0x05;
@@ -357,6 +357,7 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   // we need to wait for the final byte to completely be transmitted before
   // reading in the dummy reads to 'eat' all four bytes we sent out.
   // The NOPs are required according to the datasheet before reading TX2IF
+#if 0
   TXREG2 = datagram[0];
   Nop();
   Nop();
@@ -378,6 +379,7 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   dummy = RCREG2;
   dummy = RCREG2;
   RCSTA2bits.CREN = 1;
+#endif
 
   // Zero out the datagram, as we'll reuse it for the reply
   for (i=0; i < 8; i++)
@@ -396,6 +398,7 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
   i = 0;
   for (j = 0; j < 35; j++)
   {
+#if 0
     // Check for framing errors or overrun errors and count them
     if (RCSTA2bits.FERR)
     {
@@ -443,10 +446,14 @@ UINT32 ReadDatagram(UINT8 addr, UINT8 reg)
     }
 
     Delay10TCYx(4);
+#endif
+
   }
 
   return retval.word;
 }
+
+#if 0
 
 void SerialTurnOnTX(void)
 {
