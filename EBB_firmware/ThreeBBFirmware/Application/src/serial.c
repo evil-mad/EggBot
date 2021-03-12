@@ -53,13 +53,13 @@
 
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "serial.h"
 #include "utility.h"
 #include "usart.h"
 #include "TMC2209.h"
 #include "HardwareProfile.h"
 #include "servo.h"
-//#include "analog.h"
 #include "parse.h"
 #include "isr.h"
 
@@ -240,9 +240,9 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 };
 
 // Count the total number of framing errors seen
-/// static uint8_t FramingErrorCounter;
+ static uint8_t FramingErrorCounter;
 // Count the total number of overrun errors seen
-/// static uint8_t OverrunErrorCounter;
+ static uint8_t OverrunErrorCounter;
 
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data);
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg);
@@ -453,20 +453,19 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
   return retval.word;
 }
 
-#if 0
 
 void SerialTurnOnTX(void)
 {
   // Turn on the TX pin
-  TXSTA2bits.TXEN = 1;
-  Delay10TCYx(10);
+//  TXSTA2bits.TXEN = 1;
+//  Delay10TCYx(10);
 }
 
 void SerialTurnOffTX(void)
 {
   // Turn off the TX pin
-  Delay10TCYx(10);
-  TXSTA2bits.TXEN = 0;  
+//  Delay10TCYx(10);
+//  TXSTA2bits.TXEN = 0;
 }
 
 /*
@@ -475,8 +474,8 @@ void SerialTurnOffTX(void)
  */
 void SerialInitDrivers(void)
 {
-  UINT8 i;
-  UINT32 reg;
+  uint8_t i;
+  uint32_t reg;
   
   for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
   {
@@ -484,11 +483,11 @@ void SerialInitDrivers(void)
     // stepper drivers. This will need to change if we don't want exactly the
     // same values going to all three.
     WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-    Delay100TCYx(20);
+///    Delay100TCYx(20);
     WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-    Delay100TCYx(20);
+///    Delay100TCYx(20);
     WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
-    Delay100TCYx(20);
+///    Delay100TCYx(20);
   }
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 
@@ -510,28 +509,28 @@ void SerialInitDrivers(void)
 void SerialInit(void)
 {
   // Start out by calling for a driver init
-  DriversNeedInit = TRUE;
+  DriversNeedInit = true;
     
   // Set up initial states
-  LATCbits.LATC0 = 1;
-  LATCbits.LATC1 = 0;
+///  LATCbits.LATC0 = 1;
+///  LATCbits.LATC1 = 0;
   // Set up I/O directions
-  TRISCbits.TRISC0 = INPUT_PIN;
-  TRISCbits.TRISC1 = OUTPUT_PIN;
+///  TRISCbits.TRISC0 = INPUT_PIN;
+///  TRISCbits.TRISC1 = OUTPUT_PIN;
 
   // Set up EUSART2 RX on pin RP11
-  RPINR16 = 11; /// TODO: Are these constants defined in MCHP header files?
+///  RPINR16 = 11; /// TODO: Are these constants defined in MCHP header files?
   // Set up EUSART2 TX on pin RP12
-  RPOR12 = 5;
+///  RPOR12 = 5;
   
-  TXSTA2bits.BRGH = 1;
-  RCSTA2bits.CREN = 1;
+///  TXSTA2bits.BRGH = 1;
+///  RCSTA2bits.CREN = 1;
   // Let's make the baud rate about 115200
-  BAUDCON2bits.BRG16 = 1;
-  SPBRGH2 = 0;
-  SPBRG2 = 103;
+///  BAUDCON2bits.BRG16 = 1;
+///  SPBRGH2 = 0;
+///  SPBRG2 = 103;
   // And finally turn the UART on
-  RCSTA2bits.SPEN = 1;
+///  RCSTA2bits.SPEN = 1;
 }
 
 /*
@@ -547,9 +546,9 @@ void SerialInit(void)
  */
 void ParseDRCommand(void)
 {
-  UINT8 driverNumber = 0;
-  UINT8 registerAddress = 0;
-  UINT32 registerValue = 0;
+  uint8_t driverNumber = 0;
+  uint8_t registerAddress = 0;
+  uint32_t registerValue = 0;
 
   // Extract each of the values.
   extract_number (kUINT8, &driverNumber, kOPTIONAL);
@@ -577,7 +576,7 @@ void ParseDRCommand(void)
   registerValue = ReadDatagram(driverNumber, registerAddress);
   SerialTurnOffTX();
 
-  printf((far rom char *)"DR,%08lX\n", registerValue);
+  printf("DR,%08lX\n", registerValue);
 
   print_ack();
 }
@@ -596,9 +595,9 @@ void ParseDRCommand(void)
  */
 void ParseDWCommand(void)
 {
-  UINT8 driverNumber = 0;
-  UINT8 registerAddress = 0;
-  UINT32 registerValue = 0;
+  uint8_t driverNumber = 0;
+  uint8_t registerAddress = 0;
+  uint32_t registerValue = 0;
 
   // Extract each of the values.
   extract_number (kUINT8, &driverNumber, kREQUIRED);
@@ -627,7 +626,7 @@ void ParseDWCommand(void)
   WriteDatagram(driverNumber, registerAddress, registerValue);
   SerialTurnOffTX();
   
-  printf((far rom char *)"DW\n");
+  printf("DW\n");
 
   print_ack();
 }
@@ -643,11 +642,9 @@ void ParseDWCommand(void)
  */
 void ParseSSCommand(void)
 {
-  printf((far rom char *)"SS,%u,%u\n", FramingErrorCounter, OverrunErrorCounter);
+  printf("SS,%u,%u\n", FramingErrorCounter, OverrunErrorCounter);
   FramingErrorCounter = 0;
   OverrunErrorCounter = 0;
   
   print_ack();
 }
-
-#endif
