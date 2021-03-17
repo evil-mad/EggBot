@@ -33,7 +33,6 @@ unsigned long NodeCount;
 char Layer;
 BOOL ButtonPushed;
 BOOL UseAltPause;
-unsigned char QC_ms_timer;
 UINT StoredEngraverPower;
 
 // Stepper (mode) Configure command

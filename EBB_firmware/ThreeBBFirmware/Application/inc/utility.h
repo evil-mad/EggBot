@@ -88,7 +88,7 @@
 
 extern const char st_version[];
 
-extern volatile bool FIFONeedsInit;
+extern volatile bool queue_NeedsInit;
 // Flag set from ISR indicating that we need to initialize the 2209s
 extern volatile bool DriversNeedInit;
 
@@ -104,7 +104,7 @@ void utility_SysTick(void);
 #if defined(DEBUG)
 void ParseSHCommand(void);    // SH print Stack Highwater
 #endif
-void utilityRun(void);  
+void utility_Run(void);
 #if defined(DEBUG)
 void UtilityFillStack(void);
 void UtilityPrintStackHighWater(void);

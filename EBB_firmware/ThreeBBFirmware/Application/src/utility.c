@@ -1,15 +1,12 @@
-//#include "usb_config.h"
-//#include "Usb\usb.h"
-//#include "Usb\usb_function_cdc.h"
 //#include "HardwareProfile.h"
+#include "main.h"
 #include "utility.h"
-//#include <flash.h>
 #include "parse.h"
-//#include "isr.h"
+#include "fifo.h"
+#include "isr.h"
 //#include "analog.h"
-//#include "serial.h"
+#include "serial.h"
 #include "servo.h"
-//#include <delays.h>
 
 
 #if 0
@@ -26,7 +23,7 @@ const char st_version[] = {"3BB Firmware Version 3.0.0\n"};
 // Flag set from ISR indicating that we need to initialize the 2209s
 volatile bool DriversNeedInit;
 
-volatile bool FIFONeedsInit;
+volatile bool queue_NeedsInit;
 
 #if 0
 /******************************************************************************
@@ -405,6 +402,8 @@ void ParseQTCommand()
   print_ack();
 }
 
+#endif
+
 /*
  * Called from main loop every time through. Main task here is to check to see
  * if the stepper drivers just came on line (i.e. were just powered by 12V or
@@ -415,33 +414,36 @@ void ParseQTCommand()
  * and needs to  be initialized. Calling SerialInitDrivers() clears this bit
  * so we don't do it over and over. 
  */
-void utilityRun(void)
+void utility_Run(void)
 {
-  if (FIFONeedsInit)
+  if (queue_NeedsInit)
   {
-    fifo_Init();
-    FIFONeedsInit = FALSE;
+    queue_Init();
+    queue_NeedsInit = false;
   }
 
-  if (DriversNeedInit && !DriverInitDelayMS && ScalaedVPlusIO)
+///  if (DriversNeedInit && !DriverInitDelayMS && ScalaedVPlusIO)
+  if (DriversNeedInit && !DriverInitDelayMS)
   {
-    SerialTurnOnTX();
+    serial_TurnOnTX();
     
-    DriversNeedInit = FALSE;
-    SerialInitDrivers();
-    Delay10KTCYx(10);     // Wait about 10 ms before enableing drivers
+    DriversNeedInit = false;
+    serial_InitDrivers();
+    HAL_Delay(10);     // Wait about 10 ms before enabling drivers
     // Enable the drivers by setting their enable pin low
     // Note that we override this enable pin to leave Motor1 and Motor2
-    // disabled via UART values in SerialInitDrivers because we don't want 
+    // disabled via UART values in serial_InitDrivers because we don't want
     // them to move or have power right after being initialized. However,
     // we must set EnableIO low here so that the servo stepper can begin to
     // move home.
-    EnableIO = 0;      
-    servoPenHome();       // The drivers were limped, so home the pen
+///    EnableIO = 0;
+///    servoPenHome();       // The drivers were limped, so home the pen
     
-    SerialTurnOffTX();
+    serial_TurnOffTX();
   }
 }
+
+#if 0
 
 #if defined(DEBUG)
 
@@ -488,6 +490,35 @@ void utility_SysTick(void)
 {
   servo_ProcessTargets();
   servo_CheckPenServoPowerTimeout();
+
+  // Global delay (for short local delays in functions)
+  if (GlobalDelayMS)
+  {
+    GlobalDelayMS--;
+  }
+
+  // Global delay after DIAG rising edge before we take action in utlity_run())
+  if (DriverInitDelayMS)
+  {
+    DriverInitDelayMS--;
+  }
+  /// TODO: Refactor this into something nicer?
+#if defined(BOARD_EBB)
+  // Software timer for RCServo power control
+  if (gRCServoPoweroffCounterMS)
+  {
+    gRCServoPoweroffCounterMS--;
+    // If we just timed out, then shut off RC Servo power
+    if (gRCServoPoweroffCounterMS == 0)
+    {
+      RCServoPowerIO = RCSERVO_POWER_OFF;
+    }
+  }
+#endif
+
+  // Keep track of global time
+  TickCounterMS++;
+
 }
 
 

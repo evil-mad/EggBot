@@ -288,7 +288,7 @@ void low_ISR(void)
 //    {
       // We just got a rising edge, power has been applied, so init the drivers
       DriversNeedInit = TRUE;
-      queueNeedsInit = TRUE;
+      queue_NeedsInit = TRUE;
 //      INTCON2bits.INTEDG1 = 0;
 //    }
 //    else
@@ -305,97 +305,6 @@ void low_ISR(void)
     // Clear the interrupt 
     PIR3bits.TMR4IF = 0;
 
-    // Handle RC servo pulse generation (for next pulse/channel)
-    // Always increment the gRCServo2msCounter
-    gRC2msCounter++;
-
-    if (gRC2msCounter >= gRC2SlotMS)
-    {
-      // Clear the RC2 ms counter
-      gRC2msCounter = 0;
-
-      // Turn off the PPS routing to the 'old' pin
-      *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 0;
-
-      // Turn off TIMER3 for now
-      T3CONbits.TMR3ON = 0;
-
-      // And clear TIMER3 to zero
-      TMR3H = 0;
-      TMR3L = 0;
-
-      // And always advance the main pointer
-      gRC2Ptr++;
-      if (gRC2Ptr >= gRC2Slots)
-      {
-        gRC2Ptr = 0;
-      }
-
-      // If the value is zero, we do nothing to this pin
-      // otherwise, prime it for sending a pulse
-      if (gRC2Value[gRC2Ptr] != 0)
-      {
-        // Now, to move 'slowly', we update gRC2Value[] by
-        // seeing if we are at gRC2Target[] yet. If not, then
-        // we add (or subtract) gRC2Rate[] to try and get there.
-        if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
-        {
-          // If the rate is zero, then we always move instantly
-          // to the target.
-          if (gRC2Rate[gRC2Ptr] == 0)
-          {
-            gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-          }
-          else
-          {
-            // Otherwise, add gRC2Rate[] each time through until we
-            // get to our desired pulse width.
-            RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
-            if (RC2Difference > 0)
-            {
-              if (RC2Difference > gRC2Rate[gRC2Ptr])
-              {
-                gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
-              }
-              else
-              {
-                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-              }
-            }
-            else
-            {
-              if (-RC2Difference > gRC2Rate[gRC2Ptr])
-              {
-                gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
-              }
-              else
-              {
-                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-              }
-            }
-
-          }
-        }
-
-        // Set up the PPS routing for the CCP2
-        *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 18; // 18 = CCP2
-
-        // Disable interrupts (high)
-        INTCONbits.GIEH = 0;
-
-        // Load up the new compare time
-        CCPR2H = gRC2Value[gRC2Ptr] >> 8;
-        CCPR2L = gRC2Value[gRC2Ptr] & 0xFF;
-        CCP2CONbits.CCP2M = 0b0000;
-        CCP2CONbits.CCP2M = 0b1001;
-
-        // Turn TIMER3 back on
-        T3CONbits.TMR3ON = 1;
-
-        // Re-enable interrupts
-        INTCONbits.GIEH = 1;
-      }
-    }
 #if 0
     /// TODO: IS this necessary to have in ISR?
     // Only start analog conversions if there are channels enabled
@@ -478,12 +387,6 @@ void low_ISR(void)
           if (i==3) PORTBbits.RB3 = 0;
         }
       }
-    }
-
-    // Software timer for QC command
-    if (QC_ms_timer)
-    {
-      QC_ms_timer--;
     }
     
     // Global delay (for short local delays in functions)

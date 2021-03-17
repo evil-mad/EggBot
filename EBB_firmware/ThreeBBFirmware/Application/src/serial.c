@@ -300,7 +300,6 @@ void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask)
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
 {
   uint8_t datagram[8];
-  uint8_t i;
   
   datagram[0] = 0x05;
   if (addr > 3)
@@ -316,11 +315,7 @@ void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
   CalcCRC(&datagram[0], 8);
   
   // Send the full 64 bits out
-  for (i=0; i < 8; i++)
-  {
-//    TXREG2 = datagram[i];
-//    while(!TXSTA2bits.TRMT);
-  }
+  HAL_UART_Transmit(&huart1, datagram, 8, 1000);
 }
 
 
@@ -454,14 +449,14 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 }
 
 
-void SerialTurnOnTX(void)
+void serial_TurnOnTX(void)
 {
   // Turn on the TX pin
 //  TXSTA2bits.TXEN = 1;
 //  Delay10TCYx(10);
 }
 
-void SerialTurnOffTX(void)
+void serial_TurnOffTX(void)
 {
   // Turn off the TX pin
 //  Delay10TCYx(10);
@@ -472,7 +467,7 @@ void SerialTurnOffTX(void)
  * Walk through each of the values in the table that we want to send to the
  * drivers, and send them out, with a little delay in between.
  */
-void SerialInitDrivers(void)
+void serial_InitDrivers(void)
 {
   uint8_t i;
   uint32_t reg;
@@ -483,11 +478,11 @@ void SerialInitDrivers(void)
     // stepper drivers. This will need to change if we don't want exactly the
     // same values going to all three.
     WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-///    Delay100TCYx(20);
+    HAL_Delay(1);
     WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-///    Delay100TCYx(20);
+    HAL_Delay(1);
     WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
-///    Delay100TCYx(20);
+    HAL_Delay(1);
   }
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 
@@ -506,7 +501,7 @@ void SerialInitDrivers(void)
  * Then send the first set of UART commands which set up the drivers
  * with the options we need to have at boot time for things to run.
  * The UART RX pin is on RP11 (RC0), and the TX pin is RP12 (RC1). */
-void SerialInit(void)
+void serial_Init(void)
 {
   // Start out by calling for a driver init
   DriversNeedInit = true;
@@ -544,7 +539,7 @@ void SerialInit(void)
  * "DR,<register_value><CR>"
  * <register_value> is a 32 bit unsigned int expressed in hex with 0x on the front
  */
-void ParseDRCommand(void)
+void serial_DRCommand(void)
 {
   uint8_t driverNumber = 0;
   uint8_t registerAddress = 0;
@@ -572,9 +567,9 @@ void ParseDRCommand(void)
     return;
   }
 
-  SerialTurnOnTX();
+  serial_TurnOnTX();
   registerValue = ReadDatagram(driverNumber, registerAddress);
-  SerialTurnOffTX();
+  serial_TurnOffTX();
 
   printf("DR,%08lX\n", registerValue);
 
@@ -593,7 +588,7 @@ void ParseDRCommand(void)
  * This command replies with:
  * "DW,<CR>"
  */
-void ParseDWCommand(void)
+void serial_DWCommand(void)
 {
   uint8_t driverNumber = 0;
   uint8_t registerAddress = 0;
@@ -622,9 +617,9 @@ void ParseDWCommand(void)
     return;
   }
 
-  SerialTurnOnTX();
+  serial_TurnOnTX();
   WriteDatagram(driverNumber, registerAddress, registerValue);
-  SerialTurnOffTX();
+  serial_TurnOffTX();
   
   printf("DW\n");
 
@@ -640,7 +635,7 @@ void ParseDWCommand(void)
  * "SS,<FramingErrorCounter>,<OverrunErrorCounter><CR>"
  * And then resets both values.
  */
-void ParseSSCommand(void)
+void serial_SSCommand(void)
 {
   printf("SS,%u,%u\n", FramingErrorCounter, OverrunErrorCounter);
   FramingErrorCounter = 0;

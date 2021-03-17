@@ -54,6 +54,8 @@
 #include "isr.h"
 #include "debug.h"
 #include "servo.h"
+#include "serial.h"
+#include "utility.h"
 
 /* USER CODE END Includes */
 
@@ -138,8 +140,14 @@ int main(void)
   RetargetInit();
   DebugInit();
   servo_Init();
+  serial_Init();
   /// TODO: Add this to stepper.c init?
   HAL_TIM_Base_Start_IT(&htim6);
+
+  // Just temporary
+  DriversNeedInit = true;
+  queue_NeedsInit = true;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,6 +156,7 @@ int main(void)
   {
 ///    DEBUG_G1_SET();
 ///    DEBUG_G1_RESET();
+    utility_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

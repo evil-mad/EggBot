@@ -9,7 +9,7 @@
 #include "servo.h"
 //#include "ebb.h"
 //#include "analog.h"
-//#include "serial.h"
+#include "serial.h"
 #include "usbd_cdc_if.h"
 
 // This byte has each of its bits used as a separate error flag
@@ -75,12 +75,12 @@ const parse_t commandTable[] =
 //  {'S', 'T', ParseSTCommand},
 //  {'Q', 'T', ParseQTCommand},
 //  {'R', 'B', parseRBCommand},
-//  {'S', 'S', ParseSSCommand},
   {'Q', 'R', servo_QRCommand},
   {'S', 'R', servo_SRCommand},
 //  {'H', 'M', parseHMCommand},
-//  {'D', 'R', ParseDRCommand},
-//  {'D', 'W', ParseDWCommand},
+  {'D', 'R', serial_DRCommand},
+  {'D', 'W', serial_DWCommand},
+  {'S', 'S', serial_SSCommand},
 #if defined(DEBUG)
 //  {'S', 'H', ParseSHCommand},
 #endif
