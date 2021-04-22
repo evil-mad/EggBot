@@ -243,6 +243,7 @@ ul.no_bullets {
           <li><a href="#PO">PO</a> &mdash; Pin Output</li>
           <li><a href="#QB">QB</a> &mdash; Query Button</li>
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
+          <li><a href="#QE">QE</a> &mdash; Query motor Enables and microstep resolutions</li>
           <li><a href="#QG">QG</a> &mdash; Query General</li>
           <li><a href="#QL">QL</a> &mdash; Query Layer</li>
           <li><a href="#QM">QM</a> &mdash; Query Motors</li>
@@ -1392,6 +1393,60 @@ ul.no_bullets {
             <p>
               Note also that this command only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
             </p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+
+        <h4><a name="QE"></a>"QE" &mdash; Query motor Enables and microstep resolutions</h4>
+  
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              Reads the current state of the motor enable pins and the microstep resolution pins. It then returns two values which encode the motor enable/disable
+              state and (if enabled) microstep resolution.
+            </p>
+            <p>
+              There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the
+              two values returned by this command will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
+              never show that the two motors are both enabled and have different microstep resolutions.
+            </p>
+            <p>The two returned values are:</p>
+            <ul>
+              <li>
+                <i>MOTOR1_STATE</i>
+                <p>
+                <ul>
+                  <li>0: Motor 1 is disabled</li>
+                  <li>1: Motor 1 is enabled and is set to full step</li>
+                  <li>2: Motor 1 is enabled and is set to 1/2 steps</li>
+                  <li>4: Motor 1 is enabled and is set to 1/4 steps</li>
+                  <li>8: Motor 1 is enabled and is set to 1/8 steps</li>
+                  <li>16: Motor 1 is enabled and is set to 1/16 steps</li>
+                </ul>
+                </p>
+              </li>
+              <li>
+                <i>MOTOR2_STATE</i>
+                <p>Same as for MOTOR1_STATE but for Motor 2.
+                </p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <p>Both motors are enabled and set to 1/16th microsteps.</p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <p>Motor 1 is disabled and motor 2 is enabled an set to 1/4 steps.</p>
           </li>
         </ul>
 
