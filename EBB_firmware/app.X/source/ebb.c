@@ -258,6 +258,8 @@
 //                  EM command now always clears accumulators
 //                  Reduced effective pulse width for step pulses down to
 //                    between 1.6 and 2.3 uS.
+// 2.8.0 04/22/21 - Issue 151: Added QE command to return state of motor enables
+//                    and their microstep resolution
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -2147,6 +2149,71 @@ void parse_ES_packet(void)
 void parse_QP_packet(void)
 {
 	printf((far rom char *)"%d\n\r", PenState);
+
+	print_ack();
+}
+
+// Query motor Enables and resolution
+// Usage: QE<CR>
+// Returns: <motor1_state>,<motor2_state><CR>OK<CR>
+// Where <motor1_state> and <motor2_state> are one of the following values:
+// 0 = Motor is disabled
+// 1 = Motor is enabled and step resolution is full steps
+// 2 = Motor is enabled and step resolution is 1/2 steps
+// 4 = Motor is enabled and step resolution is 1/4 steps
+// 8 = Motor is enabled and step resolution is 1/8 steps
+// 16 = Motor is enabled and step resolution is 1/16 steps
+void parse_QE_packet(void)
+{
+  UINT8 motor1_state = 0;
+  UINT8 motor2_state = 0;
+  UINT8 temp;
+  
+  if (MS1_IO_PORT == 0 && MS2_IO_PORT == 0 && MS3_IO_PORT == 0)
+  {
+    temp = 1;
+  }
+  else if (MS1_IO_PORT == 1 && MS2_IO_PORT == 0 && MS3_IO_PORT == 0)
+  {
+    temp = 2;
+  }
+  else if (MS1_IO_PORT == 0 && MS2_IO_PORT == 1 && MS3_IO_PORT == 0)
+  {
+    temp = 4;
+  }
+  else if (MS1_IO_PORT == 1 && MS2_IO_PORT == 1 && MS3_IO_PORT == 0)
+  {
+    temp = 8;
+  }
+  else
+  {
+    temp = 16;
+  }
+  
+  if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+  {
+    if (Enable1IO_PORT == ENABLE_MOTOR)
+    {
+      motor1_state = temp;
+    }
+    if (Enable2IO_PORT == ENABLE_MOTOR)
+    {
+      motor2_state = temp;
+    }
+  }
+  else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+  {
+    if (Enable1AltIO_PORT == ENABLE_MOTOR)
+    {
+      motor1_state = temp;
+    }
+    if (Enable2AltIO_PORT == ENABLE_MOTOR)
+    {
+      motor2_state = temp;
+    }
+  }
+
+	printf((far rom char *)"%d,%d\n\r", motor1_state, motor2_state);
 
 	print_ack();
 }
