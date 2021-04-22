@@ -13,6 +13,10 @@ ThreeBeeBee (3BB) Readme.txt file
   * All strings will be terminated with just \n
   * Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
   * Add support for solenoid output (?) tied to pen, but what about z-axis stepper?
+
+  -- COMMANDS --
+  * Add command "QE" (for Query Enable Motor) which would return the current state of each motor driver's enable (either the actual enable pin or the enable bit in the register), as well as the
+    current resolution of each driver.
   
   -- BOARD --
   * Switch USB connector to USB C
