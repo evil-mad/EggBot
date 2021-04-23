@@ -1360,6 +1360,12 @@ void parse_packet(void)
 			parse_QP_packet ();
 			break;
 		}
+		case ('Q' * 256) + 'E':
+		{
+			// QE for Query motor Enable and resolution
+			parse_QE_packet ();
+			break;
+		}
 		case ('E' * 256) + 'M':
 		{
 			// EM for enable motors

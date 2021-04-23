@@ -122,28 +122,35 @@
 	#define RefRA0_IO_TRIS		TRISAbits.TRISA0
 
 	/** P E N   U P  D O W N *******************************************/
-	#define PenUpDownIO			LATBbits.LATB4
-    #define PEN_UP_DOWN_RPN     7
+	#define PenUpDownIO       LATBbits.LATB4
+  #define PEN_UP_DOWN_RPN   7
 	#define PenUpDownIO_TRIS	TRISBbits.TRISB4
 
 	/** D R I V E R   E N A B L E **************************************/
-	#define Enable1IO			LATEbits.LATE0
+	#define Enable1IO         LATEbits.LATE0
+	#define Enable1IO_PORT    PORTEbits.RE0
 	#define Enable1IO_TRIS		TRISEbits.TRISE0
-	#define Enable2IO			LATCbits.LATC1
+	#define Enable2IO         LATCbits.LATC1
+	#define Enable2IO_PORT    PORTCbits.RC1
 	#define Enable2IO_TRIS		TRISCbits.TRISC1
     // Alternate enables for external drivers
-	#define Enable1AltIO		LATDbits.LATD1
+	#define Enable1AltIO      LATDbits.LATD1
+	#define Enable1AltIO_PORT	PORTDbits.RD1
 	#define Enable1AltIO_TRIS	TRISDbits.TRISD1
-	#define Enable2AltIO		LATAbits.LATA1
+	#define Enable2AltIO      LATAbits.LATA1
+	#define Enable2AltIO_PORT	PORTAbits.RA1
 	#define Enable2AltIO_TRIS	TRISAbits.TRISA1
 
 	/** D R I V E R   M I C R O S T E P ********************************/
-	#define MS1_IO				LATEbits.LATE2
-	#define MS1_IO_TRIS			TRISEbits.TRISE2
-	#define MS2_IO				LATEbits.LATE1
-	#define MS2_IO_TRIS			TRISEbits.TRISE1
-	#define MS3_IO				LATAbits.LATA6
-	#define MS3_IO_TRIS			TRISAbits.TRISA6
+	#define MS1_IO            LATEbits.LATE2
+	#define MS1_IO_PORT       PORTEbits.RE2
+	#define MS1_IO_TRIS       TRISEbits.TRISE2
+	#define MS2_IO            LATEbits.LATE1
+	#define MS2_IO_PORT       PORTEbits.RE1
+	#define MS2_IO_TRIS       TRISEbits.TRISE1
+	#define MS3_IO            LATAbits.LATA6
+	#define MS3_IO_PORT       PORTAbits.RA6
+	#define MS3_IO_TRIS       TRISAbits.TRISA6
 
 	/** S T E P  A N D  D I R ******************************************/
 	#define Step1IO				LATDbits.LATD6
