@@ -164,6 +164,7 @@ void parse_SC_packet(void);
 void parse_SP_packet(void);
 void parse_TP_packet(void);
 void parse_QP_packet(void);
+void parse_QE_packet(void);
 void parse_SN_packet(void);
 void parse_QN_packet(void);
 void parse_NI_packet(void);
