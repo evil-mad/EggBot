@@ -78,7 +78,8 @@ typedef enum
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
   COMMAND_SE,
-  COMMAND_MOTOR_MOVE_TIMED
+  COMMAND_MOTOR_MOVE_TIMED,
+  COMMAND_EM
 } CommandType;
 
 // Byte union used for accumulator (unsigned))
