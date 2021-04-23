@@ -622,7 +622,7 @@ ul.no_bullets {
         <h4><a name="ES"></a>"ES" &mdash; E Stop</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>ES&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span><br />
             <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
@@ -632,6 +632,9 @@ ul.no_bullets {
             <span style="font-weight: bold;">Description:</span>
             <p>
               Use this command to abort any in-progress motor move (SM) Command. This command will also delete any motor move command (SM) from the FIFO. It will immediately stop the motors, but leave them energized.
+            </p>
+            <p>
+              For versions v2.8.0 and above there is an optional parameter <code>DisableMotors</code>. If <code>DisableMotors</code> is set to 1, then this command will not only stop all motion but will also disable both stepper motors.
             </p>
             <p>Returned values:</p>
             <ul>
@@ -655,18 +658,28 @@ ul.no_bullets {
               <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>  
-            Added in v2.2.7 
-            <p>
-              Prior to v2.2.9, this command will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
-            </p>
-            <p>Returned values:</p>
+            <span style="font-weight: bold;">Version History:</span>
             <ul>
               <li>
-                <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                <p>v2.8.0</p>
+                <p>
+                  In versions v2.8.0 and beyond, the optional <code>DisableMotors</code> parameter is accepted.
+                </p>
               </li>
               <li>
-                <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                <p>Added in v2.2.7</p>
+                <p>
+                  Prior to v2.2.9, this command will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
+                </p>
+                <p>Returned values:</p>
+                <ul>
+                  <li>
+                    <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                  <li>
+                    <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>

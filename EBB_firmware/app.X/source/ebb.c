@@ -260,6 +260,9 @@
 //                    between 1.6 and 2.3 uS.
 // 2.8.0 04/22/21 - Issue 151: Added QE command to return state of motor enables
 //                    and their microstep resolution
+//                  Issue 153: Add optional parameter to ES command to disable
+//                    motors.
+//                  Fix bug in ES command that didn't send return packet
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -2073,10 +2076,14 @@ static void process_SM(
 }
 
 // E-Stop
-// Usage: ES<CR>
+// Usage: ES,<disable_motors><CR>
 // Returns: <command_interrupted>,<fifo_steps1>,<fifo_steps2>,<steps_remaining1>,<steps_remaining2><CR>OK<CR>
 // This command will abort any in-progress motor move (SM) command.
 // It will also clear out any pending command(s) in the FIFO.
+// <disable_motors> This parameter is optional. If present, and if it is a 1,
+//                  then both stepper drivers will be disabled as part of the command.
+//                  If this parameter is not present or is not equal to 1, then
+//                  the motors will not be disabled. (added in v2.8.0)
 // <command_interrupted> = 0 if no FIFO or in-progress move commands were interrupted,
 //                         1 if a motor move command was in progress or in the FIFO
 // <fifo_steps1> and <fifo_steps1> = 24 bit unsigned integers with the number of steps
@@ -2088,58 +2095,80 @@ static void process_SM(
 // command was in the FIFO.
 void parse_ES_packet(void)
 {
-    UINT8 command_interrupted = 0;
-    UINT32 remaining_steps1 = 0;
-    UINT32 remaining_steps2 = 0;
-    UINT32 fifo_steps1 = 0;
-    UINT32 fifo_steps2 = 0;
-   
-    
-    // If there is a command waiting in the FIFO and it is a move command
-    // or the current command is a move command, then remember that for later.
-    if (
-        (!FIFOEmpty && CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
-        || 
-        CurrentCommand.Command == COMMAND_MOTOR_MOVE
-    )
-    {
-        command_interrupted = 1;
-    }
-    
-    // If the FIFO has a move command in it, remove it.
-    if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
-    {
-        CommandFIFO[0].Command = COMMAND_NONE;
-        fifo_steps1 = CommandFIFO[0].Steps[0];
-        fifo_steps2 = CommandFIFO[0].Steps[1];
-        CommandFIFO[0].Steps[0] = 0;
-        CommandFIFO[0].Steps[1] = 0;
-        CommandFIFO[0].Accel[0] = 0;
-        CommandFIFO[0].Accel[1] = 0;
-        FIFOEmpty = TRUE;
-    }
+  UINT8 disable_motors = 0;
+  UINT8 command_interrupted = 0;
+  UINT32 remaining_steps1 = 0;
+  UINT32 remaining_steps2 = 0;
+  UINT32 fifo_steps1 = 0;
+  UINT32 fifo_steps2 = 0;
 
-    // If the current command is a move command, then stop the move.
-    if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
-    {
-    	CurrentCommand.Command = COMMAND_NONE;
-        remaining_steps1 = CurrentCommand.Steps[0];
-        remaining_steps2 = CurrentCommand.Steps[1];
-        CurrentCommand.Steps[0] = 0;
-        CurrentCommand.Steps[1] = 0;
-        CurrentCommand.Accel[0] = 0;
-        CurrentCommand.Accel[1] = 0;
-    }
+	// Extract each of the value.
+	extract_number (kUCHAR, &disable_motors, kOPTIONAL);
 
-#if defined(DEBUG_VALUE_PRINT)
-    printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
-            command_interrupted,
-            fifo_steps1,
-            fifo_steps2,
-            remaining_steps1,
-            remaining_steps2
-        );
-#endif
+	// Bail if we got a conversion error
+	if (error_byte)
+	{
+		return;
+	}
+
+  // If there is a command waiting in the FIFO and it is a move command
+  // or the current command is a move command, then remember that for later.
+  if (
+    (!FIFOEmpty && CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+    || 
+    CurrentCommand.Command == COMMAND_MOTOR_MOVE
+  )
+  {
+    command_interrupted = 1;
+  }
+
+  // If the FIFO has a move command in it, remove it.
+  if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
+  {
+    CommandFIFO[0].Command = COMMAND_NONE;
+    fifo_steps1 = CommandFIFO[0].Steps[0];
+    fifo_steps2 = CommandFIFO[0].Steps[1];
+    CommandFIFO[0].Steps[0] = 0;
+    CommandFIFO[0].Steps[1] = 0;
+    CommandFIFO[0].Accel[0] = 0;
+    CommandFIFO[0].Accel[1] = 0;
+    FIFOEmpty = TRUE;
+  }
+
+  // If the current command is a move command, then stop the move.
+  if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+  {
+    CurrentCommand.Command = COMMAND_NONE;
+    remaining_steps1 = CurrentCommand.Steps[0];
+    remaining_steps2 = CurrentCommand.Steps[1];
+    CurrentCommand.Steps[0] = 0;
+    CurrentCommand.Steps[1] = 0;
+    CurrentCommand.Accel[0] = 0;
+    CurrentCommand.Accel[1] = 0;
+  }
+
+  if (disable_motors == 1)
+  {
+    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+    {
+      Enable1IO = DISABLE_MOTOR;
+      Enable2IO = DISABLE_MOTOR;
+    }
+    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+    {
+      Enable1AltIO = DISABLE_MOTOR;
+      Enable2AltIO = DISABLE_MOTOR;
+    }
+  }
+  
+  printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
+          command_interrupted,
+          fifo_steps1,
+          fifo_steps2,
+          remaining_steps1,
+          remaining_steps2
+  );
+
 	print_ack();
 }
 
