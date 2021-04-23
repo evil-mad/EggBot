@@ -525,10 +525,10 @@ ul.no_bullets {
         <h4><a name="EM"></a> "EM" &mdash; Enable Motors</h4>
  
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>[,<i>Enable2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>,<i>Enable2</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <p>
                 For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor. This command is also used to set the step resolution of the stepper motors.
@@ -577,6 +577,8 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode</li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
+            <p>Starting with v2.8.0, this command is placed on the motion FIFO along with the other motion commands so that
+            it occurs at a precise time in the motion sequence.</p>
             <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
           </li>
         </ul>
