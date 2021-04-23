@@ -260,6 +260,7 @@
 //                    between 1.6 and 2.3 uS.
 // 2.8.0 04/22/21 - Issue 151: Added QE command to return state of motor enables
 //                    and their microstep resolution
+//                  Issue 152: Move EM command to motion queue
 //                  Issue 153: Add optional parameter to ES command to disable
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
@@ -695,6 +696,104 @@ void high_ISR(void)
         CCP1CON = (CCP1CON & 0b11001111);
       }
       AllDone = TRUE;
+    }
+    // As of version 2.8.0, we now have the EM command transplanted here into
+    // the motion queue. This is so that changes to motor enable or microstep
+    // resolution happen at predictable times rather than randomly.
+    // We use CurrentCommand.DirBits as "EA1" (the first parameter) and
+    // CurrentCommand.ServoRPn as "EA2" (the second parameter) since they're
+    // both UINT8s.
+    else if (CurrentCommand.Command == COMMAND_EM)
+    {
+      if (CurrentCommand.DirBits > 0)
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+          Enable1IO = ENABLE_MOTOR;
+        }
+        else
+        {
+          Enable1AltIO = ENABLE_MOTOR;
+        }
+        if (CurrentCommand.DirBits == 1)
+        {
+          MS1_IO = 1;
+          MS2_IO = 1;
+          MS3_IO = 1;
+        }
+        if (CurrentCommand.DirBits == 2)
+        {
+          MS1_IO = 1;
+          MS2_IO = 1;
+          MS3_IO = 0;
+        }
+        if (CurrentCommand.DirBits == 3)
+        {
+          MS1_IO = 0;
+          MS2_IO = 1;
+          MS3_IO = 0;
+        }
+        if (CurrentCommand.DirBits == 4)
+        {
+          MS1_IO = 1;
+          MS2_IO = 0;
+          MS3_IO = 0;
+        }
+        if (CurrentCommand.DirBits == 5)
+        {
+          MS1_IO = 0;
+          MS2_IO = 0;
+          MS3_IO = 0;
+        }
+      }
+      else
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+          Enable1IO = DISABLE_MOTOR;
+        }
+        else
+        {
+          Enable1AltIO = DISABLE_MOTOR;
+        }
+      }
+    
+      if (CurrentCommand.ServoRPn > 0)
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+          Enable2IO = ENABLE_MOTOR;
+        }
+        else
+        {
+          Enable2AltIO = ENABLE_MOTOR;
+        }
+      }
+      else
+      {
+        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+        {
+          Enable2IO = DISABLE_MOTOR;
+        }
+        else
+        {
+          Enable2AltIO = DISABLE_MOTOR;
+        }
+      }
+      
+      // Always clear the step counts if motors are enabled/disabled or 
+      // resolution is changed.
+      // NOTE: This section is the same code as clear_StepCounters(), but since
+      // we can't have any function calls in an ISR (or the ISR blows up in 
+      // space and speed) we have to copy the guts of that function here.
+  
+      // Clear out the global step counters
+      globalStepCounter1 = 0;
+      globalStepCounter2 = 0;
+
+      // Clear both step accumulators as well
+      acc_union[0].value = 0;
+      acc_union[1].value = 0;
     }
 
 		// If we're done with our current command, load in the next one
@@ -2402,121 +2501,38 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 // source is controlling the drivers, the PIC still needs to control the
 // MSx lines.
 // As of 2.7.0 : We always clear out the step accumulators when the EM command
+// As of 2.8.0 : This command is now handled as part of the motion queue
 //   is executed.
 void parse_EM_packet(void)
 {
   unsigned char EA1, EA2;
-  ExtractReturnType RetVal;
+  ExtractReturnType RetVal1, RetVal2;
 
   // Extract each of the values.
-  RetVal = extract_number (kUCHAR, &EA1, kREQUIRED);
-  if (kEXTRACT_OK == RetVal)
+  RetVal1 = extract_number (kUCHAR, &EA1, kREQUIRED);
+  // Bail if we got a conversion error
+  if (error_byte || kEXTRACT_OK != RetVal1)
   {
-    // Bail if we got a conversion error
-    if (error_byte)
-    {
-      return;
-    }
-    if (
-        (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        ||
-        (DriverConfiguration == EXTERNAL_CONTROLS_DRIVERS)
-    )
-    {
-      if (EA1 > 0)
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-            Enable1IO = ENABLE_MOTOR;
-        }
-        if (EA1 == 1)
-        {
-          MS1_IO = 1;
-          MS2_IO = 1;
-          MS3_IO = 1;
-        }
-        if (EA1 == 2)
-        {
-          MS1_IO = 1;
-          MS2_IO = 1;
-          MS3_IO = 0;
-        }
-        if (EA1 == 3)
-        {
-          MS1_IO = 0;
-          MS2_IO = 1;
-          MS3_IO = 0;
-        }
-        if (EA1 == 4)
-        {
-          MS1_IO = 1;
-          MS2_IO = 0;
-          MS3_IO = 0;
-        }
-        if (EA1 == 5)
-        {
-          MS1_IO = 0;
-          MS2_IO = 0;
-          MS3_IO = 0;
-        }
-      }
-      else
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          Enable1IO = DISABLE_MOTOR;
-        }
-      }
-    }
-    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-    {
-      if (EA1 > 0)
-      {
-        Enable1AltIO = ENABLE_MOTOR;
-      }
-      else
-      {
-        Enable1AltIO = DISABLE_MOTOR;
-      }
-    }
+    return;
+  }
+  RetVal2 = extract_number (kUCHAR, &EA2, kOPTIONAL);
+  // Bail if we got a conversion error
+  if (error_byte || kEXTRACT_OK != RetVal2)
+  {
+    return;
   }
 
-  RetVal = extract_number (kUCHAR, &EA2, kOPTIONAL);
-  if (kEXTRACT_OK == RetVal)
-  {
-    // Bail if we got a conversion error
-    if (error_byte)
-    {
-      return;
-    }
-    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-    {
-      if (EA2 > 0)
-      {
-        Enable2IO = ENABLE_MOTOR;
-      }
-      else
-      {
-        Enable2IO = DISABLE_MOTOR;
-      }
-    }
-        else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-    {
-      if (EA2 > 0)
-      {
-        Enable2AltIO = ENABLE_MOTOR;
-      }
-      else
-      {
-        Enable2AltIO = DISABLE_MOTOR;
-      }
-    }
-  }
+  // Trial: Spin here until there's space in the fifo
+  while(!FIFOEmpty)
+    ;
 
-  // Always clear the step counts if motors are enabled/disabled or 
-  // resolution is changed.
-  clear_StepCounters();
-  
+  // Set up the motion queue command
+  CommandFIFO[0].DirBits = EA1;
+  CommandFIFO[0].ServoRPn = EA2;
+  CommandFIFO[0].Command = COMMAND_EM;
+
+  FIFOEmpty = FALSE;
+
   print_ack();
 }
 
@@ -2700,13 +2716,13 @@ void parse_SE_packet(void)
 {
 	UINT8 State = 0;
 	UINT16 Power = 0;
-    UINT8 SEUseMotionQueue = FALSE;
-    ExtractReturnType PowerExtract;
+  UINT8 SEUseMotionQueue = FALSE;
+  ExtractReturnType PowerExtract;
 	
 	// Extract each of the values.
 	extract_number (kUCHAR, &State, kREQUIRED);
 	PowerExtract = extract_number (kUINT, &Power, kOPTIONAL);
-    extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
+  extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
 	// Bail if we got a conversion error
 	if (error_byte)
@@ -2715,90 +2731,90 @@ void parse_SE_packet(void)
 	}
 
 	// Limit check
-    if (Power > 1023)
-    {
-        Power = 1023;
-    }
-    if (State > 1)
-    {
-        State = 1;
-    }
-    if (SEUseMotionQueue > 1)
-    {
-        SEUseMotionQueue = 1;
-    }
+  if (Power > 1023)
+  {
+    Power = 1023;
+  }
+  if (State > 1)
+  {
+    State = 1;
+  }
+  if (SEUseMotionQueue > 1)
+  {
+    SEUseMotionQueue = 1;
+  }
     
-    // Set to %50 if no Power parameter specified, otherwise use parameter
-    if (State == 1 && PowerExtract == kEXTRACT_MISSING_PARAMETER)
+  // Set to %50 if no Power parameter specified, otherwise use parameter
+  if (State == 1 && PowerExtract == kEXTRACT_MISSING_PARAMETER)
+  {
+    StoredEngraverPower = 512;
+  }
+  else
+  {
+    StoredEngraverPower = Power;
+  }
+
+  // If we're not on, then turn us on
+  if (T2CONbits.TMR2ON != 1)
+  {
+    // Set up PWM for Engraver control
+    // We will use ECCP1 and Timer2 for the engraver PWM output on RB3
+    // Our PWM will operate at about 40Khz.
+
+    // Set our reload value
+    PR2 = 0xFF;
+
+    // Initialize Timer2
+
+    // The prescaler will be at 1
+    T2CONbits.T2CKPS = 0b00;
+
+    // Do not generate an interrupt
+    PIE1bits.TMR2IE = 0;
+
+    TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+    TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+
+    CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
+    CCP1CONbits.P1M = 0b00;		// Enhanced PWM mode: single output
+
+    // Set up output routing to go to RB3 (RP6)
+    RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
+
+    T2CONbits.TMR2ON = 1;		// Turn it on
+  }
+
+  // Acting on the state is only done if the SE command is not put on the motion queue
+  if (!SEUseMotionQueue)
+  {
+    // Now act on the State
+    if (State)
     {
-        StoredEngraverPower = 512;
+      // Set RB3 to StoredEngraverPower
+      CCPR1L = StoredEngraverPower >> 2;
+      CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
     }
     else
     {
-        StoredEngraverPower = Power;
-    }
-    
-    // If we're not on, then turn us on
-    if (T2CONbits.TMR2ON != 1)
-    {
-        // Set up PWM for Engraver control
-        // We will use ECCP1 and Timer2 for the engraver PWM output on RB3
-        // Our PWM will operate at about 40Khz.
+      // Set RB3 to low by setting PWM duty cycle to zero
+      CCPR1L = 0;
+      CCP1CON = (CCP1CON & 0b11001111);
+    }		
+  }
+  else
+  {
+    // Trial: Spin here until there's space in the fifo
+    while(!FIFOEmpty)
+      ;
 
-        // Set our reload value
-        PR2 = 0xFF;
+    // Set up the motion queue command
+    CommandFIFO[0].SEPower = StoredEngraverPower;
+    CommandFIFO[0].DelayCounter = 0;
+    CommandFIFO[0].SEState = State;
+    CommandFIFO[0].Command = COMMAND_SE;
 
-        // Initialize Timer2
-
-        // The prescaler will be at 1
-        T2CONbits.T2CKPS = 0b00;
-
-        // Do not generate an interrupt
-        PIE1bits.TMR2IE = 0;
-
-        TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-        TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-
-        CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
-        CCP1CONbits.P1M = 0b00;		// Enhanced PWM mode: single output
-
-        // Set up output routing to go to RB3 (RP6)
-        RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
-
-        T2CONbits.TMR2ON = 1;		// Turn it on
-    }
-
-    // Acting on the state is only done if the SE command is not put on the motion queue
-    if (!SEUseMotionQueue)
-    {
-        // Now act on the State
-        if (State)
-        {
-            // Set RB3 to StoredEngraverPower
-            CCPR1L = StoredEngraverPower >> 2;
-            CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-        }
-        else
-        {
-            // Set RB3 to low by setting PWM duty cycle to zero
-            CCPR1L = 0;
-            CCP1CON = (CCP1CON & 0b11001111);
-        }		
-    }
-    else
-    {
-        // Trial: Spin here until there's space in the fifo
-    	while(!FIFOEmpty)
-        ;
-        
-        // Set up the motion queue command
-        CommandFIFO[0].SEPower = StoredEngraverPower;
-    	CommandFIFO[0].DelayCounter = 0;
-        CommandFIFO[0].SEState = State;
-        CommandFIFO[0].Command = COMMAND_SE;
-        	
-        FIFOEmpty = FALSE;
-    }
+    FIFOEmpty = FALSE;
+  }
     
 	print_ack();
 }
