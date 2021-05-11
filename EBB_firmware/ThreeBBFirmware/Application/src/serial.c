@@ -342,12 +342,25 @@ void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
  * Byte 1: Driver address (0 through 2 for 3BB)
  * Byte 2: Register to read (with high bit clear, indicating a read)
  * Byte 4: CRC byte of previous 3 bytes
+ *
+ * (TMC2209 then waits for 8 bit times)
+ *
+ * (Datagram from TMC2209 back to MCU)
+ * Byte 0: Value: 0x05
+ * Byte 1: Value: 0xFF (Master address)
+ * Byte 2: Register that got read (with high bit clear, indicating a read)
+ * Byte 3: Bits 31-24 of the register value read
+ * Byte 4: Bits 23-16 of the register value read
+ * Byte 5: Bits 15-8 of the register value read
+ * Byte 6: Bits 7-0 of the register value read
+ * Byte 7: CRC byte of previous 7 bytes
+ *
  */
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 {
   uint8_t write_datagram[4];
   uint8_t read_datagram[8];
-  uint8_t i, j;
+  uint8_t i;
   union {
     uint32_t  word;
     uint8_t   byte[4];
@@ -380,69 +393,14 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 
   serial_TurnOnTX();
 
-  // This loop runs for about 500uS. During that time, any bytes that come
-  // from the driver chip are pulled in and stored. If none come in (because
-  // the driver isn't powered for example) then the loop finishes without seeing
-  // any bytes. The only danger here is that the driver takes more than the 
-  // total loop time to send all 8 bytes - in that case some of the last bytes
-  // would come after the loop was finished and would get missed. This situation
-  // is helped out because taking in bytes takes time, which extends the total
-  // duration of the loop
-  i = 0;
-  for (j = 0; j < 35; j++)
+  /// TODO: Check that CRC is correct here too
+  if (read_datagram[0] == 0x05 && read_datagram[1] == 0xFF)
   {
-#if 0
-    // Check for framing errors or overrun errors and count them
-    if (RCSTA2bits.FERR)
-    {
-      if (FramingErrorCounter != 255)
-      {
-        FramingErrorCounter++;
-      }
-      break;
-    }
-    if (RCSTA2bits.OERR)
-    {
-      if (OverrunErrorCounter != 255)
-      {
-        OverrunErrorCounter++;
-      }
-      break;
-    }
-  
-    if (PIR3bits.RC2IF)
-    {
-      // Read out our data byte
-      datagram[i] = RCREG2;
-      i++;
-
-      // If we've got all of the datagram from the driver, then no point in
-      // doing more timing loop looking for more bytes. So break out.
-      if (i == 8)
-      {
-        // We have a full answer, so check to see if the CRC is correct, 
-        // and if it is, then copy the data over to the result value and 
-        // leave.
-        
-        /// TOOD: Is it necessary to check CRC every time here? What do we do
-        /// if we get an error? Higher level retries? Ugh.
-        
-        retval.byte[0] = datagram[6];
-        retval.byte[1] = datagram[5];
-        retval.byte[2] = datagram[4];
-        retval.byte[3] = datagram[3];
-        break;
-      }
-      // Check for framing error or overrun error bits
-      // If we got a byte then extend our outer loop a bit
-      j=0;
-    }
-
-    Delay10TCYx(4);
-#endif
-
+    retval.byte[0] = read_datagram[6];
+    retval.byte[1] = read_datagram[5];
+    retval.byte[2] = read_datagram[4];
+    retval.byte[3] = read_datagram[3];
   }
-
   return retval.word;
 }
 
@@ -450,15 +408,26 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 void serial_TurnOnTX(void)
 {
   // Turn on the TX pin
-//  TXSTA2bits.TXEN = 1;
-//  Delay10TCYx(10);
+
+  // This is copied from the HAL - not totally sure if it is necessary to clear both before setting one or both
+  CLEAR_BIT(huart1.Instance->CR1, (USART_CR1_TE | USART_CR1_RE));
+
+  /* Enable the USART's RX and TX */
+  SET_BIT(huart1.Instance->CR1, (USART_CR1_TE | USART_CR1_RE));
+
+  /// TODO: Do we need a short delay here?
 }
 
 void serial_TurnOffTX(void)
 {
   // Turn off the TX pin
-//  Delay10TCYx(10);
-//  TXSTA2bits.TXEN = 0;
+  // This is copied from the HAL - not totally sure if it is necessary to clear both before setting one or both
+  CLEAR_BIT(huart1.Instance->CR1, (USART_CR1_TE | USART_CR1_RE));
+
+  /* Enable the USART's receive interface by setting the RE bit in the USART CR1 register */
+  SET_BIT(huart1.Instance->CR1, USART_CR1_RE);
+
+  /// TODO: Do we need a short delay here?
 }
 
 /*
