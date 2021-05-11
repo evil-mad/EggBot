@@ -297,6 +297,17 @@ void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask)
 
 
 /* Create a 63 bit long datagram to send out to stepper drivers */
+/* Note: This is a blocking function and won't return until the datagram is sent */
+/* TMC2209 Write (64 bit) Datagram Format:
+ * Byte 0: Value: 0x05
+ * Byte 1: Driver address (0 through 2 for 3BB)
+ * Byte 2: Register to write (with high bit set, indicating a write)
+ * Byte 3: Bits 31-24 of the register value to write
+ * Byte 4: Bits 23-16 of the register value to write
+ * Byte 5: Bits 15-8 of the register value to write
+ * Byte 6: Bits 7-0 of the register value to write
+ * Byte 7: CRC byte of previous 7 bytes
+ */
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
 {
   uint8_t datagram[8];
@@ -325,62 +336,49 @@ void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
  * within that time, then the driver is not powered or something else is wrong
  * and a value of 0x0000000 will be returned.
  */
+/* TMC2209 Read (32 bit) Datagram Format:
+ * (Datagram from MCU to TMC2209)
+ * Byte 0: Value: 0x05
+ * Byte 1: Driver address (0 through 2 for 3BB)
+ * Byte 2: Register to read (with high bit clear, indicating a read)
+ * Byte 4: CRC byte of previous 3 bytes
+ */
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
 {
-  uint8_t datagram[8];
+  uint8_t write_datagram[4];
+  uint8_t read_datagram[8];
   uint8_t i, j;
   union {
     uint32_t  word;
     uint8_t   byte[4];
   } retval;
-///  volatile uint8_t dummy;
   retval.word = 0;
   
-  datagram[0] = 0x05;
+  write_datagram[0] = 0x05;
   if (addr > 3)
   {
     addr = 3;
   }
-  datagram[1] = addr;
-  datagram[2] = reg & 0x7F;
-  CalcCRC(&datagram[0], 4);
+  write_datagram[1] = addr;
+  write_datagram[2] = reg & 0x7F;
+  CalcCRC(&write_datagram[0], 4);
   
-  // Send the full 32 bits out
-  // We play a little game here - we want there to be zero delays between 
-  // bytes even when stepping (i.e. little CPU time) so we send another
-  // byte as soon as the first one has started transmitting. But at the end,
-  // we need to wait for the final byte to completely be transmitted before
-  // reading in the dummy reads to 'eat' all four bytes we sent out.
-  // The NOPs are required according to the datasheet before reading TX2IF
-#if 0
-  TXREG2 = datagram[0];
-  Nop();
-  Nop();
-  while(!PIR3bits.TX2IF);
-  TXREG2 = datagram[1];
-  Nop();
-  Nop();
-  while(!PIR3bits.TX2IF);
-  TXREG2 = datagram[2];
-  Nop();
-  Nop();
-  while(!PIR3bits.TX2IF);
-  TXREG2 = datagram[3];
-  while(!TXSTA2bits.TRMT);
+  // Send the 32 bits of the read request out
+  /// TODO: Check return value?
+  HAL_UART_Transmit(&huart1, write_datagram, 4, 1000);
 
-  // Clear CREN, empty RX FIFO and set CREN before we start to receive real 
-  // bytes from 2209s to clear out overrun/framing error bits
-  RCSTA2bits.CREN = 0;
-  dummy = RCREG2;
-  dummy = RCREG2;
-  RCSTA2bits.CREN = 1;
-#endif
-
-  // Zero out the datagram, as we'll reuse it for the reply
+  // Zero out the datagram
   for (i=0; i < 8; i++)
   {
-    datagram[i] = 0x00;
+    read_datagram[i] = 0x00;
   }
+
+  serial_TurnOffTX();
+
+  /// TODO: Check return value?
+  HAL_UART_Receive(&huart1, read_datagram, 8, 1000);
+
+  serial_TurnOnTX();
 
   // This loop runs for about 500uS. During that time, any bytes that come
   // from the driver chip are pulled in and stored. If none come in (because
@@ -474,9 +472,8 @@ void serial_InitDrivers(void)
   
   for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
   {
-    // For now, we're going to send exactly the same thing to each of the three
-    // stepper drivers. This will need to change if we don't want exactly the
-    // same values going to all three.
+    // There are two tables - one for motors 1/2 and a second for motor 3
+    // This way we can make the pen lift servo (3) have different settings
     WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
     HAL_Delay(1);
     WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
