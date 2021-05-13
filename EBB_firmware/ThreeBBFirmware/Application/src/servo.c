@@ -799,7 +799,6 @@ void servo_ProcessTargets(void)
     {
       if (servo_Target[pin] != servo_Position[pin])
       {
-        DEBUG_G1_SET();
         if ((servo_Position[pin] - servo_Target[pin]) > 0)
         {
           temp = servo_Position[pin] - servo_Rate[pin];
@@ -836,7 +835,6 @@ void servo_ProcessTargets(void)
             servo_PenActualState = servo_PenLastState;
           }
         }
-        DEBUG_G1_RESET();
       }
     }
   }

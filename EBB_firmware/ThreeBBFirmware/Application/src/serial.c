@@ -62,6 +62,7 @@
 #include "servo.h"
 #include "parse.h"
 #include "isr.h"
+#include "debug.h"
 
 // The number of 32-bit init values to send to the drivers over serial
 #define MAX_DRIVER_INIT_VALUES      4
@@ -325,6 +326,7 @@ void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data)
   datagram[6] = data & 0xFF;
   CalcCRC(&datagram[0], 8);
   
+  serial_TurnOnTX();
   // Send the full 64 bits out
   HAL_UART_Transmit(&huart1, datagram, 8, 1000);
 }
@@ -376,9 +378,11 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
   write_datagram[2] = reg & 0x7F;
   CalcCRC(&write_datagram[0], 4);
   
+  serial_TurnOnTX();
+
   // Send the 32 bits of the read request out
   /// TODO: Check return value?
-  HAL_UART_Transmit(&huart1, write_datagram, 4, 1000);
+  HAL_UART_Transmit(&huart1, write_datagram, 4, 10);
 
   // Zero out the datagram
   for (i=0; i < 8; i++)
@@ -387,9 +391,10 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
   }
 
   serial_TurnOffTX();
+  __HAL_UART_FLUSH_DRREGISTER(&huart1);
 
   /// TODO: Check return value?
-  HAL_UART_Receive(&huart1, read_datagram, 8, 1000);
+  HAL_UART_Receive(&huart1, read_datagram, 8, 10);
 
   serial_TurnOnTX();
 
@@ -413,7 +418,7 @@ void serial_TurnOnTX(void)
   CLEAR_BIT(huart1.Instance->CR1, (USART_CR1_TE | USART_CR1_RE));
 
   /* Enable the USART's RX and TX */
-  SET_BIT(huart1.Instance->CR1, (USART_CR1_TE | USART_CR1_RE));
+  SET_BIT(huart1.Instance->CR1, USART_CR1_TE);
 
   /// TODO: Do we need a short delay here?
 }
@@ -438,28 +443,29 @@ void serial_InitDrivers(void)
 {
   uint8_t i;
   uint32_t reg;
-  
+  serial_TurnOnTX();
   for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
   {
     // There are two tables - one for motors 1/2 and a second for motor 3
     // This way we can make the pen lift servo (3) have different settings
+    WriteDatagram(0, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
+    HAL_Delay(1);
     WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
     HAL_Delay(1);
-    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-    HAL_Delay(1);
-    WriteDatagram(3, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
+    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
     HAL_Delay(1);
   }
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 
   // function to write it to a 1.
-  for (i=1; i <= 3; i++)
+  for (i = 0; i <= 2; i++)
   {
     reg = ReadDatagram(i, OTP_READ);
     if (!(reg & OTP_INTERNALSENSE_MASK))
     {
       WriteOTP(i, OTP_INTERNALSENSE_PROGRAM, OTP_INTERNALSENSE_MASK);
     }
+    HAL_Delay(1);
   }
 }
 
@@ -471,27 +477,6 @@ void serial_Init(void)
 {
   // Start out by calling for a driver init
   DriversNeedInit = true;
-    
-  // Set up initial states
-///  LATCbits.LATC0 = 1;
-///  LATCbits.LATC1 = 0;
-  // Set up I/O directions
-///  TRISCbits.TRISC0 = INPUT_PIN;
-///  TRISCbits.TRISC1 = OUTPUT_PIN;
-
-  // Set up EUSART2 RX on pin RP11
-///  RPINR16 = 11; /// TODO: Are these constants defined in MCHP header files?
-  // Set up EUSART2 TX on pin RP12
-///  RPOR12 = 5;
-  
-///  TXSTA2bits.BRGH = 1;
-///  RCSTA2bits.CREN = 1;
-  // Let's make the baud rate about 115200
-///  BAUDCON2bits.BRG16 = 1;
-///  SPBRGH2 = 0;
-///  SPBRG2 = 103;
-  // And finally turn the UART on
-///  RCSTA2bits.SPEN = 1;
 }
 
 /*
@@ -514,14 +499,13 @@ void serial_DRCommand(void)
   // Extract each of the values.
   extract_number (kUINT8, &driverNumber, kOPTIONAL);
   extract_number (kUINT8, &registerAddress, kOPTIONAL);
-
   // Bail if we got a conversion error
   if (error_byte)
   {
     return;
   }
 
-  if (driverNumber > 3)
+  if (driverNumber == 0 || driverNumber > 3)
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
@@ -533,9 +517,7 @@ void serial_DRCommand(void)
     return;
   }
 
-  serial_TurnOnTX();
-  registerValue = ReadDatagram(driverNumber, registerAddress);
-  serial_TurnOffTX();
+  registerValue = ReadDatagram(driverNumber-1, registerAddress);
 
   printf("DR,%08lX\n", registerValue);
 
@@ -571,7 +553,7 @@ void serial_DWCommand(void)
     return;
   }
 
-  if (driverNumber > 3)
+  if (driverNumber == 0 || driverNumber > 3)
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
@@ -583,9 +565,7 @@ void serial_DWCommand(void)
     return;
   }
 
-  serial_TurnOnTX();
-  WriteDatagram(driverNumber, registerAddress, registerValue);
-  serial_TurnOffTX();
+  WriteDatagram(driverNumber - 1, registerAddress, registerValue);
   
   printf("DW\n");
 

@@ -13,6 +13,9 @@ ThreeBeeBee (3BB) Readme.txt file
   * All strings will be terminated with just \n
   * Put into user docs: The fact that P1/2 and P3/4/5 will all have synchronized rising edges, but 0, 1/2, and 3/4/5 may not be synchronized.
   * Add support for solenoid output (?) tied to pen, but what about z-axis stepper?
+  * serial.c : fix or remove the SS command. Is it even needed?
+  * Move serial command parsing out of CDC_Receive_FS() and into main()? Use buffer between the two.
+  * Why does UART traffic stop SysTick? That's not right. UART send/receive should not be killing interrupts
 
   -- COMMANDS --
   * Add command "QE" (for Query Enable Motor) which would return the current state of each motor driver's enable (either the actual enable pin or the enable bit in the register), as well as the

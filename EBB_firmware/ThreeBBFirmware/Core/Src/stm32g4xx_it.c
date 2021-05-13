@@ -186,11 +186,12 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-
+  DEBUG_G4_SET();
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
   utility_SysTick();
+  DEBUG_G4_RESET();
   /* USER CODE END SysTick_IRQn 1 */
 }
 
