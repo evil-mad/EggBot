@@ -49,6 +49,7 @@
 /************** INCLUDES ******************************************************/
 
 #include <stdio.h>
+#include "stm32g4xx_hal.h"
 #include "parse.h"
 //#include "fifo.h"
 //#include "main.h"

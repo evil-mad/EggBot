@@ -24,10 +24,13 @@
 
 /* USER CODE BEGIN INCLUDE */
 #include <stdbool.h>
+#include "main.h"
 #include "parse.h"
 #include "utility.h"
 #include "retarget.h"
+#include "debug.h"
 #include <stdio.h>
+#include <stdbool.h>
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,11 +46,15 @@ const char st_LFCR[] = {"\n"};
 
 // As each buffer is processed from the USB stack, each command is put here
 // and then parsed when end of line is reached
-uint8_t g_RX_buf[kRX_BUF_SIZE];
+uint8_t g_RX_buf[kRX_BUF_SIZE] = {0};
 
 // Pointers to USB receive (from PC) buffer
-uint8_t g_RX_buf_in;
-uint8_t g_RX_buf_out;
+uint8_t g_RX_buf_in = 0;
+uint8_t g_RX_buf_out = 0;
+
+bool RXDataAvailable = false;
+uint8_t * RXDataBuf;
+uint32_t * RXDataLen;
 
 /* USER CODE END PV */
 
@@ -289,18 +296,47 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
+  static bool LEDOn = false;
+
+  DEBUG_G0_SET();
+
+  RXDataAvailable = true;
+  RXDataBuf = Buf;
+  RXDataLen = Len;
+
+  if (LEDOn)
+  {
+    USR_LED_GPIO_Port->BSRR =  (uint32_t)USR_LED_Pin;
+    LEDOn = false;
+  }
+  else
+  {
+    USR_LED_GPIO_Port->BRR =  (uint32_t)USR_LED_Pin;
+    LEDOn = true;
+  }
+
+  DEBUG_G0_RESET();
+
+  return USBD_OK;
+}
+
+static void processRXData(void)
+{
   /* USER CODE BEGIN 6 */
   static bool in_cr = false;
   static bool in_esc = false;
   static uint8_t esc_sequence[3] = {0};
-  uint8_t byte_cnt;
-  uint8_t tst_char;
+  uint8_t byte_cnt = 0;
+  uint8_t tst_char = 0;
+  uint16_t dataLength = *RXDataLen;
 
-  if (*Len > 0)
+  DEBUG_G2_SET();
+
+  if (dataLength > 0)
   {
-    for(byte_cnt = 0; byte_cnt < *Len; byte_cnt++)
+    for(byte_cnt = 0; byte_cnt < dataLength; byte_cnt++)
     {
-      tst_char = Buf[byte_cnt];
+      tst_char = RXDataBuf[byte_cnt];
 
       // Check to see if we are in a CR/LF situation
       if (
@@ -323,10 +359,54 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
         // Now, if we've gotten a full command (user send <CR>) then
         // go call the code that deals with that command, and then
         // keep parsing. (This allows multiple small commands per packet)
+        DEBUG_G1_SET();
         parsePacket();
+        DEBUG_G1_RESET();
 
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
+
+        /// TODO: Make this into a function
+        // Check for any errors logged in error_byte that need to be sent out
+        if (error_byte)
+        {
+          if (bittst (error_byte, 0))
+          {
+            // Unused as of yet
+            printf ((char *)"!0 \n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_STEPS_TO_FAST))
+          {
+            // Unused as of yet
+            printf ((char *)"!1 Err: Can't step that fast\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
+          {
+            printf ((char *)"!2 Err: TX Buffer overrun\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
+          {
+            printf ((char *)"!3 Err: RX Buffer overrun\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_MISSING_PARAMETER))
+          {
+            printf ((char *)"!4 Err: Missing parameter(s)\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_PRINTED_ERROR))
+          {
+            // We don't need to do anything since something has already been printed out
+            //printf ((rom char *)"!5\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
+          {
+            printf ((char *)"!6 Err: Invalid parameter value\n");
+          }
+          if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
+          {
+            printf ((char *)"!7 Err: Extra parameter\n");
+          }
+          error_byte = 0;
+        }
       }
       else if (tst_char == 27 && in_esc == false)
       {
@@ -361,6 +441,8 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
         tst_char != kLF
         &&
         tst_char >= 32
+        &&
+        tst_char <= 127
       )
       {
         esc_sequence[0] = 0;
@@ -373,6 +455,10 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
         in_cr = false;
         g_RX_buf_in++;
       }
+      else
+      {
+        /// TODO: Signal an error here - that the data the PC sent is not in the range 32 to 127
+      }
       // Check for buffer wraparound
       if (kRX_BUF_SIZE == g_RX_buf_in)
       {
@@ -383,52 +469,12 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
     }
   }
 
-/// TODO: Make this into a function
-  // Check for any errors logged in error_byte that need to be sent out
-  if (error_byte)
-  {
-    if (bittst (error_byte, 0))
-    {
-      // Unused as of yet
-      printf ((char *)"!0 \n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_STEPS_TO_FAST))
-    {
-      // Unused as of yet
-      printf ((char *)"!1 Err: Can't step that fast\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
-    {
-      printf ((char *)"!2 Err: TX Buffer overrun\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
-    {
-      printf ((char *)"!3 Err: RX Buffer overrun\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_MISSING_PARAMETER))
-    {
-      printf ((char *)"!4 Err: Missing parameter(s)\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_PRINTED_ERROR))
-    {
-      // We don't need to do anything since something has already been printed out
-      //printf ((rom char *)"!5\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
-    {
-      printf ((char *)"!6 Err: Invalid paramter value\n");
-    }
-    if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
-    {
-      printf ((char *)"!7 Err: Extra parmater\n");
-    }
-    error_byte = 0;
-  }
-
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &RXDataBuf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  return (USBD_OK);
+  DEBUG_G2_RESET();
+
+//  return (USBD_OK);
   /* USER CODE END 6 */
 }
 
@@ -448,10 +494,14 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
   USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hUsbDeviceFS.pClassData;
-  if (hcdc->TxState != 0)
+  while (hcdc->TxState != 0)
   {
-    bitset (error_byte, kERROR_BYTE_TX_BUF_OVERRUN);
-    return USBD_BUSY;
+    // Sit and spin here until the previous USB transmission has finished. This is inefficient.
+    /// TODO: It would be better to have a separate function in main() that looked at an output (TX)
+    /// USB buffer and sent it out whenever it got full enough or enough time has passed rather than
+    /// sitting and waiting for each command's response to be sent before sending the next one.
+
+    /// TODO: Should this have some sort of timeout that expires after some amount of time has passed?
   }
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
   result = USBD_CDC_TransmitPacket(&hUsbDeviceFS);
@@ -504,6 +554,16 @@ uint8_t CDC_IsTxBusy(void)
     return USBD_BUSY;
   }
   return result;
+}
+
+
+void USB_Run(void)
+{
+  if (RXDataAvailable)
+  {
+    processRXData();
+    RXDataAvailable = false;
+  }
 }
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 

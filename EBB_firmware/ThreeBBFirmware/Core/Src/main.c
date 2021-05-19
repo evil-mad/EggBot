@@ -81,6 +81,8 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void USB_Run(void);
+
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -92,7 +94,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim6)
   {
+    DEBUG_G3_SET();
     high_ISR();
+    DEBUG_G3_RESET();
   }
 }
 
@@ -157,6 +161,7 @@ int main(void)
 ///    DEBUG_G1_SET();
 ///    DEBUG_G1_RESET();
     utility_Run();
+    USB_Run();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

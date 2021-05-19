@@ -99,7 +99,7 @@ static void incrementQueue(void)
 
 void queue_Init(void)
 {
-  QueueSize = 1;
+  QueueSize = DEFAULT_QUEUE_SIZE;
   QueueIn = 0;
   QueueOut = 0;
   QueueDepth = 0;
