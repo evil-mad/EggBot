@@ -130,10 +130,10 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
    * b4   0     : index_otpw : 0 means INDEX shows first microstep position of sequencer
    * b3   0     : shaft : 0 means normal motor direction
    * b2   0     : en_SpreadCycle : 0 means StealthChop PWM mode enabled
-   * b1   1     : internal_Rsense : 1 means use internal sense resistors
+   * b1   0     : internal_Rsense : 0 means use external sense resistors
    * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
    */
-  0x000001C2,     // GCONF
+  0x000001C0,     // GCONF
 
   /* Set up idle and run current levels
    b20:31  0000 0000 000
@@ -194,10 +194,10 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
    * b4   0     : index_otpw : 0 means INDEX shows first microstep position of sequencer
    * b3   0     : shaft : 0 means normal motor direction
    * b2   0     : en_SpreadCycle : 0 means StealthChop PWM mode enabled
-   * b1   1     : internal_Rsense : 1 means use internal sense resistors
+   * b1   0     : internal_Rsense : 0 means use external sense resistors
    * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
    */
-  0x000001C2,     // GCONF
+  0x000001C0,     // GCONF
 
   /* Set up idle and run current levels
    b20:31  0000 0000 000
@@ -455,6 +455,7 @@ void serial_InitDrivers(void)
     WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
     HAL_Delay(1);
   }
+#if 0   // Now that we have external sense resistors we don't need this right?
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 
   // function to write it to a 1.
@@ -467,6 +468,7 @@ void serial_InitDrivers(void)
     }
     HAL_Delay(1);
   }
+#endif
 }
 
 /* Initialize EUSART2 to talk to the three TMC2209 stepper drivers.

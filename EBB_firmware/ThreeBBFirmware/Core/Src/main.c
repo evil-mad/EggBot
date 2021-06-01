@@ -81,9 +81,9 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void USB_Run(void);
 
 /* USER CODE BEGIN PFP */
+void USB_Run(void);
 
 /* USER CODE END PFP */
 
