@@ -278,7 +278,7 @@ ul.no_bullets {
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -299,7 +299,7 @@ ul.no_bullets {
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;&lt;CR&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
           <li>
             NOTE 1: The EBB's analog inputs are only rated for up to 3.3 V. Be careful not to put higher voltages on them (including 5 V) or you may damage the pin.
@@ -769,7 +769,7 @@ ul.no_bullets {
             <code>
               LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -944,7 +944,7 @@ ul.no_bullets {
             <code>
               LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2233,7 +2233,7 @@ ul.no_bullets {
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gtCR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
