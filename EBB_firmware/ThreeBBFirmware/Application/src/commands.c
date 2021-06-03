@@ -62,6 +62,8 @@
 
 /************** MODULE DEFINES ************************************************/
 
+// How many 'addresses' of 32-bit RAM variables should the MR/MW commands have
+#define NUMBER_OF_RAM_COOKIES   512
 
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
@@ -73,6 +75,9 @@ uint16_t gPulseLen[4] = {0,0,0,0};
 uint16_t gPulseRate[4] = {0,0,0,0};
 // For Pulse Mode, counters keeping track of where we are
 uint16_t gPulseCounters[4] = {0,0,0,0};
+
+// For MR and MW commands, array to store RAM cookies
+static uint32_t Cookies[NUMBER_OF_RAM_COOKIES];
 
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
@@ -385,35 +390,43 @@ void parseIDCommand(void)
 // All we do here is just print out our version number
 void commands_VRCommand(void)
 {
-  printf(st_version);
+  printf("%s\n", st_version);
 }
 
-#if 0
+// All we do here is just print out our version number
+// This is the legacy version which has \r\n at the end
+void commands_VCommand(void)
+{
+  printf("%s\r\n", st_version);
+}
+
 
 // MW is for Memory Write
 // "MW,<location>,<value><CR>"
-// <location> is a decimal value between 0 and 4096 indicating the RAM address to write to 
-// <value> is a decimal value between 0 and 255 that is the value to write
-void parseMWCommand(void)
+// <location> is a decimal value between 0 and 511 indicating the RAM address to write to
+// <value> is am unsigned 32 bit decimal value between 0 and 4294967295 that is the value to write
+void commands_MWCommand(void)
 {
-  unsigned int location;
-  unsigned char value;
+  uint16_t location;
+  uint32_t value;
 
-  extract_number (kUINT16, &location, kREQUIRED);
-  extract_number (kUINT8, &value, kREQUIRED);
+  extract_number(kUINT16, &location, kREQUIRED);
+  extract_number(kUINT32, &value, kREQUIRED);
+
+  // Limit check the address
+  if (location >= NUMBER_OF_RAM_COOKIES)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+  }
 
   // Bail if we got a conversion error
   if (error_byte)
   {
     return;
   }
-  // Limit check the address and write the byte in
-  if (location < 4096)
-  {
-    *((unsigned char *)location) = value;
-  }
+  Cookies[location] = value;
 
-  print_ack ();
+  print_ack();
 }
 
 
@@ -422,12 +435,18 @@ void parseMWCommand(void)
 // <location> is a decimal value between 0 and 4096 indicating the RAM address to read from 
 // The UBW will then send a "MR,<value><CR>" packet back to the PC
 // where <value> is the byte value read from the address
-void parseMRCommand(void)
+void commands_MRCommand(void)
 {
-  unsigned int location;
-  unsigned char value;
+  uint16_t location;
+  uint32_t value;
 
-  extract_number (kUINT16, &location, kREQUIRED);
+  extract_number(kUINT32, &location, kREQUIRED);
+
+  // Limit check the address
+  if (location >= NUMBER_OF_RAM_COOKIES)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+  }
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -435,18 +454,15 @@ void parseMRCommand(void)
     return;
   }
 
-  // Limit check the address and write the byte in
-  if (location < 4096)
-  {
-    value = *((unsigned char *)location);
-  }
+  value = Cookies[location];
 
   // Now send back the MR packet
-  printf (
-    (far rom char *)"MR,%03u\n"
-    ,value
-  );
+  printf("MR,%lu\n", value);
+
+  print_ack();
 }
+
+#if 0
 
 // PD is for Pin Direction
 // "PD,<port>,<pin>,<direction><CR>"

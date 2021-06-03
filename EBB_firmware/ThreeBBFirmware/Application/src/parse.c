@@ -36,12 +36,13 @@ const parse_t commandTable[] =
 //  {'O', 'D', parseODCommand},
 //  {'I', 'D', parseIDCommand},
   {'V', 'R', commands_VRCommand},
+  {'V', 0x00, commands_VCommand},
 //  {'A', 'R', parseARCommand},
 //  {'P', 'I', parsePICommand},
 //  {'P', 'O', parsePOCommand},
 //  {'P', 'D', parsePDCommand},
-//  {'M', 'R', parseMRCommand},
-//  {'M', 'W', parseMWCommand},
+  {'M', 'R', commands_MRCommand},
+  {'M', 'W', commands_MWCommand},
 //  {'P', 'C', parsePCCommand},
 //  {'P', 'G', parsePGCommand},
   {'S', 'M', parseSMCommand},
@@ -103,10 +104,14 @@ void parsePacket(void)
   uint8_t i;
 
   // Always grab the first character (which is the first byte of the command)
-  command = toupper(g_RX_buf[g_RX_buf_out]);
+  command = toupper(g_RX_buf[g_RX_buf_out]) << 8;
   advance_RX_buf_out();
-  command = (command << 8) | toupper (g_RX_buf[g_RX_buf_out]);
-  advance_RX_buf_out();
+  // But only grab the second if it's something sane (numbers or letters)
+  if (g_RX_buf[g_RX_buf_out] >= '0' && g_RX_buf[g_RX_buf_out] <= '~')
+  {
+    command = command | toupper (g_RX_buf[g_RX_buf_out]);
+    advance_RX_buf_out();
+  }
 
   // Now 'command' is equal to two bytes of our command
   i = 0;

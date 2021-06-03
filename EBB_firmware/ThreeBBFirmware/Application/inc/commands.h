@@ -23,11 +23,12 @@ void commands_SCCommand(void);      // SC for Stepper/Servo Configure
 //void parseODCommand(void);     // O for output digital to pins
 //void parseIDCommand(void);     // I for input digital from pins
 void commands_VRCommand(void);      // VR for printing version
+void commands_VCommand(void);      // V for printing version
 //void parsePICommand(void);     // PI for reading a single pin
 //void parsePOCommand(void);     // PO for setting a single pin state
 //void parsePDCommand(void);     // PD for setting a pin's direction
-//void parseMRCommand(void);     // MR for Memory Read
-//void parseMWCommand(void);     // MW for Memory Write
+void commands_MRCommand(void);     // MR for Memory Read
+void commands_MWCommand(void);     // MW for Memory Write
 //void parseCUCommand(void);     // CU configures UBW (system wide parameters)
 //void parsePGCommand(void);     // PG Pulse Go
 //void parsePCCommand(void);     // PC Pulse Configure

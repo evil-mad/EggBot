@@ -18,7 +18,8 @@
 #endif
 
 /// TODO: Update so that version number is a define in a header file
-const char st_version[] = {"3BB Firmware Version 3.0.0\n"};
+// Note, deliberately not putting line ending on this string
+const char st_version[] = "3BB Firmware Version 3.0.0";
 
 // Flag set from ISR indicating that we need to initialize the 2209s
 volatile bool DriversNeedInit;

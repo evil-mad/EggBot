@@ -2,6 +2,92 @@ ThreeBeeBee (3BB) Readme.txt file
 
 == TODO ==
 
+  Completed Commands
+  * VR (software version)             (done)
+  * SM (Steper Move)                  (done) - for all 3 axies
+  * SP (Set Pen)                      (done) - only applies to servo, not pen stepper
+  * TP (Toggle Pen)                   (done) - only applies to servo, not pen stepper
+  * QP (Query Pen state)              (done)
+  * SC (Stepper/servo Configure)      (done) - only for 4, 5, 10, 11, 12 (pen servo parameters)
+  * S2 (General RC output)            (done)
+  * QR (Query Pen Power state)        (done)
+  * SR (Set RC Servo power timeout)   (done)
+  * DR (Driver register Read)         (done)
+  * DW (Driver register Write)        (done)
+  * SS (driver Serial Status)         (done)
+  
+  Commands to get working, in priority order
+  * V (Version, legacy, with \r\n at end, so PC software can identify what board it is connected to)
+  * XM (Stepper Move, mixed axis)
+  * EM (Enable Motors)
+  * HM (Home Motors/absolute move)
+  * LM (Low level Move)
+  * LT (Low level Timed move)
+  * QE (Query motor Enables/microstep)
+  * QG (Query General)
+  * QC (Query Current)
+  * QM (Query Motors)
+  * QS (Query Step position)
+  * CU (Configure User options)
+  * CS (Clear Step position)
+  * ES (E stop)
+  * RB (ReBoot)
+  * R (Reset)
+  * BL (enter BootLoader)
+  * ND (Node count Decrement)
+  * NI (Node count Increment)
+  * CN (Clear Node count)
+  * QN (Query Node count)
+  * CK (Check Input)
+  * QL (Query Layer)
+  * SL (Set Layer)
+  * SN (Set Node count)
+  * ST (Set 3BB nickname Tag)
+  * QT (Query nickname Tag)
+  * C (configure)
+  * PD (Pin Direction)
+  * PI (Pin Input)
+  * PO (Pin Output)
+  * QB (Query Button)
+  
+  Commands to add
+  * MW (Memory Write) - take 32 bit number, write to one of 512 locations in RAM
+  * MR (Memory Read) - read out 32 bit number from one of 512 locations in RAM
+
+  
+  Are these commands needed for 3BB?
+  * PC (Pulse Configure)
+  * PG (Pulse Go)
+  * SE (Set Engraver)
+  * O (Output)
+  * I (Input)
+  * A (Analog value get)
+  * AC (Analog Configure)
+  * T (Timed digital/analog read)
+  * MR (Memory Read) (old version, new version proposed above)
+  * MW (Memory Write)(old version, new version proposed above)
+
+  Parts of the board confirmed working
+  * MCU
+  * All six RC servo outputs
+  * RC servo power for S1
+  * Stepper Drivers
+    * External sense resistors
+    * UART communication (both directions)
+  * USB communications
+  * Both LEDs
+  * RESET and PRG buttons
+  * 3.3V power supply
+  * 5V power supply
+  * I/O header
+  
+  Parts of the board left to check out
+  * SCALED_5V and SCALED__V+ voltage monitoring ADC inptus
+  * Motor current sense ADC input on CUR_SNS
+  * Detecting stalls with Trinamic drivers? (What commands to use?)
+
+  Misc ToDo
+
   * Document the different timers used in RC servo outputs, and that within a timer the rising edges will be sychnonzied, but that between timers they won't be
   * Add EEPROM emulation layer
     - In one or more flash pages between bootloader and application
@@ -35,7 +121,7 @@ ThreeBeeBee (3BB) Readme.txt file
     - Answer (1/24/21 Windell) No. SP/TP should operate only on RC servo pen, and SM/XM should be used for all z-axis moves. Keep them separate. Maybe in the future we'll want to link them and have SP/TP control the z-axis stepper as well. 
     - Also, the PM will issue both sets of commands (RC servo and stepper) whenever it wants to create pen motion
     
-  * Should all printed lines end in just <CR>?
+  * Should all printed lines end in just <CR>? (NO! Use just Line Feed/new line - i.e. 0x0A, \n instead of Carrige Return 0x0D \r. Note that legacy "V" command will use \r\n at end, but that's the only one.)
   
   
 = Code Cleanup =
