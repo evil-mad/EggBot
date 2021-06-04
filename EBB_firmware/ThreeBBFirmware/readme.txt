@@ -15,9 +15,11 @@ ThreeBeeBee (3BB) Readme.txt file
   * DR (Driver register Read)         (done)
   * DW (Driver register Write)        (done)
   * SS (driver Serial Status)         (done)
+  * MW (Memory Write)                 (done) take 32 bit number, write to one of 512 locations in RAM
+  * MR (Memory Read)                  (done) read out 32 bit number from one of 512 locations in RAM
+  * V (Version)                       (done) legacy, with \r\n at end, so PC software can identify what board it is connected to
   
   Commands to get working, in priority order
-  * V (Version, legacy, with \r\n at end, so PC software can identify what board it is connected to)
   * XM (Stepper Move, mixed axis)
   * EM (Enable Motors)
   * HM (Home Motors/absolute move)
@@ -51,8 +53,6 @@ ThreeBeeBee (3BB) Readme.txt file
   * QB (Query Button)
   
   Commands to add
-  * MW (Memory Write) - take 32 bit number, write to one of 512 locations in RAM
-  * MR (Memory Read) - read out 32 bit number from one of 512 locations in RAM
 
   
   Are these commands needed for 3BB?
@@ -105,6 +105,8 @@ ThreeBeeBee (3BB) Readme.txt file
   * Why does UART traffic stop SysTick? That's not right. UART send/receive should not be killing interrupts. 
     - Problem was because all USB commands were happening in ISR context during USB receive. Fixed by moving command processing to main() loop, looking at flag set in USB ISR.
   * Add feature to re-init driver (over UART) if detected 12V power appears
+  * Do we want to keep the same error reporting format as EBB? ("!" followed by an error code and then string)
+  * Update all stepper move commands limit checking to use higher max step rate of 3BB (100Khz compared with 25Khz)
 
   -- COMMANDS --
   * Add command "QE" (for Query Enable Motor) which would return the current state of each motor driver's enable (either the actual enable pin or the enable bit in the register), as well as the

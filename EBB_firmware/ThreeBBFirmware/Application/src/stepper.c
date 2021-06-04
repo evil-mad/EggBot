@@ -202,17 +202,17 @@ void parseRMCommand(void)
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the the three axis values, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
-void parseSMCommand(void)
+void stepper_SMCommand(void)
 {
   uint32_t Duration = 0;
   int32_t A1Steps = 0, A2Steps = 0, A3Steps = 0;
   int32_t Steps = 0;
 
   // Extract each of the values.
-  extract_number (kUINT32, &Duration, kREQUIRED);
-  extract_number (kINT32, &A1Steps, kREQUIRED);
-  extract_number (kINT32, &A2Steps, kOPTIONAL);
-  extract_number (kINT32, &A3Steps, kOPTIONAL);
+  extract_number(kUINT32, &Duration, kREQUIRED);
+  extract_number(kINT32, &A1Steps, kREQUIRED);
+  extract_number(kINT32, &A2Steps, kOPTIONAL);
+  extract_number(kINT32, &A3Steps, kOPTIONAL);
 
   if (gLimitChecks)
   {
@@ -814,24 +814,30 @@ void parseHMCommand(void)
   }
 }
 
+#endif
+
 // The X Stepper Motor command
-// Usage: XM,<move_duration>,<axisA_steps>,<axisB_steps><CR>
+// Usage: XM,<move_duration>,<axisA_steps>,<axisB_steps>,<axisZ_steps><CR>
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
 // <axisA_steps> and <axisB_stetsp> are signed 24 bit numbers.
 // This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
 // machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
 // Axis2 = <axisA_steps> - <axisB_steps>.
-void parseXMCommand(void)
+// <axisZ_steps> is an optional signed 32 bit number which represents the number of steps that the Z Axis (3rd stepper - pen up/down)
+//  should move during this <move_duration>.
+void stepper_XMCommand(void)
 {
-  UINT32 Duration = 0;
-  INT32 A1Steps = 0, A2Steps = 0;
-  INT32 ASteps = 0, BSteps = 0;
-  INT32 Steps = 0;
+  uint32_t Duration = 0;
+  int32_t A1Steps = 0, A2Steps = 0;
+  int32_t ASteps = 0, BSteps = 0;
+  int32_t Steps = 0;
+  int32_t ZSteps = 0;
 
   // Extract each of the values.
-  extract_number (kUINT32, &Duration, kREQUIRED);
-  extract_number (kINT32, &ASteps, kREQUIRED);
-  extract_number (kINT32, &BSteps, kREQUIRED);
+  extract_number(kUINT32, &Duration, kREQUIRED);
+  extract_number(kINT32, &ASteps, kREQUIRED);
+  extract_number(kINT32, &BSteps, kREQUIRED);
+  extract_number(kINT32, &ZSteps, kOPTIONAL);
 
   // Check for invalid duration
   if (Duration == 0) 
@@ -842,7 +848,8 @@ void parseXMCommand(void)
   // Do the math to convert to Axis1 and Axis2
   A1Steps = ASteps + BSteps;
   A2Steps = ASteps - BSteps;
-    
+
+  /// TODO: Can this limit checking be turned into a function (it's used three times here and also in SM)
   // Check for too-fast step request (>25KHz)
   // First get absolute value of steps, then check if it's asking for >25KHz
   if (A1Steps > 0) 
@@ -856,24 +863,24 @@ void parseXMCommand(void)
   // Limit each parameter to just 3 bytes
   if (Duration > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n");
+    printf("!0 Err: <move_duration> larger than 16777215 ms.\n");
     return;
   }
   if (Steps > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n");
+    printf("!0 Err: <axis1> larger than 16777215 steps.\n");
     return;
   }
   // Check for too fast
   if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
   {
-    printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n");
+    printf("!0 Err: <axis1> step rate > 25K steps/second.\n");
     return;
   }
   // And check for too slow
   if ((Duration/1311) >= Steps && Steps != 0)
   {
-    printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n");
+    printf("!0 Err: <axis1> step rate < 1.31Hz.\n");
     return;
   }
 
@@ -886,35 +893,56 @@ void parseXMCommand(void)
   }    
   if (Steps > 0xFFFFFF) 
   {
-    printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n");
+    printf("!0 Err: <axis2> larger than 16777215 steps.\n");
     return;
   }
   if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
   {
-    printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n");
+    printf("!0 Err: <axis2> step rate > 25K steps/second.\n");
     return;
   }
   if ((Duration/1311) >= Steps && Steps != 0) 
   {
-    printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n");
+    printf("!0 Err: <axis2> step rate < 1.31Hz.\n");
     return;
   }
 
-    // Bail if we got a conversion error
+  if (ZSteps > 0)
+  {
+    Steps = ZSteps;
+  }
+  else {
+    Steps = -ZSteps;
+  }
+  if (Steps > 0xFFFFFF)
+  {
+    printf("!0 Err: <axis3> larger than 16777215 steps.\n");
+    return;
+  }
+  if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS)
+  {
+    printf("!0 Err: <axis3> step rate > 25K steps/second.\n");
+    return;
+  }
+  if ((Duration/1311) >= Steps && Steps != 0)
+  {
+    printf("!0 Err: <axis3> step rate < 1.31Hz.\n");
+    return;
+  }
+
+  // Bail if we got a conversion error
   if (error_byte)
   {
     return;
   }
 
-  // If we get here, we know that step rate for both A1 and A2 is
+  // If we get here, we know that step rate for both A1, A2 and Z are
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  /// TODO: Make into 3rd axis?
-  process_SM(Duration, A1Steps, A2Steps, 0);
+  process_SM(Duration, A1Steps, A2Steps, ZSteps);
 
   print_ack();
 }
 
-#endif
 
 // Main stepper move function. This is the reason EBB exists.
 // <Duration> is a 3 byte unsigned int, the number of mS that the move should take

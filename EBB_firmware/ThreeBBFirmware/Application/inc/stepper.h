@@ -19,16 +19,16 @@ extern volatile int32_t globalStepCounter1;
 extern volatile int32_t globalStepCounter2;
 extern volatile int32_t globalStepCounter3;
 
-void parseSMCommand(void);
-void parseAMCommand(void);
-void parseLMCommand(void);
-void parseHMCommand(void);
-void parseXMCommand(void);
-void parseEMCommand(void);
-void parseQMCommand(void);
-void parseESCommand(void);
-void parseQSCommand(void);
-void parseCSCommand(void);
+void stepper_SMCommand(void);
+void stepper_AMCommand(void);
+void stepper_LMCommand(void);
+void stepper_HMCommand(void);
+void stepper_XMCommand(void);
+void stepper_EMCommand(void);
+void stepper_QMCommand(void);
+void stepper_ESCommand(void);
+void stepper_QSCommand(void);
+void stepper_CSCommand(void);
 uint8_t process_QM(void);
 void process_SM(
   uint32_t Duration,
@@ -38,4 +38,3 @@ void process_SM(
 );
 
 #endif	/* STEPPER_H */
-
