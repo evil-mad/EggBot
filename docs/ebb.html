@@ -2677,6 +2677,17 @@ ul.no_bullets {
         and defaults to an off state at reset; see the <code><a href="#SR">SR</a></code> command.
         </p>
         
+        <p>Pins B1, B0, B2 and B3 are not 5-volt tolerant and any voltage above about 3.6V will damage them.
+        Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 6.0V.
+        </p>
+
+        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can easily be
+        used to read a switch by simply connecting a switch between the Port B pin and GND. Use the
+        <code><a href="#PI">PI</a></code> command to read the state of the switch. If that pin is not already 
+        an input at boot (see table below) you can make it an input using the <code><a href="#PD">PD</a></code> 
+        command.
+        </p>
+
         <p>In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include:
         PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0. Every pin on PortB,
         PortC and RA6 can source or sink up to 25mA each. All other pins can source or sink up to 4mA each.
@@ -2707,54 +2718,63 @@ ul.no_bullets {
               <td>Pin</td>
               <td>Default Direction</td>
               <td>Default State</td>
+              <td>5V Tolerant?</td>
               <td>Typical application</td>
             </tr>
             <tr>
               <td>RB0</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>No</td>
               <td>Alternate PRG/Pause button input; see <code><a href="#QB">QB</a></code></td>
             </tr>
             <tr>
               <td>RB1</td>
               <td>Output</td>
               <td>RC Servo Pulses</td>
+              <td>No</td>
               <td>Pen lift servo output; see <code><a href="#SC">SC</a></code>, <code><a href="#SP">SP</a></code></td>
             </tr>
             <tr>
               <td>RB2</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>No</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB3</td>
               <td>Output</td>
               <td>Low</td>
+              <td>No</td>
               <td>Engraver or laser PWM output control</td>
             </tr>
             <tr>
               <td>RB4</td>
               <td>Output</td>
               <td>Low</td>
+              <td>Yes</td>
               <td>Alternate Pen Up/Down I/O (solenoid/laser)</td>
             </tr>
             <tr>
               <td>RB5</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB6</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB7</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
           </tbody>
