@@ -2678,11 +2678,11 @@ ul.no_bullets {
         </p>
         
         <p>Pins B1, B0, B2 and B3 are not 5-volt tolerant and any voltage above about 3.6V will damage them.
-        Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 6.0V.
+        Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 5.5V.
         </p>
 
-        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can easily be
-        used to read a switch by simply connecting a switch between the Port B pin and GND. Use the
+        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can  be
+        used to read a switch by connecting a switch between the Port B pin and GND. Use the
         <code><a href="#PI">PI</a></code> command to read the state of the switch. If that pin is not already 
         an input at boot (see table below) you can make it an input using the <code><a href="#PD">PD</a></code> 
         command.
@@ -2718,7 +2718,7 @@ ul.no_bullets {
               <td>Pin</td>
               <td>Default Direction</td>
               <td>Default State</td>
-              <td>5V Tolerant?</td>
+              <td>5V Tolerant</td>
               <td>Typical application</td>
             </tr>
             <tr>
