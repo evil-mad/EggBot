@@ -79,6 +79,14 @@ uint16_t gPulseCounters[4] = {0,0,0,0};
 // For MR and MW commands, array to store RAM cookies
 static uint32_t Cookies[NUMBER_OF_RAM_COOKIES];
 
+
+/* REMOVE WHEN DONE
+ * WITH LEGACY
+ * MODE
+ */
+// For QL/SL commands. Stores current layer from Inkscape
+static uint8_t LegacyLayer;
+
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
 /************** PRIVATE FUNCTIONS *********************************************/
@@ -950,3 +958,36 @@ void parseT2Command()
   print_ack();
 }
 #endif
+
+
+/*****************************************************************************************/
+/*     THESE COMMANDS GO AWAWY AFTER WE NO LONGER NEED "LEGACY" MODE                     */
+/*****************************************************************************************/
+
+
+// Set Layer
+// Usage: SL,<NewLayer><CR>
+void commands_SLCommand(void)
+{
+  // Extract each of the values.
+  extract_number (kUINT8, &LegacyLayer, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  print_ack();
+}
+
+// Query Layer
+// Usage: QL<CR>
+// Returns: <Layer><CR>
+// OK<CR>
+void commands_QLCommand(void)
+{
+  printf ("%03i\n", LegacyLayer);
+
+  print_ack();
+}

@@ -18,16 +18,22 @@ ThreeBeeBee (3BB) Readme.txt file
   * MW (Memory Write)                 (done) take 32 bit number, write to one of 512 locations in RAM
   * MR (Memory Read)                  (done) read out 32 bit number from one of 512 locations in RAM
   * V (Version)                       (done) legacy, with \r\n at end, so PC software can identify what board it is connected to
+  * XM (Stepper Move, mixed axis)     (done)
+  * QL (Query Layer)                  (done - legacy only)
+  * SL (Set Layer)                    (done - legacy only)
   
   Commands to get working, in priority order
-  * XM (Stepper Move, mixed axis)
   * EM (Enable Motors)
+  * PI (Pin Input)
+  * PD (Pin Direction)
+  * PO (Pin Output)
+  * QC (Query Current)
+
   * HM (Home Motors/absolute move)
   * LM (Low level Move)
   * LT (Low level Timed move)
   * QE (Query motor Enables/microstep)
   * QG (Query General)
-  * QC (Query Current)
   * QM (Query Motors)
   * QS (Query Step position)
   * CU (Configure User options)
@@ -41,15 +47,10 @@ ThreeBeeBee (3BB) Readme.txt file
   * CN (Clear Node count)
   * QN (Query Node count)
   * CK (Check Input)
-  * QL (Query Layer)
-  * SL (Set Layer)
   * SN (Set Node count)
   * ST (Set 3BB nickname Tag)
   * QT (Query nickname Tag)
   * C (configure)
-  * PD (Pin Direction)
-  * PI (Pin Input)
-  * PO (Pin Output)
   * QB (Query Button)
   
   Commands to add
@@ -86,7 +87,7 @@ ThreeBeeBee (3BB) Readme.txt file
   * Motor current sense ADC input on CUR_SNS
   * Detecting stalls with Trinamic drivers? (What commands to use?)
 
-  Misc ToDo
+  Misc ToDo 
 
   * Document the different timers used in RC servo outputs, and that within a timer the rising edges will be sychnonzied, but that between timers they won't be
   * Add EEPROM emulation layer

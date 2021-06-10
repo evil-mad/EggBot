@@ -122,8 +122,6 @@ void Error_Handler(void);
 #define G0_GPIO_Port GPIOC
 #define G1_Pin GPIO_PIN_11
 #define G1_GPIO_Port GPIOC
-#define SWO_Pin GPIO_PIN_3
-#define SWO_GPIO_Port GPIOB
 #define P1_Pin GPIO_PIN_4
 #define P1_GPIO_Port GPIOB
 #define P2_Pin GPIO_PIN_5

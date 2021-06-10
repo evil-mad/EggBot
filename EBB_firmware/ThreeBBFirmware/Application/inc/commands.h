@@ -38,5 +38,10 @@ void commands_MWCommand(void);     // MW for Memory Write
 //void parseMRCommand(void);     // MR Motors Run command
 //void parseRBCommand(void);     // RB ReBoot command
 
+/// THESE GO AWAY ONCE WE DON'T NEED "LEGACY" MODE ANYMORE
+void commands_QLCommand(void);     // QL For Query Layer
+void commands_SLCommand(void);     // MW for Set Layer
+
+
 #endif	/* COMMANDS_H */
 

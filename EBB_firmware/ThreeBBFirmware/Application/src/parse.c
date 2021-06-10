@@ -54,8 +54,8 @@ const parse_t commandTable[] =
   {'S', 'C', commands_SCCommand},
 //  {'S', 'N', parseSNCommand},
 //  {'Q', 'N', parseQNCommand},
-//  {'S', 'L', parseSLCommand},
-//  {'Q', 'L', parseQLCommand},
+  {'S', 'L', commands_SLCommand},
+  {'Q', 'L', commands_QLCommand},
 //  {'Q', 'B', parseQBCommand},
 //  {'N', 'I', parseNICommand},
 //  {'N', 'D', parseNDCommand},
@@ -121,6 +121,9 @@ void parsePacket(void)
     if (command == testCommand)
     {
       commandTable[i].func();
+      ITM_SendChar(commandTable[i].c1);
+      ITM_SendChar(commandTable[i].c2);
+      ITM_SendChar('\n');
       break;
     }
     i++;

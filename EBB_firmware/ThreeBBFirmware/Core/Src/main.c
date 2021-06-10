@@ -66,6 +66,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define CPU_CORE_FREQUENCY_HZ 168000000 /* CPU core frequency in Hz */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -81,7 +82,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
 /* USER CODE BEGIN PFP */
 void USB_Run(void);
 
@@ -141,6 +141,7 @@ int main(void)
   MX_TIM8_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
+  SWO_Init(0x1, CPU_CORE_FREQUENCY_HZ);
   RetargetInit();
   DebugInit();
   servo_Init();
