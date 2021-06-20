@@ -66,7 +66,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define CPU_CORE_FREQUENCY_HZ 168000000 /* CPU core frequency in Hz */
+
+#define CPU_CORE_FREQUENCY_HZ 170000000 /* CPU core frequency in Hz */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/

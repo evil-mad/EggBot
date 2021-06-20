@@ -573,21 +573,3 @@ void serial_DWCommand(void)
 
   print_ack();
 }
-
-/*
- * SS command (Serial Stats)
- * 
- * "SS<CR>"
- * 
- * This command replies with:
- * "SS,<FramingErrorCounter>,<OverrunErrorCounter><CR>"
- * And then resets both values.
- */
-void serial_SSCommand(void)
-{
-  printf("SS,%u,%u\n", FramingErrorCounter, OverrunErrorCounter);
-  FramingErrorCounter = 0;
-  OverrunErrorCounter = 0;
-  
-  print_ack();
-}
