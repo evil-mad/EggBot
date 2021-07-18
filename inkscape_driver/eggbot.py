@@ -3,7 +3,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.3, dated December 23, 2020.
+# Version 2.8.4, dated July 18, 2021.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1021,7 +1021,7 @@ class EggBot(inkex.Effect):
 
     def penDown(self):
         self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-        if self.bPenIsUp:  # Continue only if pen state is up (or unknown)
+        if self.bPenIsUp or self.bPenIsUp == None:  # Continue only if pen state is up (or unknown)
             if not self.resumeMode and not self.bStopped:  # skip if we're resuming or stopped
                 self.bPenIsUp = False
                 if self.penDownActivatesEngraver:
