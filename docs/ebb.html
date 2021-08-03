@@ -243,6 +243,7 @@ ul.no_bullets {
           <li><a href="#PO">PO</a> &mdash; Pin Output</li>
           <li><a href="#QB">QB</a> &mdash; Query Button</li>
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
+          <li><a href="#QE">QE</a> &mdash; Query motor Enables and microstep resolutions</li>
           <li><a href="#QG">QG</a> &mdash; Query General</li>
           <li><a href="#QL">QL</a> &mdash; Query Layer</li>
           <li><a href="#QM">QM</a> &mdash; Query Motors</li>
@@ -277,7 +278,7 @@ ul.no_bullets {
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -298,7 +299,7 @@ ul.no_bullets {
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;&lt;CR&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
           <li>
             NOTE 1: The EBB's analog inputs are only rated for up to 3.3 V. Be careful not to put higher voltages on them (including 5 V) or you may damage the pin.
@@ -525,10 +526,10 @@ ul.no_bullets {
         <h4><a name="EM"></a> "EM" &mdash; Enable Motors</h4>
  
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>[,<i>Enable2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>,<i>Enable2</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <p>
                 For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor. This command is also used to set the step resolution of the stepper motors.
@@ -577,6 +578,8 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode</li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
+            <p>Starting with v2.8.0, this command is placed on the motion FIFO along with the other motion commands so that
+            it occurs at a precise time in the motion sequence.</p>
             <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
           </li>
         </ul>
@@ -621,7 +624,7 @@ ul.no_bullets {
         <h4><a name="ES"></a>"ES" &mdash; E Stop</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>ES&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span><br />
             <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
@@ -631,6 +634,9 @@ ul.no_bullets {
             <span style="font-weight: bold;">Description:</span>
             <p>
               Use this command to abort any in-progress motor move (SM) Command. This command will also delete any motor move command (SM) from the FIFO. It will immediately stop the motors, but leave them energized.
+            </p>
+            <p>
+              For versions v2.8.0 and above there is an optional parameter <code>DisableMotors</code>. If <code>DisableMotors</code> is set to 1, then this command will not only stop all motion but will also disable both stepper motors.
             </p>
             <p>Returned values:</p>
             <ul>
@@ -654,18 +660,28 @@ ul.no_bullets {
               <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>  
-            Added in v2.2.7 
-            <p>
-              Prior to v2.2.9, this command will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
-            </p>
-            <p>Returned values:</p>
+            <span style="font-weight: bold;">Version History:</span>
             <ul>
               <li>
-                <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                <p>v2.8.0</p>
+                <p>
+                  In versions v2.8.0 and beyond, the optional <code>DisableMotors</code> parameter is accepted.
+                </p>
               </li>
               <li>
-                <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                <p>Added in v2.2.7</p>
+                <p>
+                  Prior to v2.2.9, this command will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
+                </p>
+                <p>Returned values:</p>
+                <ul>
+                  <li>
+                    <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                  <li>
+                    <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -753,7 +769,7 @@ ul.no_bullets {
             <code>
               LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -928,7 +944,7 @@ ul.no_bullets {
             <code>
               LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1392,6 +1408,60 @@ ul.no_bullets {
             <p>
               Note also that this command only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
             </p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+
+        <h4><a name="QE"></a>"QE" &mdash; Query motor Enables and microstep resolutions</h4>
+  
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              Reads the current state of the motor enable pins and the microstep resolution pins. It then returns two values which encode the motor enable/disable
+              state and (if enabled) microstep resolution.
+            </p>
+            <p>
+              There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the
+              two values returned by this command will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
+              never show that the two motors are both enabled and have different microstep resolutions.
+            </p>
+            <p>The two returned values are:</p>
+            <ul>
+              <li>
+                <i>MOTOR1_STATE</i>
+                <p>
+                <ul>
+                  <li>0: Motor 1 is disabled</li>
+                  <li>1: Motor 1 is enabled and is set to full step</li>
+                  <li>2: Motor 1 is enabled and is set to 1/2 steps</li>
+                  <li>4: Motor 1 is enabled and is set to 1/4 steps</li>
+                  <li>8: Motor 1 is enabled and is set to 1/8 steps</li>
+                  <li>16: Motor 1 is enabled and is set to 1/16 steps</li>
+                </ul>
+                </p>
+              </li>
+              <li>
+                <i>MOTOR2_STATE</i>
+                <p>Same as for MOTOR1_STATE but for Motor 2.
+                </p>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <p>Both motors are enabled and set to 1/16th microsteps.</p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <p>Motor 1 is disabled and motor 2 is enabled an set to 1/4 steps.</p>
           </li>
         </ul>
 
@@ -2163,7 +2233,7 @@ ul.no_bullets {
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gtCR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2607,6 +2677,17 @@ ul.no_bullets {
         and defaults to an off state at reset; see the <code><a href="#SR">SR</a></code> command.
         </p>
         
+        <p>Pins B1, B0, B2 and B3 are not 5-volt tolerant and any voltage above about 3.6V will damage them.
+        Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 5.5V.
+        </p>
+
+        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can  be
+        used to read a switch by connecting a switch between the Port B pin and GND. Use the
+        <code><a href="#PI">PI</a></code> command to read the state of the switch. If that pin is not already 
+        an input at boot (see table below) you can make it an input using the <code><a href="#PD">PD</a></code> 
+        command.
+        </p>
+
         <p>In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include:
         PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0. Every pin on PortB,
         PortC and RA6 can source or sink up to 25mA each. All other pins can source or sink up to 4mA each.
@@ -2637,54 +2718,63 @@ ul.no_bullets {
               <td>Pin</td>
               <td>Default Direction</td>
               <td>Default State</td>
+              <td>5V Tolerant</td>
               <td>Typical application</td>
             </tr>
             <tr>
               <td>RB0</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>No</td>
               <td>Alternate PRG/Pause button input; see <code><a href="#QB">QB</a></code></td>
             </tr>
             <tr>
               <td>RB1</td>
               <td>Output</td>
               <td>RC Servo Pulses</td>
+              <td>No</td>
               <td>Pen lift servo output; see <code><a href="#SC">SC</a></code>, <code><a href="#SP">SP</a></code></td>
             </tr>
             <tr>
               <td>RB2</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>No</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB3</td>
               <td>Output</td>
               <td>Low</td>
+              <td>No</td>
               <td>Engraver or laser PWM output control</td>
             </tr>
             <tr>
               <td>RB4</td>
               <td>Output</td>
               <td>Low</td>
+              <td>Yes</td>
               <td>Alternate Pen Up/Down I/O (solenoid/laser)</td>
             </tr>
             <tr>
               <td>RB5</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB6</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
             <tr>
               <td>RB7</td>
               <td>Input</td>
               <td>Weak pull up</td>
+              <td>Yes</td>
               <td>General</td>
             </tr>
           </tbody>

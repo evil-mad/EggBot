@@ -1021,7 +1021,7 @@ class EggBot(inkex.Effect):
 
     def penDown(self):
         self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-        if self.bPenIsUp:  # Continue only if pen state is up (or unknown)
+        if self.bPenIsUp or self.bPenIsUp == None::  # Continue only if pen state is up (or unknown)
             if not self.resumeMode and not self.bStopped:  # skip if we're resuming or stopped
                 self.bPenIsUp = False
                 if self.penDownActivatesEngraver:
