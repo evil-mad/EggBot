@@ -240,11 +240,6 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
   0x00000001       // GSTAT
 };
 
-// Count the total number of framing errors seen
- static uint8_t FramingErrorCounter;
-// Count the total number of overrun errors seen
- static uint8_t OverrunErrorCounter;
-
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data);
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg);
 void CalcCRC(uint8_t* datagram, uint8_t datagramLength);
@@ -442,7 +437,7 @@ void serial_TurnOffTX(void)
 void serial_InitDrivers(void)
 {
   uint8_t i;
-  uint32_t reg;
+//  uint32_t reg;
   serial_TurnOnTX();
   for (i=0; i < MAX_DRIVER_INIT_VALUES; i++)
   {

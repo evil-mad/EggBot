@@ -54,7 +54,6 @@ void serial_InitDrivers(void);
 void serial_Init(void);
 void serial_DRCommand(void);
 void serial_DWCommand(void);
-void serial_SSCommand(void);
 void serial_TurnOnTX(void);
 void serial_TurnOffTX(void);
 

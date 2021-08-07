@@ -81,7 +81,6 @@ const parse_t commandTable[] =
 //  {'H', 'M', parseHMCommand},
   {'D', 'R', serial_DRCommand},
   {'D', 'W', serial_DWCommand},
-  {'S', 'S', serial_SSCommand},
 #if defined(DEBUG)
 //  {'S', 'H', ParseSHCommand},
 #endif

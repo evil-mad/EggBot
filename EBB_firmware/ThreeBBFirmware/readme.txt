@@ -54,7 +54,7 @@ ThreeBeeBee (3BB) Readme.txt file
   * QB (Query Button)
   
   Commands to add
-
+  * Add "FULL" vs "OK" reply to all motion queue commands based on high water mark (need new command for setting this)
   
   Are these commands needed for 3BB?
   * PC (Pulse Configure)
