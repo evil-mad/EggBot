@@ -1125,8 +1125,8 @@ class EggBot(inkex.Effect):
             n_time = int(math.ceil(1000.0 / self.fSpeed * plot_utils.distance(n_delta_x, n_delta_y)))
 
             while abs(n_delta_x) > 0 or abs(n_delta_y) > 0:
-                xd = n_delta_x
-                yd = n_delta_y
+                xd = int(n_delta_x)
+                yd = int(n_delta_y)
                 td = n_time
                 if td < 1:
                     td = 1  # don't allow zero-time moves.
