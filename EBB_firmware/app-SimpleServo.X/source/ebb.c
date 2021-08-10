@@ -40,7 +40,7 @@
 // 2.1.1 11/21/10- Removed Microchip USB stack v2.7, replaced it with v2.8 from MAL 2010_10_19,
 //					Also using generic Microchip folder now rather than re-named one (simpler to update)
 //				   Updated code in main.c (and others) to match updates from latest MAL CDC example
-// 2.1.1cTest1 01/17/11 - Added third paramter to SP command to use any PortB pin for servo output
+// 2.1.1cTest1 01/17/11 - Added third parameter to SP command to use any PortB pin for servo output
 //                 For this version only - used PortB2 as standard servo output
 // 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
 //                 - Updated check_and_send_TX_data() to allow unlimited data to go out without overrunning

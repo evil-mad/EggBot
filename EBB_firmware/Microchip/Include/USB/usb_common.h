@@ -468,7 +468,7 @@ stalled (ie. bit 0 = EP0, bit 1 = EP1, etc.)
         USBInitialize must have been called to initialize the USB SW
         Stack.
         
-    Paramters:
+    Parameters:
         USB_EVENT event   - Identifies the bus event that occured
         void *data        - Pointer to event-specific data
         unsigned int size - Size of the event-specific data
