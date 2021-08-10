@@ -1036,11 +1036,11 @@ void ProcessIO(void)
 		}
 		if (bittst (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
 		{
-			printf ((far rom char *)"!6 Err: Invalid paramter value\r\n");
+			printf ((far rom char *)"!6 Err: Invalid parameter value\r\n");
 		}
 		if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
 		{
-			printf ((far rom char *)"!7 Err: Extra parmater\r\n");
+			printf ((far rom char *)"!7 Err: Extra parameter\r\n");
 		}
 		error_byte = 0;
 	}
@@ -1599,8 +1599,8 @@ void parse_R_packet(void)
 }
 
 // CU is "Configure UBW" and controls system-wide configuration values
-// "CU,<parameter_number>,<paramter_value><CR>"
-// <paramter_number>	<parameter_value>
+// "CU,<parameter_number>,<parameter_value><CR>"
+// <parameter_number>	<parameter_value>
 // 1					{1|0} turns on or off the 'ack' ("OK" at end of packets)
 void parse_CU_packet(void)
 {
@@ -2913,7 +2913,7 @@ void parse_PC_packet (void)
 // interval.
 //
 // Usage:
-// PG,1<CR>		Start pulses, or load latest set of paramters and use them
+// PG,1<CR>		Start pulses, or load latest set of parameters and use them
 // PG,0<CR>		Stop pulses
 void parse_PG_packet (void)
 {

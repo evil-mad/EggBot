@@ -182,7 +182,7 @@ extern unsigned char usbCcidBulkInEndpoint[USB_EP_SIZE];	//User application buff
     PreCondition:
         usbCcidBulkInTrfState must be in the USB_CCID_BULK_IN_READY state.
         
-    Paramters:
+    Parameters:
         pDdata  : Pointer to the starting location of data bytes
         len     : Number of bytes to be transferred
         

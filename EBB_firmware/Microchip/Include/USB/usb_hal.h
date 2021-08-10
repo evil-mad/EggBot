@@ -630,7 +630,7 @@ BOOL USBHALSetEpConfiguration ( BYTE ep_num, UINT16 max_pkt_size, UINT16 flags )
     Precondition:
         The system has been initialized.
         
-    Paramters:
+    Parameters:
         flags -  Initialization flags
         
     Return Values:

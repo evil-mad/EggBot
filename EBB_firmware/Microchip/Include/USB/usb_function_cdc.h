@@ -511,7 +511,7 @@
         The USB stack should have reached the CONFIGURED_STATE prior
         to calling this API function for the first time.
         
-    Paramters:
+    Parameters:
         pDdata  : Pointer to the starting location of data bytes
         len     : Number of bytes to be transferred
         

@@ -560,7 +560,7 @@ typedef union
     PreCondition:
         None
 
-    Paramters:
+    Parameters:
         errors - Bitmap of the error status bits (caller sets the bets
                  it wishes to clear).
 

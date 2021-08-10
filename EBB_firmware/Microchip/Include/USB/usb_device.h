@@ -1601,7 +1601,7 @@ USB_HANDLE USBGetNextHandle(BYTE ep_num, BYTE ep_dir);
     PreCondition:
         None
         
-    Paramters:
+    Parameters:
         options - the various options that you want
                   when sending the control data. Options are:
                        USB_EP0_ROM
