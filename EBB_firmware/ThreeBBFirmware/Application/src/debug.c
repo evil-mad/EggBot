@@ -72,10 +72,11 @@ void DebugInit(void)
 
 void SWO_PrintString(const char *s)
 {
-  while(*s != '\0')
-  {
-    ITM_SendChar((uint32_t)*s++);
-  }
+/// TODO: Enabling this hangs us for some reason (after a few commands). Why? This should work.
+//  while(*s != '\0')
+//  {
+//    ITM_SendChar((uint32_t)*s++);
+//  }
 }
 
 /*!

@@ -232,7 +232,7 @@ void ProcessIO(void)
     }
     if (bittst (error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
     {
-      printf ((far rom char *)"!7 Err: Extra parmater\r\n");
+      printf ((far rom char *)"!7 Err: Extra parameter\r\n");
     }
     error_byte = 0;
   }

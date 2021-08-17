@@ -120,9 +120,10 @@ void parsePacket(void)
     if (command == testCommand)
     {
       commandTable[i].func();
-      ITM_SendChar(commandTable[i].c1);
-      ITM_SendChar(commandTable[i].c2);
-      ITM_SendChar('\n');
+/// TODO: Figure out why uncommenting this hangs us
+//      ITM_SendChar(commandTable[i].c1);
+//      ITM_SendChar(commandTable[i].c2);
+//      ITM_SendChar('\n');
       break;
     }
     i++;

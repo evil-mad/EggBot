@@ -89,6 +89,9 @@ ThreeBeeBee (3BB) Readme.txt file
 
   Misc ToDo 
 
+  * Convert ISR over to using table for I/O, and loop for 3 steppers like XMount does
+  * Add default 'EBB' mode, and a new command to switch to 3BB mode
+  * Figure out why SWO locks up software when enabled
   * Document the different timers used in RC servo outputs, and that within a timer the rising edges will be sychnonzied, but that between timers they won't be
   * Add EEPROM emulation layer
     - In one or more flash pages between bootloader and application
