@@ -52,7 +52,7 @@
 #include "stm32g4xx_hal.h"
 #include "parse.h"
 //#include "fifo.h"
-//#include "main.h"
+#include "main.h"
 #include "servo.h"
 //#include "analog.h"
 #include "utility.h"
@@ -839,22 +839,43 @@ void LongDelay(void)
   }
   //Delay is ~59.8ms at 48MHz.
 }
+#endif
 
 // BL command : simply jump to the bootloader
 // Example: "BL<CR>"
 void parseBLCommand()
 {
-  // First, kill interrupts though
-  INTCONbits.GIEH = 0;  // Turn high priority interrupts on
-  INTCONbits.GIEL = 0;  // Turn low priority interrupts on
+  // First, kill interrupts
+  __disable_irq();
 
-  UCONbits.SUSPND = 0;  //Disable USB module
-  UCON = 0x00;          //Disable USB module
+  // Turn off USB
+  HAL_DeInit();
+
   //And wait awhile for the USB cable capacitance to discharge down to disconnected (SE0) state. 
   //Otherwise host might not realize we disconnected/reconnected when we do the reset.
-  LongDelay();
-  _asm goto 0x00001E _endasm
+  uint32_t t = HAL_GetTick();
+
+  while ((HAL_GetTick() - t) < 500)
+  {
+    ;
+  }
+
+  // Set the magic value that will cause the bootloader to know we called it and we want it to run
+  BL_FORCE_RAMLOC = BL_FORCE_RUN_MAGIC;
+
+  // Now jump to the bootloader
+
+  /* Function pointer to the address of the bootloader. */
+  uint32_t jump_addr = *((__IO uint32_t*)(BOOTLOADER_ADDR+4u));
+
+  /* Change the main stack pointer. */
+  __set_MSP(*(__IO uint32_t*)BOOTLOADER_ADDR);
+  SCB->VTOR = BOOTLOADER_ADDR;
+
+  ((void (*) (void)) (jump_addr)) ();
 }
+
+#if 0
 
 // RB ReBoot command : simply jump to the reset vector
 // Example: "RB<CR>"

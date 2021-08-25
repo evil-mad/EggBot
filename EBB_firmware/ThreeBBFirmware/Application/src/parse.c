@@ -59,7 +59,7 @@ const parse_t commandTable[] =
 //  {'Q', 'B', parseQBCommand},
 //  {'N', 'I', parseNICommand},
 //  {'N', 'D', parseNDCommand},
-//  {'B', 'L', parseBLCommand},
+  {'B', 'L', parseBLCommand},
 //  {'T', '1', parseT1Command},
 //  {'T', '2', parseT2Command},
 //  {'Q', 'C', parseQCCommand},

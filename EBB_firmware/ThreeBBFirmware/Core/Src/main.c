@@ -86,6 +86,7 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void USB_Run(void);
+void swoInit (uint32_t portMask, uint32_t cpuCoreFreqHz, uint32_t baudrate);
 
 /* USER CODE END PFP */
 
@@ -143,7 +144,7 @@ int main(void)
   MX_TIM8_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
-  SWO_Init(0x1, CPU_CORE_FREQUENCY_HZ);
+  Debug_SWOInit(0x00000001, CPU_CORE_FREQUENCY_HZ, 2000000);
   RetargetInit();
   DebugInit();
   servo_Init();
@@ -155,6 +156,7 @@ int main(void)
   DriversNeedInit = true;
   queue_NeedsInit = true;
 
+  printf("3BB Application Starting.\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */
