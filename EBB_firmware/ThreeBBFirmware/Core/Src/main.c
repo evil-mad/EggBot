@@ -86,7 +86,6 @@
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void USB_Run(void);
-void swoInit (uint32_t portMask, uint32_t cpuCoreFreqHz, uint32_t baudrate);
 
 /* USER CODE END PFP */
 
@@ -112,6 +111,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
+  /* Change the main stack pointer. */
+  __set_MSP(*(__IO uint32_t*)0x08008000);
+  SCB->VTOR = 0x08008000;
 
   /* USER CODE END 1 */
 
@@ -156,7 +159,7 @@ int main(void)
   DriversNeedInit = true;
   queue_NeedsInit = true;
 
-  printf("3BB Application Starting.\n");
+  SWOprintf("3BB Application Starting.\n");
   /* USER CODE END 2 */
 
   /* Infinite loop */

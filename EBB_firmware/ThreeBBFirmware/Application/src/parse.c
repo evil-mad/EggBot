@@ -7,8 +7,7 @@
 #include "stepper.h"
 #include "commands.h"
 #include "servo.h"
-//#include "ebb.h"
-//#include "analog.h"
+#include "main.h"
 #include "serial.h"
 #include "usbd_cdc_if.h"
 
@@ -120,10 +119,7 @@ void parsePacket(void)
     if (command == testCommand)
     {
       commandTable[i].func();
-/// TODO: Figure out why uncommenting this hangs us
-//      ITM_SendChar(commandTable[i].c1);
-//      ITM_SendChar(commandTable[i].c2);
-//      ITM_SendChar('\n');
+      SWOprintf("Cmd:%c%c\n", commandTable[i].c1, commandTable[i].c2);
       break;
     }
     i++;
@@ -131,7 +127,7 @@ void parsePacket(void)
   if (commandTable[i].c1 == 0x00)
   {
     // Send back 'unknown command' error
-    printf (
+    printf(
        "!8 Err: Unknown command '%c%c:%4X'\n"
       ,(uint8_t)(command >> 8)
       ,(uint8_t)command

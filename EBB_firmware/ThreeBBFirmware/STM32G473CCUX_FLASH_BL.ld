@@ -38,7 +38,7 @@ MEMORY
 {
   NO_INIT_RAM  (rw)    : ORIGIN = 0x20000000,   LENGTH =   64
   RAM         (xrw)    : ORIGIN = 0x20000040,   LENGTH = (128K - 64)
-  FLASH        (rx)    : ORIGIN = 0x08000000,   LENGTH = 224K
+  FLASH        (rx)    : ORIGIN = 0x08008000,   LENGTH = 224K
 }
 
 /* Sections */

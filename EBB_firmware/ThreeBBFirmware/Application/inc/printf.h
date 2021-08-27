@@ -56,8 +56,11 @@ void _putchar(char character);
  * and internal underscore-appended functions like printf_() are used
  * \param format A string that specifies the format of the output
  * \return The number of characters that are written into the array, not counting the terminating null character
+ *
+ * Brian Schmalz Modification Note: So that we don't conflict with the built-in printf() which goes to the USB serial
+ * channel, we use SWOprintf for this library.
  */
-#define printf printf_
+#define SWOprintf printf_
 int printf_(const char* format, ...);
 
 
