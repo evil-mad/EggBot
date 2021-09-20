@@ -21,6 +21,8 @@
 #include "tim.h"
 
 /* USER CODE BEGIN 0 */
+#include "debug.h"
+#include "isr.h"
 
 /* USER CODE END 0 */
 
@@ -500,6 +502,17 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 }
 
 /* USER CODE BEGIN 1 */
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  if (htim == &htim6)
+  {
+    DEBUG_G3_SET();
+    ISR_MotionISR();
+    DEBUG_G3_RESET();
+  }
+}
+
 
 /* USER CODE END 1 */
 

@@ -1,22 +1,69 @@
+/*********************************************************************
+ *
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        stepper.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
+ */
+
+/*
+ * This module implements the stepper command functionality
+ */
+
+/* Includes ------------------------------------------------------------------*/
+
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include "parse.h"
 #include "HardwareProfile.h"
-//#include "ebb.h"
 #include "utility.h"
 #include "isr.h"
 #include "fifo.h"
-//#include "Compiler.h"
-//#include "servo.h"
-//#include "math.h"
+#include "main.h"
+#include "debug.h"
+#include "servo.h"
+#include "commands.h"
 #include "stepper.h"
 
+/* Private typedef -----------------------------------------------------------*/
+
+
+
+/* Private define ------------------------------------------------------------*/
 
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
 #define OVERFLOW_MUL            (0x8000 / HIGH_ISR_TICKS_PER_MS)
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* These values hold the global step position of each axis */
 volatile int32_t globalStepCounter1;
@@ -26,8 +73,25 @@ volatile int32_t globalStepCounter3;
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 bool gLimitChecks = true;
 
+
+/* Private function prototypes -----------------------------------------------*/
+
 /* Local function definitions */
 void clear_StepCounters(void);
+
+/* Private functions ---------------------------------------------------------*/
+
+
+
+
+
+
+/* Public functions ---------------------------------------------------------*/
+
+
+
+
+
 
 #if 0
 // Enable Motor

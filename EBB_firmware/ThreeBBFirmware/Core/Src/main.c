@@ -51,7 +51,6 @@
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
 #include "retarget.h"
-#include "isr.h"
 #include "debug.h"
 #include "servo.h"
 #include "serial.h"
@@ -92,16 +91,6 @@ void USB_Run(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-  if (htim == &htim6)
-  {
-    DEBUG_G3_SET();
-    high_ISR();
-    DEBUG_G3_RESET();
-  }
-}
-
 /* USER CODE END 0 */
 
 /**
@@ -111,10 +100,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+#if defined(USING_BOOTLOADER)
   /* Change the main stack pointer. */
   __set_MSP(*(__IO uint32_t*)0x08008000);
   SCB->VTOR = 0x08008000;
+#endif
 
   /* USER CODE END 1 */
 

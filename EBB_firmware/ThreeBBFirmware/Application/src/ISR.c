@@ -1,18 +1,46 @@
+/*********************************************************************
+ *
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        ISR.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
+ */
+
+/*
+ * This module implements the
+ */
+
+/* Includes ------------------------------------------------------------------*/
+
 #include "main.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "isr.h"
+#include "ISR.h"
 #include "HardwareProfile.h"
 #include "debug.h"
-//#include "ebb.h"
-#include "fifo.h"
-//#include "analog.h"
-//#include "delays.h"
+#include "FIFO.h"
 #include "stepper.h"
 #include "servo.h"
-//#include "solenoid.h"
 #include "commands.h"
 #include "utility.h"
+
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private define ------------------------------------------------------------*/
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
 
 // Constantly incrementing every 1ms in ISR global tick counter
 volatile uint32_t TickCounterMS;
@@ -23,10 +51,28 @@ volatile uint8_t GlobalDelayMS;
 
 volatile uint8_t DriverInitDelayMS;
 
-// ISR now at 100KHz
-void high_ISR(void)
+/* Private function prototypes -----------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+
+/* Public functions ---------------------------------------------------------*/
+
+
+
+/*
+ * Main interrupt service routine
+ * Runs at 100kHz (EBB is at 25kHz)
+ * Called from tim.c's HAL_TIM_PeriodElapsedCallback() when TIM6 fires
+ * This routine looks at the currently executing command in the move fifo,
+ * and 'runs' it. For example, the primary command is moving stepper motors:
+ *   Step through each of the 3 stepper motors. For each one, check to see
+ *   if it is moving, and if so, see if it needs to take a step. Do the math
+ *   for acceleration as well, just like on EBB.
+ * But also check for servo changes and other move commands in the fifo.
+ */
+void ISR_MotionISR(void)
 {
-  // Accumulators (at 25Khz) used to determine when to take a step
+  // Accumulators (at 100kHz) used to determine when to take a step
   static uint32_t StepAcc[NUMBER_OF_STEPPERS];
   static uint8_t OutByte;
   static bool TookStep;
@@ -264,6 +310,10 @@ void high_ISR(void)
 ///    }
 ///DEBUG_G0_RESET();
 }
+
+
+
+
 
 #if 0
 void low_ISR(void)
