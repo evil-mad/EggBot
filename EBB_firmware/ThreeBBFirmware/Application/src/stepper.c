@@ -74,6 +74,21 @@ volatile int32_t globalStepCounter3;
 bool gLimitChecks = true;
 
 
+/* Pin table for stepper control */
+const SteppersIO_t SteppersIO[NUMBER_OF_STEPPERS] = {
+    {DIR_ALT_GPIO_Port,    DIR_ALT_Pin,    STP_ALT_GPIO_Port,    STP_ALT_Pin    },   // MOTOR1
+    {DIR_AZ_GPIO_Port,     DIR_AZ_Pin,     STP_AZ_GPIO_Port,     STP_AZ_Pin     },   // MOTOR2
+    {DIR_ZOOM1_GPIO_Port,  DIR_ZOOM1_Pin,  STP_ZOOM1_GPIO_Port,  STP_ZOOM1_Pin  },   // MOTOR3
+};
+
+// Actual array for all values used for each stepper
+volatile Steppers_t Steppers[NUMBER_OF_STEPPERS] = {
+    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR1
+    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR2
+    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR3
+};
+
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Local function definitions */
