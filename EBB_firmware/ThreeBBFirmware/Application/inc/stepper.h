@@ -1,16 +1,32 @@
-/* 
- * File:   stepper.h
- * Author: Brian Schmalz
+/*********************************************************************
  *
- * Created on May 27, 2020, 4:07 PM
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        stepper.h
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
  */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef STEPPER_H
 #define	STEPPER_H
 
+/* Includes ------------------------------------------------------------------*/
 #include <stdbool.h>
 #include <stdint.h>
 #include "main.h"
+#include "FIFO.h"
+
+/* Exported types ------------------------------------------------------------*/
 
 // Structure to hold step and direction pin values for a stepper
 // This is separate from Steppers array because this never changes
@@ -24,26 +40,20 @@ typedef struct {
 // Structure for all important changing values related to one stepper in the Steppers table
 /// Todo: Make some of these volatile and not the whole struct?
 typedef struct {
-  int32_t   TargetPosition;     // Target (global) position in global 1/256th steps
   uint32_t  StepAdd;            // Amount to add to SteppAcc every ISR (determines speed)
   int32_t   StepAddInc;         // (future) For acceleration, how much to add to StepAdd each ISR
   uint32_t  StepAcc;            // Step accumulator
   int32_t   GlobalPosition;     // Current global position in 1/256th macro steps
-  uint32_t  MoveID;             // User assigned ID for this move
-  uint32_t  FinishedMoveID;     // The MoveID of the last move that finished which needs to be printed
-  uint8_t   PrintReply;         // Movement on this stepper has finished (set by ISR, cleared by mainline)
   uint8_t   Microsteps;         // Current microstep value - same as set by SP command (0 = 256th, 8 = full steps)
 } Steppers_t;
 
+/* Exported constants --------------------------------------------------------*/
 
-// How many stepper motors does this board support? (3BB has 3)
-#define NUMBER_OF_STEPPERS      3
+/* Exported macros -----------------------------------------------------------*/
 
-/* These values hold the global step position of each axis */
-extern volatile int32_t globalStepCounter1;
-extern volatile int32_t globalStepCounter2;
-extern volatile int32_t globalStepCounter3;
+/* Exported functions --------------------------------------------------------*/
 
+uint8_t stepper_Step(StepperCommand_t * cmdPtr);
 void stepper_SMCommand(void);
 void stepper_AMCommand(void);
 void stepper_LMCommand(void);

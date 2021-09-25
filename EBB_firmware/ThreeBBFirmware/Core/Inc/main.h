@@ -153,6 +153,9 @@ void Error_Handler(void);
 #define P5_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
+// How many stepper motors does this board support? (3BB has 3)
+#define NUMBER_OF_STEPPERS      3
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

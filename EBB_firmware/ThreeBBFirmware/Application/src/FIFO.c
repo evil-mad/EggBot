@@ -1,9 +1,9 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
- * FileName:        servo.c
+ * FileName:        FIFO.c
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
@@ -11,6 +11,8 @@
  *
  * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -123,7 +125,11 @@ void queue_WaitForEmpty(void)
 }
 
 // Add a new stepper motion command to the motion queue
-void queue_AddStepperCommandToQueue(int32_t stepAdd[NUMBER_OF_STEPPERS], int32_t stepAddInc[NUMBER_OF_STEPPERS], uint32_t stepsCounter[NUMBER_OF_STEPPERS], uint8_t dirBits)
+void queue_AddStepperCommandToQueue(
+    int32_t stepAdd[NUMBER_OF_STEPPERS],
+    int32_t stepAddInc[NUMBER_OF_STEPPERS],
+    uint32_t stepsCounter[NUMBER_OF_STEPPERS],
+    uint8_t dir[NUMBER_OF_STEPPERS])
 {
   uint8_t i;
 
@@ -134,8 +140,8 @@ void queue_AddStepperCommandToQueue(int32_t stepAdd[NUMBER_OF_STEPPERS], int32_t
     Queue[QueueIn].Data.Stepper.StepAdd[i] = stepAdd[i];
     Queue[QueueIn].Data.Stepper.StepsCounter[i] = stepsCounter[i];
     Queue[QueueIn].Data.Stepper.StepAddInc[i] = stepAddInc[i];
+    Queue[QueueIn].Data.Stepper.Dir[i] = dir[i];
   }
-  Queue[QueueIn].Data.Stepper.DirBits = dirBits;
   Queue[QueueIn].DelayCounter = 0;
   Queue[QueueIn].Command = COMMAND_MOTOR_MOVE;
 

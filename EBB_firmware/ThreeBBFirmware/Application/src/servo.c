@@ -88,7 +88,7 @@
 #include "tim.h"
 #include "parse.h"
 #include "utility.h"
-#include "fifo.h"
+#include "FIFO.h"
 #include "isr.h"
 #include "debug.h"
 #include "main.h"

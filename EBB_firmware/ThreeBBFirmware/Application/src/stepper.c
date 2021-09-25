@@ -51,34 +51,14 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* These values hold the global step position of each axis */
-volatile int32_t globalStepCounter1;
-volatile int32_t globalStepCounter2;
-volatile int32_t globalStepCounter3;
-
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 bool gLimitChecks = true;
 
-
 /* Pin table for stepper control */
 const SteppersIO_t SteppersIO[NUMBER_OF_STEPPERS] = {
-    {DIR_ALT_GPIO_Port,    DIR_ALT_Pin,    STP_ALT_GPIO_Port,    STP_ALT_Pin    },   // MOTOR1
-    {DIR_AZ_GPIO_Port,     DIR_AZ_Pin,     STP_AZ_GPIO_Port,     STP_AZ_Pin     },   // MOTOR2
-    {DIR_ZOOM1_GPIO_Port,  DIR_ZOOM1_Pin,  STP_ZOOM1_GPIO_Port,  STP_ZOOM1_Pin  },   // MOTOR3
+    {DIR1_GPIO_Port,  DIR1_Pin, STEP1_GPIO_Port,  STEP1_Pin},   // MOTOR1
+    {DIR2_GPIO_Port,	DIR2_Pin, STEP2_GPIO_Port,  STEP2_Pin},   // MOTOR2
+    {DIR3_GPIO_Port,	DIR3_Pin, STEP3_GPIO_Port,  STEP3_Pin},   // MOTOR3
 };
 
 // Actual array for all values used for each stepper
@@ -103,6 +83,59 @@ void clear_StepCounters(void);
 
 /* Public functions ---------------------------------------------------------*/
 
+/*
+ * Called from the 100kHz ISR if the current FIFO command is COMMAND_MOTOR_MOVE
+ * Loop through all motors and Perform all of the work of see if any motors
+ * need a step, acceleration, etc.
+ * Returns true if the command is complete (no more steps to take)
+ */
+uint8_t stepper_Step(StepperCommand_t * cmdPtr)
+{
+  uint8_t stepper;
+  int8_t dir;
+  uint8_t done = true;
+
+  /// TODO: We only need to set up and output the DIR bits once, when we first start the move. No need to waste time after that.
+
+  // Loop through all 3 steppers
+  for (stepper = 0; stepper < NUMBER_OF_STEPPERS; stepper++)
+  {
+    // Only check for needed stepping if there are steps left to take
+    if (cmdPtr->StepsCounter[stepper] != 0)
+    {
+      done = false;
+      // Make sure to Set the direction bit properly
+      if (cmdPtr->Dir[stepper])
+      {
+        SteppersIO[stepper].DirPort->BSRR = (uint32_t)SteppersIO[stepper].DirPin;
+        dir = 1;
+      }
+      else
+      {
+        SteppersIO[stepper].DirPort->BRR = (uint32_t)SteppersIO[stepper].DirPin;
+        dir = -1;
+      }
+
+      // Add increment value to accumulator, then see if highest bit is set
+      Steppers[stepper].StepAcc += cmdPtr->StepAdd[stepper];
+
+      if (Steppers[stepper].StepAcc & 0x80000000)
+      {
+        // Set the step bit
+        SteppersIO[stepper].StepPort->BSRR = (uint32_t)SteppersIO[stepper].StepPin;
+        // Do the housekeeping math
+        Steppers[stepper].StepAcc = Steppers[stepper].StepAcc & 0x7FFFFFFF;
+        cmdPtr->StepsCounter[stepper]--;
+        Steppers[stepper].GlobalPosition += dir;
+        // Clear the step bit
+        SteppersIO[stepper].StepPort->BSRR = (uint32_t)SteppersIO[stepper].StepPin;
+      }
+      // For acceleration, we now add a bit to StepAdd each time through as well
+      cmdPtr->StepAdd[stepper] += cmdPtr->StepAddInc[stepper];
+    }
+  }
+  return done;
+}
 
 
 
@@ -1040,7 +1073,7 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
   uint32_t temp1 = 0;
   uint32_t temp2 = 0;
   uint32_t remainder = 0;
-  uint8_t dirBits = 0;
+  uint8_t dir[NUMBER_OF_STEPPERS];
   int32_t stepAdd[NUMBER_OF_STEPPERS];
   int32_t stepAddInc[NUMBER_OF_STEPPERS];
   uint32_t stepsCounter[NUMBER_OF_STEPPERS];
@@ -1059,7 +1092,9 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
   }
   else
   {
-    dirBits = 0;
+    dir[0] = 0;
+    dir[1] = 0;
+    dir[2] = 0;
 
     // Always enable both motors when we want to move them
 ///    Enable1IO = ENABLE_MOTOR;
@@ -1070,17 +1105,17 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
     // First, set the direction bits
     if (a1Stp < 0)
     {
-      dirBits |= DIR1_BIT;
+      dir[0] = 1;
       a1Stp = -a1Stp;
     }
     if (a2Stp < 0)
     {
-      dirBits |= DIR2_BIT;
+      dir[1] = 1;
       a2Stp = -a2Stp;
     }
     if (a3Stp < 0)
     {
-      dirBits |= DIR3_BIT;
+      dir[2] = 1;
       a3Stp = -a3Stp;
     }
 
@@ -1234,7 +1269,7 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
     //    );
 
     // Add the stepper command to the motion queue
-    queue_AddStepperCommandToQueue(stepAdd, stepAddInc, stepsCounter, dirBits);
+    queue_AddStepperCommandToQueue(stepAdd, stepAddInc, stepsCounter, dir);
   }
 
   print_ack();
