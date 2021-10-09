@@ -89,7 +89,7 @@
 # Make inset settable in selected units as well.
 
 # Current software version:
-# (v2.4.0, August 8, 2021)
+# (v2.4.1, October 9, 2021<)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
