@@ -83,15 +83,15 @@ bool gLimitChecks = true;
 /* Pin table for stepper control */
 const SteppersIO_t SteppersIO[NUMBER_OF_STEPPERS] = {
     {DIR1_GPIO_Port,  DIR1_Pin, STEP1_GPIO_Port,  STEP1_Pin},   // MOTOR1
-    {DIR2_GPIO_Port,	DIR2_Pin, STEP2_GPIO_Port,  STEP2_Pin},   // MOTOR2
-    {DIR3_GPIO_Port,	DIR3_Pin, STEP3_GPIO_Port,  STEP3_Pin},   // MOTOR3
+    {DIR2_GPIO_Port,  DIR2_Pin, STEP2_GPIO_Port,  STEP2_Pin},   // MOTOR2
+    {DIR3_GPIO_Port,  DIR3_Pin, STEP3_GPIO_Port,  STEP3_Pin},   // MOTOR3
 };
 
 // Actual array for all values used for each stepper
 volatile Steppers_t Steppers[NUMBER_OF_STEPPERS] = {
-    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR1
-    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR2
-    {0, 0x10000000, 0, 0, 0, 0, 0, false, 0},   // MOTOR3
+    {0, 0x10000000, 0, 0, 0},   // MOTOR1
+    {0, 0x10000000, 0, 0, 0},   // MOTOR2
+    {0, 0x10000000, 0, 0, 0},   // MOTOR3
 };
 
 
