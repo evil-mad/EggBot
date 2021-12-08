@@ -1,9 +1,9 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
- * FileName:        servo.c
+ * FileName:        debug.c
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
@@ -11,6 +11,8 @@
  *
  * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -94,7 +96,7 @@
 #include "main.h"
 
 
-/************** MODULE TYPEDEFS ************************************************/
+/************** PRIVATE TYPEDEFS **********************************************/
 
 typedef enum
 {
@@ -104,7 +106,7 @@ typedef enum
 } PenStateType;
 
 
-/************** MODULE DEFINES ************************************************/
+/************** PRIVATE DEFINES ***********************************************/
 
 // Which of the six RC servo outputs (P0-P5) is the pen lift servo on
 #define SERVO_PEN_UP_DOWN_SERVO_PIN             1

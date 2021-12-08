@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
  * FileName:        commands.c
@@ -11,6 +11,8 @@
  *
  * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -60,7 +62,9 @@
 //#include "init.h"
 #include "commands.h"
 
-/************** MODULE DEFINES ************************************************/
+/************** PRIVATE TYPEDEFS **********************************************/
+
+/************** PRIVATE DEFINES ***********************************************/
 
 // How many 'addresses' of 32-bit RAM variables should the MR/MW commands have
 #define NUMBER_OF_RAM_COOKIES   512

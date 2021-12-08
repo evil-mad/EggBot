@@ -1,9 +1,9 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
- * FileName:        servo.c
+ * FileName:        serial.c
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
@@ -11,6 +11,8 @@
  *
  * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -51,6 +53,7 @@
  * driver chips (for configuration and status).
  */
 
+/************** INCLUDES ******************************************************/
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -63,6 +66,10 @@
 #include "parse.h"
 #include "isr.h"
 #include "debug.h"
+
+/************** PRIVATE TYPEDEFS **********************************************/
+
+/************** PRIVATE DEFINES ***********************************************/
 
 // The number of 32-bit init values to send to the drivers over serial
 #define MAX_DRIVER_INIT_VALUES      4
@@ -102,6 +109,7 @@
 // 32-bit mask representing the 'reset' bit in the GSTAT register
 #define GSTAT_RESET_MASK            0x00000001UL
 
+/************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
 static const uint8_t DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
@@ -240,10 +248,15 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
   0x00000001       // GSTAT
 };
 
+/************** PRIVATE FUNCTION PROTOTYPES ***********************************/
+
+
 void WriteDatagram(uint8_t addr, uint8_t reg, uint32_t data);
 uint32_t ReadDatagram(uint8_t addr, uint8_t reg);
 void CalcCRC(uint8_t* datagram, uint8_t datagramLength);
 void WriteOTP(uint8_t addr, uint32_t data, uint32_t mask);
+
+/************** PRIVATE FUNCTIONS *********************************************/
 
 
 
@@ -404,6 +417,7 @@ uint32_t ReadDatagram(uint8_t addr, uint8_t reg)
   return retval.word;
 }
 
+/************** PUBLIC FUNCTIONS **********************************************/
 
 void serial_TurnOnTX(void)
 {

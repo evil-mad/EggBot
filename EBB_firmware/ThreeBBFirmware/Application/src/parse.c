@@ -1,3 +1,54 @@
+/*********************************************************************
+ *
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        parse.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+
+/************** INCLUDES ******************************************************/
 
 #include <ctype.h>
 #include <stdio.h>
@@ -11,20 +62,23 @@
 #include "serial.h"
 #include "usbd_cdc_if.h"
 
-// This byte has each of its bits used as a separate error flag
-uint8_t error_byte;
-
-// Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
-bool g_ack_enable = true;
-
-static bool extractHexDigits(uint32_t * acc, uint8_t digits);
-static bool extractDecDigits(uint32_t * acc, uint8_t digits);
+/************** PRIVATE TYPEDEFS **********************************************/
 
 typedef struct {
   uint8_t c1;
   uint8_t c2;
   void (*func)(void);
 } const parse_t;
+
+/************** PRIVATE DEFINES ***********************************************/
+
+/************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
+
+// This byte has each of its bits used as a separate error flag
+uint8_t error_byte;
+
+// Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
+bool g_ack_enable = true;
 
 const parse_t commandTable[] =
 {
@@ -86,6 +140,15 @@ const parse_t commandTable[] =
   {0x00, 0x00, NULL},             // Table terminator. Must have c1=0x00
 };
 
+
+/************** PRIVATE FUNCTION PROTOTYPES ***********************************/
+
+static bool extractHexDigits(uint32_t * acc, uint8_t digits);
+static bool extractDecDigits(uint32_t * acc, uint8_t digits);
+
+/************** PRIVATE FUNCTIONS *********************************************/
+
+/************** PUBLIC FUNCTIONS **********************************************/
 
 /*
  *  Look at the new packet, see what command it is, and 

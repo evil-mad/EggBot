@@ -1,68 +1,103 @@
-/**
-  ******************************************************************************
-  * @file    system_stm32g4xx.c
-  * @author  MCD Application Team
-  * @brief   CMSIS Cortex-M4 Device Peripheral Access Layer System Source File
-  *
-  *   This file provides two functions and one global variable to be called from
-  *   user application:
-  *      - SystemInit(): This function is called at startup just after reset and
-  *                      before branch to main program. This call is made inside
-  *                      the "startup_stm32g4xx.s" file.
-  *
-  *      - SystemCoreClock variable: Contains the core clock (HCLK), it can be used
-  *                                  by the user application to setup the SysTick
-  *                                  timer or configure other parameters.
-  *
-  *      - SystemCoreClockUpdate(): Updates the variable SystemCoreClock and must
-  *                                 be called whenever the core clock is changed
-  *                                 during program execution.
-  *
-  *   After each device reset the HSI (16 MHz) is used as system clock source.
-  *   Then SystemInit() function is called, in "startup_stm32g4xx.s" file, to
-  *   configure the system clock before to branch to main program.
-  *
-  *   This file configures the system clock as follows:
-  *=============================================================================
-  *-----------------------------------------------------------------------------
-  *        System Clock source                    | HSI
-  *-----------------------------------------------------------------------------
-  *        SYSCLK(Hz)                             | 16000000
-  *-----------------------------------------------------------------------------
-  *        HCLK(Hz)                               | 16000000
-  *-----------------------------------------------------------------------------
-  *        AHB Prescaler                          | 1
-  *-----------------------------------------------------------------------------
-  *        APB1 Prescaler                         | 1
-  *-----------------------------------------------------------------------------
-  *        APB2 Prescaler                         | 1
-  *-----------------------------------------------------------------------------
-  *        PLL_M                                  | 1
-  *-----------------------------------------------------------------------------
-  *        PLL_N                                  | 16
-  *-----------------------------------------------------------------------------
-  *        PLL_P                                  | 7
-  *-----------------------------------------------------------------------------
-  *        PLL_Q                                  | 2
-  *-----------------------------------------------------------------------------
-  *        PLL_R                                  | 2
-  *-----------------------------------------------------------------------------
-  *        Require 48MHz for RNG                  | Disabled
-  *-----------------------------------------------------------------------------
-  *=============================================================================
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
+/* USER CODE BEGIN Header */
+/*********************************************************************
+ *
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        stm32g4xx_it.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * @brief   CMSIS Cortex-M4 Device Peripheral Access Layer System Source File
+ *
+ *   This file provides two functions and one global variable to be called from
+ *   user application:
+ *      - SystemInit(): This function is called at startup just after reset and
+ *                      before branch to main program. This call is made inside
+ *                      the "startup_stm32g4xx.s" file.
+ *
+ *      - SystemCoreClock variable: Contains the core clock (HCLK), it can be used
+ *                                  by the user application to setup the SysTick
+ *                                  timer or configure other parameters.
+ *
+ *      - SystemCoreClockUpdate(): Updates the variable SystemCoreClock and must
+ *                                 be called whenever the core clock is changed
+ *                                 during program execution.
+ *
+ *   After each device reset the HSI (16 MHz) is used as system clock source.
+ *   Then SystemInit() function is called, in "startup_stm32g4xx.s" file, to
+ *   configure the system clock before to branch to main program.
+ *
+ *   This file configures the system clock as follows:
+ *=============================================================================
+ *-----------------------------------------------------------------------------
+ *        System Clock source                    | HSI
+ *-----------------------------------------------------------------------------
+ *        SYSCLK(Hz)                             | 16000000
+ *-----------------------------------------------------------------------------
+ *        HCLK(Hz)                               | 16000000
+ *-----------------------------------------------------------------------------
+ *        AHB Prescaler                          | 1
+ *-----------------------------------------------------------------------------
+ *        APB1 Prescaler                         | 1
+ *-----------------------------------------------------------------------------
+ *        APB2 Prescaler                         | 1
+ *-----------------------------------------------------------------------------
+ *        PLL_M                                  | 1
+ *-----------------------------------------------------------------------------
+ *        PLL_N                                  | 16
+ *-----------------------------------------------------------------------------
+ *        PLL_P                                  | 7
+ *-----------------------------------------------------------------------------
+ *        PLL_Q                                  | 2
+ *-----------------------------------------------------------------------------
+ *        PLL_R                                  | 2
+ *-----------------------------------------------------------------------------
+ *        Require 48MHz for RNG                  | Disabled
+ *-----------------------------------------------------------------------------
+ *=============================================================================
+ */
+/* USER CODE END Header */
 
 /** @addtogroup CMSIS
   * @{

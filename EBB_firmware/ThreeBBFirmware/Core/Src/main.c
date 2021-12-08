@@ -1,44 +1,80 @@
 /* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
+/*********************************************************************
+ *
+ *                3BB Firmware
+ *
+ *********************************************************************
+ * FileName:        stm32g4xx_it.c
+ * Company:         Schmalz Haus LLC
+ * Author:          Brian Schmalz
+ *
+ * Software License Agreement
+ *
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
+ * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
+ *
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of
+ * its contributors may be used to endorse or promote products
+ * derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ *
+ ******************************************************************************
+ * Timer Use
+ * ----------
+ * TIM1    Not currently used
+ * TIM2    Not currently used (could be used for STEP1/STEP2/STEP3)
+ * TIM3    RC Servo outputs (CH1->P1, CH2->P2)
+ * TIM4    RC Servo outputs (CH1->P3, CH2->P4, CH3->P5)
+ * TIM5    Not currently used
+ * TIM6    Generates 100Khz "high_isr()" for step/dir pulse generation
+ * TIM7    Not currently used
+ * TIM8    RC Servo output (CH1->P0)
+ * TIM15   Not currently used
+ * TIM16   Not currently used
+ * TIM17   Not currently used
+ * TIM20   Not currently used
+ *
+ *
+ *
+ *
+ *
+ *
+ ******************************************************************************
   *
-  * <h2><center>&copy; Copyright (c) 2020 Brian Schmalz.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  * Timer Use
-  * ----------
-  * TIM1    Not currently used
-  * TIM2    Not currently used (could be used for STEP1/STEP2/STEP3)
-  * TIM3    RC Servo outputs (CH1->P1, CH2->P2)
-  * TIM4    RC Servo outputs (CH1->P3, CH2->P4, CH3->P5)
-  * TIM5    Not currently used
-  * TIM6    Generates 100Khz "high_isr()" for step/dir pulse generation
-  * TIM7    Not currently used
-  * TIM8    RC Servo output (CH1->P0)
-  * TIM15   Not currently used
-  * TIM16   Not currently used
-  * TIM17   Not currently used
-  * TIM20   Not currently used
-  *
-  *
-  *
-  *
-  *
-  *
-  ******************************************************************************
-  *
-  */
+ */
 /* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
