@@ -296,32 +296,6 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  static bool LEDOn = false;
-
-  DEBUG_G0_SET();
-
-  RXDataAvailable = true;
-  RXDataBuf = Buf;
-  RXDataLen = Len;
-
-  if (LEDOn)
-  {
-    USR_LED_GPIO_Port->BSRR =  (uint32_t)USR_LED_Pin;
-    LEDOn = false;
-  }
-  else
-  {
-    USR_LED_GPIO_Port->BRR =  (uint32_t)USR_LED_Pin;
-    LEDOn = true;
-  }
-
-  DEBUG_G0_RESET();
-
-  return USBD_OK;
-}
-
-static void processRXData(void)
-{
   /* USER CODE BEGIN 6 */
   static bool in_cr = false;
   static bool in_esc = false;
