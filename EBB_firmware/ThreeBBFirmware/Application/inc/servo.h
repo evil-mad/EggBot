@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
  * FileName:        servo.h
@@ -9,8 +9,10 @@
  *
  * Software License Agreement
  *
- * Copyright (c) 2020, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -46,8 +48,9 @@
  * SUCH DAMAGE.
  */
 
-#ifndef SERVO_H
-#define SERVO_H
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __SERVO_H__
+#define __SERVO_H__
 
 void servo_Init(void);
 void servo_SPCommand(void);

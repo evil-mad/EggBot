@@ -1,18 +1,18 @@
 /*********************************************************************
  *
- *                BBFirmware
+ *                3BB Firmware
  *
  *********************************************************************
  * FileName:        HardwareProfile.h
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
- * Based on original files by Microchip Inc. in MAL USB example.
- *
  * Software License Agreement
  *
- * Copyright (c) 2014-2020, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -48,8 +48,12 @@
  * SUCH DAMAGE.
  */
 
-#ifndef HARDWARE_PROFILE_H
-#define HARDWARE_PROFILE_H
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __HARDWARE_PROFILE_H__
+#define __HARDWARE_PROFILE_H__
+
+/************** INCLUDES ******************************************************/
 
 
   /** Board definition ***********************************************/

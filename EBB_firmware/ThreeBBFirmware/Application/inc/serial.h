@@ -1,16 +1,18 @@
 /*********************************************************************
  *
- *                ThreeBotBoard Firmware
+ *                3BB Firmware
  *
  *********************************************************************
- * FileName:        serial.h
+ * FileName:        srial.h
  * Company:         Schmalz Haus LLC
  * Author:          Brian Schmalz
  *
  * Software License Agreement
  *
- * Copyright (c) 2020, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2020-2021, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
+ * Based on EiBotBoard (EBB) Firmware, written by Brian Schmalz of
+ *   Schmalz Haus LLC
  *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
@@ -46,9 +48,9 @@
  * SUCH DAMAGE.
  */
 
-
-#ifndef SERIAL_H
-#define	SERIAL_H
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __SERIAL_H__
+#define __SERIAL_H__
 
 void serial_InitDrivers(void);
 void serial_Init(void);
