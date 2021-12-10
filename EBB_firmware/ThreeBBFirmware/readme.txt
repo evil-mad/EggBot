@@ -89,7 +89,6 @@ ThreeBeeBee (3BB) Readme.txt file
 
   Misc ToDo 
 
-  * Convert ISR over to using table for I/O, and loop for 3 steppers like XMount does
   * Add default 'EBB' mode, and a new command to switch to 3BB mode
   * Figure out why SWO locks up software when enabled
   * Document the different timers used in RC servo outputs, and that within a timer the rising edges will be sychnonzied, but that between timers they won't be
@@ -111,6 +110,8 @@ ThreeBeeBee (3BB) Readme.txt file
   * Add feature to re-init driver (over UART) if detected 12V power appears
   * Do we want to keep the same error reporting format as EBB? ("!" followed by an error code and then string)
   * Update all stepper move commands limit checking to use higher max step rate of 3BB (100Khz compared with 25Khz)
+
+  * Convert ISR over to using table for I/O, and loop for 3 steppers like XMount does (done)
 
   -- COMMANDS --
   * Add command "QE" (for Query Enable Motor) which would return the current state of each motor driver's enable (either the actual enable pin or the enable bit in the register), as well as the
