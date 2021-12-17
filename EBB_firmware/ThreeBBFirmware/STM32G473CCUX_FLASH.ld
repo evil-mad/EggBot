@@ -36,8 +36,8 @@ _Min_Stack_Size = 0x400 ;	/* required amount of stack */
 /* Memories definition */
 MEMORY
 {
-  NO_INIT_RAM  (rw)    : ORIGIN = 0x20000000,   LENGTH =   64
-  RAM         (xrw)    : ORIGIN = 0x20000040,   LENGTH = (128K - 64)
+  NO_INIT_RAM  (rw)    : ORIGIN = 0x20000000,   LENGTH = 0x40
+  RAM         (xrw)    : ORIGIN = 0x20000040,   LENGTH = (128K - 0x40)
   FLASH        (rx)    : ORIGIN = 0x08000000,   LENGTH = 224K
 }
 
@@ -137,24 +137,6 @@ SECTIONS
     
   } >RAM AT> FLASH
 
-  /* Noinit, noload RAM section for passing commands to/from APP */
-  .noinit (NOLOAD):
-  {
-    . = ALIGN(4);
-    _noinit = .;
-
-    *(.noinit .noinit.*)
-
-    . = ALIGN(4) ;
-    _end_noinit = .;
-  } > NO_INIT_RAM
-
-  /* Mandatory to be word aligned, _sbrk assumes this */
-  PROVIDE ( end = _end_noinit ); /* was _ebss */
-  PROVIDE ( _end = _end_noinit );
-  PROVIDE ( __end = _end_noinit );
-  PROVIDE ( __end__ = _end_noinit );
-
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :
@@ -181,6 +163,23 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
+
+  /* Noinit, noload RAM section for passing commands to/from APP */
+  .noinit (NOLOAD):
+  {
+    . = ALIGN(4);
+    _noinit = .;
+
+    *(.noinit .noinit.*)
+
+    . = ALIGN(4) ;
+    _end_noinit = .;
+  } >NO_INIT_RAM
+  /* Mandatory to be word aligned, _sbrk assumes this */
+  PROVIDE ( end = _end_noinit );
+  PROVIDE ( _end = _end_noinit );
+  PROVIDE ( __end = _end_noinit );
+  PROVIDE ( __end__ = _end_noinit );
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

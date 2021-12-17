@@ -114,6 +114,9 @@
 
 /* USER CODE BEGIN PV */
 
+/// TODO: Use this for good, not evil. (for communciating with bootloader)
+int xxx_counter __attribute__((section (".noinit")));
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
