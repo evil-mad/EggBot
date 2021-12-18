@@ -76,11 +76,14 @@ void commands_MWCommand(void);     // MW for Memory Write
 //void parseCUCommand(void);     // CU configures UBW (system wide parameters)
 //void parsePGCommand(void);     // PG Pulse Go
 //void parsePCCommand(void);     // PC Pulse Configure
-void parseBLCommand(void);     // BL Boot Load command
+void commands_BLCommand(void);     // BL Boot Load command
 //void parseT1Command(void);     // T1 Test command for input parameters
 //void parseT2Command(void);     // T1 Test command for input parameters
 //void parseMRCommand(void);     // MR Motors Run command
 //void parseRBCommand(void);     // RB ReBoot command
+void commands_QCCommand(void);    // QC command for query voltages
+void commands_QBCommand(void);    // QB command for Query Button
+
 
 /// THESE GO AWAY ONCE WE DON'T NEED "LEGACY" MODE ANYMORE
 void commands_QLCommand(void);     // QL For Query Layer

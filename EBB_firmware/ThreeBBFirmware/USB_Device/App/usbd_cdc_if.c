@@ -337,6 +337,8 @@ static void processRXData(void){
     {
       tst_char = RXDataBuf[byte_cnt];
 
+      SWOprintf("%c", tst_char);
+
       // Check to see if we are in a CR/LF situation
       if (
         !in_cr

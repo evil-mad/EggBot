@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "usbd_cdc_if.h"
+#include "debug.h"
+#include "printf.h"
 
 #if !defined(OS_USE_SEMIHOSTING)
 
@@ -40,11 +42,18 @@ int _isatty(int fd)
 int _write(int fd, char* ptr, int len)
 {
   uint8_t status;
+  uint16_t i;
 
   if (fd == STDOUT_FILENO || fd == STDERR_FILENO)
   {
     status = CDC_Transmit_FS((uint8_t *) ptr, len);
-///    status = HAL_UART_Transmit(gHuart, (uint8_t *) ptr, len, HAL_MAX_DELAY);
+
+    for (i=0; i < len; i++)
+    {
+      SWOprintf("%c", ptr[i]);
+    }
+
+    ///    status = HAL_UART_Transmit(gHuart, (uint8_t *) ptr, len, HAL_MAX_DELAY);
     if (status == USBD_OK)
     {
       return len;

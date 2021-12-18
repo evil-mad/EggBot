@@ -161,7 +161,6 @@ uint8_t stepper_Step(StepperCommand_t * cmdPtr)
 
 
 
-#if 0
 // Enable Motor
 // Usage: EM,<EnableAxis1>,<EnableAxis2><CR>
 // Everything after EnableAxis1 is optional
@@ -186,7 +185,7 @@ uint8_t stepper_Step(StepperCommand_t * cmdPtr)
 // Note that the MSx lines do not come to any headers, so even when an external
 // source is controlling the drivers, the PIC still needs to control the
 // MSx lines.
-void parseEMCommand(void)
+void stepper_EMCommand(void)
 {
   unsigned char EA1, EA2;
   ExtractReturnType RetVal;
@@ -200,7 +199,7 @@ void parseEMCommand(void)
     {
       return;
     }
-/// TODO: Come back and fix this for 3BB
+/// TODO: Add proper code for enabling the motors at various levels
 #if defined(BOARD_EBB)
     if (
       (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -311,10 +310,13 @@ void parseEMCommand(void)
 
   // Always clear the step counts if motors are enabled/disabled or 
   // resolution is changed.
-  clear_StepCounters();
+/// TODO: Create this function
+///  clear_StepCounters();
   
   print_ack();
 }
+
+#if 0
 
 // RM command
 // For Run Motor - allows completely independent running of the three stepper motors
@@ -1291,8 +1293,6 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
     // Add the stepper command to the motion queue
     queue_AddStepperCommandToQueue(stepAdd, stepAddInc, stepsCounter, dir);
   }
-
-  print_ack();
 }
 
 #if 0

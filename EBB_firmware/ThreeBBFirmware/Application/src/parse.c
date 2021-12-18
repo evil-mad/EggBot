@@ -103,19 +103,19 @@ const parse_t commandTable[] =
   {'S', 'P', servo_SPCommand},
   {'T', 'P', servo_TPCommand},
   {'Q', 'P', servo_QPCommand},
-//  {'E', 'M', parseEMCommand},
+  {'E', 'M', stepper_EMCommand},
   {'S', 'C', commands_SCCommand},
 //  {'S', 'N', parseSNCommand},
 //  {'Q', 'N', parseQNCommand},
   {'S', 'L', commands_SLCommand},
   {'Q', 'L', commands_QLCommand},
-//  {'Q', 'B', parseQBCommand},
+  {'Q', 'B', commands_QBCommand},
 //  {'N', 'I', parseNICommand},
 //  {'N', 'D', parseNDCommand},
-  {'B', 'L', parseBLCommand},
+  {'B', 'L', commands_BLCommand},
 //  {'T', '1', parseT1Command},
 //  {'T', '2', parseT2Command},
-//  {'Q', 'C', parseQCCommand},
+  {'Q', 'C', commands_QCCommand},
 //  {'Q', 'G', parseQGCommand},
 //  {'S', 'E', parseSECommand},
   {'S', '2', servo_S2Command},
@@ -181,8 +181,8 @@ void parsePacket(void)
     testCommand = ((uint16_t)commandTable[i].c1 << 8) | commandTable[i].c2;
     if (command == testCommand)
     {
-      commandTable[i].func();
       SWOprintf("Cmd:%c%c\n", commandTable[i].c1, commandTable[i].c2);
+      commandTable[i].func();
       break;
     }
     i++;
@@ -192,6 +192,11 @@ void parsePacket(void)
     // Send back 'unknown command' error
     printf(
        "!8 Err: Unknown command '%c%c:%4X'\n"
+      ,(uint8_t)(command >> 8)
+      ,(uint8_t)command
+      ,command
+    );
+    SWOprintf("!8 Err: Unknown command '%c%c:%4X'\n"
       ,(uint8_t)(command >> 8)
       ,(uint8_t)command
       ,command

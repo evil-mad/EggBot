@@ -412,6 +412,26 @@ void commands_VCommand(void)
   printf("%s\r\n", st_version);
 }
 
+// Query Current
+// Usage: QC<CR>
+// Returns: <voltage_on_REF_RA0_net>,<voltage_on_v+_net><CR>
+// Both values have a range of 0 to 1023 (10-bit ADC)
+// The ADC is set up with 0V = 0 and 3.3V = 1023
+// For the REF_RA0 (current adjustment pot) a value of 0V-ADC (0 counts) = 46mA
+// and a value of 2.58V-ADC (800 counts) = 1.35A
+// For the V+ net a value of 0V-ADC (0 counts) = 0V on V+
+// and a value of 2.79V-ADC (870 counts) = 31.4V on V+
+// REF_RA0 comes in on AN0 (RA0)
+// V+ comes in on AN11 (RC2)
+void commands_QCCommand(void)
+{
+  // Print out our results
+  /// TODO: Fake this for now, fill in with real 3BB voltages
+  printf("%04i,%04i\n", 370, 300);
+
+  print_ack();
+}
+
 
 // MW is for Memory Write
 // "MW,<location>,<value><CR>"
@@ -847,7 +867,7 @@ void LongDelay(void)
 
 // BL command : simply jump to the bootloader
 // Example: "BL<CR>"
-void parseBLCommand()
+void commands_BLCommand(void)
 {
   // First, kill interrupts
   __disable_irq();
@@ -984,6 +1004,21 @@ void parseT2Command()
 }
 #endif
 
+
+// Query Button
+// Usage: QB<CR>
+// Returns: <HasButtonBeenPushedSinceLastQB><CR> (0 or 1)
+// OK<CR>
+void commands_QBCommand(void)
+{
+  /// TODO: This is just a stub. Add code to query the button state
+  printf("%1i\n", 0);
+//  if (ButtonPushed)
+//  {
+//    ButtonPushed = FALSE;
+//  }
+  print_ack();
+}
 
 /*****************************************************************************************/
 /*     THESE COMMANDS GO AWAWY AFTER WE NO LONGER NEED "LEGACY" MODE                     */
