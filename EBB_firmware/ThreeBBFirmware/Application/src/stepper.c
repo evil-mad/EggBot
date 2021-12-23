@@ -148,7 +148,7 @@ uint8_t stepper_Step(StepperCommand_t * cmdPtr)
         cmdPtr->StepsCounter[stepper]--;
         Steppers[stepper].GlobalPosition += dir;
         // Clear the step bit
-        SteppersIO[stepper].StepPort->BSRR = (uint32_t)SteppersIO[stepper].StepPin;
+        SteppersIO[stepper].StepPort->BRR = (uint32_t)SteppersIO[stepper].StepPin;
       }
       // For acceleration, we now add a bit to StepAdd each time through as well
       cmdPtr->StepAdd[stepper] += cmdPtr->StepAddInc[stepper];
