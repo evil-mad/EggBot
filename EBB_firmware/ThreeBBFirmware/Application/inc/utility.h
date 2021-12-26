@@ -136,6 +136,8 @@ extern volatile bool queue_NeedsInit;
 // Flag set from ISR indicating that we need to initialize the 2209s
 extern volatile bool DriversNeedInit;
 
+void utility_SetLegacyMode(bool newMode);
+bool utility_LegacyModeEnabled(void);
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
 bool SwitchIsPressed(void);    // Check to see if the user (PRG) switch is pressed
 void SetPinTRISFromRPn(char Pin, char State);
@@ -148,6 +150,7 @@ void utility_SysTick(void);
 #if defined(DEBUG)
 void ParseSHCommand(void);    // SH print Stack Highwater
 #endif
+void utility_LGCommand(void);
 void utility_Run(void);
 #if defined(DEBUG)
 void UtilityFillStack(void);

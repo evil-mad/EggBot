@@ -157,14 +157,38 @@ void commands_SCCommand(void)
 #endif
 
   // Set Pen RC Servo min position (pen up)
+  // Units are STU (Servo Time Units) of 305ns each
+  //
+  // LEGACY:
+  // When legacy mode is on, units are in old EBB servo units of 83ns each
+  //
   if (para1 == 4)
   {
-    servo_SetPenMinPosition(para2);
+    if (!utility_LegacyModeEnabled())
+    {
+      servo_SetPenMinPosition(para2);
+    }
+    else
+    {
+      servo_SetPenMinPosition((uint16_t)((float)para2*(83.0f/305.0f)));
+    }
   }
   // Set Pen RC servo max position (pen down)
+  // Units are STU (Servo Time Units) of 305ns each
+  //
+  // LEGACY:
+  // When legacy mode is on, units are in old EBB servo units of 83ns each
+  //
   if (para1 == 5)
   {
-    servo_SetPenMaxPosition(para2);
+    if (!utility_LegacyModeEnabled())
+    {
+      servo_SetPenMaxPosition(para2);
+    }
+    else
+    {
+      servo_SetPenMaxPosition((uint16_t)((float)para2*(83.0f/305.0f)));
+    }
   }
 
 #if 0

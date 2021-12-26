@@ -85,11 +85,47 @@ volatile bool DriversNeedInit;
 
 volatile bool queue_NeedsInit;
 
+// If true, then Legacy Mode is on. Default to on so we appear as EBB to PC
+volatile bool LegacyMode = true;
+
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
 /************** PRIVATE FUNCTIONS *********************************************/
 
 /************** PUBLIC FUNCTIONS **********************************************/
+
+/*
+ * Turn Legacy Mode on
+ */
+/// TOOD: Should this be stored in flash?
+void utility_SetLegacyMode(bool newMode)
+{
+  if (newMode)
+  {
+    LegacyMode = true;
+  }
+  else
+  {
+    LegacyMode = false;
+  }
+}
+
+/*
+ * Return true if Legacy Mode (EBB compatibility) is turned on
+ */
+bool utility_LegacyModeEnabled(void)
+{
+  if (LegacyMode == true)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+
 
 #if 0
 /******************************************************************************
@@ -469,6 +505,33 @@ void ParseQTCommand()
 }
 
 #endif
+
+// Set legacy mode on or off
+void utility_LGCommand(void)
+{
+  uint8_t mode;
+
+  // Extract the new mode
+  extract_number (kUINT8, &mode, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (mode)
+  {
+    utility_SetLegacyMode(true);
+  }
+  else
+  {
+    utility_SetLegacyMode(false);
+  }
+
+  print_ack();
+}
+
 
 /*
  * Called from main loop every time through. Main task here is to check to see

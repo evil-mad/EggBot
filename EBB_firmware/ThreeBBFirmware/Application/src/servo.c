@@ -357,6 +357,7 @@ void servo_SetTarget(uint16_t position, uint8_t pin, uint16_t rate)
  * <pin> is from 0 to 5, larger values will cause no change
  * This function can be called in mainline or interrupt contexts.
  */
+/// TODO: Can this be re-written as a lookup table like the step function was?
 void servo_SetOutput(uint16_t position, uint8_t pin)
 {
   uint32_t oldPosition;
@@ -740,6 +741,8 @@ void servo_SRCommand(void)
 
 /*
  * Sets new value for pen's maximum position value (used in SP/TP)
+ *
+ * Position is in STU (Servo Time Units) of 305ns each
  */
 void servo_SetPenMaxPosition(uint16_t position)
 {
@@ -748,6 +751,8 @@ void servo_SetPenMaxPosition(uint16_t position)
 
 /*
  * Sets new value for pen's minimum position value (used in SP/TP)
+ *
+ * Position is in STU (Servo Time Units) of 305ns each
  */
 void servo_SetPenMinPosition(uint16_t position)
 {
@@ -756,6 +761,8 @@ void servo_SetPenMinPosition(uint16_t position)
 
 /*
  * Sets new value for pen's delay - time before next motion command is allow to run
+ *
+ * Delay is in milliseconds
  */
 void servo_SetPenDelay(uint16_t delay)
 {
