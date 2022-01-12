@@ -43,6 +43,20 @@ void MX_ADC4_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+/*
+ * Returns the previously acquired SCALED_V+ value
+ * and starts the next conversion.
+ * Returns raw 12 bit ADC conversion
+ */
+uint16_t adc_AcquireScaledVPlus(void);
+
+/*
+ * Returns the previously acquired SCALED_5V value
+ * and starts the next conversion.
+ * Returns raw 12 bit ADC conversion
+ */
+uint16_t adc_AcquireScaled5V(void);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

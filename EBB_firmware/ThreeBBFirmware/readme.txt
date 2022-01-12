@@ -55,6 +55,8 @@ ThreeBeeBee (3BB) Readme.txt file
   
   Commands to add
   * Add "FULL" vs "OK" reply to all motion queue commands based on high water mark (need new command for setting this)
+  * Add command to switch into/out-of Legacy Mode
+  * Add command to query Legacy Mode state
   
   Are these commands needed for 3BB?
   * PC (Pulse Configure)

@@ -138,6 +138,8 @@ extern volatile bool DriversNeedInit;
 
 void utility_SetLegacyMode(bool newMode);
 bool utility_LegacyModeEnabled(void);
+float utility_GetScaled5V(void);
+float utility_GetScaledVPlus(void);
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
 bool SwitchIsPressed(void);    // Check to see if the user (PRG) switch is pressed
 void SetPinTRISFromRPn(char Pin, char State);

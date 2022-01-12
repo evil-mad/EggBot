@@ -438,20 +438,34 @@ void commands_VCommand(void)
 
 // Query Current
 // Usage: QC<CR>
-// Returns: <voltage_on_REF_RA0_net>,<voltage_on_v+_net><CR>
-// Both values have a range of 0 to 1023 (10-bit ADC)
+//
+// LEGACY MODE:
+// Returns: 278,<voltage_on_v+_net><CR>
+// <voltage_on_v+_net> has a range of 0 to 1023 (10-bit ADC)
 // The ADC is set up with 0V = 0 and 3.3V = 1023
-// For the REF_RA0 (current adjustment pot) a value of 0V-ADC (0 counts) = 46mA
-// and a value of 2.58V-ADC (800 counts) = 1.35A
+//
+// The first value is hard coded to 278, indicating some nominal motor current
+// setpoint (from EBB days)
+//
 // For the V+ net a value of 0V-ADC (0 counts) = 0V on V+
 // and a value of 2.79V-ADC (870 counts) = 31.4V on V+
-// REF_RA0 comes in on AN0 (RA0)
-// V+ comes in on AN11 (RC2)
+//
+// 3BB MODE:
+// Returns: <SCALED_5V_VOLTAGE>,<SCALED_V+_VOLTAGE><CR>
+// Both values are floating point, and are in units of volts
+// ADC is configured for 12 bits (0 to 4905 counts) and 4095 counts = 3.3V
+//
 void commands_QCCommand(void)
 {
-  // Print out our results
-  /// TODO: Fake this for now, fill in with real 3BB voltages
-  printf("%04i,%04i\n", 370, 300);
+  if (utility_LegacyModeEnabled())
+  {
+
+    printf("278,%04i\n", (uint16_t)(utility_GetScaledVPlus() * (870.0f/31.4f)));
+  }
+  else
+  {
+    printf("%1.4f,%1.4f\n", utility_GetScaled5V(), utility_GetScaledVPlus());
+  }
 
   print_ack();
 }

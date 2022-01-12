@@ -58,12 +58,18 @@
 //#include "analog.h"
 #include "serial.h"
 #include "servo.h"
+#include "adc.h"
 
 
 /************** PRIVATE TYPEDEFS **********************************************/
 
 /************** PRIVATE DEFINES ***********************************************/
 
+// Multiplication factor to get from 12 bit ADC counts to 12V (V+) rail
+#define SCALED_VPLUS_SCALING_FACTOR   1.0f
+
+// Multiplication factor to get from 12 bit ADC counts to 5V rail
+#define SCALED_5V_SCALING_FACTOR      1.0f
 
 #if 0
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
@@ -88,9 +94,40 @@ volatile bool queue_NeedsInit;
 // If true, then Legacy Mode is on. Default to on so we appear as EBB to PC
 volatile bool LegacyMode = true;
 
+// The current power input voltage, in volts, updated every second
+static volatile float Voltage12V = 0.0;
+
+// The current 5V power rail, in volts, updated every second
+static volatile float Voltage5V = 0.0;
+
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
+static void ADCProcess(void);
+
 /************** PRIVATE FUNCTIONS *********************************************/
+
+/*
+ * Called every SysTick
+ * Reads out previous ADC conversion, and begins new ones
+ * Only two ADC channels to read out: SCALED_V+ on PB14 (ADC4_IN4) and
+ * SCALED_5V on PB12 (ADC1_IN11).
+ */
+static void ADCProcess(void)
+{
+  static uint32_t lastCheckTime = 0;
+
+  // No need to do this every tick. Only do it once every second.
+  uint32_t now = HAL_GetTick();
+
+  if (now - lastCheckTime > 1000)
+  {
+    lastCheckTime = now;
+
+    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
+    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
+  }
+}
+
 
 /************** PUBLIC FUNCTIONS **********************************************/
 
@@ -123,6 +160,17 @@ bool utility_LegacyModeEnabled(void)
   {
     return false;
   }
+}
+
+float utility_GetScaled5V(void)
+{
+  return Voltage5V;
+}
+
+
+float utility_GetScaledVPlus(void)
+{
+  return Voltage12V;
 }
 
 
@@ -631,6 +679,10 @@ void utility_SysTick(void)
   {
     DriverInitDelayMS--;
   }
+
+  // Update ADC inputs
+  ADCProcess();
+
   /// TODO: Refactor this into something nicer?
 #if defined(BOARD_EBB)
   // Software timer for RCServo power control
