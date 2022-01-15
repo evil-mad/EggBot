@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -56,6 +56,13 @@ uint16_t adc_AcquireScaledVPlus(void);
  * Returns raw 12 bit ADC conversion
  */
 uint16_t adc_AcquireScaled5V(void);
+
+/*
+ * Returns the previously acquired CUR_SNS value
+ * and starts the next conversion.
+ * Returns raw 12 bit ADC conversion
+ */
+uint16_t adc_AcquireMotorCurrent(void);
 
 /* USER CODE END Prototypes */
 

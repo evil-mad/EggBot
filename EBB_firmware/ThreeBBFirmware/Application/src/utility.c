@@ -59,14 +59,14 @@
 #include "serial.h"
 #include "servo.h"
 #include "adc.h"
-
+#include <stdio.h>
 
 /************** PRIVATE TYPEDEFS **********************************************/
 
 /************** PRIVATE DEFINES ***********************************************/
 
 // Multiplication factor to get from 12 bit ADC counts to 12V (V+) rail
-#define SCALED_VPLUS_SCALING_FACTOR   1.0f
+#define SCALED_VPLUS_SCALING_FACTOR   ((24.0f/3.13f)*(3.3f/4095.0f))
 
 // Multiplication factor to get from 12 bit ADC counts to 5V rail
 #define SCALED_5V_SCALING_FACTOR      1.0f
@@ -100,6 +100,9 @@ static volatile float Voltage12V = 0.0;
 // The current 5V power rail, in volts, updated every second
 static volatile float Voltage5V = 0.0;
 
+// The motor current measured from the CUR_SNS net
+static volatile float MotorCurrent = 0.0;
+
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
 static void ADCProcess(void);
@@ -123,8 +126,19 @@ static void ADCProcess(void)
   {
     lastCheckTime = now;
 
-    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
-    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
+    uint16_t i, j, k;
+
+//    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
+//    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
+    i = adc_AcquireScaledVPlus();
+    j = adc_AcquireScaled5V();
+    k = adc_AcquireMotorCurrent();
+
+    printf("%4u,%4u,%4u\n", i, j, k);
+
+    Voltage12V = (float)i;
+    Voltage5V = (float)j;
+    MotorCurrent = (float)k;
   }
 }
 

@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under Ultimate Liberty license
@@ -108,11 +108,11 @@ void MX_ADC4_Init(void)
   hadc4.Init.Resolution = ADC_RESOLUTION_12B;
   hadc4.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc4.Init.GainCompensation = 0;
-  hadc4.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hadc4.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc4.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc4.Init.LowPowerAutoWait = DISABLE;
   hadc4.Init.ContinuousConvMode = DISABLE;
-  hadc4.Init.NbrOfConversion = 1;
+  hadc4.Init.NbrOfConversion = 2;
   hadc4.Init.DiscontinuousConvMode = DISABLE;
   hadc4.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc4.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
@@ -137,7 +137,6 @@ void MX_ADC4_Init(void)
   }
   /* USER CODE BEGIN ADC4_Init 2 */
   HAL_ADCEx_Calibration_Start(&hadc4, ADC_SINGLE_ENDED);
-  HAL_ADC_Start(&hadc4);
   /* USER CODE END ADC4_Init 2 */
 
 }
@@ -236,10 +235,28 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 uint16_t adc_AcquireScaledVPlus(void)
 {
   uint16_t retval;
+  ADC_ChannelConfTypeDef sConfig = {0};
 
-  HAL_ADC_PollForConversion(&hadc1, 1);
-  retval = HAL_ADC_GetValue(&hadc1);
-  HAL_ADC_Start(&hadc1);
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_ADC_Start(&hadc4);
+  HAL_ADC_PollForConversion(&hadc4, 1);
+  retval = HAL_ADC_GetValue(&hadc4);
+
+  sConfig.Rank = 0;
+  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   return retval;
 }
@@ -248,13 +265,42 @@ uint16_t adc_AcquireScaled5V(void)
 {
   uint16_t retval;
 
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SingleDiff = ADC_SINGLE_ENDED;
+  sConfig.OffsetNumber = ADC_OFFSET_NONE;
+  sConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  HAL_ADC_Start(&hadc4);
   HAL_ADC_PollForConversion(&hadc4, 1);
   retval = HAL_ADC_GetValue(&hadc4);
-  HAL_ADC_Start(&hadc4);
+
+  sConfig.Rank = 0;
+  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   return retval;
 }
 
+uint16_t adc_AcquireMotorCurrent(void)
+{
+  uint16_t retval;
+
+  HAL_ADC_PollForConversion(&hadc1, 1);
+  retval = HAL_ADC_GetValue(&hadc1);
+  HAL_ADC_Start(&hadc1);
+
+  return retval;
+}
 
 /* USER CODE END 1 */
 
