@@ -575,5 +575,3 @@ void USB_Run(void)
 /**
   * @}
   */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

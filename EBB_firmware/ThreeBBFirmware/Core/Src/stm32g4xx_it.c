@@ -241,10 +241,12 @@ void SysTick_Handler(void)
 void DMA1_Channel1_IRQHandler(void)
 {
   /* USER CODE BEGIN DMA1_Channel1_IRQn 0 */
+  DEBUG_G5_SET();
 
   /* USER CODE END DMA1_Channel1_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_adc4);
   /* USER CODE BEGIN DMA1_Channel1_IRQn 1 */
+  DEBUG_G5_RESET();
 
   /* USER CODE END DMA1_Channel1_IRQn 1 */
 }
@@ -280,4 +282,4 @@ void TIM6_DAC_IRQHandler(void)
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

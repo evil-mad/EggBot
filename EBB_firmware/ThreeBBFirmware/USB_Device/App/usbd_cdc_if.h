@@ -146,4 +146,3 @@ uint8_t CDC_IsTxBusy(void);
 
 #endif /* __USBD_CDC_IF_H__ */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

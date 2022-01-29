@@ -67,17 +67,27 @@ extern void SystemClock_Config(void);
 *******************************************************************************/
 /* MSP Init */
 
-#if (USE_HAL_PCD_REGISTER_CALLBACK == 1U)
+#if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
 static void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
 #else
 void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACK */
+#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
   if(pcdHandle->Instance==USB)
   {
   /* USER CODE BEGIN USB_MspInit 0 */
 
   /* USER CODE END USB_MspInit 0 */
+  /** Initializes the peripherals clocks
+  */
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+    PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
     /* Peripheral clock enable */
     __HAL_RCC_USB_CLK_ENABLE();
 
@@ -90,11 +100,11 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
   }
 }
 
-#if (USE_HAL_PCD_REGISTER_CALLBACK == 1U)
+#if (USE_HAL_PCD_REGISTER_CALLBACKS == 1U)
 static void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
 #else
 void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
-#endif /* USE_HAL_PCD_REGISTER_CALLBACK */
+#endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
   if(pcdHandle->Instance==USB)
   {
@@ -785,4 +795,3 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
   }
   return usb_status;
 }
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

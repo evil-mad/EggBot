@@ -142,4 +142,3 @@ extern USBD_DescriptorsTypeDef     CDC_Desc;
 
 #endif /* __USBD_DESC__C__ */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
