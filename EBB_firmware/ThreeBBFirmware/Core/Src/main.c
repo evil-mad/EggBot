@@ -77,6 +77,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "usart.h"
 #include "tim.h"
 #include "usb_device.h"
@@ -173,6 +174,7 @@ int main(void)
   MX_LPUART1_UART_Init();
   MX_ADC1_Init();
   MX_TIM8_Init();
+  MX_DMA_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   Debug_SWOInit(0x00000001, CPU_CORE_FREQUENCY_HZ, 2000000);

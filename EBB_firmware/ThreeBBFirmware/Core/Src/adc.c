@@ -22,10 +22,17 @@
 
 /* USER CODE BEGIN 0 */
 
+#include "debug.h"
+
+// Stores the two ADC samples transferred by DMA after conversion (SCALED_5V
+// on channel 3 and SCALED_V+ on channel 4).
+static uint16_t ADC4_DMA_Values[2];
+
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc4;
+DMA_HandleTypeDef hdma_adc4;
 
 /* ADC1 init function */
 void MX_ADC1_Init(void)
@@ -111,13 +118,13 @@ void MX_ADC4_Init(void)
   hadc4.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc4.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc4.Init.LowPowerAutoWait = DISABLE;
-  hadc4.Init.ContinuousConvMode = DISABLE;
+  hadc4.Init.ContinuousConvMode = ENABLE;
   hadc4.Init.NbrOfConversion = 2;
   hadc4.Init.DiscontinuousConvMode = DISABLE;
   hadc4.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc4.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc4.Init.DMAContinuousRequests = DISABLE;
-  hadc4.Init.Overrun = ADC_OVR_DATA_PRESERVED;
+  hadc4.Init.DMAContinuousRequests = ENABLE;
+  hadc4.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   hadc4.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc4) != HAL_OK)
   {
@@ -135,8 +142,18 @@ void MX_ADC4_Init(void)
   {
     Error_Handler();
   }
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN ADC4_Init 2 */
   HAL_ADCEx_Calibration_Start(&hadc4, ADC_SINGLE_ENDED);
+
+  HAL_ADC_Start_DMA(&hadc4, (uint32_t *)ADC4_DMA_Values, 10);
   /* USER CODE END ADC4_Init 2 */
 
 }
@@ -184,6 +201,24 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+    /* ADC4 DMA Init */
+    /* ADC4 Init */
+    hdma_adc4.Instance = DMA1_Channel1;
+    hdma_adc4.Init.Request = DMA_REQUEST_ADC4;
+    hdma_adc4.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc4.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc4.Init.MemInc = DMA_MINC_DISABLE;
+    hdma_adc4.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc4.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc4.Init.Mode = DMA_CIRCULAR;
+    hdma_adc4.Init.Priority = DMA_PRIORITY_LOW;
+    if (HAL_DMA_Init(&hdma_adc4) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc4);
+
   /* USER CODE BEGIN ADC4_MspInit 1 */
 
   /* USER CODE END ADC4_MspInit 1 */
@@ -224,6 +259,8 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     */
     HAL_GPIO_DeInit(GPIOB, SCALED_5V_Pin|SCALED_V__Pin);
 
+    /* ADC4 DMA DeInit */
+    HAL_DMA_DeInit(adcHandle->DMA_Handle);
   /* USER CODE BEGIN ADC4_MspDeInit 1 */
 
   /* USER CODE END ADC4_MspDeInit 1 */
@@ -234,74 +271,57 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 uint16_t adc_AcquireScaledVPlus(void)
 {
-  uint16_t retval;
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  sConfig.Channel = ADC_CHANNEL_4;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
-  sConfig.SingleDiff = ADC_SINGLE_ENDED;
-  sConfig.OffsetNumber = ADC_OFFSET_NONE;
-  sConfig.Offset = 0;
-  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  HAL_ADC_Start(&hadc4);
-  HAL_ADC_PollForConversion(&hadc4, 1);
-  retval = HAL_ADC_GetValue(&hadc4);
-
-  sConfig.Rank = 0;
-  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  return retval;
+  return ADC4_DMA_Values[1];
 }
 
 uint16_t adc_AcquireScaled5V(void)
 {
-  uint16_t retval;
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  sConfig.Channel = ADC_CHANNEL_3;
-  sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
-  sConfig.SingleDiff = ADC_SINGLE_ENDED;
-  sConfig.OffsetNumber = ADC_OFFSET_NONE;
-  sConfig.Offset = 0;
-  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  HAL_ADC_Start(&hadc4);
-  HAL_ADC_PollForConversion(&hadc4, 1);
-  retval = HAL_ADC_GetValue(&hadc4);
-
-  sConfig.Rank = 0;
-  if (HAL_ADC_ConfigChannel(&hadc4, &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  return retval;
+  DEBUG_G2_SET();
+  HAL_ADC_Start_DMA(&hadc4, (uint32_t *)ADC4_DMA_Values, 10);
+  DEBUG_G2_RESET();
+  return ADC4_DMA_Values[0];
 }
 
 uint16_t adc_AcquireMotorCurrent(void)
 {
   uint16_t retval;
 
-  HAL_ADC_PollForConversion(&hadc1, 1);
+//  HAL_ADC_PollForConversion(&hadc1, 1);
   retval = HAL_ADC_GetValue(&hadc1);
-  HAL_ADC_Start(&hadc1);
+//  HAL_ADC_Start(&hadc1);
 
   return retval;
 }
 
+// Called when first half of buffer is filled
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  DEBUG_G0_SET();
+  DEBUG_G0_RESET();
+  DEBUG_G0_SET();
+  DEBUG_G0_RESET();
+  DEBUG_G0_SET();
+  DEBUG_G0_RESET();
+  DEBUG_G0_SET();
+  DEBUG_G0_RESET();
+  DEBUG_G0_SET();
+  DEBUG_G0_RESET();
+}
+
+// Called when buffer is completely filled
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  DEBUG_G1_SET();
+  DEBUG_G1_RESET();
+  DEBUG_G1_SET();
+  DEBUG_G1_RESET();
+  DEBUG_G1_SET();
+  DEBUG_G1_RESET();
+  DEBUG_G1_SET();
+  DEBUG_G1_RESET();
+  DEBUG_G1_SET();
+  DEBUG_G1_RESET();
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
