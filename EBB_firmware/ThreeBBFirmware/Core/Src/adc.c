@@ -24,15 +24,15 @@
 
 #include "debug.h"
 
-// Stores the two ADC samples transferred by DMA after conversion (SCALED_5V
-// on channel 3 and SCALED_V+ on channel 4).
-static uint16_t ADC4_DMA_Values[2];
+// Result values from ADC conversions - always hold latest conversion
+static uint16_t ADCResultCurSns;        // ADC1_IN4
+static uint16_t ADCResultScaled5V;      // ADC4_IN3
+static uint16_t ADCResultScaledVPlus;   // ADC4_IN4
 
 /* USER CODE END 0 */
 
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc4;
-DMA_HandleTypeDef hdma_adc4;
 
 /* ADC1 init function */
 void MX_ADC1_Init(void)
@@ -91,7 +91,6 @@ void MX_ADC1_Init(void)
   }
   /* USER CODE BEGIN ADC1_Init 2 */
   HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
-  HAL_ADC_Start(&hadc1);
   /* USER CODE END ADC1_Init 2 */
 
 }
@@ -118,12 +117,12 @@ void MX_ADC4_Init(void)
   hadc4.Init.ScanConvMode = ADC_SCAN_ENABLE;
   hadc4.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   hadc4.Init.LowPowerAutoWait = DISABLE;
-  hadc4.Init.ContinuousConvMode = ENABLE;
+  hadc4.Init.ContinuousConvMode = DISABLE;
   hadc4.Init.NbrOfConversion = 2;
   hadc4.Init.DiscontinuousConvMode = DISABLE;
   hadc4.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc4.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc4.Init.DMAContinuousRequests = ENABLE;
+  hadc4.Init.DMAContinuousRequests = DISABLE;
   hadc4.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   hadc4.Init.OversamplingMode = DISABLE;
   if (HAL_ADC_Init(&hadc4) != HAL_OK)
@@ -134,7 +133,7 @@ void MX_ADC4_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_3;
   sConfig.Rank = ADC_REGULAR_RANK_1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
@@ -152,8 +151,6 @@ void MX_ADC4_Init(void)
   }
   /* USER CODE BEGIN ADC4_Init 2 */
   HAL_ADCEx_Calibration_Start(&hadc4, ADC_SINGLE_ENDED);
-
-  HAL_ADC_Start_DMA(&hadc4, (uint32_t *)ADC4_DMA_Values, 10);
   /* USER CODE END ADC4_Init 2 */
 
 }
@@ -189,6 +186,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(CUR_SNS_GPIO_Port, &GPIO_InitStruct);
 
+    /* ADC1 interrupt Init */
+    HAL_NVIC_SetPriority(ADC1_2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
   /* USER CODE END ADC1_MspInit 1 */
@@ -221,24 +221,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* ADC4 DMA Init */
-    /* ADC4 Init */
-    hdma_adc4.Instance = DMA1_Channel1;
-    hdma_adc4.Init.Request = DMA_REQUEST_ADC4;
-    hdma_adc4.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma_adc4.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma_adc4.Init.MemInc = DMA_MINC_DISABLE;
-    hdma_adc4.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    hdma_adc4.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    hdma_adc4.Init.Mode = DMA_CIRCULAR;
-    hdma_adc4.Init.Priority = DMA_PRIORITY_LOW;
-    if (HAL_DMA_Init(&hdma_adc4) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc4);
-
+    /* ADC4 interrupt Init */
+    HAL_NVIC_SetPriority(ADC4_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(ADC4_IRQn);
   /* USER CODE BEGIN ADC4_MspInit 1 */
 
   /* USER CODE END ADC4_MspInit 1 */
@@ -261,6 +246,8 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     */
     HAL_GPIO_DeInit(CUR_SNS_GPIO_Port, CUR_SNS_Pin);
 
+    /* ADC1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(ADC1_2_IRQn);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
@@ -279,8 +266,8 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     */
     HAL_GPIO_DeInit(GPIOB, SCALED_5V_Pin|SCALED_V__Pin);
 
-    /* ADC4 DMA DeInit */
-    HAL_DMA_DeInit(adcHandle->DMA_Handle);
+    /* ADC4 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(ADC4_IRQn);
   /* USER CODE BEGIN ADC4_MspDeInit 1 */
 
   /* USER CODE END ADC4_MspDeInit 1 */
@@ -291,55 +278,71 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 uint16_t adc_AcquireScaledVPlus(void)
 {
-  return ADC4_DMA_Values[1];
+  return ADCResultScaledVPlus;
 }
 
 uint16_t adc_AcquireScaled5V(void)
 {
-  DEBUG_G2_SET();
-  HAL_ADC_Start_DMA(&hadc4, (uint32_t *)ADC4_DMA_Values, 10);
-  DEBUG_G2_RESET();
-  return ADC4_DMA_Values[0];
+  return ADCResultScaled5V;
 }
 
 uint16_t adc_AcquireMotorCurrent(void)
 {
-  uint16_t retval;
-
-//  HAL_ADC_PollForConversion(&hadc1, 1);
-  retval = HAL_ADC_GetValue(&hadc1);
-//  HAL_ADC_Start(&hadc1);
-
-  return retval;
+  return ADCResultCurSns;
 }
 
-// Called when first half of buffer is filled
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
-{
-  DEBUG_G0_SET();
-  DEBUG_G0_RESET();
-  DEBUG_G0_SET();
-  DEBUG_G0_RESET();
-  DEBUG_G0_SET();
-  DEBUG_G0_RESET();
-  DEBUG_G0_SET();
-  DEBUG_G0_RESET();
-  DEBUG_G0_SET();
-  DEBUG_G0_RESET();
-}
 
-// Called when buffer is completely filled
+// Called After ADC conversion is complete, from ADC ISR
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-  DEBUG_G1_SET();
-  DEBUG_G1_RESET();
-  DEBUG_G1_SET();
-  DEBUG_G1_RESET();
-  DEBUG_G1_SET();
-  DEBUG_G1_RESET();
-  DEBUG_G1_SET();
-  DEBUG_G1_RESET();
-  DEBUG_G1_SET();
-  DEBUG_G1_RESET();
+  DEBUG_G0_SET();
+  // If we've had an overrun, then the ISR couldn't get to the data in time. So
+  // we're going to ignore this data that we just got, and wait until the next
+  // sample to save off a new conversion
+  if (!__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_OVR))
+  {
+    if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC))
+    {
+      DEBUG_G6_SET();
+    }
+    if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
+    {
+      DEBUG_G7_SET();
+    }
+
+    if (hadc->Instance == ADC1)
+    {
+      // Since ADC1 is only converting one channel, simply record the
+      // conversion result and then there's nothing else to do.
+      ADCResultCurSns = HAL_ADC_GetValue(&hadc1);
+    }
+    if (hadc->Instance == ADC4)
+    {
+      // An EOS flag set means that we've finished the sequence - i.e. the conversion that
+      // triggered this ISR is channel 4 (V+)
+      if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
+      {
+        DEBUG_G1_SET();
+        ADCResultScaledVPlus = HAL_ADC_GetValue(&hadc4);
+      }
+      else  // If EOC is not set, then this is first of the two conversions, channel 3 (5V)
+      {
+        ADCResultScaled5V = HAL_ADC_GetValue(&hadc4);
+      }
+    }
+  }
+DEBUG_G0_RESET();
+DEBUG_G1_RESET();
+DEBUG_G2_RESET();
+DEBUG_G6_RESET();
+DEBUG_G7_RESET();
 }
+
+// Call this to begin the ADC conversions
+void ADC_StartConversions(void)
+{
+  HAL_ADC_Start_IT(&hadc1);
+  HAL_ADC_Start_IT(&hadc4);
+}
+
 /* USER CODE END 1 */

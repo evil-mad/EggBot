@@ -112,8 +112,8 @@ static void ADCProcess(void);
 /*
  * Called every SysTick
  * Reads out previous ADC conversion, and begins new ones
- * Only two ADC channels to read out: SCALED_V+ on PB14 (ADC4_IN4) and
- * SCALED_5V on PB12 (ADC1_IN11).
+ * Only three ADC channels to read out: SCALED_V+ on PB14 (ADC4_IN4), SCALED_5V
+ * on PB12 (ADC4_IN3) and CUR_SNS (ADC1_IN4)
  */
 static void ADCProcess(void)
 {
@@ -128,6 +128,7 @@ static void ADCProcess(void)
 
     uint16_t i, j, k;
 
+
 //    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
 //    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
     i = adc_AcquireScaledVPlus();
@@ -140,6 +141,9 @@ static void ADCProcess(void)
     Voltage5V = (float)j;
     MotorCurrent = (float)k;
   }
+
+  // Kick off another set of conversions. This will happen every SysTick()
+  ADC_StartConversions();
 }
 
 
