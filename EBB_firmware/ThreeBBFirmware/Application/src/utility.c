@@ -66,10 +66,20 @@
 /************** PRIVATE DEFINES ***********************************************/
 
 // Multiplication factor to get from 12 bit ADC counts to 12V (V+) rail
-#define SCALED_VPLUS_SCALING_FACTOR   ((24.0f/3.13f)*(3.3f/4095.0f))
+#define SCALED_VPLUS_SCALING_FACTOR   ((24.0f/3.13f)*(3.28f/4095.0f))
 
 // Multiplication factor to get from 12 bit ADC counts to 5V rail
-#define SCALED_5V_SCALING_FACTOR      1.0f
+#define SCALED_5V_SCALING_FACTOR      (5.0f/3157.0f)
+
+// Multiplication factor to get from 12 bit ADC count of CUR_SNS to Amps
+// (Measured 867mA motor current (after subtracting off 82mA quiescent current)
+// with ADC reading of 1127 counts.)
+#define MOTOR_CURRENT_SCALING_FACTOR  ((867.0f/1127.0f)/1000.0f)
+// ADC counts that represent "no motor current" (about 82mA of current flowing
+// through the sense resistor without any motors connected)
+#define MOTOR_CURRENT_ADC_ZERO        36
+
+
 
 #if 0
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
@@ -126,20 +136,33 @@ static void ADCProcess(void)
   {
     lastCheckTime = now;
 
-    uint16_t i, j, k;
-
+    uint16_t vPlusTemp;
+    uint16_t fiveVTemp;
+    uint16_t motorCurrentTemp;
 
 //    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
 //    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
-    i = adc_AcquireScaledVPlus();
-    j = adc_AcquireScaled5V();
-    k = adc_AcquireMotorCurrent();
+    vPlusTemp = adc_AcquireScaledVPlus();
+    fiveVTemp = adc_AcquireScaled5V();
+    motorCurrentTemp = adc_AcquireMotorCurrent();
 
-    printf("%4u,%4u,%4u\n", i, j, k);
+    // Subtract off the quiescent V+ current draw so we only measure actual
+    // motor current draw
+    if (motorCurrentTemp < MOTOR_CURRENT_ADC_ZERO)
+    {
+      motorCurrentTemp = 0;
+    }
+    else
+    {
+      motorCurrentTemp -= MOTOR_CURRENT_ADC_ZERO;
+    }
 
-    Voltage12V = (float)i;
-    Voltage5V = (float)j;
-    MotorCurrent = (float)k;
+    Voltage12V = (float)vPlusTemp * SCALED_VPLUS_SCALING_FACTOR;
+    Voltage5V = (float)fiveVTemp * SCALED_5V_SCALING_FACTOR;
+    MotorCurrent = (float)motorCurrentTemp * MOTOR_CURRENT_SCALING_FACTOR;
+
+    printf("%4u %f V+, %4u %f 5V, %4u %f MS\n", vPlusTemp, Voltage12V, fiveVTemp, Voltage5V, motorCurrentTemp, MotorCurrent);
+
   }
 
   // Kick off another set of conversions. This will happen every SysTick()

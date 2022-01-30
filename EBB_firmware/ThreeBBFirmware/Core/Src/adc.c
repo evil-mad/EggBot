@@ -276,40 +276,32 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
 /* USER CODE BEGIN 1 */
 
+// Return the latest V+ ADC value
 uint16_t adc_AcquireScaledVPlus(void)
 {
   return ADCResultScaledVPlus;
 }
 
+// Return the latest 5V ADC value
 uint16_t adc_AcquireScaled5V(void)
 {
   return ADCResultScaled5V;
 }
 
+// Return the latest CUR_SNS value
 uint16_t adc_AcquireMotorCurrent(void)
 {
   return ADCResultCurSns;
 }
 
-
 // Called After ADC conversion is complete, from ADC ISR
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-  DEBUG_G0_SET();
   // If we've had an overrun, then the ISR couldn't get to the data in time. So
   // we're going to ignore this data that we just got, and wait until the next
   // sample to save off a new conversion
   if (!__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_OVR))
   {
-    if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC))
-    {
-      DEBUG_G6_SET();
-    }
-    if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
-    {
-      DEBUG_G7_SET();
-    }
-
     if (hadc->Instance == ADC1)
     {
       // Since ADC1 is only converting one channel, simply record the
@@ -322,7 +314,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
       // triggered this ISR is channel 4 (V+)
       if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOS))
       {
-        DEBUG_G1_SET();
         ADCResultScaledVPlus = HAL_ADC_GetValue(&hadc4);
       }
       else  // If EOC is not set, then this is first of the two conversions, channel 3 (5V)
@@ -331,11 +322,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
       }
     }
   }
-DEBUG_G0_RESET();
-DEBUG_G1_RESET();
-DEBUG_G2_RESET();
-DEBUG_G6_RESET();
-DEBUG_G7_RESET();
 }
 
 // Call this to begin the ADC conversions

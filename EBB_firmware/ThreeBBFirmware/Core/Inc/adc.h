@@ -63,7 +63,7 @@ uint16_t adc_AcquireScaled5V(void);
 uint16_t adc_AcquireMotorCurrent(void);
 
 /*
- * Starts up ADC conversions on both ADC1 and ADC4
+ * Triggers one ADC conversion on all three channels
  */
 void ADC_StartConversions(void);
 
