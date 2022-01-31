@@ -85,9 +85,9 @@ ThreeBeeBee (3BB) Readme.txt file
   * I/O header
   
   Parts of the board left to check out
-  * SCALED_5V and SCALED__V+ voltage monitoring ADC inptus
-  * Motor current sense ADC input on CUR_SNS
-  * Detecting stalls with Trinamic drivers? (What commands to use?)
+  * SCALED_5V and SCALED__V+ voltage monitoring ADC inptus (done, working)
+  * Motor current sense ADC input on CUR_SNS (done, working)
+  * Detecting stalls with Trinamic drivers? (From other project: this is super super hard. Not worth the time.)
 
   Misc ToDo 
 

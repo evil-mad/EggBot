@@ -464,6 +464,8 @@ void serial_InitDrivers(void)
     WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
     HAL_Delay(1);
   }
+  printf("Drivers initialized\n");
+
 #if 0   // Now that we have external sense resistors we don't need this right?
   // Read Byte0 of OPT memory and check bit 6. This is the otp_internalSense
   // bit and needs to be high. If it is not high, then use the writeOPT() 

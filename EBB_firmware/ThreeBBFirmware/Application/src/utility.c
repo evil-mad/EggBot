@@ -79,6 +79,8 @@
 // through the sense resistor without any motors connected)
 #define MOTOR_CURRENT_ADC_ZERO        36
 
+// Threshold voltage for 12V (V+) which will trigger a driver re-init
+#define VPLUS_DRIVER_INIT_THRESHOLD   5.5f
 
 
 #if 0
@@ -128,6 +130,7 @@ static void ADCProcess(void);
 static void ADCProcess(void)
 {
   static uint32_t lastCheckTime = 0;
+  static float lastVPlusVoltage = 0.0;
 
   // No need to do this every tick. Only do it once every second.
   uint32_t now = HAL_GetTick();
@@ -140,8 +143,6 @@ static void ADCProcess(void)
     uint16_t fiveVTemp;
     uint16_t motorCurrentTemp;
 
-//    Voltage12V = (float)adc_AcquireScaledVPlus() * SCALED_VPLUS_SCALING_FACTOR;
-//    Voltage5V = (float)adc_AcquireScaled5V() * SCALED_5V_SCALING_FACTOR;
     vPlusTemp = adc_AcquireScaledVPlus();
     fiveVTemp = adc_AcquireScaled5V();
     motorCurrentTemp = adc_AcquireMotorCurrent();
@@ -157,11 +158,17 @@ static void ADCProcess(void)
       motorCurrentTemp -= MOTOR_CURRENT_ADC_ZERO;
     }
 
+    // Update the global values
     Voltage12V = (float)vPlusTemp * SCALED_VPLUS_SCALING_FACTOR;
     Voltage5V = (float)fiveVTemp * SCALED_5V_SCALING_FACTOR;
     MotorCurrent = (float)motorCurrentTemp * MOTOR_CURRENT_SCALING_FACTOR;
 
-    printf("%4u %f V+, %4u %f 5V, %4u %f MS\n", vPlusTemp, Voltage12V, fiveVTemp, Voltage5V, motorCurrentTemp, MotorCurrent);
+    // Check to see if 12V just came on, and if so, trigger a driver init sequence
+    if (lastVPlusVoltage < VPLUS_DRIVER_INIT_THRESHOLD && Voltage12V >= VPLUS_DRIVER_INIT_THRESHOLD)
+    {
+      DriversNeedInit = true;
+    }
+    lastVPlusVoltage = Voltage12V;
 
   }
 
