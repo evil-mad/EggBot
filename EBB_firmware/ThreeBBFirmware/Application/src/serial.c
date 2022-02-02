@@ -109,9 +109,14 @@
 // 32-bit mask representing the 'reset' bit in the GSTAT register
 #define GSTAT_RESET_MASK            0x00000001UL
 
+// Position of the default CHOPCONF register value within the DriverInitTableValues
+// array.
+#define INIT_ARRAY_CHOPCONF         2
+
 /************** MODULE GLOBAL VARIABLE DEFINITIONS ****************************/
 
 // Table of each address to send DriverInitTableValues to (coordinate with values)
+// NOTE: Update any #defines above if these registers move to new locations
 static const uint8_t DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
 {
   GCONF,
@@ -490,6 +495,36 @@ void serial_Init(void)
 {
   // Start out by calling for a driver init
   DriversNeedInit = true;
+}
+
+
+/*
+ * Set microstep setting of a motor
+ * Note that <motor> parameter is from 1 to 3
+ *
+ * Take the default value of CHOPCONF register from the DriverInitTableVaules
+ * array, and then modify it with the new microstep setting.
+ */
+void serial_SetMicrosteps(uint8_t motor, stepper_Microsteps_t microsteps)
+{
+  uint32_t newCHOPCONF = 0;
+
+  if (microsteps <= MICROSTEP_1)
+  {
+    if (motor == 1 || motor == 2)
+    {
+      newCHOPCONF = (DriverInitTableValuesM12[INIT_ARRAY_CHOPCONF] & 0xF0FFFFFF) | (microsteps << 24);
+    }
+    else if (motor == 3)
+    {
+      newCHOPCONF = (DriverInitTableValuesM3[INIT_ARRAY_CHOPCONF] & 0xF0FFFFFF) | (microsteps << 24);
+    }
+
+    if (motor != 0 && motor <= 3)
+    {
+      WriteDatagram((motor - 1), CHOPCONF, newCHOPCONF);
+    }
+  }
 }
 
 /*

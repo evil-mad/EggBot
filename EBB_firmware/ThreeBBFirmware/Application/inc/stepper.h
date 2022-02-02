@@ -79,6 +79,20 @@ typedef struct {
   uint8_t   Microsteps;         // Current microstep value - same as set by SP command (0 = 256th, 8 = full steps)
 } Steppers_t;
 
+// All of the possible values for the microstep settings in the TMC2209 driver
+typedef enum
+{
+  MICROSTEP_256 = 0,
+  MICROSTEP_128,
+  MICROSTEP_64,
+  MICROSTEP_32,
+  MICROSTEP_16,
+  MICROSTEP_8,
+  MICROSTEP_4,
+  MICROSTEP_2,
+  MICROSTEP_1
+} stepper_Microsteps_t;
+
 /* Exported constants --------------------------------------------------------*/
 
 /* Exported macros -----------------------------------------------------------*/
@@ -103,5 +117,8 @@ void process_SM(
   int32_t A2Stp,
   int32_t A3Stp
 );
+void stepper_Enable(bool state);
+void stepper_Init(void);
+
 
 #endif	/* STEPPER_H */

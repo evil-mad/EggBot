@@ -52,8 +52,14 @@
 #ifndef __SERIAL_H__
 #define __SERIAL_H__
 
+#include "stepper.h"
+
 void serial_InitDrivers(void);
 void serial_Init(void);
+
+// Set the microstep setting on <motor> to <microsteps>
+void serial_SetMicrosteps(uint8_t motor, stepper_Microsteps_t microsteps);
+
 void serial_DRCommand(void);
 void serial_DWCommand(void);
 void serial_TurnOnTX(void);

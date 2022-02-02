@@ -66,6 +66,7 @@
 #include "servo.h"
 #include "commands.h"
 #include "stepper.h"
+#include "serial.h"
 
 /************** PRIVATE TYPEDEFS **********************************************/
 
@@ -166,20 +167,17 @@ uint8_t stepper_Step(StepperCommand_t * cmdPtr)
 // Everything after EnableAxis1 is optional
 // Each parameter can have a value of
 //    0 to disable that motor driver
-// FOR OLD DRIVER CHIP (A3967) - can do separate enables for each axis
-//    1 to enable the driver in 1/8th step mode
-//    2 to enable the driver in 1/4 step mode
-//    3 to enable the driver in 1/2 step mode
-//    4 to enable the driver in full step mode
-// FOR NEW DRIVER CHIP (A4988/A4983)
+// Legacy Mode: (default at power up)
 // (only first parameter applies, and it applies to both drivers)
 //    1 to enable the driver in 1/16th step mode
 //    2 to enable the driver in 1/8 step mode
 //    3 to enable the driver in 1/4 step mode
 //    4 to enable the driver in 1/2 step mode
 //    5 to enable the driver in full step mode
-// If you disable a motor, it goes 'limp' (we clear the ENABLE pin on that motor's
-// driver chip)
+// 3BB Mode:
+//    1 to
+//
+// If you disable a motor (0 for parameter), it goes 'limp'
 // Note that when using 0 or 1 for a parameter, you can use both axis even
 // on a 'new' driver chip board. (i.e. EM,0,1 will disable motor 1 and enable 2)
 // Note that the MSx lines do not come to any headers, so even when an external
@@ -187,18 +185,91 @@ uint8_t stepper_Step(StepperCommand_t * cmdPtr)
 // MSx lines.
 void stepper_EMCommand(void)
 {
-  unsigned char EA1, EA2;
-  ExtractReturnType RetVal;
+  unsigned char EA1, EA2, EA3;
+  ExtractReturnType RetVal1, RetVal2, RetVal3;
 
   // Extract each of the values.
-  RetVal = extract_number (kUINT8, &EA1, kREQUIRED);
-  if (kEXTRACT_OK == RetVal)
+  RetVal1 = extract_number (kUINT8, &EA1, kREQUIRED);
+  RetVal2 = extract_number (kUINT8, &EA2, kOPTIONAL);
+  RetVal3 = extract_number (kUINT8, &EA3, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
   {
-    // Bail if we got a conversion error
-    if (error_byte)
+    return;
+  }
+
+  // NOTE: Because 3BB only has one enable line going to all three steppers,
+  // we just take the first parameter to the command as the enable state for
+  // all three.
+  if (utility_LegacyModeEnabled())
+  {
+
+    if (kEXTRACT_OK == RetVal1)
     {
-      return;
+      switch (EA1)
+      {
+        case 0:
+          stepper_Enable(false);
+          break;
+
+        case 1:   // 1/16th microstep mode
+          stepper_Enable(true);
+          serial_SetMicrosteps(1, MICROSTEP_16);
+          serial_SetMicrosteps(2, MICROSTEP_16);
+          serial_SetMicrosteps(3, MICROSTEP_16);
+          break;
+
+        case 2:   // 1/8th microstep mode
+          stepper_Enable(true);
+          serial_SetMicrosteps(1, MICROSTEP_8);
+          serial_SetMicrosteps(2, MICROSTEP_8);
+          serial_SetMicrosteps(3, MICROSTEP_8);
+          break;
+
+        case 3:   // 1/4h microstep mode
+          stepper_Enable(true);
+          serial_SetMicrosteps(1, MICROSTEP_4);
+          serial_SetMicrosteps(2, MICROSTEP_4);
+          serial_SetMicrosteps(3, MICROSTEP_4);
+          break;
+
+        case 4:   // 1/2 microstep mode
+          stepper_Enable(true);
+          serial_SetMicrosteps(1, MICROSTEP_2);
+          serial_SetMicrosteps(2, MICROSTEP_2);
+          serial_SetMicrosteps(3, MICROSTEP_2);
+          break;
+
+        case 5:   // full step mode
+          stepper_Enable(true);
+          serial_SetMicrosteps(1, MICROSTEP_1);
+          serial_SetMicrosteps(2, MICROSTEP_1);
+          serial_SetMicrosteps(3, MICROSTEP_1);
+          break;
+
+        default:
+          break;
+      }
+      if (kEXTRACT_OK == RetVal2)
+      {
+        if (EA2 == 0)
+        {
+
+        }
+        else
+        {
+
+        }
+      }
+      else
+      {
+
+      }
+
     }
+  }
+
 /// TODO: Add proper code for enabling the motors at various levels
 #if defined(BOARD_EBB)
     if (
@@ -268,16 +339,7 @@ void stepper_EMCommand(void)
       }
     }
 #endif
-  }
 
-  RetVal = extract_number (kUINT8, &EA2, kOPTIONAL);
-  if (kEXTRACT_OK == RetVal)
-  {
-    // Bail if we got a conversion error
-    if (error_byte)
-    {
-      return;
-    }
 #if defined(BOARD_EBB)
     if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
     {
@@ -306,7 +368,7 @@ void stepper_EMCommand(void)
       }
     }
 #endif
-  }
+
 
   // Always clear the step counts if motors are enabled/disabled or 
   // resolution is changed.
@@ -1290,6 +1352,9 @@ void process_SM(uint32_t duration, int32_t a1Stp, int32_t a2Stp, int32_t a3Stp)
     //        move.StepsCounter[1]
     //    );
 
+    // Always enable the stepper motors before we start moving them
+    stepper_Enable(true);
+
     // Add the stepper command to the motion queue
     queue_AddStepperCommandToQueue(stepAdd, stepAddInc, stepsCounter, dir);
   }
@@ -1517,3 +1582,20 @@ void parseCSCommand(void)
   print_ack();
 }
 #endif
+
+void stepper_Init(void)
+{
+  stepper_Enable(false);
+}
+
+void stepper_Enable(bool state)
+{
+  if (state)
+  {
+    HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, GPIO_PIN_RESET);
+  }
+  else
+  {
+    HAL_GPIO_WritePin(EN_GPIO_Port, EN_Pin, GPIO_PIN_SET);
+  }
+}
