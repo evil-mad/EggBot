@@ -1798,7 +1798,7 @@ ul.no_bullets {
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li><i>position</i>, a number in the range 0 to 65535.
-                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 &mu;s).</p>
+                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83.3 ns).</p>
               </li>
               <li><i>output_pin</i>, a number in the range 0 to 24.
                 <p>The physical RPx pin number to use for generating the servo pulses.<br></p>
@@ -2020,7 +2020,7 @@ ul.no_bullets {
               </li>
               <li>
                 <i>position</i>, a number in the range 0 to 32000.
-                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83 ns).</p>
+                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83.3 ns).</p>
               </li>
               <li>
                 <i>output_pin</i>, a number in the range 0 to 24.
@@ -2139,10 +2139,10 @@ ul.no_bullets {
               </ul>
             </li>
             <li>
-              <code>SC,4,<i>servo_min</i></code> Set the minimum value for the RC servo output position. <i>servo_min</i> may be in the range 1 to 65535, in units of 83 ns intervals. This sets the "Pen Up" position. <br />Default: 12000 (1.0 ms) on reset.
+              <code>SC,4,<i>servo_min</i></code> Set the minimum value for the RC servo output position. <i>servo_min</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Up" position. <br />Default: 12000 (1.0 ms) on reset.
             </li>
             <li>
-              <code>SC,5,<i>servo_max</i></code> Set the maximum value for the RC servo output position. <i>servo_max</i> may be in the range 1 to 65535, in units of 83 ns intervals. 
+              <code>SC,5,<i>servo_max</i></code> Set the maximum value for the RC servo output position. <i>servo_max</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. 
               This sets the "Pen Down" position. 
               <br />
               Default: 16000 (1.33 ms) on reset.
