@@ -3,8 +3,6 @@
   <_name>Reorder Paths for Speed</_name>
   <id>command.evilmadscientist.eggbot.reorder</id>
   <dependency type="executable" location="extensions">axidraw_svg_reorder.py</dependency>
-  <dependency type="executable" location="extensions">inkex.py</dependency>
-
 
 <_param indent="5" name="splashpage" type="description" 
 appearance="header">EggBot Plot Optimization Tool</_param>
