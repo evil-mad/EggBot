@@ -184,10 +184,10 @@ CallBack Function cbButton() As Long
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting update to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
                     COMM_Print(hComm, "BL" & Chr$(13))
-                    Sleep 100
+                    Sleep 1000
                     COMM_Close(hComm)
-                    Sleep 2000        
-                    sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename   
+                    Sleep 5000
+                    sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename
                     If (bConsole) Then Console_WriteLine sCommandLine
                     If (bUpdaterConsole) Then
                       pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
