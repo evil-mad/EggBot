@@ -3,7 +3,6 @@
    <_name>Preset hatch for fills</_name>
    <id>command.evilmadscience.hatch.eggbot</id>
        <dependency type="executable" location="extensions">eggbot_presethatch.py</dependency>
-       <dependency type="executable" location="extensions">inkex.py</dependency>
        <_param name="title" type="description" xml:space="preserve">
 This extension applies a set of eggbot-friendly
 default presets to the live path effect called

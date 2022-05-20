@@ -3,7 +3,7 @@
 # Part of the Eggbot driver for Inkscape
 # https://github.com/evil-mad/EggBot
 #
-# Version 2.8.1, dated June 19, 2019.
+# Version 2.8.5, dated August 9, 2021.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,21 +19,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# TODO: Add and honor advisory locking around device open/close for non Win32
-
 import gettext
 import math
 import time
-import sys
 
-import cubicsuperpath
-import ebb_motion  # https://github.com/evil-mad/plotink    Requires version 0.2 or newer.
-import ebb_serial  # https://github.com/evil-mad/plotink
+from lxml import etree
+
+from plot_utils_import import from_dependency_import # plotink
+simplepath = from_dependency_import('ink_extensions.simplepath')
+simplestyle = from_dependency_import('ink_extensions.simplestyle')
+cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+simpletransform = from_dependency_import('ink_extensions.simpletransform')
+inkex = from_dependency_import('ink_extensions.inkex')
+exit_status = from_dependency_import('ink_extensions_utils.exit_status')
+message = from_dependency_import('ink_extensions_utils.message')
+ebb_serial = from_dependency_import('plotink.ebb_serial')  # Requires v 0.13 in plotink    https://github.com/evil-mad/plotink
+ebb_motion = from_dependency_import('plotink.ebb_motion')  # Requires v 0.16 in plotink
+plot_utils = from_dependency_import('plotink.plot_utils')  # Requires v 0.15 in plotink
+
 import eggbot_conf  # Some settings can be changed here.
-import inkex
-import plot_utils  # https://github.com/evil-mad/plotink
-import simplepath
-from simpletransform import applyTransformToPath, composeTransform, parseTransform
+
+
 
 F_DEFAULT_SPEED = 1
 N_PEN_DOWN_DELAY = 400  # delay (ms) for the pen to go down before the next move
@@ -436,7 +442,7 @@ class EggBot(inkex.Effect):
             if float(vinfo[2]) != 0 and float(vinfo[3]) != 0:
                 sx = self.svgWidth / float(vinfo[2])
                 sy = self.svgHeight / float(vinfo[3])
-                self.svgTransform = parseTransform('scale({0:f},{1:f}) translate({2:f},{3:f})'.format(sx, sy, -float(vinfo[0]), -float(vinfo[1])))
+                self.svgTransform = simpletransform.parseTransform('scale({0:f},{1:f}) translate({2:f},{3:f})'.format(sx, sy, -float(vinfo[0]), -float(vinfo[1])))
 
         self.ServoSetup()
         ebb_motion.sendEnableMotors(self.serialPort, 1)  # 16X microstepping
@@ -505,7 +511,7 @@ class EggBot(inkex.Effect):
                 continue
 
             # first apply the current matrix transform to this node's transform
-            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
+            mat_new = simpletransform.composeTransform(mat_current, simpletransform.parseTransform(node.get("transform")))
 
             if node.tag in [inkex.addNS('g', 'svg'), 'g']:
 
@@ -515,7 +521,10 @@ class EggBot(inkex.Effect):
                     if not self.allLayers:
                         self.DoWePlotLayer(self.sCurrentLayerName)
                 self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
-
+            elif node.tag in [inkex.addNS('switch', 'svg'), 'switch']:
+                # Treat switch as a container element to plot
+                self.penUp()
+                self.recursivelyTraverseSvg(node, mat_new, parent_visibility=v)
             elif node.tag in [inkex.addNS('use', 'svg'), 'use']:
 
                 # A <use> element refers to another SVG element via an xlink:href="#blah"
@@ -541,7 +550,7 @@ class EggBot(inkex.Effect):
                         y = float(node.get('y', '0'))
                         # Note: the transform has already been applied
                         if x != 0 or y != 0:
-                            mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
+                            mat_new2 = simpletransform.composeTransform(mat_new, simpletransform.parseTransform('translate({0:f},{1:f})'.format(x, y)))
                         else:
                             mat_new2 = mat_new
                         v = node.get('visibility', v)
@@ -842,19 +851,19 @@ class EggBot(inkex.Effect):
                                   inkex.addNS('flowRoot', 'svg'), 'flowRoot']:
                     if 'text' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw text; ' +
-                                                       'please convert it to a path first.  Consider using the ' +
-                                                       'Hershey Text extension which is located under the ' +
-                                                       '"Render" category of extensions.'))
+                            str(self.sCurrentLayerName) + '" unable to draw text; ' +
+                            'please convert it to a path first.  Consider using the ' +
+                            'Hershey Text extension which is located in the menu' +
+                            'under Extensions > Text.'))
                         self.warnings['text'] = 1
                     pass
                 elif node.tag in [inkex.addNS('image', 'svg'), 'image']:
                     if 'image' not in self.warnings:
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw bitmap images; ' +
-                                                       'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
-                                                       'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
-                                                       'cause cut-and-paste operations to paste in bitmap copies.'))
+                            str(self.sCurrentLayerName) + '" unable to draw bitmap images; ' +
+                            'please convert them to line art first.  Consider using the "Trace bitmap..." ' +
+                            'tool of the "Path" menu.  Mac users please note that some X11 settings may ' +
+                            'cause cut-and-paste operations to paste in bitmap copies.'))
                         self.warnings['image'] = 1
                     pass
                 elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
@@ -874,19 +883,14 @@ class EggBot(inkex.Effect):
                 elif node.tag in [inkex.addNS('color-profile', 'svg'), 'color-profile']:
                     # Gamma curves, color temp, etc. are not relevant to single color output
                     pass
-                elif not isinstance(node.tag, basestring):
-                    # This is likely an XML processing instruction such as an XML
-                    # comment.  lxml uses a function reference for such node tags
-                    # and as such the node tag is likely not a printable string.
-                    # Further, converting it to a printable string likely won't
-                    # be very useful.
+                elif node.tag in [inkex.addNS('foreignObject', 'svg'), 'foreignObject']:
                     pass
                 else:
                     if str(node.tag) not in self.warnings:
                         t = str(node.tag).split('}')
                         inkex.errormsg(gettext.gettext('Warning: in layer "' +
-                                                       self.sCurrentLayerName + '" unable to draw <' + str(t[-1]) +
-                                                       '> object, please convert it to a path first.'))
+                            str(self.sCurrentLayerName) + '" unable to draw <' + str(t[-1]) +
+                            '> object, please convert it to a path first.'))
                         self.warnings[str(node.tag)] = 1
                     pass
 
@@ -904,11 +908,7 @@ class EggBot(inkex.Effect):
         temp_num_string = 'x'
         string_pos = 1
 
-        if sys.version_info < (3,):  # Yes this is ugly. More elegant suggestions welcome. :)
-            current_layer_name = str_layer_name.encode('ascii', 'ignore')  # Drop non-ascii characters
-        else:
-            current_layer_name = str(str_layer_name)
-
+        current_layer_name = str(str_layer_name)
         current_layer_name.lstrip()  # Remove leading whitespace
 
         # Look at layer name.  Sample first character, then first two, and
@@ -918,14 +918,14 @@ class EggBot(inkex.Effect):
         max_length = len(current_layer_name)
         if max_length > 0:
             while string_pos <= max_length:
-                if str.isdigit(current_layer_name[:string_pos]):
+                if current_layer_name[:string_pos].isdigit():
                     temp_num_string = current_layer_name[:string_pos]  # Store longest numeric string so far
                     string_pos += 1
                 else:
                     break
 
         self.plotCurrentLayer = False  # Temporarily assume that we aren't plotting the layer
-        if str.isdigit(temp_num_string):
+        if temp_num_string.isdigit():
             if self.svgLayer == int(float(temp_num_string)):
                 self.plotCurrentLayer = True  # We get to plot the layer!
                 self.LayersPlotted += 1
@@ -959,7 +959,7 @@ class EggBot(inkex.Effect):
         p = cubicsuperpath.parsePath(d)
 
         # ...and apply the transformation to each point
-        applyTransformToPath(mat_transform, p)
+        simpletransform.applyTransformToPath(mat_transform, p)
 
         # p is now a list of lists of cubic beziers [control pt1, control pt2, endpoint]
         # where the start-point is the last point in the previous segment.
@@ -1021,7 +1021,7 @@ class EggBot(inkex.Effect):
 
     def penDown(self):
         self.virtualPenIsUp = False  # Virtual pen keeps track of state for resuming plotting.
-        if self.bPenIsUp or self.bPenIsUp == None::  # Continue only if pen state is up (or unknown)
+        if self.bPenIsUp or self.bPenIsUp == None:  # Continue only if pen state is up (or unknown)
             if not self.resumeMode and not self.bStopped:  # skip if we're resuming or stopped
                 self.bPenIsUp = False
                 if self.penDownActivatesEngraver:
@@ -1125,8 +1125,8 @@ class EggBot(inkex.Effect):
             n_time = int(math.ceil(1000.0 / self.fSpeed * plot_utils.distance(n_delta_x, n_delta_y)))
 
             while abs(n_delta_x) > 0 or abs(n_delta_y) > 0:
-                xd = n_delta_x
-                yd = n_delta_y
+                xd = int(n_delta_x)
+                yd = int(n_delta_y)
                 td = n_time
                 if td < 1:
                     td = 1  # don't allow zero-time moves.
