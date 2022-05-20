@@ -84,8 +84,12 @@
 # This prevents extremely complex plots from generating glitches
 # Modifications are limited to recursivelyTraverseSvg and effect methods 
 
+# Updated by Windell H. Oskay, 2021
+# Add option for selecting units.
+# Make inset settable in selected units as well.
+
 # Current software version:
-# (v2.3.2, March 27, 2020)
+# (v2.4.1, October 9, 2021<)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -102,26 +106,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import math
+from lxml import etree
 
-try:
-    from plot_utils_import import from_dependency_import # plotink
-    inkex = from_dependency_import('ink_extensions.inkex')
-    simplepath = from_dependency_import('ink_extensions.simplepath')
-    simpletransform = from_dependency_import('ink_extensions.simpletransform')
-    simplestyle = from_dependency_import('ink_extensions.simplestyle')
-    cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
-    cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
-    bezmisc = from_dependency_import('ink_extensions.bezmisc')
-except:
-    import inkex
-    import simplepath
-    import simpletransform
-    import simplestyle
-    import cubicsuperpath
-    import cspsubdiv
-    import bezmisc
-
-import plot_utils  # https://github.com/evil-mad/plotink
+from axidrawinternal.plot_utils_import import from_dependency_import # plotink
+inkex = from_dependency_import('ink_extensions.inkex')
+simplepath = from_dependency_import('ink_extensions.simplepath')
+simpletransform = from_dependency_import('ink_extensions.simpletransform')
+simplestyle = from_dependency_import('ink_extensions.simplestyle')
+cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
+bezmisc = from_dependency_import('ink_extensions.bezmisc')
+plot_utils = from_dependency_import('plotink.plot_utils')  # https://github.com/evil-mad/plotink
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
@@ -480,7 +475,7 @@ def interstices(self, p1, p2, paths, hatches, b_hold_back_hatches, f_hold_back_s
             # remove it from consideration by marking it as already drawn - a
             # fiction, but is much quicker than actually removing the hatch from the list.
 
-            f_min_allowed_hatch_length = self.options.hatchSpacing * MIN_HATCH_FRACTION
+            f_min_allowed_hatch_length = self.hatch_spacing_px * MIN_HATCH_FRACTION
             f_initial_hatch_length = math.hypot(x2 - x1, y2 - y1)
             # We did as much as possible of the inset operation back when we were finding intersections.
             # We did it back then because at that point we knew more about the geometry than we know now.
@@ -619,19 +614,19 @@ class Eggbot_Hatch(inkex.Effect):
         self.docTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
         self.OptionParser.add_option(
-                "--holdBackSteps", action="store", type="float",
-                dest="holdBackSteps", default=3.0,
-                help="How far hatch strokes stay from boundary (steps)")
+                "--inset_dist", action="store", type="float",
+                dest="inset_dist", default=3.0,
+                help="How far hatch strokes stay from boundary")
         self.OptionParser.add_option(
                 "--hatchScope", action="store", type="float",
                 dest="hatchScope", default=3.0,
                 help="Radius searched for segments to join (units of hatch width)")
         self.OptionParser.add_option(
-                "--holdBackHatchFromEdges", action="store", dest="holdBackHatchFromEdges",
+                "--inset_bool", action="store", dest="inset_bool",
                 type="inkbool", default=True,
                 help="Stay away from edges, so no need for inset")
         self.OptionParser.add_option(
-                "--reducePenLifts", action="store", dest="reducePenLifts",
+                "--connect_bool", action="store", dest="connect_bool",
                 type="inkbool", default=True,
                 help="Reduce plotting time by joining some hatches")
         self.OptionParser.add_option(
@@ -648,11 +643,18 @@ class Eggbot_Hatch(inkex.Effect):
                 help="Spacing between hatch lines")
         self.OptionParser.add_option(
                 "--tolerance", action="store", type="float",
-                dest="tolerance", default=20.0,
+                dest="tolerance", default=3.0,
                 help="Allowed deviation from original paths")
+        self.OptionParser.add_option(
+                "--units",
+                 action="store",  type="int",
+                 dest="units", default=1,
+                 help="Units to use for hatches. 1: line width. 2: px. 3: mm. 4: inch")
+
         self.OptionParser.add_option("--tab",  # NOTE: value is not used.
-                                     action="store", type="string", dest="tab", default="splash",
+                                     action="store", type="string", dest="_tab", default="splash",
                                      help="The active tab when Apply was pressed")
+                                     
 
     def getDocProps(self):
 
@@ -812,7 +814,17 @@ class Eggbot_Hatch(inkex.Effect):
             if v == 'inherit':
                 v = parent_visibility
             if v == 'hidden' or v == 'collapse':
-                pass
+                continue
+
+            style = simplestyle.parseStyle(node.get('style'))
+
+            # Check for "display:none" in the node's style attribute:
+            if 'display' in style.keys() and style['display'] == 'none':
+                continue  # Do not hatch this object or its children
+
+            # The node may have a display="none" attribute as well:
+            if node.get('display') == 'none':
+                continue  # Do not hatch this object or its children
 
             # first apply the current matrix transform to this node's transform
             mat_new = simpletransform.composeTransform(mat_current, simpletransform.parseTransform(node.get("transform")))
@@ -858,13 +870,13 @@ class Eggbot_Hatch(inkex.Effect):
                     self.addPathVertices(path_data, node, mat_new)
                     # We now have a path we want to apply a (cross)hatch to
                     # Apply appropriate functions
-                    b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                    b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                     if b_have_grid:
                         if self.options.crossHatch:
-                            self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                            self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                         # Now loop over our hatch lines looking for intersections
                         for h in self.grid:
-                            interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                            interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('rect', 'svg'), 'rect']:
 
@@ -894,13 +906,13 @@ class Eggbot_Hatch(inkex.Effect):
                 self.addPathVertices(simplepath.formatPath(a), node, mat_new)
                 # We now have a path we want to apply a (cross)hatch to
                 # Apply appropriate functions
-                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                 if b_have_grid:
                     if self.options.crossHatch:
-                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
-                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('line', 'svg'), 'line']:
 
@@ -923,13 +935,13 @@ class Eggbot_Hatch(inkex.Effect):
                 self.addPathVertices(simplepath.formatPath(a), node, mat_new)
                 # We now have a path we want to apply a (cross)hatch to
                 # Apply appropriate functions
-                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                 if b_have_grid:
                     if self.options.crossHatch:
-                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
-                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('polyline', 'svg'), 'polyline']:
 
@@ -964,13 +976,13 @@ class Eggbot_Hatch(inkex.Effect):
 
                     # We now have a path we want to apply a (cross)hatch to
                     # Apply appropriate functions
-                    b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                    b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                     if b_have_grid:
                         if self.options.crossHatch:
-                            self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                            self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                             # Now loop over our hatch lines looking for intersections
                         for h in self.grid:
-                            interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                            interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('polygon', 'svg'), 'polygon']:
                 # Convert
@@ -991,13 +1003,13 @@ class Eggbot_Hatch(inkex.Effect):
                 self.addPathVertices(d, node, mat_new)
                 # We now have a path we want to apply a (cross)hatch to
                 # Apply appropriate functions
-                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                 if b_have_grid:
                     if self.options.crossHatch:
-                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                         # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
-                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('ellipse', 'svg'), 'ellipse',
                               inkex.addNS('circle', 'svg'), 'circle']:
@@ -1042,34 +1054,33 @@ class Eggbot_Hatch(inkex.Effect):
                 self.addPathVertices(d, node, mat_new)
                 # We now have a path we want to apply a (cross)hatch to
                 # Apply appropriate functions
-                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.options.hatchSpacing), True)
+                b_have_grid = self.makeHatchGrid(float(self.options.hatchAngle), float(self.hatch_spacing_px), True)
                 if b_have_grid:
                     if self.options.crossHatch:
-                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.options.hatchSpacing), False)
+                        self.makeHatchGrid(float(self.options.hatchAngle + 90.0), float(self.hatch_spacing_px), False)
                     # Now loop over our hatch lines looking for intersections
                     for h in self.grid:
-                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.holdBackHatchFromEdges, self.options.holdBackSteps)
+                        interstices(self, (h[0], h[1]), (h[2], h[3]), self.paths, self.hatches, self.options.inset_bool, self.inset_dist_px)
 
             elif node.tag in [inkex.addNS('pattern', 'svg'), 'pattern']:
-                pass
+                continue
             elif node.tag in [inkex.addNS('metadata', 'svg'), 'metadata']:
-                pass
+                continue
             elif node.tag in [inkex.addNS('defs', 'svg'), 'defs']:
-                pass
+                continue
             elif node.tag in [inkex.addNS('namedview', 'sodipodi'), 'namedview']:
-                pass
+                continue
             elif node.tag in [inkex.addNS('eggbot', 'svg'), 'eggbot']:
-                pass
+                continue
             elif node.tag in [inkex.addNS('WCB', 'svg'), 'WCB']:
-                pass
+                continue
+            elif node.tag in [inkex.addNS('image', 'svg'), 'image']:
+                continue
             elif node.tag in [inkex.addNS('text', 'svg'), 'text']:
-                inkex.errormsg('Warning: unable to draw text, please convert it to a path first.')
-                pass
-            elif not isinstance(node.tag, basestring):
-                pass
+                inkex.errormsg('Warning: unable to hatch text, please convert it to a path first.')
+                continue
             else:
-                inkex.errormsg('Warning: unable to hatch object <{0}>, please convert it to a path first.'.format(node.tag))
-                pass
+                continue # produce no error on other SVG elements.
 
     def joinFillsWithNode(self, node, stroke_width, path):
 
@@ -1202,8 +1213,19 @@ class Eggbot_Hatch(inkex.Effect):
         # Viewbox handling
         self.handleViewBox()
 
-        if self.options.hatchSpacing == 0:
-            self.options.hatchSpacing = 0.1 # Hardcode minimum value
+        # Default spacing values for hatches and inset; handle px units case:
+        self.hatch_spacing_px = self.options.hatchSpacing
+        self.inset_dist_px = self.options.inset_dist
+
+        if self.options.units == 3: # Units in mm
+            self.hatch_spacing_px =  (96.0 / 25.4) * self.options.hatchSpacing
+            self.inset_dist_px =  (96.0 / 25.4) * self.options.inset_dist
+        if self.options.units == 4: # Units in inches
+            self.hatch_spacing_px = 96.0 * self.options.hatchSpacing
+            self.inset_dist_px = 96.0 * self.options.inset_dist
+
+        if self.hatch_spacing_px < 0.1:
+            self.hatch_spacing_px = 0.1 # Hardcode minimum value
 
         ref_count = 0
         pt_last_position_abs = [0, 0]
@@ -1265,14 +1287,14 @@ class Eggbot_Hatch(inkex.Effect):
                 stroke_width = 1.0
 
             # The transform also applies to the hatch spacing we use when searching for end connections
-            transformed_hatch_spacing = stroke_width * self.options.hatchSpacing
+            transformed_hatch_spacing = stroke_width * self.hatch_spacing_px
 
             path = ''  # regardless of whether or not we're reducing pen lifts
             pt_last_position_abs = [0, 0]
             pt_last_position_abs[0] = 0
             pt_last_position_abs[1] = 0
             f_distance_moved_with_pen_up = 0
-            if not self.options.reducePenLifts:
+            if not self.options.connect_bool:
                 for segment in self.hatches[key]:
                     if len(segment) < 2:
                         continue
