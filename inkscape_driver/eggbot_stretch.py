@@ -19,13 +19,17 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import math
+from lxml import etree
+from plot_utils_import import from_dependency_import # plotink
+simplepath = from_dependency_import('ink_extensions.simplepath')
+bezmisc = from_dependency_import('ink_extensions.bezmisc')
+cspsubdiv = from_dependency_import('ink_extensions.cspsubdiv')
+cubicsuperpath = from_dependency_import('ink_extensions.cubicsuperpath')
+simpletransform = from_dependency_import('ink_extensions.simpletransform')
+inkex = from_dependency_import('ink_extensions.inkex')
 
-import bezmisc
-import cspsubdiv
-import cubicsuperpath
-import inkex
-import simplepath
-from simpletransform import applyTransformToPath, applyTransformToPoint, composeTransform, parseTransform
+
+
 
 N_PAGE_WIDTH = 3200
 N_PAGE_HEIGHT = 800
@@ -218,7 +222,7 @@ class Map(inkex.Effect):
                 if (vinfo[2] != 0) and (vinfo[3] != 0):
                     sx = self.docWidth / float(vinfo[2])
                     sy = self.docHeight / float(vinfo[3])
-                    self.docTransform = parseTransform('scale({0:f},{1:f})'.format(sx, sy))
+                    self.docTransform = simpletransform.parseTransform('scale({0:f},{1:f})'.format(sx, sy))
 
     def getPathVertices(self, path, node=None, transform=None, find_bbox=False):
 
@@ -246,7 +250,7 @@ class Map(inkex.Effect):
             return None
 
         if transform:
-            applyTransformToPath(transform, p)
+            simpletransform.applyTransformToPath(transform, p)
 
         # Now traverse the cubic super path
         subpath_list = []
@@ -298,13 +302,13 @@ class Map(inkex.Effect):
             last_point = subpath[0]
             last_point[0] = self.cx + (last_point[0] - self.cx) / math.cos((last_point[1] - self.cy) * steps2rads)
             if inv_transform is not None:
-                applyTransformToPoint(inv_transform, last_point)
+                simpletransform.applyTransformToPoint(inv_transform, last_point)
             new_path += ' M {0:f},{1:f}'.format(last_point[0], last_point[1])
             for point in subpath[1:]:
                 x = self.cx + (point[0] - self.cx) / math.cos((point[1] - self.cy) * steps2rads)
                 pt = [x, point[1]]
                 if inv_transform is not None:
-                    applyTransformToPoint(inv_transform, pt)
+                    simpletransform.applyTransformToPoint(inv_transform, pt)
                 new_path += ' l {0:f},{1:f}'.format(pt[0] - last_point[0], pt[1] - last_point[1])
                 last_point = pt
 
@@ -344,7 +348,7 @@ class Map(inkex.Effect):
                 pass
 
             # First apply the current matrix transform to this node's transform
-            mat_new = composeTransform(mat_current, parseTransform(node.get("transform")))
+            mat_new = simpletransform.composeTransform(mat_current, simpletransform.parseTransform(node.get("transform")))
 
             if node.tag in [inkex.addNS('g', 'svg'), 'g']:
                 self.recursivelyTraverseSvg(node, mat_new, v, find_bbox)
@@ -375,7 +379,7 @@ class Map(inkex.Effect):
                     y = float(node.get('y', '0'))
                     # Note: the transform has already been applied
                     if (x != 0) or (y != 0):
-                        mat_new2 = composeTransform(mat_new, parseTransform('translate({0:f},{1:f})'.format(x, y)))
+                        mat_new2 = simpletransform.composeTransform(mat_new, simpletransform.parseTransform('translate({0:f},{1:f})'.format(x, y)))
                     else:
                         mat_new2 = mat_new
                     v = node.get('visibility', v)
@@ -604,11 +608,11 @@ class Map(inkex.Effect):
             if node_transform is None:
                 return parent_transform
             else:
-                tr = parseTransform(node_transform)
+                tr = simpletransform.parseTransform(node_transform)
                 if parent_transform is None:
                     return tr
                 else:
-                    return composeTransform(parent_transform, tr)
+                    return simpletransform.composeTransform(parent_transform, tr)
         else:
             return self.docTransform
 
