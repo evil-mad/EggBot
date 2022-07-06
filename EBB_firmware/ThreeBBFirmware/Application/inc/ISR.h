@@ -54,15 +54,17 @@
 
 /* Includes ------------------------------------------------------------------*/
 
+#include "FIFO.h"
+
+/* Exported types ------------------------------------------------------------*/
+
+/* Exported constants --------------------------------------------------------*/
+
 /* TMR6 fires high_ISR() at 100 KHz rate, so this value is used in math to take this
  * rate into account.
  * TODO: Make this derive from CubeMX somehow?
  */
 #define HIGH_ISR_TICKS_PER_MS (100)
-
-/* Exported types ------------------------------------------------------------*/
-
-/* Exported constants --------------------------------------------------------*/
 
 /* Exported macros -----------------------------------------------------------*/
 
@@ -73,6 +75,7 @@ volatile extern uint32_t TickCounterMS;
 volatile extern uint8_t GlobalDelayMS;
 volatile extern uint8_t DriverInitDelayMS;
 
+MoveCommand_t volatile * ISR_GetCurrentCommand(void);
 void ISR_MotionISR(void);
 
 ///void low_ISR(void);

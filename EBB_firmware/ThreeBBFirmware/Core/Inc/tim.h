@@ -52,6 +52,10 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* USER CODE BEGIN Prototypes */
 
+void TIM_TIM6Start(void);
+void TIM_TIM6InterruptStop(void);
+void TIM_TIM6InterruptStart(void);
+
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

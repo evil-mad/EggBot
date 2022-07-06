@@ -78,13 +78,28 @@ volatile uint8_t GlobalDelayMS;
 
 volatile uint8_t DriverInitDelayMS;
 
+// Holds the data for the currently executing command
+/// TODO: Can this just be the currently pointed to element in the FIFO? Why
+/// have it be a separate variable?
+volatile MoveCommand_t CurrentCommand;
+
+
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
 /************** PRIVATE FUNCTIONS *********************************************/
 
 /************** PUBLIC FUNCTIONS **********************************************/
 
-
+/* For functions outside this module that need access to information about the
+ * current command. Returns a pointer to the currently executing command.
+ */
+/// TODO: This is dangerous. It would be much better to somehow have accessor
+/// functions which would allow external modules to get read-only access to
+/// the currently executing command right?
+volatile MoveCommand_t * ISR_GetCurrentCommand(void)
+{
+  return &CurrentCommand;
+}
 
 /*
  * Main interrupt service routine
@@ -101,32 +116,31 @@ void ISR_MotionISR(void)
 {
   // Accumulators (at 100kHz) used to determine when to take a step
   static bool AllDone;
-  static MoveCommandType move = {0};
   AllDone = true;
 
 ///DEBUG_G0_SET();
   // If we are not already processing a command, see if there are any
   // waiting for us on the queue
-  if (move.Command == COMMAND_NONE)
+  if (CurrentCommand.Command == COMMAND_NONE)
   {
-    if (queue_PullNextCommand(&move) == false)
+    if (queue_PullNextCommand(&CurrentCommand) == false)
     {
       // Nope, queue is empty. So just mark that we do not have a command
       // to process and be done
-      move.Command = COMMAND_NONE;
+      CurrentCommand.Command = COMMAND_NONE;
       return;
     }
   }
 
-  if (move.Command == COMMAND_MOTOR_MOVE)
+  if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
   {
-    AllDone = stepper_Step(&(move.Data.Stepper));
+    AllDone = stepper_Step(&(CurrentCommand.Data.Stepper));
   }
   // Check to see if we should start or stop the engraver
-  else if (move.Command == COMMAND_SE)
+  else if (CurrentCommand.Command == COMMAND_SE)
   {
     // Now act on the State of the SE command
-    if (move.Data.Engraver.SEState)
+    if (CurrentCommand.Data.Engraver.SEState)
     {
       // Set RB3 to StoredEngraverPower
 ///          CCPR1L = queue_G1[queueOut].SEPower >> 2;
@@ -141,34 +155,34 @@ void ISR_MotionISR(void)
     AllDone = true;
   }
   // Do we have an RC servo move?
-  else if (move.Command == COMMAND_SERVO_MOVE)
+  else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
   {
     // Set up a new target and rate for one of the servos
-    servo_SetTarget(move.Data.Servo.ServoPosition, move.Data.Servo.ServoPin, move.Data.Servo.ServoRate);
+    servo_SetTarget(CurrentCommand.Data.Servo.ServoPosition, CurrentCommand.Data.Servo.ServoPin, CurrentCommand.Data.Servo.ServoRate);
     AllDone = true;
   }
   // Note that we can have a delay with a COMMAND_DELAY or a COMMAND_SERVO_MOVE
   // That's why this is not an elseif here.
   if (
-    move.Command == COMMAND_DELAY
+    CurrentCommand.Command == COMMAND_DELAY
     ||
-    move.Command == COMMAND_SERVO_MOVE
+    CurrentCommand.Command == COMMAND_SERVO_MOVE
   )
   {
-    if (move.DelayCounter)
+    if (CurrentCommand.DelayCounter)
     {
       // Double check that things aren't way too big
-      if (move.DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
+      if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (uint32_t)0x10000)
       {
-        move.DelayCounter = 0;
+        CurrentCommand.DelayCounter = 0;
       }
       else
       {
-        move.DelayCounter--;
+        CurrentCommand.DelayCounter--;
       }
     }
 
-    if (move.DelayCounter)
+    if (CurrentCommand.DelayCounter)
     {
       AllDone = false;
     }
@@ -178,11 +192,9 @@ void ISR_MotionISR(void)
   if (AllDone)
   {
     // "Erase" the current command from the queue
-    move.Command = COMMAND_NONE;
+    CurrentCommand.Command = COMMAND_NONE;
   }
-
-
-    // Check for button being pushed
+  // Check for button being pushed
 ///    if (
 ///      (!swProgram)
 ///      ||
@@ -197,9 +209,6 @@ void ISR_MotionISR(void)
 ///    }
 ///DEBUG_G0_RESET();
 }
-
-
-
 
 
 #if 0

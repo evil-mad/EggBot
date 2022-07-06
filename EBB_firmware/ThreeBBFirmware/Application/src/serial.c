@@ -125,6 +125,26 @@ static const uint8_t DriverInitTableAddress[MAX_DRIVER_INIT_VALUES] =
   GSTAT
 };
 
+/* Driver 1 OTP read = 0x0000004B
+ *   Default to StealthChop mode, HEND=0, HSTART=5, TOOF=3
+ *   IHOLD = 16
+ *   IHOLDDELAY = 1
+ *   PWM_FREQ = 0b01 = 2/683
+ *   PWM_REG = 0b1000 = max 4 increments/cycle
+ *   PWW_OFS = 36
+ *   TPWM_THRS = 0
+ *   PWM_AUTOGRAD = 1
+ *   PWM_GRAD = 14
+ *   otp_internalRsense = 1 : use internal sense resistors
+ *
+ * Driver 2 OTP read = 0x0000004D
+ * Driver 3 OTP read = 0x0000004D
+ */
+
+/* Brand new driver chip OTP read = 0x0000000A
+ *
+ */
+
 // Table of 32 values to send to drivers on init (coordinate with addresses)
 // (Used with X and Y steppers - Motor1 and Motor2)
 static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
@@ -132,7 +152,7 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
   /* Set up default general config settings */
 
   /* GCONF Setup:
-   * 0x000001C2
+   * 0x   0    0    0    0    0    1    C    2
    * 0b0000 0000 0000 0000 0000 0001 1100 0010
    * 
    * b9   0     : test_mode : 0 for normal operation
@@ -146,7 +166,7 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
    * b1   0     : internal_Rsense : 0 means use external sense resistors
    * b0   0     : I_scale_analog : 0 means use internal reference derived from 5VOUT
    */
-  0x000001C0,     // GCONF
+  0x000001C0,     // GCONF, 0x00, 0
 
   /* Set up idle and run current levels
    b20:31  0000 0000 000
@@ -156,14 +176,14 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
    b5:7    000
    b0:4    0 1000 : IHOLD : Motor hold current
     
-   0000 0000 0000 0100 0000 0100 0000 0001
-   0    0    0    4    0    4    0    1
+   0b0000 0000 0000 0100 0000 0100 0000 0001
+   0x   0    0    0    4    0    4    0    1
    */
-  0x00000A06,     // IHOLD_RUN
+  0x00000A06,     // IHOLD_RUN, 0x10, 16
 
   /* On boot, TMC2209 has the following values in CHOPCONF:
-   0x10010053
-   b0001 0000 0000 0001 0000 0000 1001 0111
+   0x   1    0    0    1    0    0    5    3
+   0b0001 0000 0000 0001 0000 0000 1001 0111
    
    b31    0      : diss2vs : low side short protection disable : protection enabled
    b30    0      : diss2g  : short to GND protection disable : protection enabled
@@ -183,10 +203,10 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
     
    0x14010053
    */
-  0x14010053,      // CHOPCONF
+  0x14010053,      // CHOPCONF, 0x6C, 108
 
   /* Write a 1 to GSTAT's reset bit to clear it */
-  0x00000001       // GSTAT
+  0x00000001       // GSTAT, 0x01, 1
 };
 
 // Table of 32 values to send to drivers on init (coordinate with addresses)
@@ -462,12 +482,12 @@ void serial_InitDrivers(void)
   {
     // There are two tables - one for motors 1/2 and a second for motor 3
     // This way we can make the pen lift servo (3) have different settings
-    WriteDatagram(0, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-    HAL_Delay(1);
-    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-    HAL_Delay(1);
-    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
-    HAL_Delay(1);
+//    WriteDatagram(0, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
+//    HAL_Delay(1);
+//    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
+//    HAL_Delay(1);
+//    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
+//    HAL_Delay(1);
   }
   printf("Drivers initialized\n");
 

@@ -181,8 +181,6 @@ int main(void)
   servo_Init();
   serial_Init();
   stepper_Init();
-  /// TODO: Add this to stepper.c init?
-  HAL_TIM_Base_Start_IT(&htim6);
 
   // Just temporary
   DriversNeedInit = true;

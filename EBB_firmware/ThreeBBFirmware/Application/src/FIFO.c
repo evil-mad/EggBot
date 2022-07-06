@@ -78,7 +78,7 @@ static volatile uint8_t QueueOut;
 static volatile uint8_t QueueDepth;
 
 // The motion command queue
-static MoveCommandType Queue[MAX_QUEUE_SIZE];
+static MoveCommand_t Queue[MAX_QUEUE_SIZE];
 
 /************** PRIVATE FUNCTION PROTOTYPES ***********************************/
 
@@ -100,6 +100,11 @@ static void incrementQueue(void)
 
 
 /************** PUBLIC FUNCTIONS **********************************************/
+
+uint8_t queue_GetSize(void)
+{
+  return QueueDepth;
+}
 
 void queue_Init(void)
 {
@@ -191,7 +196,7 @@ void queue_AddDelayCommandToQueue(uint32_t delay)
 
 // Try to pull a command off the queue. If there are none, then return false. Otherwise return true.
 // If there is one available, copy it into 'move'.
-bool queue_PullNextCommand(MoveCommandType * move)
+bool queue_PullNextCommand(MoveCommand_t * move)
 {
   if (QueueDepth)
   {

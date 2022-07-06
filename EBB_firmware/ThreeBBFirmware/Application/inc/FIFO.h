@@ -130,7 +130,7 @@ typedef struct
     struct ServoCommand     Servo;
     struct EngraverCommand  Engraver;
   } Data;
-} MoveCommandType;  // 27 bytes
+} MoveCommand_t;  // 27 bytes
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -138,6 +138,7 @@ typedef struct
 
 /* Exported functions --------------------------------------------------------*/
 
+uint8_t queue_GetSize(void);
 void queue_Init(void);
 void queue_WaitForRoom(void);
 void queue_WaitForEmpty(void);
@@ -149,6 +150,6 @@ void queue_AddStepperCommandToQueue(
 void queue_AddServoCommandToQueue(uint16_t position, uint8_t pin, uint16_t rate, uint32_t delay);
 void queue_AddEngraverCommandToQueue(uint8_t state, uint16_t power);
 void queue_AddDelayCommandToQueue(uint32_t delay);
-bool queue_PullNextCommand(MoveCommandType * move);
+bool queue_PullNextCommand(MoveCommand_t * move);
 
 #endif	/* FIFO_H */

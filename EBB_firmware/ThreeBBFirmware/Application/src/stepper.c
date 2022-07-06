@@ -67,6 +67,7 @@
 #include "commands.h"
 #include "stepper.h"
 #include "serial.h"
+#include "tim.h"
 
 /************** PRIVATE TYPEDEFS **********************************************/
 
@@ -1451,41 +1452,50 @@ void parseESCommand(void)
   process_EStop(TRUE);
 }
 
+#endif
 
 // Do the work of the QM command so we can use this same code for QM and
 // for QG commands.
-UINT8 process_QM(void)
+uint8_t process_QM(void)
 {
-  UINT8 CommandExecuting = 0;
-  UINT8 Motor1Running = 0;
-  UINT8 Motor2Running = 0;
-  UINT8 FIFOStatus = 0;
+  uint8_t commandExecuting = 0;
+  uint8_t motor1Running = 0;
+  uint8_t motor2Running = 0;
+  uint8_t motor3Running = 0;
+  uint8_t FIFOStatus = 0;
+  volatile MoveCommand_t * currentCommand;
 
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+  // Disable stepper interrupt briefly here to read out value that ISR uses
+  TIM_TIM6InterruptStop();
+
+  currentCommand = ISR_GetCurrentCommand();
 
   // Create our output values to print back to the PC
-  if (FIFODepth) 
+  if (currentCommand->Command != COMMAND_NONE)
   {
-    CommandExecuting = 1;
+    commandExecuting = 1;
   }
-  if (FIFODepth > 1)
+  if (queue_GetSize() > 0)
   {
     FIFOStatus = 1;
   }
-  if (CommandExecuting && FIFO_G2[FIFOOut].StepsCounter0 != 0) 
+  if (commandExecuting && currentCommand->Data.Stepper.StepsCounter[0] != 0)
   {
-    Motor1Running = 1;
+    motor1Running = 1;
   }
-  if (CommandExecuting && FIFO_G3[FIFOOut].StepsCounter1 != 0) 
+  if (commandExecuting && currentCommand->Data.Stepper.StepsCounter[1] != 0)
   {
-    Motor2Running = 1;
+    motor2Running = 1;
+  }
+  if (commandExecuting && currentCommand->Data.Stepper.StepsCounter[2] != 0)
+  {
+    motor3Running = 1;
   }
 
-  // Re-enable interrupts
-  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  // Re-enable stepper interrupt
+  TIM_TIM6InterruptStart();
     
-  return ((CommandExecuting << 3) | (Motor1Running << 2) | (Motor2Running << 1) | FIFOStatus);
+  return ((motor3Running << 4) | (commandExecuting << 3) | (motor1Running << 2) | (motor2Running << 1) | FIFOStatus);
 }
 
 // QM command
@@ -1497,17 +1507,19 @@ UINT8 process_QM(void)
 //   <CommandExecutingStatus>: 0 if no 'motion command' is executing, > 0 if some 'motion command' is executing
 //   <Motor1Status>: 0 if motor 1 is idle, 1 if motor is moving
 //   <Motor2Status>: 0 if motor 2 is idle, 1 if motor is moving
+//   <Motor3Status>: 0 if motor 3 is idle, 1 if motor is moving
 //
 // As of version 2.4.4, there is now a fourth parameter at the end of the reply packet.
 // QM,<CommandExecutingStatus>,<Motor1Satus>,<Motor2Status>,<FIFOStatus><CR>
 // Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
-void parseQMCommand(void)
+void stepper_QMCommand(void)
 {
-  UINT8 CommandExecuting = 0;
-  UINT8 Motor1Running = 0;
-  UINT8 Motor2Running = 0;
-  UINT8 FIFOStatus = 0;
-  UINT8 result = process_QM();
+  uint8_t CommandExecuting = 0;
+  uint8_t Motor1Running = 0;
+  uint8_t Motor2Running = 0;
+  uint8_t Motor3Running = 0;
+  uint8_t FIFOStatus = 0;
+  uint8_t result = process_QM();
 
   if (result & 0x01)
   {
@@ -1525,49 +1537,70 @@ void parseQMCommand(void)
   {
     CommandExecuting = 1;
   }
+  if (result & 0x10)
+  {
+    Motor3Running = 1;
+  }
 
-  printf((far ROM char *)"QM,%i,%i,%i,%i\n", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  if(utility_LegacyModeEnabled())
+  {
+    printf("QM,%i,%i,%i,%i\n", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  }
+  else
+  {
+    printf("QM,%i,%i,%i,%i,%i\n", CommandExecuting, Motor1Running, Motor2Running, Motor3Running, FIFOStatus);
+  }
 }
 
 // QS command
 // For Query Step position - returns the current x and y global step positions
 // QS takes no parameters, so usage is just CS<CR>
 // QS returns:
-// QS,<global_step1_position>,<global_step2_position><CR>
+// QS,<global_step1_position>,<global_step2_position>,<global_step3_position><CR>
 // where:
 //   <global_step1_position>: signed 32 bit value, current global motor 1 step position
 //   <global_step2_position>: signed 32 bit value, current global motor 2 step position
-void parseQSCommand(void)
+//   <global_step2_position>: signed 32 bit value, current global motor 3 step position
+void stepper_QSCommand(void)
 {
-  INT32 step1, step2;
+  int32_t step1, step2, step3;
 
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+  // Disable stepper interrupt briefly here to read out value that ISR uses
+  TIM_TIM6InterruptStop();
 
   // Make a local copy of the things we care about
-  step1 = globalStepCounter1;
-  step2 = globalStepCounter2;
+  step1 = Steppers[0].GlobalPosition;
+  step2 = Steppers[1].GlobalPosition;
+  step3 = Steppers[2].GlobalPosition;
 
-  // Re-enable interrupts
-  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  // Re-enable stepper interrupt
+  TIM_TIM6InterruptStart();
 
-  printf((far ROM char *)"%li,%li\n", step1, step2);
+  if(utility_LegacyModeEnabled())
+  {
+    printf("%li,%li\n", step1, step2);
+  }
+  else
+  {
+    printf("%li,%li,%li\n", step1, step2, step3);
+  }
+
   print_ack();
 }
 
 // Perform the actual clearing of the step counters (used from several places)
 void clear_StepCounters(void)
 {
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+  // Disable stepper interrupt briefly here to read out value that ISR uses
+  TIM_TIM6InterruptStop();
 
   // Make a local copy of the things we care about
-  globalStepCounter1 = 0;
-  globalStepCounter2 = 0;
-  globalStepCounter3 = 0;
+  Steppers[0].GlobalPosition = 0;
+  Steppers[1].GlobalPosition = 0;
+  Steppers[2].GlobalPosition = 0;
 
-  // Re-enable interrupts
-  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  // Re-enable stepper interrupt
+  TIM_TIM6InterruptStart();
 }
 
 // CS command
@@ -1575,16 +1608,16 @@ void clear_StepCounters(void)
 // CS takes no parameters, so usage is just CS<CR>
 // QS returns:
 // OK<CR>
-void parseCSCommand(void)
+void stepper_CSCommand(void)
 {
   clear_StepCounters();
   
   print_ack();
 }
-#endif
 
 void stepper_Init(void)
 {
+  TIM_TIM6Start();
   stepper_Enable(false);
 }
 

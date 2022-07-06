@@ -110,6 +110,7 @@ void stepper_QMCommand(void);
 void stepper_ESCommand(void);
 void stepper_QSCommand(void);
 void stepper_CSCommand(void);
+void stepper_CSCommand(void);
 uint8_t process_QM(void);
 void process_SM(
   uint32_t Duration,

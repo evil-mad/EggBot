@@ -53,34 +53,34 @@
 #define __TMC2209_H__
 
 /* Register addresses */
-#define GCONF         0x00
-#define GSTAT         0x01
-#define IFCNT         0x02
-#define SLAVECONF     0x03
-#define OTP_PROG      0x04
-#define OTP_READ      0x05
-#define IOIN          0x06
-#define FACTORY_CONF  0x07
+#define GCONF         0x00  //   0
+#define GSTAT         0x01  //   1
+#define IFCNT         0x02  //   2
+#define SLAVECONF     0x03  //   3
+#define OTP_PROG      0x04  //   4
+#define OTP_READ      0x05  //   5
+#define IOIN          0x06  //   6
+#define FACTORY_CONF  0x07  //   7
 
-#define IHOLD_IRUN    0x10
-#define TPOWERDOWN    0x11
-#define TSTEP         0x12
-#define TPWMTHRS      0x13
-#define VACTUAL       0x22
+#define IHOLD_IRUN    0x10  //  16
+#define TPOWERDOWN    0x11  //  17
+#define TSTEP         0x12  //  18
+#define TPWMTHRS      0x13  //  19
+#define VACTUAL       0x22  //  34
 
-#define TCOOLTHRS     0x14
-#define SGTHRS        0x40
-#define SG_RESULT     0x41
-#define COOLCONF      0x42
+#define TCOOLTHRS     0x14  //  20
+#define SGTHRS        0x40  //  64
+#define SG_RESULT     0x41  //  65
+#define COOLCONF      0x42  //  66
 
-#define MSCNT         0x6A
-#define MSCURACT      0x6B
+#define MSCNT         0x6A  // 106
+#define MSCURACT      0x6B  // 107
 
-#define CHOPCONF      0x6C
-#define DRV_STATUS    0x6F
-#define PWMCONF       0x70
-#define PWM_SCALE     0x71
-#define PWM_AUTO      0x72 
+#define CHOPCONF      0x6C  // 108
+#define DRV_STATUS    0x6F  // 111
+#define PWMCONF       0x70  // 112
+#define PWM_SCALE     0x71  // 113
+#define PWM_AUTO      0x72  // 114
 
 #endif	/* TMC2209_H */
 
