@@ -5,8 +5,8 @@ import serial
 import time
 from ast import literal_eval
 
-minSpeed =     10000   # in microsteps/second - all runs start at this speed
-maxSpeed1 =    14000   # in microsteps/second - first run maxes at this speed
+minSpeed =     2000   # in microsteps/second - all runs start at this speed
+maxSpeed1 =    6000   # in microsteps/second - first run maxes at this speed
 maxSpeed2 =    18000   # in microsteps/second - last run maxes at this speed
 bigIterations =   20   # Number of outer loop up/down speed attempts
 iterations =      10   # Number of inner loop move segments

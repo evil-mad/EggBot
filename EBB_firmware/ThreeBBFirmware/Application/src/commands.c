@@ -253,18 +253,20 @@ void parseRSCommand(void)
   UserInit();
   print_ack();
 }
+#endif
+
 
 // CU is "Configure UBW" and controls system-wide configuration values
 // "CU,<parameter_number>,<paramter_value><CR>"
 // <paramter_number> <parameter_value>
 // 1                  {1|0} turns on or off the 'ack' ("OK" at end of packets)
-void parseCUCommand(void)
+void commands_CUCommand(void)
 {
-  unsigned char parameter_number = 0;
-  signed int parameter_value = 0;
+  uint8_t parameterNumber = 0;
+  int32_t parameterValue = 0;
 
-  extract_number (kUINT8, &parameter_number, kREQUIRED);
-  extract_number (kINT16, &parameter_value, kOPTIONAL);
+  extract_number (kUINT8, &parameterNumber, kREQUIRED);
+  extract_number (kINT16, &parameterValue, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -272,12 +274,12 @@ void parseCUCommand(void)
     return;
   }
 
-  switch(parameter_number)
+  switch(parameterNumber)
   {
     case 1:   // Turn on/off ACK ENABLE
-      if (0 == parameter_value || 1 == parameter_value)
+      if (0 == parameterValue || 1 == parameterValue)
       {
-        g_ack_enable = parameter_value;
+        g_ack_enable = parameterValue;
       }
       else
       {
@@ -286,9 +288,9 @@ void parseCUCommand(void)
       break;
       
     case 2:   // Turn on/off limit checks
-      if (0 == parameter_value || 1 == parameter_value)
+      if (0 == parameterValue || 1 == parameterValue)
       {
-        gLimitChecks = parameter_value;
+//        gLimitChecks = parameterValue;
       }
       else
       {
@@ -297,20 +299,20 @@ void parseCUCommand(void)
       break;
       
     case 3:   // Set/read FIFO SIZE
-      if (0 != parameter_value)
+      if (0 != parameterValue)
       {
         // Set the FIFOSize to parameter_value if parameter_value isn't zero
-        if (parameter_value > COMMAND_FIFO_LENGTH)
-        {
-          FIFOSize = COMMAND_FIFO_LENGTH;
-        }
-        else
-        {
-          FIFOSize = parameter_value;
-        }
+//        if (parameterValue > COMMAND_FIFO_LENGTH)
+//        {
+//          FIFOSize = COMMAND_FIFO_LENGTH;
+//        }
+//        else
+//        {
+//          FIFOSize = parameterValue;
+//        }
       }
       // Always return FIFODepth and max FIFO depth
-      printf ((far rom char*)"%i,%i\n", FIFOSize, COMMAND_FIFO_LENGTH);
+//      printf("%i,%i\n", FIFOSize, COMMAND_FIFO_LENGTH);
       break;
       
     default:
@@ -318,6 +320,8 @@ void parseCUCommand(void)
   }
   print_ack();
 }
+
+#if 0
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
 // UBW version. The analog config value is eliminated, replaced with the "AC"

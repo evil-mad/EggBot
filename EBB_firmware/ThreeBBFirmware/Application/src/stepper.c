@@ -1498,6 +1498,87 @@ uint8_t process_QM(void)
   return ((motor3Running << 4) | (commandExecuting << 3) | (motor1Running << 2) | (motor2Running << 1) | FIFOStatus);
 }
 
+// Query General
+// Three forms of the command:
+// Form 1:
+// Usage: QG<CR> or QG,0<CR>
+// Returns: <status><NL><CR>
+// <status> is a single byte, printed as a hexadecimal number from "00" to "FF".
+// Each bit in the byte represents the status of a single bit of information in the EBB.
+// Bit 1 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
+// Bit 2 : Motor2 status (0 = not moving, 1 = moving)
+// Bit 3 : Motor1 status (0 = not moving, 1 = moving)
+// Bit 4 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
+// Bit 5 : Pen status (0 = up, 1 = down)
+// Bit 6 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
+// Bit 7 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 8 : GPIO Pin RB5 state (0 = low, 1 = high)
+// Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
+//
+// Form 2:
+// Usage: QG,1<CR>
+// Returns: <status>,<input_state><NL><CR>
+// <status> is exactly as in Form 1
+// <input_state> is for future expansion and will always be 0 for now
+//
+// Form 3:
+// Usage: QG,2<CR>
+// Returns: <status>,<input_state>,<queue_depth><NL><CR>
+// <status> is exactly as in Form 1
+// <input_state> is for future expansion and will always be 0 for now
+// <queue_depth> is an unsigned 2 byte integer representing how many motion commands are currently
+//   sitting in the motion queue, waiting to be executed. This value will never be more than the
+//   <fifo_size> parameter set with the CU,3,<fifo_size> command or COMMAND_FIFO_LENGTH whichever
+//   is smaller.
+//
+void stepper_QGCommand(void)
+{
+  uint8_t result = process_QM();
+  uint8_t param = 0;
+
+  extract_number (kUINT8, &param, kOPTIONAL);
+
+  // process_QM() gives us the low 4 bits of our output result.
+  result = result & 0x0F;
+
+//  if (gPenStateActual)
+//  {
+//    result = result | (1 << 4);
+//  }
+//  if (ButtonPushed)
+//  {
+//    result = result | (1 << 5);
+//  }
+//  if (PORTBbits.RB2)
+//  {
+//    result = result | (1 << 6);
+//  }
+//  if (PORTBbits.RB5)
+//  {
+//    result = result | (1 << 7);
+//  }
+
+  if (param == 1)
+  {
+    printf("%02X,0\n", result);
+  }
+  else if (param == 2)
+  {
+    printf("%02X,0,%u\n", result, queue_GetSize());
+  }
+  else
+  {
+    printf("%02X\n", result);
+  }
+
+  // Reset the button pushed flag
+//  if (ButtonPushed)
+//  {
+//    ButtonPushed = FALSE;
+//  }
+}
+
+
 // QM command
 // For Query Motor - returns the current status of each motor
 // QM takes no parameters, so usage is just QM<CR>

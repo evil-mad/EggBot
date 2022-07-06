@@ -73,7 +73,7 @@ void commands_VCommand(void);      // V for printing version
 //void parsePDCommand(void);     // PD for setting a pin's direction
 void commands_MRCommand(void);     // MR for Memory Read
 void commands_MWCommand(void);     // MW for Memory Write
-//void parseCUCommand(void);     // CU configures UBW (system wide parameters)
+void commands_CUCommand(void);     // CU configures UBW (system wide parameters)
 //void parsePGCommand(void);     // PG Pulse Go
 //void parsePCCommand(void);     // PC Pulse Configure
 void commands_BLCommand(void);     // BL Boot Load command
