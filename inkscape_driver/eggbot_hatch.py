@@ -88,8 +88,10 @@
 # Add option for selecting units.
 # Make inset settable in selected units as well.
 
-# Current software version:
-# (v2.4.1, October 9, 2021<)
+# Updated by Windell H. Oskay, 2021 with note forcing hatch lines to one direction
+# 2022-07: Bug fix for improper transform handling on selected objects
+
+# Current software version: v2.4.3, July 17, 2022
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -802,7 +804,6 @@ class Eggbot_Hatch(inkex.Effect):
              Initialize dictionary for each new node
              This allows us to create hatch fills as if each 
              object to be hatched has been selected individually
-
             """
             self.xmin, self.ymin = (0.0, 0.0)
             self.xmax, self.ymax = (0.0, 0.0)
@@ -1231,10 +1232,12 @@ class Eggbot_Hatch(inkex.Effect):
         pt_last_position_abs = [0, 0]
 
         # Build a list of the vertices for the document's graphical elements
+
         if self.options.ids:
             # Traverse the selected objects
             for id_ in self.options.ids:
-                self.recursivelyTraverseSvg([self.selected[id_]], self.docTransform)
+                transform = self.recursivelyGetEnclosingTransform(self.selected[id_])
+                self.recursivelyTraverseSvg([self.selected[id_]], transform)
         else:
             # Traverse the entire document
             self.recursivelyTraverseSvg(self.document.getroot(), self.docTransform)
@@ -1325,6 +1328,8 @@ class Eggbot_Hatch(inkex.Effect):
                         # Or go this direction
                         path += ('M {0:f},{1:f} l {2:f},{3:f} '.format(pt2[0], pt2[1], pt1[0] - pt2[0], pt1[1] - pt2[1]))
 
+                    # Comment out the following line to force hatch marks to all
+                    #   go the same direction (when not connecting ends):
                     direction = not direction
                 self.joinFillsWithNode(key, stroke_width, path[:-1])
 
@@ -1703,6 +1708,27 @@ class Eggbot_Hatch(inkex.Effect):
     def ProposeNeighborhoodRadiusSquared(self, transformed_hatch_spacing):
         return transformed_hatch_spacing * transformed_hatch_spacing * self.options.hatchScope * self.options.hatchScope
         # The multiplier of x generates a radius of x^0.5 times the hatch spacing.
+
+    def recursivelyGetEnclosingTransform(self, node):
+    
+        """
+        Determine the cumulative transform which node inherits from
+        its chain of ancestors.
+        """
+        node = node.getparent()
+        if node is not None:
+            parent_transform = self.recursivelyGetEnclosingTransform(node)
+            node_transform = node.get('transform', None)
+            if node_transform is None:
+                return parent_transform
+            else:
+                tr = simpletransform.parseTransform(node_transform)
+                if parent_transform is None:
+                    return tr
+                else:
+                    return simpletransform.composeTransform(parent_transform, tr)
+        else:
+            return self.docTransform
 
     @staticmethod
     def RelativeControlPointPosition(distance, f_delta_x, f_delta_y, delta_x, delta_y):
