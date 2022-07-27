@@ -6,35 +6,27 @@
 	<dict>
 		<key>Resources/AppIcon.icns</key>
 		<data>
-		HLXPJsj7wzjY8gLtve5FetnPmo4=
+		HBDI8vivcy+joKCWSHorAjo37UE=
 		</data>
 		<key>Resources/AppSettings.plist</key>
 		<data>
-		pYv0fIotOIm6NBImz52oGb/88GA=
+		SHG5UoBg3fWJuZNc2C7Xr6hEZN4=
 		</data>
-		<key>Resources/EBF_v281.hex</key>
+		<key>Resources/EBF_v262_BL.unified.hex</key>
 		<data>
-		lLy5gH6712/fCsVaLLblDzQYmkg=
+		L6WUA1XDYoUqhqK0IpgUPq6BOd8=
 		</data>
-		<key>Resources/MainMenu.nib/designable.nib</key>
+		<key>Resources/MainMenu.nib</key>
 		<data>
-		vqAVQ62ugIsFextEjL5cz4/x14I=
+		A6U5zHCI1Zl1YQ+TIqTKmpcniU0=
 		</data>
-		<key>Resources/MainMenu.nib/keyedobjects-101300.nib</key>
+		<key>Resources/mphidflash</key>
 		<data>
-		cDo4MgZZQIzVkaUV/VUbRU61Ktg=
-		</data>
-		<key>Resources/MainMenu.nib/keyedobjects.nib</key>
-		<data>
-		LRkZ5HGc3VKqVOhgFbNbin08dok=
-		</data>
-		<key>Resources/mphidflash-1.8-osx-64</key>
-		<data>
-		dt/JbNXw66pa4cVdhpOisiiPE0A=
+		ckkmQbL4dMHVggQnW8mExJPEJWo=
 		</data>
 		<key>Resources/script</key>
 		<data>
-		Lsz/bbhRHkBuT+RnMqsazc+g0Go=
+		smvCZ0aGIaXtEz3M5mkPeW5knq8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -43,88 +35,66 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			HLXPJsj7wzjY8gLtve5FetnPmo4=
+			HBDI8vivcy+joKCWSHorAjo37UE=
 			</data>
 			<key>hash2</key>
 			<data>
-			x8yekWE2skfSba6vP79rOxUkei1N2rN0QophTg9vPag=
+			p55gXGHE70E5eNgYzXp0+85fSIcBbVCIqaC97xQ1EA4=
 			</data>
 		</dict>
 		<key>Resources/AppSettings.plist</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			pYv0fIotOIm6NBImz52oGb/88GA=
+			SHG5UoBg3fWJuZNc2C7Xr6hEZN4=
 			</data>
 			<key>hash2</key>
 			<data>
-			4C8plPkCKkNmvztd19Vi7Htcut2hjGzXsWkjaTOf2XM=
+			K9MuyW52SBwKrg/SeVtPT0PDp+9HmIjo0SV+B667apU=
 			</data>
 		</dict>
-		<key>Resources/EBF_v281.hex</key>
+		<key>Resources/EBF_v262_BL.unified.hex</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			lLy5gH6712/fCsVaLLblDzQYmkg=
+			L6WUA1XDYoUqhqK0IpgUPq6BOd8=
 			</data>
 			<key>hash2</key>
 			<data>
-			Uhm5DHDgQrL/9rxVKPlldy3RzRuiu3/0Yg9u/RE7B9w=
+			hEafjK0Z3c/uT2tkiCVkEke4E6c/2O3Um1nww+F6gqQ=
 			</data>
 		</dict>
-		<key>Resources/MainMenu.nib/designable.nib</key>
+		<key>Resources/MainMenu.nib</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			vqAVQ62ugIsFextEjL5cz4/x14I=
+			A6U5zHCI1Zl1YQ+TIqTKmpcniU0=
 			</data>
 			<key>hash2</key>
 			<data>
-			FPU17+QsaNKDX/X1rdhi3pEESbUzPDyb63L0vHd70tM=
+			8w0RE82geIQkOHKQc3NB/B4A+XdVRxGHC7LS+8TTLa0=
 			</data>
 		</dict>
-		<key>Resources/MainMenu.nib/keyedobjects-101300.nib</key>
+		<key>Resources/mphidflash</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			cDo4MgZZQIzVkaUV/VUbRU61Ktg=
+			ckkmQbL4dMHVggQnW8mExJPEJWo=
 			</data>
 			<key>hash2</key>
 			<data>
-			1RLyRlfWtujdoXcpBYu94kHCSryk1fb/03+piGfGaAU=
-			</data>
-		</dict>
-		<key>Resources/MainMenu.nib/keyedobjects.nib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			LRkZ5HGc3VKqVOhgFbNbin08dok=
-			</data>
-			<key>hash2</key>
-			<data>
-			prNTAkTISF8OlXYS2c+BDtznAMn/Ba5lgAyjpcynwq4=
-			</data>
-		</dict>
-		<key>Resources/mphidflash-1.8-osx-64</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			dt/JbNXw66pa4cVdhpOisiiPE0A=
-			</data>
-			<key>hash2</key>
-			<data>
-			iJBoRUYMX7z4ra60h3m9NHVWYyWUltq6SUzr7TPIlfo=
+			S2fKlUmn4wwAkjK65c5f37psKKUpynu4r16XBJ5G4+k=
 			</data>
 		</dict>
 		<key>Resources/script</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			Lsz/bbhRHkBuT+RnMqsazc+g0Go=
+			smvCZ0aGIaXtEz3M5mkPeW5knq8=
 			</data>
 			<key>hash2</key>
 			<data>
-			WYgqP2OMKEqpNQKGR2YacJXLXID23gWrJoizwX3OeCI=
+			K9C6FVsrLlSsAQ0jU4dE5tVELIBM104YoQdG0h3nMI0=
 			</data>
 		</dict>
 	</dict>
