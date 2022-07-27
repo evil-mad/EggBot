@@ -264,6 +264,7 @@
 //                  Issue 153: Add optional parameter to ES command to disable
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
+// 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -802,6 +803,10 @@ void high_ISR(void)
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
 			{
+        if (gRedLEDEmptyFIFO)
+        {
+          mLED_2_Off()
+        }
 #if defined(GPIO_DEBUG)
         TRISDbits.TRISD0 = 0;
         LATDbits.LATD0 = 1;
@@ -864,6 +869,11 @@ void high_ISR(void)
       else 
       {
         CurrentCommand.DelayCounter = 0;
+
+        if (gRedLEDEmptyFIFO)
+        {
+          mLED_2_On()
+        }
 #if defined(GPIO_DEBUG)
   TRISAbits.TRISA1 = 0;
   LATAbits.LATA1 = 1;

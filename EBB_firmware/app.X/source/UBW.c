@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.0\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.1\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -226,6 +226,9 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS = 0;
 volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+
+// When true, red LED will light when FIFO is empty
+volatile BOOL gRedLEDEmptyFIFO = FALSE;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
@@ -1601,7 +1604,9 @@ void parse_R_packet(void)
 // CU is "Configure UBW" and controls system-wide configuration values
 // "CU,<parameter_number>,<parameter_value><CR>"
 // <parameter_number>	<parameter_value>
-// 1					{1|0} turns on or off the 'ack' ("OK" at end of packets)
+// 1  {1|0} turns on or off the 'ack' ("OK" at end of packets)
+// 2  {1|0} turns on or off parameter limit checking (defaults to on))
+// 3  {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
 void parse_CU_packet(void)
 {
 	unsigned char parameter_number;
@@ -1627,17 +1632,29 @@ void parse_CU_packet(void)
 			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		}
 	}
-    if (2 == parameter_number)
+  else if (2 == parameter_number)
+  {
+    if (0 == paramater_value || 1 == paramater_value)
     {
-        if (0 == paramater_value || 1 == paramater_value)
-        {
-            gLimitChecks = paramater_value;
-        }
-		else
-		{
-			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		}
+      gLimitChecks = paramater_value;
     }
+    else
+    {
+      bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else if (3 == parameter_number)
+  {
+    if (0 == paramater_value || 1 == paramater_value)
+    {
+      gRedLEDEmptyFIFO = paramater_value;
+      mLED_2_Off()
+    }
+    else
+    {
+      bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
 	print_ack();
 }
 
