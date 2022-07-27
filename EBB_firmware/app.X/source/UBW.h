@@ -135,6 +135,8 @@ extern volatile tRC_state g_RC_state[kRC_DATA_SIZE];
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 
+extern volatile BOOL gRedLEDEmptyFIFO;
+
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void UserInit (void);
 void ProcessIO (void);
