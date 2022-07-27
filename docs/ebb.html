@@ -516,6 +516,11 @@ ul.no_bullets {
                 <p>
                   Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier.
                 </p>
+                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 0, then the red LED will not be used to indicate an empty FIFO (default).</li>
+                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 1, then the red LED will be used to indicate an empty FIFO.</li>
+                <p>
+                  Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO.
+                </p>
               </ul>
             </p>
           </li>
