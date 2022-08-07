@@ -183,20 +183,20 @@ static const uint32_t DriverInitTableValuesM12[MAX_DRIVER_INIT_VALUES] =
 
   /* On boot, TMC2209 has the following values in CHOPCONF:
    0x   1    0    0    1    0    0    5    3
-   0b0001 0000 0000 0001 0000 0000 1001 0111
+   0b0001 0000 0000 0001 0000 0000 1001 0011
    
    b31    0      : diss2vs : low side short protection disable : protection enabled
    b30    0      : diss2g  : short to GND protection disable : protection enabled
    b29    0      : dedge   : enable double edge step pulses : disabled
-   b28    1      : intpol  : interpoation to 256 microsteps : enabled
+   b28    1      : intpol  : interpolation to 256 microsteps : enabled
    b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
    b18:23 000000 : reserved
    b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
-   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
+   b15:16 10     : tbl     : TBL blank time select : comparator blank time at 32 clocks
    b11:14 0000   : reserved
-   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
-   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
-   b0:3   0111   : toff    : TOFF off time and driver enable;
+   b7:10  0001   : hend    : HEND hysteresis low value OFFSET sine wave offset :
+   b4:6   001    : hstrt   : HSTRT hysteresis start value added to HEND
+   b0:3   0011   : toff    : TOFF off time and driver enable;
    
    Our default is 16x microstepping, so we are going to take the above default
    and simply edit the microstep value:
@@ -247,27 +247,27 @@ static const uint32_t DriverInitTableValuesM3[MAX_DRIVER_INIT_VALUES] =
 
   /* On boot, TMC2209 has the following values in CHOPCONF:
    0x10010053
-   b0001 0000 0000 0001 0000 0000 1001 0111
+   b0001 0000 0000 0001 0000 0000 1001 0011
    
    b31    0      : diss2vs : low side short protection disable : protection enabled
    b30    0      : diss2g  : short to GND protection disable : protection enabled
    b29    0      : dedge   : enable double edge step pulses : disabled
-   b28    1      : intpol  : interpoation to 256 microsteps : enabled
+   b28    1      : intpol  : interpolation to 256 microsteps : enabled
    b24:27 0000   : mres    : MRES micro step resolution : 256 microsteps
    b18:23 000000 : reserved
    b17    0      : vsense  : sense resistor voltage based current scaling : Low sensitivity, high sense resistor voltage
-   b15:16 10     : tbl     : TBL blank time select : comprator blank time at 32 clocks
+   b15:16 10     : tbl     : TBL blank time select : comparator blank time at 32 clocks
    b11:14 0000   : reserved
-   b7:10  0001   : hend    : HEND hystersis low value OFFSET sine wave offset :
-   b4:6   001    : hstrt   : HSTRT hystersis start value added to HEND
-   b0:3   0111   : toff    : TOFF off time and driver enable;
+   b7:10  0001   : hend    : HEND hysteresis low value OFFSET sine wave offset :
+   b4:6   001    : hstrt   : HSTRT hysteresis start value added to HEND
+   b0:3   0011   : toff    : TOFF off time and driver enable;
    
    Our default is 16x microstepping, so we are going to take the above default
    and simply edit the microstep value:
     
    0x14010053
    */
-  0x14010053,      // CHOPCONF
+  0x14010053,      // CHOPCONF, 0x6C, 108
 
   /* Write a 1 to GSTAT's reset bit to clear it */
   0x00000001       // GSTAT
@@ -482,12 +482,12 @@ void serial_InitDrivers(void)
   {
     // There are two tables - one for motors 1/2 and a second for motor 3
     // This way we can make the pen lift servo (3) have different settings
-//    WriteDatagram(0, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-//    HAL_Delay(1);
-//    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
-//    HAL_Delay(1);
-//    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
-//    HAL_Delay(1);
+    WriteDatagram(0, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
+    HAL_Delay(1);
+    WriteDatagram(1, DriverInitTableAddress[i], DriverInitTableValuesM12[i]);
+    HAL_Delay(1);
+    WriteDatagram(2, DriverInitTableAddress[i], DriverInitTableValuesM3[i]);
+    HAL_Delay(1);
   }
   printf("Drivers initialized\n");
 
