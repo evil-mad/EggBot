@@ -55,7 +55,7 @@
 //#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
-//#define GPIO_DEBUG
+#define GPIO_DEBUG
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
@@ -109,6 +109,10 @@ typedef union union32b4 {
 typedef struct
 {
   CommandType     Command;
+  uS32b4_t        Pop[NUMBER_OF_STEPPERS];
+  uS32b4_t        Crack[NUMBER_OF_STEPPERS];
+  uS32b4_t        Snap[NUMBER_OF_STEPPERS];
+  uS32b4_t        Jerk[NUMBER_OF_STEPPERS];
   uS32b4_t        Rate[NUMBER_OF_STEPPERS];
   INT32           Accel[NUMBER_OF_STEPPERS];
   UINT32          Steps[NUMBER_OF_STEPPERS];

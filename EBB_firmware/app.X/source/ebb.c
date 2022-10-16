@@ -415,6 +415,10 @@ void high_ISR(void)
       (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
     )
 		{
+#if defined(GPIO_DEBUG)
+  TRISDbits.TRISD0 = 0;
+  LATDbits.LATD0 = 1;
+#endif
       // Only output DIR bits if we are actually doing something
 			if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
       {
@@ -431,7 +435,7 @@ void high_ISR(void)
             }
 
             // Motor 1
-            
+             
             // For acceleration, we now add a bit to StepAdd each time through as well
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
             if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
@@ -470,8 +474,15 @@ void high_ISR(void)
           // Only do this if there are steps left to take
           if (CurrentCommand.Active[0])
           {
+            /// NEW TEST CODE FOR TIMING
+            ///CurrentCommand.Crack[0].value += CurrentCommand.Pop[0].value;
+            ///CurrentCommand.Snap[0].value += CurrentCommand.Crack[0].value;
+            ///CurrentCommand.Jerk[0].value += CurrentCommand.Snap[0].value;
+            ///CurrentCommand.Accel[0] += CurrentCommand.Jerk[0].value;
+
             // For acceleration, we now add a bit to StepAdd each time through as well
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+            
             if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
             {
               CurrentCommand.Rate[0].bytes.b4 += 0x80;
@@ -491,6 +502,12 @@ void high_ISR(void)
           }
           if (CurrentCommand.Active[1])
           {
+            /// NEW TEST CODE FOR TIMING
+            ///CurrentCommand.Crack[1].value += CurrentCommand.Pop[1].value;
+            ///CurrentCommand.Snap[1].value += CurrentCommand.Crack[1].value;
+            ///CurrentCommand.Jerk[1].value += CurrentCommand.Snap[1].value;
+            ///CurrentCommand.Accel[1] += CurrentCommand.Jerk[1].value;
+
             // For acceleration, we now add a bit to StepAdd each time through as well
             CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
             if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
@@ -617,6 +634,9 @@ void high_ISR(void)
 					}
 				}
 			}
+#if defined(GPIO_DEBUG)
+  LATDbits.LATD0 = 0;
+#endif
     }
     // Check to see if we should change the state of the pen
 		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
@@ -808,8 +828,8 @@ void high_ISR(void)
           mLED_2_Off()
         }
 #if defined(GPIO_DEBUG)
-        TRISDbits.TRISD0 = 0;
-        LATDbits.LATD0 = 1;
+        TRISCbits.TRISC0 = 0;
+        LATCbits.LATC0 = 1;
 #endif
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
@@ -865,6 +885,9 @@ void high_ISR(void)
           }
         }
 				FIFOEmpty = TRUE;
+#if defined(GPIO_DEBUG)
+        LATCbits.LATC0 = 0;
+#endif
 			}
       else 
       {
@@ -874,10 +897,6 @@ void high_ISR(void)
         {
           mLED_2_On()
         }
-#if defined(GPIO_DEBUG)
-  TRISAbits.TRISA1 = 0;
-  LATAbits.LATA1 = 1;
-#endif
       }
 		}
 		
@@ -896,7 +915,7 @@ void high_ISR(void)
 		}
 	}
 #if defined(GPIO_DEBUG)
-  LATAbits.LATA1 = 0;
+  LATCbits.LATC0 = 0;
   LATDbits.LATD0 = 0;
   LATDbits.LATD1 = 0;
 #endif
