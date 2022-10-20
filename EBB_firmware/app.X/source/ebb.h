@@ -66,20 +66,21 @@
 
 typedef enum
 {
-	PEN_DOWN = 0,
-	PEN_UP
+  PEN_DOWN = 0,
+  PEN_UP
 } PenStateType;
 
 /* Enum that lists each type of command that can be put in the motion control FIFO */
 typedef enum
 {
-	COMMAND_NONE = 0,
-	COMMAND_MOTOR_MOVE,
-	COMMAND_DELAY,
-	COMMAND_SERVO_MOVE,
+  COMMAND_NONE = 0,
+  COMMAND_MOTOR_MOVE,
+  COMMAND_DELAY,
+  COMMAND_SERVO_MOVE,
   COMMAND_SE,
   COMMAND_MOTOR_MOVE_TIMED,
-  COMMAND_EM
+  COMMAND_EM,
+  COMMAND_PO
 } CommandType;
 
 // Byte union used for accumulator (unsigned))
@@ -124,10 +125,10 @@ typedef struct
 } MoveCommandType;
 
 // Define global things that depend on the board type
-#define STEP1_BIT	(0x01)
-#define DIR1_BIT	(0x02)
-#define STEP2_BIT	(0x04)
-#define DIR2_BIT	(0x08)
+#define STEP1_BIT   (0x01)
+#define DIR1_BIT    (0x02)
+#define STEP2_BIT   (0x04)
+#define DIR2_BIT    (0x08)
 
 #define NUMBER_OF_STEPPERS  2
 

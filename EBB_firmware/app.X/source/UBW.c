@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.1\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.1_186\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -2284,147 +2284,131 @@ void parse_PI_packet(void)
 }
 
 // PO is for Pin Output
-// "PO,<port>,<pin>,<value><CR>"
+// "PO,<port>,<pin>,<value>,<queue><CR>"
 // <port> is "A", "B", "C" and indicates the port
 // <pin> is a number between 0 and 7 and indicates which pin to write out the value to
 // <value> is "1" or "0" and indicates the state to change the pin to
+// <queue> is optional and if "1" adds this command to the motion queue, "0" (or no value) executes it immediately
 void parse_PO_packet(void)
 {
-	unsigned char port;
-	unsigned char pin;
-	unsigned char value;
+  unsigned char port;
+  unsigned char pin;
+  unsigned char value;
+  unsigned char queue = 0;
 
-	extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
-	extract_number (kUCHAR, &pin, kREQUIRED);
-	extract_number (kUCHAR, &value, kREQUIRED);
+  extract_number (kUCASE_ASCII_CHAR, &port, kREQUIRED);
+  extract_number (kUCHAR, &pin, kREQUIRED);
+  extract_number (kUCHAR, &value, kREQUIRED);
+  extract_number (kUCHAR, &queue, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-	// Limit check the parameters
-	if (value > 1)
-	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		return;
-	}
-	if (pin > 7)
-	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		return;
-	}
-	if ('A' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATA, pin);  	
-		}
-		else
-		{
-			bitset (LATA, pin);  	
-		}
-	}
-	else if ('B' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATB, pin);  	
-		}
-		else
-		{
-			bitset (LATB, pin);  	
-		}		
-	}
-	else if ('C' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATC, pin);  	
-		}
-		else
-		{
-			bitset (LATC, pin);  	
-		}		
-	}
+  // Limit check the parameters
+  if (value > 1)
+  {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+  if (pin > 7)
+  {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+    if (queue > 1)
+  {
+    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  // Execute the pin change immediately unless the user wanted it added to the motion queue
+  if (queue == 0)
+  {
+    if ('A' == port)
+    {
+      if (0 == value)
+      {
+        bitclr (LATA, pin);  	
+      }
+      else
+      {
+        bitset (LATA, pin);  	
+      }
+    }
+    else if ('B' == port)
+    {
+      if (0 == value)
+      {
+        bitclr (LATB, pin);  	
+      }
+      else
+      {
+        bitset (LATB, pin);  	
+      }
+    }
+    else if ('C' == port)
+    {
+      if (0 == value)
+      {
+        bitclr (LATC, pin);  	
+      }
+      else
+      {
+        bitset (LATC, pin);  	
+      }
+    }
 #if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-	else if ('D' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATD, pin);  	
-		}
-		else
-		{
-			bitset (LATD, pin);  	
-		}		
-	}
-	else if ('E' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATE, pin);  	
-		}
-		else
-		{
-			bitset (LATE, pin);  	
-		}		
-	}
+    else if ('D' == port)
+    {
+      if (0 == value)
+      {
+        bitclr (LATD, pin);  	
+      }
+      else
+      {
+        bitset (LATD, pin);  	
+      }
+    }
+    else if ('E' == port)
+    {
+      if (0 == value)
+      {
+        bitclr (LATE, pin);  	
+      }
+      else
+      {
+        bitset (LATE, pin);  	
+      }
+    }
 #endif
-#if defined(BOARD_EBB_V10)
-	else if ('F' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATF, pin);  	
-		}
-		else
-		{
-			bitset (LATF, pin);  	
-		}		
-	}
-	else if ('G' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATG, pin);  	
-		}
-		else
-		{
-			bitset (LATG, pin);  	
-		}		
-	}
-	else if ('H' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATH, pin);  	
-		}
-		else
-		{
-			bitset (LATH, pin);  	
-		}		
-	}
-	else if ('J' == port)
-	{
-		if (0 == value)
-		{
-			bitclr (LATJ, pin);  	
-		}
-		else
-		{
-			bitset (LATJ, pin);  	
-		}		
-	}
-#endif
-	else
-	{
-		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-		return;	
-	}
-	
-	print_ack ();
+    else
+    {
+      bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;	
+    }
+  }
+  else
+  {
+    // Add this PO command to the motion queue
+    // Spin here until there's space in the queue
+    while(!FIFOEmpty)
+      ;
+
+    // Set up the motion queue command. For PO, we use DirBits to hold
+    // the port, ServoRPn to hold the pin and ServoChannel to store the
+    // new state.
+    CommandFIFO[0].DirBits = port;
+    CommandFIFO[0].ServoRPn = pin;
+    CommandFIFO[0].ServoChannel = value;
+    CommandFIFO[0].Command = COMMAND_PO;
+
+    FIFOEmpty = FALSE;
+  }
+
+  print_ack ();
 }
 
 // TX is for Serial Transmit

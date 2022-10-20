@@ -265,6 +265,7 @@
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
 // 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
+// 2.8.  10/19/22 - Issue 186: Added 'motion queue' parameter to PO command
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -366,25 +367,25 @@ void high_ISR(void)
   LATDbits.LATD1 = 1;
 #endif
   
-	//Check which interrupt flag caused the interrupt.
-	//Service the interrupt
-	//Clear the interrupt flag
-	//Etc.
-	#if defined(USB_INTERRUPT)
-		USBDeviceTasks();
-	#endif
+  //Check which interrupt flag caused the interrupt.
+  //Service the interrupt
+  //Clear the interrupt flag
+  //Etc.
+  #if defined(USB_INTERRUPT)
+    USBDeviceTasks();
+  #endif
 
   // 25KHz ISR fire
-	if (PIR1bits.TMR1IF)
-	{
-		// Clear the interrupt 
-		PIR1bits.TMR1IF = 0;
-		TMR1H = TIMER1_H_RELOAD;	//
-		TMR1L = TIMER1_L_RELOAD;	// Reload for 25KHz ISR fire
+  if (PIR1bits.TMR1IF)
+  {
+    // Clear the interrupt 
+    PIR1bits.TMR1IF = 0;
+    TMR1H = TIMER1_H_RELOAD;	//
+    TMR1L = TIMER1_L_RELOAD;	// Reload for 25KHz ISR fire
 
-		OutByte = CurrentCommand.DirBits;
-		TookStep = FALSE;
-		AllDone = TRUE;
+    OutByte = CurrentCommand.DirBits;
+    TookStep = FALSE;
+    AllDone = TRUE;
 
     // Note, you don't even need a command to delay. Any command can have
     // a delay associated with it, if DelayCounter is != 0.
@@ -397,7 +398,7 @@ void high_ISR(void)
       }
       else {
         CurrentCommand.DelayCounter--;
-      }            
+      }
     }
 
     if (CurrentCommand.DelayCounter)
@@ -414,9 +415,9 @@ void high_ISR(void)
       || 
       (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
     )
-		{
+    {
       // Only output DIR bits if we are actually doing something
-			if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
+      if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
       {
         if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
         {
@@ -519,8 +520,8 @@ void high_ISR(void)
         {
           AllDone = FALSE;
         }
-				if (TookStep)
-				{
+        if (TookStep)
+        {
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
             // Set the dir bits
@@ -541,14 +542,14 @@ void high_ISR(void)
               Dir2IO = 0;
             }
             // Set the step bits
- 						if (OutByte & STEP1_BIT)
-						{
-							Step1IO = 1;
-						}
-						if (OutByte & STEP2_BIT)
-						{
-							Step2IO = 1;
-						}
+            if (OutByte & STEP1_BIT)
+            {
+              Step1IO = 1;
+            }
+            if (OutByte & STEP2_BIT)
+            {
+              Step2IO = 1;
+            }
           }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
@@ -560,7 +561,7 @@ void high_ISR(void)
             else
             {
               Dir1AltIO = 0;
-            }	
+            }
             if (CurrentCommand.DirBits & DIR2_BIT)
             {
               Dir2AltIO = 1;
@@ -570,15 +571,15 @@ void high_ISR(void)
               Dir2AltIO = 0;
             }
             // Set the STEP bits
-						if (OutByte & STEP1_BIT)
-						{
-							Step1AltIO = 1;
-						}
-						if (OutByte & STEP2_BIT)
-						{
-							Step2AltIO = 1;
-						}
-					}
+            if (OutByte & STEP1_BIT)
+            {
+              Step1AltIO = 1;
+            }
+            if (OutByte & STEP2_BIT)
+            {
+              Step2AltIO = 1;
+            }
+          }
 
           // This next section not only counts the step(s) we are taking, but
           // also acts as a delay to keep the step bit set for a little while.
@@ -605,22 +606,22 @@ void high_ISR(void)
               globalStepCounter2++;
             }
           }
-					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-					{
-						Step1IO = 0;
-						Step2IO = 0;
-					}
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          {
+            Step1IO = 0;
+            Step2IO = 0;
+          }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-					{
-						Step1AltIO = 0;
-						Step2AltIO = 0;
-					}
-				}
-			}
+          {
+            Step1AltIO = 0;
+            Step2AltIO = 0;
+          }
+        }
+      }
     }
     // Check to see if we should change the state of the pen
-		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
-		{
+    else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
+    {
       if (gUseRCPenServo)
       {
         // Precompute the channel, since we use it all over the place
@@ -655,7 +656,7 @@ void high_ISR(void)
           }
         }
       }
-            
+
       // If this servo is the pen servo (on g_servo2_RPn)
       if (CurrentCommand.ServoRPn == g_servo2_RPn)
       {
@@ -679,10 +680,10 @@ void high_ISR(void)
           }
         }
       }
-		}
+    }
     // Check to see if we should start or stop the engraver
-		else if (CurrentCommand.Command == COMMAND_SE)
-		{
+    else if (CurrentCommand.Command == COMMAND_SE)
+    {
       // Now act on the State of the SE command
       if (CurrentCommand.SEState)
       {
@@ -787,7 +788,7 @@ void high_ISR(void)
       // NOTE: This section is the same code as clear_StepCounters(), but since
       // we can't have any function calls in an ISR (or the ISR blows up in 
       // space and speed) we have to copy the guts of that function here.
-  
+
       // Clear out the global step counters
       globalStepCounter1 = 0;
       globalStepCounter2 = 0;
@@ -796,13 +797,75 @@ void high_ISR(void)
       acc_union[0].value = 0;
       acc_union[1].value = 0;
     }
+    // As of version 2.8.2, the PO command has a parameter which allows it to
+    // be placed on the motion queue. We will use the DirBits value to store
+    // the port, ServoRPn to store the pin, and ServoChannel to store the
+    // new pin value.
+    else if (CurrentCommand.Command == COMMAND_PO)
+    {
+      if ('A' == CurrentCommand.DirBits)
+      {
+        if (0 == CurrentCommand.ServoChannel)
+        {
+          bitclr (LATA, CurrentCommand.ServoRPn);
+        }
+        else
+        {
+          bitset (LATA, CurrentCommand.ServoRPn);
+        }
+      }
+      else if ('B' == CurrentCommand.DirBits)
+      {
+        if (0 == CurrentCommand.ServoChannel)
+        {
+          bitclr (LATB, CurrentCommand.ServoRPn);
+        }
+        else
+        {
+          bitset (LATB, CurrentCommand.ServoRPn);
+        }
+      }
+      else if ('C' == CurrentCommand.DirBits)
+      {
+        if (0 == CurrentCommand.ServoChannel)
+        {
+          bitclr (LATC, CurrentCommand.ServoRPn);
+        }
+        else
+        {
+          bitset (LATC, CurrentCommand.ServoRPn);
+        }
+      }
+      else if ('D' == CurrentCommand.DirBits)
+      {
+        if (0 == CurrentCommand.ServoChannel)
+        {
+          bitclr (LATD, CurrentCommand.ServoRPn);
+        }
+        else
+        {
+          bitset (LATD, CurrentCommand.ServoRPn);
+        }
+      }
+      else if ('E' == CurrentCommand.DirBits)
+      {
+        if (0 == CurrentCommand.ServoChannel)
+        {
+          bitclr (LATE, CurrentCommand.ServoRPn);
+        }
+        else
+        {
+          bitset (LATE, CurrentCommand.ServoRPn);
+        }
+      }      
+    }
 
-		// If we're done with our current command, load in the next one
-		if (AllDone && CurrentCommand.DelayCounter == 0)
-		{
-			CurrentCommand.Command = COMMAND_NONE;
-			if (!FIFOEmpty)
-			{
+    // If we're done with our current command, load in the next one
+    if (AllDone && CurrentCommand.DelayCounter == 0)
+    {
+      CurrentCommand.Command = COMMAND_NONE;
+      if (!FIFOEmpty)
+      {
         if (gRedLEDEmptyFIFO)
         {
           mLED_2_Off()
@@ -864,8 +927,8 @@ void high_ISR(void)
             CurrentCommand.Active[1] = FALSE;
           }
         }
-				FIFOEmpty = TRUE;
-			}
+        FIFOEmpty = TRUE;
+      }
       else 
       {
         CurrentCommand.DelayCounter = 0;
@@ -879,22 +942,22 @@ void high_ISR(void)
   LATAbits.LATA1 = 1;
 #endif
       }
-		}
-		
-		// Check for button being pushed
-		if (
-			(!swProgram)
-			||
-			(
-				UseAltPause
-				&&
-				!PORTBbits.RB0
-			)
-		)
-		{
-			ButtonPushed = TRUE;
-		}
-	}
+    }
+
+    // Check for button being pushed
+    if (
+      (!swProgram)
+      ||
+      (
+        UseAltPause
+        &&
+        !PORTBbits.RB0
+      )
+    )
+    {
+      ButtonPushed = TRUE;
+    }
+  }
 #if defined(GPIO_DEBUG)
   LATAbits.LATA1 = 0;
   LATDbits.LATD0 = 0;
