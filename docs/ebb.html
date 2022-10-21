@@ -1304,15 +1304,17 @@ ul.no_bullets {
         <h4><a name="PO"></a>"PO" &mdash; Pin Output</h4>
         
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>[,<i>AddToQueue</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate or added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li><i>Port</i>: is one of the following letters: A,B,C,D,E. It specifies which port on the processor is to be used for the output.</li>
               <li><i>Pin</i>: is an integer in the range from 0 through 7. It specifies the pin to be used for the output.</li> 
-              <li><i>Value</i>: is either 0 or 1. It specifies the logical value to be output on the pin.</li> 
+              <li><i>Value</i>: is either 0 or 1. It specifies the logical value to be output on the pin.</li>
+              <li><i>AddToQueue</i>: (optional) is either 0 or 1. If 1 then this PO command will be added to the FIFO motion queue. Any other value for AddToQueue or
+              leaving the parameter off will cause the command to be executed immediately.</li>
             </ul>
           </li>
           <li>
@@ -1327,8 +1329,13 @@ ul.no_bullets {
               This command is a very low-level I/O command. Many other higher level commands (like <code><a href="#SM">SM</a></code>, <code><a href="#S2">S2</a></code>, etc.) will over-write the output state of pins that they need. This commands allows you low-level access to every pin on the processor.
             </p>
           </li>
+          <li><span style="font-weight: bold;">Version History:</span> The AddToQueue parameter was added in v2.8.2</li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>PO,C,7,1\r</code> This command would set the pin RC7 (or Port C, pin 7) to a high value.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>PO,B,3,0,1\r</code> This command would add the PO command to the motion queue. When
+            any other motion commands are done executing then this PO command would take effect, seting the pin RB3 (or Port B, pin 3) to a low value.
           </li>
         </ul>
 
