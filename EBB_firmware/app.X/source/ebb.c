@@ -265,6 +265,11 @@
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
 // 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
+//
+// x.x.x 11/2/22  - Issue 185 : Get LT and LM commands to allow accelerations
+//                  through zero (i.e. reverse direction mid-move)
+//                  Before : 50% of CPU used for ISR worst case - 25KS/s)
+//                  After  : 60% of CPU used for ISR (worst case - 25KS/s)
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -298,7 +303,7 @@ typedef enum
 	SOLENOID_PWM
 } SolenoidStateType;
 
-static void process_SM(
+static void process_simple_motor_move(
 	UINT32 Duration,
 	INT32 A1Stp,
 	INT32 A2Stp,
@@ -382,98 +387,102 @@ void high_ISR(void)
 		TMR1H = TIMER1_H_RELOAD;	//
 		TMR1L = TIMER1_L_RELOAD;	// Reload for 25KHz ISR fire
 
-		OutByte = CurrentCommand.DirBits;
-		TookStep = FALSE;
-		AllDone = TRUE;
+		AllDone = TRUE;           // Start every ISR assuming we are done with the current command
 
-    // Note, you don't even need a command to delay. Any command can have
-    // a delay associated with it, if DelayCounter is != 0.
-    if (CurrentCommand.DelayCounter)
+    switch (CurrentCommand.Command)
     {
-      // Double check that things aren't way too big
-      if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-      {
-        CurrentCommand.DelayCounter = 0;
-      }
-      else {
-        CurrentCommand.DelayCounter--;
-      }            
-    }
+      case COMMAND_SM_XM_HM_MOVE:
+      case COMMAND_LM_MOVE:
+      case COMMAND_LT_MOVE:
+        // Process a motor move command of any type
+        // This is the main chunk of code for EBB : the step generation code in the 25KHz ISR
+        // The first section determines if we need to take any steps this time through the ISR
+        // It is broken into sections, one for each type of stepper motion command because 
+        // they each have different amounts of processing needed to determine if a step is 
+        // necessary or not.
+        // Then the second section is common to all stepper motion commands and handles
+        // the actual step pulse generation as well as direction bit control
 
-    if (CurrentCommand.DelayCounter)
-    {
-      AllDone = FALSE;
-    }
+        // These only need to be initialized if we have a command that uses them
+        // (stepper motor motion) so we do them inside this block rather than at 
+        // the top of the function
+        OutByte = CurrentCommand.DirBits;
+        TookStep = FALSE;
 
-    // Note: by not making this an else-if, we have our DelayCounter
-    // counting done at the same time as our motor move or servo move.
-    // This allows the delay time to start counting at the beginning of the
-    // command execution.
-    if (
-      (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
-      || 
-      (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
-    )
-		{
-      // Only output DIR bits if we are actually doing something
-			if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
-      {
-        if (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
+        // The Active bits will be set if there is still motion left to 
+        // generate on an axis. They are set when the command is first loaded
+        // into CurrentCommand and then cleared once all steps have been taken
+        // (either in time or in step count). They are checked inside each
+        // command's step processing (below) so that we only spend time working
+        // on axis that have activity left
+        
+        // Figure out if we have steps to take with the 'simple' stepper
+        // motion commands. These three command (SM, XM and HM) do not use
+        // acceleration and so that code is left out to save time
+        if (CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE)
         {
-          // Has time run out for this command yet?
+          // Only do this if there are steps left to take
           if (CurrentCommand.Active[0])
           {
-            // Nope. So count this ISR tick, and then see if we need to take a step
-            CurrentCommand.Steps[0]--;
-            if (CurrentCommand.Steps[0] == 0)
-            {
-              CurrentCommand.Active[0] = FALSE;
-            }
-
-            // Motor 1
-            
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
-            if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
-            {
-              CurrentCommand.Rate[0].bytes.b4 += 0x80;
-            }
+            // Add the rate to the accumulator and see if the MSb got set. If so
+            // then take a step and record that the step was taken
             acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP1_BIT;
               TookStep = TRUE;
-            }
+              CurrentCommand.Steps[0]--;
 
-            // Motor 2
-            
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
-            if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
-            {
-              CurrentCommand.Rate[1].bytes.b4 += 0x80;
+              // For these stepper motion commands zero steps left means
+              // the axis is no longer active
+              if (CurrentCommand.Steps[0] == 0)
+              {
+                CurrentCommand.Active[0] = FALSE;
+              }
             }
+          }
+          if (CurrentCommand.Active[1])
+          {
             acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
               acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
               OutByte = OutByte | STEP2_BIT;
               TookStep = TRUE;
+              CurrentCommand.Steps[1]--;
+              if (CurrentCommand.Steps[1] == 0)
+              {
+                CurrentCommand.Active[1] = FALSE;
+              }
             }
           }
         }
-        else
+        // Low level Move (LM) : This one uses acceleration, so take that
+        // into account.
+        else if (CurrentCommand.Command == COMMAND_LM_MOVE)
         {
-          // This only fires if the Command is COMMAND_MOTOR_MOVE
-          
           // Only do this if there are steps left to take
           if (CurrentCommand.Active[0])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
+            // First we check to see if adding this acceleration value will cause
+            // rate to go negative. If it does, then that means we've "gone through"
+            // zero speed and need to reverse direction and reverse the sign of the
+            // acceleration so that we start accelerating.
+            if ((INT32)CurrentCommand.Rate[0].value + CurrentCommand.Accel[0] < 0)
+            {
+              // Negate the acceleration value so it starts adding to Rate
+              CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
+              // Invert the direction so we start moving in the other direction
+              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR1_BIT;
+            }
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+            // Check for rate roll over - we can't have a rate with it's MSb set
             if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
             {
+              // TODO: Is this really the right thing to do if rate gets too high?
+              // Could we just clear the high bit? (Would that be faster?)
               CurrentCommand.Rate[0].bytes.b4 += 0x80;
             }
             acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
@@ -492,7 +501,15 @@ void high_ISR(void)
           if (CurrentCommand.Active[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
+            if ((INT32)CurrentCommand.Rate[1].value + CurrentCommand.Accel[1] < 0)
+            {
+              // Negate the acceleration value so it starts adding to Rate
+              CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
+              // Invert the direction so we start moving in the other direction
+              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR2_BIT;
+            }
             CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+
             if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
             {
               CurrentCommand.Rate[1].bytes.b4 += 0x80;
@@ -511,16 +528,87 @@ void high_ISR(void)
             }
           }
         }
+        // The Low level Timed (LT) command is pretty special. Instead of running
+        // until all step counts are zero, it runs for a certain amount of 25Khz
+        // ISR ticks (stored in .Steps[0]). Both axis continue to produce steps
+        // until the time is used up. This affects how .Active is computed.
+        // Only .Active[0] is used for this command, not .Active[1].
+        else if (CurrentCommand.Command == COMMAND_LT_MOVE)
+        {
+          // Has time run out for this command yet?
+          if (CurrentCommand.Active[0])
+          {
+            // Nope. So count this ISR tick, and then see if we need to take a step
+            CurrentCommand.Steps[0]--;
+            if (CurrentCommand.Steps[0] == 0)
+            {
+              CurrentCommand.Active[0] = FALSE;
+            }
+
+            // Motor 1
+
+            // For acceleration, we now add a bit to Rate each time through as well
+            if ((INT32)CurrentCommand.Rate[0].value + CurrentCommand.Accel[0] < 0)
+            {
+              // Negate the acceleration value so it starts adding to Rate
+              CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
+              // Invert the direction so we start moving in the other direction
+              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR1_BIT;
+            }
+            CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+
+            if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
+            {
+              CurrentCommand.Rate[0].bytes.b4 += 0x80;
+            }
+            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
+            if (acc_union[0].bytes.b4 & 0x80)
+            {
+              acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
+              OutByte = OutByte | STEP1_BIT;
+              TookStep = TRUE;
+            }
+
+            // Motor 2
+
+            // For acceleration, we now add a bit to StepAdd each time through as well
+            if ((INT32)CurrentCommand.Rate[1].value + CurrentCommand.Accel[1] < 0)
+            {
+              // Negate the acceleration value so it starts adding to Rate
+              CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
+              // Invert the direction so we start moving in the other direction
+              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR2_BIT;
+            }
+            CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+
+            if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
+            {
+              CurrentCommand.Rate[1].bytes.b4 += 0x80;
+            }
+            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
+            if (acc_union[1].bytes.b4 & 0x80)
+            {
+              acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
+              OutByte = OutByte | STEP2_BIT;
+              TookStep = TRUE;
+            }
+          }
+        }
+
+
         // We want to allow for a one-ISR tick move, which requires us to check
         // to see if the move has been completed here (to load the next command
         // immediately rather than waiting for the next tick). This primarily gives
         // us simpler math when figuring out how long moves will take.
-        if (CurrentCommand.Active[0] ||  CurrentCommand.Active[1])
+        // TODO: Is there a way to optimize this? Make this check here 
+        // less costly somehow?
+        if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
         {
           AllDone = FALSE;
         }
-				if (TookStep)
-				{
+
+        if (TookStep)
+        {
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
             // Set the dir bits
@@ -541,14 +629,14 @@ void high_ISR(void)
               Dir2IO = 0;
             }
             // Set the step bits
- 						if (OutByte & STEP1_BIT)
-						{
-							Step1IO = 1;
-						}
-						if (OutByte & STEP2_BIT)
-						{
-							Step2IO = 1;
-						}
+            if (OutByte & STEP1_BIT)
+            {
+              Step1IO = 1;
+            }
+            if (OutByte & STEP2_BIT)
+            {
+              Step2IO = 1;
+            }
           }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
@@ -570,15 +658,15 @@ void high_ISR(void)
               Dir2AltIO = 0;
             }
             // Set the STEP bits
-						if (OutByte & STEP1_BIT)
-						{
-							Step1AltIO = 1;
-						}
-						if (OutByte & STEP2_BIT)
-						{
-							Step2AltIO = 1;
-						}
-					}
+            if (OutByte & STEP1_BIT)
+            {
+              Step1AltIO = 1;
+            }
+            if (OutByte & STEP2_BIT)
+            {
+              Step2AltIO = 1;
+            }
+          }
 
           // This next section not only counts the step(s) we are taking, but
           // also acts as a delay to keep the step bit set for a little while.
@@ -605,200 +693,224 @@ void high_ISR(void)
               globalStepCounter2++;
             }
           }
-					if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-					{
-						Step1IO = 0;
-						Step2IO = 0;
-					}
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          {
+            Step1IO = 0;
+            Step2IO = 0;
+          }
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-					{
-						Step1AltIO = 0;
-						Step2AltIO = 0;
-					}
-				}
-			}
-    }
-    // Check to see if we should change the state of the pen
-		else if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
-		{
-      if (gUseRCPenServo)
-      {
-        // Precompute the channel, since we use it all over the place
-        UINT8 Channel = CurrentCommand.ServoChannel - 1;
+          {
+            Step1AltIO = 0;
+            Step2AltIO = 0;
+          }
+        }
+        break;
+       
+      case COMMAND_SERVO_MOVE:
+        // Check to see if we should change the state of the pen
+        if (gUseRCPenServo)
+        {
+          // Precompute the channel, since we use it all over the place
+          UINT8 Channel = CurrentCommand.ServoChannel - 1;
 
-        // This code below is the meat of the RCServo2_Move() function
-        // We have to manually write it in here rather than calling
-        // the function because a real function inside the ISR
-        // causes the compiler to generate enormous amounts of setup/teardown
-        // code and things run way too slowly.
+          // This code below is the meat of the RCServo2_Move() function
+          // We have to manually write it in here rather than calling
+          // the function because a real function inside the ISR
+          // causes the compiler to generate enormous amounts of setup/teardown
+          // code and things run way too slowly.
 
-        // If the user is trying to turn off this channel's RC servo output
-        if (0 == CurrentCommand.ServoPosition)
+          // If the user is trying to turn off this channel's RC servo output
+          if (0 == CurrentCommand.ServoPosition)
+          {
+            // Turn off the PPS routing to the pin
+            *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
+            // Clear everything else out for this channel
+            gRC2Rate[Channel] = 0;
+            gRC2Target[Channel] = 0;
+            gRC2RPn[Channel] = 0;
+            gRC2Value[Channel] = 0;
+          }
+          else
+          {
+            // Otherwise, set all of the values that start this RC servo moving
+            gRC2Rate[Channel] = CurrentCommand.ServoRate;
+            gRC2Target[Channel] = CurrentCommand.ServoPosition;
+            gRC2RPn[Channel] = CurrentCommand.ServoRPn;
+            if (gRC2Value[Channel] == 0)
+            {
+              gRC2Value[Channel] = CurrentCommand.ServoPosition;
+            }
+          }
+        }
+
+        // If this servo is the pen servo (on g_servo2_RPn)
+        if (CurrentCommand.ServoRPn == g_servo2_RPn)
         {
-          // Turn off the PPS routing to the pin
-          *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
-          // Clear everything else out for this channel
-          gRC2Rate[Channel] = 0;
-          gRC2Target[Channel] = 0;
-          gRC2RPn[Channel] = 0;
-          gRC2Value[Channel] = 0;
+          // Then set its new state based on the new position
+          if (CurrentCommand.ServoPosition == g_servo2_min)
+          {
+            PenState = PEN_UP;
+            SolenoidState = SOLENOID_OFF;
+            if (gUseSolenoid)
+            {
+              PenUpDownIO = 0;
+            }
+          }
+          else
+          {
+            PenState = PEN_DOWN;
+            SolenoidState = SOLENOID_ON;
+            if (gUseSolenoid)
+            {
+              PenUpDownIO = 1;
+            }
+          }
+        }
+        // NOTE: Intentional fall-through to COMMAND_DELAY here
+        // Because the only two commands that ever use DelayCounter are
+        // COMMAND_DELAY and COMMAND_SERVO_MOVE. So we handle the servo stuff
+        // above, and then let it fall through to the delay code below.
+        
+      case COMMAND_DELAY:
+        // Handle a delay
+        if (CurrentCommand.DelayCounter)
+        {
+          CurrentCommand.DelayCounter--;
+
+          if (CurrentCommand.DelayCounter)
+          {
+            AllDone = FALSE;
+          }
+        }
+        break;
+        
+      case COMMAND_SE:
+        // Check to see if we should start or stop the engraver
+        // Now act on the State of the SE command
+        if (CurrentCommand.SEState)
+        {
+          // Set RB3 to StoredEngraverPower
+          CCPR1L = CurrentCommand.SEPower >> 2;
+          CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
         }
         else
         {
-          // Otherwise, set all of the values that start this RC servo moving
-          gRC2Rate[Channel] = CurrentCommand.ServoRate;
-          gRC2Target[Channel] = CurrentCommand.ServoPosition;
-          gRC2RPn[Channel] = CurrentCommand.ServoRPn;
-          if (gRC2Value[Channel] == 0)
-          {
-            gRC2Value[Channel] = CurrentCommand.ServoPosition;
-          }
+          // Set RB3 to low by setting PWM duty cycle to zero
+          CCPR1L = 0;
+          CCP1CON = (CCP1CON & 0b11001111);
         }
-      }
-            
-      // If this servo is the pen servo (on g_servo2_RPn)
-      if (CurrentCommand.ServoRPn == g_servo2_RPn)
-      {
-        // Then set its new state based on the new position
-        if (CurrentCommand.ServoPosition == g_servo2_min)
+        // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
+        AllDone = TRUE;
+        break;
+        
+      case COMMAND_EM:
+        // As of version 2.8.0, we now have the EM command transplanted here into
+        // the motion queue. This is so that changes to motor enable or microstep
+        // resolution happen at predictable times rather than randomly.
+        // We use CurrentCommand.DirBits as "EA1" (the first parameter) and
+        // CurrentCommand.ServoRPn as "EA2" (the second parameter) since they're
+        // both UINT8s.
+        if (CurrentCommand.DirBits > 0)
         {
-          PenState = PEN_UP;
-          SolenoidState = SOLENOID_OFF;
-          if (gUseSolenoid)
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
-            PenUpDownIO = 0;
+            Enable1IO = ENABLE_MOTOR;
+          }
+          else
+          {
+            Enable1AltIO = ENABLE_MOTOR;
+          }
+          if (CurrentCommand.DirBits == 1)
+          {
+            MS1_IO = 1;
+            MS2_IO = 1;
+            MS3_IO = 1;
+          }
+          if (CurrentCommand.DirBits == 2)
+          {
+            MS1_IO = 1;
+            MS2_IO = 1;
+            MS3_IO = 0;
+          }
+          if (CurrentCommand.DirBits == 3)
+          {
+            MS1_IO = 0;
+            MS2_IO = 1;
+            MS3_IO = 0;
+          }
+          if (CurrentCommand.DirBits == 4)
+          {
+            MS1_IO = 1;
+            MS2_IO = 0;
+            MS3_IO = 0;
+          }
+          if (CurrentCommand.DirBits == 5)
+          {
+            MS1_IO = 0;
+            MS2_IO = 0;
+            MS3_IO = 0;
           }
         }
         else
         {
-          PenState = PEN_DOWN;
-          SolenoidState = SOLENOID_ON;
-          if (gUseSolenoid)
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
-            PenUpDownIO = 1;
+            Enable1IO = DISABLE_MOTOR;
+          }
+          else
+          {
+            Enable1AltIO = DISABLE_MOTOR;
           }
         }
-      }
-		}
-    // Check to see if we should start or stop the engraver
-		else if (CurrentCommand.Command == COMMAND_SE)
-		{
-      // Now act on the State of the SE command
-      if (CurrentCommand.SEState)
-      {
-        // Set RB3 to StoredEngraverPower
-        CCPR1L = CurrentCommand.SEPower >> 2;
-        CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
-      }
-      else
-      {
-        // Set RB3 to low by setting PWM duty cycle to zero
-        CCPR1L = 0;
-        CCP1CON = (CCP1CON & 0b11001111);
-      }
-      AllDone = TRUE;
+
+        if (CurrentCommand.ServoRPn > 0)
+        {
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          {
+            Enable2IO = ENABLE_MOTOR;
+          }
+          else
+          {
+            Enable2AltIO = ENABLE_MOTOR;
+          }
+        }
+        else
+        {
+          if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+          {
+            Enable2IO = DISABLE_MOTOR;
+          }
+          else
+          {
+            Enable2AltIO = DISABLE_MOTOR;
+          }
+        }
+
+        // Always clear the step counts if motors are enabled/disabled or 
+        // resolution is changed.
+        // NOTE: This section is the same code as clear_StepCounters(), but since
+        // we can't have any function calls in an ISR (or the ISR blows up in 
+        // space and speed) we have to copy the guts of that function here.
+
+        // Clear out the global step counters
+        globalStepCounter1 = 0;
+        globalStepCounter2 = 0;
+
+        // Clear both step accumulators as well
+        acc_union[0].value = 0;
+        acc_union[1].value = 0;
+
+        // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
+        AllDone = TRUE;
+        break;
+        
+      default:
+        // Intentionally no code here. AllDone will be true, so we'll go on to the next command (if there is one)
+        break;
     }
-    // As of version 2.8.0, we now have the EM command transplanted here into
-    // the motion queue. This is so that changes to motor enable or microstep
-    // resolution happen at predictable times rather than randomly.
-    // We use CurrentCommand.DirBits as "EA1" (the first parameter) and
-    // CurrentCommand.ServoRPn as "EA2" (the second parameter) since they're
-    // both UINT8s.
-    else if (CurrentCommand.Command == COMMAND_EM)
-    {
-      if (CurrentCommand.DirBits > 0)
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          Enable1IO = ENABLE_MOTOR;
-        }
-        else
-        {
-          Enable1AltIO = ENABLE_MOTOR;
-        }
-        if (CurrentCommand.DirBits == 1)
-        {
-          MS1_IO = 1;
-          MS2_IO = 1;
-          MS3_IO = 1;
-        }
-        if (CurrentCommand.DirBits == 2)
-        {
-          MS1_IO = 1;
-          MS2_IO = 1;
-          MS3_IO = 0;
-        }
-        if (CurrentCommand.DirBits == 3)
-        {
-          MS1_IO = 0;
-          MS2_IO = 1;
-          MS3_IO = 0;
-        }
-        if (CurrentCommand.DirBits == 4)
-        {
-          MS1_IO = 1;
-          MS2_IO = 0;
-          MS3_IO = 0;
-        }
-        if (CurrentCommand.DirBits == 5)
-        {
-          MS1_IO = 0;
-          MS2_IO = 0;
-          MS3_IO = 0;
-        }
-      }
-      else
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          Enable1IO = DISABLE_MOTOR;
-        }
-        else
-        {
-          Enable1AltIO = DISABLE_MOTOR;
-        }
-      }
     
-      if (CurrentCommand.ServoRPn > 0)
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          Enable2IO = ENABLE_MOTOR;
-        }
-        else
-        {
-          Enable2AltIO = ENABLE_MOTOR;
-        }
-      }
-      else
-      {
-        if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-        {
-          Enable2IO = DISABLE_MOTOR;
-        }
-        else
-        {
-          Enable2AltIO = DISABLE_MOTOR;
-        }
-      }
-      
-      // Always clear the step counts if motors are enabled/disabled or 
-      // resolution is changed.
-      // NOTE: This section is the same code as clear_StepCounters(), but since
-      // we can't have any function calls in an ISR (or the ISR blows up in 
-      // space and speed) we have to copy the guts of that function here.
-  
-      // Clear out the global step counters
-      globalStepCounter1 = 0;
-      globalStepCounter2 = 0;
-
-      // Clear both step accumulators as well
-      acc_union[0].value = 0;
-      acc_union[1].value = 0;
-    }
-
-		// If we're done with our current command, load in the next one
-		if (AllDone && CurrentCommand.DelayCounter == 0)
+   // If we're done with our current command, load in the next one
+		if (AllDone)
 		{
 			CurrentCommand.Command = COMMAND_NONE;
 			if (!FIFOEmpty)
@@ -828,14 +940,16 @@ void high_ISR(void)
         CommandFIFO[0].SEPower = 0;
         CommandFIFO[0].Active[0] = FALSE;
         CommandFIFO[0].Active[1] = FALSE;
+
+        // Check that DelayCounter doesn't have a crazy high value
+        if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+        {
+          CurrentCommand.DelayCounter = 0;
+        }
         
         // Take care of clearing the step accumulators for the next move if
-        // it's a motor move
-        if (
-          (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
-          ||
-          (CurrentCommand.Command == COMMAND_MOTOR_MOVE_TIMED)
-        )
+        // it's a motor move (of any type)
+        if (CurrentCommand.Command > COMMAND_SEPARATOR_MOTOR_MOVES_ABOVE_THIS)
         {
           // Use the SEState to determine which accumulators to clear.
           if (CurrentCommand.SEState & 0x01)
@@ -1381,7 +1495,7 @@ void parse_LM_packet (void)
   move.Rate[1].value = Rate2;
   move.Steps[1] = Steps2;
   move.Accel[1] = Accel2;
-  move.Command = COMMAND_MOTOR_MOVE;
+  move.Command = COMMAND_LM_MOVE;
 
   // Spin here until there's space in the fifo
   while(!FIFOEmpty)
@@ -1538,7 +1652,7 @@ void parse_LT_packet (void)
   move.Rate[1].value = Rate2;
   move.Steps[1] = 0;
   move.Accel[1] = Accel2;
-  move.Command = COMMAND_MOTOR_MOVE_TIMED;
+  move.Command = COMMAND_LT_MOVE;
 
   // Spin here until there's space in the fifo
   while(!FIFOEmpty)
@@ -1652,7 +1766,7 @@ void parse_SM_packet (void)
 
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_SM(Duration, A1Steps, A2Steps, ClearAccs);
+  	process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
 
     if (g_ack_enable)
     {
@@ -1800,7 +1914,7 @@ void parse_HM_packet (void)
       {
         XSteps = Steps2;
       }
-      process_SM(Duration, XSteps, Steps2, 3);
+      process_simple_motor_move(Duration, XSteps, Steps2, 3);
       // Update both steps count for final move
       Steps1 = Steps1 - XSteps;
       Steps2 = 0;
@@ -1841,7 +1955,7 @@ void parse_HM_packet (void)
       {
         XSteps = Steps1;
       }
-      process_SM(Duration, Steps1, XSteps, 3);
+      process_simple_motor_move(Duration, Steps1, XSteps, 3);
       // Update both steps count for final move
       Steps2 = Steps2 - XSteps;
       Steps1 = 0;
@@ -1864,7 +1978,7 @@ void parse_HM_packet (void)
 #endif
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_SM(Duration, Steps1, Steps2, 3);
+  process_simple_motor_move(Duration, Steps1, Steps2, 3);
 
   if (g_ack_enable)
   {
@@ -1962,7 +2076,7 @@ void parse_XM_packet (void)
 
     // If we get here, we know that step rate for both A1 and A2 is
     // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_SM(Duration, A1Steps, A2Steps, ClearAccs);
+  	process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
 
 	print_ack();
 }
@@ -1982,7 +2096,7 @@ void parse_XM_packet (void)
 //
 // In the future, making the FIFO more elements deep may be cool.
 // 
-static void process_SM(
+static void process_simple_motor_move(
   UINT32 Duration,
   INT32 A1Stp,
   INT32 A2Stp,
@@ -2161,7 +2275,7 @@ static void process_SM(
     move.Rate[1].value = temp;
     move.Steps[1] = A2Stp;
     move.Accel[1] = 0;
-    move.Command = COMMAND_MOTOR_MOVE;
+    move.Command = COMMAND_SM_XM_HM_MOVE;
 
     /* For debugging step motion , uncomment the next line */
 #if defined(DEBUG_VALUE_PRINT)
@@ -2187,7 +2301,7 @@ static void process_SM(
 // E-Stop
 // Usage: ES,<disable_motors><CR>
 // Returns: <command_interrupted>,<fifo_steps1>,<fifo_steps2>,<steps_remaining1>,<steps_remaining2><CR>OK<CR>
-// This command will abort any in-progress motor move (SM) command.
+// This command will abort any in-progress motor move command.
 // It will also clear out any pending command(s) in the FIFO.
 // <disable_motors> This parameter is optional. If present, and if it is a 1,
 //                  then both stepper drivers will be disabled as part of the command.
@@ -2220,20 +2334,20 @@ void parse_ES_packet(void)
 		return;
 	}
 
-  // If there is a command waiting in the FIFO and it is a move command
-  // or the current command is a move command, then remember that for later.
-  if (
-    (!FIFOEmpty && CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
-    || 
-    CurrentCommand.Command == COMMAND_MOTOR_MOVE
+  // Need to turn off high priority interrupts breifly here to mess with ISR command parameters
+  INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+
+  // If the FIFO has a move command in it, remove it.
+  if 
+  (
+    CommandFIFO[0].Command == COMMAND_SM_XM_HM_MOVE
+    ||
+    CommandFIFO[0].Command == COMMAND_LM_MOVE
+    ||
+    CommandFIFO[0].Command == COMMAND_LT_MOVE
   )
   {
     command_interrupted = 1;
-  }
-
-  // If the FIFO has a move command in it, remove it.
-  if (CommandFIFO[0].Command == COMMAND_MOTOR_MOVE)
-  {
     CommandFIFO[0].Command = COMMAND_NONE;
     fifo_steps1 = CommandFIFO[0].Steps[0];
     fifo_steps2 = CommandFIFO[0].Steps[1];
@@ -2245,7 +2359,14 @@ void parse_ES_packet(void)
   }
 
   // If the current command is a move command, then stop the move.
-  if (CurrentCommand.Command == COMMAND_MOTOR_MOVE)
+  if 
+  (
+    CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE
+    ||
+    CurrentCommand.Command == COMMAND_LM_MOVE
+    ||
+    CurrentCommand.Command == COMMAND_LT_MOVE
+  )
   {
     CurrentCommand.Command = COMMAND_NONE;
     remaining_steps1 = CurrentCommand.Steps[0];
@@ -2270,6 +2391,9 @@ void parse_ES_packet(void)
     }
   }
   
+  // Re-enable interrupts
+  INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+
   printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
           command_interrupted,
           fifo_steps1,

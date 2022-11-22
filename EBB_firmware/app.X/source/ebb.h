@@ -55,7 +55,7 @@
 //#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
-//#define GPIO_DEBUG
+#define GPIO_DEBUG
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
@@ -74,12 +74,15 @@ typedef enum
 typedef enum
 {
 	COMMAND_NONE = 0,
-	COMMAND_MOTOR_MOVE,
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
   COMMAND_SE,
-  COMMAND_MOTOR_MOVE_TIMED,
-  COMMAND_EM
+  COMMAND_EM,
+  COMMAND_SEPARATOR_MOTOR_MOVES_ABOVE_THIS,   // This is not a real command. Used for quick check if a command is a motor moving command.
+                                              // All commands higher than this separator are motor move commands
+  COMMAND_SM_XM_HM_MOVE,
+  COMMAND_LM_MOVE,
+  COMMAND_LT_MOVE
 } CommandType;
 
 // Byte union used for accumulator (unsigned))
