@@ -612,7 +612,7 @@ void high_ISR(void)
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
             // Set the dir bits
-            if (CurrentCommand.DirBits & DIR1_BIT)
+            if (OutByte & DIR1_BIT)
             {
               Dir1IO = 1;
             }
@@ -620,7 +620,7 @@ void high_ISR(void)
             {
               Dir1IO = 0;
             }	
-            if (CurrentCommand.DirBits & DIR2_BIT)
+            if (OutByte & DIR2_BIT)
             {
               Dir2IO = 1;
             }
@@ -641,7 +641,7 @@ void high_ISR(void)
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
             // Set the DIR Bits
-            if (CurrentCommand.DirBits & DIR1_BIT)
+            if (OutByte & DIR1_BIT)
             {
               Dir1AltIO = 1;
             }
@@ -649,7 +649,7 @@ void high_ISR(void)
             {
               Dir1AltIO = 0;
             }	
-            if (CurrentCommand.DirBits & DIR2_BIT)
+            if (OutByte & DIR2_BIT)
             {
               Dir2AltIO = 1;
             }
