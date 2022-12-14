@@ -125,10 +125,10 @@ distribution.
   <effect needs-live-preview="true">
     <object-type>all</object-type>
     <effects-menu>
-    <submenu _name="EggBot"/>
+    <submenu name="EggBot"/>
     </effects-menu>
   </effect>
     <script>
-      <command reldir="extensions" interpreter="python">hershey.py</command>
+      <command location="extensions" interpreter="python">hershey.py</command>
     </script>
 </inkscape-extension>
