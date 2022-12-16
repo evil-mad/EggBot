@@ -668,9 +668,9 @@ void UserInit(void)
 #endif
 
 	// Initalize LED I/Os to outputs
-    mInitAllLEDs();
+  mInitAllLEDs();
 	// Initalize switch as an input
-    mInitSwitch();
+  mInitSwitch();
 
 	// Start off always using "OK" acknoledge.
 	g_ack_enable = TRUE;
@@ -679,12 +679,12 @@ void UserInit(void)
 	stdout = _H_USER;
 
 	// Initalize all of the ISR FIFOs
-    ISR_A_FIFO_out = 0;
-    ISR_A_FIFO_in = 0;
-    ISR_A_FIFO_length = 0;
-    ISR_D_FIFO_out = 0;
-    ISR_D_FIFO_in = 0;
-    ISR_D_FIFO_length = 0;
+  ISR_A_FIFO_out = 0;
+  ISR_A_FIFO_in = 0;
+  ISR_A_FIFO_length = 0;
+  ISR_D_FIFO_out = 0;
+  ISR_D_FIFO_in = 0;
+  ISR_D_FIFO_length = 0;
 
 	// Make sure that our timer stuff starts out disabled
 	ISR_D_RepeatRate = 0;
@@ -693,16 +693,16 @@ void UserInit(void)
 	A_tick_counter = 0;
 	A_cur_channel = 0;
 	
-    // Now init our registers
+  // Now init our registers
 	// Initalize Timer4
 	// The prescaler will be at 16
-    T4CONbits.T4CKPS1 = 1;
-    T4CONbits.T4CKPS0 = 1;
-    // We want the TMR4 post scaler to be a 3
-    T4CONbits.T4OUTPS3 = 0;
-    T4CONbits.T4OUTPS2 = 0;
-    T4CONbits.T4OUTPS1 = 1;
-    T4CONbits.T4OUTPS0 = 0;
+  T4CONbits.T4CKPS1 = 1;
+  T4CONbits.T4CKPS0 = 1;
+  // We want the TMR4 post scaler to be a 3
+  T4CONbits.T4OUTPS3 = 0;
+  T4CONbits.T4OUTPS2 = 0;
+  T4CONbits.T4OUTPS1 = 1;
+  T4CONbits.T4OUTPS0 = 0;
 	// Set our reload value
 	PR4 = kPR4_RELOAD;
 
@@ -710,27 +710,27 @@ void UserInit(void)
 	// Clear out the FIFO data
 	for (i = 0; i < 16; i++)
 	{
-    	ISR_A_FIFO[i] = 0;
+  	ISR_A_FIFO[i] = 0;
 	}	
 
-    // Initialize USB TX and RX buffer management
-    g_RX_buf_in = 0;
-    g_RX_buf_out = 0;
+  // Initialize USB TX and RX buffer management
+  g_RX_buf_in = 0;
+  g_RX_buf_out = 0;
 	g_TX_buf_in = 0;
 	g_TX_buf_out = 0;
 
-    for (i=0; i < kTX_BUF_SIZE; i++)
-    {
-        g_TX_buf[i] = 0;
-    }
-    for (i=0; i < kRX_COMMAND_BUF_SIZE; i++)
-    {
-        g_RX_command_buf[i] = 0;
-    }
-    for (i=0; i < kRX_BUF_SIZE; i++)
-    {
-        g_RX_buf[i] = 0;
-    }
+  for (i=0; i < kTX_BUF_SIZE; i++)
+  {
+    g_TX_buf[i] = 0;
+  }
+  for (i=0; i < kRX_COMMAND_BUF_SIZE; i++)
+  {
+    g_RX_command_buf[i] = 0;
+  }
+  for (i=0; i < kRX_BUF_SIZE; i++)
+  {
+    g_RX_buf[i] = 0;
+  }
     
 	// And the USART TX and RX buffer management
 	g_USART_RX_buf_in = 0;
@@ -758,22 +758,22 @@ void UserInit(void)
 	INTCONbits.TMR0IE = 0;	// And clear the interrupt enable
 	INTCON2bits.TMR0IP = 0;	// Low priority
 
-    // Turn on band-gap
-    ANCON1bits.VBGEN = 1;
+  // Turn on band-gap
+  ANCON1bits.VBGEN = 1;
 
-    // Set up ADCON1 options
-    // A/D Result right justified
-    // Normal A/D (no calibration)
-    // Acq time = 20 Tad (?)
-    // Tad = Fosc/64
-    ADCON1 = 0b10111110;
+  // Set up ADCON1 options
+  // A/D Result right justified
+  // Normal A/D (no calibration)
+  // Acq time = 20 Tad (?)
+  // Tad = Fosc/64
+  ADCON1 = 0b10111110;
 
-    // Enable interrupt priorities
-    RCONbits.IPEN = 1;
+  // Enable interrupt priorities
+  RCONbits.IPEN = 1;
 	T4CONbits.TMR4ON = 0;
     
-    PIE3bits.TMR4IE = 1;
-    IPR3bits.TMR4IP = 0;
+  PIE3bits.TMR4IE = 1;
+  IPR3bits.TMR4IP = 0;
     
 	// Call the ebb init function to setup whatever it needs
 	EBB_Init();   
@@ -782,15 +782,15 @@ void UserInit(void)
 	RCServo2_Init();
 #endif
 
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
-    INTCONbits.GIEL = 1;	// Turn low priority interrupts on
+  INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+  INTCONbits.GIEL = 1;	// Turn low priority interrupts on
 
 	// Turn on the Timer4
 	T4CONbits.TMR4ON = 1; 
     
-    // If there's a name in FLASH for us, copy it over to the USB Device
-    // descriptor before we enumerate
-    populateDeviceStringWithName();
+  // If there's a name in FLASH for us, copy it over to the USB Device
+  // descriptor before we enumerate
+  populateDeviceStringWithName();
 }//end UserInit
 
 /******************************************************************************
@@ -825,7 +825,7 @@ void ProcessIO(void)
 	static char esc_sequence[3] = {0};
 	static BOOL in_cr = FALSE;
 	static BYTE last_fifo_size;
-    unsigned char tst_char;
+  unsigned char tst_char;
 	static unsigned char button_state = 0;
 	static unsigned int button_ctr = 0;
 	char i;
@@ -836,16 +836,14 @@ void ProcessIO(void)
 	BlinkUSBStatus();
 
 #if defined(BUILD_WITH_DEMO)    
-    /* Demo code, for playing back array of points so we can run without PC.*/
-    
-    // Check for start of playback
-    if (!swProgram)
-    {
-        
-        
-    }
-
+  /* Demo code, for playing back array of points so we can run without PC.*/
+   
+  // Check for start of playback
+  if (!swProgram)
+  {
+  }
 #endif    
+
 	// Check for any new I packets (from T command) ready to go out
 	while (ISR_D_FIFO_length > 0)
 	{
@@ -885,17 +883,21 @@ void ProcessIO(void)
 		return;
 	}
 
+
 	// Pull in some new data if there is new data to pull in
 	// And we aren't waiting for the current move to finish
-	
-	rx_bytes = getsUSBUSART((char *)g_RX_command_buf, 64);
+	rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);
 
 	if (rx_bytes > 0)
 	{
-		for(byte_cnt = 0; byte_cnt < rx_bytes; byte_cnt++)
+		for (byte_cnt = 0; byte_cnt < rx_bytes; byte_cnt++)
 		{
 			tst_char = g_RX_command_buf[byte_cnt];
-
+      
+#ifdef UART_OUTPUT_DEBUG
+      Write1USART(tst_char);
+#endif      
+      
 			// Check to see if we are in a CR/LF situation
 			if (
 				!in_cr 
@@ -922,7 +924,7 @@ void ProcessIO(void)
 				{
 					last_command[i] = g_RX_buf[i];
 				}
-				parse_packet ();
+				parse_packet();
 				g_RX_buf_in = 0;
 				g_RX_buf_out = 0;
 			}
@@ -1049,7 +1051,7 @@ void ProcessIO(void)
 	}
 
 	// Go send any data that needs sending to PC
-	check_and_send_TX_data ();
+	check_and_send_TX_data();
 }
 
 // This is our replacement for the standard putc routine

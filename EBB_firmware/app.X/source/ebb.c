@@ -1019,24 +1019,24 @@ void high_ISR(void)
 // Init code
 void EBB_Init(void)
 {
-    char i;
+  char i;
 
-    // Initialize all Current Command values
-    for (i = 0; i < NUMBER_OF_STEPPERS; i++)
-    {
-        CurrentCommand.Rate[i].value = 1;
-        CurrentCommand.Steps[i] = 0;
-        CurrentCommand.Accel[i] = 0;
-    }
-    CurrentCommand.Command = COMMAND_NONE;
-    CurrentCommand.DirBits = 0;
-    CurrentCommand.DelayCounter = 0;
-    CurrentCommand.ServoPosition = 0;
-    CurrentCommand.ServoRPn = 0;
-    CurrentCommand.ServoChannel = 0;
-    CurrentCommand.ServoRate = 0;
+  // Initialize all Current Command values
+  for (i = 0; i < NUMBER_OF_STEPPERS; i++)
+  {
+    CurrentCommand.Rate[i].value = 1;
+    CurrentCommand.Steps[i] = 0;
+    CurrentCommand.Accel[i] = 0;
+  }
+  CurrentCommand.Command = COMMAND_NONE;
+  CurrentCommand.DirBits = 0;
+  CurrentCommand.DelayCounter = 0;
+  CurrentCommand.ServoPosition = 0;
+  CurrentCommand.ServoRPn = 0;
+  CurrentCommand.ServoChannel = 0;
+  CurrentCommand.ServoRate = 0;
 
-    FIFOEmpty = TRUE;
+  FIFOEmpty = TRUE;
 
 	// Set up TMR1 for our 25KHz High ISR for stepping
 	T1CONbits.RD16 = 1; 	// Set 16 bit mode
@@ -1066,13 +1066,13 @@ void EBB_Init(void)
 //	PORTE = 0;
 //	TRISE = 0;
 
-    // And make sure to always use low priority for ADC
-    IPR1bits.ADIP = 0;
-    
-    // Turn on AN0 (RA0) as analog input
-    AnalogConfigure(0,1);
-    // Turn on AN11 (V+) as analog input
-    AnalogConfigure(11,1);
+  // And make sure to always use low priority for ADC
+  IPR1bits.ADIP = 0;
+
+  // Turn on AN0 (RA0) as analog input
+  AnalogConfigure(0,1);
+  // Turn on AN11 (V+) as analog input
+  AnalogConfigure(11,1);
 
 	MS1_IO = 1;
 	MS1_IO_TRIS = OUTPUT_PIN;
@@ -1101,41 +1101,41 @@ void EBB_Init(void)
 	// The idea here is to get the schmidt trigger input RC7 high before
 	// we make it an input, thus getting it above the 2.65V ST threshold
 	// And allowing VUSB to keep the logic level on the pin high at 2.5V
-    #if defined(USE_USB_BUS_SENSE_IO)
-	    tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
-    	USB_BUS_SENSE = 1;
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		Delay1TCY();
-		tris_usb_bus_sense = INPUT_PIN;
-		USB_BUS_SENSE = 0;
-	#endif
-    gUseSolenoid = TRUE;
-    gUseRCPenServo = TRUE;
+#if defined(USE_USB_BUS_SENSE_IO)
+  tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
+  USB_BUS_SENSE = 1;
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  Delay1TCY();
+  tris_usb_bus_sense = INPUT_PIN;
+  USB_BUS_SENSE = 0;
+#endif
+  gUseSolenoid = TRUE;
+  gUseRCPenServo = TRUE;
 
     // Set up pen up/down direction as output
 	PenUpDownIO = 0;
 	PenUpDownIO_TRIS = OUTPUT_PIN;
     
-    // Set up RC Servo power control to be off
-    RCServoPowerIO = RCSERVO_POWER_OFF;
-    RCServoPowerIO_TRIS = OUTPUT_PIN;
+  // Set up RC Servo power control to be off
+  RCServoPowerIO = RCSERVO_POWER_OFF;
+  RCServoPowerIO_TRIS = OUTPUT_PIN;
 
 	SolenoidState = SOLENOID_ON;
 	DriverConfiguration = PIC_CONTROLS_DRIVERS;
@@ -1153,8 +1153,21 @@ void EBB_Init(void)
 	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
 	PORTBbits.RB3 = 0;          // And make sure it starts out off
     
-    // Clear out global stepper positions
-    parse_CS_packet();
+  // Clear out global stepper positions
+  parse_CS_packet();
+  
+#ifdef UART_OUTPUT_DEBUG
+  Open1USART(
+    USART_TX_INT_OFF &
+    USART_RX_INT_OFF &
+    USART_ASYNCH_MODE &
+    USART_EIGHT_BIT &
+    USART_CONT_RX &
+    USART_BRGH_HIGH &
+    USART_ADDEN_OFF,
+    2                   // At 48 MHz, this creates 1 Mbaud output
+  );
+#endif
 }
 
 // Stepper (mode) Configure command
