@@ -329,7 +329,7 @@ BOOL FIFOEmpty;
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
-static unsigned char OutByte;
+//static unsigned char OutByte;
 static unsigned char TookStep;
 static unsigned char AllDone;
 static unsigned char i;
@@ -403,10 +403,6 @@ void high_ISR(void)
         // Then the second section is common to all stepper motion commands and handles
         // the actual step pulse generation as well as direction bit control
 
-        // These only need to be initialized if we have a command that uses them
-        // (stepper motor motion) so we do them inside this block rather than at 
-        // the top of the function
-        OutByte = CurrentCommand.DirBits;
         TookStep = FALSE;
 
         // The Active bits will be set if there is still motion left to 
@@ -421,16 +417,19 @@ void high_ISR(void)
         // acceleration and so that code is left out to save time
         if (CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE)
         {
+
+          //// MOTOR 1 ////
+
           // Only do this if there are steps left to take
           if (CurrentCommand.Active[0])
           {
             // Add the rate to the accumulator and see if the MSb got set. If so
             // then take a step and record that the step was taken
-            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
+            acc_union[0].value += CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
-              acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP1_BIT;
+              acc_union[0].bytes.b4 &= 0x7F;
+              CurrentCommand.DirBits |= STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
 
@@ -442,13 +441,16 @@ void high_ISR(void)
               }
             }
           }
+
+          //// MOTOR 2 ////
+
           if (CurrentCommand.Active[1])
           {
-            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
+            acc_union[1].value += CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
-              acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP2_BIT;
+              acc_union[1].bytes.b4 &= 0x7F;
+              CurrentCommand.DirBits |= STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
               if (CurrentCommand.Steps[1] == 0)
@@ -462,22 +464,40 @@ void high_ISR(void)
         // into account.
         else if (CurrentCommand.Command == COMMAND_LM_MOVE)
         {
+          //// MOTOR 1 ////
+          
           // Only do this if there are steps left to take
           if (CurrentCommand.Active[0])
           {
-            // For acceleration, we now add a bit to StepAdd each time through as well
-            // First we check to see if adding this acceleration value will cause
-            // rate to go negative. If it does, then that means we've "gone through"
-            // zero speed and need to reverse direction and reverse the sign of the
-            // acceleration so that we start accelerating.
-            if ((INT32)CurrentCommand.Rate[0].value + CurrentCommand.Accel[0] < 0)
+            // For acceleration, we now add Accel to Rate each time through the ISR
+            // However, based on the exact parameters, we might be going through 
+            // a direction flip because the speed of the motor has reached zero
+            // and we need to start acceleration in the other direction. This was
+            // all precomputed in the parse function. So check to see if we need
+            // to think about flipping, and if so, count this tick towards the
+            // direction flip, and if it's time to flip then do it.
+            if (bittst(CurrentCommand.ServoRPn, 0) == 1)
             {
+              CurrentCommand.TicksToFlip[0]--;
+              
+              if (CurrentCommand.TicksToFlip[0] == 0)
+            {
+                bitclr(CurrentCommand.ServoRPn, 0);
+                
               // Negate the acceleration value so it starts adding to Rate
               CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
               // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR1_BIT;
+              CurrentCommand.DirBits ^= DIR1_BIT;
+// TAKE OUT AFTER TESTING IS DONE
+TookStep = TRUE;
+              }
             }
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+            
+            /// TODO: This next if() can be eliminated if the parse_LM() function
+            /// can correctly determine if rate will overflow (or underflow) and
+            /// prevent the move from happening if so.
+            
             // Check for rate roll over - we can't have a rate with it's MSb set
             if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
             {
@@ -485,11 +505,12 @@ void high_ISR(void)
               // Could we just clear the high bit? (Would that be faster?)
               CurrentCommand.Rate[0].bytes.b4 += 0x80;
             }
-            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
+            acc_union[0].value += CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
+              /// TODO: Is bitclr(acc_union[0].bytes.b4,7) faster?
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP1_BIT;
+              CurrentCommand.DirBits |= STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
               if (CurrentCommand.Steps[0] == 0)
@@ -498,15 +519,27 @@ void high_ISR(void)
               }
             }
           }
+
+          //// MOTOR 2 ////
+
           if (CurrentCommand.Active[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            if ((INT32)CurrentCommand.Rate[1].value + CurrentCommand.Accel[1] < 0)
+            if (bittst(CurrentCommand.ServoRPn, 1) == 1)
             {
+              CurrentCommand.TicksToFlip[1]--;
+              
+              if (CurrentCommand.TicksToFlip[1] == 0)
+              {
+                bitclr(CurrentCommand.ServoRPn, 1);
+                
               // Negate the acceleration value so it starts adding to Rate
               CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
               // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR2_BIT;
+                CurrentCommand.DirBits ^= DIR2_BIT;
+// TAKE OUT AFTER TESTING IS DONE
+TookStep = TRUE;
+              }
             }
             CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
 
@@ -514,11 +547,11 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[1].bytes.b4 += 0x80;
             }
-            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
+            acc_union[1].value += CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
               acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP2_BIT;
+              CurrentCommand.DirBits |= STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
               if (CurrentCommand.Steps[1] == 0)
@@ -545,15 +578,30 @@ void high_ISR(void)
               CurrentCommand.Active[0] = FALSE;
             }
 
-            // Motor 1
+            //// MOTOR 1 ////
 
-            // For acceleration, we now add a bit to Rate each time through as well
-            if ((INT32)CurrentCommand.Rate[0].value + CurrentCommand.Accel[0] < 0)
+            // For acceleration, we now add Accel to Rate each time through the ISR
+            // However, based on the exact parameters, we might be going through 
+            // a direction flip because the speed of the motor has reached zero
+            // and we need to start acceleration in the other direction. This was
+            // all precomputed in the parse function. So check to see if we need
+            // to think about flipping, and if so, count this tick towards the
+            // direction flip, and if it's time to flip then do it.
+            if (bittst(CurrentCommand.ServoRPn, 0) == 1)
             {
+              CurrentCommand.TicksToFlip[0]--;
+              
+              if (CurrentCommand.TicksToFlip[0] == 0)
+              {
+                bitclr(CurrentCommand.ServoRPn, 0);
+                
               // Negate the acceleration value so it starts adding to Rate
               CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
               // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR1_BIT;
+              CurrentCommand.DirBits ^= DIR1_BIT;
+// TAKE OUT AFTER TESTING IS DONE
+TookStep = TRUE;
+              }
             }
             CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
 
@@ -561,23 +609,32 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[0].bytes.b4 += 0x80;
             }
-            acc_union[0].value = acc_union[0].value + CurrentCommand.Rate[0].value;
+            acc_union[0].value += CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
-              acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP1_BIT;
+              acc_union[0].bytes.b4 &= 0x7F;
+              CurrentCommand.DirBits |= STEP1_BIT;
               TookStep = TRUE;
             }
 
-            // Motor 2
+            //// MOTOR 2 ////
 
             // For acceleration, we now add a bit to StepAdd each time through as well
-            if ((INT32)CurrentCommand.Rate[1].value + CurrentCommand.Accel[1] < 0)
+            if (bittst(CurrentCommand.ServoRPn, 1) == 1)
             {
+              CurrentCommand.TicksToFlip[1]--;
+              
+              if (CurrentCommand.TicksToFlip[1] == 0)
+            {
+                bitclr(CurrentCommand.ServoRPn, 1);
+                
               // Negate the acceleration value so it starts adding to Rate
               CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
               // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits = CurrentCommand.DirBits ^ DIR2_BIT;
+              CurrentCommand.DirBits ^= DIR2_BIT;
+// TAKE OUT AFTER TESTING IS DONE
+TookStep = TRUE;
+              }
             }
             CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
 
@@ -585,16 +642,15 @@ void high_ISR(void)
             {
               CurrentCommand.Rate[1].bytes.b4 += 0x80;
             }
-            acc_union[1].value = acc_union[1].value + CurrentCommand.Rate[1].value;
+            acc_union[1].value += CurrentCommand.Rate[1].value;
             if (acc_union[1].bytes.b4 & 0x80)
             {
-              acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
-              OutByte = OutByte | STEP2_BIT;
+              acc_union[1].bytes.b4 &= 0x7F;
+              CurrentCommand.DirBits |= STEP2_BIT;
               TookStep = TRUE;
             }
           }
         }
-
 
         // We want to allow for a one-ISR tick move, which requires us to check
         // to see if the move has been completed here (to load the next command
@@ -611,8 +667,11 @@ void high_ISR(void)
         {
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
+            /// TODO: Since we know that these are all the upper 4 bits of PortD,
+            /// can we just set the bit constants properly and then always just
+            /// output the top for bits of OutByte directly to PortD?
             // Set the dir bits
-            if (OutByte & DIR1_BIT)
+            if (CurrentCommand.DirBits & DIR1_BIT)
             {
               Dir1IO = 1;
             }
@@ -620,7 +679,7 @@ void high_ISR(void)
             {
               Dir1IO = 0;
             }	
-            if (OutByte & DIR2_BIT)
+            if (CurrentCommand.DirBits & DIR2_BIT)
             {
               Dir2IO = 1;
             }
@@ -629,11 +688,11 @@ void high_ISR(void)
               Dir2IO = 0;
             }
             // Set the step bits
-            if (OutByte & STEP1_BIT)
+            if (CurrentCommand.DirBits & STEP1_BIT)
             {
               Step1IO = 1;
             }
-            if (OutByte & STEP2_BIT)
+            if (CurrentCommand.DirBits & STEP2_BIT)
             {
               Step2IO = 1;
             }
@@ -641,7 +700,7 @@ void high_ISR(void)
           else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
           {
             // Set the DIR Bits
-            if (OutByte & DIR1_BIT)
+            if (CurrentCommand.DirBits & DIR1_BIT)
             {
               Dir1AltIO = 1;
             }
@@ -649,7 +708,7 @@ void high_ISR(void)
             {
               Dir1AltIO = 0;
             }	
-            if (OutByte & DIR2_BIT)
+            if (CurrentCommand.DirBits & DIR2_BIT)
             {
               Dir2AltIO = 1;
             }
@@ -658,11 +717,11 @@ void high_ISR(void)
               Dir2AltIO = 0;
             }
             // Set the STEP bits
-            if (OutByte & STEP1_BIT)
+            if (CurrentCommand.DirBits & STEP1_BIT)
             {
               Step1AltIO = 1;
             }
-            if (OutByte & STEP2_BIT)
+            if (CurrentCommand.DirBits & STEP2_BIT)
             {
               Step2AltIO = 1;
             }
@@ -671,7 +730,7 @@ void high_ISR(void)
           // This next section not only counts the step(s) we are taking, but
           // also acts as a delay to keep the step bit set for a little while.
           // The code paths though here are approximately constant time.
-          if (OutByte & STEP1_BIT)
+          if (CurrentCommand.DirBits & STEP1_BIT)
           {
             if (CurrentCommand.DirBits & DIR1_BIT)
             {
@@ -682,7 +741,7 @@ void high_ISR(void)
               globalStepCounter1++;
             }
           }
-          if (OutByte & STEP2_BIT)
+          if (CurrentCommand.DirBits & STEP2_BIT)
           {
             if (CurrentCommand.DirBits & DIR2_BIT)
             {
@@ -703,6 +762,9 @@ void high_ISR(void)
             Step1AltIO = 0;
             Step2AltIO = 0;
           }
+          
+          // Clear the two step bits so they're empty for the next pass through ISR
+          CurrentCommand.DirBits &= ~(STEP1_BIT | STEP2_BIT);
         }
         break;
        
@@ -925,6 +987,8 @@ void high_ISR(void)
 #endif
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
+        /// TODO: Can this be done with a memclr faster? A loop and pointer?
+        /// TODO: What about skipping the copy and just changing the index, making currentcommand just one of the FIFO elements?
         CommandFIFO[0].Command = COMMAND_NONE;
         CommandFIFO[0].Rate[0].value = 0;
         CommandFIFO[0].Rate[1].value = 0;
@@ -938,6 +1002,8 @@ void high_ISR(void)
         CommandFIFO[0].ServoRate = 0;
         CommandFIFO[0].SEState = 0;
         CommandFIFO[0].SEPower = 0;
+        CommandFIFO[0].TicksToFlip[0] = 0;
+        CommandFIFO[0].TicksToFlip[1] = 0;
         CommandFIFO[0].Active[0] = FALSE;
         CommandFIFO[0].Active[1] = FALSE;
 
@@ -1478,6 +1544,46 @@ void parse_LM_packet (void)
   else
   {
     Rate2 = Rate2 - (Accel2 >> 1);
+  }
+  
+  // New from Issue 185: If necessary, pre-compute the tick at which the 
+  // rate 'goes through zero'. This will happen if the acceleration is negative
+  // and there are enough steps to take (and the initial Rate value is small
+  // enough) that the acceleration value will cause the Rate value to become
+  // negative. As of Issue 185 we are interpreting this as an indication that
+  // the user wants the direction of the motor to flip at that point in time.
+  // The sign of the acceleration value is also flipped so that the motor then
+  // starts speeding up until all steps are exhausted for this move.
+  // By precomputing how many ISR ticks it will take to hit this point here,
+  // we can do a simple (and inexpensive in time) decrement operation on the 
+  // TicksToFlip[] value and when it reaches zero then we know to flip the 
+  // direction and sign of Accel. 
+  // We will ONLY need to compute this value if we know we're going to have 
+  // a flip, which means Accel starts out negative, and if there are enough
+  // steps to get to the flip. Since computing the steps to flip here is
+  // computationally expensive, we'll skip that check and compute the 
+  // TicksToFlip[] any time Accel is negative. A possible optimization in the
+  // future would also compute if the move length in ticks (based on Rate,
+  // Accel and Step Count) is greater than TicksToFlip.
+  if (Accel1 < 0)
+  {
+    bitset(move.ServoRPn, 0); // Set flag to ISR that a flip might be needed
+    
+    move.TicksToFlip[0] = Rate1/(-Accel1) + 1;
+  }
+  else
+  {
+    bitclr(move.ServoRPn, 0); // Clear the flag bit (in case it was 1 from before))
+  }
+  if (Accel2 < 0)
+  {
+    bitset(move.ServoRPn, 1); // Set flag to ISR that a flip might be needed
+    
+    move.TicksToFlip[1] = Rate2/(-Accel2) + 1;
+  }
+  else
+  {
+    bitclr(move.ServoRPn, 1); // Clear the flag bit (in case it was 1 from before))
   }
   
   // We are going to reuse SEState to hold the clear accumulators flag

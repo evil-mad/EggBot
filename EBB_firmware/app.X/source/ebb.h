@@ -55,7 +55,7 @@
 //#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
-//#define GPIO_DEBUG
+#define GPIO_DEBUG
 
 // Define this to output every byte received from PC out UART1 (TX1 = RC6)
 // for debugging PC comms.
@@ -114,20 +114,21 @@ typedef union union32b4 {
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
-{
-  CommandType     Command;
-  uS32b4_t        Rate[NUMBER_OF_STEPPERS];
-  INT32           Accel[NUMBER_OF_STEPPERS];
-  UINT32          Steps[NUMBER_OF_STEPPERS];
-  UINT8           DirBits;
-  UINT32          DelayCounter;   // NOT Milliseconds! In 25KHz units
-  UINT16          ServoPosition;
-  UINT8           ServoRPn;
-  UINT8           ServoChannel;
-  UINT16          ServoRate;
-  UINT8           SEState;
-  UINT16          SEPower;
-  UINT8           Active[NUMBER_OF_STEPPERS];
+{                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
+  CommandType     Command;                        // SM DL S2 SE EN LM LT
+  uS32b4_t        Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
+  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
+  UINT8           DirBits;                        // SM          EN LM LT
+  UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
+  UINT16          ServoPosition;                  //       S2
+  UINT8           ServoRPn;                       //       S2    EN LM LT
+  UINT8           ServoChannel;                   //       S2
+  UINT16          ServoRate;                      //       S2
+  UINT8           SEState;                        // SM       SE    LM LT
+  UINT16          SEPower;                        //          SE
+  UINT32          TicksToFlip[NUMBER_OF_STEPPERS];//                LM LT
+  UINT8           Active[NUMBER_OF_STEPPERS];     // (internal to ISR only)
 } MoveCommandType;
 
 // Define global things that depend on the board type
