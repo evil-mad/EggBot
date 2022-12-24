@@ -476,18 +476,18 @@ void high_ISR(void)
             // all precomputed in the parse function. So check to see if we need
             // to think about flipping, and if so, count this tick towards the
             // direction flip, and if it's time to flip then do it.
-            if (bittst(CurrentCommand.ServoRPn, 0) == 1)
+            if (bittst(CurrentCommand.ServoRPn, 0))
             {
               CurrentCommand.TicksToFlip[0]--;
               
               if (CurrentCommand.TicksToFlip[0] == 0)
-            {
+              {
                 bitclr(CurrentCommand.ServoRPn, 0);
                 
-              // Negate the acceleration value so it starts adding to Rate
-              CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
-              // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits ^= DIR1_BIT;
+                // Negate the acceleration value so it starts adding to Rate
+                CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
+                // Invert the direction so we start moving in the other direction
+                CurrentCommand.DirBits ^= DIR1_BIT;
 // TAKE OUT AFTER TESTING IS DONE
 TookStep = TRUE;
               }
@@ -525,7 +525,7 @@ TookStep = TRUE;
           if (CurrentCommand.Active[1])
           {
             // For acceleration, we now add a bit to StepAdd each time through as well
-            if (bittst(CurrentCommand.ServoRPn, 1) == 1)
+            if (bittst(CurrentCommand.ServoRPn, 1))
             {
               CurrentCommand.TicksToFlip[1]--;
               
@@ -533,9 +533,9 @@ TookStep = TRUE;
               {
                 bitclr(CurrentCommand.ServoRPn, 1);
                 
-              // Negate the acceleration value so it starts adding to Rate
-              CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
-              // Invert the direction so we start moving in the other direction
+                // Negate the acceleration value so it starts adding to Rate
+                CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
+                // Invert the direction so we start moving in the other direction
                 CurrentCommand.DirBits ^= DIR2_BIT;
 // TAKE OUT AFTER TESTING IS DONE
 TookStep = TRUE;
@@ -587,7 +587,7 @@ TookStep = TRUE;
             // all precomputed in the parse function. So check to see if we need
             // to think about flipping, and if so, count this tick towards the
             // direction flip, and if it's time to flip then do it.
-            if (bittst(CurrentCommand.ServoRPn, 0) == 1)
+            if (bittst(CurrentCommand.ServoRPn, 0))
             {
               CurrentCommand.TicksToFlip[0]--;
               
@@ -595,10 +595,10 @@ TookStep = TRUE;
               {
                 bitclr(CurrentCommand.ServoRPn, 0);
                 
-              // Negate the acceleration value so it starts adding to Rate
-              CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
-              // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits ^= DIR1_BIT;
+                // Negate the acceleration value so it starts adding to Rate
+                CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
+                // Invert the direction so we start moving in the other direction
+                CurrentCommand.DirBits ^= DIR1_BIT;
 // TAKE OUT AFTER TESTING IS DONE
 TookStep = TRUE;
               }
@@ -619,19 +619,26 @@ TookStep = TRUE;
 
             //// MOTOR 2 ////
 
+            /// TODO IDEA: It seems that this compiler has trouble with structures. Maybe slow?
+            /// So don't use a struct in the ISR for "CurrentCommand". Instead, have all separate
+            /// little global variables, arranged exactly as they are arranged in the struct. Then,
+            /// when it's time to copy in the next command from the FIFO, treat the little variables
+            /// as a struct (cast it) to have the compiler do the copy in a loop, then convert
+            /// all accesses in the ISR to simple variables
+            
             // For acceleration, we now add a bit to StepAdd each time through as well
-            if (bittst(CurrentCommand.ServoRPn, 1) == 1)
+            if (bittst(CurrentCommand.ServoRPn, 1))
             {
               CurrentCommand.TicksToFlip[1]--;
               
               if (CurrentCommand.TicksToFlip[1] == 0)
-            {
+              {
                 bitclr(CurrentCommand.ServoRPn, 1);
                 
-              // Negate the acceleration value so it starts adding to Rate
-              CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
-              // Invert the direction so we start moving in the other direction
-              CurrentCommand.DirBits ^= DIR2_BIT;
+                // Negate the acceleration value so it starts adding to Rate
+                CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
+                // Invert the direction so we start moving in the other direction
+                CurrentCommand.DirBits ^= DIR2_BIT;
 // TAKE OUT AFTER TESTING IS DONE
 TookStep = TRUE;
               }
@@ -1765,6 +1772,49 @@ void parse_LT_packet (void)
     Rate2 = Rate2 - (Accel2 >> 1);
   }
   
+  // New from Issue 185: If necessary, pre-compute the tick at which the 
+  // rate 'goes through zero'. This will happen if the acceleration is negative
+  // and there are enough steps to take (and the initial Rate value is small
+  // enough) that the acceleration value will cause the Rate value to become
+  // negative. As of Issue 185 we are interpreting this as an indication that
+  // the user wants the direction of the motor to flip at that point in time.
+  // The sign of the acceleration value is also flipped so that the motor then
+  // starts speeding up until all steps are exhausted for this move.
+  // By precomputing how many ISR ticks it will take to hit this point here,
+  // we can do a simple (and inexpensive in time) decrement operation on the 
+  // TicksToFlip[] value and when it reaches zero then we know to flip the 
+  // direction and sign of Accel. 
+  // We will ONLY need to compute this value if we know we're going to have 
+  // a flip, which means Accel starts out negative, and if there are enough
+  // steps to get to the flip. Since computing the steps to flip here is
+  // computationally expensive, we'll skip that check and compute the 
+  // TicksToFlip[] any time Accel is negative. A possible optimization in the
+  // future would also compute if the move length in ticks (based on Rate,
+  // Accel and Step Count) is greater than TicksToFlip.
+  if (Accel1 < 0)
+  {
+    bitset(move.ServoRPn, 0); // Set flag to ISR that a flip might be needed
+    
+    move.TicksToFlip[0] = Rate1/(-Accel1) + 1;
+  }
+  else
+  {
+    bitclr(move.ServoRPn, 0); // Clear the flag bit (in case it was 1 from before))
+  }
+  if (Accel2 < 0)
+  {
+Write1USART('{');
+
+    bitset(move.ServoRPn, 1); // Set flag to ISR that a flip might be needed
+    
+    move.TicksToFlip[1] = Rate2/(-Accel2) + 1;
+  }
+  else
+  {
+    bitclr(move.ServoRPn, 1); // Clear the flag bit (in case it was 1 from before))
+Write1USART('}');
+  }
+
   move.Rate[0].value = Rate1;
   move.Steps[0] = Intervals;    // Overloading StepsCounter[0] for intervals
   move.Accel[0] = Accel1;

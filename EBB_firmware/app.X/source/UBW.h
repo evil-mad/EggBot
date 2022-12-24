@@ -65,7 +65,7 @@
 
 #define bitset(var,bitno) ((var) |= (1 << (bitno)))
 #define bitclr(var,bitno) ((var) &= ~(1 << (bitno)))
-#define bittst(var,bitno) (var & (1 << bitno))
+#define bittst(var,bitno) (((var) & (1 << (bitno))) != 0)
 
 
 // defines for the error_byte byte - each bit has a meaning
