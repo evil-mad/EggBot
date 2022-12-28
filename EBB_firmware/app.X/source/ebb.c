@@ -978,7 +978,7 @@ TookStep = TRUE;
         break;
     }
     
-   // If we're done with our current command, load in the next one
+    // If we're done with our current command, load in the next one
 		if (AllDone)
 		{
 			CurrentCommand.Command = COMMAND_NONE;
