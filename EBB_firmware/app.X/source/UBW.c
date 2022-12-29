@@ -50,31 +50,31 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rawin Rojvanit       11/19/04    Original.
- * Brian Schmalz		03/15/06	Added user code to implement
- *									firmware version D v1.0 for UBW
- *									project. See www.greta.dhs.org/UBW
- * Brian Schmalz		05/04/06	Starting version 1.1, which will 
- * 									include several fixes. See website.
- * BPS					06/21/06	Starting v1.2 -
+ * Brian Schmalz        03/15/06    Added user code to implement
+ *                      firmware version D v1.0 for UBW
+ *                      project. See www.greta.dhs.org/UBW
+ * Brian Schmalz        05/04/06    Starting version 1.1, which will 
+ *                      include several fixes. See website.
+ * BPS                  06/21/06	Starting v1.2 -
  * - Fixed problem with I packets (from T command) filling up TX buffer
- * 		and not letting any incoming commands be received. (strange)
+ *    and not letting any incoming commands be received. (strange)
  * - Adding several commands - Analog inputs being the biggest set.
  * - Also Byte read/Byte write (PEEK/POKE) anywhere in memory
  * - Individual pin I/O and direction
- * BPS					08/16/06	v1.3 - Fixed bug with USB startup
- * BPS					09/09/06	v1.4 - Starting 1.4
+ * BPS                  08/16/06  v1.3 - Fixed bug with USB startup
+ * BPS                  09/09/06  v1.4 - Starting 1.4
  * - Fixed Microchip bug with early silicon - UCONbits.PKTDIS = 0;
  * - Adding BO and BC commands for parallel output to graphics panels
- * BPS					12/06/06	v1.4 - More work on 1.4
+ * BPS                  12/06/06  v1.4 - More work on 1.4
  * - Re-wrote all I/O buffering code for increased speed and functionality
  * - Re-wrote error handling code
  * - Added delays to BC/BO commands to help Corey
- * BPS					01/06/07	v1.4 - Added RC command for servos
- * BPS					03/07/07	v1.4.1 - Changed blink rate for SFE
- * BPS					05/24/07	v1.4.2 - Fixed RC command bug - it
- *									wouldn't shut off.
- * BPS					08/28/07	v1.4.3 - Allowed UBW to run without
- *									usb connected.
+ * BPS                  01/06/07  v1.4 - Added RC command for servos
+ * BPS                  03/07/07  v1.4.1 - Changed blink rate for SFE
+ * BPS                  05/24/07  v1.4.2 - Fixed RC command bug - it
+ *                      wouldn't shut off.
+ * BPS                  08/28/07  v1.4.3 - Allowed UBW to run without
+ *                      usb connected.
  *
  ********************************************************************/
 
@@ -108,8 +108,8 @@
 
 #define ANALOG_INITATE_MS_BETWEEN_STARTS 5u     // Number of ms between analog converts (all enabled channels)
 
-#define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
-#define FLASH_NAME_LENGTH       16u             // Size of store for EBB's name in FLASH
+#define FLASH_NAME_ADDRESS    0xF800            // Starting address in FLASH where we store our EBB's name
+#define FLASH_NAME_LENGTH     16u               // Size of store for EBB's name in FLASH
 
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
@@ -119,15 +119,15 @@
 // Rate variable - how fast does interrupt fire to capture inputs?
 unsigned int time_between_updates;
 
-volatile unsigned int ISR_D_RepeatRate;			// How many 1ms ticks between Digital updates
-volatile unsigned char ISR_D_FIFO_in;				// In pointer
-volatile unsigned char ISR_D_FIFO_out;				// Out pointer
-volatile unsigned char ISR_D_FIFO_length;			// Current FIFO depth
+volatile unsigned int ISR_D_RepeatRate;       // How many 1ms ticks between Digital updates
+volatile unsigned char ISR_D_FIFO_in;         // In pointer
+volatile unsigned char ISR_D_FIFO_out;        // Out pointer
+volatile unsigned char ISR_D_FIFO_length;     // Current FIFO depth
 
-volatile unsigned int ISR_A_RepeatRate;			// How many 1ms ticks between Analog updates
-volatile unsigned char ISR_A_FIFO_in;				// In pointer
-volatile unsigned char ISR_A_FIFO_out;				// Out pointer
-volatile unsigned char ISR_A_FIFO_length;			// Current FIFO depth
+volatile unsigned int ISR_A_RepeatRate;       // How many 1ms ticks between Analog updates
+volatile unsigned char ISR_A_FIFO_in;         // In pointer
+volatile unsigned char ISR_A_FIFO_out;        // Out pointer
+volatile unsigned char ISR_A_FIFO_length;     // Current FIFO depth
 
 // This byte has each of its bits used as a separate error flag
 unsigned char error_byte;
@@ -152,22 +152,22 @@ const rom char st_LFCR[] = {"\r\n"};
 
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-	const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V11)
-	const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V12)
-	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO1_AO0\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO1_AO0\r\n"};
 #elif defined(BOARD_UBW)
-	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
 
 #pragma udata ISR_buf = 0x100
-volatile unsigned int ISR_A_FIFO[16];                       // Stores the most recent analog conversions
-volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];	// FIFO of actual data
-volatile tRC_state g_RC_state[kRC_DATA_SIZE];				// Stores states for each pin for RC command
-volatile unsigned int g_RC_value[kRC_DATA_SIZE];			// Stores reload values for TMR0
+volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
+volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];  // FIFO of actual data
+volatile tRC_state g_RC_state[kRC_DATA_SIZE];             // Stores states for each pin for RC command
+volatile unsigned int g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
 
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
@@ -212,7 +212,7 @@ unsigned char g_USART_TX_buf_in;
 unsigned char g_USART_TX_buf_out;
 
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
-BOOL	g_ack_enable;
+BOOL g_ack_enable;
 
 // Set to TRUE to turn Pulse Mode on
 unsigned char gPulsesOn = FALSE;
@@ -231,40 +231,40 @@ volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 volatile BOOL gRedLEDEmptyFIFO = FALSE;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
-void BlinkUSBStatus (void);		// Handles blinking the USB status LED
-BOOL SwitchIsPressed (void);	// Check to see if the user (PRG) switch is pressed
-void parse_packet (void);		// Take a full packet and dispatch it to the right function
+void BlinkUSBStatus (void);     // Handles blinking the USB status LED
+BOOL SwitchIsPressed (void);    // Check to see if the user (PRG) switch is pressed
+void parse_packet (void);       // Take a full packet and dispatch it to the right function
 signed char extract_digit (unsigned long * acc, unsigned char digits); // Pull a character out of the packet
-void parse_R_packet (void);		// R for resetting UBW
-void parse_C_packet (void);		// C for configuring I/O and analog pins
-void parse_CX_packet (void); 	// CX For configuring serial port
-void parse_O_packet (void);		// O for output digital to pins
-void parse_I_packet (void);		// I for input digital from pins
-void parse_V_packet (void);		// V for printing version
-void parse_A_packet (void);		// A for requesting analog inputs
-void parse_T_packet (void);		// T for setting up timed I/O (digital or analog)
-void parse_PI_packet (void);	// PI for reading a single pin
-void parse_PO_packet (void);	// PO for setting a single pin state
-void parse_PD_packet (void);	// PD for setting a pin's direction
-void parse_MR_packet (void);	// MR for Memory Read
-void parse_MW_packet (void); 	// MW for Memory Write
-void parse_TX_packet (void);	// TX for transmitting serial
-void parse_RX_packet (void);	// RX for receiving serial
-void parse_RC_packet (void);	// RC is for outputing RC servo pulses 
-void parse_BO_packet (void);	// BO sends data to fast parallel output
-void parse_BC_packet (void);	// BC configures fast parallel outputs
-void parse_BS_packet (void);	// BS sends binary data to fast parallel output
-void parse_CU_packet (void);	// CU configures UBW (system wide parameters)
-void parse_SS_packet (void);	// SS Send SPI
-void parse_RS_packet (void);	// RS Receive SPI
-void parse_SI_packet (void);	// SI Send I2C
-void parse_RI_packet (void);	// RI Receive I2C
-void parse_CI_packet (void);	// CI Configure I2C
-void parse_PG_packet (void);	// PG Pulse Go
-void parse_PC_packet (void);	// PC Pulse Configure
-void parse_BL_packet (void);	// BL Boot Load command
-void parse_CK_packet (void);	// CK ChecK command
-void parse_MR_packet (void);	// MR Motors Run command
+void parse_R_packet (void);     // R for resetting UBW
+void parse_C_packet (void);     // C for configuring I/O and analog pins
+void parse_CX_packet (void);    // CX For configuring serial port
+void parse_O_packet (void);     // O for output digital to pins
+void parse_I_packet (void);     // I for input digital from pins
+void parse_V_packet (void);     // V for printing version
+void parse_A_packet (void);     // A for requesting analog inputs
+void parse_T_packet (void);     // T for setting up timed I/O (digital or analog)
+void parse_PI_packet (void);    // PI for reading a single pin
+void parse_PO_packet (void);    // PO for setting a single pin state
+void parse_PD_packet (void);    // PD for setting a pin's direction
+void parse_MR_packet (void);    // MR for Memory Read
+void parse_MW_packet (void);    // MW for Memory Write
+void parse_TX_packet (void);    // TX for transmitting serial
+void parse_RX_packet (void);    // RX for receiving serial
+void parse_RC_packet (void);    // RC is for outputing RC servo pulses 
+void parse_BO_packet (void);    // BO sends data to fast parallel output
+void parse_BC_packet (void);    // BC configures fast parallel outputs
+void parse_BS_packet (void);    // BS sends binary data to fast parallel output
+void parse_CU_packet (void);    // CU configures UBW (system wide parameters)
+void parse_SS_packet (void);    // SS Send SPI
+void parse_RS_packet (void);    // RS Receive SPI
+void parse_SI_packet (void);    // SI Send I2C
+void parse_RI_packet (void);    // RI Receive I2C
+void parse_CI_packet (void);    // CI Configure I2C
+void parse_PG_packet (void);    // PG Pulse Go
+void parse_PC_packet (void);    // PC Pulse Configure
+void parse_BL_packet (void);    // BL Boot Load command
+void parse_CK_packet (void);    // CK ChecK command
+void parse_MR_packet (void);    // MR Motors Run command
 void parse_AC_packet (void);    // AC Analog Configure
 void parse_ST_packet (void);    // ST Set Tag command
 void parse_QT_packet (void);    // QT Query Tag command
@@ -272,413 +272,410 @@ void parse_RB_packet (void);    // RB ReBoot command
 void parse_QR_packet (void);    // QR Query RC Servo power state
 void parse_SR_packet (void);    // SR Set RC Servo power timeout
 void check_and_send_TX_data (void); // See if there is any data to send to PC, and if so, do it
-int _user_putc (char c);		// Our UBS based stream character printer
+int _user_putc (char c);        // Our UBS based stream character printer
 
 /** D E C L A R A T I O N S **************************************************/
 #pragma code
 
 #pragma interruptlow low_ISR
 void low_ISR(void)
-{	
-	unsigned int i;
-	signed int RC2Difference = 0;
+{
+  unsigned int i;
+  signed int RC2Difference = 0;
 
-	// Do we have a Timer4 interrupt? (1ms rate)
-	if (PIR3bits.TMR4IF)
-	{
-		// Clear the interrupt 
-		PIR3bits.TMR4IF = 0;
-		
-		// Handle RC servo pulse generation (for next pulse/channel)
-		// Always increment the gRCServo2msCounter
-        gRC2msCounter++;
+  // Do we have a Timer4 interrupt? (1ms rate)
+  if (PIR3bits.TMR4IF)
+  {
+    // Clear the interrupt 
+    PIR3bits.TMR4IF = 0;
 
-        if (gRC2msCounter >= gRC2SlotMS)
+    // Handle RC servo pulse generation (for next pulse/channel)
+    // Always increment the gRCServo2msCounter
+    gRC2msCounter++;
+
+    if (gRC2msCounter >= gRC2SlotMS)
+    {
+      // Clear the RC2 ms counter
+      gRC2msCounter = 0;
+
+      // Turn off the PPS routing to the 'old' pin
+      *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 0;
+
+      // Turn off TIMER3 for now
+      T3CONbits.TMR3ON = 0;
+
+      // And clear TIMER3 to zero
+      TMR3H = 0;
+      TMR3L = 0;
+
+      // And always advance the main pointer
+      gRC2Ptr++;
+      if (gRC2Ptr >= gRC2Slots)
+      {
+        gRC2Ptr = 0;
+      }
+
+      // If the value is zero, we do nothing to this pin
+      // otherwise, prime it for sending a pulse
+      if (gRC2Value[gRC2Ptr] != 0u)
+      {
+        // Now, to move 'slowly', we update gRC2Value[] by
+        // seeing if we are at gRC2Target[] yet. If not, then
+        // we add (or subtract) gRC2Rate[] to try and get there.
+        if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
-            // Clear the RC2 ms counter
-            gRC2msCounter = 0;
-
-            // Turn off the PPS routing to the 'old' pin
-            *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 0;
-
-            // Turn off TIMER3 for now
-            T3CONbits.TMR3ON = 0;
-
-            // And clear TIMER3 to zero
-            TMR3H = 0;
-            TMR3L = 0;
-
-            // And always advance the main pointer
-            gRC2Ptr++;
-            if (gRC2Ptr >= gRC2Slots)
+          // If the rate is zero, then we always move instantly
+          // to the target.
+          if (gRC2Rate[gRC2Ptr] == 0u)
+          {
+            gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+          }
+          else
+          {
+            // Otherwise, add gRC2Rate[] each time through until we
+            // get to our desired pulse width.
+            RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
+            if (RC2Difference > 0)
             {
-                gRC2Ptr = 0;
+              if (RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
+              {
+                gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
+              }
+              else
+              {
+                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+              }
             }
-
-            // If the value is zero, we do nothing to this pin
-            // otherwise, prime it for sending a pulse
-            if (gRC2Value[gRC2Ptr] != 0u)
-            {
-                // Now, to move 'slowly', we update gRC2Value[] by
-                // seeing if we are at gRC2Target[] yet. If not, then
-                // we add (or subtract) gRC2Rate[] to try and get there.
-                if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
-                {
-                    // If the rate is zero, then we always move instantly
-                    // to the target.
-                    if (gRC2Rate[gRC2Ptr] == 0u)
-                    {
-                        gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                    }
-                    else
-                    {
-                        // Otherwise, add gRC2Rate[] each time through until we
-                        // get to our desired pulse width.
-                        RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
-                        if (RC2Difference > 0)
-                        {
-                            if (RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
-                            {
-                                gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
-                            }
-                            else
-                            {
-                                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                            }
-                        }
-                        else
-                        {
-                            if (-RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
-                            {
-                                gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
-                            }
-                            else
-                            {
-                                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
-                            }
-                        }
-
-                    }
-                }
-
-                // Set up the PPS routing for the CCP2
-                *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 18;	// 18 = CCP2
-
-                // Disable interrupts (high)
-                INTCONbits.GIEH = 0;
-
-                // Load up the new compare time
-                CCPR2H = gRC2Value[gRC2Ptr] >> 8;
-                CCPR2L = gRC2Value[gRC2Ptr] & 0xFF;
-                CCP2CONbits.CCP2M = 0b0000;
-                CCP2CONbits.CCP2M = 0b1001;
-
-                // Turn TIMER3 back on
-                T3CONbits.TMR3ON = 1;
-
-                // Re-enable interrupts
-                INTCONbits.GIEH = 1;
-            }
-        }
-		
-				
-		// See if it's time to fire off an I packet
-		if (ISR_D_RepeatRate > 0u)
-		{
-			D_tick_counter++;
-			if (D_tick_counter >= ISR_D_RepeatRate)
-			{
-				D_tick_counter = 0;
-				// Tell the main code to send an I packet
-				if (ISR_D_FIFO_length < kISR_FIFO_D_DEPTH)
-				{
-					// And copy over our port values
-					ISR_D_FIFO[0][ISR_D_FIFO_in] = PORTA;
-					ISR_D_FIFO[1][ISR_D_FIFO_in] = PORTB;
-					ISR_D_FIFO[2][ISR_D_FIFO_in] = PORTC;
-					ISR_D_FIFO_in++;
-					if (ISR_D_FIFO_in >= kISR_FIFO_D_DEPTH)
-					{
-						ISR_D_FIFO_in = 0;	
-					}
-					ISR_D_FIFO_length++;
-				}
-				else
-				{
-					// Stop the madness! Something is wrong, we're
-					// not getting our packets out. So kill the 
-					// timer.
-					ISR_D_RepeatRate = 0;
-				}
-			}	
-		}
-		
-		// See if it's time to fire off an A packet
-		if ((ISR_A_RepeatRate > 0u) && (AnalogEnabledChannels > 0u))
-		{
-			A_tick_counter++;
-			if (A_tick_counter >= ISR_A_RepeatRate)
-			{
-				A_tick_counter = 0;
-				// Tell the main code to send an A packet
-				if (ISR_A_FIFO_length < kISR_FIFO_A_DEPTH)
-				{
-					ISR_A_FIFO_in++;
-					if (ISR_A_FIFO_in >= kISR_FIFO_A_DEPTH)
-					{
-						ISR_A_FIFO_in = 0;	
-					}
-					ISR_A_FIFO_length++;
-				}
-				else
-				{
-					// Stop the madness! Something is wrong, we're
-					// not getting our packets out. So kill the A
-					// packets.
-					ISR_A_RepeatRate = 0;
-				}
-			}	
-		}
-
-		// Only start analog conversions if there are channels enabled
-        if (AnalogEnabledChannels)
-        {
-            // Only start every so many ms
-            if (AnalogInitiate >= ANALOG_INITATE_MS_BETWEEN_STARTS)
-            {
-                // Always start off with calibration
-                ADCON1bits.ADCAL = 1;
-
-                // Clear the interrupt
-                PIR1bits.ADIF = 0;
-
-                // Set the interrupt enable
-                PIE1bits.ADIE = 1;
-
-                // Make sure it's on!
-                ADCON0bits.ADON = 1;
-
-                // And tell the A/D to GO!
-                ADCON0bits.GO_DONE = 1;
-
-                // Reset AnalogInitiate counter
-                AnalogInitiate = 0;
-            }
-            // Otherwise, increment each 1ms
             else
             {
-                AnalogInitiate++;
+              if (-RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
+              {
+                gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
+              }
+              else
+              {
+                gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
+              }
             }
+          }
         }
 
-		// Is Pulse Mode on?
-		if (gPulsesOn)
-		{
-			// Loop across the four pins
-			for (i=0; i<4u; i++)
-			{
-				// Only pulse the pin if there is a length for the pin
-				if (gPulseLen[i])
-				{
-					// If this is the beginning of the pulse, turn the pin on
-					if (gPulseCounters[i] == 0u)
-					{
-						// Turn the pin
-						if (i==0u) PORTBbits.RB0 = 1;
-						if (i==1u) PORTBbits.RB1 = 1;
-						if (i==2u) PORTBbits.RB2 = 1;
-						if (i==3u) PORTBbits.RB3 = 1;
-					}
-					
-					// If we've reached the end of the pulse, turn the pin off
-					if (gPulseCounters[i] == gPulseLen[i])
-					{
-						// Turn the pin off
-						if (i==0u) PORTBbits.RB0 = 0;
-						if (i==1u) PORTBbits.RB1 = 0;
-						if (i==2u) PORTBbits.RB2 = 0;
-						if (i==3u) PORTBbits.RB3 = 0;
-					}
+        // Set up the PPS routing for the CCP2
+        *(gRC2RPORPtr + gRC2RPn[gRC2Ptr]) = 18;	// 18 = CCP2
 
-					// Now increment the counter
-					gPulseCounters[i]++;
+        // Disable interrupts (high)
+        INTCONbits.GIEH = 0;
 
-					// And check to see if we've reached the end of the rate
-					if (gPulseCounters[i] >= gPulseRate[i])
-					{
-						// If so, start over from zero
-						gPulseCounters[i] = 0;
-					}
-				}
-				else
-				{
-					// Turn the pin off
-					if (i==0u) PORTBbits.RB0 = 0;
-					if (i==1u) PORTBbits.RB1 = 0;
-					if (i==2u) PORTBbits.RB2 = 0;
-					if (i==3u) PORTBbits.RB3 = 0;
-				}
-			}
-		}
+        // Load up the new compare time
+        CCPR2H = gRC2Value[gRC2Ptr] >> 8;
+        CCPR2L = gRC2Value[gRC2Ptr] & 0xFF;
+        CCP2CONbits.CCP2M = 0b0000;
+        CCP2CONbits.CCP2M = 0b1001;
 
-		// Software timer for QC command
-		if (QC_ms_timer)
-		{
-			QC_ms_timer--;
-		}
-        
-        // Software timer for RCServo power control
-        if (gRCServoPoweroffCounterMS)
+        // Turn TIMER3 back on
+        T3CONbits.TMR3ON = 1;
+
+        // Re-enable interrupts
+        INTCONbits.GIEH = 1;
+      }
+    }
+
+    // See if it's time to fire off an I packet
+    if (ISR_D_RepeatRate > 0u)
+    {
+      D_tick_counter++;
+      if (D_tick_counter >= ISR_D_RepeatRate)
+      {
+        D_tick_counter = 0;
+        // Tell the main code to send an I packet
+        if (ISR_D_FIFO_length < kISR_FIFO_D_DEPTH)
         {
-            gRCServoPoweroffCounterMS--;
-            // If we just timed out, then shut off RC Servo power
-            if (gRCServoPoweroffCounterMS == 0u)
-            {
-                RCServoPowerIO = RCSERVO_POWER_OFF;
-            }
-        }
-
-	} // end of 1ms interrupt
-
-	// Do we have an analog interrupt?
-	if (PIR1bits.ADIF)
-	{
-		// Clear the interrupt
-		PIR1bits.ADIF = 0;
-
-        // If we just had a calibration, means we just started, so clear things
-        // out and begin our sequence.
-        if (ADCON1bits.ADCAL)
-        {
-            ADCON1bits.ADCAL = 0;
-            ChannelBit = 0x0001;
-            A_cur_channel = 0;
+          // And copy over our port values
+          ISR_D_FIFO[0][ISR_D_FIFO_in] = PORTA;
+          ISR_D_FIFO[1][ISR_D_FIFO_in] = PORTB;
+          ISR_D_FIFO[2][ISR_D_FIFO_in] = PORTC;
+          ISR_D_FIFO_in++;
+          if (ISR_D_FIFO_in >= kISR_FIFO_D_DEPTH)
+          {
+            ISR_D_FIFO_in = 0;	
+          }
+          ISR_D_FIFO_length++;
         }
         else
         {
-            // Read out the value that we just converted, and store it.
-            ISR_A_FIFO[A_cur_channel] =
-                (unsigned int)ADRESL
-                |
-                ((unsigned int)ADRESH << 8);
-
-            // Incriment the channel and mask bit
-            ChannelBit = ChannelBit << 1;
-            A_cur_channel++;
+          // Stop the madness! Something is wrong, we're
+          // not getting our packets out. So kill the 
+          // timer.
+          ISR_D_RepeatRate = 0;
         }
+      }	
+    }
 
-        // Walk through the enabled channels until we find the next one
-        while (A_cur_channel < 16u)
+    // See if it's time to fire off an A packet
+    if ((ISR_A_RepeatRate > 0u) && (AnalogEnabledChannels > 0u))
+    {
+      A_tick_counter++;
+      if (A_tick_counter >= ISR_A_RepeatRate)
+      {
+        A_tick_counter = 0;
+        // Tell the main code to send an A packet
+        if (ISR_A_FIFO_length < kISR_FIFO_A_DEPTH)
         {
-            if (ChannelBit & AnalogEnabledChannels)
-            {
-                break;
-            }
-            else
-            {
-                // Incriment the channel and write the new one in
-                A_cur_channel++;
-                ChannelBit = ChannelBit << 1;
-            }
+          ISR_A_FIFO_in++;
+          if (ISR_A_FIFO_in >= kISR_FIFO_A_DEPTH)
+          {
+            ISR_A_FIFO_in = 0;	
+          }
+          ISR_A_FIFO_length++;
         }
+        else
+        {
+          // Stop the madness! Something is wrong, we're
+          // not getting our packets out. So kill the A
+          // packets.
+          ISR_A_RepeatRate = 0;
+        }
+      }	
+    }
 
-		if (A_cur_channel >= 16u)
-		{
-			// We're done, so just sit and wait
-			// Turn off our interrupts though.
-			PIE1bits.ADIE = 0;
-		}
-		else
-		{
-			// Update the channel number
-			ADCON0 = (A_cur_channel << 2) + 1;
-			// And start the next conversion
-			ADCON0bits.GO_DONE = 1;
-		}
-	}
+    // Only start analog conversions if there are channels enabled
+    if (AnalogEnabledChannels)
+    {
+      // Only start every so many ms
+      if (AnalogInitiate >= ANALOG_INITATE_MS_BETWEEN_STARTS)
+      {
+        // Always start off with calibration
+        ADCON1bits.ADCAL = 1;
 
-	// Do we have a TMR0 interrupt? (RC command)
-	// TMR0 is in 16 bit mode, and counts up to FFFF and overflows, generating
-	// this interrupt.
-	if (INTCONbits.TMR0IF)
-	{
-		// Turn off Timer0
-		T0CONbits.TMR0ON = 0;
+        // Clear the interrupt
+        PIR1bits.ADIF = 0;
 
-		// Clear the interrupt
-		INTCONbits.TMR0IF = 0;
-		
-		// And disable it
-		INTCONbits.TMR0IE = 0;
+        // Set the interrupt enable
+        PIE1bits.ADIE = 1;
 
-		// Only do our stuff if the pin is in the proper state
-		if (kTIMING == g_RC_state[g_RC_timing_ptr])
-		{
-			// All we need to do is clear the pin and change its state to kWAITING
-			if (g_RC_timing_ptr < 8u)
-			{
-				bitclr (LATA, g_RC_timing_ptr & 0x7);
-			}
-			else if (g_RC_timing_ptr < 16u)
-			{
-				bitclr (LATB, g_RC_timing_ptr & 0x7);
-			}
-			else
-			{
-				bitclr (LATC, g_RC_timing_ptr & 0x7);
-			}
-			g_RC_state[g_RC_timing_ptr] = kWAITING;		
-		}
-	}
+        // Make sure it's on!
+        ADCON0bits.ADON = 1;
+
+        // And tell the A/D to GO!
+        ADCON0bits.GO_DONE = 1;
+
+        // Reset AnalogInitiate counter
+        AnalogInitiate = 0;
+      }
+      // Otherwise, increment each 1ms
+      else
+      {
+        AnalogInitiate++;
+      }
+    }
+
+    // Is Pulse Mode on?
+    if (gPulsesOn)
+    {
+      // Loop across the four pins
+      for (i=0; i<4u; i++)
+      {
+        // Only pulse the pin if there is a length for the pin
+        if (gPulseLen[i])
+        {
+          // If this is the beginning of the pulse, turn the pin on
+          if (gPulseCounters[i] == 0u)
+          {
+            // Turn the pin
+            if (i==0u) PORTBbits.RB0 = 1;
+            if (i==1u) PORTBbits.RB1 = 1;
+            if (i==2u) PORTBbits.RB2 = 1;
+            if (i==3u) PORTBbits.RB3 = 1;
+          }
+
+          // If we've reached the end of the pulse, turn the pin off
+          if (gPulseCounters[i] == gPulseLen[i])
+          {
+            // Turn the pin off
+            if (i==0u) PORTBbits.RB0 = 0;
+            if (i==1u) PORTBbits.RB1 = 0;
+            if (i==2u) PORTBbits.RB2 = 0;
+            if (i==3u) PORTBbits.RB3 = 0;
+          }
+
+          // Now increment the counter
+          gPulseCounters[i]++;
+
+          // And check to see if we've reached the end of the rate
+          if (gPulseCounters[i] >= gPulseRate[i])
+          {
+            // If so, start over from zero
+            gPulseCounters[i] = 0;
+          }
+        }
+        else
+        {
+          // Turn the pin off
+          if (i==0u) PORTBbits.RB0 = 0;
+          if (i==1u) PORTBbits.RB1 = 0;
+          if (i==2u) PORTBbits.RB2 = 0;
+          if (i==3u) PORTBbits.RB3 = 0;
+        }
+      }
+    }
+
+    // Software timer for QC command
+    if (QC_ms_timer)
+    {
+      QC_ms_timer--;
+    }
+
+    // Software timer for RCServo power control
+    if (gRCServoPoweroffCounterMS)
+    {
+      gRCServoPoweroffCounterMS--;
+      // If we just timed out, then shut off RC Servo power
+      if (gRCServoPoweroffCounterMS == 0u)
+      {
+        RCServoPowerIO = RCSERVO_POWER_OFF;
+      }
+    }
+  } // end of 1ms interrupt
+
+  // Do we have an analog interrupt?
+  if (PIR1bits.ADIF)
+  {
+    // Clear the interrupt
+    PIR1bits.ADIF = 0;
+
+    // If we just had a calibration, means we just started, so clear things
+    // out and begin our sequence.
+    if (ADCON1bits.ADCAL)
+    {
+      ADCON1bits.ADCAL = 0;
+      ChannelBit = 0x0001;
+      A_cur_channel = 0;
+    }
+    else
+    {
+      // Read out the value that we just converted, and store it.
+      ISR_A_FIFO[A_cur_channel] =
+          (unsigned int)ADRESL
+          |
+          ((unsigned int)ADRESH << 8);
+
+      // Incriment the channel and mask bit
+      ChannelBit = ChannelBit << 1;
+      A_cur_channel++;
+    }
+
+    // Walk through the enabled channels until we find the next one
+    while (A_cur_channel < 16u)
+    {
+      if (ChannelBit & AnalogEnabledChannels)
+      {
+        break;
+      }
+      else
+      {
+        // Incriment the channel and write the new one in
+        A_cur_channel++;
+        ChannelBit = ChannelBit << 1;
+      }
+    }
+
+    if (A_cur_channel >= 16u)
+    {
+      // We're done, so just sit and wait
+      // Turn off our interrupts though.
+      PIE1bits.ADIE = 0;
+    }
+    else
+    {
+      // Update the channel number
+      ADCON0 = (A_cur_channel << 2) + 1;
+      // And start the next conversion
+      ADCON0bits.GO_DONE = 1;
+    }
+  }
+
+  // Do we have a TMR0 interrupt? (RC command)
+  // TMR0 is in 16 bit mode, and counts up to FFFF and overflows, generating
+  // this interrupt.
+  if (INTCONbits.TMR0IF)
+  {
+    // Turn off Timer0
+    T0CONbits.TMR0ON = 0;
+
+    // Clear the interrupt
+    INTCONbits.TMR0IF = 0;
+
+    // And disable it
+    INTCONbits.TMR0IE = 0;
+
+    // Only do our stuff if the pin is in the proper state
+    if (kTIMING == g_RC_state[g_RC_timing_ptr])
+    {
+      // All we need to do is clear the pin and change its state to kWAITING
+      if (g_RC_timing_ptr < 8u)
+      {
+        bitclr (LATA, g_RC_timing_ptr & 0x7);
+      }
+      else if (g_RC_timing_ptr < 16u)
+      {
+        bitclr (LATB, g_RC_timing_ptr & 0x7);
+      }
+      else
+      {
+        bitclr (LATC, g_RC_timing_ptr & 0x7);
+      }
+      g_RC_state[g_RC_timing_ptr] = kWAITING;		
+    }
+  }
 }
 
 void UserInit(void)
 {
-	UINT32  i, j;
+  UINT32  i, j;
 
-	// Make all of 3 digital inputs
-	LATA = 0x00;
-	TRISA = 0xFF;
-	// Turn all analog inputs into digital inputs
-//	ADCON1 = 0x0F;
-	// Turn off the ADC
-//	ADCON0bits.ADON = 0;
-	// Turn off our own idea of how many analog channels to convert
-	AnalogEnabledChannels = 0;
-	// Make all of PORTB inputs
-	LATB = 0x00;
-	TRISB = 0xFF;
-	// Make all of PORTC inputs
-	LATC = 0x00;
-	TRISC = 0xFF;
-	// Make all of PORTD and PORTE inputs too
+  // Make all of 3 digital inputs
+  LATA = 0x00;
+  TRISA = 0xFF;
+  // Turn all analog inputs into digital inputs
+  //  ADCON1 = 0x0F;
+  // Turn off the ADC
+  //  ADCON0bits.ADON = 0;
+  // Turn off our own idea of how many analog channels to convert
+  AnalogEnabledChannels = 0;
+  // Make all of PORTB inputs
+  LATB = 0x00;
+  TRISB = 0xFF;
+  // Make all of PORTC inputs
+  LATC = 0x00;
+  TRISC = 0xFF;
+  // Make all of PORTD and PORTE inputs too
 #if defined(BOARD_EBB_V10)
-	LATD = 0x00;
-	TRISD = 0xFF;
-	LATE = 0x00;
-	TRISE = 0xFF;
-	LATF = 0x00;
-	TRISF = 0xFF;
-	LATG = 0x00;
-	TRISG = 0xFF;
-	LATH = 0x00;
-	TRISH = 0xFF;
-	LATJ = 0x00;
-	TRISJ = 0xFF;
+  LATD = 0x00;
+  TRISD = 0xFF;
+  LATE = 0x00;
+  TRISE = 0xFF;
+  LATF = 0x00;
+  TRISF = 0xFF;
+  LATG = 0x00;
+  TRISG = 0xFF;
+  LATH = 0x00;
+  TRISH = 0xFF;
+  LATJ = 0x00;
+  TRISJ = 0xFF;
 #endif
 
-	// Initalize LED I/Os to outputs
+  // Initalize LED I/Os to outputs
   mInitAllLEDs();
-	// Initalize switch as an input
+  // Initalize switch as an input
   mInitSwitch();
 
-	// Start off always using "OK" acknoledge.
-	g_ack_enable = TRUE;
+  // Start off always using "OK" acknoledge.
+  g_ack_enable = TRUE;
 
-	// Use our own special output function for STDOUT
-	stdout = _H_USER;
+  // Use our own special output function for STDOUT
+  stdout = _H_USER;
 
-	// Initalize all of the ISR FIFOs
+  // Initalize all of the ISR FIFOs
   ISR_A_FIFO_out = 0;
   ISR_A_FIFO_in = 0;
   ISR_A_FIFO_length = 0;
@@ -686,16 +683,16 @@ void UserInit(void)
   ISR_D_FIFO_in = 0;
   ISR_D_FIFO_length = 0;
 
-	// Make sure that our timer stuff starts out disabled
-	ISR_D_RepeatRate = 0;
-	ISR_A_RepeatRate = 0;
-	D_tick_counter = 0;
-	A_tick_counter = 0;
-	A_cur_channel = 0;
-	
+  // Make sure that our timer stuff starts out disabled
+  ISR_D_RepeatRate = 0;
+  ISR_A_RepeatRate = 0;
+  D_tick_counter = 0;
+  A_tick_counter = 0;
+  A_cur_channel = 0;
+
   // Now init our registers
-	// Initalize Timer4
-	// The prescaler will be at 16
+  // Initalize Timer4
+  // The prescaler will be at 16
   T4CONbits.T4CKPS1 = 1;
   T4CONbits.T4CKPS0 = 1;
   // We want the TMR4 post scaler to be a 3
@@ -703,21 +700,21 @@ void UserInit(void)
   T4CONbits.T4OUTPS2 = 0;
   T4CONbits.T4OUTPS1 = 1;
   T4CONbits.T4OUTPS0 = 0;
-	// Set our reload value
-	PR4 = kPR4_RELOAD;
+  // Set our reload value
+  PR4 = kPR4_RELOAD;
 
-	// Set up the Analog to Digital converter
-	// Clear out the FIFO data
-	for (i = 0; i < 16u; i++)
-	{
-  	ISR_A_FIFO[i] = 0;
-	}	
+  // Set up the Analog to Digital converter
+  // Clear out the FIFO data
+  for (i = 0; i < 16u; i++)
+  {
+    ISR_A_FIFO[i] = 0;
+  }	
 
   // Initialize USB TX and RX buffer management
   g_RX_buf_in = 0;
   g_RX_buf_out = 0;
-	g_TX_buf_in = 0;
-	g_TX_buf_out = 0;
+  g_TX_buf_in = 0;
+  g_TX_buf_out = 0;
 
   for (i=0; i < kTX_BUF_SIZE; i++)
   {
@@ -732,31 +729,31 @@ void UserInit(void)
     g_RX_buf[i] = 0;
   }
     
-	// And the USART TX and RX buffer management
-	g_USART_RX_buf_in = 0;
-	g_USART_RX_buf_out = 0;
-	g_USART_TX_buf_in = 0;
-	g_USART_TX_buf_out = 0;
+  // And the USART TX and RX buffer management
+  g_USART_RX_buf_in = 0;
+  g_USART_RX_buf_out = 0;
+  g_USART_TX_buf_in = 0;
+  g_USART_TX_buf_out = 0;
 
-	// Clear out the RC servo output pointer values
-	g_RC_primed_ptr = 0;
-	g_RC_next_ptr = 0;
-	g_RC_timing_ptr = 0;
+  // Clear out the RC servo output pointer values
+  g_RC_primed_ptr = 0;
+  g_RC_next_ptr = 0;
+  g_RC_timing_ptr = 0;
 
-	// Clear the RC data structure
-	for (i = 0; i < kRC_DATA_SIZE; i++)
-	{
-		g_RC_value[i] = 0;
-		g_RC_state[i] = kOFF;
-	}
+  // Clear the RC data structure
+  for (i = 0; i < kRC_DATA_SIZE; i++)
+  {
+    g_RC_value[i] = 0;
+    g_RC_state[i] = kOFF;
+  }
 
-	// Enable TMR0 for our RC timing operation
-	T0CONbits.PSA = 1;		// Do NOT use the prescaler
-	T0CONbits.T0CS = 0;		// Use internal clock
-	T0CONbits.T08BIT = 0;	// 16 bit timer
-	INTCONbits.TMR0IF = 0;	// Clear the interrupt flag
-	INTCONbits.TMR0IE = 0;	// And clear the interrupt enable
-	INTCON2bits.TMR0IP = 0;	// Low priority
+  // Enable TMR0 for our RC timing operation
+  T0CONbits.PSA = 1;      // Do NOT use the prescaler
+  T0CONbits.T0CS = 0;     // Use internal clock
+  T0CONbits.T08BIT = 0;   // 16 bit timer
+  INTCONbits.TMR0IF = 0;	// Clear the interrupt flag
+  INTCONbits.TMR0IE = 0;	// And clear the interrupt enable
+  INTCON2bits.TMR0IP = 0;	// Low priority
 
   // Turn on band-gap
   ANCON1bits.VBGEN = 1;
@@ -770,24 +767,24 @@ void UserInit(void)
 
   // Enable interrupt priorities
   RCONbits.IPEN = 1;
-	T4CONbits.TMR4ON = 0;
-    
+  T4CONbits.TMR4ON = 0;
+
   PIE3bits.TMR4IE = 1;
   IPR3bits.TMR4IP = 0;
-    
-	// Call the ebb init function to setup whatever it needs
-	EBB_Init();   
+
+  // Call the ebb init function to setup whatever it needs
+  EBB_Init();
 
 #if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-	RCServo2_Init();
+  RCServo2_Init();
 #endif
 
   INTCONbits.GIEH = 1;	// Turn high priority interrupts on
   INTCONbits.GIEL = 1;	// Turn low priority interrupts on
 
-	// Turn on the Timer4
-	T4CONbits.TMR4ON = 1; 
-    
+  // Turn on the Timer4
+  T4CONbits.TMR4ON = 1; 
+
   // If there's a name in FLASH for us, copy it over to the USB Device
   // descriptor before we enumerate
   populateDeviceStringWithName();

@@ -70,16 +70,16 @@
 
 typedef enum
 {
-	PEN_DOWN = 0,
-	PEN_UP
+  PEN_DOWN = 0,
+  PEN_UP
 } PenStateType;
 
 /* Enum that lists each type of command that can be put in the motion control FIFO */
 typedef enum
 {
-	COMMAND_NONE = 0u,
-	COMMAND_DELAY,
-	COMMAND_SERVO_MOVE,
+  COMMAND_NONE = 0u,
+  COMMAND_DELAY,
+  COMMAND_SERVO_MOVE,
   COMMAND_SE,
   COMMAND_EM,
   COMMAND_SEPARATOR_MOTOR_MOVES_ABOVE_THIS,   // This is not a real command. Used for quick check if a command is a motor moving command.
