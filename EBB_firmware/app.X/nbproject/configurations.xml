@@ -66,7 +66,7 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool></platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
@@ -142,10 +142,10 @@
         <property key="procedural-abstraction-passes" value="0"/>
         <property key="storage-class" value="sca"/>
         <property key="verbose" value="false"/>
-        <property key="warning-level" value="2"/>
+        <property key="warning-level" value="3"/>
       </C18>
       <C18-AS>
-        <property key="cross.reference.file" value=""/>
+        <property key="cross.reference.file" value="out.lst"/>
         <property key="default.radix" value="HEX"/>
         <property key="enable.case.sensitivity" value="false"/>
         <property key="hex.output.format" value="INHX32"/>

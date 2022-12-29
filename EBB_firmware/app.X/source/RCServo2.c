@@ -243,10 +243,10 @@ UINT8 RCServo2_get_channel_from_RPn(UINT8 RPn)
     // We have not found it, so we need to allocate a new channel for this RPn
     for (i=0; i < MAX_RC2_SERVOS; i++)
     {
-        if (gRC2RPn[i] == 0)
+        if (gRC2RPn[i] == 0u)
         {
             // Found one that's free! Return the channel number
-            return (i + 1);
+            return (i + 1u);
         }
     }
 
@@ -283,7 +283,7 @@ void RCServo2_S2_command (void)
 		return;
 	}
 
-	if (Pin > 24)
+	if (Pin > 24u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
@@ -328,13 +328,13 @@ UINT8 RCServo2_Move(
   Channel = RCServo2_get_channel_from_RPn(RPn);
 
   // Error out if there were no available channels left
-  if (Channel == 0)
+  if (Channel == 0u)
   {
     return 0;
   }
 
   // If Duration is zero, then caller wants to shut down this channel
-  if (0 == Position)
+  if (0u == Position)
   {
     // Turn off the PPS routing to the pin
     *(gRC2RPORPtr + gRC2RPn[Channel - 1]) = 0;
@@ -346,7 +346,7 @@ UINT8 RCServo2_Move(
   else
   {
     // If we have a valid channel, and RPn, then make the move
-    if ((Channel - 1) < gRC2Slots && RPn <= 24)
+    if ((Channel - 1) < gRC2Slots && RPn <= 24u)
     {
       // As a special case, if the pin is the same as the pin
       // used for the solenoid, then turn off the solenoid function
@@ -357,7 +357,7 @@ UINT8 RCServo2_Move(
       }
 
       // Is this the first time we've used this channel?
-      if (gRC2Value[Channel - 1] == 0)
+      if (gRC2Value[Channel - 1] == 0u)
       {
         // Make sure the pin is set as an output, or this won't do much good
         SetPinTRISFromRPn(RPn, OUTPUT_PIN);
@@ -376,7 +376,7 @@ UINT8 RCServo2_Move(
       // If the pin we're controlling is B1 (the normal servo output) then
       // always make sure to turn power on and start the countdown timer
       // for that servo port. (issue #144)
-      if (RPn == 4)
+      if (RPn == 4u)
       {
         RCServoPowerIO = RCSERVO_POWER_ON;
         gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;

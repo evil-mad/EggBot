@@ -317,14 +317,20 @@ typedef enum
     EXTERNAL_CONTROLS_DRIVERS
 } DriverConfigurationType;
 
-// Working registers
+//#pragma udata ISR_buf = 0x100
+#pragma udata
+
+// These global variables are deliberately put into "Bank" 1 of RAM.
+// They are every global variable that the 25KHz ISR has to access.
+// With them all being in bank 1, no bank switch instructions are needed
+// in the ISR save for one at the very top.
 static volatile MoveCommandType CurrentCommand;
-//#pragma udata access fast_vars
+
 // Accumulator for each axis
 static u32b4_t acc_union[2];
+
 BOOL FIFOEmpty;
 
-#pragma udata
 /* These values hold the global step position of each axis */
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
@@ -333,6 +339,10 @@ volatile static INT32 globalStepCounter2;
 static unsigned char TookStep;
 static unsigned char AllDone;
 static unsigned char i;
+
+// These globals are now set to be put anywhere the linker can find space for them
+#pragma udata
+
 MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
 
 unsigned int DemoModeActive;
@@ -435,7 +445,7 @@ void high_ISR(void)
 
               // For these stepper motion commands zero steps left means
               // the axis is no longer active
-              if (CurrentCommand.Steps[0] == 0)
+              if (CurrentCommand.Steps[0] == 0u)
               {
                 CurrentCommand.Active[0] = FALSE;
               }
@@ -453,7 +463,7 @@ void high_ISR(void)
               CurrentCommand.DirBits |= STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
-              if (CurrentCommand.Steps[1] == 0)
+              if (CurrentCommand.Steps[1] == 0u)
               {
                 CurrentCommand.Active[1] = FALSE;
               }
@@ -476,13 +486,13 @@ void high_ISR(void)
             // all precomputed in the parse function. So check to see if we need
             // to think about flipping, and if so, count this tick towards the
             // direction flip, and if it's time to flip then do it.
-            if (bittst(CurrentCommand.ServoRPn, 0))
+            if (bittstzero(CurrentCommand.ServoRPn))
             {
               CurrentCommand.TicksToFlip[0]--;
               
-              if (CurrentCommand.TicksToFlip[0] == 0)
+              if (CurrentCommand.TicksToFlip[0] == 0u)
               {
-                bitclr(CurrentCommand.ServoRPn, 0);
+                bitclrzero(CurrentCommand.ServoRPn);
                 
                 // Negate the acceleration value so it starts adding to Rate
                 CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
@@ -513,7 +523,7 @@ TookStep = TRUE;
               CurrentCommand.DirBits |= STEP1_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[0]--;
-              if (CurrentCommand.Steps[0] == 0)
+              if (CurrentCommand.Steps[0] == 0u)
               {
                 CurrentCommand.Active[0] = FALSE;
               }
@@ -529,7 +539,7 @@ TookStep = TRUE;
             {
               CurrentCommand.TicksToFlip[1]--;
               
-              if (CurrentCommand.TicksToFlip[1] == 0)
+              if (CurrentCommand.TicksToFlip[1] == 0u)
               {
                 bitclr(CurrentCommand.ServoRPn, 1);
                 
@@ -554,7 +564,7 @@ TookStep = TRUE;
               CurrentCommand.DirBits |= STEP2_BIT;
               TookStep = TRUE;
               CurrentCommand.Steps[1]--;
-              if (CurrentCommand.Steps[1] == 0)
+              if (CurrentCommand.Steps[1] == 0u)
               {
                 CurrentCommand.Active[1] = FALSE;
               }
@@ -573,7 +583,7 @@ TookStep = TRUE;
           {
             // Nope. So count this ISR tick, and then see if we need to take a step
             CurrentCommand.Steps[0]--;
-            if (CurrentCommand.Steps[0] == 0)
+            if (CurrentCommand.Steps[0] == 0u)
             {
               CurrentCommand.Active[0] = FALSE;
             }
@@ -587,13 +597,13 @@ TookStep = TRUE;
             // all precomputed in the parse function. So check to see if we need
             // to think about flipping, and if so, count this tick towards the
             // direction flip, and if it's time to flip then do it.
-            if (bittst(CurrentCommand.ServoRPn, 0))
+            if (bittstzero(CurrentCommand.ServoRPn))
             {
               CurrentCommand.TicksToFlip[0]--;
               
-              if (CurrentCommand.TicksToFlip[0] == 0)
+              if (CurrentCommand.TicksToFlip[0] == 0u)
               {
-                bitclr(CurrentCommand.ServoRPn, 0);
+                bitclrzero(CurrentCommand.ServoRPn);
                 
                 // Negate the acceleration value so it starts adding to Rate
                 CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
@@ -631,7 +641,7 @@ TookStep = TRUE;
             {
               CurrentCommand.TicksToFlip[1]--;
               
-              if (CurrentCommand.TicksToFlip[1] == 0)
+              if (CurrentCommand.TicksToFlip[1] == 0u)
               {
                 bitclr(CurrentCommand.ServoRPn, 1);
                 
@@ -789,7 +799,7 @@ TookStep = TRUE;
           // code and things run way too slowly.
 
           // If the user is trying to turn off this channel's RC servo output
-          if (0 == CurrentCommand.ServoPosition)
+          if (0u == CurrentCommand.ServoPosition)
           {
             // Turn off the PPS routing to the pin
             *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
@@ -805,7 +815,7 @@ TookStep = TRUE;
             gRC2Rate[Channel] = CurrentCommand.ServoRate;
             gRC2Target[Channel] = CurrentCommand.ServoPosition;
             gRC2RPn[Channel] = CurrentCommand.ServoRPn;
-            if (gRC2Value[Channel] == 0)
+            if (gRC2Value[Channel] == 0u)
             {
               gRC2Value[Channel] = CurrentCommand.ServoPosition;
             }
@@ -879,7 +889,7 @@ TookStep = TRUE;
         // We use CurrentCommand.DirBits as "EA1" (the first parameter) and
         // CurrentCommand.ServoRPn as "EA2" (the second parameter) since they're
         // both UINT8s.
-        if (CurrentCommand.DirBits > 0)
+        if (CurrentCommand.DirBits > 0u)
         {
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
@@ -889,31 +899,31 @@ TookStep = TRUE;
           {
             Enable1AltIO = ENABLE_MOTOR;
           }
-          if (CurrentCommand.DirBits == 1)
+          if (CurrentCommand.DirBits == 1u)
           {
             MS1_IO = 1;
             MS2_IO = 1;
             MS3_IO = 1;
           }
-          if (CurrentCommand.DirBits == 2)
+          if (CurrentCommand.DirBits == 2u)
           {
             MS1_IO = 1;
             MS2_IO = 1;
             MS3_IO = 0;
           }
-          if (CurrentCommand.DirBits == 3)
+          if (CurrentCommand.DirBits == 3u)
           {
             MS1_IO = 0;
             MS2_IO = 1;
             MS3_IO = 0;
           }
-          if (CurrentCommand.DirBits == 4)
+          if (CurrentCommand.DirBits == 4u)
           {
             MS1_IO = 1;
             MS2_IO = 0;
             MS3_IO = 0;
           }
-          if (CurrentCommand.DirBits == 5)
+          if (CurrentCommand.DirBits == 5u)
           {
             MS1_IO = 0;
             MS2_IO = 0;
@@ -932,7 +942,7 @@ TookStep = TRUE;
           }
         }
 
-        if (CurrentCommand.ServoRPn > 0)
+        if (CurrentCommand.ServoRPn > 0u)
         {
           if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
           {
@@ -1092,7 +1102,7 @@ TookStep = TRUE;
 // Init code
 void EBB_Init(void)
 {
-  char i;
+  BYTE i;
 
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
@@ -1283,10 +1293,10 @@ void parse_SC_packet (void)
 	}
 
 	// Check for command to select which (solenoid/servo) gets used for pen
-	if (Para1 == 1)
+	if (Para1 == 1u)
 	{
         // Use just solenoid
-		if (Para2 == 0)
+		if (Para2 == 0u)
 		{
             gUseSolenoid = TRUE;
             gUseRCPenServo = FALSE;
@@ -1294,7 +1304,7 @@ void parse_SC_packet (void)
             RCServo2_Move(0, g_servo2_RPn, 0, 0);
         }
         // Use just RC servo
-		else if (Para2 == 1)
+		else if (Para2 == 1u)
 		{
             gUseSolenoid = FALSE;
             gUseRCPenServo = TRUE;
@@ -1309,9 +1319,9 @@ void parse_SC_packet (void)
 		process_SP(PenState, 0);
 	}
 	// Check for command to switch between built-in drivers and external drivers
-	else if (Para1 == 2)
+	else if (Para1 == 2u)
 	{
-		if (Para2 == 0)
+		if (Para2 == 0u)
 		{
 			DriverConfiguration = PIC_CONTROLS_DRIVERS;
             // Connections to drivers become outputs
@@ -1329,7 +1339,7 @@ void parse_SC_packet (void)
 			Enable1AltIO_TRIS = INPUT_PIN;
 			Enable2AltIO_TRIS = INPUT_PIN;
 		}
-		else if (Para2 == 1)
+		else if (Para2 == 1u)
 		{
 			DriverConfiguration = PIC_CONTROLS_EXTERNAL;
             // Connections to drivers become inputs
@@ -1347,7 +1357,7 @@ void parse_SC_packet (void)
 			Enable1AltIO_TRIS = OUTPUT_PIN;
 			Enable2AltIO_TRIS = OUTPUT_PIN;
 		}
-        else if (Para2 == 2)
+        else if (Para2 == 2u)
         {
             DriverConfiguration = EXTERNAL_CONTROLS_DRIVERS;
             // Connections to drivers become inputs
@@ -1367,17 +1377,17 @@ void parse_SC_packet (void)
      }
 	}
 	// Set <min_servo> for Servo2 method
-	else if (Para1 == 4)
+	else if (Para1 == 4u)
 	{
 		g_servo2_min = Para2;
 	}
 	// Set <max_servo> for Servo2
-	else if (Para1 == 5)
+	else if (Para1 == 5u)
 	{
 		g_servo2_max = Para2;
 	}
 	// Set <gRC2Slots>
-	else if (Para1 == 8)
+	else if (Para1 == 8u)
 	{
 		if (Para2 > MAX_RC2_SERVOS)
 		{
@@ -1385,28 +1395,28 @@ void parse_SC_packet (void)
 		}
 		gRC2Slots = Para2;
 	}
-	else if (Para1 == 9)
+	else if (Para1 == 9u)
 	{
-		if (Para2 > 6)
+		if (Para2 > 6u)
 		{
 			Para2 = 6;
 		}
 		gRC2SlotMS = Para2;
 	}
-	else if (Para1 == 10)
+	else if (Para1 == 10u)
 	{
 		g_servo2_rate_up = Para2;
 		g_servo2_rate_down = Para2;
 	}
-	else if (Para1 == 11)
+	else if (Para1 == 11u)
 	{
 		g_servo2_rate_up = Para2;
 	}
-	else if (Para1 == 12)
+	else if (Para1 == 12u)
 	{
 		g_servo2_rate_down = Para2;
 	}
-    else if (Para1 == 13)
+    else if (Para1 == 13u)
 	{
 		if (Para2)
 		{
@@ -1499,11 +1509,11 @@ void parse_LM_packet (void)
   }
 
   // Limit Rates to 0x7FFFFFFF
-  if (Rate1 >= 0x7FFFFFFF)
+  if (Rate1 >= 0x7FFFFFFFu)
   {
     Rate1 = 0x7FFFFFFF;
   }
-  if (Rate2 >= 0x7FFFFFFF)
+  if (Rate2 >= 0x7FFFFFFFu)
   {
     Rate2 = 0x7FFFFFFF;
   }
@@ -1512,13 +1522,13 @@ void parse_LM_packet (void)
    * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
   if (
     (
-      ((Rate1 == 0) && (Accel1 == 0))
+      ((Rate1 == 0u) && (Accel1 == 0))
       ||
       (Steps1 == 0)
     )
     &&
     (
-      ((Rate2 == 0) && (Accel2 == 0))
+      ((Rate2 == 0u) && (Accel2 == 0))
       ||
       (Steps2 == 0)
     )
@@ -1528,7 +1538,7 @@ void parse_LM_packet (void)
     return;
   }
   
-  if (ClearAccs > 3)
+  if (ClearAccs > 3u)
   {
     ClearAccs = 3;
   }
@@ -1574,13 +1584,13 @@ void parse_LM_packet (void)
   // Accel and Step Count) is greater than TicksToFlip.
   if (Accel1 < 0)
   {
-    bitset(move.ServoRPn, 0); // Set flag to ISR that a flip might be needed
+    bitsetzero(move.ServoRPn); // Set flag to ISR that a flip might be needed
     
     move.TicksToFlip[0] = Rate1/(-Accel1) + 1;
   }
   else
   {
-    bitclr(move.ServoRPn, 0); // Clear the flag bit (in case it was 1 from before))
+    bitclrzero(move.ServoRPn); // Clear the flag bit (in case it was 1 from before))
   }
   if (Accel2 < 0)
   {
@@ -1712,7 +1722,7 @@ void parse_LT_packet (void)
    * like LT,0,X,X,X,X,X. Or LT,X,0,X,0,X,X 
    */
   if (
-    (Intervals == 0)
+    (Intervals == 0u)
     ||
     (
       ((Rate1 == 0) && (Rate2 == 0))
@@ -1723,7 +1733,7 @@ void parse_LT_packet (void)
     return;
   }
   
-  if (ClearAccs > 3)
+  if (ClearAccs > 3u)
   {
     ClearAccs = 3;
   }
@@ -1793,13 +1803,13 @@ void parse_LT_packet (void)
   // Accel and Step Count) is greater than TicksToFlip.
   if (Accel1 < 0)
   {
-    bitset(move.ServoRPn, 0); // Set flag to ISR that a flip might be needed
+    bitsetzero(move.ServoRPn); // Set flag to ISR that a flip might be needed
     
     move.TicksToFlip[0] = Rate1/(-Accel1) + 1;
   }
   else
   {
-    bitclr(move.ServoRPn, 0); // Clear the flag bit (in case it was 1 from before))
+    bitclrzero(move.ServoRPn); // Clear the flag bit (in case it was 1 from before))
   }
   if (Accel2 < 0)
   {
@@ -1872,7 +1882,7 @@ void parse_SM_packet (void)
     if (gLimitChecks)
     {
         // Check for invalid duration
-        if (Duration == 0) {
+        if (Duration == 0u) {
             bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
         }
         // Bail if we got a conversion error
@@ -1893,7 +1903,7 @@ void parse_SM_packet (void)
         else {
             Steps = -A1Steps;
         }
-        if (Steps > 0xFFFFFF) {
+        if (Steps > 0xFFFFFFl) {
            printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
            return;
         }
@@ -1903,7 +1913,7 @@ void parse_SM_packet (void)
            return;
         }
         // And check for too slow
-        if ((Duration/1311) >= Steps && Steps != 0) {
+        if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
            printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
            return;
         }
@@ -1915,7 +1925,7 @@ void parse_SM_packet (void)
             Steps = -A2Steps;
         }    
 
-        if (Steps > 0xFFFFFF) {
+        if (Steps > 0xFFFFFFl) {
            printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
            return;
         }
@@ -1923,11 +1933,11 @@ void parse_SM_packet (void)
            printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
            return;
         }
-        if ((Duration/1311) >= Steps && Steps != 0) {
+        if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
            printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
            return;
         }
-        if (ClearAccs > 3)
+        if (ClearAccs > 3u)
         {
           ClearAccs = 0;
         }
@@ -1994,7 +2004,7 @@ void parse_HM_packet (void)
 	extract_number (kLONG,  &Pos2,     kOPTIONAL);
 
   // StepRate can't be zero
-  if (StepRate == 0)
+  if (StepRate == 0u)
   {
     bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
@@ -2011,7 +2021,7 @@ void parse_HM_packet (void)
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
     // Create our output values to print back to the PC
-    if ((CurrentCommand.DelayCounter == 0) && (CurrentCommand.Command == COMMAND_NONE))
+    if ((CurrentCommand.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE))
     {
       CommandExecuting = FALSE;
     }
@@ -2043,7 +2053,7 @@ void parse_HM_packet (void)
   }
     
   // Check for too many steps to step
-  if ((AbsSteps1 > 0xFFFFFF) || (AbsSteps2 > 0xFFFFFF))
+  if ((AbsSteps1 > 0xFFFFFFl) || (AbsSteps2 > 0xFFFFFFl))
   {
     printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.\n\r");
     return;
@@ -2061,7 +2071,7 @@ void parse_HM_packet (void)
       return;
     }
     // Check for too slow, on the non-primary axis
-    if ((Duration/1311) >= AbsSteps2 && AbsSteps2 != 0)
+    if ((INT32)(Duration/1311) >= AbsSteps2 && AbsSteps2 != 0)
     {
       // We need to break apart the home into two moves.
       // The first will be to get the non-primary axis down to zero.
@@ -2102,7 +2112,7 @@ void parse_HM_packet (void)
       return;
     }
     // Check for too slow, on the non-primary axis
-    if ((Duration/1311) >= AbsSteps1 && AbsSteps1 != 0)
+    if ((INT32)(Duration/1311) >= AbsSteps1 && AbsSteps1 != 0)
     {
       // We need to break apart the home into two moves.
       // The first will be to get the non-primary axis down to zero.
@@ -2133,7 +2143,7 @@ void parse_HM_packet (void)
     }
   }
 
-  if (Duration < 10)
+  if (Duration < 10u)
   {
     Duration = 10;
   }
@@ -2176,13 +2186,13 @@ void parse_XM_packet (void)
 	extract_number (kLONG, &BSteps, kREQUIRED);
   extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
   
-  if (ClearAccs > 3)
+  if (ClearAccs > 3u)
   {
     ClearAccs = 3;
   }
 
     // Check for invalid duration
-    if (Duration == 0) {
+    if (Duration == 0u) {
     	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
 
@@ -2203,7 +2213,7 @@ void parse_XM_packet (void)
        printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
        return;
     }
-    if (Steps > 0xFFFFFF) {
+    if (Steps > 0xFFFFFFl) {
        printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
        return;
     }
@@ -2213,7 +2223,7 @@ void parse_XM_packet (void)
        return;
     }
     // And check for too slow
-    if ((Duration/1311) >= Steps && Steps != 0) {
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
        printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
        return;
     }
@@ -2224,7 +2234,7 @@ void parse_XM_packet (void)
     else {
         Steps = -A2Steps;
     }    
-    if (Steps > 0xFFFFFF) {
+    if (Steps > 0xFFFFFFl) {
        printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
        return;
     }
@@ -2232,7 +2242,7 @@ void parse_XM_packet (void)
        printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
        return;
     }
-    if ((Duration/1311) >= Steps && Steps != 0) {
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
        printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
        return;
     }
@@ -2287,7 +2297,7 @@ static void process_simple_motor_move(
       );
 #endif
   
-  if (ClearAccs > 3)
+  if (ClearAccs > 3u)
   {
     ClearAccs = 3;
   }
@@ -2358,7 +2368,7 @@ static void process_simple_motor_move(
          * this optimization, our minimum move time is 20ms. With it, it
          * drops down to about 15ms.
          */
-        if (Duration > 30)
+        if (Duration > 30u)
         {
           remainder = (temp2 << 16) / temp1;
         }
@@ -2373,12 +2383,12 @@ static void process_simple_motor_move(
         printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
         temp = 0x8000;
       }
-      if (temp == 0 && A1Stp != 0) 
+      if (temp == 0u && A1Stp != 0) 
       {
         printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
         temp = 1;
       }
-      if (Duration > 30)
+      if (Duration > 30u)
       {
         temp = (temp << 16) + remainder;
       }
@@ -2392,7 +2402,7 @@ static void process_simple_motor_move(
       temp = 0;
     }
 
-    if (temp >= 0x7FFFFFFF)
+    if (temp >= 0x7FFFFFFFu)
     {
       temp = 0x7FFFFFFF;
     }
@@ -2407,7 +2417,7 @@ static void process_simple_motor_move(
         temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
         temp = (A2Stp << 15)/temp1;
         temp2 = (A2Stp << 15) % temp1; 
-        if (Duration > 30)
+        if (Duration > 30u)
         {
           remainder = (temp2 << 16) / temp1;
         }
@@ -2422,12 +2432,12 @@ static void process_simple_motor_move(
         printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
         temp = 0x8000;
       }
-      if (temp == 0 && A2Stp != 0) 
+      if (temp == 0u && A2Stp != 0) 
       {
         printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
         temp = 1;
       }
-      if (Duration > 30)
+      if (Duration > 30u)
       {
         temp = (temp << 16) + remainder;
       }
@@ -2437,7 +2447,7 @@ static void process_simple_motor_move(
       }
     }
 
-    if (temp >= 0x7FFFFFFF)
+    if (temp >= 0x7FFFFFFFu)
     {
       temp = 0x7FFFFFFF;
     }
@@ -2546,7 +2556,7 @@ void parse_ES_packet(void)
     CurrentCommand.Accel[1] = 0;
   }
 
-  if (disable_motors == 1)
+  if (disable_motors == 1u)
   {
     if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
     {
@@ -2600,19 +2610,19 @@ void parse_QE_packet(void)
   UINT8 motor2_state = 0;
   UINT8 temp;
   
-  if (MS1_IO_PORT == 0 && MS2_IO_PORT == 0 && MS3_IO_PORT == 0)
+  if (MS1_IO_PORT == 0u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
   {
     temp = 1;
   }
-  else if (MS1_IO_PORT == 1 && MS2_IO_PORT == 0 && MS3_IO_PORT == 0)
+  else if (MS1_IO_PORT == 1u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
   {
     temp = 2;
   }
-  else if (MS1_IO_PORT == 0 && MS2_IO_PORT == 1 && MS3_IO_PORT == 0)
+  else if (MS1_IO_PORT == 0u && MS2_IO_PORT == 1u && MS3_IO_PORT == 0u)
   {
     temp = 4;
   }
-  else if (MS1_IO_PORT == 1 && MS2_IO_PORT == 1 && MS3_IO_PORT == 0)
+  else if (MS1_IO_PORT == 1u && MS2_IO_PORT == 1u && MS3_IO_PORT == 0u)
   {
     temp = 8;
   }
@@ -2720,12 +2730,12 @@ void parse_SP_packet(void)
 	}
 
     // Error check
-	if (Pin > 7)
+	if (Pin > 7u)
 	{
 		Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
 	}
 
-    if (State > 1)
+    if (State > 1u)
     {
         State = 1;
     }
@@ -2843,7 +2853,7 @@ void parse_EM_packet(void)
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
-	if (NodeCount < 0xFFFFFFFEL)
+	if (NodeCount < 0xFFFFFFFEUL)
 	{
 		NodeCount++;
 	}
@@ -3034,21 +3044,21 @@ void parse_SE_packet(void)
 	}
 
 	// Limit check
-  if (Power > 1023)
+  if (Power > 1023u)
   {
     Power = 1023;
   }
-  if (State > 1)
+  if (State > 1u)
   {
     State = 1;
   }
-  if (SEUseMotionQueue > 1)
+  if (SEUseMotionQueue > 1u)
   {
     SEUseMotionQueue = 1;
   }
     
   // Set to %50 if no Power parameter specified, otherwise use parameter
-  if (State == 1 && PowerExtract == kEXTRACT_MISSING_PARAMETER)
+  if (State == 1u && PowerExtract == kEXTRACT_MISSING_PARAMETER)
   {
     StoredEngraverPower = 512;
   }
@@ -3058,7 +3068,7 @@ void parse_SE_packet(void)
   }
 
   // If we're not on, then turn us on
-  if (T2CONbits.TMR2ON != 1)
+  if (T2CONbits.TMR2ON != 1u)
   {
     // Set up PWM for Engraver control
     // We will use ECCP1 and Timer2 for the engraver PWM output on RB3
@@ -3143,7 +3153,7 @@ UINT8 process_QM(void)
     INTCONbits.GIEH = 0;	// Turn high priority interrupts off
 
     // Create our output values to print back to the PC
-    if (CurrentCommand.DelayCounter != 0) {
+    if (CurrentCommand.DelayCounter != 0u) {
         CommandExecuting = 1;
     }
     if (CurrentCommand.Command != COMMAND_NONE) {
@@ -3153,10 +3163,10 @@ UINT8 process_QM(void)
         CommandExecuting = 1;
         FIFOStatus = 1;
     }
-    if (CommandExecuting && CurrentCommand.Steps[0] != 0) {
+    if (CommandExecuting && CurrentCommand.Steps[0] != 0u) {
         Motor1Running = 1;
     }
-    if (CommandExecuting && CurrentCommand.Steps[1] != 0) {
+    if (CommandExecuting && CurrentCommand.Steps[1] != 0u) {
         Motor2Running = 1;
     }
 

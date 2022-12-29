@@ -172,10 +172,10 @@
 /* more.... see Table 25 in USB CDC Specification 1.1 */
 
 /* CDC Bulk IN transfer states */
-#define CDC_TX_READY                0
-#define CDC_TX_BUSY                 1
-#define CDC_TX_BUSY_ZLP             2       // ZLP: Zero Length Packet
-#define CDC_TX_COMPLETING           3
+#define CDC_TX_READY                0u
+#define CDC_TX_BUSY                 1u
+#define CDC_TX_BUSY_ZLP             2u      // ZLP: Zero Length Packet
+#define CDC_TX_COMPLETING           3u
 
 #if defined(USB_CDC_SET_LINE_CODING_HANDLER) 
     #define LINE_CODING_TARGET &cdc_notice.SetLineCoding._byte[0]

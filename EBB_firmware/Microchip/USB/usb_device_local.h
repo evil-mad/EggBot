@@ -88,14 +88,14 @@
 #include "usb_config.h"
 
 /* Short Packet States - Used by Control Transfer Read  - CTRL_TRF_TX */
-#define SHORT_PKT_NOT_USED  0
-#define SHORT_PKT_PENDING   1
-#define SHORT_PKT_SENT      2
+#define SHORT_PKT_NOT_USED  0u
+#define SHORT_PKT_PENDING   1u
+#define SHORT_PKT_SENT      2u
 
 /* Control Transfer States */
-#define WAIT_SETUP          0
-#define CTRL_TRF_TX         1
-#define CTRL_TRF_RX         2
+#define WAIT_SETUP          0u
+#define CTRL_TRF_TX         1u
+#define CTRL_TRF_RX         2u
 
 
 typedef union

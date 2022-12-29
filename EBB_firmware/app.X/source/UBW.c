@@ -97,19 +97,19 @@
 
 /** D E F I N E S ********************************************************/
 
-#define kUSART_TX_BUF_SIZE    10                // In bytes
-#define kUSART_RX_BUF_SIZE    10                // In bytes
+#define kUSART_TX_BUF_SIZE    10u               // In bytes
+#define kUSART_RX_BUF_SIZE    10u               // In bytes
 
-#define kISR_FIFO_A_DEPTH     3
-#define kISR_FIFO_D_DEPTH     3
-#define kPR4_RELOAD           250               // For 1ms TMR4 tick
-#define kCR                   0x0D
-#define kLF                   0x0A
+#define kISR_FIFO_A_DEPTH     3u
+#define kISR_FIFO_D_DEPTH     3u
+#define kPR4_RELOAD           250u              // For 1ms TMR4 tick
+#define kCR                   0x0Du
+#define kLF                   0x0Au
 
-#define ANALOG_INITATE_MS_BETWEEN_STARTS 5      // Number of ms between analog converts (all enabled channels)
+#define ANALOG_INITATE_MS_BETWEEN_STARTS 5u     // Number of ms between analog converts (all enabled channels)
 
 #define FLASH_NAME_ADDRESS      0xF800          // Starting address in FLASH where we store our EBB's name
-#define FLASH_NAME_LENGTH       16              // Size of store for EBB's name in FLASH
+#define FLASH_NAME_LENGTH       16u             // Size of store for EBB's name in FLASH
 
 #define RCSERVO_POWEROFF_DEFAULT_MS (60ul*1000ul)  // Number of milliseconds to default the RCServo power autotimeout (5min)
 
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0rc5\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO1_AO0\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -317,7 +317,7 @@ void low_ISR(void)
 
             // If the value is zero, we do nothing to this pin
             // otherwise, prime it for sending a pulse
-            if (gRC2Value[gRC2Ptr] != 0)
+            if (gRC2Value[gRC2Ptr] != 0u)
             {
                 // Now, to move 'slowly', we update gRC2Value[] by
                 // seeing if we are at gRC2Target[] yet. If not, then
@@ -326,7 +326,7 @@ void low_ISR(void)
                 {
                     // If the rate is zero, then we always move instantly
                     // to the target.
-                    if (gRC2Rate[gRC2Ptr] == 0)
+                    if (gRC2Rate[gRC2Ptr] == 0u)
                     {
                         gRC2Value[gRC2Ptr] = gRC2Target[gRC2Ptr];
                     }
@@ -337,7 +337,7 @@ void low_ISR(void)
                         RC2Difference = (gRC2Target[gRC2Ptr] - gRC2Value[gRC2Ptr]);
                         if (RC2Difference > 0)
                         {
-                            if (RC2Difference > gRC2Rate[gRC2Ptr])
+                            if (RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
                             {
                                 gRC2Value[gRC2Ptr] += gRC2Rate[gRC2Ptr];
                             }
@@ -348,7 +348,7 @@ void low_ISR(void)
                         }
                         else
                         {
-                            if (-RC2Difference > gRC2Rate[gRC2Ptr])
+                            if (-RC2Difference > (INT16)gRC2Rate[gRC2Ptr])
                             {
                                 gRC2Value[gRC2Ptr] -= gRC2Rate[gRC2Ptr];
                             }
@@ -383,7 +383,7 @@ void low_ISR(void)
 		
 				
 		// See if it's time to fire off an I packet
-		if (ISR_D_RepeatRate > 0)
+		if (ISR_D_RepeatRate > 0u)
 		{
 			D_tick_counter++;
 			if (D_tick_counter >= ISR_D_RepeatRate)
@@ -414,7 +414,7 @@ void low_ISR(void)
 		}
 		
 		// See if it's time to fire off an A packet
-		if ((ISR_A_RepeatRate > 0) && (AnalogEnabledChannels > 0))
+		if ((ISR_A_RepeatRate > 0u) && (AnalogEnabledChannels > 0u))
 		{
 			A_tick_counter++;
 			if (A_tick_counter >= ISR_A_RepeatRate)
@@ -475,29 +475,29 @@ void low_ISR(void)
 		if (gPulsesOn)
 		{
 			// Loop across the four pins
-			for (i=0; i<4; i++)
+			for (i=0; i<4u; i++)
 			{
 				// Only pulse the pin if there is a length for the pin
 				if (gPulseLen[i])
 				{
 					// If this is the beginning of the pulse, turn the pin on
-					if (gPulseCounters[i] == 0)
+					if (gPulseCounters[i] == 0u)
 					{
 						// Turn the pin
-						if (i==0) PORTBbits.RB0 = 1;
-						if (i==1) PORTBbits.RB1 = 1;
-						if (i==2) PORTBbits.RB2 = 1;
-						if (i==3) PORTBbits.RB3 = 1;
+						if (i==0u) PORTBbits.RB0 = 1;
+						if (i==1u) PORTBbits.RB1 = 1;
+						if (i==2u) PORTBbits.RB2 = 1;
+						if (i==3u) PORTBbits.RB3 = 1;
 					}
 					
 					// If we've reached the end of the pulse, turn the pin off
 					if (gPulseCounters[i] == gPulseLen[i])
 					{
 						// Turn the pin off
-						if (i==0) PORTBbits.RB0 = 0;
-						if (i==1) PORTBbits.RB1 = 0;
-						if (i==2) PORTBbits.RB2 = 0;
-						if (i==3) PORTBbits.RB3 = 0;
+						if (i==0u) PORTBbits.RB0 = 0;
+						if (i==1u) PORTBbits.RB1 = 0;
+						if (i==2u) PORTBbits.RB2 = 0;
+						if (i==3u) PORTBbits.RB3 = 0;
 					}
 
 					// Now increment the counter
@@ -513,10 +513,10 @@ void low_ISR(void)
 				else
 				{
 					// Turn the pin off
-					if (i==0) PORTBbits.RB0 = 0;
-					if (i==1) PORTBbits.RB1 = 0;
-					if (i==2) PORTBbits.RB2 = 0;
-					if (i==3) PORTBbits.RB3 = 0;
+					if (i==0u) PORTBbits.RB0 = 0;
+					if (i==1u) PORTBbits.RB1 = 0;
+					if (i==2u) PORTBbits.RB2 = 0;
+					if (i==3u) PORTBbits.RB3 = 0;
 				}
 			}
 		}
@@ -532,7 +532,7 @@ void low_ISR(void)
         {
             gRCServoPoweroffCounterMS--;
             // If we just timed out, then shut off RC Servo power
-            if (gRCServoPoweroffCounterMS == 0)
+            if (gRCServoPoweroffCounterMS == 0u)
             {
                 RCServoPowerIO = RCSERVO_POWER_OFF;
             }
@@ -568,7 +568,7 @@ void low_ISR(void)
         }
 
         // Walk through the enabled channels until we find the next one
-        while (A_cur_channel < 16)
+        while (A_cur_channel < 16u)
         {
             if (ChannelBit & AnalogEnabledChannels)
             {
@@ -582,7 +582,7 @@ void low_ISR(void)
             }
         }
 
-		if (A_cur_channel >= 16)
+		if (A_cur_channel >= 16u)
 		{
 			// We're done, so just sit and wait
 			// Turn off our interrupts though.
@@ -615,11 +615,11 @@ void low_ISR(void)
 		if (kTIMING == g_RC_state[g_RC_timing_ptr])
 		{
 			// All we need to do is clear the pin and change its state to kWAITING
-			if (g_RC_timing_ptr < 8)
+			if (g_RC_timing_ptr < 8u)
 			{
 				bitclr (LATA, g_RC_timing_ptr & 0x7);
 			}
-			else if (g_RC_timing_ptr < 16)
+			else if (g_RC_timing_ptr < 16u)
 			{
 				bitclr (LATB, g_RC_timing_ptr & 0x7);
 			}
@@ -634,7 +634,7 @@ void low_ISR(void)
 
 void UserInit(void)
 {
-	int  i, j;
+	UINT32  i, j;
 
 	// Make all of 3 digital inputs
 	LATA = 0x00;
@@ -708,7 +708,7 @@ void UserInit(void)
 
 	// Set up the Analog to Digital converter
 	// Clear out the FIFO data
-	for (i = 0; i < 16; i++)
+	for (i = 0; i < 16u; i++)
 	{
   	ISR_A_FIFO[i] = 0;
 	}	
@@ -828,7 +828,7 @@ void ProcessIO(void)
   unsigned char tst_char;
 	static unsigned char button_state = 0;
 	static unsigned int button_ctr = 0;
-	char i;
+	BYTE i;
 	BOOL	done = FALSE;
 	unsigned char rx_bytes = 0;
 	unsigned char byte_cnt = 0;
@@ -845,7 +845,7 @@ void ProcessIO(void)
 #endif    
 
 	// Check for any new I packets (from T command) ready to go out
-	while (ISR_D_FIFO_length > 0)
+	while (ISR_D_FIFO_length > 0u)
 	{
 		// Spit out an I packet first
 		parse_I_packet ();
@@ -860,7 +860,7 @@ void ProcessIO(void)
 	}			
 
 	// Check for a new A packet (from T command) ready to go out
-	while (ISR_A_FIFO_length > 0)
+	while (ISR_A_FIFO_length > 0u)
 	{
 		// Spit out an A packet first
 		parse_A_packet ();
@@ -877,7 +877,7 @@ void ProcessIO(void)
     if(
 		(USBDeviceState < CONFIGURED_STATE)
 		||
-		(USBSuspendControl==1)
+		(USBSuspendControl==1u)
 	) 
 	{
 		return;
@@ -888,7 +888,7 @@ void ProcessIO(void)
 	// And we aren't waiting for the current move to finish
 	rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);
 
-	if (rx_bytes > 0)
+	if (rx_bytes > 0u)
 	{
 		for (byte_cnt = 0; byte_cnt < rx_bytes; byte_cnt++)
 		{
@@ -928,7 +928,7 @@ void ProcessIO(void)
 				g_RX_buf_in = 0;
 				g_RX_buf_out = 0;
 			}
-			else if (tst_char == 27 && in_esc == FALSE)
+			else if (tst_char == 27u && in_esc == FALSE)
 			{
 				in_esc = TRUE;
 				esc_sequence[0] = 27;
@@ -938,7 +938,7 @@ void ProcessIO(void)
 			else if (
 				in_esc == TRUE 
 				&& 
-				tst_char == 91 
+				tst_char == 91u 
 				&& 
 				esc_sequence[0] == 27 
 				&& 
@@ -950,7 +950,7 @@ void ProcessIO(void)
 			else if (
 				in_esc == TRUE 
 				&& 
-				tst_char == 65 
+				tst_char == 65u 
 				&&
 				esc_sequence[0] == 27 
 				&& 
@@ -974,7 +974,7 @@ void ProcessIO(void)
 				printf((far rom char *)"\x1b[B\x1b[1K\x1b[0G");
 				printf((far rom char *)"%s", g_RX_buf);
 			}
-			else if (tst_char == 8 && g_RX_buf_in > 0)
+			else if (tst_char == 8u && g_RX_buf_in > 0u)
 			{
 				// Handle the backspace thing
 				g_RX_buf_in--;
@@ -986,7 +986,7 @@ void ProcessIO(void)
 				&&
 				tst_char != kLF
 				&&
-				tst_char >= 32
+				tst_char >= 32u
 			)
 			{
 				esc_sequence[0] = 0;
@@ -1012,7 +1012,7 @@ void ProcessIO(void)
 	// Check for any errors logged in error_byte that need to be sent out
 	if (error_byte)
 	{
-		if (bittst (error_byte, 0))
+		if (bittstzero(error_byte))
 		{
 			// Unused as of yet
 			printf ((far rom char *)"!0 \r\n");
@@ -1082,7 +1082,7 @@ int _user_putc (char c)
 		g_TX_buf_in = 0;
 	}
 	
-	// Also check to see if we bumpted up against our output pointer
+	// Also check to see if we bumped up against our output pointer
 	if (g_TX_buf_in == g_TX_buf_out)
 	{
 		bitset (error_byte, kERROR_BYTE_TX_BUF_OVERRUN);
@@ -1096,7 +1096,7 @@ void check_and_send_TX_data (void)
 {
 	char temp;
 
-	// Oly send if there's something there to send
+	// Only send if there's something there to send
 	if (g_TX_buf_out != g_TX_buf_in)
 	{
 		// Yes, Microchip says not to do this. We'll be blocking
@@ -1156,7 +1156,7 @@ void parse_packet(void)
 	command = cmd1;
 
 	// Only grab second one if it is not a comma
-	if (g_RX_buf[g_RX_buf_out] != ',' && g_RX_buf[g_RX_buf_out] != kCR)
+	if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR)
 	{
 		cmd2 = toupper (g_RX_buf[g_RX_buf_out]);
 		advance_RX_buf_out();
@@ -1543,7 +1543,7 @@ void parse_packet(void)
 		}
 		default:
 		{
-			if (0 == cmd2)
+			if (0u == cmd2)
 			{
 				// Send back 'unknown command' error
 				printf (
@@ -1572,7 +1572,7 @@ void parse_packet(void)
 	// the command parsing routine didn't eat. This would be an error and needs
 	// to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
 	if (
-		(g_RX_buf[g_RX_buf_out] != kCR && 0 == error_byte)
+		(g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
 		&&
 		('R' != command)
 	)
@@ -1623,7 +1623,7 @@ void parse_CU_packet(void)
 		return;
 	}
 
-	if (1 == parameter_number)
+	if (1u == parameter_number)
 	{
 		if (0 == paramater_value || 1 == paramater_value)
 		{
@@ -1634,7 +1634,7 @@ void parse_CU_packet(void)
 			bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		}
 	}
-  else if (2 == parameter_number)
+  else if (2u == parameter_number)
   {
     if (0 == paramater_value || 1 == paramater_value)
     {
@@ -1645,7 +1645,7 @@ void parse_CU_packet(void)
       bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  else if (3 == parameter_number)
+  else if (3u == parameter_number)
   {
     if (0 == paramater_value || 1 == paramater_value)
     {
@@ -1686,9 +1686,9 @@ void parse_T_packet(void)
 
 	// Now start up the timer at the right rate or shut 
 	// it down.
-	if (0 == mode)
+	if (0u == mode)
 	{
-		if (0 == time_between_updates)
+		if (0u == time_between_updates)
 		{
 			// Turn off sending of I packets.
 			ISR_D_RepeatRate = 0;
@@ -1703,7 +1703,7 @@ void parse_T_packet(void)
 	}	
 	else
 	{
-		if (0 == time_between_updates)
+		if (0u == time_between_updates)
 		{
 			// Turn off sending of A packets.
 			ISR_A_RepeatRate = 0;
@@ -1769,7 +1769,7 @@ void parse_C_packet(void)
 // It is called from other pieces of code, not the user
 void AnalogConfigure(unsigned char Channel, unsigned char Enable)
 {
-    if (Channel > 16)
+    if (Channel > 16u)
     {
         Channel = 16;
     }
@@ -1778,14 +1778,14 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
     {
         AnalogEnabledChannels |= ((unsigned int)0x0001 << Channel);
         // Make sure to turn this analog input on
-        if (Channel < 8)
+        if (Channel < 8u)
         {
             // Clear the right bit in ANCON0
             ANCON0 &= ~(1 << Channel);
         }
         else
         {
-            if (Channel <= 12)
+            if (Channel <= 12u)
             {
                 // Clear the right bit in ANCON1
                 ANCON1 &= ~(1 << (Channel-8));
@@ -1796,14 +1796,14 @@ void AnalogConfigure(unsigned char Channel, unsigned char Enable)
     {
         AnalogEnabledChannels &= ~((unsigned int)0x0001 << Channel);
         // Make sure to turn this analog input off
-        if (Channel < 8)
+        if (Channel < 8u)
         {
             // Set the right bit in ANCON0
             ANCON0 |= (1 << Channel);
         }
         else
         {
-            if (Channel <= 12)
+            if (Channel <= 12u)
             {
                 // Set the right bit in ANCON1
                 ANCON1 |= (1 << (Channel-8));
@@ -2012,7 +2012,7 @@ void parse_MW_packet(void)
 		return;
 	}
 	// Limit check the address and write the byte in
-	if (location < 4096)
+	if (location < 4096u)
 	{
 		*((unsigned char *)location) = value;
 	}
@@ -2040,7 +2040,7 @@ void parse_MR_packet(void)
 	}
 
 	// Limit check the address and write the byte in
-	if (location < 4096)
+	if (location < 4096u)
 	{
 		value = *((unsigned char *)location);
 	}
@@ -2074,19 +2074,19 @@ void parse_PD_packet(void)
 	}
 
 	// Limit check the parameters
-	if (direction > 1)
+	if (direction > 1u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
 	}
-	if (pin > 7)
+	if (pin > 7u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
 	}
 	if ('A' == port)
 	{
-		if (0 == direction)
+		if (0u == direction)
 		{
 			bitclr (TRISA, pin);  	
 		}
@@ -2097,7 +2097,7 @@ void parse_PD_packet(void)
 	}
 	else if ('B' == port)
 	{
-		if (0 == direction)
+		if (0u == direction)
 		{
 			bitclr (TRISB, pin);  	
 		}
@@ -2108,7 +2108,7 @@ void parse_PD_packet(void)
 	}
 	else if ('C' == port)
 	{
-		if (0 == direction)
+		if (0u == direction)
 		{
 			bitclr (TRISC, pin);  	
 		}
@@ -2120,7 +2120,7 @@ void parse_PD_packet(void)
 #if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	else if ('D' == port)
 	{
-		if (0 == direction)
+		if (0u == direction)
 		{
 			bitclr (TRISD, pin);  	
 		}
@@ -2131,7 +2131,7 @@ void parse_PD_packet(void)
 	}
 	else if ('E' == port)
 	{
-		if (0 == direction)
+		if (0u == direction)
 		{
 			bitclr (TRISE, pin);  	
 		}
@@ -2219,7 +2219,7 @@ void parse_PI_packet(void)
 	}
 
 	// Limit check the parameters
-	if (pin > 7)
+	if (pin > 7u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
@@ -2307,19 +2307,19 @@ void parse_PO_packet(void)
 	}
 
 	// Limit check the parameters
-	if (value > 1)
+	if (value > 1u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
 	}
-	if (pin > 7)
+	if (pin > 7u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
 	}
 	if ('A' == port)
 	{
-		if (0 == value)
+		if (0u == value)
 		{
 			bitclr (LATA, pin);  	
 		}
@@ -2330,7 +2330,7 @@ void parse_PO_packet(void)
 	}
 	else if ('B' == port)
 	{
-		if (0 == value)
+		if (0u == value)
 		{
 			bitclr (LATB, pin);  	
 		}
@@ -2341,7 +2341,7 @@ void parse_PO_packet(void)
 	}
 	else if ('C' == port)
 	{
-		if (0 == value)
+		if (0u == value)
 		{
 			bitclr (LATC, pin);  	
 		}
@@ -2353,7 +2353,7 @@ void parse_PO_packet(void)
 #if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
 	else if ('D' == port)
 	{
-		if (0 == value)
+		if (0u == value)
 		{
 			bitclr (LATD, pin);  	
 		}
@@ -2364,7 +2364,7 @@ void parse_PO_packet(void)
 	}
 	else if ('E' == port)
 	{
-		if (0 == value)
+		if (0u == value)
 		{
 			bitclr (LATE, pin);  	
 		}
@@ -2516,7 +2516,7 @@ void parse_RC_packet(void)
 	}
 
 	// Max value user can input. (min is zero)
-	if (value > 11890)
+	if (value > 11890u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
@@ -2524,12 +2524,12 @@ void parse_RC_packet(void)
 	
 	// Now get Value in the form that TMR0 needs it
 	// TMR0 needs to get filled with values from 65490 (1ms) to 53600 (2ms)
-	if (value != 0)
+	if (value != 0u)
 	{
 		value = (65535 - (value + 45));
 	}
 
-	if (pin > 7)
+	if (pin > 7u)
 	{
 		bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
 		return;
@@ -2908,7 +2908,7 @@ void parse_PC_packet (void)
 	gPulseRate[0] = Rate;
 
 	// And now loop for the other 3
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < 3u; i++)
 	{
 		RetVal1 = extract_number(kUINT, &Length, kOPTIONAL);
 		RetVal2 = extract_number(kUINT, &Rate, kOPTIONAL);
@@ -3137,7 +3137,7 @@ void populateDeviceStringWithName(void)
     {
         // Only copy over valid ASCII characters. On the first invalid
         // one, bail out.
-        if (name[i] <= 128 && name[i] >= 32)
+        if (name[i] <= 128u && name[i] >= 32u)
         {
             *(USB_SD_Ptr[2] + 24 + (i*2)) = name[i];
             *(USB_SD_Ptr[3] + 2 + (i*2)) = name[i];
@@ -3201,7 +3201,7 @@ void parse_QT_packet()
     ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
     
     // Only print it out if the first character is printable ASCII
-    if (name[0] >= 128 || name[0] < 32)
+    if (name[0] >= 128u || name[0] < 32u)
     {
     	printf ((rom char far *)"\r\n");
     }
@@ -3247,7 +3247,7 @@ UINT8 extract_string (
     while(1)
     {
         // Check to see if we're already at the end
-        if (kCR == g_RX_buf[g_RX_buf_out] || ',' == g_RX_buf[g_RX_buf_out] || bytes >= MaxBytes)
+        if (kCR == g_RX_buf[g_RX_buf_out] || (BYTE)',' == g_RX_buf[g_RX_buf_out] || bytes >= MaxBytes)
         {
             return (bytes);
         }
@@ -3288,7 +3288,7 @@ ExtractReturnType extract_number(
 	// Check to see if we're already at the end
 	if (kCR == g_RX_buf[g_RX_buf_out])
 	{
-		if (0 == Required)
+		if (0u == Required)
 		{
 			bitset (error_byte, kERROR_BYTE_MISSING_PARAMETER);
 		}
@@ -3298,7 +3298,7 @@ ExtractReturnType extract_number(
 	// Check for comma where ptr points
 	if (g_RX_buf[g_RX_buf_out] != ',')
 	{
-		if (0 == Required)
+		if (0u == Required)
 		{
 			printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
 			bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
@@ -3312,7 +3312,7 @@ ExtractReturnType extract_number(
 	// Check for end of command
 	if (kCR == g_RX_buf[g_RX_buf_out])
 	{
-		if (0 == Required)
+		if (0u == Required)
 		{
 			bitset (error_byte, kERROR_BYTE_MISSING_PARAMETER);
 		}
@@ -3497,7 +3497,7 @@ signed char extract_digit(unsigned long * acc,	unsigned char digits)
 	for (digit_cnt = 0; digit_cnt < digits; digit_cnt++)
 	{
 		val = g_RX_buf[g_RX_buf_out];
-		if ((val >= 48) && (val <= 57))
+		if ((val >= 48u) && (val <= 57u))
 		{
 			*acc = (*acc * 10) + (val - 48);
 			// Move to the next character
@@ -3547,13 +3547,13 @@ void BlinkUSBStatus(void)
     if (
 		USBDeviceState == DETACHED_STATE
        	||
-       	1 == USBSuspendControl
+       	1u == USBSuspendControl
     )
     {
 		LEDCount--;
-		if (0 == LEDState)
+		if (0u == LEDState)
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_On();
 				LEDCount = 4000U;				
@@ -3562,7 +3562,7 @@ void BlinkUSBStatus(void)
 		}
 		else
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_Off();
 				LEDCount = 4000U;				
@@ -3581,9 +3581,9 @@ void BlinkUSBStatus(void)
 	)
     {
 		LEDCount--;
-		if (0 == LEDState)
+		if (0u == LEDState)
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_On();
 				LEDCount = 20000U;				
@@ -3592,7 +3592,7 @@ void BlinkUSBStatus(void)
 		}
 		else
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_Off();
 				LEDCount = 20000U;				
@@ -3603,27 +3603,27 @@ void BlinkUSBStatus(void)
     else if (USBDeviceState == CONFIGURED_STATE)
     {
 		LEDCount--;
-		if (0 == LEDState)
+		if (0u == LEDState)
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_On();
 				LEDCount = 10000U;				
 				LEDState = 1;
 			}
 		}
-		else if (1 == LEDState)
+		else if (1u == LEDState)
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_Off();
 				LEDCount = 10000U;				
 				LEDState = 2;
 			}
 		}
-		else if (2 == LEDState)
+		else if (2u == LEDState)
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_On();
 				LEDCount = 100000U;				
@@ -3632,7 +3632,7 @@ void BlinkUSBStatus(void)
 		}
 		else
 		{
-			if (0 == LEDCount)
+			if (0u == LEDCount)
 			{
 				mLED_1_Off();
 				LEDCount = 10000U;				

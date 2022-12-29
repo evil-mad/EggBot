@@ -62,11 +62,11 @@
 #define UART_OUTPUT_DEBUG
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
-#define ENABLE_MOTOR        0
-#define DISABLE_MOTOR       1
+#define ENABLE_MOTOR        0u
+#define DISABLE_MOTOR       1u
 
 // How many stepper motors does this board support? (EBB is always 2)
-#define NUMBER_OF_STEPPERS  2
+#define NUMBER_OF_STEPPERS  2u
 
 typedef enum
 {
@@ -77,7 +77,7 @@ typedef enum
 /* Enum that lists each type of command that can be put in the motion control FIFO */
 typedef enum
 {
-	COMMAND_NONE = 0,
+	COMMAND_NONE = 0u,
 	COMMAND_DELAY,
 	COMMAND_SERVO_MOVE,
   COMMAND_SE,
@@ -132,12 +132,10 @@ typedef struct
 } MoveCommandType;
 
 // Define global things that depend on the board type
-#define STEP1_BIT	(0x01)
-#define DIR1_BIT	(0x02)
-#define STEP2_BIT	(0x04)
-#define DIR2_BIT	(0x08)
-
-#define NUMBER_OF_STEPPERS  2
+#define STEP1_BIT	(0x01u)
+#define DIR1_BIT	(0x02u)
+#define STEP2_BIT	(0x04u)
+#define DIR2_BIT	(0x08u)
 
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
@@ -150,13 +148,13 @@ typedef struct
 // values.
 // The values here are hand tuned for 25KHz ISR operation
 // 0xFFFF - 0x01E0 = 0xFE1F
-#define TIMER1_L_RELOAD (61)  // 0x3D
-#define TIMER1_H_RELOAD (254) // 0xFE
+#define TIMER1_L_RELOAD (61u)  // 0x3D
+#define TIMER1_H_RELOAD (254u) // 0xFE
 //#define TIMER1_L_RELOAD (0x3F)
 //#define TIMER1_H_RELOAD (0xED)
 
 
-#define HIGH_ISR_TICKS_PER_MS (25)  // Note: computed by hand, could be formula
+#define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
 
 
 extern MoveCommandType CommandFIFO[];

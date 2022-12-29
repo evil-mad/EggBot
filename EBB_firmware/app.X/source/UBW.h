@@ -53,9 +53,9 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 
-#define kTX_BUF_SIZE           64   // In bytes
-#define kRX_BUF_SIZE          256   // In bytes (defines maximum number of bytes in one command)
-#define kRX_COMMAND_BUF_SIZE   64   // In bytes (maximum number of bytes to pull from USB stack at a time)
+#define kTX_BUF_SIZE           64u   // In bytes
+#define kRX_BUF_SIZE          256u   // In bytes (defines maximum number of bytes in one command)
+#define kRX_COMMAND_BUF_SIZE   64u   // In bytes (maximum number of bytes to pull from USB stack at a time)
 
 #define kREQUIRED           FALSE
 #define kOPTIONAL            TRUE
@@ -63,20 +63,26 @@
 #define INPUT_PIN               1
 #define OUTPUT_PIN              0
 
-#define bitset(var,bitno) ((var) |= (1 << (bitno)))
-#define bitclr(var,bitno) ((var) &= ~(1 << (bitno)))
-#define bittst(var,bitno) (((var) & (1 << (bitno))) != 0)
+// These macros allow setting/clearing/testing a bit within a byte
+// There are separate versions for dealing with bit zero because the compiler
+// generates a warning if you try to shift the 1 zero bits to the left
+#define bitset(var,bitno)   ((var) |= (1 << (bitno)))
+#define bitsetzero(var)     ((var) |= 1)                      // Use this for setting bit zero of a byte
+#define bitclr(var,bitno)   ((var) &= ~(1 << (bitno)))
+#define bitclrzero(var)     ((var) &= ~1)                     // Use this for clearing bit zero of a byte
+#define bittst(var,bitno)   (((var) & (1 << (bitno))) != 0u)  // Use this for testing bits 1 through 7 of a byte
+#define bittstzero(var)     (((var) & 1) != 0u)               // Use this for testing bit zero of a byte
 
 
 // defines for the error_byte byte - each bit has a meaning
-#define kERROR_BYTE_STEPS_TO_FAST           1   // If you ask us to step more than 25 steps/ms
-#define kERROR_BYTE_TX_BUF_OVERRUN          2
-#define kERROR_BYTE_RX_BUFFER_OVERRUN       3
-#define kERROR_BYTE_MISSING_PARAMETER       4
-#define kERROR_BYTE_PRINTED_ERROR           5   // We've already printed out an error
-#define kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT 6
-#define kERROR_BYTE_EXTRA_CHARACTERS        7
-#define kERROR_BYTE_UNKNOWN_COMMAND         8   // Part of command parser, not error handler
+#define kERROR_BYTE_STEPS_TO_FAST           1u   // If you ask us to step more than 25 steps/ms
+#define kERROR_BYTE_TX_BUF_OVERRUN          2u
+#define kERROR_BYTE_RX_BUFFER_OVERRUN       3u
+#define kERROR_BYTE_MISSING_PARAMETER       4u
+#define kERROR_BYTE_PRINTED_ERROR           5u   // We've already printed out an error
+#define kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT 6u
+#define kERROR_BYTE_EXTRA_CHARACTERS        7u
+#define kERROR_BYTE_UNKNOWN_COMMAND         8u   // Part of command parser, not error handler
 
 // Enum for extract_num() function parameter
 typedef enum {
@@ -119,7 +125,7 @@ typedef enum {
   ,kTIMING
 } tRC_state;
 
-#define kRC_DATA_SIZE                 24  // In structs, since there are 3 ports of 8 bits each
+#define kRC_DATA_SIZE                 24u  // In structs, since there are 3 ports of 8 bits each
 
 extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
