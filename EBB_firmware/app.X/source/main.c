@@ -110,11 +110,11 @@ void USBDeviceTasks(void);
   #define REMAPPED_RESET_VECTOR_ADDRESS           0x1000
   #define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS  0x1008
   #define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS   0x1018
-#elif defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)	
+#elif defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
   #define REMAPPED_RESET_VECTOR_ADDRESS           0x800
   #define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS  0x808
   #define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS   0x818
-#else	
+#else
   #define REMAPPED_RESET_VECTOR_ADDRESS           0x00
   #define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS  0x08
   #define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS 0x18
@@ -225,7 +225,7 @@ static void InitializeSystem(void)
   ANCON1 = 0xFF;            // Default all pins to digital
   WDTCONbits.ADSHR = 0;     // Select normal SFR locations
 #elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  unsigned int pll_startup_counter;	//Used for software delay while pll is starting up
+  unsigned int pll_startup_counter; //Used for software delay while pll is starting up
 
   //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
   //use the ANCONx registers to control this, which is different from other devices which
@@ -266,9 +266,9 @@ static void InitializeSystem(void)
 //  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
 //  firmware needs some means to detect when Vbus is being powered by the host.
 //  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
-// 	can be used to detect when Vbus is high (host actively powering), or low
+//  can be used to detect when Vbus is high (host actively powering), or low
 //  (host is shut down or otherwise not supplying power).  The USB firmware
-// 	can then periodically poll this I/O pin to know when it is okay to turn on
+//  can then periodically poll this I/O pin to know when it is okay to turn on
 //  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
 //  peripheral device, it is not possible to source current on D+ or D- when the
 //  host is not actively providing power on Vbus. Therefore, implementing this
@@ -288,7 +288,7 @@ static void InitializeSystem(void)
 //  respond accordingly.  If the hardware has been configured like demonstrated
 //  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
 //  currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
-//  is used for	this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
+//  is used for this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
 //  has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
 //  to it in HardwareProfile.h.
 #if defined(USE_SELF_POWER_SENSE_IO)
@@ -342,14 +342,14 @@ void USBCBSuspend(void)
   //ConfigureIOPinsForLowPower();
   //SaveStateOfAllInterruptEnableBits();
   //DisableAllInterruptEnableBits();
-  //EnableOnlyTheInterruptsWhichWillBeUsedToWakeTheMicro();	//should enable at least USBActivityIF as a wake source
+  //EnableOnlyTheInterruptsWhichWillBeUsedToWakeTheMicro(); //should enable at least USBActivityIF as a wake source
   //Sleep();
   //RestoreStateOfAllPreviouslySavedInterruptEnableBits();  //Preferrably, this should be done in the USBCBWakeFromSuspend() function instead.
   //RestoreIOPinsToNormal();                                //Preferrably, this should be done in the USBCBWakeFromSuspend() function instead.
 
   //IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
   //cleared inside the usb_device.c file.  Clearing USBActivityIF here will cause 
-  //things to not work as intended.	
+  //things to not work as intended.
 
 #if defined(__C30__)
   USBSleepOnSuspend();
@@ -551,7 +551,7 @@ void USBCBInitEP(void)
  *                  as if it is in a low power suspend to RAM state).
  *                  This can be a very useful feature in some
  *                  USB applications, such as an Infrared remote
- *                  control	receiver.  If a user presses the "power"
+ *                  control receiver.  If a user presses the "power"
  *                  button on a remote control, it is nice that the
  *                  IR receiver can detect this signalling, and then
  *                  send a USB "command" to the PC to wake up.

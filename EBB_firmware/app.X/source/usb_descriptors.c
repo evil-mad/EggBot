@@ -1,15 +1,15 @@
 /********************************************************************
- FileName:     	usb_descriptors.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- Company:		Microchip Technology, Inc.
+ FileName:      usb_descriptors.c
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18 or PIC24 USB Microcontrollers
+ Hardware:      The code is natively intended to be used on the following
+                hardware platforms: PICDEM™ FS USB Demo Board, 
+                PIC18F87J50 FS USB Plug-In Module, or
+                Explorer 16 + PIC24 USB PIM.  The firmware may be
+                modified for use on other USB platforms by editing the
+                HardwareProfile.h file.
+ Complier:      Microchip C18 (for PIC18) or C30 (for PIC24)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -192,7 +192,7 @@ ROM BYTE configDescriptor1[]={
     0,                      // Configuration string index
     _DEFAULT | _SELF,               // Attributes, see usb_device.h
     50,                     // Max power consumption (2X mA)
-							
+
     /* Interface Descriptor */
     9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type

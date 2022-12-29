@@ -53,58 +53,57 @@
 // 1.8.2 5/31/10 - Only change is to change name in USB enumeration string to Ei
 //                  Bot Board - using new PID for SchmalzHaus
 // 1.9   6/11/10 - Added two commands:
-//					SQ - Solenoid Query - returns 0 or 1 for down and up
-//					ST - Solenoid Toggle - toggles state of the servo/solenoid
+//                  SQ - Solenoid Query - returns 0 or 1 for down and up
+//                  ST - Solenoid Toggle - toggles state of the servo/solenoid
 // 1.9.2 6/15/10 - Added commands:
-//					SC,11 sets pen up speed
-//					SC,12 sets pen down speed
-//					SL - sets the current layer
-//					QL - queries the current layer
-//					SN - sets move (node) count
-//					QN - Query node count
-//					QB - Query Button command
+//                  SC,11 sets pen up speed
+//                  SC,12 sets pen down speed
+//                  SL - sets the current layer
+//                  QL - queries the current layer
+//                  SN - sets move (node) count
+//                  QN - Query node count
+//                  QB - Query Button command
 // 1.9.3 6/16/10 - Replaced SN with CL (Clear Node) command
 // 1.9.4 6/22/10 - Node Count now incremented on pauses (SM with zero step size)
 //                  as well
 // 1.9.5 7/2/10 - Node count no longer incrimented at all except for NI command
-//					NI - Node count Incriment
-//					ND - Node count Decriment
-//					SN - Set Node count (with 8 byte variable)
-//					BL - With latest bootloader, will jumpt to Boot Load mode
+//                  NI - Node count Incriment
+//                  ND - Node count Decriment
+//                  SN - Set Node count (with 8 byte variable)
+//                  BL - With latest bootloader, will jump to Boot Load mode
 // 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX
 //                      files
-//					- use c018i_HID_BL.o now
+//                - use c018i_HID_BL.o now
 // 2.0.0 9/9/10 - Add in
-//					QC - Query Current - reads voltage of current adjustment pot
-//						NOTE: This is NOT done the 'right way'. Instead, we set
+//                  QC - Query Current - reads voltage of current adjustment pot
+//                  NOTE: This is NOT done the 'right way'. Instead, we set
 //                      up the pin for analog input at boot, then when the QC
 //                      comes in, we activate the ADC and take one reading and
 //                      then shut it down. Eventually, we should re-write the
 //                      'UBW' ADC routines to work with the much more flexible
 //                      ADC in the 46J50 part and then just use that generic
 //                      code for reading the value of the pot.
-//					SC,13,{0,1} - enables/disables RB0 as another PRG button for
+//                  SC,13,{0,1} - enables/disables RB0 as another PRG button for
 //                      pause detection
 // 2.0.1 9/13/10 - Bug fix - on v1.1 EBB hardware, need to disable RB0 alt pause
-//                      button.
-//					switched it to RB2 on v1.1 hardware
+//                      button. Switched it to RB2 on v1.1 hardware
 // 2.0.2 10/3/10 - Bug fix - QC command not returning proper results - added
 //                      cast and now works OK
 // 2.1.0 10/21/10- Added in
-//					SE - Set Engraver - turns engraver (on RB3) on or off, or
+//                  SE - Set Engraver - turns engraver (on RB3) on or off, or
 //                      set to PWM power level
-// 				   Added code in init to pre-charge RC7 (USB_SENSE_IO) high
+//                    Added code in init to pre-charge RC7 (USB_SENSE_IO) high
 //                      before running rest of code
-//					to get around wrong resistor value on hardware.
+//                      to get around wrong resistor value on hardware.
 // 2.1.1 11/21/10- Removed Microchip USB stack v2.7, replaced it with v2.8 from 
 //                  MAL 2010_10_19.
-//					Also using generic Microchip folder now rather than re-named
+//                  Also using generic Microchip folder now rather than re-named
 //                      one (simpler to update).
-//				   Updated code in main.c (and others) to match updates from 
+//                  Updated code in main.c (and others) to match updates from 
 //                      latest MAL CDC example.
 // 2.1.1cTest1 01/17/11 - Added third parameter to SP command to use any PortB 
 //                      pin for servo output.
-//                 For this version only - used PortB2 as standard servo output
+//                  For this version only - used PortB2 as standard servo output
 // 2.1.1d 02/11/11 - Reverted back to RB1 for servo output
 //                 - Updated check_and_send_TX_data() to allow unlimited data to
 //                      go out without overrunning the output buffer, same as
@@ -289,32 +288,32 @@
 
 // This is the value that gets multiplied by Steps/Duration to compute
 // the StepAdd values.
-#define OVERFLOW_MUL	(0x8000 / HIGH_ISR_TICKS_PER_MS)
+#define OVERFLOW_MUL            (0x8000 / HIGH_ISR_TICKS_PER_MS)
 
-#define MAX_RC_DURATION 11890
+#define MAX_RC_DURATION         11890
 
 // Maximum number of elements in the command FIFO
 #define COMMAND_FIFO_LENGTH     1
 
 typedef enum
 {
-	SOLENOID_OFF = 0,
-	SOLENOID_ON,
-	SOLENOID_PWM
+  SOLENOID_OFF = 0,
+  SOLENOID_ON,
+  SOLENOID_PWM
 } SolenoidStateType;
 
 static void process_simple_motor_move(
-	UINT32 Duration,
-	INT32 A1Stp,
-	INT32 A2Stp,
+  UINT32 Duration,
+  INT32 A1Stp,
+  INT32 A2Stp,
   UINT8 ClearAccs
 );
 
 typedef enum
 {
-	PIC_CONTROLS_DRIVERS = 0,
-	PIC_CONTROLS_EXTERNAL,
-    EXTERNAL_CONTROLS_DRIVERS
+  PIC_CONTROLS_DRIVERS = 0,
+  PIC_CONTROLS_EXTERNAL,
+  EXTERNAL_CONTROLS_DRIVERS
 } DriverConfigurationType;
 
 //#pragma udata ISR_buf = 0x100
@@ -381,23 +380,23 @@ void high_ISR(void)
   LATDbits.LATD1 = 1;
 #endif
   
-	//Check which interrupt flag caused the interrupt.
-	//Service the interrupt
-	//Clear the interrupt flag
-	//Etc.
-	#if defined(USB_INTERRUPT)
-		USBDeviceTasks();
-	#endif
+  //Check which interrupt flag caused the interrupt.
+  //Service the interrupt
+  //Clear the interrupt flag
+  //Etc.
+  #if defined(USB_INTERRUPT)
+    USBDeviceTasks();
+  #endif
 
   // 25KHz ISR fire
-	if (PIR1bits.TMR1IF)
-	{
-		// Clear the interrupt 
-		PIR1bits.TMR1IF = 0;
-		TMR1H = TIMER1_H_RELOAD;	//
-		TMR1L = TIMER1_L_RELOAD;	// Reload for 25KHz ISR fire
+  if (PIR1bits.TMR1IF)
+  {
+    // Clear the interrupt 
+    PIR1bits.TMR1IF = 0;
+    TMR1H = TIMER1_H_RELOAD;  //
+    TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
-		AllDone = TRUE;           // Start every ISR assuming we are done with the current command
+    AllDone = TRUE;           // Start every ISR assuming we are done with the current command
 
     switch (CurrentCommand.Command)
     {
@@ -695,7 +694,7 @@ TookStep = TRUE;
             else
             {
               Dir1IO = 0;
-            }	
+            }
             if (CurrentCommand.DirBits & DIR2_BIT)
             {
               Dir2IO = 1;
@@ -724,7 +723,7 @@ TookStep = TRUE;
             else
             {
               Dir1AltIO = 0;
-            }	
+            }
             if (CurrentCommand.DirBits & DIR2_BIT)
             {
               Dir2AltIO = 1;
@@ -989,11 +988,11 @@ TookStep = TRUE;
     }
     
     // If we're done with our current command, load in the next one
-		if (AllDone)
-		{
-			CurrentCommand.Command = COMMAND_NONE;
-			if (!FIFOEmpty)
-			{
+    if (AllDone)
+    {
+      CurrentCommand.Command = COMMAND_NONE;
+      if (!FIFOEmpty)
+      {
         if (gRedLEDEmptyFIFO)
         {
           mLED_2_Off()
@@ -1061,8 +1060,8 @@ TookStep = TRUE;
             CurrentCommand.Active[1] = FALSE;
           }
         }
-				FIFOEmpty = TRUE;
-			}
+        FIFOEmpty = TRUE;
+      }
       else 
       {
         CurrentCommand.DelayCounter = 0;
@@ -1076,22 +1075,22 @@ TookStep = TRUE;
   LATAbits.LATA1 = 1;
 #endif
       }
-		}
-		
-		// Check for button being pushed
-		if (
-			(!swProgram)
-			||
-			(
-				UseAltPause
-				&&
-				!PORTBbits.RB0
-			)
-		)
-		{
-			ButtonPushed = TRUE;
-		}
-	}
+    }
+    
+    // Check for button being pushed
+    if (
+      (!swProgram)
+      ||
+      (
+        UseAltPause
+        &&
+        !PORTBbits.RB0
+      )
+    )
+    {
+      ButtonPushed = TRUE;
+    }
+  }
 #if defined(GPIO_DEBUG)
   LATAbits.LATA1 = 0;
   LATDbits.LATD0 = 0;
@@ -1121,33 +1120,33 @@ void EBB_Init(void)
 
   FIFOEmpty = TRUE;
 
-	// Set up TMR1 for our 25KHz High ISR for stepping
-	T1CONbits.RD16 = 1; 	// Set 16 bit mode
-	T1CONbits.TMR1CS1 = 0; 	// System clocked from Fosc/4
-	T1CONbits.TMR1CS0 = 0;
-	T1CONbits.T1CKPS1 = 0; 	// Use 1:1 Prescale value
-	T1CONbits.T1CKPS0 = 0;
-	T1CONbits.T1OSCEN = 0; 	// Don't use external osc
-	T1CONbits.T1SYNC = 0;
-	TMR1H = TIMER1_H_RELOAD;	//
-	TMR1L = TIMER1_L_RELOAD;	// Reload for 25Khz ISR fire
+  // Set up TMR1 for our 25KHz High ISR for stepping
+  T1CONbits.RD16 = 1;       // Set 16 bit mode
+  T1CONbits.TMR1CS1 = 0;    // System clocked from Fosc/4
+  T1CONbits.TMR1CS0 = 0;
+  T1CONbits.T1CKPS1 = 0;    // Use 1:1 Prescale value
+  T1CONbits.T1CKPS0 = 0;
+  T1CONbits.T1OSCEN = 0;    // Don't use external osc
+  T1CONbits.T1SYNC = 0;
+  TMR1H = TIMER1_H_RELOAD;  //
+  TMR1L = TIMER1_L_RELOAD;  // Reload for 25Khz ISR fire
 
-	T1CONbits.TMR1ON = 1; // Turn the timer on
+  T1CONbits.TMR1ON = 1; // Turn the timer on
 
-	IPR1bits.TMR1IP = 1;	// Use high priority interrupt
-	PIR1bits.TMR1IF = 0;	// Clear the interrupt
-	PIE1bits.TMR1IE = 1;	// Turn on the interrupt
+  IPR1bits.TMR1IP = 1;  // Use high priority interrupt
+  PIR1bits.TMR1IF = 0;  // Clear the interrupt
+  PIE1bits.TMR1IE = 1;  // Turn on the interrupt
 
-//	PORTA = 0;
-	RefRA0_IO_TRIS = INPUT_PIN;
-//	PORTB = 0;
-//	INTCON2bits.RBPU = 0;	// Turn on weak-pull ups for port B
-//	PORTC = 0;		// Start out low
-//	TRISC = 0x80;	// Make portC output execpt for PortC bit 7, USB bus sense
-//	PORTD = 0;
-//	TRISD = 0;
-//	PORTE = 0;
-//	TRISE = 0;
+//  PORTA = 0;
+  RefRA0_IO_TRIS = INPUT_PIN;
+//  PORTB = 0;
+//  INTCON2bits.RBPU = 0; // Turn on weak-pull ups for port B
+//  PORTC = 0;            // Start out low
+//  TRISC = 0x80;         // Make portC output except for PortC bit 7, USB bus sense
+//  PORTD = 0;
+//  TRISD = 0;
+//  PORTE = 0;
+//  TRISE = 0;
 
   // And make sure to always use low priority for ADC
   IPR1bits.ADIP = 0;
@@ -1157,33 +1156,33 @@ void EBB_Init(void)
   // Turn on AN11 (V+) as analog input
   AnalogConfigure(11,1);
 
-	MS1_IO = 1;
-	MS1_IO_TRIS = OUTPUT_PIN;
-	MS2_IO = 1;
-	MS2_IO_TRIS = OUTPUT_PIN;
-	MS3_IO	= 1;
-	MS3_IO_TRIS = OUTPUT_PIN;
+  MS1_IO = 1;
+  MS1_IO_TRIS = OUTPUT_PIN;
+  MS2_IO = 1;
+  MS2_IO_TRIS = OUTPUT_PIN;
+  MS3_IO = 1;
+  MS3_IO_TRIS = OUTPUT_PIN;
 
-	Enable1IO = 1;	
-	Enable1IO_TRIS = OUTPUT_PIN;	
-	Enable2IO = 1;
-	Enable2IO_TRIS = OUTPUT_PIN;
+  Enable1IO = 1;
+  Enable1IO_TRIS = OUTPUT_PIN;
+  Enable2IO = 1;
+  Enable2IO_TRIS = OUTPUT_PIN;
 
-	Step1IO	= 0;
-	Step1IO_TRIS = OUTPUT_PIN;
-	Dir1IO = 0;
-	Dir1IO_TRIS = OUTPUT_PIN;
-	Step2IO	= 0;	
-	Step2IO_TRIS = OUTPUT_PIN;	
-	Dir2IO = 0;	
-	Dir2IO_TRIS = OUTPUT_PIN;
+  Step1IO = 0;
+  Step1IO_TRIS = OUTPUT_PIN;
+  Dir1IO = 0;
+  Dir1IO_TRIS = OUTPUT_PIN;
+  Step2IO = 0;
+  Step2IO_TRIS = OUTPUT_PIN;
+  Dir2IO = 0;
+  Dir2IO_TRIS = OUTPUT_PIN;
 
-	// For bug in VUSB divider resistor, set RC7 as output and set high
-	// Wait a little while to charge up
-	// Then set back as an input
-	// The idea here is to get the schmidt trigger input RC7 high before
-	// we make it an input, thus getting it above the 2.65V ST threshold
-	// And allowing VUSB to keep the logic level on the pin high at 2.5V
+  // For bug in VUSB divider resistor, set RC7 as output and set high
+  // Wait a little while to charge up
+  // Then set back as an input
+  // The idea here is to get the Schmidt trigger input RC7 high before
+  // we make it an input, thus getting it above the 2.65V ST threshold
+  // And allowing VUSB to keep the logic level on the pin high at 2.5V
 #if defined(USE_USB_BUS_SENSE_IO)
   tris_usb_bus_sense = OUTPUT_PIN; // See HardwareProfile.h
   USB_BUS_SENSE = 1;
@@ -1212,30 +1211,30 @@ void EBB_Init(void)
   gUseSolenoid = TRUE;
   gUseRCPenServo = TRUE;
 
-    // Set up pen up/down direction as output
-	PenUpDownIO = 0;
-	PenUpDownIO_TRIS = OUTPUT_PIN;
+  // Set up pen up/down direction as output
+  PenUpDownIO = 0;
+  PenUpDownIO_TRIS = OUTPUT_PIN;
     
   // Set up RC Servo power control to be off
   RCServoPowerIO = RCSERVO_POWER_OFF;
   RCServoPowerIO_TRIS = OUTPUT_PIN;
 
-	SolenoidState = SOLENOID_ON;
-	DriverConfiguration = PIC_CONTROLS_DRIVERS;
-	PenState = PEN_UP;
-	Layer = 0;
-	NodeCount = 0;
-	ButtonPushed = FALSE;
-	// Default RB0 to be an input, with the pull-up enabled, for use as alternate
-	// PAUSE button (just like PRG)
-	// Except for v1.1 hardware, use RB2
-	TRISBbits.TRISB0 = 1;
-	INTCON2bits.RBPU = 0;	// Turn on all of PortB pull-ups
-	UseAltPause = TRUE;
+  SolenoidState = SOLENOID_ON;
+  DriverConfiguration = PIC_CONTROLS_DRIVERS;
+  PenState = PEN_UP;
+  Layer = 0;
+  NodeCount = 0;
+  ButtonPushed = FALSE;
+  // Default RB0 to be an input, with the pull-up enabled, for use as alternate
+  // PAUSE button (just like PRG)
+  // Except for v1.1 hardware, use RB2
+  TRISBbits.TRISB0 = 1;
+  INTCON2bits.RBPU = 0;       // Turn on all of PortB pull-ups
+  UseAltPause = TRUE;
 
-	TRISBbits.TRISB3 = 0;		// Make RB3 an output (for engraver)
-	PORTBbits.RB3 = 0;          // And make sure it starts out off
-    
+  TRISBbits.TRISB3 = 0;       // Make RB3 an output (for engraver)
+  PORTBbits.RB3 = 0;          // And make sure it starts out off
+
   // Clear out global stepper positions
   parse_CS_packet();
   
@@ -1259,12 +1258,12 @@ void EBB_Init(void)
 // SC,1,2<CR> will use servo on RB1 for pen up/down, but with ECCP2 (PWM) in hardware (default)
 // SC,2,0<CR> will make PIC control drivers (default)
 // SC,2,1<CR> will make PIC control external drivers using these pins
-//		ENABLE1 = RD1
-//		ENABLE2 = RA1
-//		STEP1 = RC6
-//		DIR1 = RC2
-//		STEP2 = RA5
-//		DIR2 = RA2
+//    ENABLE1 = RD1
+//    ENABLE2 = RA1
+//    STEP1 = RC6
+//    DIR1 = RC2
+//    STEP2 = RA5
+//    DIR2 = RA2
 // SC,2,2<CR> will disconnect PIC from drivers and allow external step/dir source
 // SC,4,<servo2_min><CR> will set <servo2_min> as the minimum value for the servo (1 to 65535)
 // SC,5,<servo2_max><CR> will set <servo2_max> as the maximum value for the servo (1 to 65535)
@@ -1279,185 +1278,185 @@ void EBB_Init(void)
 // SC,13,0<CR> disables RB3 as parallel input to PRG button for pause detection
 void parse_SC_packet (void)
 {
-	unsigned char Para1 = 0;
-	unsigned int Para2 = 0;
+  unsigned char Para1 = 0;
+  unsigned int Para2 = 0;
 
-	// Extract each of the values.
-	extract_number (kUCHAR, &Para1, kREQUIRED);
-	extract_number (kUINT, &Para2, kREQUIRED);
+  // Extract each of the values.
+  extract_number(kUCHAR, &Para1, kREQUIRED);
+  extract_number(kUINT, &Para2, kREQUIRED);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-	// Check for command to select which (solenoid/servo) gets used for pen
-	if (Para1 == 1u)
-	{
+  // Check for command to select which (solenoid/servo) gets used for pen
+  if (Para1 == 1u)
+  {
         // Use just solenoid
-		if (Para2 == 0u)
-		{
-            gUseSolenoid = TRUE;
-            gUseRCPenServo = FALSE;
-            // Turn off RC signal on Pen Servo output
-            RCServo2_Move(0, g_servo2_RPn, 0, 0);
-        }
-        // Use just RC servo
-		else if (Para2 == 1u)
-		{
-            gUseSolenoid = FALSE;
-            gUseRCPenServo = TRUE;
-		}
-        // Use solenoid AND servo (default)
-		else
-		{
-            gUseSolenoid = TRUE;
-            gUseRCPenServo = TRUE;
-		}
+    if (Para2 == 0u)
+    {
+      gUseSolenoid = TRUE;
+      gUseRCPenServo = FALSE;
+      // Turn off RC signal on Pen Servo output
+      RCServo2_Move(0, g_servo2_RPn, 0, 0);
+    }
+    // Use just RC servo
+    else if (Para2 == 1u)
+    {
+      gUseSolenoid = FALSE;
+      gUseRCPenServo = TRUE;
+    }
+    // Use solenoid AND servo (default)
+    else
+    {
+      gUseSolenoid = TRUE;
+      gUseRCPenServo = TRUE;
+    }
         // Send a new command to set the state of the servo/solenoid
-		process_SP(PenState, 0);
-	}
-	// Check for command to switch between built-in drivers and external drivers
-	else if (Para1 == 2u)
-	{
-		if (Para2 == 0u)
-		{
-			DriverConfiguration = PIC_CONTROLS_DRIVERS;
-            // Connections to drivers become outputs
-            Enable1IO_TRIS = OUTPUT_PIN;
-            Enable2IO_TRIS = OUTPUT_PIN;
-            Step1IO_TRIS = OUTPUT_PIN;
-            Dir1IO_TRIS = OUTPUT_PIN;
-            Step2IO_TRIS = OUTPUT_PIN;
-            Dir2IO_TRIS = OUTPUT_PIN;
-			// Alternate I/O pins become inputs
-			Dir1AltIO_TRIS = INPUT_PIN;
-			Dir2AltIO_TRIS = INPUT_PIN;
-			Step1AltIO_TRIS = INPUT_PIN;
-			Step2AltIO_TRIS = INPUT_PIN;
-			Enable1AltIO_TRIS = INPUT_PIN;
-			Enable2AltIO_TRIS = INPUT_PIN;
-		}
-		else if (Para2 == 1u)
-		{
-			DriverConfiguration = PIC_CONTROLS_EXTERNAL;
-            // Connections to drivers become inputs
-            Enable1IO_TRIS = INPUT_PIN;
-            Enable2IO_TRIS = INPUT_PIN;
-            Step1IO_TRIS = INPUT_PIN;
-            Dir1IO_TRIS = INPUT_PIN;
-            Step2IO_TRIS = INPUT_PIN;
-            Dir2IO_TRIS = INPUT_PIN;
-			// Alternate I/O pins become outputs
-			Dir1AltIO_TRIS = OUTPUT_PIN;
-			Dir2AltIO_TRIS = OUTPUT_PIN;
-			Step1AltIO_TRIS = OUTPUT_PIN;
-			Step2AltIO_TRIS = OUTPUT_PIN;
-			Enable1AltIO_TRIS = OUTPUT_PIN;
-			Enable2AltIO_TRIS = OUTPUT_PIN;
-		}
-        else if (Para2 == 2u)
-        {
-            DriverConfiguration = EXTERNAL_CONTROLS_DRIVERS;
-            // Connections to drivers become inputs
-            Enable1IO_TRIS = INPUT_PIN;
-            Enable2IO_TRIS = INPUT_PIN;
-            Step1IO_TRIS = INPUT_PIN;
-            Dir1IO_TRIS = INPUT_PIN;
-            Step2IO_TRIS = INPUT_PIN;
-            Dir2IO_TRIS = INPUT_PIN;
-   			// Alternate I/O pins become inputs
-			Dir1AltIO_TRIS = INPUT_PIN;
-			Dir2AltIO_TRIS = INPUT_PIN;
-			Step1AltIO_TRIS = INPUT_PIN;
-			Step2AltIO_TRIS = INPUT_PIN;
-			Enable1AltIO_TRIS = INPUT_PIN;
-			Enable2AltIO_TRIS = INPUT_PIN;
+    process_SP(PenState, 0);
+  }
+  // Check for command to switch between built-in drivers and external drivers
+  else if (Para1 == 2u)
+  {
+    if (Para2 == 0u)
+    {
+      DriverConfiguration = PIC_CONTROLS_DRIVERS;
+      // Connections to drivers become outputs
+      Enable1IO_TRIS = OUTPUT_PIN;
+      Enable2IO_TRIS = OUTPUT_PIN;
+      Step1IO_TRIS = OUTPUT_PIN;
+      Dir1IO_TRIS = OUTPUT_PIN;
+      Step2IO_TRIS = OUTPUT_PIN;
+      Dir2IO_TRIS = OUTPUT_PIN;
+      // Alternate I/O pins become inputs
+      Dir1AltIO_TRIS = INPUT_PIN;
+      Dir2AltIO_TRIS = INPUT_PIN;
+      Step1AltIO_TRIS = INPUT_PIN;
+      Step2AltIO_TRIS = INPUT_PIN;
+      Enable1AltIO_TRIS = INPUT_PIN;
+      Enable2AltIO_TRIS = INPUT_PIN;
+    }
+    else if (Para2 == 1u)
+    {
+      DriverConfiguration = PIC_CONTROLS_EXTERNAL;
+      // Connections to drivers become inputs
+      Enable1IO_TRIS = INPUT_PIN;
+      Enable2IO_TRIS = INPUT_PIN;
+      Step1IO_TRIS = INPUT_PIN;
+      Dir1IO_TRIS = INPUT_PIN;
+      Step2IO_TRIS = INPUT_PIN;
+      Dir2IO_TRIS = INPUT_PIN;
+      // Alternate I/O pins become outputs
+      Dir1AltIO_TRIS = OUTPUT_PIN;
+      Dir2AltIO_TRIS = OUTPUT_PIN;
+      Step1AltIO_TRIS = OUTPUT_PIN;
+      Step2AltIO_TRIS = OUTPUT_PIN;
+      Enable1AltIO_TRIS = OUTPUT_PIN;
+      Enable2AltIO_TRIS = OUTPUT_PIN;
+    }
+    else if (Para2 == 2u)
+    {
+      DriverConfiguration = EXTERNAL_CONTROLS_DRIVERS;
+      // Connections to drivers become inputs
+      Enable1IO_TRIS = INPUT_PIN;
+      Enable2IO_TRIS = INPUT_PIN;
+      Step1IO_TRIS = INPUT_PIN;
+      Dir1IO_TRIS = INPUT_PIN;
+      Step2IO_TRIS = INPUT_PIN;
+      Dir2IO_TRIS = INPUT_PIN;
+      // Alternate I/O pins become inputs
+      Dir1AltIO_TRIS = INPUT_PIN;
+      Dir2AltIO_TRIS = INPUT_PIN;
+      Step1AltIO_TRIS = INPUT_PIN;
+      Step2AltIO_TRIS = INPUT_PIN;
+      Enable1AltIO_TRIS = INPUT_PIN;
+      Enable2AltIO_TRIS = INPUT_PIN;
      }
-	}
-	// Set <min_servo> for Servo2 method
-	else if (Para1 == 4u)
-	{
-		g_servo2_min = Para2;
-	}
-	// Set <max_servo> for Servo2
-	else if (Para1 == 5u)
-	{
-		g_servo2_max = Para2;
-	}
-	// Set <gRC2Slots>
-	else if (Para1 == 8u)
-	{
-		if (Para2 > MAX_RC2_SERVOS)
-		{
-			Para2 = MAX_RC2_SERVOS;
-		}
-		gRC2Slots = Para2;
-	}
-	else if (Para1 == 9u)
-	{
-		if (Para2 > 6u)
-		{
-			Para2 = 6;
-		}
-		gRC2SlotMS = Para2;
-	}
-	else if (Para1 == 10u)
-	{
-		g_servo2_rate_up = Para2;
-		g_servo2_rate_down = Para2;
-	}
-	else if (Para1 == 11u)
-	{
-		g_servo2_rate_up = Para2;
-	}
-	else if (Para1 == 12u)
-	{
-		g_servo2_rate_down = Para2;
-	}
+  }
+  // Set <min_servo> for Servo2 method
+  else if (Para1 == 4u)
+  {
+    g_servo2_min = Para2;
+  }
+  // Set <max_servo> for Servo2
+  else if (Para1 == 5u)
+  {
+    g_servo2_max = Para2;
+  }
+  // Set <gRC2Slots>
+  else if (Para1 == 8u)
+  {
+    if (Para2 > MAX_RC2_SERVOS)
+    {
+      Para2 = MAX_RC2_SERVOS;
+    }
+    gRC2Slots = Para2;
+  }
+  else if (Para1 == 9u)
+  {
+    if (Para2 > 6u)
+    {
+      Para2 = 6;
+    }
+    gRC2SlotMS = Para2;
+  }
+  else if (Para1 == 10u)
+  {
+    g_servo2_rate_up = Para2;
+    g_servo2_rate_down = Para2;
+  }
+  else if (Para1 == 11u)
+  {
+    g_servo2_rate_up = Para2;
+  }
+  else if (Para1 == 12u)
+  {
+    g_servo2_rate_down = Para2;
+  }
     else if (Para1 == 13u)
-	{
-		if (Para2)
-		{
-			UseAltPause = TRUE;
-		}
-		else
-		{
-			UseAltPause = FALSE;
-		}			
-	}
-    print_ack();
+  {
+    if (Para2)
+    {
+      UseAltPause = TRUE;
+    }
+    else
+    {
+      UseAltPause = FALSE;
+    }
+  }
+  print_ack();
 }
 
 #if 0
 void fprint(float f)
 {
-    float pf = 0;
-    
-    if (f > 2147483648.0)
+  float pf = 0;
+  
+  if (f > 2147483648.0)
+  {
+      printf((far rom char *)"f too big\n\r");
+  }
+  else
+  {
+    if (f < -2147483648.0)
     {
-        printf((far rom char *)"f too big\n\r");
+      printf((far rom char *)"f too small\n\r");
     }
     else
     {
-        if (f < -2147483648.0)
-        {
-            printf((far rom char *)"f too small\n\r");
-        }
-        else
-        {
-            if (f < 0.0)
-            {
-                pf = 0.0 - f;
-            }
-            else
-            {
-                pf = f;
-            }
-            printf((far rom char *)"%ld.%04lu\n\r", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
-        }
+      if (f < 0.0)
+      {
+        pf = 0.0 - f;
+      }
+      else
+      {
+        pf = f;
+      }
+      printf((far rom char *)"%ld.%04lu\n\r", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
     }
+  }
 }
 #endif
 
@@ -1477,7 +1476,7 @@ void fprint(float f)
 //
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
-void parse_LM_packet (void)
+void parse_LM_packet(void)
 {
   UINT32 Rate1 = 0;
   UINT32 Rate2 = 0;
@@ -1494,13 +1493,13 @@ void parse_LM_packet (void)
 #endif
   
   // Extract each of the values.
-  extract_number (kULONG, &Rate1,     kREQUIRED);
-  extract_number (kLONG,  &Steps1,    kREQUIRED);
-  extract_number (kLONG,  &Accel1,    kREQUIRED);
-  extract_number (kULONG, &Rate2,     kREQUIRED);
-  extract_number (kLONG,  &Steps2,    kREQUIRED);
-  extract_number (kLONG,  &Accel2,    kREQUIRED);
-  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &Rate1,     kREQUIRED);
+  extract_number(kLONG,  &Steps1,    kREQUIRED);
+  extract_number(kLONG,  &Accel1,    kREQUIRED);
+  extract_number(kULONG, &Rate2,     kREQUIRED);
+  extract_number(kLONG,  &Steps2,    kREQUIRED);
+  extract_number(kLONG,  &Accel2,    kREQUIRED);
+  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1534,7 +1533,7 @@ void parse_LM_packet (void)
     )
   )
   {
-    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   
@@ -1641,13 +1640,13 @@ void parse_LM_packet (void)
 #if defined(DEBUG_VALUE_PRINT)
   // For debugging step motion , uncomment the next line
   printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-          CommandFIFO[0].Rate[0].value,  // Rate1 unsigned 31 bit
-          CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
-          CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-          CommandFIFO[0].Rate[1].value,  // Rate2 unsigned 31 bit
-          CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
-          CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
-      );
+    CommandFIFO[0].Rate[0].value,  // Rate1 unsigned 31 bit
+    CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
+    CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
+    CommandFIFO[0].Rate[1].value,  // Rate2 unsigned 31 bit
+    CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
+    CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
+  );
   
   // To test that our Rate = Rate + ((-Accel) >> 1) math works properly, we can
   // also print out what happens after the first ISR tick, which we will
@@ -1664,13 +1663,13 @@ void parse_LM_packet (void)
   }
 
   printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-          LocalRate1,              // Rate1 unsigned 31 bit into 32 bit signed
-          CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
-          CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-          LocalRate2,              // Rate2 unsigned 31 bit into 32 bit signed
-          CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
-          CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
-      );
+    LocalRate1,              // Rate1 unsigned 31 bit into 32 bit signed
+    CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
+    CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
+    LocalRate2,              // Rate2 unsigned 31 bit into 32 bit signed
+    CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
+    CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
+  );
 #endif
   
   FIFOEmpty = FALSE;
@@ -1697,7 +1696,7 @@ void parse_LM_packet (void)
 //
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
-void parse_LT_packet (void)
+void parse_LT_packet(void)
 {
   UINT32 Intervals = 0;
   INT32 Rate1, Rate2, Accel1, Accel2 = 0;
@@ -1705,12 +1704,12 @@ void parse_LT_packet (void)
   UINT8 ClearAccs = 0;
 
   // Extract each of the values.
-  extract_number (kULONG, &Intervals, kREQUIRED);
-  extract_number (kLONG,  &Rate1,     kREQUIRED);
-  extract_number (kLONG,  &Accel1,    kREQUIRED);
-  extract_number (kLONG,  &Rate2,     kREQUIRED);
-  extract_number (kLONG,  &Accel2,    kREQUIRED);
-  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &Intervals, kREQUIRED);
+  extract_number(kLONG,  &Rate1,     kREQUIRED);
+  extract_number(kLONG,  &Accel1,    kREQUIRED);
+  extract_number(kLONG,  &Rate2,     kREQUIRED);
+  extract_number(kLONG,  &Accel2,    kREQUIRED);
+  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1729,7 +1728,7 @@ void parse_LT_packet (void)
     )
   )
   {
-    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   
@@ -1813,8 +1812,6 @@ void parse_LT_packet (void)
   }
   if (Accel2 < 0)
   {
-Write1USART('{');
-
     bitset(move.ServoRPn, 1); // Set flag to ISR that a flip might be needed
     
     move.TicksToFlip[1] = Rate2/(-Accel2) + 1;
@@ -1822,7 +1819,6 @@ Write1USART('{');
   else
   {
     bitclr(move.ServoRPn, 1); // Clear the flag bit (in case it was 1 from before))
-Write1USART('}');
   }
 
   move.Rate[0].value = Rate1;
@@ -1841,12 +1837,12 @@ Write1USART('}');
 
   /* For debugging step motion , uncomment the next line */
 #if defined(DEBUG_VALUE_PRINT)
-   printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
-          CommandFIFO[0].Rate[0],
-          CommandFIFO[0].Steps[0],
-          CommandFIFO[0].Rate[1],
-          CommandFIFO[0].Steps[1]
-    );
+  printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
+    CommandFIFO[0].Rate[0],
+    CommandFIFO[0].Steps[0],
+    CommandFIFO[0].Rate[1],
+    CommandFIFO[0].Steps[1]
+  );
 #endif
 
   FIFOEmpty = FALSE;
@@ -1866,91 +1862,103 @@ Write1USART('}');
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
-void parse_SM_packet (void)
+void parse_SM_packet(void)
 {
-	UINT32 Duration = 0;
-	INT32 A1Steps = 0, A2Steps = 0;
+  UINT32 Duration = 0;
+  INT32 A1Steps = 0, A2Steps = 0;
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
 
-	// Extract each of the values.
-	extract_number (kULONG, &Duration, kREQUIRED);
-	extract_number (kLONG,  &A1Steps,  kREQUIRED);
-	extract_number (kLONG,  &A2Steps,  kOPTIONAL);
-  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+  // Extract each of the values.
+  extract_number(kULONG, &Duration, kREQUIRED);
+  extract_number(kLONG,  &A1Steps,  kREQUIRED);
+  extract_number(kLONG,  &A2Steps,  kOPTIONAL);
+  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
 
-    if (gLimitChecks)
+  if (gLimitChecks)
+  {
+    // Check for invalid duration
+    if (Duration == 0u) 
     {
-        // Check for invalid duration
-        if (Duration == 0u) {
-            bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-        }
-        // Bail if we got a conversion error
-        if (error_byte)
-        {
-            return;
-        }
-        // Limit each parameter to just 3 bytes
-        if (Duration > 0xFFFFFF) {
-           printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
-           return;
-        }
-        // Check for too-fast step request (>25KHz)
-        // First get absolute value of steps, then check if it's asking for >25KHz
-        if (A1Steps > 0) {
-            Steps = A1Steps;
-        }
-        else {
-            Steps = -A1Steps;
-        }
-        if (Steps > 0xFFFFFFl) {
-           printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
-           return;
-        }
-        // Check for too fast
-        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-           printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
-           return;
-        }
-        // And check for too slow
-        if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
-           printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
-           return;
-        }
-                
-        if (A2Steps > 0) {
-            Steps = A2Steps;
-        }
-        else {
-            Steps = -A2Steps;
-        }    
-
-        if (Steps > 0xFFFFFFl) {
-           printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-           return;
-        }
-        if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-           printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
-           return;
-        }
-        if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
-           printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
-           return;
-        }
-        if (ClearAccs > 3u)
-        {
-          ClearAccs = 0;
-        }
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+      return;
+    }
+    // Limit each parameter to just 3 bytes
+    if (Duration > 0xFFFFFF) 
+    {
+      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      return;
+    }
+    // Check for too-fast step request (>25KHz)
+    // First get absolute value of steps, then check if it's asking for >25KHz
+    if (A1Steps > 0) 
+    {
+      Steps = A1Steps;
+    }
+    else 
+    {
+      Steps = -A1Steps;
+    }
+    if (Steps > 0xFFFFFFl) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      return;
+    }
+    // Check for too fast
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      return;
+    }
+    // And check for too slow
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      return;
     }
 
-    // If we get here, we know that step rate for both A1 and A2 is
-    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
-
-    if (g_ack_enable)
+    if (A2Steps > 0) 
     {
-    	print_ack();
+      Steps = A2Steps;
     }
+    else 
+    {
+      Steps = -A2Steps;
+    }
+
+    if (Steps > 0xFFFFFFl) 
+    {
+     printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+     return;
+    }
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+      return;
+    }
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    {
+      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+      return;
+    }
+    if (ClearAccs > 3u)
+    {
+      ClearAccs = 0;
+    }
+  }
+
+  // If we get here, we know that step rate for both A1 and A2 is
+  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
+
+  if (g_ack_enable)
+  {
+    print_ack();
+  }
 }
 
 // Home the motors
@@ -1985,12 +1993,12 @@ void parse_SM_packet (void)
 //
 // TODO: This code can't handle steps counts above 4,294,967 in either axis. Is
 // there a way to allow it to handle steps counts up to 16,777,215 easily?
-void parse_HM_packet (void)
+void parse_HM_packet(void)
 {
-	UINT32 StepRate = 0;
+  UINT32 StepRate = 0;
   INT32  Pos1 = 0;
   INT32  Pos2 = 0;
-	INT32  Steps1 = 0;
+  INT32  Steps1 = 0;
   INT32  Steps2 = 0;
   INT32  AbsSteps1 = 0;
   INT32  AbsSteps2 = 0;
@@ -1998,27 +2006,27 @@ void parse_HM_packet (void)
   BOOL   CommandExecuting = TRUE;
   INT32  XSteps = 0;
 
-	// Extract the step rate.
-	extract_number (kULONG, &StepRate, kREQUIRED);
-	extract_number (kLONG,  &Pos1,     kOPTIONAL);
-	extract_number (kLONG,  &Pos2,     kOPTIONAL);
+  // Extract the step rate.
+  extract_number(kULONG, &StepRate, kREQUIRED);
+  extract_number(kLONG,  &Pos1,     kOPTIONAL);
+  extract_number(kLONG,  &Pos2,     kOPTIONAL);
 
   // StepRate can't be zero
   if (StepRate == 0u)
   {
-    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   
   // Wait until FIFO is empty
-	while(!FIFOEmpty)
-	;
+  while (!FIFOEmpty)
+  ;
 
   // Then wait for motion command to finish (if one's running)
-  while(CommandExecuting == TRUE)
+  while (CommandExecuting == TRUE)
   {
     // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+    INTCONbits.GIEH = 0;    // Turn high priority interrupts off
 
     // Create our output values to print back to the PC
     if ((CurrentCommand.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE))
@@ -2027,9 +2035,9 @@ void parse_HM_packet (void)
     }
 
     // Re-enable interrupts
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+    INTCONbits.GIEH = 1;    // Turn high priority interrupts on
   }
-    
+
   // Make a local copy of the things we care about. This is how far we need to move.
   Steps1 = -globalStepCounter1 + Pos1;
   Steps2 = -globalStepCounter2 + Pos2;
@@ -2103,9 +2111,9 @@ void parse_HM_packet (void)
   }
   else
   {
-    Duration = (AbsSteps2 * 1000) / StepRate;        
+    Duration = (AbsSteps2 * 1000) / StepRate;
     // Axis2 is primary
-    // Check for too fast 
+    // Check for too fast
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
       printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.\n\r");
@@ -2172,92 +2180,104 @@ void parse_HM_packet (void)
 // This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
 // machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
 // Axis2 = <axisA_steps> - <axisB_steps>.
-void parse_XM_packet (void)
+void parse_XM_packet(void)
 {
-	UINT32 Duration = 0;
-	INT32 A1Steps = 0, A2Steps = 0;
+  UINT32 Duration = 0;
+  INT32 A1Steps = 0, A2Steps = 0;
   INT32 ASteps = 0, BSteps = 0;
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
 
-	// Extract each of the values.
-	extract_number (kULONG, &Duration, kREQUIRED);
-	extract_number (kLONG, &ASteps, kREQUIRED);
-	extract_number (kLONG, &BSteps, kREQUIRED);
-  extract_number (kUCHAR, &ClearAccs, kOPTIONAL);
+  // Extract each of the values.
+  extract_number(kULONG, &Duration, kREQUIRED);
+  extract_number(kLONG, &ASteps, kREQUIRED);
+  extract_number(kLONG, &BSteps, kREQUIRED);
+  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
   
   if (ClearAccs > 3u)
   {
     ClearAccs = 3;
   }
 
-    // Check for invalid duration
-    if (Duration == 0u) {
-    	bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
+  // Check for invalid duration
+  if (Duration == 0u) 
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+  }
 
-    // Do the math to convert to Axis1 and Axis2
-    A1Steps = ASteps + BSteps;
-    A2Steps = ASteps - BSteps;
-    
-    // Check for too-fast step request (>25KHz)
-    // First get absolute value of steps, then check if it's asking for >25KHz
-    if (A1Steps > 0) {
-        Steps = A1Steps;
-    }
-    else {
-        Steps = -A1Steps;
-    }
-    // Limit each parameter to just 3 bytes
-    if (Duration > 0xFFFFFF) {
-       printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
-       return;
-    }
-    if (Steps > 0xFFFFFFl) {
-       printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
-       return;
-    }
-    // Check for too fast
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-       printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
-       return;
-    }
-    // And check for too slow
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
-       printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
-       return;
-    }
+  // Do the math to convert to Axis1 and Axis2
+  A1Steps = ASteps + BSteps;
+  A2Steps = ASteps - BSteps;
+  
+  // Check for too-fast step request (>25KHz)
+  // First get absolute value of steps, then check if it's asking for >25KHz
+  if (A1Steps > 0) 
+  {
+    Steps = A1Steps;
+  }
+  else 
+  {
+    Steps = -A1Steps;
+  }
+  // Limit each parameter to just 3 bytes
+  if (Duration > 0xFFFFFF) 
+  {
+    printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+    return;
+  }
+  if (Steps > 0xFFFFFFl) 
+  {
+    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+    return;
+  }
+  // Check for too fast
+  if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+  {
+    printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+    return;
+  }
+  // And check for too slow
+  if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+  {
+    printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+    return;
+  }
 
-    if (A2Steps > 0) {
-        Steps = A2Steps;
-    }
-    else {
-        Steps = -A2Steps;
-    }    
-    if (Steps > 0xFFFFFFl) {
-       printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-       return;
-    }
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) {
-       printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
-       return;
-    }
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) {
-       printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
-       return;
-    }
+  if (A2Steps > 0) 
+  {
+    Steps = A2Steps;
+  }
+  else 
+  {
+    Steps = -A2Steps;
+  }
+  if (Steps > 0xFFFFFFl) 
+  {
+   printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+   return;
+  }
+  if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+  {
+   printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+   return;
+  }
+  if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+  {
+   printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+   return;
+  }
 
-    // Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-    // If we get here, we know that step rate for both A1 and A2 is
-    // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  	process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
+  // If we get here, we know that step rate for both A1 and A2 is
+  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
 
-	print_ack();
+  print_ack();
 }
 
 // Main stepper move function. This is the reason EBB exists.
@@ -2291,10 +2311,10 @@ static void process_simple_motor_move(
   // Uncomment the following printf() for debugging
 #if defined(DEBUG_VALUE_PRINT)
   printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
-          Duration,
-          A1Stp,
-          A2Stp
-      );
+    Duration,
+    A1Stp,
+    A2Stp
+  );
 #endif
   
   if (ClearAccs > 3u)
@@ -2343,16 +2363,16 @@ static void process_simple_motor_move(
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
 #if defined(DEBUG_VALUE_PRINT)
-  // First check for duration to large.
-  if (A1Stp < (0xFFFFFF/763)) 
-  {
-    if (Duration > (A1Stp * 763)) 
+    // First check for duration to large.
+    if (A1Stp < (0xFFFFFF/763)) 
     {
-      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
-      temp = 0;
-      A1Stp = 0;
+      if (Duration > (A1Stp * 763)) 
+      {
+        printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
+        temp = 0;
+        A1Stp = 0;
+      }
     }
-  }
 #endif
     if (A1Stp != 0) 
     {
@@ -2459,11 +2479,11 @@ static void process_simple_motor_move(
     /* For debugging step motion , uncomment the next line */
 #if defined(DEBUG_VALUE_PRINT)
     printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
-            move.Rate[0],
-            move.Steps[0],
-            move.Rate[1],
-            move.Steps[1]
-        );
+      move.Rate[0],
+      move.Steps[0],
+      move.Rate[1],
+      move.Steps[1]
+    );
 #endif
   }
   
@@ -2504,17 +2524,17 @@ void parse_ES_packet(void)
   UINT32 fifo_steps1 = 0;
   UINT32 fifo_steps2 = 0;
 
-	// Extract each of the value.
-	extract_number (kUCHAR, &disable_motors, kOPTIONAL);
+  // Extract each of the value.
+  extract_number(kUCHAR, &disable_motors, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
   // Need to turn off high priority interrupts breifly here to mess with ISR command parameters
-  INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // If the FIFO has a move command in it, remove it.
   if 
@@ -2571,17 +2591,17 @@ void parse_ES_packet(void)
   }
   
   // Re-enable interrupts
-  INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+  INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
   printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
-          command_interrupted,
-          fifo_steps1,
-          fifo_steps2,
-          remaining_steps1,
-          remaining_steps2
+    command_interrupted,
+    fifo_steps1,
+    fifo_steps2,
+    remaining_steps1,
+    remaining_steps2
   );
 
-	print_ack();
+  print_ack();
 }
 
 // Query Pen
@@ -2589,9 +2609,9 @@ void parse_ES_packet(void)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
-	printf((far rom char *)"%d\n\r", PenState);
+  printf((far rom char *)"%d\n\r", PenState);
 
-	print_ack();
+  print_ack();
 }
 
 // Query motor Enables and resolution
@@ -2654,9 +2674,9 @@ void parse_QE_packet(void)
     }
   }
 
-	printf((far rom char *)"%d,%d\n\r", motor1_state, motor2_state);
+  printf((far rom char *)"%d,%d\n\r", motor1_state, motor2_state);
 
-	print_ack();
+  print_ack();
 }
 
 // Toggle Pen
@@ -2667,27 +2687,27 @@ void parse_QE_packet(void)
 // Duration is in units of 1ms
 void parse_TP_packet(void)
 {
-	UINT16 CommandDuration = 0;
+  UINT16 CommandDuration = 0;
 
-	// Extract each of the values.
-	extract_number (kUINT, &CommandDuration, kOPTIONAL);
+  // Extract each of the values.
+  extract_number (kUINT, &CommandDuration, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-	if (PenState == PEN_UP)
-	{
-		process_SP(PEN_DOWN, CommandDuration);
-	}
-	else
-	{
-		process_SP(PEN_UP, CommandDuration);
-	}
+  if (PenState == PEN_UP)
+  {
+    process_SP(PEN_DOWN, CommandDuration);
+  }
+  else
+  {
+    process_SP(PEN_UP, CommandDuration);
+  }
 
-	print_ack();
+  print_ack();
 }
 
 // Set Pen
@@ -2713,48 +2733,48 @@ void parse_TP_packet(void)
 //
 void parse_SP_packet(void)
 {
-	UINT8 State = 0;
-	UINT16 CommandDuration = 0;
-	UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
-    ExtractReturnType Ret;
+  UINT8 State = 0;
+  UINT16 CommandDuration = 0;
+  UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+  ExtractReturnType Ret;
 
-	// Extract each of the values.
-	extract_number (kUCHAR, &State, kREQUIRED);
-	extract_number (kUINT, &CommandDuration, kOPTIONAL);
-	Ret = extract_number (kUCHAR, &Pin, kOPTIONAL);
+  // Extract each of the values.
+  extract_number(kUCHAR, &State, kREQUIRED);
+  extract_number(kUINT, &CommandDuration, kOPTIONAL);
+  Ret = extract_number(kUCHAR, &Pin, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-    // Error check
-	if (Pin > 7u)
-	{
-		Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
-	}
+  // Error check
+  if (Pin > 7u)
+  {
+    Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
+  }
 
-    if (State > 1u)
-    {
-        State = 1;
-    }
+  if (State > 1u)
+  {
+    State = 1;
+  }
 
-    // Set the PRn of the Pen Servo output
-    // Add 3 to get from PORTB pin number to RPn number
-    if (g_servo2_RPn != (Pin + 3))
-    {
-        // if we are changing which pin the pen servo is on, we need to cancel
-        // the servo output on the old channel first
-        RCServo2_Move(0, g_servo2_RPn, 0, 0);
-        // Now record the new RPn
-        g_servo2_RPn = Pin + 3;
-    }
+  // Set the PRn of the Pen Servo output
+  // Add 3 to get from PORTB pin number to RPn number
+  if (g_servo2_RPn != (Pin + 3))
+  {
+    // if we are changing which pin the pen servo is on, we need to cancel
+    // the servo output on the old channel first
+    RCServo2_Move(0, g_servo2_RPn, 0, 0);
+    // Now record the new RPn
+    g_servo2_RPn = Pin + 3;
+  }
 
-    // Execute the servo state change
-	process_SP(State, CommandDuration);
-    
-	print_ack();
+  // Execute the servo state change
+  process_SP(State, CommandDuration);
+
+  print_ack();
 }
 
 // Internal use function -
@@ -2853,22 +2873,22 @@ void parse_EM_packet(void)
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
-	if (NodeCount < 0xFFFFFFFEUL)
-	{
-		NodeCount++;
-	}
-	print_ack();
+  if (NodeCount < 0xFFFFFFFEUL)
+  {
+    NodeCount++;
+  }
+  print_ack();
 }
 
 // Node counter Decrement
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
-	if (NodeCount)
-	{
-		NodeCount--;
-	}
-	print_ack();
+  if (NodeCount)
+  {
+    NodeCount--;
+  }
+  print_ack();
 }
 
 // Set Node counter
@@ -2876,15 +2896,15 @@ void parse_ND_packet(void)
 // <value> is a 4 byte unsigned value
 void parse_SN_packet(void)
 {
-	unsigned long Temp;
-	ExtractReturnType RetVal;
-	
-	RetVal = extract_number (kULONG, &Temp, kREQUIRED);
-	if (kEXTRACT_OK == RetVal)
-	{
-		NodeCount = Temp;
-	}
-	print_ack();
+  unsigned long Temp;
+  ExtractReturnType RetVal;
+
+  RetVal = extract_number(kULONG, &Temp, kREQUIRED);
+  if (kEXTRACT_OK == RetVal)
+  {
+    NodeCount = Temp;
+  }
+  print_ack();
 }
 
 // Query Node counter
@@ -2893,25 +2913,25 @@ void parse_SN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
-	printf ((far rom char*)"%010lu\r\n", NodeCount);
+  printf((far rom char*)"%010lu\r\n", NodeCount);
 
-	print_ack();
+  print_ack();
 }
 
 // Set Layer
 // Usage: SL,<NewLayer><CR>
 void parse_SL_packet(void)
 {
-	// Extract each of the values.
-	extract_number (kUCHAR, &Layer, kREQUIRED);
+  // Extract each of the values.
+  extract_number(kUCHAR, &Layer, kREQUIRED);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
 
-	print_ack();
+  print_ack();
 }
 
 // Query Layer
@@ -2920,9 +2940,9 @@ void parse_SL_packet(void)
 // OK<CR>
 void parse_QL_packet(void)
 {
-	printf ((far rom char*)"%03i\r\n", Layer);
+  printf((far rom char*)"%03i\r\n", Layer);
 
-	print_ack();
+  print_ack();
 }
 
 // Query Button
@@ -2931,12 +2951,12 @@ void parse_QL_packet(void)
 // OK<CR>
 void parse_QB_packet(void)
 {
-	printf ((far rom char*)"%1i\r\n", ButtonPushed);
-	if (ButtonPushed)
-    {
-        ButtonPushed = FALSE;
-    }
-	print_ack();
+  printf((far rom char*)"%1i\r\n", ButtonPushed);
+  if (ButtonPushed)
+  {
+    ButtonPushed = FALSE;
+  }
+  print_ack();
 }
 
 // Query Current
@@ -2952,16 +2972,16 @@ void parse_QB_packet(void)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
 {
-    // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
-    // mainline code accessing at the same time, we will just wait for
-    // the cycle of ADC readings to finish before we spit out our value.
-    while (PIE1bits.ADIE);
+  // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
+  // mainline code accessing at the same time, we will just wait for
+  // the cycle of ADC readings to finish before we spit out our value.
+  while (PIE1bits.ADIE);
 
-	// Print out our results
-	printf ((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+  // Print out our results
+  printf((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
 
-	print_ack();
-}	
+  print_ack();
+}
 
 // Query General
 // Usage: QG<CR>
@@ -2979,36 +2999,36 @@ void parse_QC_packet(void)
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
 {
-    UINT8 result = process_QM();
+  UINT8 result = process_QM();
 
-    // process_QM() gives us the low 4 bits of our output result.
-    result = result & 0x0F;
+  // process_QM() gives us the low 4 bits of our output result.
+  result = result & 0x0F;
 
-    if (PenState)
-    {
-        result = result | (1 << 4);
-    }
-    if (ButtonPushed)
-    {
-        result = result | (1 << 5);
-    }
-    if (PORTBbits.RB2)
-    {
-        result = result | (1 << 6);
-    }
-    if (PORTBbits.RB5)
-    {
-        result = result | (1 << 7);
-    }
+  if (PenState)
+  {
+    result = result | (1 << 4);
+  }
+  if (ButtonPushed)
+  {
+    result = result | (1 << 5);
+  }
+  if (PORTBbits.RB2)
+  {
+    result = result | (1 << 6);
+  }
+  if (PORTBbits.RB5)
+  {
+    result = result | (1 << 7);
+  }
 
-	printf ((far rom char*)"%02X\r\n", result);
-    
-    // Reset the button pushed flag
-    if (ButtonPushed)
-    {
-        ButtonPushed = FALSE;
-    }
-}	
+  printf((far rom char*)"%02X\r\n", result);
+  
+  // Reset the button pushed flag
+  if (ButtonPushed)
+  {
+      ButtonPushed = FALSE;
+  }
+}
 
 // Set Engraver
 // Usage: SE,<state>,<power>,<use_motion_queue><CR>
@@ -3027,23 +3047,23 @@ void parse_QG_packet(void)
 
 void parse_SE_packet(void)
 {
-	UINT8 State = 0;
-	UINT16 Power = 0;
+  UINT8 State = 0;
+  UINT16 Power = 0;
   UINT8 SEUseMotionQueue = FALSE;
   ExtractReturnType PowerExtract;
-	
-	// Extract each of the values.
-	extract_number (kUCHAR, &State, kREQUIRED);
-	PowerExtract = extract_number (kUINT, &Power, kOPTIONAL);
-  extract_number (kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
-	// Bail if we got a conversion error
-	if (error_byte)
-	{
-		return;
-	}
+  // Extract each of the values.
+  extract_number(kUCHAR, &State, kREQUIRED);
+  PowerExtract = extract_number(kUINT, &Power, kOPTIONAL);
+  extract_number(kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
-	// Limit check
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // Limit check
   if (Power > 1023u)
   {
     Power = 1023;
@@ -3085,16 +3105,16 @@ void parse_SE_packet(void)
     // Do not generate an interrupt
     PIE1bits.TMR2IE = 0;
 
-    TCLKCONbits.T3CCP1 = 1;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
-    TCLKCONbits.T3CCP2 = 0;		// ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+    TCLKCONbits.T3CCP1 = 1;       // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
+    TCLKCONbits.T3CCP2 = 0;       // ECCP1 uses Timer1/2 and ECCP2 uses Timer3/4
 
-    CCP1CONbits.CCP1M = 0b1100;	// Set EECP1 as PWM mode
-    CCP1CONbits.P1M = 0b00;		// Enhanced PWM mode: single output
+    CCP1CONbits.CCP1M = 0b1100;   // Set EECP1 as PWM mode
+    CCP1CONbits.P1M = 0b00;       // Enhanced PWM mode: single output
 
     // Set up output routing to go to RB3 (RP6)
-    RPOR6 = 14;	// 14 is CCP1/P1A - ECCP1 PWM Output Channel A
+    RPOR6 = 14;                   // 14 is CCP1/P1A - ECCP1 PWM Output Channel A
 
-    T2CONbits.TMR2ON = 1;		// Turn it on
+    T2CONbits.TMR2ON = 1;         // Turn it on
   }
 
   // Acting on the state is only done if the SE command is not put on the motion queue
@@ -3112,7 +3132,7 @@ void parse_SE_packet(void)
       // Set RB3 to low by setting PWM duty cycle to zero
       CCPR1L = 0;
       CCP1CON = (CCP1CON & 0b11001111);
-    }		
+    }
   }
   else
   {
@@ -3128,52 +3148,55 @@ void parse_SE_packet(void)
 
     FIFOEmpty = FALSE;
   }
-    
-	print_ack();
+
+  print_ack();
 }
 
 // RM command
 // For Run Motor - allows completely independent running of the two stepper motors
 void parse_RM_packet(void)
 {
-	
-	
 }
 
 // Do the work of the QM command so we can use this same code for QM and
 // for QG commands.
 UINT8 process_QM(void)
 {
-    UINT8 CommandExecuting = 0;
-    UINT8 Motor1Running = 0;
-    UINT8 Motor2Running = 0;
-    UINT8 FIFOStatus = 0;
+  UINT8 CommandExecuting = 0;
+  UINT8 Motor1Running = 0;
+  UINT8 Motor2Running = 0;
+  UINT8 FIFOStatus = 0;
 
-    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
-    // Create our output values to print back to the PC
-    if (CurrentCommand.DelayCounter != 0u) {
-        CommandExecuting = 1;
-    }
-    if (CurrentCommand.Command != COMMAND_NONE) {
-        CommandExecuting = 1;
-    }
-    if (FIFOEmpty == FALSE) {
-        CommandExecuting = 1;
-        FIFOStatus = 1;
-    }
-    if (CommandExecuting && CurrentCommand.Steps[0] != 0u) {
-        Motor1Running = 1;
-    }
-    if (CommandExecuting && CurrentCommand.Steps[1] != 0u) {
-        Motor2Running = 1;
-    }
+  // Create our output values to print back to the PC
+  if (CurrentCommand.DelayCounter != 0u) 
+  {
+    CommandExecuting = 1;
+  }
+  if (CurrentCommand.Command != COMMAND_NONE) 
+  {
+    CommandExecuting = 1;
+  }
+  if (FIFOEmpty == FALSE) 
+  {
+    CommandExecuting = 1;
+    FIFOStatus = 1;
+  }
+  if (CommandExecuting && CurrentCommand.Steps[0] != 0u) 
+  {
+    Motor1Running = 1;
+  }
+  if (CommandExecuting && CurrentCommand.Steps[1] != 0u) 
+  {
+    Motor2Running = 1;
+  }
 
-    // Re-enable interrupts
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
-    
-    return ((CommandExecuting << 3) | (Motor1Running << 2) | (Motor2Running << 1) | FIFOStatus);
+  // Re-enable interrupts
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  
+  return ((CommandExecuting << 3) | (Motor1Running << 2) | (Motor2Running << 1) | FIFOStatus);
 }
 
 // QM command
@@ -3191,30 +3214,30 @@ UINT8 process_QM(void)
 // Where <FIFOStatus> is either 1 (if there are any commands in the FIFO) or 0 (if the FIFO is empty)
 void parse_QM_packet(void)
 {
-    UINT8 CommandExecuting = 0;
-    UINT8 Motor1Running = 0;
-    UINT8 Motor2Running = 0;
-    UINT8 FIFOStatus = 0;
-    UINT8 result = process_QM();
+  UINT8 CommandExecuting = 0;
+  UINT8 Motor1Running = 0;
+  UINT8 Motor2Running = 0;
+  UINT8 FIFOStatus = 0;
+  UINT8 result = process_QM();
 
-    if (result & 0x01)
-    {
-        FIFOStatus = 1;
-    }
-    if (result & 0x02)
-    {
-        Motor2Running = 1;
-    }
-    if (result & 0x04)
-    {
-        Motor1Running = 1;
-    }
-    if (result & 0x08)
-    {
-        CommandExecuting = 1;
-    }
+  if (result & 0x01)
+  {
+    FIFOStatus = 1;
+  }
+  if (result & 0x02)
+  {
+    Motor2Running = 1;
+  }
+  if (result & 0x04)
+  {
+    Motor1Running = 1;
+  }
+  if (result & 0x08)
+  {
+    CommandExecuting = 1;
+  }
 
-	printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
 }
 
 // QS command
@@ -3227,38 +3250,38 @@ void parse_QM_packet(void)
 //   <global_step2_position>: signed 32 bit value, current global motor 2 step position
 void parse_QS_packet(void)
 {
-    INT32 step1, step2;
+  INT32 step1, step2;
 
-    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
-    // Make a local copy of the things we care about
-    step1 = globalStepCounter1;
-    step2 = globalStepCounter2;
-    
-    // Re-enable interrupts
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+  // Make a local copy of the things we care about
+  step1 = globalStepCounter1;
+  step2 = globalStepCounter2;
+  
+  // Re-enable interrupts
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 
-	printf((far ROM char *)"%li,%li\n\r", step1, step2);
-	print_ack();
+  printf((far ROM char *)"%li,%li\n\r", step1, step2);
+  print_ack();
 }
 
 // Perform the actual clearing of the step counters (used from several places)
 void clear_StepCounters(void)
 {
-    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
-    INTCONbits.GIEH = 0;	// Turn high priority interrupts off
+  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
-    // Clear out the global step counters
-    globalStepCounter1 = 0;
-    globalStepCounter2 = 0;
-    
-    // Clear both step accumulators as well
-    acc_union[0].value = 0;
-    acc_union[1].value = 0;
-    
-    // Re-enable interrupts
-    INTCONbits.GIEH = 1;	// Turn high priority interrupts on
+  // Clear out the global step counters
+  globalStepCounter1 = 0;
+  globalStepCounter2 = 0;
+  
+  // Clear both step accumulators as well
+  acc_union[0].value = 0;
+  acc_union[1].value = 0;
+  
+  // Re-enable interrupts
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 }
 
 // CS command
@@ -3271,5 +3294,5 @@ void parse_CS_packet(void)
 {
   clear_StepCounters();
   
-	print_ack();
+  print_ack();
 }
