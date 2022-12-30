@@ -55,29 +55,29 @@
 #include "HardwareProfile.h"
 
 #if !defined (PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-  #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
-  #pragma config PLLDIV = 2           //Divide by 2 (8 MHz internal oscillator)
-  #pragma config STVREN = ON          //stack overflow/underflow reset enabled
-  #pragma config XINST = OFF          //Extended instruction set disabled
-  #pragma config CPUDIV = OSC1        //No CPU system clock divide
-  #pragma config CP0 = OFF            //Program memory is not code-protected
-  #pragma config OSC = INTOSCPLL      //Internal oscillator, PLL enabled, PLL used by USB, RA6 and RA7 for I/O use
-  #pragma config T1DIG = ON           //Sec Osc clock source may be selected
-  #pragma config LPT1OSC = ON         //high power Timer1 mode
-  #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
-  #pragma config IESO = OFF           //Two-Speed Start-up disabled
-  #pragma config WDTPS = 32768        //1:32768
-  #pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
-  #pragma config RTCOSC = T1OSCREF    //RTCC uses T1OSC/T1CKI as clock
-  #pragma config DSBOREN = OFF        //Zero-Power BOR disabled in Deep Sleep
-  #pragma config DSWDTEN = OFF        //Disabled
-  #pragma config DSWDTPS = 8192       //1:8,192 (8.5 seconds)
-  #pragma config IOL1WAY = OFF        //IOLOCK bit can be set and cleared
-  #pragma config MSSP7B_EN = MSK7     //7 Bit address masking
-  #pragma config WPFP = PAGE_1        //Write Protect Program Flash Page 0
-  #pragma config WPEND = PAGE_0       //Start protection at page 0
-  #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
-  #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
+  #pragma config WDTEN = OFF          // WDT disabled (enabled by SWDTEN bit)
+  #pragma config PLLDIV = 2           // Divide by 2 (8 MHz internal oscillator)
+  #pragma config STVREN = ON          // stack overflow/underflow reset enabled
+  #pragma config XINST = OFF          // Extended instruction set disabled
+  #pragma config CPUDIV = OSC1        // No CPU system clock divide
+  #pragma config CP0 = OFF            // Program memory is not code-protected
+  #pragma config OSC = INTOSCPLL      // Internal oscillator, PLL enabled, PLL used by USB, RA6 and RA7 for I/O use
+  #pragma config T1DIG = ON           // Sec Osc clock source may be selected
+  #pragma config LPT1OSC = ON         // high power Timer1 mode
+  #pragma config FCMEN = OFF          // Fail-Safe Clock Monitor disabled
+  #pragma config IESO = OFF           // Two-Speed Start-up disabled
+  #pragma config WDTPS = 32768        // 1:32768
+  #pragma config DSWDTOSC = INTOSCREF // DSWDT uses INTOSC/INTRC as clock
+  #pragma config RTCOSC = T1OSCREF    // RTCC uses T1OSC/T1CKI as clock
+  #pragma config DSBOREN = OFF        // Zero-Power BOR disabled in Deep Sleep
+  #pragma config DSWDTEN = OFF        // Disabled
+  #pragma config DSWDTPS = 8192       // 1:8,192 (8.5 seconds)
+  #pragma config IOL1WAY = OFF        // IOLOCK bit can be set and cleared
+  #pragma config MSSP7B_EN = MSK7     // 7 Bit address masking
+  #pragma config WPFP = PAGE_1        // Write Protect Program Flash Page 0
+  #pragma config WPEND = PAGE_0       // Start protection at page 0
+  #pragma config WPCFG = OFF          // Write/Erase last page protect Disabled
+  #pragma config WPDIS = OFF          // WPFP[5:0], WPEND, and WPCFG bits ignored 
 #endif
 
 /** I N C L U D E S **********************************************************/
@@ -186,9 +186,9 @@ void main(void)
 
     // Application-specific tasks.
     // Application related code may be added here, or in the ProcessIO() function.
-    ProcessIO();        
-  }//end while
-}//end main
+    ProcessIO();
+  }
+}
 
 /******************************************************************************
  * Function:        static void InitializeSystem(void)
@@ -206,7 +206,7 @@ void main(void)
  *                  here.
  *
  *                  User application initialization routine should also be
- *                  called from here.                  
+ *                  called from here.
  *
  * Note:            None
  *****************************************************************************/
@@ -214,91 +214,92 @@ static void InitializeSystem(void)
 {
 #if defined(BOARD_EBB_V10)
   unsigned int pll_startup_counter = 600;
-  OSCTUNEbits.PLLEN = 1;    //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+  OSCTUNEbits.PLLEN = 1;    // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
   while(pll_startup_counter--);
 
-  //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-  //use the ANCONx registers to control this, which is different from other devices which
-  //use the ADCON1 register for this purpose.
+  // Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
+  // use the ANCONx registers to control this, which is different from other devices which
+  // use the ADCON1 register for this purpose.
   WDTCONbits.ADSHR = 1;     // Select alternate SFR location to access ANCONx registers
   ANCON0 = 0xFF;            // Default all pins to digital
   ANCON1 = 0xFF;            // Default all pins to digital
   WDTCONbits.ADSHR = 0;     // Select normal SFR locations
 #elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  unsigned int pll_startup_counter; //Used for software delay while pll is starting up
+  unsigned int pll_startup_counter; //Used for software delay while PLL is starting up
 
-  //Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-  //use the ANCONx registers to control this, which is different from other devices which
-  //use the ADCON1 register for this purpose.
+  // Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
+  // use the ANCONx registers to control this, which is different from other devices which
+  // use the ADCON1 register for this purpose.
   ANCON0 = 0xFF;                  // Default all pins to digital
   ANCON1 = 0xFF;                  // Default all pins to digital
 
-  OSCCON = 0x60;                  //Clock switch to primary clock source.  May not have been running
-                                  //from this if the bootloader is called from the application firmware.
+  OSCCON = 0x60;                  // Clock switch to primary clock source.  May not have been running
+                                  // from this if the bootloader is called from the application firmware.
 
-  //On the PIC18F46J50 Family of USB microcontrollers, the PLL will not power up and be enabled
-  //by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
-  //This allows the device to power up at a lower initial operating frequency, which can be
-  //advantageous when powered from a source which is not gauranteed to be adequate for 48MHz
-  //operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
-  //power up the PLL.
+  // On the PIC18F46J50 Family of USB microcontrollers, the PLL will not power up and be enabled
+  // by default, even if a PLL enabled oscillator configuration is selected (such as HS+PLL).
+  // This allows the device to power up at a lower initial operating frequency, which can be
+  // advantageous when powered from a source which is not guaranteed to be adequate for 48MHz
+  // operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
+  // power up the PLL.
   #if defined(__18F24J50)||defined(__18F25J50) || \
       defined(__18F26J50)||defined(__18F44J50) || \
       defined(__18F45J50)||defined(__18F46J50) 
 
-  OSCTUNEbits.PLLEN = 1;  //Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+  OSCTUNEbits.PLLEN = 1;  // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
   pll_startup_counter = 600;
-  while(pll_startup_counter--);
-    //Device switches over automatically to PLL output after PLL is locked and ready.
+  while(pll_startup_counter--)
+    ;
+  // Device switches over automatically to PLL output after PLL is locked and ready.
   #else
-  #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
-    //Also make sure the correct board is selected in usbcfg.h.  If 
-    //everything is correct, comment out the above "#error ..." line
-    //to suppress the error message.
+    #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
+    // Also make sure the correct board is selected in usbcfg.h.  If 
+    // everything is correct, comment out the above "#error ..." line
+    // to suppress the error message.
   #endif
 #endif
 
-//  The USB specifications require that USB peripheral devices must never source
-//  current onto the Vbus pin.  Additionally, USB peripherals should not source
-//  current on D+ or D- when the host/hub is not actively powering the Vbus line.
-//  When designing a self powered (as opposed to bus powered) USB peripheral
-//  device, the firmware should make sure not to turn on the USB module and D+
-//  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
-//  firmware needs some means to detect when Vbus is being powered by the host.
-//  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
-//  can be used to detect when Vbus is high (host actively powering), or low
-//  (host is shut down or otherwise not supplying power).  The USB firmware
-//  can then periodically poll this I/O pin to know when it is okay to turn on
-//  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
-//  peripheral device, it is not possible to source current on D+ or D- when the
-//  host is not actively providing power on Vbus. Therefore, implementing this
-//  bus sense feature is optional.  This firmware can be made to use this bus
-//  sense feature by making sure "USE_USB_BUS_SENSE_IO" has been defined in the
-//  HardwareProfile.h file.    
+  //  The USB specifications require that USB peripheral devices must never source
+  //  current onto the Vbus pin.  Additionally, USB peripherals should not source
+  //  current on D+ or D- when the host/hub is not actively powering the Vbus line.
+  //  When designing a self powered (as opposed to bus powered) USB peripheral
+  //  device, the firmware should make sure not to turn on the USB module and D+
+  //  or D- pull up resistor unless Vbus is actively powered.  Therefore, the
+  //  firmware needs some means to detect when Vbus is being powered by the host.
+  //  A 5V tolerant I/O pin can be connected to Vbus (through a resistor), and
+  //  can be used to detect when Vbus is high (host actively powering), or low
+  //  (host is shut down or otherwise not supplying power).  The USB firmware
+  //  can then periodically poll this I/O pin to know when it is okay to turn on
+  //  the USB module/D+/D- pull up resistor.  When designing a purely bus powered
+  //  peripheral device, it is not possible to source current on D+ or D- when the
+  //  host is not actively providing power on Vbus. Therefore, implementing this
+  //  bus sense feature is optional.  This firmware can be made to use this bus
+  //  sense feature by making sure "USE_USB_BUS_SENSE_IO" has been defined in the
+  //  HardwareProfile.h file.    
 #if defined(USE_USB_BUS_SENSE_IO)
   tris_usb_bus_sense = INPUT_PIN; // See HardwareProfile.h
 #endif
 
-//  If the host PC sends a GetStatus (device) request, the firmware must respond
-//  and let the host know if the USB peripheral device is currently bus powered
-//  or self powered.  See chapter 9 in the official USB specifications for details
-//  regarding this request.  If the peripheral device is capable of being both
-//  self and bus powered, it should not return a hard coded value for this request.
-//  Instead, firmware should check if it is currently self or bus powered, and
-//  respond accordingly.  If the hardware has been configured like demonstrated
-//  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
-//  currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
-//  is used for this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
-//  has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
-//  to it in HardwareProfile.h.
+  //  If the host PC sends a GetStatus (device) request, the firmware must respond
+  //  and let the host know if the USB peripheral device is currently bus powered
+  //  or self powered.  See chapter 9 in the official USB specifications for details
+  //  regarding this request.  If the peripheral device is capable of being both
+  //  self and bus powered, it should not return a hard coded value for this request.
+  //  Instead, firmware should check if it is currently self or bus powered, and
+  //  respond accordingly.  If the hardware has been configured like demonstrated
+  //  on the PICDEM FS USB Demo Board, an I/O pin can be polled to determine the
+  //  currently selected power source.  On the PICDEM FS USB Demo Board, "RA2" 
+  //  is used for this purpose.  If using this feature, make sure "USE_SELF_POWER_SENSE_IO"
+  //  has been defined in HardwareProfile.h, and that an appropriate I/O pin has been mapped
+  //  to it in HardwareProfile.h.
 #if defined(USE_SELF_POWER_SENSE_IO)
   tris_self_power = INPUT_PIN;  // See HardwareProfile.h
 #endif
   UserInit();
 
-  USBDeviceInit();  //usb_device.c.  Initializes USB module SFRs and firmware
-                    //variables to known states.
-}//end InitializeSystem
+  USBDeviceInit();  // usb_device.c.  Initializes USB module SFRs and firmware
+                    // variables to known states.
+}
 
 // ******************************************************************************************************
 // ************** USB Callback Functions ****************************************************************
@@ -335,21 +336,21 @@ static void InitializeSystem(void)
  *****************************************************************************/
 void USBCBSuspend(void)
 {
-  //Example power saving code.  Insert appropriate code here for the desired
-  //application behavior.  If the microcontroller will be put to sleep, a
-  //process similar to that shown below may be used:
+  // Example power saving code.  Insert appropriate code here for the desired
+  // application behavior.  If the microcontroller will be put to sleep, a
+  // process similar to that shown below may be used:
 
-  //ConfigureIOPinsForLowPower();
-  //SaveStateOfAllInterruptEnableBits();
-  //DisableAllInterruptEnableBits();
-  //EnableOnlyTheInterruptsWhichWillBeUsedToWakeTheMicro(); //should enable at least USBActivityIF as a wake source
-  //Sleep();
-  //RestoreStateOfAllPreviouslySavedInterruptEnableBits();  //Preferrably, this should be done in the USBCBWakeFromSuspend() function instead.
-  //RestoreIOPinsToNormal();                                //Preferrably, this should be done in the USBCBWakeFromSuspend() function instead.
+  // ConfigureIOPinsForLowPower();
+  // SaveStateOfAllInterruptEnableBits();
+  // DisableAllInterruptEnableBits();
+  // EnableOnlyTheInterruptsWhichWillBeUsedToWakeTheMicro(); // should enable at least USBActivityIF as a wake source
+  // Sleep();
+  // RestoreStateOfAllPreviouslySavedInterruptEnableBits();  // Preferably, this should be done in the USBCBWakeFromSuspend() function instead.
+  // RestoreIOPinsToNormal();                                // Preferably, this should be done in the USBCBWakeFromSuspend() function instead.
 
-  //IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
-  //cleared inside the usb_device.c file.  Clearing USBActivityIF here will cause 
-  //things to not work as intended.
+  // IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
+  // cleared inside the usb_device.c file.  Clearing USBActivityIF here will cause 
+  // things to not work as intended.
 
 #if defined(__C30__)
   USBSleepOnSuspend();
@@ -370,7 +371,7 @@ void USBCBSuspend(void)
  * Overview:        The host may put USB peripheral devices in low power
  *                  suspend mode (by "sending" 3+ms of idle).  Once in suspend
  *                  mode, the host may wake the device back up by sending non-
- *                  idle state signalling.
+ *                  idle state signaling.
  *
  *                  This call back is invoked when a wakeup from USB suspend 
  *                  is detected.
@@ -452,7 +453,6 @@ void USBCBErrorHandler(void)
   // for debugging purposes.
 }
 
-
 /*******************************************************************
  * Function:        void USBCBCheckOtherReq(void)
  *
@@ -484,7 +484,7 @@ void USBCBErrorHandler(void)
 void USBCBCheckOtherReq(void)
 {
   USBCheckCDCRequest();
-}//end
+}
 
 /*******************************************************************
  * Function:        void USBCBStdSetDscHandler(void)
@@ -508,7 +508,7 @@ void USBCBCheckOtherReq(void)
 void USBCBStdSetDscHandler(void)
 {
   // Must claim session ownership if supporting this request
-}//end
+}
 
 /*******************************************************************
  * Function:        void USBCBInitEP(void)
@@ -553,11 +553,11 @@ void USBCBInitEP(void)
  *                  USB applications, such as an Infrared remote
  *                  control receiver.  If a user presses the "power"
  *                  button on a remote control, it is nice that the
- *                  IR receiver can detect this signalling, and then
+ *                  IR receiver can detect this signaling, and then
  *                  send a USB "command" to the PC to wake up.
  *
  *                  The USBCBSendResume() "callback" function is used
- *                  to send this special USB signalling which wakes 
+ *                  to send this special USB signaling which wakes 
  *                  up the PC.  This function may be called by
  *                  application firmware to wake up the PC.  This
  *                  function will only be able to wake up the host if
@@ -577,7 +577,7 @@ void USBCBInitEP(void)
  *                  then this function will return without actually performing a
  *                  remote wakeup sequence.  This is the required behavior, 
  *                  as a USB device that has not been armed to perform remote 
- *                  wakeup must not drive remote wakeup signalling onto the bus;
+ *                  wakeup must not drive remote wakeup signaling onto the bus;
  *                  doing so will cause USB compliance testing failure.
  *                  
  *                  This callback should send a RESUME signal that
@@ -633,13 +633,13 @@ void USBCBSendResume(void)
   // the device as remote wakeup capable, AND, if the feature is enabled
   // on the host (ex: on Windows based hosts, in the device manager 
   // properties page for the USB device, power management tab, the 
-  // "Allow this device to bring the computer out of standby." checkbox 
+  // "Allow this device to bring the computer out of standby." check box 
   // should be checked).
-  if(USBGetRemoteWakeupStatus() == TRUE) 
+  if (USBGetRemoteWakeupStatus() == TRUE) 
   {
     // Verify that the USB bus is in fact suspended, before we send
-    // remote wakeup signalling.
-    if(USBIsBusSuspended() == TRUE)
+    // remote wakeup signaling.
+    if (USBIsBusSuspended() == TRUE)
     {
       USBMaskInterrupts();
 
@@ -651,30 +651,29 @@ void USBCBSendResume(void)
 
       // Section 7.1.7.7 of the USB 2.0 specifications indicates a USB
       // device must continuously see 5ms+ of idle on the bus, before it sends
-      // remote wakeup signalling.  One way to be certain that this parameter
+      // remote wakeup signaling.  One way to be certain that this parameter
       // gets met, is to add a 2ms+ blocking delay here (2ms plus at 
-      // least 3ms from bus idle to USBIsBusSuspended() == TRUE, yeilds
+      // least 3ms from bus idle to USBIsBusSuspended() == TRUE, yields
       // 5ms+ total delay since start of idle).
-      delay_count = 3600U;        
+      delay_count = 3600U;
       do
       {
         delay_count--;
       }while(delay_count);
 
-      // Now drive the resume K-state signalling onto the USB bus.
+      // Now drive the resume K-state signaling onto the USB bus.
       USBResumeControl = 1;       // Start RESUME signaling
       delay_count = 1800U;        // Set RESUME line for 1-13 ms
       do
       {
         delay_count--;
       }while(delay_count);
-      USBResumeControl = 0;       // Finished driving resume signalling
+      USBResumeControl = 0;       // Finished driving resume signaling
 
       USBUnmaskInterrupts();
     }
   }
 }
-
 
 /*******************************************************************
  * Function:        void USBCBEP0DataReceived(void)
@@ -694,7 +693,7 @@ void USBCBSendResume(void)
  *                  data that is received via the control endpoint.
  *                  This function needs to be used in conjunction
  *                  with the USBCBCheckOtherReq() function since 
- *                  the USBCBCheckOtherReq() function is the apps
+ *                  the USBCBCheckOtherReq() function is the application's
  *                  method for getting the initial control transfer
  *                  before the data arrives.
  *
@@ -722,7 +721,7 @@ void USBCBEP0DataReceived(void)
  *
  * Overview:        This function is called from the USB stack to
  *                  notify a user application that a USB event
- *                  occured.  This callback is in interrupt context
+ *                  occurred.  This callback is in interrupt context
  *                  when the USB_INTERRUPT option is selected.
  *
  * Note:            None

@@ -54,7 +54,7 @@
 #include "Compiler.h"
 
 #define MAX_RC2_SERVOS                24u   // This is 24 because there are 24 RPn pins
-#define INITAL_RC2_SLOTS              8u    // Inital number of RC2 slots (determines repeat rate of pulses)
+#define INITAL_RC2_SLOTS              8u    // Initial number of RC2 slots (determines repeat rate of pulses)
 #define DEFAULT_EBB_SERVO_PORTB_PIN   1u    // Note, this indicates a PortB pin number, not RPn number
 #define DEFAULT_EBB_SERVO_RPN         (DEFAULT_EBB_SERVO_PORTB_PIN + 3u) // RPn number for default pen up/down servo
 

@@ -66,9 +66,9 @@
 // 1.9.3 6/16/10 - Replaced SN with CL (Clear Node) command
 // 1.9.4 6/22/10 - Node Count now incremented on pauses (SM with zero step size)
 //                  as well
-// 1.9.5 7/2/10 - Node count no longer incrimented at all except for NI command
-//                  NI - Node count Incriment
-//                  ND - Node count Decriment
+// 1.9.5 7/2/10 - Node count no longer incremented at all except for NI command
+//                  NI - Node count Increment
+//                  ND - Node count Decrement
 //                  SN - Set Node count (with 8 byte variable)
 //                  BL - With latest bootloader, will jump to Boot Load mode
 // 1.9.6 7/3/10 - Removed extra vectors below 0x1000 for easier merging of HEX
@@ -166,7 +166,7 @@
 //                  is used, it does not default to 500mS delay, but rather 0mS.
 //                  This should now work exactly as 2.0.1 when no parameter is
 //                  used.
-//                - Tested 2.2.4 against 2.0.1 with Seleae Logic analyzer. Looked
+//                - Tested 2.2.4 against 2.0.1 with Saleae Logic analyzer. Looked
 //                  at several Inkscape plots. Confirmed that timing of steppers
 //                  and servo are the same. Confirmed that all RB0 through RB7
 //                  outputs are the same between the two versions.
@@ -252,7 +252,7 @@
 //                  Added LT command, based on LM command
 //                  Updated math in LM command based on Kinematics analysis
 //                  Updated math in ISR (for LM/LT) based on Kinematics analysis
-//                  Fixed bug where negative accels could cause delays before 
+//                  Fixed bug where negative accelerations could cause delays before 
 //                    last step.
 //                  EM command now always clears accumulators
 //                  Reduced effective pulse width for step pulses down to
@@ -330,7 +330,7 @@ static u32b4_t acc_union[2];
 
 BOOL FIFOEmpty;
 
-/* These values hold the global step position of each axis */
+// These values hold the global step position of each axis
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
@@ -366,7 +366,7 @@ BOOL gUseRCPenServo;
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 BOOL gLimitChecks = TRUE;
 
-/* Local function definitions */
+// Local function definitions
 UINT8 process_QM(void);
 void clear_StepCounters(void);
 
@@ -380,10 +380,10 @@ void high_ISR(void)
   LATDbits.LATD1 = 1;
 #endif
   
-  //Check which interrupt flag caused the interrupt.
-  //Service the interrupt
-  //Clear the interrupt flag
-  //Etc.
+  // Check which interrupt flag caused the interrupt.
+  // Service the interrupt
+  // Clear the interrupt flag
+  // Etc.
   #if defined(USB_INTERRUPT)
     USBDeviceTasks();
   #endif
@@ -393,7 +393,7 @@ void high_ISR(void)
   {
     // Clear the interrupt 
     PIR1bits.TMR1IF = 0;
-    TMR1H = TIMER1_H_RELOAD;  //
+    TMR1H = TIMER1_H_RELOAD;
     TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
     AllDone = TRUE;           // Start every ISR assuming we are done with the current command
@@ -517,7 +517,6 @@ TookStep = TRUE;
             acc_union[0].value += CurrentCommand.Rate[0].value;
             if (acc_union[0].bytes.b4 & 0x80)
             {
-              /// TODO: Is bitclr(acc_union[0].bytes.b4,7) faster?
               acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
               CurrentCommand.DirBits |= STEP1_BIT;
               TookStep = TRUE;
@@ -794,7 +793,7 @@ TookStep = TRUE;
           // This code below is the meat of the RCServo2_Move() function
           // We have to manually write it in here rather than calling
           // the function because a real function inside the ISR
-          // causes the compiler to generate enormous amounts of setup/teardown
+          // causes the compiler to generate enormous amounts of setup/tear down
           // code and things run way too slowly.
 
           // If the user is trying to turn off this channel's RC servo output
@@ -1003,7 +1002,6 @@ TookStep = TRUE;
 #endif
         CurrentCommand = CommandFIFO[0];
         // Zero out command in FIFO
-        /// TODO: Can this be done with a memclr faster? A loop and pointer?
         /// TODO: What about skipping the copy and just changing the index, making currentcommand just one of the FIFO elements?
         CommandFIFO[0].Command = COMMAND_NONE;
         CommandFIFO[0].Rate[0].value = 0;
@@ -1131,18 +1129,18 @@ void EBB_Init(void)
   TMR1H = TIMER1_H_RELOAD;  //
   TMR1L = TIMER1_L_RELOAD;  // Reload for 25Khz ISR fire
 
-  T1CONbits.TMR1ON = 1; // Turn the timer on
+  T1CONbits.TMR1ON = 1;     // Turn the timer on
 
-  IPR1bits.TMR1IP = 1;  // Use high priority interrupt
-  PIR1bits.TMR1IF = 0;  // Clear the interrupt
-  PIE1bits.TMR1IE = 1;  // Turn on the interrupt
+  IPR1bits.TMR1IP = 1;      // Use high priority interrupt
+  PIR1bits.TMR1IF = 0;      // Clear the interrupt
+  PIE1bits.TMR1IE = 1;      // Turn on the interrupt
 
 //  PORTA = 0;
   RefRA0_IO_TRIS = INPUT_PIN;
 //  PORTB = 0;
-//  INTCON2bits.RBPU = 0; // Turn on weak-pull ups for port B
-//  PORTC = 0;            // Start out low
-//  TRISC = 0x80;         // Make portC output except for PortC bit 7, USB bus sense
+//  INTCON2bits.RBPU = 0;   // Turn on weak-pull ups for port B
+//  PORTC = 0;              // Start out low
+//  TRISC = 0x80;           // Make portC output except for PortC bit 7, USB bus sense
 //  PORTD = 0;
 //  TRISD = 0;
 //  PORTE = 0;
@@ -1294,7 +1292,7 @@ void parse_SC_packet (void)
   // Check for command to select which (solenoid/servo) gets used for pen
   if (Para1 == 1u)
   {
-        // Use just solenoid
+    // Use just solenoid
     if (Para2 == 0u)
     {
       gUseSolenoid = TRUE;
@@ -1314,7 +1312,7 @@ void parse_SC_packet (void)
       gUseSolenoid = TRUE;
       gUseRCPenServo = TRUE;
     }
-        // Send a new command to set the state of the servo/solenoid
+    // Send a new command to set the state of the servo/solenoid
     process_SP(PenState, 0);
   }
   // Check for command to switch between built-in drivers and external drivers
@@ -1517,8 +1515,8 @@ void parse_LM_packet(void)
     Rate2 = 0x7FFFFFFF;
   }
 
-  /* Quickly eliminate obvious invalid parameter combinations,
-   * like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78 */
+  // Quickly eliminate obvious invalid parameter combinations,
+  // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
   if (
     (
       ((Rate1 == 0u) && (Accel1 == 0))
@@ -1632,7 +1630,7 @@ void parse_LM_packet(void)
   move.Accel[1] = Accel2;
   move.Command = COMMAND_LM_MOVE;
 
-  // Spin here until there's space in the fifo
+  // Spin here until there's space in the FIFO
   while(!FIFOEmpty)
   ;
 
@@ -1717,9 +1715,8 @@ void parse_LT_packet(void)
     return;
   }
 
-  /* Eliminate obvious invalid parameter combinations,
-   * like LT,0,X,X,X,X,X. Or LT,X,0,X,0,X,X 
-   */
+  // Eliminate obvious invalid parameter combinations,
+  // like LT,0,X,X,X,X,X. Or LT,X,0,X,0,X,X
   if (
     (Intervals == 0u)
     ||
@@ -1822,20 +1819,20 @@ void parse_LT_packet(void)
   }
 
   move.Rate[0].value = Rate1;
-  move.Steps[0] = Intervals;    // Overloading StepsCounter[0] for intervals
+  move.Steps[0] = Intervals;  // Overloading StepsCounter[0] for intervals
   move.Accel[0] = Accel1;
   move.Rate[1].value = Rate2;
   move.Steps[1] = 0;
   move.Accel[1] = Accel2;
   move.Command = COMMAND_LT_MOVE;
 
-  // Spin here until there's space in the fifo
+  // Spin here until there's space in the FIFO
   while(!FIFOEmpty)
-  ;
+    ;
 
   CommandFIFO[0] = move;
 
-  /* For debugging step motion , uncomment the next line */
+  // For debugging step motion , uncomment the next line
 #if defined(DEBUG_VALUE_PRINT)
   printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
     CommandFIFO[0].Rate[0],
@@ -2020,12 +2017,12 @@ void parse_HM_packet(void)
   
   // Wait until FIFO is empty
   while (!FIFOEmpty)
-  ;
+    ;
 
   // Then wait for motion command to finish (if one's running)
   while (CommandExecuting == TRUE)
   {
-    // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+    // Need to turn off high priority interrupts briefly here to read out value that ISR uses
     INTCONbits.GIEH = 0;    // Turn high priority interrupts off
 
     // Create our output values to print back to the PC
@@ -2381,13 +2378,12 @@ static void process_simple_motor_move(
         temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
         temp = (A1Stp << 15)/temp1;
         temp2 = (A1Stp << 15) % temp1;
-        /* Because it takes us about 5ms extra time to do this division,
-         * we only perform this extra step if our move is long enough to
-         * warrant it. That way, for really short moves (where the extra
-         * precision isn't necessary) we don't take up extra time. Without
-         * this optimization, our minimum move time is 20ms. With it, it
-         * drops down to about 15ms.
-         */
+        // Because it takes us about 5ms extra time to do this division,
+        // we only perform this extra step if our move is long enough to
+        // warrant it. That way, for really short moves (where the extra
+        // precision isn't necessary) we don't take up extra time. Without
+        // this optimization, our minimum move time is 20ms. With it, it
+        // drops down to about 15ms.
         if (Duration > 30u)
         {
           remainder = (temp2 << 16) / temp1;
@@ -2476,7 +2472,7 @@ static void process_simple_motor_move(
     move.Accel[1] = 0;
     move.Command = COMMAND_SM_XM_HM_MOVE;
 
-    /* For debugging step motion , uncomment the next line */
+    // For debugging step motion , uncomment the next line
 #if defined(DEBUG_VALUE_PRINT)
     printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
       move.Rate[0],
@@ -2487,11 +2483,11 @@ static void process_simple_motor_move(
 #endif
   }
   
-  // Spin here until there's space in the fifo
+  // Spin here until there's space in the FIFO
   while(!FIFOEmpty)
   ;
 
-  // Now, quick copy over the computed command data to the command fifo
+  // Now, quick copy over the computed command data to the command FIFO
   CommandFIFO[0] = move;
 
   FIFOEmpty = FALSE;
@@ -2509,7 +2505,7 @@ static void process_simple_motor_move(
 // <command_interrupted> = 0 if no FIFO or in-progress move commands were interrupted,
 //                         1 if a motor move command was in progress or in the FIFO
 // <fifo_steps1> and <fifo_steps1> = 24 bit unsigned integers with the number of steps
-//                         in any SM command sitting in the fifo for axis1 and axis2.
+//                         in any SM command sitting in the FIFO for axis1 and axis2.
 // <steps_remaining1> and <steps_remaining2> = 24 bit unsigned integers with the number of
 //                         steps left in the currently executing SM command (if any) for
 //                         axis1 and axis2.
@@ -2533,7 +2529,7 @@ void parse_ES_packet(void)
     return;
   }
 
-  // Need to turn off high priority interrupts breifly here to mess with ISR command parameters
+  // Need to turn off high priority interrupts briefly here to mess with ISR command parameters
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // If the FIFO has a move command in it, remove it.
@@ -2721,7 +2717,7 @@ void parse_TP_packet(void)
 // This is a command that the user can send from the PC to set the pen state.
 // Note that there is only one pen RC servo output - if you use the <PortB_Pin>
 // parameter, then that new pin becomes the pen RC servo output. This command
-// does not allow for mulitple servo signals at the same time from port B pins.
+// does not allow for multiple servo signals at the same time from port B pins.
 // Use the S2 command for that.
 //
 // This function will use the values for <serv_min>, <servo_max>,
@@ -3026,7 +3022,7 @@ void parse_QG_packet(void)
   // Reset the button pushed flag
   if (ButtonPushed)
   {
-      ButtonPushed = FALSE;
+    ButtonPushed = FALSE;
   }
 }
 
@@ -3044,7 +3040,6 @@ void parse_QG_packet(void)
 // Timer2 and ECCP1 is engraver PWM
 // Timer3 and ECCP2 is RC servo2 output
 // Timer4 is 1ms ISR
-
 void parse_SE_packet(void)
 {
   UINT8 State = 0;
@@ -3136,7 +3131,7 @@ void parse_SE_packet(void)
   }
   else
   {
-    // Trial: Spin here until there's space in the fifo
+    // Trial: Spin here until there's space in the FIFO
     while(!FIFOEmpty)
       ;
 
@@ -3167,7 +3162,7 @@ UINT8 process_QM(void)
   UINT8 Motor2Running = 0;
   UINT8 FIFOStatus = 0;
 
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // Create our output values to print back to the PC
@@ -3252,7 +3247,7 @@ void parse_QS_packet(void)
 {
   INT32 step1, step2;
 
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // Make a local copy of the things we care about
@@ -3269,7 +3264,7 @@ void parse_QS_packet(void)
 // Perform the actual clearing of the step counters (used from several places)
 void clear_StepCounters(void)
 {
-  // Need to turn off high priority interrupts breifly here to read out value that ISR uses
+  // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
   // Clear out the global step counters

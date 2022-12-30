@@ -126,7 +126,7 @@
 //1.  Control transfers with no data stage: Status stage must complete within 
 //      50ms of the start of the control transfer.
 //2.  Control transfers with (IN) data stage: Status stage must complete within 
-//      50ms of sending the last IN data packet in fullfilment of the data stage.
+//      50ms of sending the last IN data packet in fulfillment of the data stage.
 //3.  Control transfers with (OUT) data stage: No specific status stage timing
 //      requirement.  However, the total time of the entire control transfer (ex:
 //      including the OUT data stage and IN status stage) must not exceed 5 seconds.

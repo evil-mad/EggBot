@@ -8,7 +8,7 @@
 
  PreCondition:      None
                   
- Input:             startaddr - Strating address from which flash has to be read
+ Input:             startaddr - Starting address from which flash has to be read
                     num_bytes - Number of bytes of flash to be read
                     *flash_array - Pointer to array to which the flash has be read
  

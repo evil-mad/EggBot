@@ -74,7 +74,7 @@
  * BPS                  05/24/07  v1.4.2 - Fixed RC command bug - it
  *                      wouldn't shut off.
  * BPS                  08/28/07  v1.4.3 - Allowed UBW to run without
- *                      usb connected.
+ *                      USB connected.
  *
  ********************************************************************/
 
@@ -250,7 +250,7 @@ void parse_MR_packet(void);    // MR for Memory Read
 void parse_MW_packet(void);    // MW for Memory Write
 void parse_TX_packet(void);    // TX for transmitting serial
 void parse_RX_packet(void);    // RX for receiving serial
-void parse_RC_packet(void);    // RC is for outputing RC servo pulses 
+void parse_RC_packet(void);    // RC is for outputting RC servo pulses 
 void parse_BO_packet(void);    // BO sends data to fast parallel output
 void parse_BC_packet(void);    // BC configures fast parallel outputs
 void parse_BS_packet(void);    // BS sends binary data to fast parallel output
@@ -559,7 +559,7 @@ void low_ISR(void)
           |
           ((unsigned int)ADRESH << 8);
 
-      // Incriment the channel and mask bit
+      // Increment the channel and mask bit
       ChannelBit = ChannelBit << 1;
       A_cur_channel++;
     }
@@ -573,7 +573,7 @@ void low_ISR(void)
       }
       else
       {
-        // Incriment the channel and write the new one in
+        // Increment the channel and write the new one in
         A_cur_channel++;
         ChannelBit = ChannelBit << 1;
       }
@@ -631,7 +631,7 @@ void low_ISR(void)
 
 void UserInit(void)
 {
-  UINT32  i, j;
+  UINT32 i, j;
 
   // Make all of 3 digital inputs
   LATA = 0x00;
@@ -664,18 +664,18 @@ void UserInit(void)
   TRISJ = 0xFF;
 #endif
 
-  // Initalize LED I/Os to outputs
+  // Initialize LED I/Os to outputs
   mInitAllLEDs();
-  // Initalize switch as an input
+  // Initialize switch as an input
   mInitSwitch();
 
-  // Start off always using "OK" acknoledge.
+  // Start off always using "OK" acknowledge.
   g_ack_enable = TRUE;
 
   // Use our own special output function for STDOUT
   stdout = _H_USER;
 
-  // Initalize all of the ISR FIFOs
+  // Initialize all of the ISR FIFOs
   ISR_A_FIFO_out = 0;
   ISR_A_FIFO_in = 0;
   ISR_A_FIFO_length = 0;
@@ -691,7 +691,7 @@ void UserInit(void)
   A_cur_channel = 0;
 
   // Now init our registers
-  // Initalize Timer4
+  // Initialize Timer4
   // The prescaler will be at 16
   T4CONbits.T4CKPS1 = 1;
   T4CONbits.T4CKPS0 = 1;
@@ -788,7 +788,7 @@ void UserInit(void)
   // If there's a name in FLASH for us, copy it over to the USB Device
   // descriptor before we enumerate
   populateDeviceStringWithName();
-}//end UserInit
+}
 
 /******************************************************************************
  * Function:        void ProcessIO(void)
@@ -833,7 +833,7 @@ void ProcessIO(void)
   BlinkUSBStatus();
 
 #if defined(BUILD_WITH_DEMO)
-  /* Demo code, for playing back array of points so we can run without PC.*/
+  // Demo code, for playing back array of points so we can run without PC.
    
   // Check for start of playback
   if (!swProgram)
@@ -847,7 +847,7 @@ void ProcessIO(void)
     // Spit out an I packet first
     parse_I_packet();
 
-    // Then upate our I packet fifo stuff
+    // Then update our I packet FIFO stuff
     ISR_D_FIFO_out++;
     if (ISR_D_FIFO_out == kISR_FIFO_D_DEPTH)
     {
@@ -862,7 +862,7 @@ void ProcessIO(void)
     // Spit out an A packet first
     parse_A_packet();
 
-    // Then update our A packet fifo stuff
+    // Then update our A packet FIFO stuff
     ISR_A_FIFO_out++;
     if (ISR_A_FIFO_out == kISR_FIFO_A_DEPTH)
     {
@@ -1187,7 +1187,7 @@ void parse_packet(void)
     }
     case 'C':
     {
-      // Configure command (configure ports for Input or Ouptut)
+      // Configure command (configure ports for Input or Output)
       parse_C_packet();
       break;
     }
@@ -1911,7 +1911,7 @@ void parse_O_packet(void)
 // Port B bits 0 through 7
 // Port C bits 0,1,2 and 6,7
 // And that Port C bits 0,1,2 are used for
-//  User1 LED, User2 LED and Program switch respectively.
+// User1 LED, User2 LED and Program switch respectively.
 // The rest will be read in as zeros.
 void parse_I_packet(void)
 {
@@ -2135,7 +2135,7 @@ void parse_PD_packet(void)
     }
   }
 #endif
-#if defined(BOARD_EBB_V10) 
+#if defined(BOARD_EBB_V10)
   else if ('F' == port)
   {
     if (0 == direction)
@@ -2455,9 +2455,9 @@ void parse_TX_packet(void)
 // <variable_length_data> is the data (in raw form - byte for byte what was received - 
 // i.e. not translated in any way, into ASCII values or anything else) that the UBW
 // received. This may include <CR>s and NULLs among any other bytes, so make sure
-// your PC application treates the RX packet coming back from the UBW in a speical way
-// so as not to screw up normal packet processing if any special caracters are received.
-// <buffer_fullness> is a valule between 0 and MAX_SERIAL_RX_BUFFER_SIZE that records
+// your PC application treats the RX packet coming back from the UBW in a special way
+// so as not to screw up normal packet processing if any special characters are received.
+// <buffer_fullness> is a value between 0 and MAX_SERIAL_RX_BUFFER_SIZE that records
 // the total number of bytes, at that point in time, that the UBW is holding, waiting
 // to pass on to the PC.
 // <status> has several bits. 
@@ -2465,7 +2465,7 @@ void parse_TX_packet(void)
 //    has been overrun and data has been lost) This will happen if you don't
 //    read the data out of the UWB often enough and the data is coming in too fast.
 //  Bit 1 = Software TX Buffer Overrun (1 means software TX buffer (on TX pin)
-//    as been overrun and data hs been lost. This will happen if you send too much
+//    as been overrun and data has been lost. This will happen if you send too much
 //    data to the UBW and you have the serial port set to a low baud rate.
 void parse_RX_packet(void)
 {
@@ -2486,10 +2486,10 @@ void parse_CX_packet(void)
 // <value> is an unsigned 16 bit number between 0 and 11890.
 // If <value> is "0" then the RC output on that pin is disabled.
 // Otherwise <value> = 1 means 1ms pulse, <value> = 11890 means 2ms pulse,
-// any value inbetween means proportional pulse values between those two
+// any value in between means proportional pulse values between those two
 // Note: The pin used for RC output must be set as an output, or not much will happen.
 // The RC command will continue to send out pulses at the last set value on 
-// each pin that has RC output with a repition rate of 1 pulse about every 19ms.
+// each pin that has RC output with a repetition rate of 1 pulse about every 19ms.
 // If you have RC output enabled on a pin, outputting a digital value to that pin
 // will be overwritten the next time the RC pulses. Make sure to turn off the RC
 // output if you want to use the pin for something else.
@@ -2582,13 +2582,13 @@ void parse_BC_packet(void)
 //    return;
 //  }
 //
-//  // Copy over values to their gloabls
+//  // Copy over values to their globals
 //  g_BO_init = BO_init;
 //  g_BO_wait_mask = BO_wait_mask;
 //  g_BO_strobe_mask = BO_strobe_mask;
 //  g_BO_wait_delay = BO_wait_delay;
 //  g_BO_strobe_delay = BO_strobe_delay;
-//  // And initalize Port A
+//  // And initialize Port A
 //  LATA = g_BO_init;
 //
   print_ack();
@@ -2596,12 +2596,12 @@ void parse_BC_packet(void)
 
 // Bulk Output (BO)
 // BO,4AF2C124<CR>
-// After the inital comma, pull in hex values and spit them out to port A
+// After the initial comma, pull in hex values and spit them out to port A
 // Note that the procedure here is as follows:
 //  1) Write new value to PortB
 //  2) Assert <strobemask>
 //  3) Wait for <strobdelay> (if not zero)
-//  4) Deassert <strobemask>
+//  4) De-assert <strobemask>
 //  5) Wait for <waitmask> to be asserted
 //  6) Wait for <waitmask> to be deasserted
 //  7) If 5) or 6) takes longer than <waitdelay> then just move on to next byte
@@ -2742,7 +2742,7 @@ void parse_BO_packet(void)
 // The UBW will pull in one byte at a time within the <binary_data>
 // section and output it to PORTB exactly as the BO command does.
 // It will do this for <count> bytes. It will then pull in another
-// byte (which must be a carrige return) and be done.
+// byte (which must be a carriage return) and be done.
 // The whole point of this command is to improve data throughput
 // from the PC to the UBW. This form of data is also more efficient
 // for the UBW to process.
@@ -3638,31 +3638,31 @@ void BlinkUSBStatus(void)
 }
 
 volatile near unsigned char * RPnTRISPort[25] = {
-  &TRISA,      // RP0
-  &TRISA,      // RP1
-  &TRISA,      // RP2
-  &TRISB,      // RP3
-  &TRISB,      // RP4
-  &TRISB,      // RP5
-  &TRISB,      // RP6
-  &TRISB,      // RP7
-  &TRISB,      // RP8
-  &TRISB,      // RP9
-  &TRISB,      // RP10
-  &TRISC,      // RP11
-  &TRISC,      // RP12
-  &TRISC,      // RP13
-  &TRISC,      // RP14
-  &TRISC,      // RP15
-  &TRISC,      // RP16
-  &TRISC,      // RP17
-  &TRISC,      // RP18
-  &TRISD,      // RP19
-  &TRISD,      // RP20
-  &TRISD,      // RP21
-  &TRISD,      // RP22
-  &TRISD,      // RP23
-  &TRISD,      // RP24
+  &TRISA,     // RP0
+  &TRISA,     // RP1
+  &TRISA,     // RP2
+  &TRISB,     // RP3
+  &TRISB,     // RP4
+  &TRISB,     // RP5
+  &TRISB,     // RP6
+  &TRISB,     // RP7
+  &TRISB,     // RP8
+  &TRISB,     // RP9
+  &TRISB,     // RP10
+  &TRISC,     // RP11
+  &TRISC,     // RP12
+  &TRISC,     // RP13
+  &TRISC,     // RP14
+  &TRISC,     // RP15
+  &TRISC,     // RP16
+  &TRISC,     // RP17
+  &TRISC,     // RP18
+  &TRISD,     // RP19
+  &TRISD,     // RP20
+  &TRISD,     // RP21
+  &TRISD,     // RP22
+  &TRISD,     // RP23
+  &TRISD,     // RP24
 };
 
 volatile near unsigned char * RPnLATPort[25] = {

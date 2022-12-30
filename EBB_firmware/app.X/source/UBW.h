@@ -114,7 +114,7 @@ typedef enum {
 }
 
 // For the RC command, we define a little data structure that holds the 
-// values assoicated with a particular servo connection
+// values associated with a particular servo connection
 // It's port, pin, value (position) and state (INACTIVE, PRIMED or TIMING)
 // Later on we make an array of these (19 elements long - 19 pins) to track
 // the values of all of the servos.
