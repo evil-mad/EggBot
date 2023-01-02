@@ -120,7 +120,7 @@ typedef union union32b4 {
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
-  BYTE            Command;                        // SM DL S2 SE EN LM LT
+  UINT8           Command;                        // SM DL S2 SE EN LM LT
   uS32b4_t        Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
@@ -133,7 +133,6 @@ typedef struct
   UINT8           SEState;                        // SM       SE    LM LT
   UINT16          SEPower;                        //          SE
   UINT32          TicksToFlip[NUMBER_OF_STEPPERS];//                LM LT
-  UINT8           Active[NUMBER_OF_STEPPERS];     // (internal to ISR only)
 } MoveCommandType;
 
 // Define global things that depend on the board type

@@ -334,9 +334,11 @@ BOOL FIFOEmpty;
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
-static BYTE TookStep;       // LSb set if a step was taken
-static BYTE AllDone;        // LSB set if this command is complete
-static BYTE i;
+static UINT8 TookStep;       // LSb set if a step was taken
+static UINT8 AllDone;        // LSb set if this command is complete
+static UINT8 i;
+static UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
+
 static DriverConfigurationType DriverConfiguration;
 // Set TRUE to enable RC Servo output for pen up/down
 static BOOL gUseRCPenServo;
@@ -430,7 +432,7 @@ void high_ISR(void)
       //// MOTOR 1 ////
 
       // Only do this if there are steps left to take
-      if (CurrentCommand.Active[0])
+      if (bittstzero(AxisActive[0]))
       {
         // Add the rate to the accumulator and see if the MSb got set. If so
         // then take a step and record that the step was taken
@@ -446,14 +448,14 @@ void high_ISR(void)
           // the axis is no longer active
           if (CurrentCommand.Steps[0] == 0u)
           {
-            CurrentCommand.Active[0] = FALSE;
+            bitclrzero(AxisActive[0]);
           }
         }
       }
 
       //// MOTOR 2 ////
 
-      if (CurrentCommand.Active[1])
+      if (bittstzero(AxisActive[1]))
       {
         acc_union[1].value += CurrentCommand.Rate[1].value;
         if (acc_union[1].bytes.b4 & 0x80)
@@ -464,7 +466,7 @@ void high_ISR(void)
           CurrentCommand.Steps[1]--;
           if (CurrentCommand.Steps[1] == 0u)
           {
-            CurrentCommand.Active[1] = FALSE;
+            bitclrzero(AxisActive[1]);
           }
         }
       }
@@ -479,7 +481,7 @@ void high_ISR(void)
       // us simpler math when figuring out how long moves will take.
       // TODO: Is there a way to optimize this? Make this check here 
       // less costly somehow?
-      if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
+      if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
       {
         bitclrzero(AllDone);
       }
@@ -493,7 +495,7 @@ void high_ISR(void)
       //// MOTOR 1 ////
 
       // Only do this if there are steps left to take
-      if (CurrentCommand.Active[0])
+      if (bittstzero(AxisActive[0]))
       {
         // For acceleration, we now add Accel to Rate each time through the ISR
         // However, based on the exact parameters, we might be going through 
@@ -540,14 +542,14 @@ bitsetzero(TookStep);
           CurrentCommand.Steps[0]--;
           if (CurrentCommand.Steps[0] == 0u)
           {
-            CurrentCommand.Active[0] = FALSE;
+            bitclrzero(AxisActive[0]);
           }
         }
       }
 
       //// MOTOR 2 ////
 
-      if (CurrentCommand.Active[1])
+      if (bittstzero(AxisActive[1]))
       {
         // For acceleration, we now add a bit to StepAdd each time through as well
         if (bittst(CurrentCommand.ServoRPn, 1))
@@ -581,7 +583,7 @@ bitsetzero(TookStep);
           CurrentCommand.Steps[1]--;
           if (CurrentCommand.Steps[1] == 0u)
           {
-            CurrentCommand.Active[1] = FALSE;
+            bitclrzero(AxisActive[1]);
           }
         }
       }
@@ -596,7 +598,7 @@ bitsetzero(TookStep);
       // us simpler math when figuring out how long moves will take.
       // TODO: Is there a way to optimize this? Make this check here 
       // less costly somehow?
-      if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
+      if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
       {
         bitclrzero(AllDone);
       }
@@ -606,18 +608,18 @@ bitsetzero(TookStep);
     // The Low level Timed (LT) command is pretty special. Instead of running
     // until all step counts are zero, it runs for a certain amount of 25Khz
     // ISR ticks (stored in .Steps[0]). Both axis continue to produce steps
-    // until the time is used up. This affects how .Active is computed.
-    // Only .Active[0] is used for this command, not .Active[1].
+    // until the time is used up. This affects how AxisActive is computed.
+    // Only AxisActive[0] is used for this command, not AxisActive[1].
     if (bittst(CurrentCommand.Command, COMMAND_LT_MOVE_BIT))
     {
       // Has time run out for this command yet?
-      if (CurrentCommand.Active[0])
+      if (bittstzero(AxisActive[0]))
       {
         // Nope. So count this ISR tick, and then see if we need to take a step
         CurrentCommand.Steps[0]--;
         if (CurrentCommand.Steps[0] == 0u)
         {
-          CurrentCommand.Active[0] = FALSE;
+          bitclrzero(AxisActive[0]);
         }
 
         //// MOTOR 1 ////
@@ -710,7 +712,7 @@ bitsetzero(TookStep);
       // us simpler math when figuring out how long moves will take.
       // TODO: Is there a way to optimize this? Make this check here 
       // less costly somehow?
-      if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
+      if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
       {
         bitclrzero(AllDone);
       }
@@ -1066,8 +1068,8 @@ CheckForNextCommand:
         CommandFIFO[0].SEPower = 0;
         CommandFIFO[0].TicksToFlip[0] = 0;
         CommandFIFO[0].TicksToFlip[1] = 0;
-        CommandFIFO[0].Active[0] = FALSE;
-        CommandFIFO[0].Active[1] = FALSE;
+        bitclrzero(AxisActive[0]);
+        bitclrzero(AxisActive[1]);
 
         // Check that DelayCounter doesn't have a crazy high value
         if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
@@ -1091,19 +1093,19 @@ CheckForNextCommand:
           // Set the "Active" flags for this move based on steps for each axis
           if (CurrentCommand.Steps[0])
           {
-            CurrentCommand.Active[0] = TRUE;
+            bitsetzero(AxisActive[0]);
           }
           else
           {
-            CurrentCommand.Active[0] = FALSE;
+            bitclrzero(AxisActive[0]);
           }
           if (CurrentCommand.Steps[1])
           {
-            CurrentCommand.Active[1] = TRUE;
+            bitsetzero(AxisActive[1]);
           }
           else
           {
-            CurrentCommand.Active[1] = FALSE;
+            bitclrzero(AxisActive[1]);
           }
         }
         FIFOEmpty = TRUE;
