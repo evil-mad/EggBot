@@ -328,7 +328,8 @@ static volatile MoveCommandType CurrentCommand;
 // Accumulator for each axis
 static u32b4_t acc_union[2];
 
-BOOL FIFOEmpty;
+// LSb set when the one-deep FIFO has no command in it
+UINT8 FIFOEmpty;
 
 // These values hold the global step position of each axis
 volatile static INT32 globalStepCounter1;
@@ -1041,7 +1042,7 @@ CheckForNextCommand:
     if (bittstzero(AllDone))
     {
       CurrentCommand.Command = COMMAND_NONE;
-      if (!FIFOEmpty)
+      if (!bittstzero(FIFOEmpty))
       {
         if (gRedLEDEmptyFIFO)
         {
@@ -1108,7 +1109,7 @@ CheckForNextCommand:
             bitclrzero(AxisActive[1]);
           }
         }
-        FIFOEmpty = TRUE;
+        bitsetzero(FIFOEmpty);
       }
       else 
       {
@@ -1166,7 +1167,7 @@ void EBB_Init(void)
   CurrentCommand.ServoChannel = 0;
   CurrentCommand.ServoRate = 0;
 
-  FIFOEmpty = TRUE;
+  bitsetzero(FIFOEmpty);
   gRedLEDEmptyFIFO = FALSE;
 
   // Set up TMR1 for our 25KHz High ISR for stepping
@@ -1682,7 +1683,7 @@ void parse_LM_packet(void)
   move.Command = COMMAND_LM_MOVE;
 
   // Spin here until there's space in the FIFO
-  while(!FIFOEmpty)
+  while(!bittstzero(FIFOEmpty))
   ;
 
   CommandFIFO[0] = move;
@@ -1721,7 +1722,7 @@ void parse_LM_packet(void)
   );
 #endif
   
-  FIFOEmpty = FALSE;
+  bitclrzero(FIFOEmpty);
 
   if (g_ack_enable)
   {
@@ -1878,7 +1879,7 @@ void parse_LT_packet(void)
   move.Command = COMMAND_LT_MOVE;
 
   // Spin here until there's space in the FIFO
-  while(!FIFOEmpty)
+  while(!bittstzero(FIFOEmpty))
     ;
 
   CommandFIFO[0] = move;
@@ -1893,7 +1894,7 @@ void parse_LT_packet(void)
   );
 #endif
 
-  FIFOEmpty = FALSE;
+  bitclrzero(FIFOEmpty);
 
   if (g_ack_enable)
   {
@@ -2067,7 +2068,7 @@ void parse_HM_packet(void)
   }
   
   // Wait until FIFO is empty
-  while (!FIFOEmpty)
+  while(!bittstzero(FIFOEmpty))
     ;
 
   // Then wait for motion command to finish (if one's running)
@@ -2535,13 +2536,13 @@ static void process_simple_motor_move(
   }
   
   // Spin here until there's space in the FIFO
-  while(!FIFOEmpty)
+  while(!bittstzero(FIFOEmpty))
   ;
 
   // Now, quick copy over the computed command data to the command FIFO
   CommandFIFO[0] = move;
 
-  FIFOEmpty = FALSE;
+  bitclrzero(FIFOEmpty);
 }
 
 // E-Stop
@@ -2601,7 +2602,7 @@ void parse_ES_packet(void)
     CommandFIFO[0].Steps[1] = 0;
     CommandFIFO[0].Accel[0] = 0;
     CommandFIFO[0].Accel[1] = 0;
-    FIFOEmpty = TRUE;
+    bitsetzero(FIFOEmpty);
   }
 
   // If the current command is a move command, then stop the move.
@@ -2903,7 +2904,7 @@ void parse_EM_packet(void)
   }
 
   // Trial: Spin here until there's space in the fifo
-  while(!FIFOEmpty)
+  while(!bittstzero(FIFOEmpty))
     ;
 
   // Set up the motion queue command
@@ -2911,7 +2912,7 @@ void parse_EM_packet(void)
   CommandFIFO[0].ServoRPn = EA2;
   CommandFIFO[0].Command = COMMAND_EM;
 
-  FIFOEmpty = FALSE;
+  bitclrzero(FIFOEmpty);
 
   print_ack();
 }
@@ -3183,7 +3184,7 @@ void parse_SE_packet(void)
   else
   {
     // Trial: Spin here until there's space in the FIFO
-    while(!FIFOEmpty)
+    while(!bittstzero(FIFOEmpty))
       ;
 
     // Set up the motion queue command
@@ -3192,7 +3193,7 @@ void parse_SE_packet(void)
     CommandFIFO[0].SEState = State;
     CommandFIFO[0].Command = COMMAND_SE;
 
-    FIFOEmpty = FALSE;
+    bitclrzero(FIFOEmpty);
   }
 
   print_ack();
@@ -3225,7 +3226,7 @@ UINT8 process_QM(void)
   {
     CommandExecuting = 1;
   }
-  if (FIFOEmpty == FALSE) 
+  if (!bittstzero(FIFOEmpty)) 
   {
     CommandExecuting = 1;
     FIFOStatus = 1;

@@ -163,7 +163,7 @@ typedef struct
 
 extern MoveCommandType CommandFIFO[];
 extern unsigned int DemoModeActive;
-extern BOOL FIFOEmpty;
+extern UINT8 FIFOEmpty;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;

@@ -369,7 +369,7 @@ UINT8 RCServo2_Move(
 
       // Wait until we have a free spot in the FIFO, and add our new
       // command in
-      while(!FIFOEmpty)
+      while(!bittstzero(FIFOEmpty))
       ;
       
       // If the pin we're controlling is B1 (the normal servo output) then
@@ -389,7 +389,7 @@ UINT8 RCServo2_Move(
       CommandFIFO[0].ServoPosition = Position;
       CommandFIFO[0].ServoRate = Rate;
 
-      FIFOEmpty = FALSE;
+      bitclrzero(FIFOEmpty);
     }
   }
   return Channel;
