@@ -316,13 +316,13 @@ typedef enum
   EXTERNAL_CONTROLS_DRIVERS
 } DriverConfigurationType;
 
-//#pragma udata ISR_buf = 0x100
-#pragma udata
 
 // These global variables are deliberately put into "Bank" 1 of RAM.
 // They are every global variable that the 25KHz ISR has to access.
 // With them all being in bank 1, no bank switch instructions are needed
 // in the ISR save for one at the very top.
+#pragma udata ISR_globals = 0x180
+
 static volatile MoveCommandType CurrentCommand;
 
 // Accumulator for each axis
@@ -334,10 +334,9 @@ BOOL FIFOEmpty;
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
-//static unsigned char OutByte;
-static unsigned char TookStep;
-static unsigned char AllDone;
-static unsigned char i;
+static BYTE TookStep;
+static BYTE AllDone;
+static BYTE i;
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -396,7 +395,7 @@ void high_ISR(void)
     TMR1H = TIMER1_H_RELOAD;
     TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
-    AllDone = TRUE;           // Start every ISR assuming we are done with the current command
+    bitsetzero(AllDone);           // Start every ISR assuming we are done with the current command - set bit 0 of AllDone
 
     switch (CurrentCommand.Command)
     {
@@ -675,7 +674,7 @@ TookStep = TRUE;
         // less costly somehow?
         if (CurrentCommand.Active[0] || CurrentCommand.Active[1])
         {
-          AllDone = FALSE;
+          bitclrzero(AllDone);
         }
 
         if (TookStep)
@@ -856,7 +855,7 @@ TookStep = TRUE;
 
           if (CurrentCommand.DelayCounter)
           {
-            AllDone = FALSE;
+            bitclrzero(AllDone);
           }
         }
         break;
@@ -877,7 +876,7 @@ TookStep = TRUE;
           CCP1CON = (CCP1CON & 0b11001111);
         }
         // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
-        AllDone = TRUE;
+        bitsetzero(AllDone);
         break;
         
       case COMMAND_EM:
@@ -978,7 +977,7 @@ TookStep = TRUE;
         acc_union[1].value = 0;
 
         // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
-        AllDone = TRUE;
+        bitsetzero(AllDone);
         break;
         
       default:
@@ -987,7 +986,7 @@ TookStep = TRUE;
     }
     
     // If we're done with our current command, load in the next one
-    if (AllDone)
+    if (bittstzero(AllDone))
     {
       CurrentCommand.Command = COMMAND_NONE;
       if (!FIFOEmpty)
