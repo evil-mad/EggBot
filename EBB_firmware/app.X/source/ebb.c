@@ -337,6 +337,13 @@ volatile static INT32 globalStepCounter2;
 static BYTE TookStep;       // LSb set if a step was taken
 static BYTE AllDone;        // LSB set if this command is complete
 static BYTE i;
+static DriverConfigurationType DriverConfiguration;
+// Set TRUE to enable RC Servo output for pen up/down
+static BOOL gUseRCPenServo;
+// When true, red LED will light when FIFO is empty
+volatile BOOL gRedLEDEmptyFIFO;
+static BOOL ButtonPushed;
+static BOOL UseAltPause;
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -347,21 +354,16 @@ unsigned int DemoModeActive;
 unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
-static DriverConfigurationType DriverConfiguration;
 
 // track the latest state of the pen
 static PenStateType PenState;
 
 static unsigned long NodeCount;
 static char Layer;
-static BOOL ButtonPushed;
-static BOOL UseAltPause;
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
 // Set TRUE to enable solenoid output for pen up/down
 BOOL gUseSolenoid;
-// Set TRUE to enable RC Servo output for pen up/down
-BOOL gUseRCPenServo;
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
 BOOL gLimitChecks = TRUE;
 
@@ -1163,6 +1165,7 @@ void EBB_Init(void)
   CurrentCommand.ServoRate = 0;
 
   FIFOEmpty = TRUE;
+  gRedLEDEmptyFIFO = FALSE;
 
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
@@ -1180,7 +1183,7 @@ void EBB_Init(void)
   IPR1bits.TMR1IP = 1;      // Use high priority interrupt
   PIR1bits.TMR1IF = 0;      // Clear the interrupt
   PIE1bits.TMR1IE = 1;      // Turn on the interrupt
-
+  
 //  PORTA = 0;
   RefRA0_IO_TRIS = INPUT_PIN;
 //  PORTB = 0;

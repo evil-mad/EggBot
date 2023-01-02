@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO2_AO0\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO3_AO0\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -226,9 +226,6 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS = 0;
 volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
-
-// When true, red LED will light when FIFO is empty
-volatile BOOL gRedLEDEmptyFIFO = FALSE;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
