@@ -401,7 +401,7 @@ void high_ISR(void)
     // Clear TookStep here. Any command that affects the steppers will set this
     // if that command needs to output step or direction bits. Other commands
     // need to leave this bit alone.
-    TookStep = FALSE;         
+    bitsetzero(TookStep);
 
     // Process a motor move command of any type
     // This is the main chunk of code for EBB : the step generation code in the 25KHz ISR
@@ -439,7 +439,7 @@ void high_ISR(void)
         {
           acc_union[0].bytes.b4 &= 0x7F;
           CurrentCommand.DirBits |= STEP1_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
           CurrentCommand.Steps[0]--;
 
           // For these stepper motion commands zero steps left means
@@ -460,7 +460,7 @@ void high_ISR(void)
         {
           acc_union[1].bytes.b4 &= 0x7F;
           CurrentCommand.DirBits |= STEP2_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
           CurrentCommand.Steps[1]--;
           if (CurrentCommand.Steps[1] == 0u)
           {
@@ -515,7 +515,7 @@ void high_ISR(void)
             // Invert the direction so we start moving in the other direction
             CurrentCommand.DirBits ^= DIR1_BIT;
 // TAKE OUT AFTER TESTING IS DONE
-TookStep = TRUE;
+bitsetzero(TookStep);
           }
         }
         CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
@@ -536,7 +536,7 @@ TookStep = TRUE;
         {
           acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
           CurrentCommand.DirBits |= STEP1_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
           CurrentCommand.Steps[0]--;
           if (CurrentCommand.Steps[0] == 0u)
           {
@@ -563,7 +563,7 @@ TookStep = TRUE;
             // Invert the direction so we start moving in the other direction
             CurrentCommand.DirBits ^= DIR2_BIT;
 // TAKE OUT AFTER TESTING IS DONE
-TookStep = TRUE;
+bitsetzero(TookStep);
           }
         }
         CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
@@ -577,7 +577,7 @@ TookStep = TRUE;
         {
           acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
           CurrentCommand.DirBits |= STEP2_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
           CurrentCommand.Steps[1]--;
           if (CurrentCommand.Steps[1] == 0u)
           {
@@ -642,7 +642,7 @@ TookStep = TRUE;
             // Invert the direction so we start moving in the other direction
             CurrentCommand.DirBits ^= DIR1_BIT;
 // TAKE OUT AFTER TESTING IS DONE
-TookStep = TRUE;
+bitsetzero(TookStep);
           }
         }
         CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
@@ -656,7 +656,7 @@ TookStep = TRUE;
         {
           acc_union[0].bytes.b4 &= 0x7F;
           CurrentCommand.DirBits |= STEP1_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
         }
 
         //// MOTOR 2 ////
@@ -682,7 +682,7 @@ TookStep = TRUE;
             // Invert the direction so we start moving in the other direction
             CurrentCommand.DirBits ^= DIR2_BIT;
 // TAKE OUT AFTER TESTING IS DONE
-TookStep = TRUE;
+bitsetzero(TookStep);
           }
         }
         CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
@@ -696,7 +696,7 @@ TookStep = TRUE;
         {
           acc_union[1].bytes.b4 &= 0x7F;
           CurrentCommand.DirBits |= STEP2_BIT;
-          TookStep = TRUE;
+          bitsetzero(TookStep);
         }
       }
 
@@ -720,7 +720,7 @@ TookStep = TRUE;
     // ran needs to output something new. Also take care of recording this
     // step properly.
 OutputBits:
-    if (TookStep)
+    if (bittstzero(TookStep))
     {
       if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
       {
