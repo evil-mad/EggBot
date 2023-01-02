@@ -74,20 +74,25 @@ typedef enum
   PEN_UP
 } PenStateType;
 
-/* Enum that lists each type of command that can be put in the motion control FIFO */
-typedef enum
-{
-  COMMAND_NONE = 0u,
-  COMMAND_DELAY,
-  COMMAND_SERVO_MOVE,
-  COMMAND_SE,
-  COMMAND_EM,
-  COMMAND_SEPARATOR_MOTOR_MOVES_ABOVE_THIS,   // This is not a real command. Used for quick check if a command is a motor moving command.
-                                              // All commands higher than this separator are motor move commands
-  COMMAND_SM_XM_HM_MOVE,
-  COMMAND_LM_MOVE,
-  COMMAND_LT_MOVE
-} CommandType;
+// Bitfield defines the CommandType BYTE in the MoveCommandType
+// We use
+
+#define COMMAND_DELAY_BIT             0u
+#define COMMAND_SERVO_MOVE_BIT        1u
+#define COMMAND_SE_BIT                2u
+#define COMMAND_EM_BIT                3u
+#define COMMAND_SM_XM_HM_MOVE_BIT     4u
+#define COMMAND_LM_MOVE_BIT           5u
+#define COMMAND_LT_MOVE_BIT           6u
+
+#define COMMAND_NONE                  0u
+#define COMMAND_DELAY                 1u
+#define COMMAND_SERVO_MOVE            (1u << COMMAND_SERVO_MOVE_BIT)
+#define COMMAND_SE                    (1u << COMMAND_SE_BIT)
+#define COMMAND_EM                    (1u << COMMAND_EM_BIT)
+#define COMMAND_SM_XM_HM_MOVE         (1u << COMMAND_SM_XM_HM_MOVE_BIT)
+#define COMMAND_LM_MOVE               (1u << COMMAND_LM_MOVE_BIT)
+#define COMMAND_LT_MOVE               (1u << COMMAND_LT_MOVE_BIT)
 
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
@@ -115,7 +120,7 @@ typedef union union32b4 {
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
-  CommandType     Command;                        // SM DL S2 SE EN LM LT
+  BYTE            Command;                        // SM DL S2 SE EN LM LT
   uS32b4_t        Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT

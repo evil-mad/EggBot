@@ -130,7 +130,7 @@ volatile unsigned char ISR_A_FIFO_out;        // Out pointer
 volatile unsigned char ISR_A_FIFO_length;     // Current FIFO depth
 
 // This byte has each of its bits used as a separate error flag
-unsigned char error_byte;
+BYTE error_byte;
 
 // RC servo variables
 // First the main array of data for each servo
@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO1_AO0\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO2_AO0\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -672,6 +672,10 @@ void UserInit(void)
   // Start off always using "OK" acknowledge.
   g_ack_enable = TRUE;
 
+  // This has been missing for a long time and created problems on boot if not
+  // set to zero.
+  error_byte = 0;
+  
   // Use our own special output function for STDOUT
   stdout = _H_USER;
 
