@@ -136,10 +136,18 @@ typedef struct
 } MoveCommandType;
 
 // Define global things that depend on the board type
-#define STEP1_BIT	(0x01u)
-#define DIR1_BIT	(0x02u)
-#define STEP2_BIT	(0x04u)
-#define DIR2_BIT	(0x08u)
+// STEP2 = RD4
+#define STEP2_BIT_NUM   4u
+#define STEP2_BIT       (1u << STEP2_BIT_NUM)
+// DIR2 = RD5
+#define DIR2_BIT_NUM    5u
+#define DIR2_BIT        (1u << DIR2_BIT_NUM)
+// STEP1 = RD6
+#define STEP1_BIT_NUM   6u
+#define STEP1_BIT       (1u << STEP1_BIT_NUM)
+// DIR1 = RD7
+#define DIR1_BIT_NUM    7u
+#define DIR1_BIT        (1u << DIR1_BIT_NUM)
 
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4

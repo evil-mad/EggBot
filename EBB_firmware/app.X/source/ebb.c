@@ -335,18 +335,20 @@ UINT8 FIFOEmpty;
 volatile static INT32 globalStepCounter1;
 volatile static INT32 globalStepCounter2;
 
-static UINT8 TookStep;       // LSb set if a step was taken
+//static UINT8 TookStep;       // LSb set if a step was taken
 static UINT8 AllDone;        // LSb set if this command is complete
 static UINT8 i;
 static UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
 
 static DriverConfigurationType DriverConfiguration;
-// Set TRUE to enable RC Servo output for pen up/down
-static BOOL gUseRCPenServo;
-// When true, red LED will light when FIFO is empty
-volatile BOOL gRedLEDEmptyFIFO;
-static BOOL ButtonPushed;
-static BOOL UseAltPause;
+// LSb set to enable RC Servo output for pen up/down
+static UINT8 gUseRCPenServo;
+// LSb set to enable red LED lit when FIFO is empty
+volatile UINT8 gRedLEDEmptyFIFO;
+// LSb set when user presses the PRG or alternate PRG button
+static volatile UINT8 ButtonPushed;
+// LSb set to enable use of alternate PRG (pause) button
+static volatile UINT8 UseAltPause;
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -394,10 +396,6 @@ void high_ISR(void)
   TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
   bitsetzero(AllDone);      // Start every ISR assuming we are done with the current command - set bit 0 of AllDone
-  // Clear TookStep here. Any command that affects the steppers will set this
-  // if that command needs to output step or direction bits. Other commands
-  // need to leave this bit alone.
-  bitsetzero(TookStep);
 
   // Process a motor move command of any type
   // This is the main chunk of code for EBB : the step generation code in the 25KHz ISR
@@ -435,7 +433,6 @@ void high_ISR(void)
       {
         acc_union[0].bytes.b4 &= 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
-        bitsetzero(TookStep);
         CurrentCommand.Steps[0]--;
 
         // For these stepper motion commands zero steps left means
@@ -456,7 +453,6 @@ void high_ISR(void)
       {
         acc_union[1].bytes.b4 &= 0x7F;
         CurrentCommand.DirBits |= STEP2_BIT;
-        bitsetzero(TookStep);
         CurrentCommand.Steps[1]--;
         if (CurrentCommand.Steps[1] == 0u)
         {
@@ -510,8 +506,6 @@ void high_ISR(void)
           CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
           // Invert the direction so we start moving in the other direction
           CurrentCommand.DirBits ^= DIR1_BIT;
-// TAKE OUT AFTER TESTING IS DONE
-bitsetzero(TookStep);
         }
       }
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
@@ -532,7 +526,6 @@ bitsetzero(TookStep);
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
-        bitsetzero(TookStep);
         CurrentCommand.Steps[0]--;
         if (CurrentCommand.Steps[0] == 0u)
         {
@@ -558,8 +551,6 @@ bitsetzero(TookStep);
           CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
           // Invert the direction so we start moving in the other direction
           CurrentCommand.DirBits ^= DIR2_BIT;
-// TAKE OUT AFTER TESTING IS DONE
-bitsetzero(TookStep);
         }
       }
       CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
@@ -573,7 +564,6 @@ bitsetzero(TookStep);
       {
         acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
         CurrentCommand.DirBits |= STEP2_BIT;
-        bitsetzero(TookStep);
         CurrentCommand.Steps[1]--;
         if (CurrentCommand.Steps[1] == 0u)
         {
@@ -637,8 +627,6 @@ bitsetzero(TookStep);
           CurrentCommand.Accel[0] = -CurrentCommand.Accel[0];
           // Invert the direction so we start moving in the other direction
           CurrentCommand.DirBits ^= DIR1_BIT;
-// TAKE OUT AFTER TESTING IS DONE
-bitsetzero(TookStep);
         }
       }
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
@@ -652,7 +640,6 @@ bitsetzero(TookStep);
       {
         acc_union[0].bytes.b4 &= 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
-        bitsetzero(TookStep);
       }
 
       //// MOTOR 2 ////
@@ -677,8 +664,6 @@ bitsetzero(TookStep);
           CurrentCommand.Accel[1] = -CurrentCommand.Accel[1];
           // Invert the direction so we start moving in the other direction
           CurrentCommand.DirBits ^= DIR2_BIT;
-// TAKE OUT AFTER TESTING IS DONE
-bitsetzero(TookStep);
         }
       }
       CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
@@ -692,7 +677,6 @@ bitsetzero(TookStep);
       {
         acc_union[1].bytes.b4 &= 0x7F;
         CurrentCommand.DirBits |= STEP2_BIT;
-        bitsetzero(TookStep);
       }
     }
 
@@ -716,44 +700,19 @@ bitsetzero(TookStep);
   // ran needs to output something new. Also take care of recording this
   // step properly.
 OutputBits:
-  if (bittstzero(TookStep))
+  if ((CurrentCommand.DirBits & (STEP1_BIT | STEP2_BIT)) != 0u)
   {
     if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
     {
-      /// TODO: Since we know that these are all the upper 4 bits of PortD,
-      /// can we just set the bit constants properly and then always just
-      /// output the top for bits of OutByte directly to PortD?
-      // Set the dir bits
-      if (CurrentCommand.DirBits & DIR1_BIT)
-      {
-        Dir1IO = 1;
-      }
-      else
-      {
-        Dir1IO = 0;
-      }
-      if (CurrentCommand.DirBits & DIR2_BIT)
-      {
-        Dir2IO = 1;
-      }
-      else
-      {
-        Dir2IO = 0;
-      }
-      // Set the step bits
-      if (CurrentCommand.DirBits & STEP1_BIT)
-      {
-        Step1IO = 1;
-      }
-      if (CurrentCommand.DirBits & STEP2_BIT)
-      {
-        Step2IO = 1;
-      }
+      // The Step and Direction bits are all output on the top four bits
+      // of PortD. So we can be very efficient here and simply output those
+      // four bits directly to port D.
+      LATD = (PORTD & ~(STEP1_BIT | STEP2_BIT | DIR1_BIT | DIR2_BIT)) | CurrentCommand.DirBits;
     }
-    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+    else
     {
       // Set the DIR Bits
-      if (CurrentCommand.DirBits & DIR1_BIT)
+      if (bittst(CurrentCommand.DirBits, DIR1_BIT_NUM))
       {
         Dir1AltIO = 1;
       }
@@ -761,7 +720,7 @@ OutputBits:
       {
         Dir1AltIO = 0;
       }
-      if (CurrentCommand.DirBits & DIR2_BIT)
+      if (bittst(CurrentCommand.DirBits, DIR2_BIT_NUM))
       {
         Dir2AltIO = 1;
       }
@@ -770,11 +729,11 @@ OutputBits:
         Dir2AltIO = 0;
       }
       // Set the STEP bits
-      if (CurrentCommand.DirBits & STEP1_BIT)
+      if (bittst(CurrentCommand.DirBits, STEP1_BIT_NUM))
       {
         Step1AltIO = 1;
       }
-      if (CurrentCommand.DirBits & STEP2_BIT)
+      if (bittst(CurrentCommand.DirBits, STEP2_BIT_NUM))
       {
         Step2AltIO = 1;
       }
@@ -783,9 +742,9 @@ OutputBits:
     // This next section not only counts the step(s) we are taking, but
     // also acts as a delay to keep the step bit set for a little while.
     // The code paths though here are approximately constant time.
-    if (CurrentCommand.DirBits & STEP1_BIT)
+    if (bittst(CurrentCommand.DirBits, STEP1_BIT_NUM))
     {
-      if (CurrentCommand.DirBits & DIR1_BIT)
+      if (bittst(CurrentCommand.DirBits, DIR1_BIT_NUM))
       {
         globalStepCounter1--;
       }
@@ -794,9 +753,9 @@ OutputBits:
         globalStepCounter1++;
       }
     }
-    if (CurrentCommand.DirBits & STEP2_BIT)
+    if (bittst(CurrentCommand.DirBits, STEP2_BIT_NUM))
     {
-      if (CurrentCommand.DirBits & DIR2_BIT)
+      if (bittst(CurrentCommand.DirBits, DIR2_BIT_NUM))
       {
         globalStepCounter2--;
       }
@@ -804,16 +763,6 @@ OutputBits:
       {
         globalStepCounter2++;
       }
-    }
-    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
-    {
-      Step1IO = 0;
-      Step2IO = 0;
-    }
-    else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
-    {
-      Step1AltIO = 0;
-      Step2AltIO = 0;
     }
 
     // Clear the two step bits so they're empty for the next pass through ISR
@@ -824,7 +773,7 @@ OutputBits:
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT))
   {
     // Check to see if we should change the state of the pen
-    if (gUseRCPenServo)
+    if (bittstzero(gUseRCPenServo))
     {
       // Precompute the channel, since we use it all over the place
       UINT8 Channel = CurrentCommand.ServoChannel - 1;
@@ -1037,7 +986,7 @@ CheckForNextCommand:
     CurrentCommand.Command = COMMAND_NONE;
     if (!bittstzero(FIFOEmpty))
     {
-      if (gRedLEDEmptyFIFO)
+      if (bittstzero(gRedLEDEmptyFIFO))
       {
         mLED_2_Off()
       }
@@ -1108,7 +1057,7 @@ CheckForNextCommand:
     {
       CurrentCommand.DelayCounter = 0;
 
-      if (gRedLEDEmptyFIFO)
+      if (bittstzero(gRedLEDEmptyFIFO))
       {
         mLED_2_On()
       }
@@ -1120,18 +1069,32 @@ LATAbits.LATA1 = 1;
   }
 
   // Check for button being pushed
-  if (
-    (!swProgram)
-    ||
-    (
-      UseAltPause
-      &&
-      !PORTBbits.RB0
-    )
-  )
+  if (!swProgram)
   {
-    ButtonPushed = TRUE;
+    bitsetzero(ButtonPushed);
   }
+  if (bittstzero(UseAltPause))
+  {
+    if (!PORTBbits.RB0)
+    {
+      bitsetzero(ButtonPushed);
+    }
+  }
+
+  // To give as much time for the step pulses to be high, we clear them as the
+  // very last thing we do before leaving the ISR. It never hurts us to clear 
+  // these bits even if no step happened this ISR tick
+  if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+  {
+    Step1IO = 0;
+    Step2IO = 0;
+  }
+  else
+  {
+    Step1AltIO = 0;
+    Step2AltIO = 0;
+  }
+
 #if defined(GPIO_DEBUG)
   LATAbits.LATA1 = 0;
   LATDbits.LATD0 = 0;
@@ -1160,7 +1123,7 @@ void EBB_Init(void)
   CurrentCommand.ServoRate = 0;
 
   bitsetzero(FIFOEmpty);
-  gRedLEDEmptyFIFO = FALSE;
+  bitsetzero(gRedLEDEmptyFIFO);
 
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
@@ -1251,7 +1214,7 @@ void EBB_Init(void)
   USB_BUS_SENSE = 0;
 #endif
   gUseSolenoid = TRUE;
-  gUseRCPenServo = TRUE;
+  bitsetzero(gUseRCPenServo);
 
   // Set up pen up/down direction as output
   PenUpDownIO = 0;
@@ -1266,13 +1229,13 @@ void EBB_Init(void)
   PenState = PEN_UP;
   Layer = 0;
   NodeCount = 0;
-  ButtonPushed = FALSE;
+  bitclrzero(ButtonPushed);
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
   // Except for v1.1 hardware, use RB2
   TRISBbits.TRISB0 = 1;
   INTCON2bits.RBPU = 0;       // Turn on all of PortB pull-ups
-  UseAltPause = TRUE;
+  bitsetzero(UseAltPause);
 
   TRISBbits.TRISB3 = 0;       // Make RB3 an output (for engraver)
   PORTBbits.RB3 = 0;          // And make sure it starts out off
@@ -1340,7 +1303,7 @@ void parse_SC_packet (void)
     if (Para2 == 0u)
     {
       gUseSolenoid = TRUE;
-      gUseRCPenServo = FALSE;
+      bitclrzero(gUseRCPenServo);
       // Turn off RC signal on Pen Servo output
       RCServo2_Move(0, g_servo2_RPn, 0, 0);
     }
@@ -1348,13 +1311,13 @@ void parse_SC_packet (void)
     else if (Para2 == 1u)
     {
       gUseSolenoid = FALSE;
-      gUseRCPenServo = TRUE;
+      bitsetzero(gUseRCPenServo);
     }
     // Use solenoid AND servo (default)
     else
     {
       gUseSolenoid = TRUE;
-      gUseRCPenServo = TRUE;
+      bitsetzero(gUseRCPenServo);
     }
     // Send a new command to set the state of the servo/solenoid
     process_SP(PenState, 0);
@@ -1461,11 +1424,11 @@ void parse_SC_packet (void)
   {
     if (Para2)
     {
-      UseAltPause = TRUE;
+      bitsetzero(UseAltPause);
     }
     else
     {
-      UseAltPause = FALSE;
+      bitclrzero(UseAltPause);
     }
   }
   print_ack();
@@ -2992,9 +2955,9 @@ void parse_QL_packet(void)
 void parse_QB_packet(void)
 {
   printf((far rom char*)"%1i\r\n", ButtonPushed);
-  if (ButtonPushed)
+  if (bittstzero(ButtonPushed))
   {
-    ButtonPushed = FALSE;
+    bitclrzero(ButtonPushed);
   }
   print_ack();
 }
@@ -3048,7 +3011,7 @@ void parse_QG_packet(void)
   {
     result = result | (1 << 4);
   }
-  if (ButtonPushed)
+  if (bittstzero(ButtonPushed))
   {
     result = result | (1 << 5);
   }
@@ -3064,9 +3027,9 @@ void parse_QG_packet(void)
   printf((far rom char*)"%02X\r\n", result);
   
   // Reset the button pushed flag
-  if (ButtonPushed)
+  if (bittstzero(ButtonPushed))
   {
-    ButtonPushed = FALSE;
+    bitclrzero(ButtonPushed);
   }
 }
 

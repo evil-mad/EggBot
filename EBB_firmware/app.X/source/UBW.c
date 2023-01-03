@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO6_AO1\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_MO6_AO2\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -1642,9 +1642,14 @@ void parse_CU_packet(void)
   }
   else if (3u == parameter_number)
   {
-    if (0 == paramater_value || 1 == paramater_value)
+    if (0 == paramater_value)
     {
-      gRedLEDEmptyFIFO = paramater_value;
+      bitclrzero(gRedLEDEmptyFIFO);
+      mLED_2_Off()      
+    }
+    else if (1 == paramater_value)
+    {
+      bitsetzero(gRedLEDEmptyFIFO);
       mLED_2_Off()
     }
     else
