@@ -110,8 +110,8 @@
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
-        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
-        <makeCustomizationPostStep></makeCustomizationPostStep>
+        <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStep>"C:\MCC18\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\MCC18\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o</makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
