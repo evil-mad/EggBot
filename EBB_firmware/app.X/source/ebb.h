@@ -75,8 +75,12 @@ typedef enum
 } PenStateType;
 
 // Bitfield defines the CommandType BYTE in the MoveCommandType
-// We use
-
+// We use bits now in this byte in order to trigger a command,
+// one bit per command. Thus we can only have 8 total commands that are passed
+// through the FIFO to the ISR. Note that three USB commands (SM, XM HM) are
+// all the same and represented by one bit.
+// Only one bit must be set at a time or undefined behavior will occur.
+// If no bits are set, then the command is effectively COMMAND_NONE.
 #define COMMAND_DELAY_BIT             0u
 #define COMMAND_SERVO_MOVE_BIT        1u
 #define COMMAND_SE_BIT                2u
@@ -120,14 +124,14 @@ typedef union union32b4 {
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
-  UINT8           Command;                        // SM DL S2 SE EN LM LT
+  UINT8           Command;                        // SM DL S2 SE EM LM LT
   uS32b4_t        Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
-  UINT8           DirBits;                        // SM          EN LM LT
+  UINT8           DirBits;                        // SM          EM LM LT
   UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
   UINT16          ServoPosition;                  //       S2
-  UINT8           ServoRPn;                       //       S2    EN LM LT
+  UINT8           ServoRPn;                       //       S2    EM LM LT
   UINT8           ServoChannel;                   //       S2
   UINT16          ServoRate;                      //       S2
   UINT8           SEState;                        // SM       SE    LM LT

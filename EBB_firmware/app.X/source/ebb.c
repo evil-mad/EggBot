@@ -994,7 +994,86 @@ CheckForNextCommand:
       TRISDbits.TRISD0 = 0;
       LATDbits.LATD0 = 1;
 #endif
-      CurrentCommand = CommandFIFO[0];
+      // Instead of copying over the entire MoveCommandType every time, to save
+      // time we will check which command is next in the FIFO, and then only 
+      // copy over those fields that the new command actually uses.
+      // The order that we check these is the same as the main ISR check order
+      // above, where we want to have the most common commands checked first
+      // since they will then happen faster.
+      if (bittst(CommandFIFO[0].Command, COMMAND_SM_XM_HM_MOVE_BIT))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
+        CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
+        CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
+        CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
+        CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+        CurrentCommand.SEState        = CommandFIFO[0].SEState;
+      }
+      else if (bittst(CommandFIFO[0].Command, COMMAND_LM_MOVE_BIT))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
+        CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
+        CurrentCommand.Accel[0]       = CommandFIFO[0].Accel[0];
+        CurrentCommand.Accel[1]       = CommandFIFO[0].Accel[1];
+        CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
+        CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
+        CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+        CurrentCommand.ServoRPn       = CommandFIFO[0].ServoRPn;
+        CurrentCommand.SEState        = CommandFIFO[0].SEState;
+        CurrentCommand.TicksToFlip[0] = CommandFIFO[0].TicksToFlip[0];
+        CurrentCommand.TicksToFlip[1] = CommandFIFO[0].TicksToFlip[1];
+      }
+      else if (bittst(CommandFIFO[0].Command, COMMAND_LT_MOVE_BIT))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
+        CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
+        CurrentCommand.Accel[0]       = CommandFIFO[0].Accel[0];
+        CurrentCommand.Accel[1]       = CommandFIFO[0].Accel[1];
+        CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
+        CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
+        CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+        CurrentCommand.ServoRPn       = CommandFIFO[0].ServoRPn;
+        CurrentCommand.SEState        = CommandFIFO[0].SEState;
+        CurrentCommand.TicksToFlip[0] = CommandFIFO[0].TicksToFlip[0];
+        CurrentCommand.TicksToFlip[1] = CommandFIFO[0].TicksToFlip[1];
+      }
+      else if (bittst(CommandFIFO[0].Command, COMMAND_SERVO_MOVE_BIT))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+        CurrentCommand.ServoPosition  = CommandFIFO[0].ServoPosition;
+        CurrentCommand.ServoRPn       = CommandFIFO[0].ServoRPn;
+        CurrentCommand.ServoChannel   = CommandFIFO[0].ServoChannel;
+        CurrentCommand.ServoRate      = CommandFIFO[0].ServoRate;
+      }
+      // Note: bittst(CurrentCommand, COMMAND_DELAY_BIT)
+      else if (bittstzero(CommandFIFO[0].Command))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+      }
+      else if (bittst(CommandFIFO[0].Command, COMMAND_SE_BIT))
+      {
+        CurrentCommand.Command        = CommandFIFO[0].Command;
+        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
+        CurrentCommand.SEState        = CommandFIFO[0].SEState;
+        CurrentCommand.SEPower        = CommandFIFO[0].SEPower;
+      }
+      else // Note: We are assuming that if there is a command in the FIFO, and 
+           // it is NOT one of the above 6 commands, then it MUST be a 
+           // COMMAND_EM_BIT. We do NOT test explicitly for this to save time
+      {
+        CurrentCommand.Command       = CommandFIFO[0].Command;
+        CurrentCommand.DirBits       = CommandFIFO[0].DirBits;
+        CurrentCommand.ServoRPn      = CommandFIFO[0].ServoRPn;
+      }
+      
       // Zero out command in FIFO, but leave the rest of the fields alone
       CommandFIFO[0].Command = COMMAND_NONE;
 
