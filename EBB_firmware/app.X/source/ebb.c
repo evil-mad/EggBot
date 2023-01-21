@@ -995,24 +995,8 @@ CheckForNextCommand:
       LATDbits.LATD0 = 1;
 #endif
       CurrentCommand = CommandFIFO[0];
-      // Zero out command in FIFO
+      // Zero out command in FIFO, but leave the rest of the fields alone
       CommandFIFO[0].Command = COMMAND_NONE;
-      CommandFIFO[0].Rate[0].value = 0;
-      CommandFIFO[0].Rate[1].value = 0;
-      CommandFIFO[0].Steps[0] = 0;
-      CommandFIFO[0].Steps[1] = 0;
-      CommandFIFO[0].DirBits = 0;
-      CommandFIFO[0].DelayCounter = 0;
-      CommandFIFO[0].ServoPosition = 0;
-      CommandFIFO[0].ServoRPn = 0;
-      CommandFIFO[0].ServoChannel = 0;
-      CommandFIFO[0].ServoRate = 0;
-      CommandFIFO[0].SEState = 0;
-      CommandFIFO[0].SEPower = 0;
-      CommandFIFO[0].TicksToFlip[0] = 0;
-      CommandFIFO[0].TicksToFlip[1] = 0;
-      bitclrzero(AxisActive[0]);
-      bitclrzero(AxisActive[1]);
 
       // Check that DelayCounter doesn't have a crazy high value
       if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
