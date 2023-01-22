@@ -463,6 +463,14 @@ void high_ISR(void)
       }
     }
 
+    // We want to allow for a one-ISR tick move, which requires us to check
+    // to see if the move has been completed here (to load the next command
+    // this tick rather than waiting for the next tick). This primarily gives
+    // us simpler math when figuring out how long moves will take.
+    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+    {
+      bitclrzero(AllDone);
+    }
     goto OutputBits;
   }
 
@@ -560,6 +568,14 @@ void high_ISR(void)
       }
     }
 
+    // We want to allow for a one-ISR tick move, which requires us to check
+    // to see if the move has been completed here (to load the next command
+    // this tick rather than waiting for the next tick). This primarily gives
+    // us simpler math when figuring out how long moves will take.
+    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+    {
+      bitclrzero(AllDone);
+    }
     goto OutputBits;
   }
 
@@ -653,6 +669,15 @@ void high_ISR(void)
         CurrentCommand.DirBits |= STEP2_BIT;
       }
     }
+
+    // We want to allow for a one-ISR tick move, which requires us to check
+    // to see if the move has been completed here (to load the next command
+    // this tick rather than waiting for the next tick). This primarily gives
+    // us simpler math when figuring out how long moves will take.
+    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+    {
+      bitclrzero(AllDone);
+    }
   }
 
   // This next block of code (OutputBits:) is common to all of the above
@@ -667,14 +692,6 @@ void high_ISR(void)
   // way saves a few instruction cycles for the commands where speed matters
   // most - the stepper commands.
 OutputBits:
-  // We want to allow for a one-ISR tick move, which requires us to check
-  // to see if the move has been completed here (to load the next command
-  // this tick rather than waiting for the next tick). This primarily gives
-  // us simpler math when figuring out how long moves will take.
-  if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
-  {
-    bitclrzero(AllDone);
-  }
 
   // Now check to see if either stepper needs to actually output a step pulse
   if ((CurrentCommand.DirBits & (STEP1_BIT | STEP2_BIT)) != 0u)
@@ -748,6 +765,7 @@ OutputBits:
     goto CheckForNextCommand;
   }
 
+NonStepperCommands:
   // Now check for all the other (non-stepper based) motion FIFO commands
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT))
   {
