@@ -389,6 +389,16 @@ UINT8 RCServo2_Move(
       CommandFIFO[0].ServoPosition = Position;
       CommandFIFO[0].ServoRate = Rate;
 
+      // Check that DelayCounter doesn't have a crazy high value (this was
+      // being done in the ISR, now moved here for speed)
+      if (CommandFIFO[0].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+      {
+        // Ideally we would throw an error to the user here, but since we're in
+        // the helper function that's not so easy. So we just set the delay time
+        // to zero and hope they notice that their delays aren't doing anything.
+        CommandFIFO[0].DelayCounter = 0;
+      }
+
       bitclrzero(FIFOEmpty);
     }
   }

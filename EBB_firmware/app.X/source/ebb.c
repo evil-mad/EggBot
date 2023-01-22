@@ -398,13 +398,13 @@ void high_ISR(void)
   bitsetzero(AllDone);      // Start every ISR assuming we are done with the current command - set bit 0 of AllDone
 
   // Process a motor move command of any type
-  // This is the main chunk of code for EBB : the step generation code in the 25KHz ISR
-  // The first section determines if we need to take any steps this time through the ISR
+  // This is the main chunk of code for EBB : the step generation code in the 25KHz ISR.
+  // The first section determines if we need to take any steps this time through the ISR.
   // It is broken into sections, one for each type of stepper motion command because 
   // they each have different amounts of processing needed to determine if a step is 
   // necessary or not.
   // Then the second section is common to all stepper motion commands and handles
-  // the actual step pulse generation as well as direction bit control
+  // the actual step pulse generation as well as direction bit control.
 
   // The Active bits will be set if there is still motion left to 
   // generate on an axis. They are set when the command is first loaded
@@ -416,12 +416,14 @@ void high_ISR(void)
   // Important assumptions:
   // There is only one bit set in the CurrentCommand.Command byte
 
-  // Figure out if we have steps to take with the 'simple' stepper
-  // motion commands. These three command (SM, XM and HM) do not use
-  // acceleration and so that code is left out to save time
+  // Here we handle the 'simple' (non accelerating) stepper commands.
+  // These three command (SM, XM and HM) do not use
+  // acceleration and so that code is left out to save time. This is also
+  // the most common command used by the various PC softwares so we check 
+  // for it first.
   if (bittst(CurrentCommand.Command, COMMAND_SM_XM_HM_MOVE_BIT))
   {
-    //// MOTOR 1 ////
+    //// MOTOR 1     SM XH HM ////
 
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
@@ -444,7 +446,7 @@ void high_ISR(void)
       }
     }
 
-    //// MOTOR 2 ////
+    //// MOTOR 2     SM XH HM ////
 
     if (bittstzero(AxisActive[1]))
     {
@@ -461,20 +463,6 @@ void high_ISR(void)
       }
     }
 
-    /// Temporary: Put this check at the end of each stepper motor command
-    /// So that we don't have to do extra checks (if we made it a common code
-    /// block) for speed.
-
-    // We want to allow for a one-ISR tick move, which requires us to check
-    // to see if the move has been completed here (to load the next command
-    // immediately rather than waiting for the next tick). This primarily gives
-    // us simpler math when figuring out how long moves will take.
-    // TODO: Is there a way to optimize this? Make this check here 
-    // less costly somehow?
-    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
-    {
-      bitclrzero(AllDone);
-    }
     goto OutputBits;
   }
 
@@ -572,20 +560,6 @@ void high_ISR(void)
       }
     }
 
-    /// Temporary: Put this check at the end of each stepper motor command
-    /// So that we don't have to do extra checks (if we made it a common code
-    /// block) for speed.
-
-    // We want to allow for a one-ISR tick move, which requires us to check
-    // to see if the move has been completed here (to load the next command
-    // immediately rather than waiting for the next tick). This primarily gives
-    // us simpler math when figuring out how long moves will take.
-    // TODO: Is there a way to optimize this? Make this check here 
-    // less costly somehow?
-    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
-    {
-      bitclrzero(AllDone);
-    }
     goto OutputBits;
   }
 
@@ -679,27 +653,30 @@ void high_ISR(void)
         CurrentCommand.DirBits |= STEP2_BIT;
       }
     }
-
-    /// Temporary: Put this check at the end of each stepper motor command
-    /// So that we don't have to do extra checks (if we made it a common code
-    /// block) for speed.
-
-    // We want to allow for a one-ISR tick move, which requires us to check
-    // to see if the move has been completed here (to load the next command
-    // immediately rather than waiting for the next tick). This primarily gives
-    // us simpler math when figuring out how long moves will take.
-    // TODO: Is there a way to optimize this? Make this check here 
-    // less costly somehow?
-    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
-    {
-      bitclrzero(AllDone);
-    }
   }
 
-  // Code to set/clear step and direction GPIO bits if the command that just
-  // ran needs to output something new. Also take care of recording this
+  // This next block of code (OutputBits:) is common to all of the above
+  // stepper motion commands. Each of them either jumps here when they 
+  // are done or falls through in the case of the last command above.
+  // This block sets/clears step and direction GPIO bits if the command that just
+  // ran needs to output something new. Also takes care of recording this
   // step properly.
+  //
+  // NOTE: Even though it seems like a bad idea to have non-stepper
+  // commands execute this block before they are caught below, doing it this
+  // way saves a few instruction cycles for the commands where speed matters
+  // most - the stepper commands.
 OutputBits:
+  // We want to allow for a one-ISR tick move, which requires us to check
+  // to see if the move has been completed here (to load the next command
+  // this tick rather than waiting for the next tick). This primarily gives
+  // us simpler math when figuring out how long moves will take.
+  if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+  {
+    bitclrzero(AllDone);
+  }
+
+  // Now check to see if either stepper needs to actually output a step pulse
   if ((CurrentCommand.DirBits & (STEP1_BIT | STEP2_BIT)) != 0u)
   {
     if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
@@ -741,7 +718,6 @@ OutputBits:
 
     // This next section not only counts the step(s) we are taking, but
     // also acts as a delay to keep the step bit set for a little while.
-    // The code paths though here are approximately constant time.
     if (bittst(CurrentCommand.DirBits, STEP1_BIT_NUM))
     {
       if (bittst(CurrentCommand.DirBits, DIR1_BIT_NUM))
@@ -767,9 +743,12 @@ OutputBits:
 
     // Clear the two step bits so they're empty for the next pass through ISR
     CurrentCommand.DirBits &= ~(STEP1_BIT | STEP2_BIT);
+    // We need to skip over all the rest of command checks, since we already
+    // handled the command that is currently executing.
     goto CheckForNextCommand;
   }
 
+  // Now check for all the other (non-stepper based) motion FIFO commands
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT))
   {
     // Check to see if we should change the state of the pen
@@ -1077,14 +1056,8 @@ CheckForNextCommand:
       // Zero out command in FIFO, but leave the rest of the fields alone
       CommandFIFO[0].Command = COMMAND_NONE;
 
-      // Check that DelayCounter doesn't have a crazy high value
-      if (CurrentCommand.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
-      {
-        CurrentCommand.DelayCounter = 0;
-      }
-
       // Take care of clearing the step accumulators for the next move if
-      // it's a motor move (of any type)
+      // it's a motor move (of any type) - if the command requests it
       if (CurrentCommand.Command & (COMMAND_SM_XM_HM_MOVE | COMMAND_LM_MOVE | COMMAND_LT_MOVE))
       {
         // Use the SEState to determine which accumulators to clear.
@@ -2397,6 +2370,16 @@ static void process_simple_motor_move(
     // This is OK because we only need to multiply the 3 byte Duration by
     // 25, so it fits in 4 bytes OK.
     move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+    
+    // Check that DelayCounter doesn't have a crazy high value (this was
+    // being done in the ISR, now moved here for speed)
+    if (move.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+    {
+      // Ideally we would throw an error to the user here, but since we're in
+      // the helper function that's not so easy. So we just set the delay time
+      // to zero and hope they notice that their delays aren't doing anything.
+      move.DelayCounter = 0;
+    }
   }
   else
   {
