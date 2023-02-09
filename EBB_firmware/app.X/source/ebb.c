@@ -872,7 +872,7 @@ NonStepperCommands:
     goto CheckForNextCommand;
   }
 
-  if (bittst(CurrentCommand.Command, COMMAND_EM))
+  if (bittst(CurrentCommand.Command, COMMAND_EM_BIT))
   {
     // As of version 2.8.0, we now have the EM command transplanted here into
     // the motion queue. This is so that changes to motor enable or microstep
