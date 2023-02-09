@@ -415,6 +415,10 @@ void high_ISR(void)
 
   // Important assumptions:
   // There is only one bit set in the CurrentCommand.Command byte
+  
+  // A very complete mathematical analysis of the way the various stepper 
+  // commands are expected to work can be found here;
+  // https://evilmadscience.s3.amazonaws.com/dl/ad/public/AxiDrawKinematics.pdf
 
   // Here we handle the 'simple' (non accelerating) stepper commands.
   // These three command (SM, XM and HM) do not use
@@ -423,8 +427,19 @@ void high_ISR(void)
   // for it first.
   if (bittst(CurrentCommand.Command, COMMAND_SM_XM_HM_MOVE_BIT))
   {
-    //// MOTOR 1     SM XH HM ////
+    // Direction bits need to be output before step bits. Since we know step bis
+    // are clear at this point, it's safe to always output direction bits here
+    // before we start messing with the step bits
+    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+    {
+      // The Step and Direction bits are all output on the top four bits
+      // of PortD. So we can be very efficient here and simply output those
+      // four bits directly to port D.
+      LATD = (PORTD & ~(DIR1_BIT | DIR2_BIT)) | CurrentCommand.DirBits;
+    }
 
+    //// MOTOR 1     SM XH HM ////
+    
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
@@ -478,7 +493,18 @@ void high_ISR(void)
   // into account.
   if (bittst(CurrentCommand.Command, COMMAND_LM_MOVE_BIT))
   {
-    //// MOTOR 1 ////
+    // Direction bits need to be output before step bits. Since we know step bis
+    // are clear at this point, it's safe to always output direction bits here
+    // before we start messing with the step bits
+    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+    {
+      // The Step and Direction bits are all output on the top four bits
+      // of PortD. So we can be very efficient here and simply output those
+      // four bits directly to port D.
+      LATD = (PORTD & ~(DIR1_BIT | DIR2_BIT)) | CurrentCommand.DirBits;
+    }
+
+    //// MOTOR 1   LM ////
 
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
@@ -530,7 +556,7 @@ void high_ISR(void)
       }
     }
 
-    //// MOTOR 2 ////
+    //// MOTOR 2    LM ////
 
     if (bittstzero(AxisActive[1]))
     {
@@ -586,6 +612,17 @@ void high_ISR(void)
   // Only AxisActive[0] is used for this command, not AxisActive[1].
   if (bittst(CurrentCommand.Command, COMMAND_LT_MOVE_BIT))
   {
+    // Direction bits need to be output before step bits. Since we know step bis
+    // are clear at this point, it's safe to always output direction bits here
+    // before we start messing with the step bits
+    if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+    {
+      // The Step and Direction bits are all output on the top four bits
+      // of PortD. So we can be very efficient here and simply output those
+      // four bits directly to port D.
+      LATD = (PORTD & ~(DIR1_BIT | DIR2_BIT)) | CurrentCommand.DirBits;
+    }
+
     // Has time run out for this command yet?
     if (bittstzero(AxisActive[0]))
     {
@@ -596,7 +633,7 @@ void high_ISR(void)
         bitclrzero(AxisActive[0]);
       }
 
-      //// MOTOR 1 ////
+      //// MOTOR 1   LT ////
 
       // For acceleration, we now add Accel to Rate each time through the ISR
       // However, based on the exact parameters, we might be going through 
@@ -632,7 +669,7 @@ void high_ISR(void)
         CurrentCommand.DirBits |= STEP1_BIT;
       }
 
-      //// MOTOR 2 ////
+      //// MOTOR 2    LT  ////
 
       /// TODO IDEA: It seems that this compiler has trouble with structures. Maybe slow?
       /// So don't use a struct in the ISR for "CurrentCommand". Instead, have all separate
