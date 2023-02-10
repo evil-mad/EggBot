@@ -938,8 +938,9 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             First added in v2.5.0 with partial functionality, and revised in v2.5.3.
-             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
+            Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
             This command should only be considered to be fully functional as of v2.7.0.
+            In v2.9.0 the ability to decelerate through zero speed and reverse direction at that point was added.
           </li>
         </ul>
       
@@ -1009,8 +1010,7 @@ ul.no_bullets {
           </li>
           <li>
               
-              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
-     We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
             <ul class="no_bullets">
               <li><code>LT,10169,3865471,1732,0,0,3</code></li>
             </ul>
@@ -1028,8 +1028,7 @@ ul.no_bullets {
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            Added in v2.7.0.
-
+            Added in v2.7.0. In v2.9.0 the ability to decelerate through zero speed and reverse direction at that point was added.
           </li>
         </ul>
       
@@ -2806,8 +2805,9 @@ ul.no_bullets {
         </p>
         <p style="padding-left:5%">
         Output step pulse duration for external stepper drivers:
-        <ul style="padding-left:10%">      
-            <li>EBB firmware 2.7.0 and above: 1.6 - 2.3 &mu;s.</li>
+        <ul style="padding-left:10%">
+            <li>EBB firmware 2.9.0 and above: 2.2 - 2.5 &mu;s.</li>
+            <li>EBB firmware 2.7.0 to 2.8.1: 1.6 - 2.3 &mu;s.</li>
             <li>EBB firmware 2.6.5 and below: 2.8 - 3.0 &mu;s.</li>
         </ul>
         </p>
@@ -2819,7 +2819,7 @@ ul.no_bullets {
         are no gaps between the last step of one move and the first step of the next move.
         For a high enough sustained rate of sufficiently short movement commands, the EBB will not
         be able to parse and queue each command prior to starting the subsequent move.
-        The available CPU time available for parsing and queueing commands does depend on the 
+        The available CPU time available for parsing and queuing commands does depend on the 
         active step rate, as the EBB shares CPU time between command parsing and step generation.
         </p>
         <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain
@@ -2839,21 +2839,25 @@ ul.no_bullets {
           <tbody>
             <tr style="font-weight:bold;">
               <td>Command</td>
-              <td>Firmware &gt;= 2.7.0</td>
+              <td>Firmware &gt; 2.8.1</td>
+              <td>Firmware 2.8.1 to 2.7.0</td>
               <td>Firmware &lt; 2.7.0</td>
             </tr>
             <tr>
               <td>SM</td>
+              <td>2 ms</td>
               <td>3-4 ms</td>
               <td>4-7 ms</td>
             </tr>
             <tr>
               <td>XM</td>
+              <td>2 ms</td>
               <td>3-4 ms</td>
               <td>4-6 ms</td>
             </tr>
             <tr>
               <td>LM, LT </td>
+              <td>3 ms</td>
               <td>3-5 ms</td>
               <td>4-6 ms</td>
             </tr>

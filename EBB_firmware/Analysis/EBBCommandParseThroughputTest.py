@@ -57,6 +57,8 @@ print("Starting EBB USB throughput testing.")
 response = query(the_port, 'V\r')
 print(response)
 
+"""
+
 # Test 10000 "NI" commands with no motion
 startTime = time.perf_counter()
 for x in range(10000):
@@ -90,6 +92,89 @@ endTime = time.perf_counter()
 print(f"{((endTime - startTime)*1000)/10000:3.3f} ms per NI command with complex (LM/LT) motion")
 
 time.sleep(15)
+
+"""
+
+# Section to test fastest separate move commands tolerated by EBB Firmware
+# Note that worst case timings are used here - max step rate (25Khz) and both steppers stepping
+# together at that rate. This gives the CPU the least amount of time to parse USB commands as 
+# possible.
+#
+# When this code is run, it should be used with the GPIO_DEBUG and UART_OUTPUT_DEBUG defined so that 
+# it is easy to see on the logic analyzer when the FIFO is not full all the time. The UART output
+# can then be used to see which command caused the un-full FIFO.
+
+# First for SM command
+for x in range(100):
+    query(the_port, "SM,10,250,250" + '\r')
+for x in range(100):
+    query(the_port, "SM,9,225,225" + '\r')
+for x in range(100):
+    query(the_port, "SM,8,200,200" + '\r')
+for x in range(100):
+    query(the_port, "SM,7,175,175" + '\r')
+for x in range(100):
+    query(the_port, "SM,6,150,150" + '\r')
+for x in range(100):
+    query(the_port, "SM,5,125,125" + '\r')
+for x in range(100):
+    query(the_port, "SM,4,100,100" + '\r')
+for x in range(100):
+    query(the_port, "SM,3,75,75" + '\r')
+for x in range(100):
+    query(the_port, "SM,2,50,50" + '\r')
+for x in range(100):
+    query(the_port, "SM,1,25,25" + '\r')
+
+time.sleep(0.5)
+
+# Then for XM command
+for x in range(100):
+    query(the_port, "XM,10,250,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,9,225,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,8,200,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,7,175,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,6,150,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,5,125,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,4,100,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,3,75,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,2,50,0" + '\r')
+for x in range(100):
+    query(the_port, "XM,1,25,0" + '\r')
+
+time.sleep(0.5)
+
+# Then for LM command
+for x in range(100):
+    query(the_port, "LT,250,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,225,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,200,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,175,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,150,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,125,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,100,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,75,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,50,2147483647,-1,2147483647,-1" + '\r')
+for x in range(100):
+    query(the_port, "LT,25,2147483647,-1,2147483647,-1" + '\r')
+
+time.sleep(0.5)
 
 print("Test complete")
 
