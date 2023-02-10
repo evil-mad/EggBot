@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
-  <_name>Stretch</_name>
+  <name>Stretch</name>
   <id>command.eggbot.contributed.stretch</id>
   <dependency type="executable" location="extensions">eggbot_stretch.py</dependency>
 
-  <_param name="Header" type="description" xml:space="preserve">
+  <label xml:space="preserve">
 This extension will horizontally stretch your drawing.  The
 amount of stretch increases towards the poles of your egg
 (i.e., increases with distance away from the equator).  The
@@ -35,20 +35,20 @@ The curve smoothing value is the same control as in the
 Eggbot Control extension.  It needs to be applied here
 before plotting as all curves will be rendered to straight
 line segments by this extension.
-  </_param>
+  </label>
 
   <param name="maxDy" type="float" min="0.0001" max="999.0"
-	 _gui-text="Vertical smoothing (lower for more)">5.0</param>
+	 gui-text="Vertical smoothing (lower for more)">5.0</param>
   <param name="smoothness" type="float" min="0.0001" max="5"
-	 _gui-text="   Curve smoothing (lower for more)">0.2</param>
+	 gui-text="   Curve smoothing (lower for more)">0.2</param>
 
   <effect needs-live-preview="false">
     <object-type>all</object-type>
     <effects-menu>
-      <submenu _name="EggBot"/>
+      <submenu name="EggBot"/>
     </effects-menu>
   </effect>
   <script>
-    <command reldir="extensions" interpreter="python">eggbot_stretch.py</command>
+    <command location="extensions" interpreter="python">eggbot_stretch.py</command>
   </script>
 </inkscape-extension>

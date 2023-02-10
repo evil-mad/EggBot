@@ -524,6 +524,10 @@ ul.no_bullets {
               </ul>
             </p>
           </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
+          </li>
         </ul>
 
         <hr class="short" />
@@ -1016,10 +1020,10 @@ ul.no_bullets {
             <code><a href="#HM">HM</a></code> command following a move like this.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,25000,33865471,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
           </li>
-          <li><span style="font-weight: bold;">Example 3:</span> <code>LM,12500,17179000,-687,8592000,687\r</code> 
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
           </li>
           <li>
