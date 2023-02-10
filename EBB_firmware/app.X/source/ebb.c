@@ -265,10 +265,11 @@
 //                  Fix bug in ES command that didn't send return packet
 // 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
 //
-// x.x.x 11/2/22  - Issue 185 : Get LT and LM commands to allow accelerations
-//                  through zero (i.e. reverse direction mid-move)
-//                  Before : 50% of CPU used for ISR worst case - 25KS/s)
-//                  After  : 60% of CPU used for ISR (worst case - 25KS/s)
+// 2.9.0 11/2/22  - Issue 185 : Get LT and LM commands to allow accelerations
+//                    through zero (i.e. reverse direction mid-move)
+//                  Massive refactor of motion ISR to improve performance
+//                  Proper formatting/indenting of entire EBB codebase for readability
+//                  Turned all warnings/messages on in compiler, fixed all
 
 #include <p18cxxx.h>
 #include <usart.h>
