@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2014-2023, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -439,7 +439,7 @@ void high_ISR(void)
       LATD = (PORTD & ~(DIR1_BIT | DIR2_BIT)) | CurrentCommand.DirBits;
     }
 
-    //// MOTOR 1     SM XH HM ////
+    //// MOTOR 1     SM XM HM ////
     
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
@@ -462,7 +462,7 @@ void high_ISR(void)
       }
     }
 
-    //// MOTOR 2     SM XH HM ////
+    //// MOTOR 2     SM XM HM ////
 
     if (bittstzero(AxisActive[1]))
     {
@@ -535,13 +535,14 @@ void high_ISR(void)
 
       /// TODO: This next if() can be eliminated if the parse_LM() function
       /// can correctly determine if rate will overflow (or underflow) and
-      /// prevent the move from happening if so.
+      /// prevent the move from happening if so. (Future optimization opportunity)
 
       // Check for rate roll over - we can't have a rate with it's MSb set
       if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
       {
         // TODO: Is this really the right thing to do if rate gets too high?
         // Could we just clear the high bit? (Would that be faster?)
+        // It looks like this would save 1 instruction. (Future optimization opportunity)
         CurrentCommand.Rate[0].bytes.b4 += 0x80;
       }
       acc_union[0].value += CurrentCommand.Rate[0].value;
@@ -671,13 +672,6 @@ void high_ISR(void)
       }
 
       //// MOTOR 2    LT  ////
-
-      /// TODO IDEA: It seems that this compiler has trouble with structures. Maybe slow?
-      /// So don't use a struct in the ISR for "CurrentCommand". Instead, have all separate
-      /// little global variables, arranged exactly as they are arranged in the struct. Then,
-      /// when it's time to copy in the next command from the FIFO, treat the little variables
-      /// as a struct (cast it) to have the compiler do the copy in a loop, then convert
-      /// all accesses in the ISR to simple variables
 
       // For acceleration, we now add a bit to StepAdd each time through as well
       if (bittst(CurrentCommand.ServoRPn, 1))

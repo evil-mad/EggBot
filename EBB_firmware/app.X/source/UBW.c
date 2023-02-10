@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2014-2023, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
