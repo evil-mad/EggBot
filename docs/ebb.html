@@ -905,7 +905,7 @@ ul.no_bullets {
             
           </li>
           <li>
-              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865471)/10169 = 1732. 
      We then have the following LM command:
             <ul class="no_bullets">
               <li><code>LM,3865471,60,1732,0,0,0</code></li>
@@ -913,30 +913,34 @@ ul.no_bullets {
             Notice that we are only using axis 1 in this example. You can of course use both axes at the same time, but you usually need to be careful that the times for each axis match up.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,3865471,1000,0,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> 
+            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899350,10,0,17179870,2,0\r</code> 
             This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,500,0,85899346,250,0\r</code> 
+            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899350,500,0,85899350,250,0\r</code> 
             This example will step both axis at a 1 ms/step rate, and axis 1 will step for 500 steps and axis 2 will step for 250 steps. This is <i>usually</i> not what you want in practice; it's usually better if the moves for each axis terminate at the same time. This is a "constant-rate" move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 5:</span> <code>LM,17180814,6,0,57266231,20,0\r</code> 
+            <span style="font-weight: bold;">Example 5:</span> <code>LM,17179870,6,0,57266176,20,0\r</code> 
             This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
-            <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 6:</span> <code>LM,42949675,50,13400,0,0,0\r</code> 
             This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> 
+            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179870,75,-687,8589935,75,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>  
+            <span style="font-weight: bold;">Example 8 (requires v2.9.0 or above):</span> <code>LM,85899350,50,-68719,0,0,0,3\r</code> 
+            This example will start with axis 1 at 1000 steps/second. Over the course of 50 steps, it will decelerate to 0 steps/s (after 50ms or 25 steps) and then reverse direction, accelerating until it reaches 1000 steps/second at the end of the move. The move will take 100 ms. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>
             First added in v2.5.0 with partial functionality, and revised in v2.5.3.
             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
             This command should only be considered to be fully functional as of v2.7.0.
@@ -1010,7 +1014,7 @@ ul.no_bullets {
           </li>
           <li>
               
-              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474838, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474838 - 3865471)/10169 = 1732. We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
             <ul class="no_bullets">
               <li><code>LT,10169,3865471,1732,0,0,3</code></li>
             </ul>
@@ -1020,11 +1024,17 @@ ul.no_bullets {
             <code><a href="#HM">HM</a></code> command following a move like this.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,3865471,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
           </li>
-          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> 
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179870,-687,85859350,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 4 (requires v2.9.0 or above):</span> <code>LT,25000,-8589935,-2062,42949675,-2062,0\r</code> 
+            This example creates a move which is 1s in duration. Axis 1 starts out at 100 steps/s, decelerates through zero and then accelerates back up to 500 steps/s.
+            Axis 2 does the exact opposite, starting at 500 steps/s and going through zero to 100 steps/s. The negative Rate1 indicates that axis 1 starts out in the 
+            opposite direction as axis 2. They both reverse direction as they go through zero speed.
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
