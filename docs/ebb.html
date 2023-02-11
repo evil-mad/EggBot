@@ -966,7 +966,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li><i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.</li>
-            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
+            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should initially turn.
             The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
             </li>
             <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
