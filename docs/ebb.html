@@ -2888,6 +2888,75 @@ ul.no_bullets {
           For the example above. ((15000 - 10000) * .024)/100 = 1.2 seconds.
         </p>
 
+        <p>
+          <b>Q2)</b> What do the LED patterns mean?
+        </p>
+        <p>
+          <b>A2)</b> There are two applications that live on the EBB: The bootloader and the main EBB firmware. They each have different LED blink patterns. There is a green power LED labeled 3.3V which is always lit as long as either the USB or barrel jack connector is receiving power. It is located next to the large electrolytic capacitor. 
+        </p>
+        <p>
+          The LED timing mechanism used by both bootloader and main EBB applications is sensitive to the commands currently being executed. For example, the timing of the alternating LED pattern when the bootloader is running will change as a new EBB firmware application is being actively programmed.
+        </p>
+        <p>
+          <b>Bootloader</b> When the bootloader is running (only used to update main EBB firmware), the two LEDs between the USB and barrel jack connectors can take on two different states:
+          <table border="1" cellpadding="2" cellspacing="2"
+              style="margin-left:10%;width:80%;">
+            <tbody>
+              <tr style="font-weight:bold;">
+                <td>Pattern</td>
+                <td>Description</td>
+                <td>USR/Red</td>
+                <td>USB/Green</td>
+              </tr>
+              <tr>
+                <td>Idle</td>
+                <td>Waiting for USB connection with host</td>
+                <td>Off</td>
+                <td>On</td>
+              </tr>
+              <tr>
+                <td>Alternating</td>
+                <td>USB connection established to host</td>
+                <td>200 ms on, 200 ms off, alternating with Green</td>
+                <td>200 ms on, 200 ms off, alternating with Red</td>
+              </tr>
+            </tbody>
+          </table>
+        </p>
+        <p>
+          <b>Main EBB Firmware</b> When the main EBB firmware is running (normal operating mode) the two LEDs between the USB and barrel jack connectors can take on three different states:
+          <table border="1" cellpadding="2" cellspacing="2"
+              style="margin-left:10%;width:80%;">
+            <tbody>
+              <tr style="font-weight:bold;">
+                <td>Pattern</td>
+                <td>Description</td>
+                <td>USR/Red</td>
+                <td>USB/Green</td>
+              </tr>
+              <tr>
+                <td>Fast Blink</td>
+                <td>No connection to USB host</td>
+                <td>On</td>
+                <td>60 ms on, 60 ms off</td>
+              </tr>
+              <tr>
+                <td>Slow Blink</td>
+                <td>Connected to USB host but not enumerated</td>
+                <td>On</td>
+                <td>750 ms on, 750 ms off</td>
+              </tr>
+              <tr>
+                <td>Short Long Blink</td>
+                <td>Fully enumerated and communicating with USB host</td>
+                <td>On</td>
+                <td>365 ms on, 365 ms off, 1.25s on, 365 ms off</td>
+              </tr>
+            </tbody>
+          </table>
+          The Fast Blink pattern is almost never seen in practice, since the USB host normally enumerates the EBB immediately upon connection with a USB cable. However, if proper drivers are not installed on the host or if there is some other problem with the USB enumeration process the Fast Blink pattern can be observed and used as a debugging aid.
+        </p>
+
         <hr />
 
         <p />
