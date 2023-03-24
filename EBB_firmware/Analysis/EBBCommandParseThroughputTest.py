@@ -105,6 +105,7 @@ time.sleep(15)
 # can then be used to see which command caused the un-full FIFO.
 
 # First for SM command
+"""
 for x in range(100):
     query(the_port, "SM,10,250,250" + '\r')
 for x in range(100):
@@ -175,6 +176,46 @@ for x in range(100):
     query(the_port, "LT,25,2147483647,-1,2147483647,-1" + '\r')
 
 time.sleep(0.5)
+"""
+
+# Test LM command- specifically looking for step position errors 
+# Clear the step position at the beginning, and then check it after
+# each test.
+#
+# First just straight non-accelerating moves in a square
+query(the_port, "CS" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,100,0,85899350,100,0" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,-100,0,85899350,100,0" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,-100,0,85899350,-100,0" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,100,0,85899350,-100,0" + '\r')
+
+time.sleep(1.0)
+
+response = query(the_port, 'QS\r')
+print(response)
+
+# Now each set of moves is an accel down to zero and then back up again as separate commands
+for x in range(10):
+    query(the_port, "LM,85899350,100,-34360,85899350,100,-34360" + '\r')
+    query(the_port, "LM,0,100,34360,0,100,34360" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,-100,-34360,85899350,100,-34360" + '\r')
+    query(the_port, "LM,0,-100,34360,0,100,34360" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,-100,-34360,85899350,-100,-34360" + '\r')
+    query(the_port, "LM,0,-100,34360,0,100,34360" + '\r')
+for x in range(10):
+    query(the_port, "LM,85899350,100,-34360,85899350,-100,-34360" + '\r')
+    query(the_port, "LM,0,100,34360,0,100,34360" + '\r')
+
+time.sleep(1.0)
+
+response = query(the_port, 'QS\r')
+print(response)
 
 print("Test complete")
 

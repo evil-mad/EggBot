@@ -892,7 +892,7 @@ void ProcessIO(void)
       tst_char = g_RX_command_buf[byte_cnt];
       
 #ifdef UART_OUTPUT_DEBUG
-      Write1USART(tst_char);
+//      Write1USART(tst_char);
 #endif
       
       // Check to see if we are in a CR/LF situation

@@ -52,14 +52,17 @@
 #define EBB_H
 
 // Enable this line to compile with a lot of debug prints for motion commands
-//#define DEBUG_VALUE_PRINT
+#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
-// #define GPIO_DEBUG
+ #define GPIO_DEBUG
 
 // Define this to output every byte received from PC out UART1 (TX1 = RC6)
 // for debugging PC comms.
-// #define UART_OUTPUT_DEBUG
+#define UART_OUTPUT_DEBUG
+
+// Define this to make the ISR run at 250Hz rather than 25KHz
+#define ISR_250HZ
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0u
@@ -164,11 +167,14 @@ typedef struct
 // values.
 // The values here are hand tuned for 25KHz ISR operation
 // 0xFFFF - 0x01E0 = 0xFE1F
+
+#ifndef ISR_250HZ
 #define TIMER1_L_RELOAD (61u)  // 0x3D
 #define TIMER1_H_RELOAD (254u) // 0xFE
-//#define TIMER1_L_RELOAD (0x3F)
-//#define TIMER1_H_RELOAD (0xED)
-
+#else
+#define TIMER1_L_RELOAD (127u)  // 0x7F
+#define TIMER1_H_RELOAD (68u)  // 0x44
+#endif
 
 #define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
 

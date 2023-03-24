@@ -378,6 +378,11 @@ UINT8 process_QM(void);
 void clear_StepCounters(void);
 
 
+UINT32 xx;
+UINT8 y;
+UINT8 zz;
+
+
 // ISR
 #pragma interrupt high_ISR
 void high_ISR(void)
@@ -556,6 +561,17 @@ void high_ISR(void)
           bitclrzero(AxisActive[0]);
         }
       }
+#ifdef UART_OUTPUT_DEBUG
+      xx = acc_union[0].value;
+      for (y=0; y < 10u; y++)
+      {
+        zz = (xx % 10) + 48;
+        Write1USART(zz);
+        xx = xx / 10;
+      }
+      Write1USART('\r');
+      Write1USART('\n');
+#endif
     }
 
     //// MOTOR 2    LM ////
@@ -1209,7 +1225,7 @@ void EBB_Init(void)
   CurrentCommand.ServoRate = 0;
 
   bitsetzero(FIFOEmpty);
-  bitsetzero(gRedLEDEmptyFIFO);
+  bitclrzero(gRedLEDEmptyFIFO);
 
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
@@ -1328,7 +1344,7 @@ void EBB_Init(void)
 
   // Clear out global stepper positions
   parse_CS_packet();
-  
+
 #ifdef UART_OUTPUT_DEBUG
   Open1USART(
     USART_TX_INT_OFF &

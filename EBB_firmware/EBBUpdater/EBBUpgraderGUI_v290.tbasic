@@ -50,7 +50,7 @@ Function TBMain() As Long
 
   gPortOpen = FALSE
   '---Create a new dialog
-    hDlg = Dialog_New Pixels, 0, "EBB Update to frimware v" & sFirmwareNumber, -1, -1, 400, 400,
+    hDlg = Dialog_New Pixels, 0, "EBB Update to firmware v" & sFirmwareNumber, -1, -1, 400, 400,
                                                   %WS_DLGFRAME  | 
                                                   %DS_CENTER    | 
                                                   %WS_CAPTION   | 
@@ -128,10 +128,11 @@ End Function
 '------------------------------------------------------------------------------
 ' Callback procedure for button control
 '------------------------------------------------------------------------------
-CallBack Function cbButton() As Long                               
+CallBack Function cbButton() As Long
   Local sComPort As String
   Local sTemp As String
   Local dFloat As Double
+  Local yyy as Double
 
   If CBMSG = %WM_COMMAND Then
 
@@ -139,19 +140,22 @@ CallBack Function cbButton() As Long
       Case %BN_CLICKED
         Select Case CBCTL  
 
-          Case %ID_StartUpdateButton    
+          Case %ID_StartUpdateButton
             Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Building a list of COM ports ..." + Chr$(13) + Chr$(10)
             sBuffer = WMI_GetData(ComputerName, "", "", "", "Win32_PnPEntity", "", "Name" )
               
             nItems = Parse( sBuffer, vData(), $CRLF)
             
-            ReDim Ports() 
-              
+            ReDim Ports()
+            
             For Counter = 1 To nItems
               Position = InStr(Ucase$(vData(Counter)),"(COM")
               If Position Then
                 ReDim Preserve Ports(UBound(Ports)+1)
-                PortS(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
+                ' NOTE: we are leaving index 1 of Ports() empty so that we can detect when no ports are found.
+                ' The first actual port gets put into ports(2), the next port in ports(3), etc.
+                Ports(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
+                if (bConsole) then Console_writeLine("prt " & PortS(Ubound(Ports)))
               End If
             Next
 
@@ -159,28 +163,31 @@ CallBack Function cbButton() As Long
             If LBound(Ports) = 1 And UBound(Ports) = 1 Then
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No COM ports found on this computer. Click Exit." + Chr$(13) + Chr$(10)
             Else
+              '
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Ports from " + str$(lbound(Ports)+1) + " to " + Ubound(Ports) + Chr$(13) + Chr$(10)
+              '
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following ports:" + Chr$(13) + Chr$(10)
-              For Counter = LBound(Ports) To UBound(Ports)
-                Control Append Text CBHNDL, %ID_CommandOutputTexBox, Ports(Counter) + Chr$(13) + Chr$(10)
+              For Counter = (LBound(Ports) + 1) To UBound(Ports)
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, str$(Counter) & ": " & Ports(Counter) + Chr$(13) + Chr$(10)
               Next
-              For Counter = LBound(Ports) To UBound(Ports)
+              For Counter = (LBound(Ports) + 1) To UBound(Ports)
                 hComm = COMM_FreeFile
                 Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Testing port " & Ports(Counter) & " ... "
                 COMM_Open("\\.\" & Ports(Counter), hComm)
                 If Err = 0 Then
                   COMM_Set(hComm, %COMM_BAUD, 123)
-                  COMM_Print(hComm, "V" & Chr$(13))    
+                  COMM_Print(hComm, "V" & Chr$(13))
                   Sleep 100
                   nBytes = COMM_Get(hComm, %COMM_RXQUE)
                   COMM_TRecv(hComm, nBytes, sBuffer, 1000)
                   
-                  COMM_Print(hComm, "V" & Chr$(13))    
+                  COMM_Print(hComm, "V" & Chr$(13))
                   Sleep 100
                   nBytes = COMM_Get(hComm, %COMM_RXQUE)
                   COMM_TRecv(hComm, nBytes, sBuffer, 1000)
                   
                   sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
-                  If LEFT$(sBuffer, 3) = "EBB" Then                                                           
+                  If LEFT$(sBuffer, 3) = "EBB" Then
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting update to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
                     COMM_Print(hComm, "BL" & Chr$(13))
@@ -199,12 +206,12 @@ CallBack Function cbButton() As Long
                     If pID = 0 Then
                       COMM_Open("\\.\" & Ports(Counter), hComm)
                       If Err = 0 Then
-                        COMM_Print(hComm, "V" & Chr$(13))          
+                        COMM_Print(hComm, "V" & Chr$(13))
                         Sleep 200
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
                         Sleep 200
-                        COMM_Print(hComm, "V" & Chr$(13))          
+                        COMM_Print(hComm, "V" & Chr$(13))
                         Sleep 200
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
@@ -221,15 +228,19 @@ CallBack Function cbButton() As Long
                     EndIf
                   Else
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, " no EBB found" + Chr$(13) + Chr$(10)
+                    If (bConsole) Then Console_WriteLine("[" & sBuffer & "]")
+                    for yyy = 1 to len(sBuffer)
+                      If (bConsole) Then Console_WriteLine("'" & mid$(sBuffer,yyy,1) & "':" & asc(sBuffer,yyy))
+                    next
                     'If (bConsole) Then Console_WriteLine("...closing port " & "\\.\" & Ports(Counter))
-                    COMM_Close(hComm)    
+                    COMM_Close(hComm)
                   EndIf
                 Else
                   Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Error: " & Err + Chr$(13) + Chr$(10)
                 End If
               Next
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Click Exit (or click Start Upgrade again to update more EBBs)" + Chr$(13) + Chr$(10)
-            End If                                                                                                  
+            End If
             
 ''          Case %ID_OpenCommButton
 ''            If (bConsole) Then Console_Writeline Time$, "OpenCommButton clicked" 
