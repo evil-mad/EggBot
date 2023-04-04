@@ -377,12 +377,6 @@ BOOL gLimitChecks = TRUE;
 UINT8 process_QM(void);
 void clear_StepCounters(void);
 
-
-UINT32 xx;
-UINT8 y;
-UINT8 zz;
-
-
 // ISR
 #pragma interrupt high_ISR
 void high_ISR(void)
@@ -451,7 +445,7 @@ void high_ISR(void)
     {
       // Add the rate to the accumulator and see if the MSb got set. If so
       // then take a step and record that the step was taken
-      acc_union[0].value += CurrentCommand.Rate[0].value;
+      acc_union[0].value += CurrentCommand.Rate[0];
       if (acc_union[0].bytes.b4 & 0x80)
       {
         acc_union[0].bytes.b4 &= 0x7F;
@@ -471,7 +465,7 @@ void high_ISR(void)
 
     if (bittstzero(AxisActive[1]))
     {
-      acc_union[1].value += CurrentCommand.Rate[1].value;
+      acc_union[1].value += CurrentCommand.Rate[1];
       if (acc_union[1].bytes.b4 & 0x80)
       {
         acc_union[1].bytes.b4 &= 0x7F;
@@ -536,21 +530,22 @@ void high_ISR(void)
           CurrentCommand.DirBits ^= DIR1_BIT;
         }
       }
-      CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+      CurrentCommand.Rate[0] += CurrentCommand.Accel[0];
 
       /// TODO: This next if() can be eliminated if the parse_LM() function
       /// can correctly determine if rate will overflow (or underflow) and
       /// prevent the move from happening if so. (Future optimization opportunity)
 
       // Check for rate roll over - we can't have a rate with it's MSb set
-      if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
-      {
-        // TODO: Is this really the right thing to do if rate gets too high?
-        // Could we just clear the high bit? (Would that be faster?)
-        // It looks like this would save 1 instruction. (Future optimization opportunity)
-        CurrentCommand.Rate[0].bytes.b4 += 0x80;
-      }
-      acc_union[0].value += CurrentCommand.Rate[0].value;
+//      if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
+//      {
+//        // TODO: Is this really the right thing to do if rate gets too high?
+//        // Could we just clear the high bit? (Would that be faster?)
+//        // It looks like this would save 1 instruction. (Future optimization opportunity)
+//        CurrentCommand.Rate[0].bytes.b4 += 0x80;
+//      }
+      acc_union[0].value += CurrentCommand.Rate[0];
+
       if (acc_union[0].bytes.b4 & 0x80)
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
@@ -562,15 +557,24 @@ void high_ISR(void)
         }
       }
 #ifdef UART_OUTPUT_DEBUG
-      xx = acc_union[0].value;
-      for (y=0; y < 10u; y++)
       {
-        zz = (xx % 10) + 48;
-        Write1USART(zz);
-        xx = xx / 10;
+        UINT32 xx;
+        INT8 yy;
+        UINT8 pt[10];
+        xx = acc_union[0].value;
+        for (yy = 0; yy < 10; yy++)
+        {
+          pt[yy] = (xx % 10) + 48;
+          xx = xx / 10;
+        }
+        for (yy = 9; yy >= 0; yy--)
+        {
+            while(Busy1USART())
+            { }
+            Write1USART(pt[yy]);
+        }
+        Write1USART('\n');
       }
-      Write1USART('\r');
-      Write1USART('\n');
 #endif
     }
 
@@ -593,13 +597,13 @@ void high_ISR(void)
           CurrentCommand.DirBits ^= DIR2_BIT;
         }
       }
-      CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+      CurrentCommand.Rate[1] += CurrentCommand.Accel[1];
 
-      if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
-      {
-        CurrentCommand.Rate[1].bytes.b4 += 0x80;
-      }
-      acc_union[1].value += CurrentCommand.Rate[1].value;
+//      if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
+//      {
+//        CurrentCommand.Rate[1].bytes.b4 += 0x80;
+//      }
+      acc_union[1].value += CurrentCommand.Rate[1];
       if (acc_union[1].bytes.b4 & 0x80)
       {
         acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
@@ -674,13 +678,13 @@ void high_ISR(void)
           CurrentCommand.DirBits ^= DIR1_BIT;
         }
       }
-      CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
+      CurrentCommand.Rate[0] += CurrentCommand.Accel[0];
 
-      if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
-      {
-        CurrentCommand.Rate[0].bytes.b4 += 0x80;
-      }
-      acc_union[0].value += CurrentCommand.Rate[0].value;
+//      if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
+//      {
+//        CurrentCommand.Rate[0].bytes.b4 += 0x80;
+//      }
+      acc_union[0].value += CurrentCommand.Rate[0];
       if (acc_union[0].bytes.b4 & 0x80)
       {
         acc_union[0].bytes.b4 &= 0x7F;
@@ -704,13 +708,13 @@ void high_ISR(void)
           CurrentCommand.DirBits ^= DIR2_BIT;
         }
       }
-      CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+      CurrentCommand.Rate[1] += CurrentCommand.Accel[1];
 
-      if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
-      {
-        CurrentCommand.Rate[1].bytes.b4 += 0x80;
-      }
-      acc_union[1].value += CurrentCommand.Rate[1].value;
+//      if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
+//      {
+//        CurrentCommand.Rate[1].bytes.b4 += 0x80;
+//      }
+      acc_union[1].value += CurrentCommand.Rate[1];
       if (acc_union[1].bytes.b4 & 0x80)
       {
         acc_union[1].bytes.b4 &= 0x7F;
@@ -1212,7 +1216,7 @@ void EBB_Init(void)
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
   {
-    CurrentCommand.Rate[i].value = 1;
+    CurrentCommand.Rate[i] = 1;
     CurrentCommand.Steps[i] = 0;
     CurrentCommand.Accel[i] = 0;
   }
@@ -1731,10 +1735,10 @@ void parse_LM_packet(void)
     Steps2 = -Steps2;
   }
 
-  move.Rate[0].value = Rate1;
+  move.Rate[0] = Rate1;
   move.Steps[0] = Steps1;
   move.Accel[0] = Accel1;
-  move.Rate[1].value = Rate2;
+  move.Rate[1] = Rate2;
   move.Steps[1] = Steps2;
   move.Accel[1] = Accel2;
   move.Command = COMMAND_LM_MOVE;
@@ -1747,10 +1751,10 @@ void parse_LM_packet(void)
 #if defined(DEBUG_VALUE_PRINT)
   // For debugging step motion , uncomment the next line
   printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-    CommandFIFO[0].Rate[0].value,  // Rate1 unsigned 31 bit
+    CommandFIFO[0].Rate[0],  // Rate1 unsigned 31 bit
     CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
     CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-    CommandFIFO[0].Rate[1].value,  // Rate2 unsigned 31 bit
+    CommandFIFO[0].Rate[1],  // Rate2 unsigned 31 bit
     CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
     CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
   );
@@ -1758,12 +1762,12 @@ void parse_LM_packet(void)
   // To test that our Rate = Rate + ((-Accel) >> 1) math works properly, we can
   // also print out what happens after the first ISR tick, which we will
   // simulate here.
-  LocalTestStepAdd = CommandFIFO[0].Rate[0].value + CommandFIFO[0].Accel[0];
+  LocalTestStepAdd = CommandFIFO[0].Rate[0] + CommandFIFO[0].Accel[0];
   if (LocalTestStepAdd > 0)
   {
     LocalRate1 = LocalTestStepAdd;
   }
-  LocalTestStepAdd = CommandFIFO[0].Rate[1].value + CommandFIFO[0].Accel[1];
+  LocalTestStepAdd = CommandFIFO[0].Rate[1] + CommandFIFO[0].Accel[1];
   if (LocalTestStepAdd > 0)
   {
     LocalRate2 = LocalTestStepAdd;
@@ -1927,10 +1931,10 @@ void parse_LT_packet(void)
     bitclr(move.ServoRPn, 1); // Clear the flag bit (in case it was 1 from before))
   }
 
-  move.Rate[0].value = Rate1;
+  move.Rate[0] = Rate1;
   move.Steps[0] = Intervals;  // Overloading StepsCounter[0] for intervals
   move.Accel[0] = Accel1;
-  move.Rate[1].value = Rate2;
+  move.Rate[1] = Rate2;
   move.Steps[1] = 0;
   move.Accel[1] = Accel2;
   move.Command = COMMAND_LT_MOVE;
@@ -2480,9 +2484,9 @@ static void process_simple_motor_move(
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
 #if defined(DEBUG_VALUE_PRINT)
     // First check for duration to large.
-    if (A1Stp < (0xFFFFFF/763)) 
+    if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
     {
-      if (Duration > (A1Stp * 763)) 
+      if (Duration > ((UINT32)A1Stp * 763u)) 
       {
         printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
         temp = 0;
@@ -2541,7 +2545,7 @@ static void process_simple_motor_move(
     {
       temp = 0x7FFFFFFF;
     }
-    move.Rate[0].value = temp;
+    move.Rate[0] = temp;
     move.Steps[0] = A1Stp;
     move.Accel[0] = 0;
 
@@ -2586,7 +2590,7 @@ static void process_simple_motor_move(
     {
       temp = 0x7FFFFFFF;
     }
-    move.Rate[1].value = temp;
+    move.Rate[1] = temp;
     move.Steps[1] = A2Stp;
     move.Accel[1] = 0;
     move.Command = COMMAND_SM_XM_HM_MOVE;

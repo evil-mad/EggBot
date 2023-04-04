@@ -113,22 +113,22 @@ typedef union union32b4 {
 } u32b4_t;
 
 // Byte union used for rate (signed)
-typedef union union32b4 {
-  struct byte_map {
-      UINT8 b1; // Low byte
-      UINT8 b2;
-      UINT8 b3;
-      UINT8 b4; // High byte
-  } bytes;
-  INT32 value;
-} uS32b4_t;
+//typedef union union32b4 {
+//  struct byte_map {
+//      UINT8 b1; // Low byte
+//      UINT8 b2;
+//      UINT8 b3;
+//      UINT8 b4; // High byte
+//  } bytes;
+//  INT32 value;
+//} s32b4_t;
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           Command;                        // SM DL S2 SE EM LM LT
-  uS32b4_t        Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  INT32           Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
   UINT8           DirBits;                        // SM          EM LM LT
