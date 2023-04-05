@@ -351,6 +351,12 @@ static volatile UINT8 ButtonPushed;
 // LSb set to enable use of alternate PRG (pause) button
 static volatile UINT8 UseAltPause;
 
+// ISR globals only used when enabling extended ISR debug serial output
+#ifdef UART_OUTPUT_DEBUG
+static UINT32 gISRTickCountForThisCommand;
+static UINT32 gMotor1StepCountForThisCommand;
+#endif
+
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
 
@@ -509,6 +515,9 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
+#ifdef UART_OUTPUT_DEBUG
+      gISRTickCountForThisCommand++;
+#endif
       // For acceleration, we now add Accel to Rate each time through the ISR
       // However, based on the exact parameters, we might be going through 
       // a direction flip because the speed of the motor has reached zero
@@ -550,10 +559,68 @@ void high_ISR(void)
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
+#ifdef UART_OUTPUT_DEBUG
+        gMotor1StepCountForThisCommand++;
+#endif
         CurrentCommand.Steps[0]--;
         if (CurrentCommand.Steps[0] == 0u)
         {
           bitclrzero(AxisActive[0]);
+#ifdef UART_OUTPUT_DEBUG
+          {
+            UINT32 xx;
+            INT8 yy;
+            UINT8 pt[10];
+
+            // Write out the total ISR ticks for this move
+            while(Busy1USART())
+            { }
+            Write1USART('T');
+            while(Busy1USART())
+            { }
+            Write1USART(':');
+
+            xx = gISRTickCountForThisCommand;
+            for (yy = 0; yy < 10; yy++)
+            {
+              pt[yy] = (xx % 10) + 48;
+              xx = xx / 10;
+            }
+            for (yy = 9; yy >= 0; yy--)
+            {
+                while(Busy1USART())
+                { }
+                Write1USART(pt[yy]);
+            }
+            while(Busy1USART())
+            { }
+            Write1USART('\n');
+
+            // Write out the total steps for this move
+            while(Busy1USART())
+            { }
+            Write1USART('S');
+            while(Busy1USART())
+            { }
+            Write1USART(':');
+
+            xx = gMotor1StepCountForThisCommand;
+            for (yy = 0; yy < 10; yy++)
+            {
+              pt[yy] = (xx % 10) + 48;
+              xx = xx / 10;
+            }
+            for (yy = 9; yy >= 0; yy--)
+            {
+                while(Busy1USART())
+                { }
+                Write1USART(pt[yy]);
+            }
+            while(Busy1USART())
+            { }
+            Write1USART('\n');
+          }
+#endif
         }
       }
 #ifdef UART_OUTPUT_DEBUG
@@ -561,6 +628,15 @@ void high_ISR(void)
         UINT32 xx;
         INT8 yy;
         UINT8 pt[10];
+
+        // Write out the accumulator1 value after all math is complete
+        while(Busy1USART())
+        { }
+        Write1USART('A');
+        while(Busy1USART())
+        { }
+        Write1USART(':');
+
         xx = acc_union[0].value;
         for (yy = 0; yy < 10; yy++)
         {
@@ -573,6 +649,8 @@ void high_ISR(void)
             { }
             Write1USART(pt[yy]);
         }
+        while(Busy1USART())
+        { }
         Write1USART('\n');
       }
 #endif
@@ -1157,6 +1235,10 @@ CheckForNextCommand:
           bitclrzero(AxisActive[1]);
         }
       }
+#ifdef UART_OUTPUT_DEBUG
+      gISRTickCountForThisCommand = 0;
+      gMotor1StepCountForThisCommand = 0;
+#endif
       bitsetzero(FIFOEmpty);
     }
     else 
@@ -1576,21 +1658,21 @@ void fprint(float f)
 //
 // Is for doing low level moves with optional acceleration. 
 //
-// <Rate1> and <Rate2> are a 32-bit unsigned ints, but we will generate an error if
-// the MSb is set, so they are only allowed to be 31 bit unsigned integers as parameters.
+// <Rate1> and <Rate2> are a signed 32-bit integers
+// Negative values indicate movement in the opposite direction.
 // They are the values added to the accumulator every 25KHz.
 // <Steps1> and <Steps2> are signed 32-bit integers where the signs determine the 
 // direction of travel for that axis. Each axis will take <steps> steps and then stop.
 // Once both axis are done moving, the command is complete.
-// <Accel1> and <Accel2> are 32 bit signed ints. Their values are added to <Rate1>
+// <Accel1> and <Accel2> are 32 bit signed integers. Their values are added to <Rate1>
 // and <Rate2> respectively every ISR tick.
 //
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet(void)
 {
-  UINT32 Rate1 = 0;
-  UINT32 Rate2 = 0;
+  INT32 Rate1 = 0;
+  INT32 Rate2 = 0;
   INT32 Steps1 = 0;
   INT32 Steps2 = 0;
   INT32 Accel1 = 0;
@@ -1604,10 +1686,10 @@ void parse_LM_packet(void)
 #endif
   
   // Extract each of the values.
-  extract_number(kULONG, &Rate1,     kREQUIRED);
+  extract_number(kLONG,  &Rate1,     kREQUIRED);
   extract_number(kLONG,  &Steps1,    kREQUIRED);
   extract_number(kLONG,  &Accel1,    kREQUIRED);
-  extract_number(kULONG, &Rate2,     kREQUIRED);
+  extract_number(kLONG,  &Rate2,     kREQUIRED);
   extract_number(kLONG,  &Steps2,    kREQUIRED);
   extract_number(kLONG,  &Accel2,    kREQUIRED);
   extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
@@ -1618,27 +1700,17 @@ void parse_LM_packet(void)
     return;
   }
 
-  // Limit Rates to 0x7FFFFFFF
-  if (Rate1 >= 0x7FFFFFFFu)
-  {
-    Rate1 = 0x7FFFFFFF;
-  }
-  if (Rate2 >= 0x7FFFFFFFu)
-  {
-    Rate2 = 0x7FFFFFFF;
-  }
-
   // Quickly eliminate obvious invalid parameter combinations,
   // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
   if (
     (
-      ((Rate1 == 0u) && (Accel1 == 0))
+      ((Rate1 == 0) && (Accel1 == 0))
       ||
       (Steps1 == 0)
     )
     &&
     (
-      ((Rate2 == 0u) && (Accel2 == 0))
+      ((Rate2 == 0) && (Accel2 == 0))
       ||
       (Steps2 == 0)
     )
@@ -1652,7 +1724,58 @@ void parse_LM_packet(void)
   {
     ClearAccs = 3;
   }
+
+  // Since we will only use the sign of Rate as the signal for initial 
+  // stepper direction, if the user has sent us negative step counts, we
+  // apply a 'legacy' mode rule here : if steps are negative, make sure
+  // rate is positive, then make steps positive and rate negative and invert
+  // acceleration too to compensate. After this step, the sign of rate completely
+  // controls the direction.
+  if (Steps1 < 0)
+  {
+    if (Rate1 < 0)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
+    else
+    {
+      Steps1 = -Steps1;
+      Rate1 = -Rate1;
+      Accel1 = -Accel1;
+    }
+  }
+  if (Steps2 < 0)
+  {
+    if (Rate2 < 0)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
+    else
+    {
+      Steps1 = -Steps2;
+      Rate2 = -Rate2;
+      Accel2 = -Accel2;
+    }
+  }
   
+  // Set the initial direction based on the sign of rate
+  // At this point we know that both steps and rate are positive, or
+  // steps. A dir bit = 0 means CW and dir bit = 1 means CCW.
+  // Note that this decision happens here, before we subtract off half
+  // of Accel from Rate, since that will artifically affect the sign of
+  // Rate for certain values of Rate and Accel.
+  move.DirBits = 0;       // Start by assuming motors start CW
+  if (Rate1 < 0)
+  {
+    move.DirBits = move.DirBits | DIR1_BIT;
+  }
+  if (Rate2 < 0)
+  {
+    move.DirBits = move.DirBits | DIR2_BIT;
+  }
+
   // Subtract off half of the Accel term from the Rate term before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
   // documentation)
@@ -1701,6 +1824,7 @@ void parse_LM_packet(void)
   else
   {
     bitclrzero(move.ServoRPn); // Clear the flag bit (in case it was 1 from before))
+    move.TicksToFlip[0] = 0;
   }
   if (Accel2 < 0)
   {
@@ -1711,30 +1835,21 @@ void parse_LM_packet(void)
   else
   {
     bitclr(move.ServoRPn, 1); // Clear the flag bit (in case it was 1 from before))
+    move.TicksToFlip[1] = 0;
   }
   
   // We are going to reuse SEState to hold the clear accumulators flag
   move.SEState = ClearAccs;
   
-  move.DelayCounter = 0; // No delay for motor moves
-  move.DirBits = 0;
+  move.DelayCounter = 0;  // No delay for motor moves
 
   // Always enable both motors when we want to move them
+  // (To be more logical this should happen in the ISR when this move
+  // is loaded rather than here.)
   Enable1IO = ENABLE_MOTOR;
   Enable2IO = ENABLE_MOTOR;
 
-  // First, set the direction bits
-  if (Steps1 < 0)
-  {
-    move.DirBits = move.DirBits | DIR1_BIT;
-    Steps1 = -Steps1;
-  }
-  if (Steps2 < 0)
-  {
-    move.DirBits = move.DirBits | DIR2_BIT;
-    Steps2 = -Steps2;
-  }
-
+  // Load up the move structure with all needed values
   move.Rate[0] = Rate1;
   move.Steps[0] = Steps1;
   move.Accel[0] = Accel1;
@@ -1749,14 +1864,16 @@ void parse_LM_packet(void)
 
   CommandFIFO[0] = move;
 #if defined(DEBUG_VALUE_PRINT)
-  // For debugging step motion , uncomment the next line
-  printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-    CommandFIFO[0].Rate[0],  // Rate1 unsigned 31 bit
-    CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
-    CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-    CommandFIFO[0].Rate[1],  // Rate2 unsigned 31 bit
-    CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
-    CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
+  // Print the final values used by the ISR for this move
+  printf((far rom char *)"R1=%ld S1=%lu A1=%ld R2=%ld S2=%lu A2=%ld Flip1=%lu Flip2=%lu\n\r",
+    move.Rate[0],       // Rate1 signed 32 bit
+    move.Steps[0],      // Steps1 (now) unsigned 31 bit
+    move.Accel[0],      // Accel1 signed 32 bit
+    move.Rate[1],       // Rate2 signed 32 bit
+    move.Steps[1],      // Steps2 (now) unsigned 31 bit
+    move.Accel[1],      // Accel2 signed 32 bit
+    move.TicksToFlip[0],// Flip is unsigned 32 bit
+    move.TicksToFlip[1] // Flip is unsigned 32 bit
   );
   
   // To test that our Rate = Rate + ((-Accel) >> 1) math works properly, we can
@@ -1773,11 +1890,12 @@ void parse_LM_packet(void)
     LocalRate2 = LocalTestStepAdd;
   }
 
-  printf((far rom char *)"R1=%lu S1=%lu A1=%ld R2=%lu S2=%lu A2=%ld\n\r",
-    LocalRate1,              // Rate1 unsigned 31 bit into 32 bit signed
+  printf((far rom char *)"After first ISR:\n\r");
+  printf((far rom char *)"R1=%ld S1=%lu A1=%ld R2=%ld S2=%lu A2=%ld\n\r",
+    LocalRate1,              // Rate1 signed 32 bit
     CommandFIFO[0].Steps[0], // Steps1 (now) unsigned 31 bit
     CommandFIFO[0].Accel[0], // Accel1 signed 32 bit
-    LocalRate2,              // Rate2 unsigned 31 bit into 32 bit signed
+    LocalRate2,              // Rate2 signed 32 bit
     CommandFIFO[0].Steps[1], // Steps2 (now) unsigned 31 bit
     CommandFIFO[0].Accel[1]  // Accel2 signed 32 bit
   );
