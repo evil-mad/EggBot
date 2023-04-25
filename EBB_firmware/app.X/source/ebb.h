@@ -52,17 +52,13 @@
 #define EBB_H
 
 // Enable this line to compile with a lot of debug prints for motion commands
-#define DEBUG_VALUE_PRINT
+//#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
- #define GPIO_DEBUG
+#define GPIO_DEBUG
 
-// Define this to output every byte received from PC out UART1 (TX1 = RC6)
-// for debugging PC comms.
+// Define this for printing out internal ISR values at end of each move
 #define UART_OUTPUT_DEBUG
-
-// Define this to make the ISR run at 250Hz rather than 25KHz
-#define ISR_250HZ
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0u
@@ -104,31 +100,31 @@ typedef enum
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
   struct byte_map {
-      UINT8 b1; // Low byte
-      UINT8 b2;
-      UINT8 b3;
-      UINT8 b4; // High byte
+    UINT8 b1; // Low byte
+    UINT8 b2;
+    UINT8 b3;
+    UINT8 b4; // High byte
   } bytes;
   UINT32 value;
 } u32b4_t;
 
 // Byte union used for rate (signed)
-//typedef union union32b4 {
-//  struct byte_map {
-//      UINT8 b1; // Low byte
-//      UINT8 b2;
-//      UINT8 b3;
-//      UINT8 b4; // High byte
-//  } bytes;
-//  INT32 value;
-//} s32b4_t;
+typedef union union32b4 {
+  struct byte_map {
+    UINT8 b1; // Low byte
+    UINT8 b2;
+    UINT8 b3;
+    UINT8 b4; // High byte
+  } bytes;
+  INT32 value;
+} s32b4_t;
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           Command;                        // SM DL S2 SE EM LM LT
-  INT32           Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
   UINT8           DirBits;                        // SM          EM LM LT
@@ -139,7 +135,6 @@ typedef struct
   UINT16          ServoRate;                      //       S2
   UINT8           SEState;                        // SM       SE    LM LT
   UINT16          SEPower;                        //          SE
-  UINT32          TicksToFlip[NUMBER_OF_STEPPERS];//                LM LT
 } MoveCommandType;
 
 // Define global things that depend on the board type
@@ -156,6 +151,14 @@ typedef struct
 #define DIR1_BIT_NUM    7u
 #define DIR1_BIT        (1u << DIR1_BIT_NUM)
 
+// Bitfield used in motion commands for communicating accumulator handling
+// messages to ISR
+#define SESTATE_CLEAR_ACC1_BIT    0x01
+#define SESTATE_CLEAR_ACC2_BIT    0x02
+#define SESTATE_NEGATE_ACC1_BIT   0x04
+#define SESTATE_NEGATE_ACC2_BIT   0x08
+#define SESTATE_ARBITRARY_ACC_BIT 0x10
+
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
 // (normal CPU instruction rate of Fosc/4)
@@ -166,18 +169,17 @@ typedef struct
 // that happen after the timer fires but before we can reload the timer with new
 // values.
 // The values here are hand tuned for 25KHz ISR operation
-// 0xFFFF - 0x01E0 = 0xFE1F
+// 0xFFFF - 0x01BE = 0xFE41
+// 0xFE40 = 24.938 KHz
+// 0xFE41 = 24.994 KHz
+// 0xFE42 = 25.044 KHz
+// Note that the timing of the ISR is affected by any of the 'debug' defines
+// above, so you have to have them turned off to get the most accurate time.
 
-#ifndef ISR_250HZ
-#define TIMER1_L_RELOAD (61u)  // 0x3D
-#define TIMER1_H_RELOAD (254u) // 0xFE
-#else
-#define TIMER1_L_RELOAD (127u)  // 0x7F
-#define TIMER1_H_RELOAD (68u)  // 0x44
-#endif
+#define TIMER1_L_RELOAD (0x41)
+#define TIMER1_H_RELOAD (0xFE)
 
 #define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
-
 
 extern MoveCommandType CommandFIFO[];
 extern unsigned int DemoModeActive;

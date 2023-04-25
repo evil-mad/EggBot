@@ -65,7 +65,7 @@
 
   //The PICDEM FS USB Demo Board platform supports the USE_SELF_POWER_SENSE_IO
   //and USE_USB_BUS_SENSE_IO features.  Uncomment the below line(s) if
-  //it is desireable to use one or both of the features.
+  //it is desirable to use one or both of the features.
   //#define USE_SELF_POWER_SENSE_IO
   #define tris_self_power     TRISAbits.TRISA2    // Input
   #if defined(USE_SELF_POWER_SENSE_IO)
@@ -100,10 +100,10 @@
   /*******************************************************************/
 
   /** Board definition ***********************************************/
-  //These defintions will tell the main() function which board is
+  //These definitions will tell the main() function which board is
   //  currently selected.  This will allow the application to add
   //  the correct configuration bits as wells use the correct
-  //  initialization functions for the board.  These defitions are only
+  //  initialization functions for the board.  These definitions are only
   //  required in the stack provided demos.  They are not required in
   //  final application design.
   #define CLOCK_FREQ            48000000
