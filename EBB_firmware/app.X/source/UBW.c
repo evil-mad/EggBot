@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_rf\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -891,10 +891,11 @@ void ProcessIO(void)
     {
       tst_char = g_RX_command_buf[byte_cnt];
       
-#ifdef UART_OUTPUT_DEBUG
-//      Write1USART(tst_char);
-#endif
-      
+      if (bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+      {
+        Write1USART(tst_char);
+      }
+        
       // Check to see if we are in a CR/LF situation
       if (
         !in_cr 
@@ -1601,13 +1602,17 @@ void parse_R_packet(void)
 // CU is "Configure UBW" and controls system-wide configuration values
 // "CU,<parameter_number>,<parameter_value><CR>"
 // <parameter_number> <parameter_value>
-// 1  {1|0} turns on or off the 'ack' ("OK" at end of packets)
-// 2  {1|0} turns on or off parameter limit checking (defaults to on))
-// 3  {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
+// 2   {1|0} turns on or off parameter limit checking (defaults to on))
+// 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
+// 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
+// 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
+// 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 void parse_CU_packet(void)
 {
-  unsigned char parameter_number;
-  signed int paramater_value;
+  UINT8 parameter_number;
+  INT16 paramater_value;
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
   extract_number(kINT, &paramater_value, kREQUIRED);
@@ -1656,6 +1661,135 @@ void parse_CU_packet(void)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
+  }
+  else if (250u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_GPIO_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_GPIO_BIT_NUM);
+      TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+      TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+      TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+#if 0
+      while(1)
+      {
+        _asm
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+          BCF 0x8c,0x0,0x0
+          BSF 0x8c,0x0,0x0
+        _endasm
+      }
+#endif
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else if (251u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
+      Open1USART(
+        USART_TX_INT_OFF &
+        USART_RX_INT_OFF &
+        USART_ASYNCH_MODE &
+        USART_EIGHT_BIT &
+        USART_CONT_RX &
+        USART_BRGH_HIGH &
+        USART_ADDEN_OFF,
+        2                   // At 48 MHz, this creates 1 Mbaud output
+      );
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else if (252u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
+      bitset(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+      Open1USART(
+        USART_TX_INT_OFF &
+        USART_RX_INT_OFF &
+        USART_ASYNCH_MODE &
+        USART_EIGHT_BIT &
+        USART_CONT_RX &
+        USART_BRGH_HIGH &
+        USART_ADDEN_OFF,
+        2                   // At 48 MHz, this creates 1 Mbaud output
+      );
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else if (253u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM);
+      Open1USART(
+        USART_TX_INT_OFF &
+        USART_RX_INT_OFF &
+        USART_ASYNCH_MODE &
+        USART_EIGHT_BIT &
+        USART_CONT_RX &
+        USART_BRGH_HIGH &
+        USART_ADDEN_OFF,
+        2                   // At 48 MHz, this creates 1 Mbaud output
+      );
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else
+  {
+    // parameter_number is not understood
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
   }
   print_ack();
 }

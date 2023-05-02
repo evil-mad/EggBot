@@ -51,14 +51,24 @@
 #ifndef EBB_H
 #define EBB_H
 
+
+// Bitfield defines for the TestModes variable.
+#define TEST_MODE_GPIO_BIT_NUM            1u
+#define TEST_MODE_GPIO_BIT                (1u << TEST_MODE_GPIO_BIT_NUM)
+// Set for any ISR printing
+#define TEST_MODE_USART_ISR_BIT_NUM       2u
+#define TEST_MODE_USART_ISR_BIT           (1u << TEST_MODE_USART_ISR_BIT_NUM)
+// Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not just end of move
+#define TEST_MODE_USART_ISR_FULL_BIT_NUM  3u
+#define TEST_MODE_USART_ISR_FULL_BIT      (1u << TEST_MODE_USART_ISR_FULL_BIT_NUM)
+#define TEST_MODE_USART_COMMAND_BIT_NUM   4u
+#define TEST_MODE_USART_COMMAND_BIT       (1u << TEST_MODE_USART_COMMAND_BIT_NUM)
+// This last bit is used during the ISR and is not available as a general test mode bit
+#define TEST_MODE_PRINT_TRIGGER_BIT_NUM   7u
+#define TEST_MODE_PRINT_TRIGGER_BIT       (1u << TEST_MDOE_PRINT_TRIGGER_BIT_NUM)
+
 // Enable this line to compile with a lot of debug prints for motion commands
 //#define DEBUG_VALUE_PRINT
-
-// Define this to turn on some GPIO pin timing debug for stepper commands
-#define GPIO_DEBUG
-
-// Define this for printing out internal ISR values at end of each move
-#define UART_OUTPUT_DEBUG
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0u
@@ -169,17 +179,97 @@ typedef struct
 // that happen after the timer fires but before we can reload the timer with new
 // values.
 // The values here are hand tuned for 25KHz ISR operation
-// 0xFFFF - 0x01BE = 0xFE41
-// 0xFE40 = 24.938 KHz
-// 0xFE41 = 24.994 KHz
-// 0xFE42 = 25.044 KHz
-// Note that the timing of the ISR is affected by any of the 'debug' defines
-// above, so you have to have them turned off to get the most accurate time.
+// 0xFE30 = 25.00 KHz
 
-#define TIMER1_L_RELOAD (0x41)
-#define TIMER1_H_RELOAD (0xFE)
+#define TIMER1_L_RELOAD 0x30
+#define TIMER1_H_RELOAD 0xFE
 
 #define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
+
+// A define to wait until the transmit register is empty, the print one byte
+#define PrintChar(print_val)          \
+  while(Busy1USART())                 \
+  { }                                 \
+  TXREG1 = print_val;
+
+
+// A define to print out a 32-bit hex value
+#define HexPrint(print_val)           \
+        xx.value = print_val;         \
+        nib = xx.bytes.b4 >> 4;       \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b4 & 0x0F;     \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b3 >> 4;       \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b3 & 0x0F;     \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b2 >> 4;       \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b2 & 0x0F;     \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b1 >> 4;       \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             \
+        nib = xx.bytes.b1 & 0x0F;     \
+        if (nib > 9u)                 \
+        {                             \
+          PrintChar(nib + '0')        \
+        }                             \
+        else                          \
+        {                             \
+          PrintChar(nib + 'A' - 10)   \
+        }                             
+
+
 
 extern MoveCommandType CommandFIFO[];
 extern unsigned int DemoModeActive;
@@ -187,6 +277,7 @@ extern UINT8 FIFOEmpty;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
+extern volatile UINT8 TestMode;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;

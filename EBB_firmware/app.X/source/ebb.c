@@ -350,13 +350,20 @@ volatile UINT8 gRedLEDEmptyFIFO;
 static volatile UINT8 ButtonPushed;
 // LSb set to enable use of alternate PRG (pause) button
 static volatile UINT8 UseAltPause;
+// Bitfield used to keep track of what test modes are enabled/disabled
+volatile UINT8 TestMode;
 
-// ISR globals only used when enabling extended ISR debug serial output
-#ifdef UART_OUTPUT_DEBUG
+// Used as temporary variable inside ISR for servo channel index
+static UINT8 ISR_Channel;
+
+// ISR globals used in test modes for keeping track of each move
 static UINT32 gISRTickCountForThisCommand;
 static UINT32 gISRStepCountForThisCommand;
 static INT32  gISRPositionForThisCommand;
-#endif
+
+// Variables used during debug printing within ISR
+static u32b4_t xx;
+static UINT8 nib;
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -391,17 +398,18 @@ void high_ISR(void)
   // 25KHz ISR fire. Note: For speed, we don't check that PIR1bits.TMR1IF is set
   // here. We assume it is, as it's the only interrupt that should be triggering
   // calls to high_ISR()
-
-#if defined(GPIO_DEBUG)
-  TRISDbits.TRISD1 = 0; // Note: enabling this slightly disturbs the 25KHz timing
-  LATDbits.LATD1 = 1;
-#endif
-
+  
   // Clear the interrupt 
   PIR1bits.TMR1IF = 0;
   TMR1H = TIMER1_H_RELOAD;
   TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
+  if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+  {
+    // Note: enabling this slightly disturbs the 25KHz timing
+    LATDbits.LATD1 = 1;
+  }
+  
   bitsetzero(AllDone);      // Start every ISR assuming we are done with the current command - set bit 0 of AllDone
 
   // Process a motor move command of any type
@@ -450,6 +458,10 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
+      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      {
+        gISRTickCountForThisCommand++;
+      }
       // Add the rate to the accumulator and see if the MSb got set. If so
       // then take a step and record that the step was taken
       acc_union[0].value += CurrentCommand.Rate[0].value;
@@ -458,6 +470,11 @@ void high_ISR(void)
         acc_union[0].bytes.b4 &= 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
         CurrentCommand.Steps[0]--;
+
+        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        {
+          gISRStepCountForThisCommand++;
+        }
 
         // For these stepper motion commands zero steps left means
         // the axis is no longer active
@@ -505,9 +522,10 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
-#ifdef UART_OUTPUT_DEBUG
-      gISRTickCountForThisCommand++;
-#endif
+      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      {
+        gISRTickCountForThisCommand++;
+      }
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
       acc_union[0].value += CurrentCommand.Rate[0].value;
 
@@ -516,9 +534,11 @@ void high_ISR(void)
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
         CurrentCommand.Steps[0]--;
-#ifdef UART_OUTPUT_DEBUG
-        gISRStepCountForThisCommand++;
-#endif
+        
+        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        {
+          gISRStepCountForThisCommand++;
+        }
         // Set the direction bit based on the sign of rate
         if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
         {
@@ -586,6 +606,11 @@ void high_ISR(void)
     // Has time run out for this command yet?
     if (bittstzero(AxisActive[0]))
     {
+      // A simple optimization: we only have one 'count' for LT, to know
+      // when we're done, so we can directly clear AllDone here if we are
+      // not yet done with this move.
+      bitclrzero(AllDone);
+
       // Nope. So count this ISR tick, and then see if we need to take a step
       CurrentCommand.Steps[0]--;
       if (CurrentCommand.Steps[0] == 0u)
@@ -595,9 +620,10 @@ void high_ISR(void)
 
       //// MOTOR 1   LT ////
       
-#ifdef UART_OUTPUT_DEBUG
-      gISRTickCountForThisCommand++;
-#endif
+      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      {
+        gISRTickCountForThisCommand++;
+      }
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
       acc_union[0].value += CurrentCommand.Rate[0].value;
 
@@ -605,9 +631,11 @@ void high_ISR(void)
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.DirBits |= STEP1_BIT;
-#ifdef UART_OUTPUT_DEBUG
-        gISRStepCountForThisCommand++;
-#endif
+        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        {
+          gISRStepCountForThisCommand++;
+        }
+        
         // Set the direction bit based on the sign of rate
         if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
         {
@@ -620,6 +648,9 @@ void high_ISR(void)
       }
       
       //// MOTOR 2    LT  ////
+
+      CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
+      acc_union[1].value += CurrentCommand.Rate[1].value;
 
       if (acc_union[1].bytes.b4 & 0x80)
       {
@@ -636,16 +667,7 @@ void high_ISR(void)
           CurrentCommand.DirBits &= ~DIR2_BIT;
         }
       }
-    }
-    
-    // We want to allow for a one-ISR tick move, which requires us to check
-    // to see if the move has been completed here (to load the next command
-    // this tick rather than waiting for the next tick). This primarily gives
-    // us simpler math when figuring out how long moves will take.
-    if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
-    {
-      bitclrzero(AllDone);
-    }
+    }    
   }
 
   // This next block of code (OutputBits:) is common to all of the above
@@ -659,8 +681,8 @@ void high_ISR(void)
   // commands execute this block before they are caught below, doing it this
   // way saves a few instruction cycles for the commands where speed matters
   // most - the stepper commands.
-OutputBits:
 
+OutputBits:
   // Now check to see if either stepper needs to actually output a step pulse
   if ((CurrentCommand.DirBits & (STEP1_BIT | STEP2_BIT)) != 0u)
   {
@@ -708,16 +730,18 @@ OutputBits:
       if (bittst(CurrentCommand.DirBits, DIR1_BIT_NUM))
       {
         globalStepCounter1--;
-#ifdef UART_OUTPUT_DEBUG
-        gISRPositionForThisCommand--;
-#endif
+        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        {
+          gISRPositionForThisCommand--;
+        }
       }
       else
       {
         globalStepCounter1++;
-#ifdef UART_OUTPUT_DEBUG
-        gISRPositionForThisCommand++;
-#endif
+        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        {
+          gISRPositionForThisCommand++;
+        }
       }
     }
     if (bittst(CurrentCommand.DirBits, STEP2_BIT_NUM))
@@ -747,7 +771,7 @@ NonStepperCommands:
     if (bittstzero(gUseRCPenServo))
     {
       // Precompute the channel, since we use it all over the place
-      UINT8 Channel = CurrentCommand.ServoChannel - 1;
+      ISR_Channel = CurrentCommand.ServoChannel - 1;
 
       // This code below is the meat of the RCServo2_Move() function
       // We have to manually write it in here rather than calling
@@ -759,22 +783,22 @@ NonStepperCommands:
       if (0u == CurrentCommand.ServoPosition)
       {
         // Turn off the PPS routing to the pin
-        *(gRC2RPORPtr + gRC2RPn[Channel]) = 0;
+        *(gRC2RPORPtr + gRC2RPn[ISR_Channel]) = 0;
         // Clear everything else out for this channel
-        gRC2Rate[Channel] = 0;
-        gRC2Target[Channel] = 0;
-        gRC2RPn[Channel] = 0;
-        gRC2Value[Channel] = 0;
+        gRC2Rate[ISR_Channel] = 0;
+        gRC2Target[ISR_Channel] = 0;
+        gRC2RPn[ISR_Channel] = 0;
+        gRC2Value[ISR_Channel] = 0;
       }
       else
       {
         // Otherwise, set all of the values that start this RC servo moving
-        gRC2Rate[Channel] = CurrentCommand.ServoRate;
-        gRC2Target[Channel] = CurrentCommand.ServoPosition;
-        gRC2RPn[Channel] = CurrentCommand.ServoRPn;
-        if (gRC2Value[Channel] == 0u)
+        gRC2Rate[ISR_Channel] = CurrentCommand.ServoRate;
+        gRC2Target[ISR_Channel] = CurrentCommand.ServoPosition;
+        gRC2RPn[ISR_Channel] = CurrentCommand.ServoRPn;
+        if (gRC2Value[ISR_Channel] == 0u)
         {
-          gRC2Value[Channel] = CurrentCommand.ServoPosition;
+          gRC2Value[ISR_Channel] = CurrentCommand.ServoPosition;
         }
       }
     }
@@ -949,252 +973,89 @@ NonStepperCommands:
   }        
   // If no bits in CurrentCommand.Command are set then AllDone will be true, 
   // so we'll go on to the next command (if there is one)
-
 CheckForNextCommand:
-
-#ifdef UART_OUTPUT_DEBUG
-
-  // When UART_OUTPUT_DEBUG is defined, comment out this next if() to get
-  // a "full trace" of all values every ISR tick. Leave it in to only get
-  // the debug output values at the end of each move.
-  if (bittstzero(AllDone))
+  // Deal with printing out internal ISR values
+  // Note that TEST_MODE_USART_ISR_BIT is set for both normal (only end of move)
+  // and full (every ISR tick) printing.
+  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
-    // If this is the end of an LM move, then print out all the important values
-    // of everything (now that global step positions have been taken into
-    // account) for checking that our math is working right
-    if (bittst(CurrentCommand.Command, COMMAND_LM_MOVE_BIT) 
-        || 
-        bittst(CurrentCommand.Command, COMMAND_LT_MOVE_BIT)
-    )
+    if (bittstzero(AllDone) || bittst(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM))
     {
-      // Move is complete, output "T:" (ISR ticks), "Steps:" (total steps from 
-      // this move) "C:" (accumulator value), "R:" (rate value), "Pos:" 
-      // (step position)
-      UINT32 xx;
-      INT8 yy;
-      UINT8 pt[10];
-      UINT8 notZeros;
+      // Setting this bit when we have something to print out will cause the next
+      // ISR to be rescheduled so we have as much time as we need to print
+      bitset(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM);
 
-      /// TODO: This could use some MASSIVE cleanup - turn this into a buffered
-      /// ISR driven serial output for best efficiency. Or at the very least
-      /// make signed and unsigned printing macros.
-      
-      // Write out the total ISR ticks for this move (unsigned)
-      while(Busy1USART())
-      { }
-      Write1USART('T');
-      while(Busy1USART())
-      { }
-      Write1USART(':');
+      // If this is the end of an LM move, then print out all the important values
+      // of everything (now that global step positions have been taken into
+      // account) for checking that our math is working right
+      if (CurrentCommand.Command & (COMMAND_LM_MOVE_BIT | COMMAND_LT_MOVE_BIT | COMMAND_SM_XM_HM_MOVE_BIT))
+      {
+        // Move is complete, output "T:" (ISR ticks), "Steps:" (total steps from 
+        // this move) "C:" (accumulator value), "R:" (rate value), "Pos:" 
+        // (step position)
 
-      xx = gISRTickCountForThisCommand;
-      for (yy = 0; yy < 10; yy++)
-      {
-        pt[yy] = (xx % 10) + 48;
-        xx = xx / 10;
-      }
-      notZeros = 0u;
-      for (yy = 9; yy >= 0; yy--)
-      {
-        if (pt[yy] != '0')
-        {
-          notZeros = 1u;
-        }
-        if (notZeros || yy == 0)
-        {
-          while(Busy1USART())
-          { }
-          Write1USART(pt[yy]);
-        }
-      }
-      while(Busy1USART())
-      { }
-      Write1USART(' ');
+        /// TODO: This could use some MASSIVE cleanup - turn this into a buffered
+        /// ISR driven serial output for best efficiency. Or at the very least
+        /// make signed and unsigned printing macros.
 
-      // Write out the total steps made during this move (unsigned)
-      while(Busy1USART())
-      { }
-      Write1USART('S');
-      while(Busy1USART())
-      { }
-      Write1USART('t');
-      while(Busy1USART())
-      { }
-      Write1USART('e');
-      while(Busy1USART())
-      { }
-      Write1USART('p');
-      while(Busy1USART())
-      { }
-      Write1USART('s');
-      while(Busy1USART())
-      { }
-      Write1USART(':');
+        // Write out the total ISR ticks for this move (unsigned)
+        PrintChar('T')
+        PrintChar(':')
 
-      xx = gISRStepCountForThisCommand;
-      for (yy = 0; yy < 10; yy++)
-      {
-        pt[yy] = (xx % 10) + 48;
-        xx = xx / 10;
-      }
-      notZeros = 0u;
-      for (yy = 9; yy >= 0; yy--)
-      {
-        if (pt[yy] != '0')
-        {
-          notZeros = 1u;
-        }
-        if (notZeros || yy == 0)
-        {
-          while(Busy1USART())
-          { }
-          Write1USART(pt[yy]);
-        }
-      }
-      while(Busy1USART())
-      { }
-      Write1USART(' ');
+        HexPrint(gISRTickCountForThisCommand) // Macro for printing HEX value
 
-      // Write out the accumulator1 value after all math is complete (unsigned)
-      while(Busy1USART())
-      { }
-      Write1USART('C');
-      while(Busy1USART())
-      { }
-      Write1USART(':');
+        // Write out the total steps made during this move (unsigned)
+        PrintChar('S')
+        PrintChar('t')
+        PrintChar('e')
+        PrintChar('p')
+        PrintChar('s')
+        PrintChar(':')
 
-      xx = acc_union[0].value;
-      for (yy = 0; yy < 10; yy++)
-      {
-        pt[yy] = (xx % 10) + 48;
-        xx = xx / 10;
-      }
-      notZeros = 0u;
-      for (yy = 9; yy >= 0; yy--)
-      {
-        if (pt[yy] != '0')
-        {
-          notZeros = 1u;
-        }
-        if (notZeros || yy == 0)
-        {
-          while(Busy1USART())
-          { }
-          Write1USART(pt[yy]);
-        }
-      }
-      while(Busy1USART())
-      { }
-      Write1USART(' ');
+        HexPrint(gISRStepCountForThisCommand)
+        PrintChar(' ')
 
-      // Write out the rate1 value (signed)
-      while(Busy1USART())
-      { }
-      Write1USART('R');
-      while(Busy1USART())
-      { }
-      Write1USART(':');
+        // Write out the accumulator1 value after all math is complete (unsigned)
+        PrintChar('C')
+        PrintChar(':')
 
-      if (CurrentCommand.Rate[0].value < 0)
-      {
-        while(Busy1USART())
-        { }
-        Write1USART('-');
-        xx = (UINT32)(-CurrentCommand.Rate[0].value);
-      }
-      else
-      {
-        xx = CurrentCommand.Rate[0].value;
-      }
-      for (yy = 0; yy < 10; yy++)
-      {
-        pt[yy] = (xx % 10) + 48;
-        xx = xx / 10;
-      }
-      notZeros = 0u;
-      for (yy = 9; yy >= 0; yy--)
-      {
-        if (pt[yy] != '0')
-        {
-          notZeros = 1u;
-        }
-        if (notZeros || yy == 0)
-        {
-          while(Busy1USART())
-          { }
-          Write1USART(pt[yy]);
-        }
-      }
-      while(Busy1USART())
-      { }
-      Write1USART(' ');
+        HexPrint(acc_union[0].value)
+        PrintChar(' ')
 
-      // Write out the current position for this command (signed)
-      while(Busy1USART())
-      { }
-      Write1USART('P');
-      while(Busy1USART())
-      { }
-      Write1USART('o');
-      while(Busy1USART())
-      { }
-      Write1USART('s');
-      while(Busy1USART())
-      { }
-      Write1USART(':');
+        // Write out the rate1 value (signed)
+        PrintChar('R')
+        PrintChar(':')
 
-      if (gISRPositionForThisCommand < 0)
-      {
-        while(Busy1USART())
-        { }
-        Write1USART('-');
-        xx = (UINT32)(-gISRPositionForThisCommand);
+        HexPrint(CurrentCommand.Rate[0].value)
+        PrintChar(' ')
+
+        // Write out the current position for this command (signed)
+        PrintChar('P')
+        PrintChar('o')
+        PrintChar('s')
+        PrintChar(':')
+
+        HexPrint(gISRPositionForThisCommand);
+
+        PrintChar('\n')
       }
-      else
-      {
-        xx = gISRPositionForThisCommand;
-      }
-      for (yy = 0; yy < 10; yy++)
-      {
-        pt[yy] = (xx % 10) + 48;
-        xx = xx / 10;
-      }
-      notZeros = 0u;
-      for (yy = 9; yy >= 0; yy--)
-      {
-        if (pt[yy] != '0')
-        {
-          notZeros = 1u;
-        }
-        if (notZeros || yy == 0)
-        {
-          while(Busy1USART())
-          { }
-          Write1USART(pt[yy]);
-        }
-      }
-      while(Busy1USART())
-      { }
-      Write1USART('\n');
     }
   }
-#endif
 
   // If we're done with our current command, load in the next one
   if (bittstzero(AllDone))
   {
-
     CurrentCommand.Command = COMMAND_NONE;
     if (!bittstzero(FIFOEmpty))
     {
+      if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+      {
+        LATDbits.LATD0 = 1;
+      }
       if (bittstzero(gRedLEDEmptyFIFO))
       {
         mLED_2_Off()
       }
-#if defined(GPIO_DEBUG)
-      TRISDbits.TRISD0 = 0;
-      LATDbits.LATD0 = 1;
-#endif
       // Instead of copying over the entire MoveCommandType every time, to save
       // time we will check which command is next in the FIFO, and then only 
       // copy over those fields that the new command actually uses.
@@ -1318,11 +1179,12 @@ CheckForNextCommand:
           bitclrzero(AxisActive[1]);
         }
       }
-#ifdef UART_OUTPUT_DEBUG
-      gISRTickCountForThisCommand = 0;
-      gISRStepCountForThisCommand = 0;
-      gISRPositionForThisCommand = 0;
-#endif
+      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT))
+      {
+        gISRTickCountForThisCommand = 0;
+        gISRStepCountForThisCommand = 0;
+        gISRPositionForThisCommand = 0;
+      }
       bitsetzero(FIFOEmpty);
     }
     else 
@@ -1333,10 +1195,10 @@ CheckForNextCommand:
       {
         mLED_2_On()
       }
-#if defined(GPIO_DEBUG)
-TRISAbits.TRISA1 = 0;
-LATAbits.LATA1 = 1;
-#endif
+      if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+      {
+        LATAbits.LATA1 = 1;
+      }
     }
   }
 
@@ -1367,18 +1229,21 @@ LATAbits.LATA1 = 1;
     Step2AltIO = 0;
   }
 
-#ifdef UART_OUTPUT_DEBUG
-  // Clear the interrupt as the last thing we do. This allows us to have
-  // arbitrarily long interrupts to print debug information out
-  PIR1bits.TMR1IF = 0;
-  TMR1H = TIMER1_H_RELOAD;
-  TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
-#endif
-#if defined(GPIO_DEBUG)
-  LATAbits.LATA1 = 0;
-  LATDbits.LATD0 = 0;
-  LATDbits.LATD1 = 0;
-#endif
+  if (bittst(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM))
+  {
+    // Clear the interrupt as the last thing we do. This allows us to have
+    // arbitrarily long interrupts to print debug information out
+    PIR1bits.TMR1IF = 0;
+    TMR1H = TIMER1_H_RELOAD;
+    TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
+    bitclr(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM);
+  }
+  if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+  {
+    LATAbits.LATA1 = 0;
+    LATDbits.LATD0 = 0;
+    LATDbits.LATD1 = 0;
+  }
 }
 
 // Init code
@@ -1404,6 +1269,8 @@ void EBB_Init(void)
   bitsetzero(FIFOEmpty);
   bitclrzero(gRedLEDEmptyFIFO);
 
+  TestMode = 0;
+  
   // Set up TMR1 for our 25KHz High ISR for stepping
   T1CONbits.RD16 = 1;       // Set 16 bit mode
   T1CONbits.TMR1CS1 = 0;    // System clocked from Fosc/4
@@ -1412,14 +1279,14 @@ void EBB_Init(void)
   T1CONbits.T1CKPS0 = 0;
   T1CONbits.T1OSCEN = 0;    // Don't use external osc
   T1CONbits.T1SYNC = 0;
-  TMR1H = TIMER1_H_RELOAD;  //
-  TMR1L = TIMER1_L_RELOAD;  // Reload for 25Khz ISR fire
-
-  T1CONbits.TMR1ON = 1;     // Turn the timer on
+  TMR1H = 0x00;             //
+  TMR1L = 0x00;             // Give the timer about 5ms before it fires the first time
 
   IPR1bits.TMR1IP = 1;      // Use high priority interrupt
   PIR1bits.TMR1IF = 0;      // Clear the interrupt
   PIE1bits.TMR1IE = 1;      // Turn on the interrupt
+
+  T1CONbits.TMR1ON = 1;     // Turn the timer on
   
 //  PORTA = 0;
   RefRA0_IO_TRIS = INPUT_PIN;
@@ -1521,19 +1388,6 @@ void EBB_Init(void)
 
   // Clear out global stepper positions
   parse_CS_packet();
-
-#ifdef UART_OUTPUT_DEBUG
-  Open1USART(
-    USART_TX_INT_OFF &
-    USART_RX_INT_OFF &
-    USART_ASYNCH_MODE &
-    USART_EIGHT_BIT &
-    USART_CONT_RX &
-    USART_BRGH_HIGH &
-    USART_ADDEN_OFF,
-    2                   // At 48 MHz, this creates 1 Mbaud output
-  );
-#endif
 }
 
 // Stepper (mode) Configure command
@@ -1779,9 +1633,7 @@ void parse_LM_packet(void)
   INT32 LocalRate1 = 0;
   INT32 LocalRate2 = 0;
 #endif
-#ifdef UART_OUTPUT_DEBUG
   ExtractReturnType ClearRet;
-#endif
   
   // Extract each of the values.
   extract_number(kLONG,  &Rate1,     kREQUIRED);
@@ -1790,11 +1642,8 @@ void parse_LM_packet(void)
   extract_number(kLONG,  &Rate2,     kREQUIRED);
   extract_number(kLONG,  &Steps2,    kREQUIRED);
   extract_number(kLONG,  &Accel2,    kREQUIRED);
-#ifdef UART_OUTPUT_DEBUG
   ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
-#else
-  extract_number(kULONG, &ClearAccs, kOPTIONAL);
-#endif
+
   // Bail if we got a conversion error
   if (error_byte)
   {
@@ -1820,14 +1669,15 @@ void parse_LM_packet(void)
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
-  
-#if !defined(UART_OUTPUT_DEBUG)
-  if (ClearAccs > 3u)
-  {
-    ClearAccs = 3;
-  }
-#endif
 
+  if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+  {
+    if (ClearAccs > 3u)
+    {
+      ClearAccs = 3;
+    }
+  }
+  
   // Since we will only use the sign of Rate as the signal for initial 
   // stepper direction, if the user has sent us negative step counts, we
   // apply a 'legacy' mode rule here : if steps are negative, make sure
@@ -1858,7 +1708,7 @@ void parse_LM_packet(void)
     }
     else
     {
-      Steps1 = -Steps2;
+      Steps2 = -Steps2;
       Rate2 = -Rate2;
       Accel2 = -Accel2;
     }
@@ -1877,48 +1727,51 @@ void parse_LM_packet(void)
   // this.
   move.SEState = 0;           // Start with all bits clear
   
-#ifdef UART_OUTPUT_DEBUG
-  if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
+  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
-    move.SEState = SESTATE_ARBITRARY_ACC_BIT;
-    move.DelayCounter = ClearAccs;
+    if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
+    {
+      move.SEState = SESTATE_ARBITRARY_ACC_BIT;
+      move.DelayCounter = ClearAccs;
+    }
+    else
+    {
+      if ((Rate1 + (Accel1/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+      }
+    }
   }
   else
   {
-    if ((Rate1 + (Accel1/2)) < 0)
+    if (ClearAccs & 0x01)
     {
-      move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      if ((Rate1 + (Accel1/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+      }
     }
-    else
+    if (ClearAccs & 0x02)
     {
-      move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-    }
-  }
-#else
-  if (ClearAccs & 0x01)
-  {
-    if ((Rate1 + (Accel1/2)) < 0)
-    {
-      move.SEState |= SESTATE_NEGATE_ACC1_BIT;
-    }
-    else
-    {
-      move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-    }
-  }
-  if (ClearAccs & 0x02)
-  {
-    if ((Rate2 + (Accel2/2)) < 0)
-    {
-      move.SEState |= SESTATE_NEGATE_ACC2_BIT;
-    }
-    else
-    {
-      move.SEState |= SESTATE_CLEAR_ACC2_BIT;
+      if ((Rate2 + (Accel2/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC2_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC2_BIT;
+      }
     }
   }
-#endif
-  
+    
   // Subtract off half of the Accel term from the Rate term before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
   // documentation)
@@ -1990,9 +1843,7 @@ void parse_LT_packet(void)
   INT32 Accel2 = 0;
   MoveCommandType move;
   UINT32 ClearAccs = 0;
-#ifdef UART_OUTPUT_DEBUG
   ExtractReturnType ClearRet;
-#endif
 
   // Extract each of the values.
   extract_number(kULONG, &Intervals, kREQUIRED);
@@ -2000,11 +1851,7 @@ void parse_LT_packet(void)
   extract_number(kLONG,  &Accel1,    kREQUIRED);
   extract_number(kLONG,  &Rate2,     kREQUIRED);
   extract_number(kLONG,  &Accel2,    kREQUIRED);
-#ifdef UART_OUTPUT_DEBUG
   ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
-#else
-  extract_number(kULONG, &ClearAccs, kOPTIONAL);
-#endif
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -2020,13 +1867,14 @@ void parse_LT_packet(void)
     return;
   }
   
-#if !defined(UART_OUTPUT_DEBUG)  
-  if (ClearAccs > 3u)
+  if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
-    ClearAccs = 3;
+    if (ClearAccs > 3u)
+    {
+      ClearAccs = 3;
+    }
   }
-#endif
-  
+    
   move.DirBits = 0;       // Start by assuming motors start CW
   move.DelayCounter = 0;  // No delay for motor moves
 
@@ -2040,47 +1888,50 @@ void parse_LT_packet(void)
   // this.
   move.SEState = 0;           // Start with all bits clear
   
-#ifdef UART_OUTPUT_DEBUG
-  if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
+  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
-    move.SEState = SESTATE_ARBITRARY_ACC_BIT;
-    move.DelayCounter = ClearAccs;
+    if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
+    {
+      move.SEState = SESTATE_ARBITRARY_ACC_BIT;
+      move.DelayCounter = ClearAccs;
+    }
+    else
+    {
+      if ((Rate1 + (Accel1/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+      }
+    }
   }
   else
   {
-    if ((Rate1 + (Accel1/2)) < 0)
+    if (ClearAccs & 0x01)
     {
-      move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      if ((Rate1 + (Accel1/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+      }
     }
-    else
+    if (ClearAccs & 0x02)
     {
-      move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-    }
-  }
-#else
-  if (ClearAccs & 0x01)
-  {
-    if ((Rate1 + (Accel1/2)) < 0)
-    {
-      move.SEState |= SESTATE_NEGATE_ACC1_BIT;
-    }
-    else
-    {
-      move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-    }
-  }
-  if (ClearAccs & 0x02)
-  {
-    if ((Rate2 + (Accel2/2)) < 0)
-    {
-      move.SEState |= SESTATE_NEGATE_ACC2_BIT;
-    }
-    else
-    {
-      move.SEState |= SESTATE_CLEAR_ACC2_BIT;
+      if ((Rate2 + (Accel2/2)) < 0)
+      {
+        move.SEState |= SESTATE_NEGATE_ACC2_BIT;
+      }
+      else
+      {
+        move.SEState |= SESTATE_CLEAR_ACC2_BIT;
+      }
     }
   }
-#endif
 
   // Subtract off half of the Accel term from the Rate term before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
