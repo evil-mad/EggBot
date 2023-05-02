@@ -90,22 +90,22 @@ typedef enum
 // all the same and represented by one bit.
 // Only one bit must be set at a time or undefined behavior will occur.
 // If no bits are set, then the command is effectively COMMAND_NONE.
-#define COMMAND_DELAY_BIT             0u
-#define COMMAND_SERVO_MOVE_BIT        1u
-#define COMMAND_SE_BIT                2u
-#define COMMAND_EM_BIT                3u
-#define COMMAND_SM_XM_HM_MOVE_BIT     4u
-#define COMMAND_LM_MOVE_BIT           5u
-#define COMMAND_LT_MOVE_BIT           6u
+#define COMMAND_DELAY_BIT_NUM             0u
+#define COMMAND_SERVO_MOVE_BIT_NUM        1u
+#define COMMAND_SE_BIT_NUM                2u
+#define COMMAND_EM_BIT_NUM                3u
+#define COMMAND_SM_XM_HM_MOVE_BIT_NUM     4u
+#define COMMAND_LM_MOVE_BIT_NUM           5u
+#define COMMAND_LT_MOVE_BIT_NUM           6u
 
-#define COMMAND_NONE                  0u
-#define COMMAND_DELAY                 1u
-#define COMMAND_SERVO_MOVE            (1u << COMMAND_SERVO_MOVE_BIT)
-#define COMMAND_SE                    (1u << COMMAND_SE_BIT)
-#define COMMAND_EM                    (1u << COMMAND_EM_BIT)
-#define COMMAND_SM_XM_HM_MOVE         (1u << COMMAND_SM_XM_HM_MOVE_BIT)
-#define COMMAND_LM_MOVE               (1u << COMMAND_LM_MOVE_BIT)
-#define COMMAND_LT_MOVE               (1u << COMMAND_LT_MOVE_BIT)
+#define COMMAND_NONE_BIT                  0u
+#define COMMAND_DELAY_BIT                 1u
+#define COMMAND_SERVO_MOVE_BIT            (1u << COMMAND_SERVO_MOVE_BIT_NUM)
+#define COMMAND_SE_BIT                    (1u << COMMAND_SE_BIT_NUM)
+#define COMMAND_EM_BIT                    (1u << COMMAND_EM_BIT_NUM)
+#define COMMAND_SM_XM_HM_MOVE_BIT         (1u << COMMAND_SM_XM_HM_MOVE_BIT_NUM)
+#define COMMAND_LM_MOVE_BIT               (1u << COMMAND_LM_MOVE_BIT_NUM)
+#define COMMAND_LT_MOVE_BIT               (1u << COMMAND_LT_MOVE_BIT_NUM)
 
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
@@ -197,7 +197,7 @@ typedef struct
 #define HexPrint(print_val)           \
         xx.value = print_val;         \
         nib = xx.bytes.b4 >> 4;       \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -206,7 +206,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b4 & 0x0F;     \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -215,7 +215,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b3 >> 4;       \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -224,7 +224,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b3 & 0x0F;     \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -233,7 +233,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b2 >> 4;       \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -242,7 +242,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b2 & 0x0F;     \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -251,7 +251,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b1 >> 4;       \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
@@ -260,7 +260,7 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             \
         nib = xx.bytes.b1 & 0x0F;     \
-        if (nib > 9u)                 \
+        if (nib <= 9u)                \
         {                             \
           PrintChar(nib + '0')        \
         }                             \
