@@ -390,6 +390,28 @@ BOOL gLimitChecks = TRUE;
 // Local function definitions
 UINT8 process_QM(void);
 void clear_StepCounters(void);
+static void process_timed_moves(
+  UINT32 Intervals, 
+  INT32 Rate1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs,
+  ExtractReturnType ClearRet);
+
+static void process_low_level_move(
+  INT32 Rate1, 
+  INT32 Steps1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Steps2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs, 
+  ExtractReturnType ClearRet);
 
 // ISR
 #pragma interrupt high_ISR
@@ -1639,6 +1661,81 @@ void parse_LM_packet(void)
   {
     return;
   }
+  
+  process_low_level_move(Rate1, Steps1, Accel1, 0, Rate2, Steps2, Accel2, 0, ClearAccs, ClearRet);
+}
+
+// Low Level Move command
+// Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
+//
+// Is for doing low level moves with optional acceleration. 
+//
+// <Rate1> and <Rate2> are signed 32-bit integers
+// Negative values indicate movement in the opposite direction.
+// They are the values added to the accumulator every 25KHz.
+// <Steps1> and <Steps2> are signed 32-bit integers. Each axis will take 
+// <steps> steps and then stop. 
+// Once both axis are done moving, the command is complete.
+// Note that as a legacy mode for v2.8.0 and below
+// software versions you can use the sign of the steps values to control the 
+// initial direction of each axis.
+// <Accel1> and <Accel2> are 32 bit signed integers. Their values are added to 
+// <Rate1> and <Rate2> respectively every ISR tick.
+//
+// <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will 
+// clear Motor 1's accumulator before starting the move. A value of 2 will 
+// clear Motor 2's accumulator. And a value of 3 will clear both.
+void parse_L3_packet(void)
+{
+  INT32 Rate1 = 0;
+  INT32 Rate2 = 0;
+  INT32 Steps1 = 0;
+  INT32 Steps2 = 0;
+  INT32 Accel1 = 0;
+  INT32 Accel2 = 0;
+  INT32 Jerk1 = 0;
+  INT32 Jerk2 = 0;
+  UINT32 ClearAccs = 0;
+  ExtractReturnType ClearRet;
+  
+  // Extract each of the values.
+  extract_number(kLONG,  &Rate1,     kREQUIRED);
+  extract_number(kLONG,  &Steps1,    kREQUIRED);
+  extract_number(kLONG,  &Accel1,    kREQUIRED);
+  extract_number(kLONG,  &Jerk1,     kREQUIRED);
+  extract_number(kLONG,  &Rate2,     kREQUIRED);
+  extract_number(kLONG,  &Steps2,    kREQUIRED);
+  extract_number(kLONG,  &Accel2,    kREQUIRED);
+  extract_number(kLONG,  &Jerk2,     kREQUIRED);
+  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  process_low_level_move(Rate1, Steps1, Accel1, Jerk1, Rate2, Steps2, Accel2, Jerk2, ClearAccs, ClearRet);
+}
+
+void process_low_level_move(
+  INT32 Rate1, 
+  INT32 Steps1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Steps2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs, 
+  ExtractReturnType ClearRet)
+{
+  MoveCommandType move;
+#if defined(DEBUG_VALUE_PRINT)
+  INT32 LocalTestStepAdd = 0;
+  INT32 LocalRate1 = 0;
+  INT32 LocalRate2 = 0;
+#endif
 
   // Quickly eliminate obvious invalid parameter combinations,
   // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
@@ -1824,6 +1921,62 @@ void parse_LM_packet(void)
 //
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
+void parse_T3_packet(void)
+{
+  UINT32 Intervals = 0;
+  INT32 Rate1 = 0;
+  INT32 Rate2 = 0;
+  INT32 Accel1 = 0;
+  INT32 Accel2 = 0;
+  INT32 Jerk1 = 0;
+  INT32 Jerk2 = 0;
+  MoveCommandType move;
+  UINT32 ClearAccs = 0;
+  ExtractReturnType ClearRet;
+  
+  // Extract each of the values.
+  extract_number(kULONG, &Intervals, kREQUIRED);
+  extract_number(kLONG,  &Rate1,     kREQUIRED);
+  extract_number(kLONG,  &Accel1,    kREQUIRED);
+  extract_number(kLONG,  &Jerk1,     kREQUIRED);
+  extract_number(kLONG,  &Rate2,     kREQUIRED);
+  extract_number(kLONG,  &Accel2,    kREQUIRED);
+  extract_number(kLONG,  &Jerk2,     kREQUIRED);
+  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // Eliminate obvious invalid parameter combinations,
+  // like LT,0,X,X,X,X,X
+  if (Intervals == 0u)
+  {
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+
+  process_timed_moves(Intervals, Rate1, Accel1, Jerk1, Rate2, Accel2, Jerk2, ClearAccs, ClearRet);
+}
+
+// Low Level Timed Move command
+// Usage: LT,<Intervals>,<Rate1>,<Accel1>,<Rate2>,<Accel2>,<ClearAccs><CR>
+//
+// This command is a modified version of the LM command. Instead of stepping for a certain number of steps
+// on each axis at a given rate (with an acceleration term for each as well), this command will step 
+// for a certain duration, no matter the step count. The rate and acceleration of each axis are still
+// specified separately.
+//
+// Note that <Intervals> is a 32-bit unsigned int and is in units of ISR ticks.
+// <Accel1> and <Accel2> are 32 bit signed ints, and <Rate1> and <Rate2> are 32 bit signed ints. 
+// The sign of <Rate1> and <Rate2> determine the direction that the axis will move.
+// After the signs are taken into account for direction purposes, the Rate values
+// are converted to unsigned 31 bit numbers.
+//
+// <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will clear Motor 1's accumulator before
+// starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LT_packet(void)
 {
   UINT32 Intervals = 0;
@@ -1831,7 +1984,6 @@ void parse_LT_packet(void)
   INT32 Rate2 = 0;
   INT32 Accel1 = 0;
   INT32 Accel2 = 0;
-  MoveCommandType move;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
@@ -1857,6 +2009,22 @@ void parse_LT_packet(void)
     return;
   }
   
+  process_timed_moves(Intervals, Rate1, Accel1, 0, Rate2, Accel2, 0, ClearAccs, ClearRet);
+}  
+  
+void process_timed_moves(
+  UINT32 Intervals, 
+  INT32 Rate1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs,
+  ExtractReturnType ClearRet)
+{
+  MoveCommandType move;
+
   if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
     if (ClearAccs > 3u)
@@ -1926,9 +2094,11 @@ void parse_LT_packet(void)
   // Subtract off half of the Accel term from the Rate term before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
   // documentation)
-  Rate1 = Rate1 - (Accel1/2);
-  Rate2 = Rate2 - (Accel2/2);
-
+  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
+  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
+  Accel1 = Accel1 - Jerk1;
+  Accel2 = Accel2 - Jerk2;
+  
   // Always enable both motors when we want to move them
   Enable1IO = ENABLE_MOTOR;
   Enable2IO = ENABLE_MOTOR;
@@ -1937,9 +2107,11 @@ void parse_LT_packet(void)
   move.Rate[0].value = Rate1;
   move.Steps[0] = Intervals;  // Overloading StepsCounter[0] for intervals
   move.Accel[0] = Accel1;
+  move.Jerk[0] = Jerk1;
   move.Rate[1].value = Rate2;
   move.Steps[1] = 0;
   move.Accel[1] = Accel2;
+  move.Jerk[1] = Jerk2;
   move.Command = COMMAND_LT_MOVE_BIT;
 
   // Spin here until there's space in the FIFO

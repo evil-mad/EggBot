@@ -135,6 +135,7 @@ typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           Command;                        // SM DL S2 SE EM LM LT
   s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
   INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
   UINT8           DirBits;                        // SM          EM LM LT
@@ -307,6 +308,8 @@ void parse_CS_packet(void);
 void parse_LM_packet(void);
 void parse_LT_packet(void);
 void parse_HM_packet(void);
+void parse_T3_packet(void);
+void parse_L3_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 #endif

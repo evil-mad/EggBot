@@ -1169,6 +1169,18 @@ void parse_packet(void)
       parse_LT_packet();
       break;
     }
+    case ('L' * 256) + '3':
+    {
+      // Low Level 3rd derivative (jerk) move
+      parse_L3_packet();
+      break;
+    }
+    case ('T' * 256) + '3':
+    {
+      // Timed 3rd derivative (jerk) move
+      parse_T3_packet();
+      break;
+    }
     case ('L' * 256) + 'M':
     {
       // Low Level Move
