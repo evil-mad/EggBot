@@ -264,6 +264,7 @@
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
 // 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
+// 2.8.2 05/05/23 - Add CU,50 to control automatic motor enable
 //
 // 2.9.0 11/2/22  - Issue 185 : Get LT and LM commands to allow accelerations
 //                    through zero (i.e. reverse direction mid-move)
@@ -413,6 +414,29 @@ static void process_low_level_move(
   UINT32 ClearAccs, 
   ExtractReturnType ClearRet);
 
+static void process_low_level_move(
+  INT32 Rate1, 
+  INT32 Steps1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Steps2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs, 
+  ExtractReturnType ClearRet);
+
+static void process_timed_moves(
+  UINT32 Intervals, 
+  INT32 Rate1, 
+  INT32 Accel1, 
+  INT32 Jerk1, 
+  INT32 Rate2, 
+  INT32 Accel2, 
+  INT32 Jerk2, 
+  UINT32 ClearAccs,
+  ExtractReturnType ClearRet);
+
 // ISR
 #pragma interrupt high_ISR
 void high_ISR(void)
@@ -548,6 +572,7 @@ void high_ISR(void)
       {
         gISRTickCountForThisCommand++;
       }
+      CurrentCommand.Accel[0] += CurrentCommand.Jerk[0];
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
       acc_union[0].value += CurrentCommand.Rate[0].value;
 
@@ -582,6 +607,7 @@ void high_ISR(void)
 
     if (bittstzero(AxisActive[1]))
     {
+      CurrentCommand.Accel[1] += CurrentCommand.Jerk[1];
       CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
       acc_union[1].value += CurrentCommand.Rate[1].value;
 
@@ -633,7 +659,8 @@ void high_ISR(void)
       // not yet done with this move.
       bitclrzero(AllDone);
 
-      // Nope. So count this ISR tick, and then see if we need to take a step
+      // Nope not done. So count this ISR tick, and then see if we need to take 
+      // a step
       CurrentCommand.Steps[0]--;
       if (CurrentCommand.Steps[0] == 0u)
       {
@@ -646,6 +673,7 @@ void high_ISR(void)
       {
         gISRTickCountForThisCommand++;
       }
+      CurrentCommand.Accel[0] += CurrentCommand.Jerk[0];
       CurrentCommand.Rate[0].value += CurrentCommand.Accel[0];
       acc_union[0].value += CurrentCommand.Rate[0].value;
 
@@ -671,6 +699,7 @@ void high_ISR(void)
       
       //// MOTOR 2    LT  ////
 
+      CurrentCommand.Accel[1] += CurrentCommand.Jerk[1];
       CurrentCommand.Rate[1].value += CurrentCommand.Accel[1];
       acc_union[1].value += CurrentCommand.Rate[1].value;
 
@@ -1092,6 +1121,8 @@ CheckForNextCommand:
         CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
         CurrentCommand.Accel[0]       = CommandFIFO[0].Accel[0];
         CurrentCommand.Accel[1]       = CommandFIFO[0].Accel[1];
+        CurrentCommand.Jerk[0]        = CommandFIFO[0].Jerk[0];
+        CurrentCommand.Jerk[1]        = CommandFIFO[0].Jerk[1];
         CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
         CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
         CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
@@ -1105,6 +1136,8 @@ CheckForNextCommand:
         CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
         CurrentCommand.Accel[0]       = CommandFIFO[0].Accel[0];
         CurrentCommand.Accel[1]       = CommandFIFO[0].Accel[1];
+        CurrentCommand.Jerk[0]        = CommandFIFO[0].Jerk[0];
+        CurrentCommand.Jerk[1]        = CommandFIFO[0].Jerk[1];
         CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
         CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
         CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
@@ -1640,11 +1673,6 @@ void parse_LM_packet(void)
   INT32 Accel2 = 0;
   MoveCommandType move;
   UINT32 ClearAccs = 0;
-#if defined(DEBUG_VALUE_PRINT)
-  INT32 LocalTestStepAdd = 0;
-  INT32 LocalRate1 = 0;
-  INT32 LocalRate2 = 0;
-#endif
   ExtractReturnType ClearRet;
   
   // Extract each of the values.
@@ -1665,10 +1693,10 @@ void parse_LM_packet(void)
   process_low_level_move(Rate1, Steps1, Accel1, 0, Rate2, Steps2, Accel2, 0, ClearAccs, ClearRet);
 }
 
-// Low Level Move command
-// Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
+// Low Level third derivative Move command
+// Usage: L3,<Rate1>,<Steps1>,<Accel1>,<Jerk1>,<Rate2>,<Steps2>,<Accel2>,<Jerk2>,<ClearAccs><CR>
 //
-// Is for doing low level moves with optional acceleration. 
+// Is for doing low level moves with optional acceleration and jerk,
 //
 // <Rate1> and <Rate2> are signed 32-bit integers
 // Negative values indicate movement in the opposite direction.
@@ -1676,11 +1704,13 @@ void parse_LM_packet(void)
 // <Steps1> and <Steps2> are signed 32-bit integers. Each axis will take 
 // <steps> steps and then stop. 
 // Once both axis are done moving, the command is complete.
-// Note that as a legacy mode for v2.8.0 and below
-// software versions you can use the sign of the steps values to control the 
-// initial direction of each axis.
 // <Accel1> and <Accel2> are 32 bit signed integers. Their values are added to 
 // <Rate1> and <Rate2> respectively every ISR tick.
+// <Jerk1> and <Jerk2> are applied to <Rate1> and <Rate2> every ISR tick.
+// See full EBB docs for more complete documentation.
+// Note that as a legacy mode for compatibility with v2.8.0 and below
+// software versions. You can use the sign of the steps values to control the 
+// initial direction of each axis, but then <Rate> must not be negative.
 //
 // <ClearAccs> is optional. A value of 0 will do nothing. A value of 1 will 
 // clear Motor 1's accumulator before starting the move. A value of 2 will 
@@ -1718,6 +1748,9 @@ void parse_L3_packet(void)
   process_low_level_move(Rate1, Steps1, Accel1, Jerk1, Rate2, Steps2, Accel2, Jerk2, ClearAccs, ClearRet);
 }
 
+// Because the code for LM and L3 are really the same, just LM doesn't use Jerk,
+// we call a common processing function from both of them once their parameters
+// are parsed into variables.
 void process_low_level_move(
   INT32 Rate1, 
   INT32 Steps1, 
@@ -1731,32 +1764,30 @@ void process_low_level_move(
   ExtractReturnType ClearRet)
 {
   MoveCommandType move;
-#if defined(DEBUG_VALUE_PRINT)
-  INT32 LocalTestStepAdd = 0;
-  INT32 LocalRate1 = 0;
-  INT32 LocalRate2 = 0;
-#endif
 
-  // Quickly eliminate obvious invalid parameter combinations,
-  // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
-  if (
-    (
-      ((Rate1 == 0) && (Accel1 == 0))
-      ||
-      (Steps1 == 0)
-    )
-    &&
-    (
-      ((Rate2 == 0) && (Accel2 == 0))
-      ||
-      (Steps2 == 0)
-    )
-  )
+  if (gLimitChecks)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
+    // Quickly eliminate obvious invalid parameter combinations,
+    // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
+    if (
+      (
+        ((Rate1 == 0) && (Accel1 == 0))
+        ||
+        (Steps1 == 0)
+      )
+      &&
+      (
+        ((Rate2 == 0) && (Accel2 == 0))
+        ||
+        (Steps2 == 0)
+      )
+    )
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
   }
-
+  
   if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
     if (ClearAccs > 3u)
@@ -1803,6 +1834,14 @@ void process_low_level_move(
   
   move.DirBits = 0;       // Start by assuming motors start CW
   move.DelayCounter = 0;  // No delay for motor moves
+
+  // Subtract off half of the Accel term and add 1/6th of the Jerk before we add the
+  // move to the queue. Why? Because it makes the math cleaner (see LM command
+  // documentation)
+  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
+  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
+  Accel1 = Accel1 - Jerk1;
+  Accel2 = Accel2 - Jerk2;
   
   // We will use the SEState move parameter to hold a bitfield. This bitfield
   // will tell the ISR if the accumulators need any special treatment when
@@ -1816,6 +1855,8 @@ void process_low_level_move(
   
   if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
+    // If the ISR_BIT_NUM test mode is on, then interpret the Clear parameter
+    // as the initial value for the accumulator.
     if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
     {
       move.SEState = SESTATE_ARBITRARY_ACC_BIT;
@@ -1823,7 +1864,9 @@ void process_low_level_move(
     }
     else
     {
-      if ((Rate1 + (Accel1/2)) < 0)
+      // But if we didn't get a Clear parameter, then treat it as if the user
+      // wants the accumulator cleared
+      if ((Rate1 + Accel1) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -1835,9 +1878,12 @@ void process_low_level_move(
   }
   else
   {
+    // Test mode not active, so just check Clear parameter bits 0 and 1
+    // to see if user wants to start move with cleared accumulator. If so,
+    // check for need to invert accumulator when move loaded into FIFO.
     if (ClearAccs & 0x01)
     {
-      if ((Rate1 + (Accel1/2)) < 0)
+      if ((Rate1 + Accel1) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -1848,7 +1894,7 @@ void process_low_level_move(
     }
     if (ClearAccs & 0x02)
     {
-      if ((Rate2 + (Accel2/2)) < 0)
+      if ((Rate2 + Accel2) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC2_BIT;
       }
@@ -1858,26 +1904,25 @@ void process_low_level_move(
       }
     }
   }
-    
-  // Subtract off half of the Accel term from the Rate term before we add the
-  // move to the queue. Why? Because it makes the math cleaner (see LM command
-  // documentation)
-  Rate1 = Rate1 - (Accel1/2);
-  Rate2 = Rate2 - (Accel2/2);
  
-  // Always enable both motors when we want to move them
-  // (To be more logical this should happen in the ISR when this move
-  // is loaded rather than here.)
-  Enable1IO = ENABLE_MOTOR;
-  Enable2IO = ENABLE_MOTOR;
+  if (gAutomaticMotorEnable == TRUE)
+  {
+    // Enable both motors when we want to move them
+    // (To be more logical this should happen in the ISR when this move
+    // is loaded rather than here.)
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
 
   // Load up the move structure with all needed values
   move.Rate[0].value = Rate1;
   move.Steps[0] = Steps1;
   move.Accel[0] = Accel1;
+  move.Jerk[0] = Jerk1;
   move.Rate[1].value = Rate2;
   move.Steps[1] = Steps2;
   move.Accel[1] = Accel2;
+  move.Jerk[1] = Jerk2;
   move.Command = COMMAND_LM_MOVE_BIT;
 
   // Spin here until there's space in the FIFO
@@ -1885,17 +1930,21 @@ void process_low_level_move(
     ;
 
   CommandFIFO[0] = move;
-#if defined(DEBUG_VALUE_PRINT)
-  // Print the final values used by the ISR for this move
-  printf((far rom char *)"R1=%ld S1=%lu A1=%ld R2=%ld S2=%lu A2=%ld\n\r",
-    move.Rate[0],       // Rate1 signed 32 bit
-    move.Steps[0],      // Steps1 (now) unsigned 31 bit
-    move.Accel[0],      // Accel1 signed 32 bit
-    move.Rate[1],       // Rate2 signed 32 bit
-    move.Steps[1],      // Steps2 (now) unsigned 31 bit
-    move.Accel[1]       // Accel2 signed 32 bit
-  );
-#endif
+
+  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  {
+    // Print the final values used by the ISR for this move
+    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld\n\r",
+      move.Rate[0],       // Rate1 signed 32 bit
+      move.Steps[0],      // Steps1 (now) unsigned 31 bit
+      move.Accel[0],      // Accel1 signed 32 bit
+      move.Jerk[0],       // Jerk1 signed 32 bit
+      move.Rate[1],       // Rate2 signed 32 bit
+      move.Steps[1],      // Steps2 (now) unsigned 31 bit
+      move.Accel[1],      // Accel2 signed 32 bit
+      move.Jerk[1]        // Jerk2 signed 32 bit
+    );
+  }
   
   bitclrzero(FIFOEmpty);
 
@@ -1905,8 +1954,8 @@ void process_low_level_move(
   }
 }
 
-// Low Level Timed Move command
-// Usage: LT,<Intervals>,<Rate1>,<Accel1>,<Rate2>,<Accel2>,<ClearAccs><CR>
+// Low Level Timed third derivative Move command
+// Usage: L3,<Intervals>,<Rate1>,<Accel1>,<Jerk1>,<Rate2>,<Accel2>,<Jerk2>,<ClearAccs><CR>
 //
 // This command is a modified version of the LM command. Instead of stepping for a certain number of steps
 // on each axis at a given rate (with an acceleration term for each as well), this command will step 
@@ -1914,7 +1963,9 @@ void process_low_level_move(
 // specified separately.
 //
 // Note that <Intervals> is a 32-bit unsigned int and is in units of ISR ticks.
-// <Accel1> and <Accel2> are 32 bit signed ints, and <Rate1> and <Rate2> are 32 bit signed ints. 
+// <Accel1> and <Accel2> are 32 bit signed ints
+// <Rate1> and <Rate2> are 32 bit signed ints
+// <Jerk1> and <Jerk2> are 32 bit signed ints
 // The sign of <Rate1> and <Rate2> determine the direction that the axis will move.
 // After the signs are taken into account for direction purposes, the Rate values
 // are converted to unsigned 31 bit numbers.
@@ -1950,12 +2001,15 @@ void parse_T3_packet(void)
     return;
   }
 
-  // Eliminate obvious invalid parameter combinations,
-  // like LT,0,X,X,X,X,X
-  if (Intervals == 0u)
+  if (gLimitChecks)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
+    // Eliminate obvious invalid parameter combinations,
+    // like LT,0,X,X,X,X,X
+    if (Intervals == 0u)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
   }
 
   process_timed_moves(Intervals, Rate1, Accel1, Jerk1, Rate2, Accel2, Jerk2, ClearAccs, ClearRet);
@@ -2001,17 +2055,23 @@ void parse_LT_packet(void)
     return;
   }
 
-  // Eliminate obvious invalid parameter combinations,
-  // like LT,0,X,X,X,X,X
-  if (Intervals == 0u)
+  if (gLimitChecks)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
+    // Eliminate obvious invalid parameter combinations,
+    // like LT,0,X,X,X,X,X
+    if (Intervals == 0u)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
   }
   
   process_timed_moves(Intervals, Rate1, Accel1, 0, Rate2, Accel2, 0, ClearAccs, ClearRet);
 }  
   
+// Because the code for LT and T3 are really the same, just LT doesn't use Jerk,
+// we call a common processing function from both of them once their parameters
+// are parsed into variables.
 void process_timed_moves(
   UINT32 Intervals, 
   INT32 Rate1, 
@@ -2035,6 +2095,14 @@ void process_timed_moves(
     
   move.DirBits = 0;       // Start by assuming motors start CW
   move.DelayCounter = 0;  // No delay for motor moves
+  
+  // Subtract off half of the Accel term and 1/6th the Jerk term before we add the
+  // move to the queue. Why? Because it makes the math cleaner (see LM command
+  // documentation)
+  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
+  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
+  Accel1 = Accel1 - Jerk1;
+  Accel2 = Accel2 - Jerk2;
 
   // We will use the SEState move parameter to hold a bitfield. This bitfield
   // will tell the ISR if the accumulators need any special treatment when
@@ -2048,6 +2116,8 @@ void process_timed_moves(
   
   if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
+    // If the ISR_BIT_NUM test mode is on, then interpret the Clear parameter
+    // as the initial value for the accumulator.
     if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
     {
       move.SEState = SESTATE_ARBITRARY_ACC_BIT;
@@ -2055,7 +2125,9 @@ void process_timed_moves(
     }
     else
     {
-      if ((Rate1 + (Accel1/2)) < 0)
+     // But if we didn't get a Clear parameter, then treat it as if the user
+     // wants the accumulator cleared
+     if ((Rate1 + Accel1) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2067,9 +2139,12 @@ void process_timed_moves(
   }
   else
   {
-    if (ClearAccs & 0x01)
+   // Test mode not active, so just check Clear parameter bits 0 and 1
+   // to see if user wants to start move with cleared accumulator. If so,
+   // check for need to invert accumulator when move loaded into FIFO.
+   if (ClearAccs & 0x01)
     {
-      if ((Rate1 + (Accel1/2)) < 0)
+      if ((Rate1 + Accel1) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2080,7 +2155,7 @@ void process_timed_moves(
     }
     if (ClearAccs & 0x02)
     {
-      if ((Rate2 + (Accel2/2)) < 0)
+      if ((Rate2 + Accel2) < 0)
       {
         move.SEState |= SESTATE_NEGATE_ACC2_BIT;
       }
@@ -2090,18 +2165,13 @@ void process_timed_moves(
       }
     }
   }
-
-  // Subtract off half of the Accel term from the Rate term before we add the
-  // move to the queue. Why? Because it makes the math cleaner (see LM command
-  // documentation)
-  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
-  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
-  Accel1 = Accel1 - Jerk1;
-  Accel2 = Accel2 - Jerk2;
   
-  // Always enable both motors when we want to move them
-  Enable1IO = ENABLE_MOTOR;
-  Enable2IO = ENABLE_MOTOR;
+  if (gAutomaticMotorEnable == TRUE)
+  {
+    // Enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
   
   // Load up the move structure with all needed values
   move.Rate[0].value = Rate1;
@@ -2120,15 +2190,19 @@ void process_timed_moves(
 
   CommandFIFO[0] = move;
 
-  // For debugging step motion , uncomment the next line
-#if defined(DEBUG_VALUE_PRINT)
-  printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
-    CommandFIFO[0].Rate[0],
-    CommandFIFO[0].Steps[0],
-    CommandFIFO[0].Rate[1],
-    CommandFIFO[0].Steps[1]
-  );
-#endif
+  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  {
+    // Print the final values used by the ISR for this move
+    printf((far rom char *)"R1=%ld I=%lu A1=%ld J1=%ld R2=%ld A2=%ld J2=%ld\n\r",
+      move.Rate[0],       // Rate1 signed 32 bit
+      move.Steps[0],      // Intervals unsigned 32 bit
+      move.Accel[0],      // Accel1 signed 32 bit
+      move.Jerk[0],       // Jerk1 signed 32 bit
+      move.Rate[1],       // Rate2 signed 32 bit
+      move.Accel[1],      // Accel2 signed 32 bit
+      move.Jerk[1]        // Jerk2 signed 32 bit
+    );
+  }
 
   bitclrzero(FIFOEmpty);
 
@@ -2296,11 +2370,14 @@ void parse_HM_packet(void)
   extract_number(kLONG,  &Pos1,     kOPTIONAL);
   extract_number(kLONG,  &Pos2,     kOPTIONAL);
 
-  // StepRate can't be zero
-  if (StepRate == 0u)
+  if (gLimitChecks)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
+    // StepRate can't be zero
+    if (StepRate == 0u)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
   }
   
   // Wait until FIFO is empty
@@ -2441,13 +2518,15 @@ void parse_HM_packet(void)
     Duration = 10;
   }
 
-#if defined(DEBUG_VALUE_PRINT)
-  printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
-    Duration,
-    Steps1,
-    Steps2
-  );
-#endif
+  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  {
+    printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
+      Duration,
+      Steps1,
+      Steps2
+    );
+  }
+
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   process_simple_motor_move(Duration, Steps1, Steps2, 3);
@@ -2484,10 +2563,13 @@ void parse_XM_packet(void)
     ClearAccs = 3;
   }
 
-  // Check for invalid duration
-  if (Duration == 0u) 
+  if (gLimitChecks)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    // Check for invalid duration
+    if (Duration == 0u) 
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
   }
 
   // Do the math to convert to Axis1 and Axis2
@@ -2504,30 +2586,34 @@ void parse_XM_packet(void)
   {
     Steps = -A1Steps;
   }
-  // Limit each parameter to just 3 bytes
-  if (Duration > 0xFFFFFF) 
-  {
-    printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
-    return;
-  }
-  if (Steps > 0xFFFFFFl) 
-  {
-    printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
-    return;
-  }
-  // Check for too fast
-  if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
-  {
-    printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
-    return;
-  }
-  // And check for too slow
-  if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
-  {
-    printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
-    return;
-  }
 
+  if (gLimitChecks)
+  {
+    // Limit each parameter to just 3 bytes
+    if (Duration > 0xFFFFFF) 
+    {
+      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      return;
+    }
+    if (Steps > 0xFFFFFFl) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      return;
+    }
+    // Check for too fast
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      return;
+    }
+    // And check for too slow
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    {
+      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      return;
+    }
+  }
+  
   if (A2Steps > 0) 
   {
     Steps = A2Steps;
@@ -2536,22 +2622,25 @@ void parse_XM_packet(void)
   {
     Steps = -A2Steps;
   }
-  if (Steps > 0xFFFFFFl) 
+  if (gLimitChecks)
   {
-   printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-   return;
+    if (Steps > 0xFFFFFFl) 
+    {
+     printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
+     return;
+    }
+    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    {
+     printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+     return;
+    }
+    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    {
+     printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+     return;
+    }
   }
-  if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
-  {
-   printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
-   return;
-  }
-  if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
-  {
-   printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
-   return;
-  }
-
+  
   // Bail if we got a conversion error
   if (error_byte)
   {
@@ -2593,14 +2682,14 @@ static void process_simple_motor_move(
   UINT32 remainder = 0;
   MoveCommandType move;
 
-  // Uncomment the following printf() for debugging
-#if defined(DEBUG_VALUE_PRINT)
-  printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
-    Duration,
-    A1Stp,
-    A2Stp
-  );
-#endif
+  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  {
+    printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+      Duration,
+      A1Stp,
+      A2Stp
+    );
+  }
   
   if (ClearAccs > 3u)
   {
@@ -2631,10 +2720,13 @@ static void process_simple_motor_move(
     move.DelayCounter = 0; // No delay for motor moves
     move.DirBits = 0;
 
-    // Always enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      // Enable both motors when we want to move them
+      Enable1IO = ENABLE_MOTOR;
+      Enable2IO = ENABLE_MOTOR;
+    }
+    
     // First, set the direction bits
     if (A1Stp < 0)
     {
@@ -2657,18 +2749,20 @@ static void process_simple_motor_move(
     // If A1Stp is 1, then duration must be 763 or less.
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
-#if defined(DEBUG_VALUE_PRINT)
-    // First check for duration to large.
-    if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
+    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
     {
-      if (Duration > ((UINT32)A1Stp * 763u)) 
+      // First check for duration to large.
+      if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
       {
-        printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
-        temp = 0;
-        A1Stp = 0;
+        if (Duration > ((UINT32)A1Stp * 763u)) 
+        {
+          printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
+          temp = 0;
+          A1Stp = 0;
+        }
       }
     }
-#endif
+    
     if (A1Stp != 0) 
     {
       if (A1Stp < 0x1FFFF) 
@@ -2770,15 +2864,15 @@ static void process_simple_motor_move(
     move.Accel[1] = 0;
     move.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 
-    // For debugging step motion , uncomment the next line
-#if defined(DEBUG_VALUE_PRINT)
-    printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
-      move.Rate[0],
-      move.Steps[0],
-      move.Rate[1],
-      move.Steps[1]
-    );
-#endif
+    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+    {
+      printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
+        move.Rate[0],
+        move.Steps[0],
+        move.Rate[1],
+        move.Steps[1]
+      );
+    }
   }
   
   // Spin here until there's space in the FIFO

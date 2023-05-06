@@ -142,6 +142,7 @@ extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 
 extern volatile UINT8 gRedLEDEmptyFIFO;
+extern BOOL gAutomaticMotorEnable;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void UserInit (void);

@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_rf\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.0_rf1\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -226,6 +226,9 @@ unsigned int gPulseCounters[4] = {0,0,0,0};
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS = 0;
 volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+
+// When true, any stepper motion command will automatically enable both motors
+BOOL gAutomaticMotorEnable = TRUE;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
@@ -1617,10 +1620,12 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 50 {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
+// 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
 void parse_CU_packet(void)
 {
   UINT8 parameter_number;
@@ -1635,6 +1640,7 @@ void parse_CU_packet(void)
     return;
   }
 
+  // CU,1,1 or CU,1,0 to turn on/off "OK" at end of command reply
   if (1u == parameter_number)
   {
     if (0 == paramater_value || 1 == paramater_value)
@@ -1646,6 +1652,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,2,1 or CU,2,0 to turn on/off parameter limit checks
   else if (2u == parameter_number)
   {
     if (0 == paramater_value || 1 == paramater_value)
@@ -1657,6 +1664,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,3,1 or CU,3,0 to turn on/off red LED FIFO empty indicator
   else if (3u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1674,6 +1682,19 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,50,1 or CU,50,0 to turn on/off automatic motor enable
+  else if (50u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      gAutomaticMotorEnable = FALSE;
+    }
+    else
+    {
+      gAutomaticMotorEnable = TRUE;
+    }
+  }
+  // CU,250,1 or CU,250,0 to turn on/off GPIO ISR timing debug
   else if (250u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1686,39 +1707,13 @@ void parse_CU_packet(void)
       TRISDbits.TRISD1 = 0;   // D1 high when in ISR
       TRISDbits.TRISD0 = 0;   // D0 high when loading next command
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-#if 0
-      while(1)
-      {
-        _asm
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-          BCF 0x8c,0x0,0x0
-          BSF 0x8c,0x0,0x0
-        _endasm
-      }
-#endif
     }
     else
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing
   else if (251u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1746,6 +1741,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing
   else if (252u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1773,6 +1769,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
+  // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing
   else if (253u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1796,6 +1793,41 @@ void parse_CU_packet(void)
     else
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  // CU,254 turns on 'lock up mode' for measuring true ISR timing by cycling
+  // I/O pin on and off as fast as possible, then breaks in that I/O toggle
+  // can be seen for the ISR and measured.
+  else if (254u == parameter_number)
+  {
+    bitset(TestMode, TEST_MODE_GPIO_BIT_NUM);
+    TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+    TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+    TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+    while(1)
+    {
+      _asm
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+        BCF 0x8c,0x0,0x0
+        BSF 0x8c,0x0,0x0
+      _endasm
     }
   }
   else
