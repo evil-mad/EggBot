@@ -265,6 +265,7 @@
 //                    motors.
 //                  Fix bug in ES command that didn't send return packet
 // 2.8.1 07/26/22 - Issue 180: Add CU,3,1 to turn on RED LED reporting of FIFO empty
+// 2.8.2 05/05/23 - Add CU,50 to control automatic motor enable
 
 #include <p18cxxx.h>
 #include <usart.h>
@@ -1359,10 +1360,13 @@ void parse_LM_packet (void)
   move.DelayCounter = 0; // No delay for motor moves
   move.DirBits = 0;
 
-  // Always enable both motors when we want to move them
-  Enable1IO = ENABLE_MOTOR;
-  Enable2IO = ENABLE_MOTOR;
-
+  if (gAutomaticMotorEnable == TRUE)
+  {
+    // Enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
+  
   // First, set the direction bits
   if (Steps1 < 0)
   {
@@ -1494,10 +1498,13 @@ void parse_LT_packet (void)
   move.DelayCounter = 0; // No delay for motor moves
   move.DirBits = 0;
 
-  // Always enable both motors when we want to move them
-  Enable1IO = ENABLE_MOTOR;
-  Enable2IO = ENABLE_MOTOR;
-
+  if (gAutomaticMotorEnable == TRUE)
+  {
+    // Enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
+  
   // First, set the direction bits
   if (Rate1 < 0)
   {
@@ -2023,10 +2030,13 @@ static void process_SM(
     move.DelayCounter = 0; // No delay for motor moves
     move.DirBits = 0;
 
-    // Always enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      // Enable both motors when we want to move them
+      Enable1IO = ENABLE_MOTOR;
+      Enable2IO = ENABLE_MOTOR;
+    }
+    
     // First, set the direction bits
     if (A1Stp < 0)
     {

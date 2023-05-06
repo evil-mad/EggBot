@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
 	const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.1\r\n"};
+	const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.8.2\r\n"};
 #elif defined(BOARD_UBW)
 	const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -229,6 +229,10 @@ volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 // When true, red LED will light when FIFO is empty
 volatile BOOL gRedLEDEmptyFIFO = FALSE;
+
+// When true, any stepper motion command will automatically enable both motors
+BOOL gAutomaticMotorEnable = TRUE;
+
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus (void);		// Handles blinking the USB status LED
@@ -1607,6 +1611,7 @@ void parse_R_packet(void)
 // 1  {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2  {1|0} turns on or off parameter limit checking (defaults to on))
 // 3  {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 50 {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 void parse_CU_packet(void)
 {
 	unsigned char parameter_number;
@@ -1653,6 +1658,17 @@ void parse_CU_packet(void)
     else
     {
       bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  else if (50 == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      gAutomaticMotorEnable = FALSE;
+    }
+    else
+    {
+      gAutomaticMotorEnable = TRUE;
     }
   }
 	print_ack();
