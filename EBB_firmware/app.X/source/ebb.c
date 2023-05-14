@@ -391,51 +391,23 @@ BOOL gLimitChecks = TRUE;
 // Local function definitions
 UINT8 process_QM(void);
 void clear_StepCounters(void);
-static void process_timed_moves(
-  UINT32 Intervals, 
+
+static void process_low_level_move(
+  UINT32 Intervals,
   INT32 Rate1, 
+  INT32 Steps1,
   INT32 Accel1, 
   INT32 Jerk1, 
   INT32 Rate2, 
+  INT32 Steps2,
   INT32 Accel2, 
-  INT32 Jerk2, 
+  INT32 Jerk2,
+  BOOL TimedMove,
   UINT32 ClearAccs,
   ExtractReturnType ClearRet);
 
-static void process_low_level_move(
-  INT32 Rate1, 
-  INT32 Steps1, 
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Steps2, 
-  INT32 Accel2, 
-  INT32 Jerk2, 
-  UINT32 ClearAccs, 
-  ExtractReturnType ClearRet);
+static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk);
 
-static void process_low_level_move(
-  INT32 Rate1, 
-  INT32 Steps1, 
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Steps2, 
-  INT32 Accel2, 
-  INT32 Jerk2, 
-  UINT32 ClearAccs, 
-  ExtractReturnType ClearRet);
-
-static void process_timed_moves(
-  UINT32 Intervals, 
-  INT32 Rate1, 
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Accel2, 
-  INT32 Jerk2, 
-  UINT32 ClearAccs,
-  ExtractReturnType ClearRet);
 
 // ISR
 #pragma interrupt high_ISR
@@ -1643,6 +1615,44 @@ void fprint(float f)
 }
 #endif
 
+// This function "looks ahead" at the start of a move (while it is being
+// parsed) to figure out if we need to negate the accumulator (i.e. start from
+// 0x7FFFFFFFUL). Since this is common to LM/LT/L3/T3, and once for each axis,
+// it gets its own function.
+static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk)
+{
+  INT32 RateTemp = 0;
+  
+  RateTemp = Rate + Accel;
+  if (RateTemp < 0)
+  {
+    return(TRUE);
+  }
+  else
+  {
+    if (RateTemp == 0)
+    {
+      RateTemp = Accel + Jerk;
+      if (RateTemp < 0)
+      {
+        return(TRUE);
+      }
+      else
+      {
+        if (RateTemp == 0)
+        {
+          if (Jerk < 0)
+          {
+            return(TRUE);
+          }
+        }
+      }
+    }
+  }
+  return(FALSE);
+}
+
+
 // Low Level Move command
 // Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
 //
@@ -1689,8 +1699,44 @@ void parse_LM_packet(void)
   {
     return;
   }
+
+  if (gLimitChecks)
+  {
+    // Quickly eliminate obvious invalid parameter combinations,
+    // like LM,1,0,2,0,0,0. Or LM,0,1,0,0,0,0,0 GH issue #78
+    if (
+      (
+        ((Rate1 == 0) && (Accel1 == 0))
+        ||
+        (Steps1 == 0)
+      )
+      &&
+      (
+        ((Rate2 == 0) && (Accel2 == 0))
+        ||
+        (Steps2 == 0)
+      )
+    )
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
+  }
   
-  process_low_level_move(Rate1, Steps1, Accel1, 0, Rate2, Steps2, Accel2, 0, ClearAccs, ClearRet);
+  process_low_level_move(
+    0,
+    Rate1, 
+    Steps1, 
+    Accel1, 
+    0, 
+    Rate2, 
+    Steps2, 
+    Accel2, 
+    0, 
+    FALSE,
+    ClearAccs, 
+    ClearRet
+  );
 }
 
 // Low Level third derivative Move command
@@ -1745,39 +1791,19 @@ void parse_L3_packet(void)
     return;
   }
 
-  process_low_level_move(Rate1, Steps1, Accel1, Jerk1, Rate2, Steps2, Accel2, Jerk2, ClearAccs, ClearRet);
-}
-
-// Because the code for LM and L3 are really the same, just LM doesn't use Jerk,
-// we call a common processing function from both of them once their parameters
-// are parsed into variables.
-void process_low_level_move(
-  INT32 Rate1, 
-  INT32 Steps1, 
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Steps2, 
-  INT32 Accel2, 
-  INT32 Jerk2, 
-  UINT32 ClearAccs, 
-  ExtractReturnType ClearRet)
-{
-  MoveCommandType move;
-
   if (gLimitChecks)
   {
     // Quickly eliminate obvious invalid parameter combinations,
-    // like LM,0,0,0,0,0,0. Or LM,0,1000,0,100000,0,100 GH issue #78
+    // like L3,1,0,2,3,0,0,0,0. Or L3,0,1,0,0,0,0,0,0,0 GH issue #78
     if (
       (
-        ((Rate1 == 0) && (Accel1 == 0))
+        ((Rate1 == 0) && (Accel1 == 0) && (Jerk1 == 0))
         ||
         (Steps1 == 0)
       )
       &&
       (
-        ((Rate2 == 0) && (Accel2 == 0))
+        ((Rate2 == 0) && (Accel2 == 0) && (Jerk1 == 0))
         ||
         (Steps2 == 0)
       )
@@ -1788,170 +1814,20 @@ void process_low_level_move(
     }
   }
   
-  if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
-  {
-    if (ClearAccs > 3u)
-    {
-      ClearAccs = 3;
-    }
-  }
-  
-  // Since we will only use the sign of Rate as the signal for initial 
-  // stepper direction, if the user has sent us negative step counts, we
-  // apply a 'legacy' mode rule here : if steps are negative, make sure
-  // rate is positive, then make steps positive and rate negative and invert
-  // acceleration too to compensate. After this step, the sign of rate completely
-  // controls the direction.
-
-  if (Steps1 < 0)
-  {
-    if (Rate1 < 0)
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-      return;
-    }
-    else
-    {
-      Steps1 = -Steps1;
-      Rate1 = -Rate1;
-      Accel1 = -Accel1;
-    }
-  }
-  if (Steps2 < 0)
-  {
-    if (Rate2 < 0)
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-      return;
-    }
-    else
-    {
-      Steps2 = -Steps2;
-      Rate2 = -Rate2;
-      Accel2 = -Accel2;
-    }
-  }
-  
-  move.DirBits = 0;       // Start by assuming motors start CW
-  move.DelayCounter = 0;  // No delay for motor moves
-
-  // Subtract off half of the Accel term and add 1/6th of the Jerk before we add the
-  // move to the queue. Why? Because it makes the math cleaner (see LM command
-  // documentation)
-  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
-  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
-  Accel1 = Accel1 - Jerk1;
-  Accel2 = Accel2 - Jerk2;
-  
-  // We will use the SEState move parameter to hold a bitfield. This bitfield
-  // will tell the ISR if the accumulators need any special treatment when
-  // the command is loaded. We can zero it, or set it to 2^31-1, or leave
-  // it alone.
-  // We need to check to see if the rate at the first step < 0, and
-  // if so, we need the FIFO to set the accumulator to 2^31-1 before
-  // as the command is loaded. So we use two bits in SEState to indicate
-  // this.
-  move.SEState = 0;           // Start with all bits clear
-  
-  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
-  {
-    // If the ISR_BIT_NUM test mode is on, then interpret the Clear parameter
-    // as the initial value for the accumulator.
-    if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
-    {
-      move.SEState = SESTATE_ARBITRARY_ACC_BIT;
-      move.DelayCounter = ClearAccs;
-    }
-    else
-    {
-      // But if we didn't get a Clear parameter, then treat it as if the user
-      // wants the accumulator cleared
-      if ((Rate1 + Accel1) < 0)
-      {
-        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
-      }
-      else
-      {
-        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-      }
-    }
-  }
-  else
-  {
-    // Test mode not active, so just check Clear parameter bits 0 and 1
-    // to see if user wants to start move with cleared accumulator. If so,
-    // check for need to invert accumulator when move loaded into FIFO.
-    if (ClearAccs & 0x01)
-    {
-      if ((Rate1 + Accel1) < 0)
-      {
-        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
-      }
-      else
-      {
-        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
-      }
-    }
-    if (ClearAccs & 0x02)
-    {
-      if ((Rate2 + Accel2) < 0)
-      {
-        move.SEState |= SESTATE_NEGATE_ACC2_BIT;
-      }
-      else
-      {
-        move.SEState |= SESTATE_CLEAR_ACC2_BIT;
-      }
-    }
-  }
- 
-  if (gAutomaticMotorEnable == TRUE)
-  {
-    // Enable both motors when we want to move them
-    // (To be more logical this should happen in the ISR when this move
-    // is loaded rather than here.)
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
-  }
-
-  // Load up the move structure with all needed values
-  move.Rate[0].value = Rate1;
-  move.Steps[0] = Steps1;
-  move.Accel[0] = Accel1;
-  move.Jerk[0] = Jerk1;
-  move.Rate[1].value = Rate2;
-  move.Steps[1] = Steps2;
-  move.Accel[1] = Accel2;
-  move.Jerk[1] = Jerk2;
-  move.Command = COMMAND_LM_MOVE_BIT;
-
-  // Spin here until there's space in the FIFO
-  while(!bittstzero(FIFOEmpty))
-    ;
-
-  CommandFIFO[0] = move;
-
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
-  {
-    // Print the final values used by the ISR for this move
-    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld\n\r",
-      move.Rate[0],       // Rate1 signed 32 bit
-      move.Steps[0],      // Steps1 (now) unsigned 31 bit
-      move.Accel[0],      // Accel1 signed 32 bit
-      move.Jerk[0],       // Jerk1 signed 32 bit
-      move.Rate[1],       // Rate2 signed 32 bit
-      move.Steps[1],      // Steps2 (now) unsigned 31 bit
-      move.Accel[1],      // Accel2 signed 32 bit
-      move.Jerk[1]        // Jerk2 signed 32 bit
-    );
-  }
-  
-  bitclrzero(FIFOEmpty);
-
-  if (g_ack_enable)
-  {
-    print_ack();
-  }
+  process_low_level_move(
+    0, 
+    Rate1, 
+    Steps1, 
+    Accel1, 
+    Jerk1, 
+    Rate2, 
+    Steps2,
+    Accel2, 
+    Jerk2, 
+    FALSE, 
+    ClearAccs, 
+    ClearRet
+  );
 }
 
 // Low Level Timed third derivative Move command
@@ -2012,7 +1888,20 @@ void parse_T3_packet(void)
     }
   }
 
-  process_timed_moves(Intervals, Rate1, Accel1, Jerk1, Rate2, Accel2, Jerk2, ClearAccs, ClearRet);
+  process_low_level_move(
+    Intervals, 
+    Rate1, 
+    0,
+    Accel1, 
+    Jerk1, 
+    Rate2, 
+    0,
+    Accel2, 
+    Jerk2, 
+    TRUE,
+    ClearAccs,
+    ClearRet
+  );
 }
 
 // Low Level Timed Move command
@@ -2066,20 +1955,36 @@ void parse_LT_packet(void)
     }
   }
   
-  process_timed_moves(Intervals, Rate1, Accel1, 0, Rate2, Accel2, 0, ClearAccs, ClearRet);
-}  
-  
-// Because the code for LT and T3 are really the same, just LT doesn't use Jerk,
-// we call a common processing function from both of them once their parameters
-// are parsed into variables.
-void process_timed_moves(
-  UINT32 Intervals, 
+  process_low_level_move(
+    Intervals, 
+    Rate1, 
+    0,
+    Accel1, 
+    0, 
+    Rate2, 
+    0,
+    Accel2, 
+    0, 
+    TRUE,
+    ClearAccs,
+    ClearRet
+  );
+}
+
+// Because the code for LM, L3, LT and T3 is really the same we call a common 
+// processing function from all of them once their parameters are parsed into 
+// variables.
+void process_low_level_move(
+  UINT32 Intervals,
   INT32 Rate1, 
+  INT32 Steps1,
   INT32 Accel1, 
   INT32 Jerk1, 
   INT32 Rate2, 
+  INT32 Steps2,
   INT32 Accel2, 
-  INT32 Jerk2, 
+  INT32 Jerk2,
+  BOOL TimedMove,
   UINT32 ClearAccs,
   ExtractReturnType ClearRet)
 {
@@ -2092,18 +1997,56 @@ void process_timed_moves(
       ClearAccs = 3;
     }
   }
-    
+  
+  // If timed move, check for legacy opposite direction
+  if (TimedMove)
+  {
+    // Since we will only use the sign of Rate as the signal for initial 
+    // stepper direction, if the user has sent us negative step counts, we
+    // apply a 'legacy' mode rule here : if steps are negative, make sure
+    // rate is positive, then make steps positive and rate negative and invert
+    // acceleration too to compensate. After this step, the sign of rate completely
+    // controls the direction.
+
+    if (Steps1 < 0)
+    {
+      if (Rate1 < 0)
+      {
+        bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        return;
+      }
+      else
+      {
+        Steps1 = -Steps1;
+        Rate1 = -Rate1;
+        Accel1 = -Accel1;
+      }
+    }
+    if (Steps2 < 0)
+    {
+      if (Rate2 < 0)
+      {
+        bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        return;
+      }
+      else
+      {
+        Steps2 = -Steps2;
+        Rate2 = -Rate2;
+        Accel2 = -Accel2;
+      }
+    }
+  }
+  
   move.DirBits = 0;       // Start by assuming motors start CW
   move.DelayCounter = 0;  // No delay for motor moves
-  
-  // Subtract off half of the Accel term and 1/6th the Jerk term before we add the
+
+  // Subtract off half of the Accel term and add 1/6th of the Jerk before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
   // documentation)
   Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
   Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
-  Accel1 = Accel1 - Jerk1;
-  Accel2 = Accel2 - Jerk2;
-
+  
   // We will use the SEState move parameter to hold a bitfield. This bitfield
   // will tell the ISR if the accumulators need any special treatment when
   // the command is loaded. We can zero it, or set it to 2^31-1, or leave
@@ -2125,9 +2068,9 @@ void process_timed_moves(
     }
     else
     {
-     // But if we didn't get a Clear parameter, then treat it as if the user
-     // wants the accumulator cleared
-     if ((Rate1 + Accel1) < 0)
+      // But if we didn't get a Clear parameter, then treat it as if the user
+      // wants the accumulator cleared
+      if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2139,12 +2082,12 @@ void process_timed_moves(
   }
   else
   {
-   // Test mode not active, so just check Clear parameter bits 0 and 1
-   // to see if user wants to start move with cleared accumulator. If so,
-   // check for need to invert accumulator when move loaded into FIFO.
-   if (ClearAccs & 0x01)
+    // Test mode not active, so just check Clear parameter bits 0 and 1
+    // to see if user wants to start move with cleared accumulator. If so,
+    // check for need to invert accumulator when move loaded into FIFO.
+    if (ClearAccs & 0x01)
     {
-      if ((Rate1 + Accel1) < 0)
+      if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
       {
         move.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2155,7 +2098,7 @@ void process_timed_moves(
     }
     if (ClearAccs & 0x02)
     {
-      if ((Rate2 + Accel2) < 0)
+      if (NeedNegativeAccumulator(Rate2, Accel2, Jerk2))
       {
         move.SEState |= SESTATE_NEGATE_ACC2_BIT;
       }
@@ -2165,24 +2108,50 @@ void process_timed_moves(
       }
     }
   }
-  
+ 
+  Accel1 = Accel1 - Jerk1;
+  Accel2 = Accel2 - Jerk2;
+
   if (gAutomaticMotorEnable == TRUE)
   {
     // Enable both motors when we want to move them
+    // (To be more logical this should happen in the ISR when this move
+    // is loaded rather than here.)
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
   }
-  
+
   // Load up the move structure with all needed values
   move.Rate[0].value = Rate1;
-  move.Steps[0] = Intervals;  // Overloading StepsCounter[0] for intervals
+  if (TimedMove)
+  {
+    move.Steps[0] = Intervals;  
+  }
+  else
+  {
+    move.Steps[0] = Steps1;    
+  }
   move.Accel[0] = Accel1;
   move.Jerk[0] = Jerk1;
   move.Rate[1].value = Rate2;
-  move.Steps[1] = 0;
+  if (TimedMove)
+  {
+    move.Steps[1] = 0;
+  }
+  else
+  {
+    move.Steps[1] = Steps2;
+  }
   move.Accel[1] = Accel2;
   move.Jerk[1] = Jerk2;
-  move.Command = COMMAND_LT_MOVE_BIT;
+  if (TimedMove)
+  {
+    move.Command = COMMAND_LT_MOVE_BIT;
+  }
+  else
+  {
+    move.Command = COMMAND_LM_MOVE_BIT;
+  }
 
   // Spin here until there's space in the FIFO
   while(!bittstzero(FIFOEmpty))
@@ -2193,17 +2162,18 @@ void process_timed_moves(
   if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
     // Print the final values used by the ISR for this move
-    printf((far rom char *)"R1=%ld I=%lu A1=%ld J1=%ld R2=%ld A2=%ld J2=%ld\n\r",
+    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld\n\r",
       move.Rate[0],       // Rate1 signed 32 bit
-      move.Steps[0],      // Intervals unsigned 32 bit
+      move.Steps[0],      // Steps1 (now) unsigned 31 bit
       move.Accel[0],      // Accel1 signed 32 bit
       move.Jerk[0],       // Jerk1 signed 32 bit
       move.Rate[1],       // Rate2 signed 32 bit
+      move.Steps[1],      // Steps2 (now) unsigned 31 bit
       move.Accel[1],      // Accel2 signed 32 bit
       move.Jerk[1]        // Jerk2 signed 32 bit
     );
   }
-
+  
   bitclrzero(FIFOEmpty);
 
   if (g_ack_enable)
