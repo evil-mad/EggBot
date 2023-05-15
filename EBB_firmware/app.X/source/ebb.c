@@ -1998,8 +1998,8 @@ void process_low_level_move(
     }
   }
   
-  // If timed move, check for legacy opposite direction
-  if (TimedMove)
+  // If not a timed move, check for legacy opposite direction support
+  if (!TimedMove)
   {
     // Since we will only use the sign of Rate as the signal for initial 
     // stepper direction, if the user has sent us negative step counts, we
