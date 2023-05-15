@@ -1392,7 +1392,7 @@ void EBB_Init(void)
   PenState = PEN_UP;
   Layer = 0;
   NodeCount = 0;
-  bitclrzero(ButtonPushed);
+  ButtonPushed = 0;
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
   // Except for v1.1 hardware, use RB2
