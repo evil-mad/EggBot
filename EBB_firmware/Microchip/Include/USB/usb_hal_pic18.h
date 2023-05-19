@@ -204,25 +204,25 @@ Description:
 #define USBResumeControl UCONbits.RESUME
 
 //----- BDnSTAT bit definitions -----------------------------------------------
-#define _BSTALL     0x04        //Buffer Stall enable
-#define _DTSEN      0x08        //Data Toggle Synch enable
-#define _INCDIS     0x10        //Address increment disable
-#define _KEN        0x20        //SIE keeps buff descriptors enable
-#define _DAT0       0x00        //DATA0 packet expected next
-#define _DAT1       0x40        //DATA1 packet expected next
-#define _DTSMASK    0x40        //DTS Mask
-#define _USIE       0x80        //SIE owns buffer
-#define _UCPU       0x00        //CPU owns buffer
-#define _STAT_MASK  0xFF
+#define _BSTALL     0x04u        //Buffer Stall enable
+#define _DTSEN      0x08u        //Data Toggle Synch enable
+#define _INCDIS     0x10u        //Address increment disable
+#define _KEN        0x20u        //SIE keeps buff descriptors enable
+#define _DAT0       0x00u        //DATA0 packet expected next
+#define _DAT1       0x40u        //DATA1 packet expected next
+#define _DTSMASK    0x40u        //DTS Mask
+#define _USIE       0x80u        //SIE owns buffer
+#define _UCPU       0x00u        //CPU owns buffer
+#define _STAT_MASK  0xFFu
 
-#define USTAT_EP0_PP_MASK   ~0x02
-#define USTAT_EP_MASK       0x7E
-#define USTAT_EP0_OUT       0x00
-#define USTAT_EP0_OUT_EVEN  0x00
-#define USTAT_EP0_OUT_ODD   0x02
-#define USTAT_EP0_IN        0x04
-#define USTAT_EP0_IN_EVEN   0x04
-#define USTAT_EP0_IN_ODD    0x06
+#define USTAT_EP0_PP_MASK   ~0x02u
+#define USTAT_EP_MASK       0x7Eu
+#define USTAT_EP0_OUT       0x00u
+#define USTAT_EP0_OUT_EVEN  0x00u
+#define USTAT_EP0_OUT_ODD   0x02u
+#define USTAT_EP0_IN        0x04u
+#define USTAT_EP0_IN_EVEN   0x04u
+#define USTAT_EP0_IN_ODD    0x06u
 
 #define ENDPOINT_MASK 0b01111000
 

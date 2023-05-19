@@ -440,73 +440,73 @@ typedef union __attribute__ ((packed))
 
 // Section: Valid PID Values
 //DOM-IGNORE-BEGIN
-#define PID_OUT                                 0x1     // PID for an OUT token
-#define PID_ACK                                 0x2     // PID for an ACK handshake
-#define PID_DATA0                               0x3     // PID for DATA0 data
-#define PID_PING                                0x4     // Special PID PING
-#define PID_SOF                                 0x5     // PID for a SOF token
-#define PID_NYET                                0x6     // PID for a NYET handshake
-#define PID_DATA2                               0x7     // PID for DATA2 data
-#define PID_SPLIT                               0x8     // Special PID SPLIT
-#define PID_IN                                  0x9     // PID for a IN token
-#define PID_NAK                                 0xA     // PID for a NAK handshake
-#define PID_DATA1                               0xB     // PID for DATA1 data
-#define PID_PRE                                 0xC     // Special PID PRE (Same as PID_ERR)
-#define PID_ERR                                 0xC     // Special PID ERR (Same as PID_PRE)
-#define PID_SETUP                               0xD     // PID for a SETUP token
-#define PID_STALL                               0xE     // PID for a STALL handshake
-#define PID_MDATA                               0xF     // PID for MDATA data
+#define PID_OUT                                 0x1u     // PID for an OUT token
+#define PID_ACK                                 0x2u     // PID for an ACK handshake
+#define PID_DATA0                               0x3u     // PID for DATA0 data
+#define PID_PING                                0x4u     // Special PID PING
+#define PID_SOF                                 0x5u     // PID for a SOF token
+#define PID_NYET                                0x6u     // PID for a NYET handshake
+#define PID_DATA2                               0x7u     // PID for DATA2 data
+#define PID_SPLIT                               0x8u     // Special PID SPLIT
+#define PID_IN                                  0x9u     // PID for a IN token
+#define PID_NAK                                 0xAu     // PID for a NAK handshake
+#define PID_DATA1                               0xBu     // PID for DATA1 data
+#define PID_PRE                                 0xCu     // Special PID PRE (Same as PID_ERR)
+#define PID_ERR                                 0xCu     // Special PID ERR (Same as PID_PRE)
+#define PID_SETUP                               0xDu     // PID for a SETUP token
+#define PID_STALL                               0xEu     // PID for a STALL handshake
+#define PID_MDATA                               0xFu     // PID for MDATA data
 
-#define PID_MASK_DATA                           0x03    // Data PID mask
+#define PID_MASK_DATA                           0x03u    // Data PID mask
 #define PID_MASK_DATA_SHIFTED                  (PID_MASK_DATA << 2) // Data PID shift to proper position
 //DOM-IGNORE-END
 
 // Section: USB Token Types
 //DOM-IGNORE-BEGIN
-#define USB_TOKEN_OUT                           0x01    // U1TOK - OUT token
-#define USB_TOKEN_IN                            0x09    // U1TOK - IN token
-#define USB_TOKEN_SETUP                         0x0D    // U1TOK - SETUP token
+#define USB_TOKEN_OUT                           0x01u    // U1TOK - OUT token
+#define USB_TOKEN_IN                            0x09u    // U1TOK - IN token
+#define USB_TOKEN_SETUP                         0x0Du    // U1TOK - SETUP token
 //DOM-IGNORE-END
 
 // Section: OTG Descriptor Constants
 
-#define OTG_HNP_SUPPORT                         0x02    // OTG Descriptor bmAttributes - HNP support flag
-#define OTG_SRP_SUPPORT                         0x01    // OTG Descriptor bmAttributes - SRP support flag
+#define OTG_HNP_SUPPORT                         0x02u    // OTG Descriptor bmAttributes - HNP support flag
+#define OTG_SRP_SUPPORT                         0x01u    // OTG Descriptor bmAttributes - SRP support flag
 
 // Section: Endpoint Directions
 
-#define USB_IN_EP                               0x80    // IN endpoint mask
-#define USB_OUT_EP                              0x00    // OUT endpoint mask
+#define USB_IN_EP                               0x80u    // IN endpoint mask
+#define USB_OUT_EP                              0x00u    // OUT endpoint mask
 
 // Section: Standard Device Requests
 
-#define USB_REQUEST_GET_STATUS                  0       // Standard Device Request - GET STATUS
-#define USB_REQUEST_CLEAR_FEATURE               1       // Standard Device Request - CLEAR FEATURE
-#define USB_REQUEST_SET_FEATURE                 3       // Standard Device Request - SET FEATURE
-#define USB_REQUEST_SET_ADDRESS                 5       // Standard Device Request - SET ADDRESS
-#define USB_REQUEST_GET_DESCRIPTOR              6       // Standard Device Request - GET DESCRIPTOR
-#define USB_REQUEST_SET_DESCRIPTOR              7       // Standard Device Request - SET DESCRIPTOR
-#define USB_REQUEST_GET_CONFIGURATION           8       // Standard Device Request - GET CONFIGURATION
-#define USB_REQUEST_SET_CONFIGURATION           9       // Standard Device Request - SET CONFIGURATION
-#define USB_REQUEST_GET_INTERFACE               10      // Standard Device Request - GET INTERFACE
-#define USB_REQUEST_SET_INTERFACE               11      // Standard Device Request - SET INTERFACE
-#define USB_REQUEST_SYNCH_FRAME                 12      // Standard Device Request - SYNCH FRAME
+#define USB_REQUEST_GET_STATUS                  0u       // Standard Device Request - GET STATUS
+#define USB_REQUEST_CLEAR_FEATURE               1u       // Standard Device Request - CLEAR FEATURE
+#define USB_REQUEST_SET_FEATURE                 3u       // Standard Device Request - SET FEATURE
+#define USB_REQUEST_SET_ADDRESS                 5u       // Standard Device Request - SET ADDRESS
+#define USB_REQUEST_GET_DESCRIPTOR              6u       // Standard Device Request - GET DESCRIPTOR
+#define USB_REQUEST_SET_DESCRIPTOR              7u       // Standard Device Request - SET DESCRIPTOR
+#define USB_REQUEST_GET_CONFIGURATION           8u       // Standard Device Request - GET CONFIGURATION
+#define USB_REQUEST_SET_CONFIGURATION           9u       // Standard Device Request - SET CONFIGURATION
+#define USB_REQUEST_GET_INTERFACE               10u      // Standard Device Request - GET INTERFACE
+#define USB_REQUEST_SET_INTERFACE               11u      // Standard Device Request - SET INTERFACE
+#define USB_REQUEST_SYNCH_FRAME                 12u      // Standard Device Request - SYNCH FRAME
 
-#define USB_FEATURE_ENDPOINT_HALT               0       // CLEAR/SET FEATURE - Endpoint Halt
-#define USB_FEATURE_DEVICE_REMOTE_WAKEUP        1       // CLEAR/SET FEATURE - Device remote wake-up
-#define USB_FEATURE_TEST_MODE                   2       // CLEAR/SET FEATURE - Test mode
+#define USB_FEATURE_ENDPOINT_HALT               0u       // CLEAR/SET FEATURE - Endpoint Halt
+#define USB_FEATURE_DEVICE_REMOTE_WAKEUP        1u       // CLEAR/SET FEATURE - Device remote wake-up
+#define USB_FEATURE_TEST_MODE                   2u       // CLEAR/SET FEATURE - Test mode
 
 // Section: Setup Data Constants
 
-#define USB_SETUP_HOST_TO_DEVICE                0x00    // Device Request bmRequestType transfer direction - host to device transfer
-#define USB_SETUP_DEVICE_TO_HOST                0x80    // Device Request bmRequestType transfer direction - device to host transfer
-#define USB_SETUP_TYPE_STANDARD                 0x00    // Device Request bmRequestType type - standard
-#define USB_SETUP_TYPE_CLASS                    0x20    // Device Request bmRequestType type - class
-#define USB_SETUP_TYPE_VENDOR                   0x40    // Device Request bmRequestType type - vendor
-#define USB_SETUP_RECIPIENT_DEVICE              0x00    // Device Request bmRequestType recipient - device
-#define USB_SETUP_RECIPIENT_INTERFACE           0x01    // Device Request bmRequestType recipient - interface
-#define USB_SETUP_RECIPIENT_ENDPOINT            0x02    // Device Request bmRequestType recipient - endpoint
-#define USB_SETUP_RECIPIENT_OTHER               0x03    // Device Request bmRequestType recipient - other
+#define USB_SETUP_HOST_TO_DEVICE                0x00u    // Device Request bmRequestType transfer direction - host to device transfer
+#define USB_SETUP_DEVICE_TO_HOST                0x80u    // Device Request bmRequestType transfer direction - device to host transfer
+#define USB_SETUP_TYPE_STANDARD                 0x00u    // Device Request bmRequestType type - standard
+#define USB_SETUP_TYPE_CLASS                    0x20u    // Device Request bmRequestType type - class
+#define USB_SETUP_TYPE_VENDOR                   0x40u    // Device Request bmRequestType type - vendor
+#define USB_SETUP_RECIPIENT_DEVICE              0x00u    // Device Request bmRequestType recipient - device
+#define USB_SETUP_RECIPIENT_INTERFACE           0x01u    // Device Request bmRequestType recipient - interface
+#define USB_SETUP_RECIPIENT_ENDPOINT            0x02u    // Device Request bmRequestType recipient - endpoint
+#define USB_SETUP_RECIPIENT_OTHER               0x03u    // Device Request bmRequestType recipient - other
 
 #define USB_SETUP_HOST_TO_DEVICE_BITFIELD       (USB_SETUP_HOST_TO_DEVICE>>7)       // Device Request bmRequestType transfer direction - host to device transfer - bit definition
 #define USB_SETUP_DEVICE_TO_HOST_BITFIELD       (USB_SETUP_DEVICE_TO_HOST>>7)       // Device Request bmRequestType transfer direction - device to host transfer - bit definition
@@ -520,25 +520,25 @@ typedef union __attribute__ ((packed))
 
 // Section: OTG SET FEATURE Constants
 
-#define OTG_FEATURE_B_HNP_ENABLE                3       // SET FEATURE OTG - Enable B device to perform HNP
-#define OTG_FEATURE_A_HNP_SUPPORT               4       // SET FEATURE OTG - A device supports HNP
-#define OTG_FEATURE_A_ALT_HNP_SUPPORT           5       // SET FEATURE OTG - Another port on the A device supports HNP
+#define OTG_FEATURE_B_HNP_ENABLE                3u       // SET FEATURE OTG - Enable B device to perform HNP
+#define OTG_FEATURE_A_HNP_SUPPORT               4u       // SET FEATURE OTG - A device supports HNP
+#define OTG_FEATURE_A_ALT_HNP_SUPPORT           5u       // SET FEATURE OTG - Another port on the A device supports HNP
 
 // Section: USB Endpoint Transfer Types
 
-#define USB_TRANSFER_TYPE_CONTROL               0x00    // Endpoint is a control endpoint.
-#define USB_TRANSFER_TYPE_ISOCHRONOUS           0x01    // Endpoint is an isochronous endpoint.
-#define USB_TRANSFER_TYPE_BULK                  0x02    // Endpoint is a bulk endpoint.
-#define USB_TRANSFER_TYPE_INTERRUPT             0x03    // Endpoint is an interrupt endpoint.
+#define USB_TRANSFER_TYPE_CONTROL               0x00u    // Endpoint is a control endpoint.
+#define USB_TRANSFER_TYPE_ISOCHRONOUS           0x01u    // Endpoint is an isochronous endpoint.
+#define USB_TRANSFER_TYPE_BULK                  0x02u    // Endpoint is a bulk endpoint.
+#define USB_TRANSFER_TYPE_INTERRUPT             0x03u    // Endpoint is an interrupt endpoint.
 
 // Section: Standard Feature Selectors for CLEAR_FEATURE Requests
-#define USB_FEATURE_ENDPOINT_STALL              0       // Endpoint recipient
-#define USB_FEATURE_DEVICE_REMOTE_WAKEUP        1       // Device recipient
-#define USB_FEATURE_TEST_MODE                   2       // Device recipient
+#define USB_FEATURE_ENDPOINT_STALL              0u       // Endpoint recipient
+#define USB_FEATURE_DEVICE_REMOTE_WAKEUP        1u       // Device recipient
+#define USB_FEATURE_TEST_MODE                   2u       // Device recipient
 
 
 // Section: USB Class Code Definitions
-#define USB_HUB_CLASSCODE                       0x09    //  Class code for a hub.
+#define USB_HUB_CLASSCODE                       0x09u    //  Class code for a hub.
 
 /********************************************************************
 USB Endpoint Definitions
@@ -608,8 +608,8 @@ This is used in the descriptors.
 
 //These are the directional indicators used for the USBTransferOnePacket()
 //  function.
-#define OUT_FROM_HOST 0
-#define IN_TO_HOST 1
+#define OUT_FROM_HOST 0u
+#define IN_TO_HOST 1u
 
 #endif  // _USB_CH9_H_
 /*************************************************************************

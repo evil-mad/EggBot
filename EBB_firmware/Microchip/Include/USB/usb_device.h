@@ -112,12 +112,12 @@ Description:
 //  to NULL so that they are in a known state during their first usage.
 #define USB_HANDLE void*
 
-#define USB_EP0_ROM            0x00     //Data comes from RAM
-#define USB_EP0_RAM            0x01     //Data comes from ROM
-#define USB_EP0_BUSY           0x80     //The PIPE is busy
-#define USB_EP0_INCLUDE_ZERO   0x40     //include a trailing zero packet
-#define USB_EP0_NO_DATA        0x00     //no data to send
-#define USB_EP0_NO_OPTIONS     0x00     //no options set
+#define USB_EP0_ROM            0x00u     //Data comes from RAM
+#define USB_EP0_RAM            0x01u     //Data comes from ROM
+#define USB_EP0_BUSY           0x80u     //The PIPE is busy
+#define USB_EP0_INCLUDE_ZERO   0x40u     //include a trailing zero packet
+#define USB_EP0_NO_DATA        0x00u     //no data to send
+#define USB_EP0_NO_OPTIONS     0x00u     //no options set
 
 /********************************************************************
  * Standard Request Codes
