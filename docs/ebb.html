@@ -784,7 +784,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
-            <li><i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the total number of steps for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should initially turn.</li>
+            <li><i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
             <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
             <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
@@ -792,12 +792,13 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-            <b>Overview:</b> This low-level command causes one or both motors to move for a given number of steps, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of steps have been made, and the command is complete when both motors have reached their targets.
+            <b>Overview:</b> This low-level command causes one or both motors to move for a given number of steps, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of steps have been made, and the command is complete when the both motors have reached their targets.
             </p> <p>
-            This command, as compared to the similar <code><a href="#LT">LT</a></code> command, allows you to
-            specify an exact number of steps to take in each axis, but is more difficult to use since the moves for the
+             This 
+            command, as compared to the similar <code><a href="#LT">LT</a></code> command, allows you to
+            specify an exact step position, but is more difficult to use since the moves for the
             two axes may complete at different times.
-            </p> <p>
+             </p> <p>
             This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.) 
             While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
@@ -806,20 +807,21 @@ ul.no_bullets {
 
 	         Each axis has a separate 32 bit Accumulator to control its timing. When the <code>LM</code> command is called, the Accumulator may be initialized to zero or left alone, depending on the value of the <i>Clear</i> argument.
             The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it.
-         Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
-           <ol>
-           <li>If <i>Rate</i> is about to go negative if we were to add <i>Accel</i>, then invert the sign of <i>Rate</i> and switch the direction of the axis. </li>
-           <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
-           <li>The value of <i>Rate</i> is added to the Accumulator.</li>
-           <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
+	       Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
+	         <ol>
+    	     <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
+    	     <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
+    	     <li>The value of <i>Rate</i> is added to the Accumulator.</li>
+    	     <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
+
               <ul>
               <li>The motor on that axis moves one step.</li>
               <li>2<sup>31</sup> is subtracted from the Accumulator for that axis. </li>
-              <li>Subtract one from the number of <i>Steps</i> left for this axis.</li>
-              </ul>
-           </li> 
-           <li>Check if the move is complete for both axes. If so, exit the LM command.</li>
-           </ol>
+            </ul></li> 
+              <li>Check to see if the total number of steps moved equals <i>Steps</i>.
+              If true, the move is complete for this axis; no further steps will be taken.</li>
+            <li>Check if the move is complete for both axes. If so, exit the LM command.</li>
+            </ol>
           
             <p>
              A restriction on the parameters is that motion must be possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion, or no motion will occur.
@@ -827,9 +829,7 @@ ul.no_bullets {
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
             </p>
-            <p>
-            If the motion in a given axis is monotonic -- if it does not reverse step direction -- then the final step position in that axis will be the initial position plus the number of steps taken with the LM command. If the motion does reverse, then the final step direction is determined by the total step count, noting that the step count does count both steps in the positive and negative directions.
-            </p>
+
             <p>
 	        <b>Computing values:</b> 
               The value of <i>Rate</i> can be computed from a motor step frequency <i>F</i>, in Hz, as:
@@ -905,7 +905,7 @@ ul.no_bullets {
             
           </li>
           <li>
-              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865471)/10169 = 1732. 
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
      We then have the following LM command:
             <ul class="no_bullets">
               <li><code>LM,3865471,60,1732,0,0,0</code></li>
@@ -913,38 +913,33 @@ ul.no_bullets {
             Notice that we are only using axis 1 in this example. You can of course use both axes at the same time, but you usually need to be careful that the times for each axis match up.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,3865471,1000,0,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899350,10,0,17179870,2,0\r</code> 
+            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> 
             This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899350,500,0,85899350,250,0\r</code> 
+            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,500,0,85899346,250,0\r</code> 
             This example will step both axis at a 1 ms/step rate, and axis 1 will step for 500 steps and axis 2 will step for 250 steps. This is <i>usually</i> not what you want in practice; it's usually better if the moves for each axis terminate at the same time. This is a "constant-rate" move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 5:</span> <code>LM,17179870,6,0,57266176,20,0\r</code> 
+            <span style="font-weight: bold;">Example 5:</span> <code>LM,17180814,6,0,57266231,20,0\r</code> 
             This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
           <li>
-            <span style="font-weight: bold;">Example 6:</span> <code>LM,42949675,50,13400,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> 
             This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179870,75,-687,8589935,75,687\r</code> 
+            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 8 (requires v2.9.0 or above):</span> <code>LM,85899350,50,-68719,0,0,0,3\r</code> 
-            This example will start with axis 1 at 1000 steps/second. Over the course of 50 steps, it will decelerate to 0 steps/s (after 50ms or 25 steps) and then reverse direction, accelerating until it reaches 1000 steps/second at the end of the move. The move will take 100 ms. 
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
+            <span style="font-weight: bold;">Version History:</span>  
             First added in v2.5.0 with partial functionality, and revised in v2.5.3.
-            Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
+             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
             This command should only be considered to be fully functional as of v2.7.0.
-            In v2.9.0 the ability to decelerate through zero speed and reverse direction at that point was added.
           </li>
         </ul>
       
@@ -1014,7 +1009,8 @@ ul.no_bullets {
           </li>
           <li>
               
-              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474838, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474838 - 3865471)/10169 = 1732. We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+     We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
             <ul class="no_bullets">
               <li><code>LT,10169,3865471,1732,0,0,3</code></li>
             </ul>
@@ -1024,21 +1020,16 @@ ul.no_bullets {
             <code><a href="#HM">HM</a></code> command following a move like this.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,3865471,0,0,0\r</code> 
+            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> 
             This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
           </li>
-          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179870,-687,85859350,687\r</code> 
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> 
             This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 4 (requires v2.9.0 or above):</span> <code>LT,25000,-8589935,-2062,42949675,-2062,0\r</code> 
-            This example creates a move which is 1s in duration. Axis 1 starts out at 100 steps/s, decelerates through zero and then accelerates back up to 500 steps/s.
-            Axis 2 does the exact opposite, starting at 500 steps/s and going through zero to 100 steps/s. The negative Rate1 indicates that axis 1 starts out in the 
-            opposite direction as axis 2. They both reverse direction as they go through zero speed.
-          </li>
-          <li>
             <span style="font-weight: bold;">Version History:</span>  
-            Added in v2.7.0. In v2.9.0 the ability to decelerate through zero speed and reverse direction at that point was added.
+            Added in v2.7.0.
+
           </li>
         </ul>
       
@@ -2815,9 +2806,8 @@ ul.no_bullets {
         </p>
         <p style="padding-left:5%">
         Output step pulse duration for external stepper drivers:
-        <ul style="padding-left:10%">
-            <li>EBB firmware 2.9.0 and above: 2.2 - 2.5 &mu;s.</li>
-            <li>EBB firmware 2.7.0 to 2.8.1: 1.6 - 2.3 &mu;s.</li>
+        <ul style="padding-left:10%">      
+            <li>EBB firmware 2.7.0 and above: 1.6 - 2.3 &mu;s.</li>
             <li>EBB firmware 2.6.5 and below: 2.8 - 3.0 &mu;s.</li>
         </ul>
         </p>
@@ -2829,7 +2819,7 @@ ul.no_bullets {
         are no gaps between the last step of one move and the first step of the next move.
         For a high enough sustained rate of sufficiently short movement commands, the EBB will not
         be able to parse and queue each command prior to starting the subsequent move.
-        The available CPU time available for parsing and queuing commands does depend on the 
+        The available CPU time available for parsing and queueing commands does depend on the 
         active step rate, as the EBB shares CPU time between command parsing and step generation.
         </p>
         <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain
@@ -2849,25 +2839,21 @@ ul.no_bullets {
           <tbody>
             <tr style="font-weight:bold;">
               <td>Command</td>
-              <td>Firmware &gt; 2.8.1</td>
-              <td>Firmware 2.8.1 to 2.7.0</td>
+              <td>Firmware &gt;= 2.7.0</td>
               <td>Firmware &lt; 2.7.0</td>
             </tr>
             <tr>
               <td>SM</td>
-              <td>2 ms</td>
               <td>3-4 ms</td>
               <td>4-7 ms</td>
             </tr>
             <tr>
               <td>XM</td>
-              <td>2 ms</td>
               <td>3-4 ms</td>
               <td>4-6 ms</td>
             </tr>
             <tr>
               <td>LM, LT </td>
-              <td>3 ms</td>
               <td>3-5 ms</td>
               <td>4-6 ms</td>
             </tr>
