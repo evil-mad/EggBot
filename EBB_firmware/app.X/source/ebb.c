@@ -362,6 +362,14 @@ static UINT32 gISRTickCountForThisCommand;
 static UINT32 gISRStepCountForThisCommand;
 static INT32  gISRPositionForThisCommand;
 
+// Temporary holder for PortB value in ISR so we don't have to sample more than once
+static UINT8 PortBTemp;
+
+// Global variables used for limit switch feature
+volatile UINT8 gLimitSwitchMask;      // 8-bit PortB mask
+volatile UINT8 gLimitSwitchTarget;    // 8-bit PortB target values
+volatile UINT8 gLimitSwitchTriggered; // Non-zero if limit switch trigger has fired
+
 // Variables used during debug printing within ISR
 static u32b4_t xx;
 static UINT8 nib;
@@ -991,6 +999,9 @@ NonStepperCommands:
     acc_union[0].value = 0;
     acc_union[1].value = 0;
 
+    // All EM command clear the limit switch trigger
+    gLimitSwitchTriggered = FALSE;
+
     // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
     bitsetzero(AllDone);
   }        
@@ -1052,6 +1063,29 @@ CheckForNextCommand:
 
         PrintChar('\n')
       }
+    }
+  }
+
+  // It limit switch checking is enabled, check to see if a limit switch value
+  // has been seen (CU,51 and CU,52)
+  if (gLimitSwitchMask)
+  {
+    PortBTemp = PORTB;
+
+    if ((~(PortBTemp ^ gLimitSwitchTarget)) & gLimitSwitchMask)
+    {
+      // At least one of the bits in PortB that we are looking at is in a state
+      // now where it has 'triggered' and so we need to shut down the current
+      // move, and remove all remaining commands from the FIFO
+      gLimitSwitchPortB = PortBTemp;
+      bitsetzero(gLimitSwitchTriggered);
+
+      AxisActive[0] = 0;
+      AxisActive[1] = 0;
+      bitsetzero(AllDone);
+      bitsetzero(FIFOEmpty);
+
+      CommandFIFO[0].Command = COMMAND_NONE_BIT;
     }
   }
 
@@ -1402,6 +1436,14 @@ void EBB_Init(void)
 
   TRISBbits.TRISB3 = 0;       // Make RB3 an output (for engraver)
   PORTBbits.RB3 = 0;          // And make sure it starts out off
+
+  // These are ISR variables, can't set them to zero in their definitions or
+  // the linker puts them in a different bank and ISR expands with more MOVLB
+  // instructions.
+  PortBTemp = 0;
+  gLimitSwitchMask = 0;
+  gLimitSwitchTarget = 0;
+  gLimitSwitchTriggered = 0;
 
   // Clear out global stepper positions
   parse_CS_packet();
@@ -1990,6 +2032,12 @@ void process_low_level_move(
 {
   MoveCommandType move;
 
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
+  {
+    return;
+  }
+
   if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
     if (ClearAccs > 3u)
@@ -2157,7 +2205,15 @@ void process_low_level_move(
   while(!bittstzero(FIFOEmpty))
     ;
 
-  CommandFIFO[0] = move;
+  // If the limit switch feature has triggered, then ignore this move command
+  // Maybe the limit switch has become true between the top of this function 
+  // and here? Better check for it.
+  if (!bittstzero(gLimitSwitchTriggered))
+  {
+    // Now, quick copy over the computed command data to the command FIFO
+    CommandFIFO[0] = move;
+    bitclrzero(FIFOEmpty);
+  }
 
   if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
@@ -2174,8 +2230,6 @@ void process_low_level_move(
     );
   }
   
-  bitclrzero(FIFOEmpty);
-
   if (g_ack_enable)
   {
     print_ack();
@@ -2652,7 +2706,12 @@ static void process_simple_motor_move(
   UINT32 remainder = 0;
   MoveCommandType move;
 
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
+  {
+    return;
+  }
+    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
     printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
       Duration,
@@ -2848,11 +2907,16 @@ static void process_simple_motor_move(
   // Spin here until there's space in the FIFO
   while(!bittstzero(FIFOEmpty))
   ;
-
-  // Now, quick copy over the computed command data to the command FIFO
-  CommandFIFO[0] = move;
-
-  bitclrzero(FIFOEmpty);
+  
+  // If the limit switch feature has triggered, then ignore this move command
+  // Maybe the limit switch has become true between the top of this function 
+  // and here? Better check for it.
+  if (!bittstzero(gLimitSwitchTriggered))
+  {
+    // Now, quick copy over the computed command data to the command FIFO
+    CommandFIFO[0] = move;
+    bitclrzero(FIFOEmpty);
+  }
 }
 
 // E-Stop
@@ -3344,16 +3408,16 @@ void parse_QC_packet(void)
 // Query General
 // Usage: QG<CR>
 // Returns: <status><NL><CR>
-// <status> is a single byte, printed as a decimal number "0" to "255".
+// <status> is a 16 bit value, printed as a hexadecimal number "00" to "FF".
 // Each bit in the byte represents the status of a single bit of information in the EBB.
-// Bit 1 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
-// Bit 2 : Motor2 status (0 = not moving, 1 = moving)
-// Bit 3 : Motor1 status (0 = not moving, 1 = moving)
-// Bit 4 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
-// Bit 5 : Pen status (0 = up, 1 = down)
-// Bit 6 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
-// Bit 7 : GPIO Pin RB2 state (0 = low, 1 = high)
-// Bit 8 : GPIO Pin RB5 state (0 = low, 1 = high)
+// Bit 0 : Motion FIFO status (0 = FIFO empty, 1 = FIFO not empty)
+// Bit 1 : Motor2 status (0 = not moving, 1 = moving)
+// Bit 2 : Motor1 status (0 = not moving, 1 = moving)
+// Bit 3 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
+// Bit 4 : Pen status (0 = up, 1 = down)
+// Bit 5 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
+// Bit 6 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 7 : gLimitSwitchTriggered
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
 {
@@ -3374,7 +3438,7 @@ void parse_QG_packet(void)
   {
     result = result | (1 << 6);
   }
-  if (PORTBbits.RB5)
+  if (gLimitSwitchTriggered)
   {
     result = result | (1 << 7);
   }

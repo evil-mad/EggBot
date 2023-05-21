@@ -279,6 +279,9 @@ extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
 extern volatile UINT8 TestMode;
+extern volatile UINT8 gLimitSwitchMask;
+extern volatile UINT8 gLimitSwitchTarget;
+extern volatile UINT8 gLimitSwitchTriggered;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
