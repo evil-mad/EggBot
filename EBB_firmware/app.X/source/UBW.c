@@ -1887,6 +1887,39 @@ void parse_CU_packet(void)
   print_ack();
 }
 
+// QU is "Query Utility" and provides a simple mechanism for the PC reading 
+// certain values from the EBB.
+// "QU,<parameter_number><CR>"
+// Returns: Some value(s), dependant on what parameter_number is.
+// <parameter_number> <return_packet>
+// 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
+//              the PortB pins at the time of the last limit switch trigger
+void parse_QU_packet(void)
+{
+  UINT8 parameter_number;
+
+  extract_number(kUCHAR, &parameter_number, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // QU,1 to read back current value of gLimitSwitchPortB
+  // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
+  if (1u == parameter_number)
+  {
+    printf((far rom char*)"QU,1,%02X\r\n", gLimitSwitchPortB);
+  }
+  else
+  {
+    // parameter_number is not understood
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+  }
+  print_ack();
+}
+
 // "T" Packet
 // Causes PIC to sample digital or analog inputs at a regular interval and send
 // I (or A) packets back at that interval.

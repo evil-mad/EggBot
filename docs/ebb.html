@@ -497,35 +497,108 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>Param_Number</i> The value 1 or 2. Specifies what <i>Param_Value</i> means.</li>
-              <li><i>Param_Value</i> An integer from -32768 to 32767. Acceptable values depend on value of <i>Param_Number</i></li>
+              <li><i>Param_Number</i> : See below for acceptable values. Specifies what <i>Param_Value</i> means.</li>
+              <li><i>Param_Value</i> : An integer from -32768 to 32767. Acceptable values depend on value of <i>Param_Number</i></li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
-            <p>
-              This command allows for configuring some run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.
-            </p>
+            <p>This command allows for configuring some run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.</p>
             <p>
               <ul>
-                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
-                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
-                <p>Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
-                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
-                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
-                <p>
-                  Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier.
-                </p>
-                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 0, then the red LED will not be used to indicate an empty FIFO (default).</li>
-                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 1, then the red LED will be used to indicate an empty FIFO.</li>
-                <p>
-                  Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO.
-                </p>
+                <li>
+                  <code>Param_Number</code> = 1 : <b>Command Response</b>
+                  <p>This sub command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 0, then <code>OK</code> response to commands is disabled.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 2 : <b>Command Parameter Limit Check</b>
+                  <p>Turning off the limit checking for the stepper motor motion commands will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier. It will also slightly speed up the command parsing of these commands.</p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>) will not perform any parameter limit checking.</li>
+                    <li>If <code>Param_Value</code> = 1, then stepper motor motion commands will perform any parameter limit checking (default at boot).</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 3 : <b>Empty FIFO Indication</b>
+                  <p>Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO. In other words, the LED will light any time there is no motion command waiting to be executed as soon as the current motion command is finished.</p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then the red LED will not be used to indicate an empty FIFO (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then the red LED will be used to indicate an empty FIFO.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 50 : <b>Set Limit Switch Mask</b>
+                  <p></p>
+                  <ul>
+                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The Param_Value set the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at boot, thus disabling the Limit Switch feature.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 51 : <b>Set Limit Switch Target</b>
+                  <p></p>
+                  <ul>
+                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The Param_Value set the new Limit Switch Target value. The default value for the Limit Switch Mask is 0 at boot.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 53 : <b>Set Limit Switch Triggered Replies</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 250 : <b>GPIO Debug Enable</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 251 : <b>USART ISR Debug Enable</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 252 : <b>Set Limit Switch Triggered Replies</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 253 : <b>Set Limit Switch Triggered Replies</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 254 : <b>Set Limit Switch Triggered Replies</b>
+                  <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                  </ul>
+                </li>
               </ul>
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
+            <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
+            <p><code>CU,51</code> and <code>CU,52</code> were added in v3.0.0</p>
             <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
           </li>
         </ul>
