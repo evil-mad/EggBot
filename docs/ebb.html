@@ -14,14 +14,14 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-<style>
-td {text-align: center}
-ul.no_bullets {
-  list-style-type: none; /* Remove bullets */
-  padding-left: 50px;
-  padding-bottom: 15px;
-}
-</style>
+    <style>
+    td {text-align: center}
+    ul.no_bullets {
+      list-style-type: none; /* Remove bullets */
+      padding-left: 50px;
+      padding-bottom: 15px;
+    }
+    </style>
 
   </head>
   <body>
@@ -503,11 +503,11 @@ ul.no_bullets {
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
-            <p>This command allows for configuring some run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.</p>
+            <p>The <code>CU</code> command allows for configuring various run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.</p>
             <p>
               <ul>
                 <li>
-                  <code>Param_Number</code> = 1 : <b>Command Response</b>
+                  <code>Param_Number</code> = 1 : <b>Enable Command Response</b>
                   <p>This sub command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
                   <ul>
                     <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
@@ -515,7 +515,7 @@ ul.no_bullets {
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 2 : <b>Command Parameter Limit Check</b>
+                  <code>Param_Number</code> = 2 : <b>Enable Command Parameter Limit Check</b>
                   <p>Turning off the limit checking for the stepper motor motion commands will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier. It will also slightly speed up the command parsing of these commands.</p>
                   <ul>
                     <li>If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>) will not perform any parameter limit checking.</li>
@@ -523,7 +523,7 @@ ul.no_bullets {
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 3 : <b>Empty FIFO Indication</b>
+                  <code>Param_Number</code> = 3 : <b>Enable Empty FIFO Indication</b>
                   <p>Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO. In other words, the LED will light any time there is no motion command waiting to be executed as soon as the current motion command is finished.</p>
                   <ul>
                     <li>If <code>Param_Value</code> = 0, then the red LED will not be used to indicate an empty FIFO (default at boot).</li>
@@ -531,65 +531,105 @@ ul.no_bullets {
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 50 : <b>Set Limit Switch Mask</b>
-                  <p></p>
+                  <code>Param_Number</code> = 50 : <b>Auto Enable Motors</b>
+                  <p>The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you do turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.</p>
                   <ul>
-                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The Param_Value set the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at boot, thus disabling the Limit Switch feature.</li>
+                    <li>If <code>Param_Value</code> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motrion command.</li>
+                    <li>If <code>Param_Value</code> = 1, then the stepper motor drivers will be auotmatically enabled at the beginning of every stepper motion command. (Default at boot)</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 51 : <b>Set Limit Switch Target</b>
-                  <p></p>
+                  <code>Param_Number</code> = 51 : <b>Set Limit Switch Mask</b>
+                  <p>Whenever the Limit Switch Mask is set to a value other than 0, the EBB will examine the current state of the PortB pins every 40us. On a bit-by-bit basis, it will look for any bit in the Limit Switch Mask which is set. For any bit in the mask which is set, it will examine the state of that PortB pin, and if that pin's state matches the corresponding bit state in the Limit Switch Target value, then a Limit Switch Stop will be executed.</p>
+                  <p>If a Limit Switch Stop is triggered, any currently exectuing motion command is immediately terminated, and any motion command in the motion FIFO is also deleted. This effectively stops all motion and clears out any pending motion. In addition, once the Limit Switch Stop has been triggered, any new stepper motion commands will be ignored until the condition is cleared.</p>
+                  <p>If the Limit Switch Triggered Replies are turned on (<code>CU,53,1</code>) then a Limit Switch Stop trigger will also cause the sending of a packet from the EBB to the PC. See the Limit Switch Triggered Replies setting below.</p>
+                  <p>To clear out a Limit Switch Stop condition, set the Limit Switch Mask value to zero with <code>CU,50,0</code>.</p>
+                  <p>All <code>EM</code> commands will automatically clear the Limit Switch Stop condition.</p>
+                  <p>Example 1: If there is a limit switch placed on PortB pin 2 such that it is normally high but the switch closure brings the pin low, then you would send <code>CU,52,0</code> to set the target vaue of bit 2 to a 0, then <code>CU,53,1</code> to enable the sending of the Limit Switch Triggered Reply, then <code>CU,51,4</code> to set the mask value for bit 2 to a 1, arming the limit switch system. Then some motion commands would be sent, potentially triggering the limit switch. If the switch were to close, creating a low on PortB bit 2, the pin value would match the target value for the one bit that is set high in the Limit Switch Mask (bit 2), thus triggering a Limit Switch Stop and also sending back a Limit Switch Triggered Reply packet to the PC. Before any further motion can happen, the PC would then have to send a <code>CU,51,0</code> command to clear the limit switch condition (i.e. disable the limit switch feature).</p>
+                  <p>Example 2: If there are three limit switches on PortB pins 2, 5 and 7, and all of them are normally low, but when they close they go high, then we could send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target value, and then <code>CU,53,1</code> to enable the Limit Switch Trigger Reply, and then <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask value. Some motion commands would then be sent, and if any of the three limit switches closed, the Limit Switch Stop would occur and the Limit Switch Triggered Reply would be sent to the PC. Sending <code>CU,51,0</code> would clear the limit switch condition and allow motion commands to be sent again. If it is critical to know exactly which limit switch was the one that triggered the Limit Switch Stop condition, use the PortB=XX value in the Limit Switch Triggered Reply. The XX is the value of all PortB pins at the moment that the Limit Switch Stop condition was triggered.</p>
                   <ul>
-                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The Param_Value set the new Limit Switch Target value. The default value for the Limit Switch Mask is 0 at boot.</li>
+                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at boot, thus disabling the Limit Switch feature.</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 53 : <b>Set Limit Switch Triggered Replies</b>
+                  <code>Param_Number</code> = 52 : <b>Set Limit Switch Target</b>
+                  <p>The Limit Switch Target and Limit Switch Mask values are used together for the limit switch function. Each bit in the Limit Switch Target value corresponds to a PortB pin. Only when the corresponding bit of the Limit Switch Mask is set will the PortB pin be compared to the corresponding bit value in the Limit Switch Target. If a match occurs, the Limit Switch Stop condition will trigger.</p>
+                  <ul>
+                    <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Target value. The default value for the Limit Switch Mask is 0 at boot.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 53 : <b>Enable Limit Switch Triggered Replies</b>
                   <p></p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, then any time a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the Limit Switch Stop trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen between replies from command parsing.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
+                  <p>This command controls a debug feature used during software development and testing. When enabled, the following GPIO pins are used to output ISR related timing information.</p>
+                  <table border="1" cellpadding="2" cellspacing="2" style="margin-left:10%;width:80%;">
+                    <tbody>
+                      <tr style="font-weight:bold;">
+                        <td style="text-align:left">Pin</td>
+                        <td>Purpose</td>
+                      </tr>
+                      <tr>
+                        <td>RD1</td>
+                        <td>High when in ISR</td>
+                      </tr>
+                      <tr>
+                        <td>RD0</td>
+                        <td>High during loading of next motion command into ISR, to be excuted on next ISR</td>
+                      </tr>
+                      <tr>
+                        <td>RA1</td>
+                        <td>High when FIFO is empty</td>
+                      </tr>
+                   </tbody>
+                  </table>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, the GPIO ISR Debug feature is turned off. (default at boot)</li>
+                    <li>If <code>Param_Value</code> = 1, the GPIO ISR Debug feature is turned on.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 251 : <b>Enable USART ISR Debug</b>
+                  <p>When enabled, this setting will ouptput a string of data on the last ISR of each move. This string is output on USART 1 TX pin (RC6, J5 pin 1) at 1M baud. The ISR completion will be delayed until all characters of the string have been sent, so this option will not run motion commands in real time. When enabled, this option causes extra statistics to be collected in the ISR, which are then printed out at the end of each move. The output string can be collected via logic analzyer and compared to previously computed expected values to test the EBB software.</p>
+                  <p>The format of the output string is <code>T,<i>ISRTickCountForThisCommand</i>,S,<i>StepCountForThisCommand</i>,C,<i>Accumulator1,</i>,R,<i>Rate1</i>,P,<i>Position</i>\n</code></p>
+                  <p><i>ISRTickCountForThisCommand</i> is the total number of ISR ticks taken by this move.</p>
+                  <p><i>StepCountForThisCommand</i> is the total number of steps (in any direction) that Axis1 has taken during this move.</p>
+                  <p><i>Accumulator1</i> is the final value of the Axis1 accumulator.</p>
+                  <p><i>Rate1</i> is the final value of the Axis1 rate.</p>
+                  <p><i>Position</i> this is the global Axis1 position at the end of the move</p>
+                  <p>All of these values are printed out as eight character unsigned hexidecimal values (00000000 to FFFFFFFF) even if they represent a signed value (like the rate or accumulator). This means that post processing must be done to properly interpret these values.</p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then the USART ISR Debug feature is disabled. (default at boot)</li>
+                    <li>If <code>Param_Value</code> = 1, then the USART ISR Debug feature is enabled.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 252 : <b>Enable USART ISR Debug Full</b>
+                  <p>When enabled, this setting will output the same string of data as the <b>USART ISR Debug</b> setting, but instead of only ouptutting the string at the end of a move, it will output the string at the end of every ISR. See <b>USART ISR Debug</b> for details on what the string contains.</p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, then the USART ISR Debug Full feature is disabled. (default at boot)</li>
+                    <li>If <code>Param_Value</code> = 1, then the USART ISR Debug Full feature is enabled.</li>
+                  </ul>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 253 : <b>Enable UART Command Debug</b>
+                  <p>Enabling the UART Command Debug feature will cause the EBB to enable USART 1 TX pin (RC6, J5 pin 1) at 1M baud. </p>
                   <ul>
                     <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
                     <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 250 : <b>GPIO Debug Enable</b>
-                  <p></p>
+                  <code>Param_Number</code> = 254 : <b>Enable Lock Up Mode</b>
+                  <p>Lock Up Mode is a special test mode used dring software developemnt and testing. When enabled, the code enters an infinite loop. Inside the loop PortD bit 0 is toggled as fast as possible (every instruction). All normal USB command processing stops and no more commands will be processed until the EBB is reset. The purpose of the command is to measure the actual time "taken away" from the mainline code by the ISR. Whenever the ISR fires, the toggles of PortD bit 0 will stop until the ISR returns. This can be viewed on a logic analzyer and the gap in pin toggles measured to determine the true time spent in the ISR.</p>
                   <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 251 : <b>USART ISR Debug Enable</b>
-                  <p></p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 252 : <b>Set Limit Switch Triggered Replies</b>
-                  <p></p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 253 : <b>Set Limit Switch Triggered Replies</b>
-                  <p></p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 254 : <b>Set Limit Switch Triggered Replies</b>
-                  <p></p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Triggered Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
+                    <li><code>Param_Value</code> = any value. The <code>Param_Value</code> is required but its value is ignored in this case.</li>
                   </ul>
                 </li>
               </ul>
@@ -598,8 +638,8 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
-            <p><code>CU,51</code> and <code>CU,52</code> were added in v3.0.0</p>
-            <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
+            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code> and <code>CU,53</code> were added in v3.0.0</p>
+            <p><code>CU,250</code>, <code>CU,251</code>, <code>CU,252</code>, <code>CU,253</code> and <code>CU,254</code> were added in v3.0.0</p>
           </li>
         </ul>
 
