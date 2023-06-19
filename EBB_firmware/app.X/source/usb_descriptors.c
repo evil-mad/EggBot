@@ -1,15 +1,15 @@
 /********************************************************************
- FileName:     	usb_descriptors.c
- Dependencies:	See INCLUDES section
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- Company:		Microchip Technology, Inc.
+ FileName:      usb_descriptors.c
+ Dependencies:  See INCLUDES section
+ Processor:     PIC18 or PIC24 USB Microcontrollers
+ Hardware:      The code is natively intended to be used on the following
+                hardware platforms: PICDEM™ FS USB Demo Board, 
+                PIC18F87J50 FS USB Plug-In Module, or
+                Explorer 16 + PIC24 USB PIM.  The firmware may be
+                modified for use on other USB platforms by editing the
+                HardwareProfile.h file.
+ Complier:      Microchip C18 (for PIC18) or C30 (for PIC24)
+ Company:       Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -163,138 +163,141 @@ state according to the definition in the USB specification.
 #endif
 
 /* Device Descriptor */
-ROM USB_DEVICE_DESCRIPTOR device_dsc=
+ROM USB_DEVICE_DESCRIPTOR device_dsc =
 {
-    0x12,                   // Size of this descriptor in bytes
-    USB_DESCRIPTOR_DEVICE,  // DEVICE descriptor type
-    0x0200,                 // USB Spec Release Number in BCD format
-    CDC_DEVICE,             // Class Code
-    0x00,                   // Subclass code
-    0x00,                   // Protocol code
-    USB_EP0_BUFF_SIZE,      // Max packet size for EP0, see usb_config.h
-    0x04D8,                 // Vendor ID
-    0xFD92,                 // Product ID: UBW based serial port device
-    0x0182,                 // Device release number in BCD format
-    0x01,                   // Manufacturer string index
-    0x02,                   // Product string index
-    0x03,                   // Device serial number string index
-    0x01                    // Number of possible configurations
+  0x12,                   // Size of this descriptor in bytes
+  USB_DESCRIPTOR_DEVICE,  // DEVICE descriptor type
+  0x0200,                 // USB Spec Release Number in BCD format
+  CDC_DEVICE,             // Class Code
+  0x00,                   // Subclass code
+  0x00,                   // Protocol code
+  USB_EP0_BUFF_SIZE,      // Max packet size for EP0, see usb_config.h
+  0x04D8,                 // Vendor ID
+  0xFD92,                 // Product ID: UBW based serial port device
+  0x0182,                 // Device release number in BCD format
+  0x01,                   // Manufacturer string index
+  0x02,                   // Product string index
+  0x03,                   // Device serial number string index
+  0x01                    // Number of possible configurations
 };
 
 /* Configuration 1 Descriptor */
-ROM BYTE configDescriptor1[]={
-    /* Configuration Descriptor */
-    0x09,//sizeof(USB_CFG_DSC),    // Size of this descriptor in bytes
-    USB_DESCRIPTOR_CONFIGURATION,                // CONFIGURATION descriptor type
-    67,0,                   // Total length of data for this cfg
-    2,                      // Number of interfaces in this cfg
-    1,                      // Index value of this configuration
-    0,                      // Configuration string index
-    _DEFAULT | _SELF,               // Attributes, see usb_device.h
-    50,                     // Max power consumption (2X mA)
-							
-    /* Interface Descriptor */
-    9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
-    USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
-    0,                      // Interface Number
-    0,                      // Alternate Setting Number
-    1,                      // Number of endpoints in this intf
-    COMM_INTF,              // Class code
-    ABSTRACT_CONTROL_MODEL, // Subclass code
-    V25TER,                 // Protocol code
-    0,                      // Interface string index
+ROM BYTE configDescriptor1[] = {
+  /* Configuration Descriptor */
+  0x09,//sizeof(USB_CFG_DSC),    // Size of this descriptor in bytes
+  USB_DESCRIPTOR_CONFIGURATION,  // CONFIGURATION descriptor type
+  67,0,                   // Total length of data for this cfg
+  2,                      // Number of interfaces in this cfg
+  1,                      // Index value of this configuration
+  0,                      // Configuration string index
+  _DEFAULT | _SELF,       // Attributes, see usb_device.h
+  50,                     // Max power consumption (2X mA)
 
-    /* CDC Class-Specific Descriptors */
-    sizeof(USB_CDC_HEADER_FN_DSC),
-    CS_INTERFACE,
-    DSC_FN_HEADER,
-    0x10,0x01,
+  /* Interface Descriptor */
+  9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
+  USB_DESCRIPTOR_INTERFACE,   // INTERFACE descriptor type
+  0,                      // Interface Number
+  0,                      // Alternate Setting Number
+  1,                      // Number of endpoints in this interface
+  COMM_INTF,              // Class code
+  ABSTRACT_CONTROL_MODEL, // Subclass code
+  V25TER,                 // Protocol code
+  0,                      // Interface string index
 
-    sizeof(USB_CDC_ACM_FN_DSC),
-    CS_INTERFACE,
-    DSC_FN_ACM,
-    USB_CDC_ACM_FN_DSC_VAL,
+  /* CDC Class-Specific Descriptors */
+  sizeof(USB_CDC_HEADER_FN_DSC),
+  CS_INTERFACE,
+  DSC_FN_HEADER,
+  0x10,0x01,
 
-    sizeof(USB_CDC_UNION_FN_DSC),
-    CS_INTERFACE,
-    DSC_FN_UNION,
-    CDC_COMM_INTF_ID,
-    CDC_DATA_INTF_ID,
+  sizeof(USB_CDC_ACM_FN_DSC),
+  CS_INTERFACE,
+  DSC_FN_ACM,
+  USB_CDC_ACM_FN_DSC_VAL,
 
-    sizeof(USB_CDC_CALL_MGT_FN_DSC),
-    CS_INTERFACE,
-    DSC_FN_CALL_MGT,
-    0x00,
-    CDC_DATA_INTF_ID,
+  sizeof(USB_CDC_UNION_FN_DSC),
+  CS_INTERFACE,
+  DSC_FN_UNION,
+  CDC_COMM_INTF_ID,
+  CDC_DATA_INTF_ID,
 
-    /* Endpoint Descriptor */
-    //sizeof(USB_EP_DSC),DSC_EP,_EP02_IN,_INT,CDC_INT_EP_SIZE,0x02,
-    0x07,/*sizeof(USB_EP_DSC)*/
-    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP01_IN,            //EndpointAddress
-    _INTERRUPT,                       //Attributes
-    0x08,0x00,                  //size
-    0x02,                       //Interval
+  sizeof(USB_CDC_CALL_MGT_FN_DSC),
+  CS_INTERFACE,
+  DSC_FN_CALL_MGT,
+  0x00,
+  CDC_DATA_INTF_ID,
 
-    /* Interface Descriptor */
-    9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
-    USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
-    1,                      // Interface Number
-    0,                      // Alternate Setting Number
-    2,                      // Number of endpoints in this intf
-    DATA_INTF,              // Class code
-    0,                      // Subclass code
-    NO_PROTOCOL,            // Protocol code
-    0,                      // Interface string index
-    
-    /* Endpoint Descriptor */
-    //sizeof(USB_EP_DSC),DSC_EP,_EP03_OUT,_BULK,CDC_BULK_OUT_EP_SIZE,0x00,
-    0x07,/*sizeof(USB_EP_DSC)*/
-    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP02_OUT,            //EndpointAddress
-    _BULK,                       //Attributes
-    0x40,0x00,                  //size
-    0x00,                       //Interval
+  /* Endpoint Descriptor */
+  //sizeof(USB_EP_DSC),DSC_EP,_EP02_IN,_INT,CDC_INT_EP_SIZE,0x02,
+  0x07,/*sizeof(USB_EP_DSC)*/
+  USB_DESCRIPTOR_ENDPOINT,    // Endpoint Descriptor
+  _EP01_IN,                   // EndpointAddress
+  _INTERRUPT,                 // Attributes
+  0x08,0x00,                  // size
+  0x02,                       // Interval
 
-    /* Endpoint Descriptor */
-    //sizeof(USB_EP_DSC),DSC_EP,_EP03_IN,_BULK,CDC_BULK_IN_EP_SIZE,0x00
-    0x07,/*sizeof(USB_EP_DSC)*/
-    USB_DESCRIPTOR_ENDPOINT,    //Endpoint Descriptor
-    _EP02_IN,            //EndpointAddress
-    _BULK,                       //Attributes
-    0x40,0x00,                  //size
-    0x00,                       //Interval
+  /* Interface Descriptor */
+  9,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
+  USB_DESCRIPTOR_INTERFACE,   // INTERFACE descriptor type
+  1,                          // Interface Number
+  0,                          // Alternate Setting Number
+  2,                          // Number of endpoints in this interface
+  DATA_INTF,                  // Class code
+  0,                          // Subclass code
+  NO_PROTOCOL,                // Protocol code
+  0,                          // Interface string index
+  
+  /* Endpoint Descriptor */
+  //sizeof(USB_EP_DSC),DSC_EP,_EP03_OUT,_BULK,CDC_BULK_OUT_EP_SIZE,0x00,
+  0x07,/*sizeof(USB_EP_DSC)*/
+  USB_DESCRIPTOR_ENDPOINT,    // Endpoint Descriptor
+  _EP02_OUT,                  // EndpointAddress
+  _BULK,                      // Attributes
+  0x40,0x00,                  // size
+  0x00,                       // Interval
+
+  /* Endpoint Descriptor */
+  //sizeof(USB_EP_DSC),DSC_EP,_EP03_IN,_BULK,CDC_BULK_IN_EP_SIZE,0x00
+  0x07,/*sizeof(USB_EP_DSC)*/
+  USB_DESCRIPTOR_ENDPOINT,    // Endpoint Descriptor
+  _EP02_IN,                   // EndpointAddress
+  _BULK,                      // Attributes
+  0x40,0x00,                  // size
+  0x00,                       // Interval
 };
 
 
-//Language code string descriptor
-struct{BYTE bLength;BYTE bDscType;WORD string[1];}sd000={
-sizeof(sd000),USB_DESCRIPTOR_STRING,{0x0409}};
+// Language code string descriptor
+struct{BYTE bLength;BYTE bDscType;WORD string[1];}sd000 = {
+  sizeof(sd000),USB_DESCRIPTOR_STRING,{0x0409}
+};
 
-//Manufacturer string descriptor
-struct{BYTE bLength;BYTE bDscType;WORD string[11];}sd001={
-sizeof(sd001),USB_DESCRIPTOR_STRING,
-{'S','c','h','m','a','l','z','H','a','u','s'}};
+// Manufacturer string descriptor
+struct{BYTE bLength;BYTE bDscType;WORD string[11];}sd001 = {
+  sizeof(sd001),USB_DESCRIPTOR_STRING,
+  {'S','c','h','m','a','l','z','H','a','u','s'}
+};
 
-//Product string descriptor
+// Product string descriptor
 // As of EBB firmware v2.5.4 this is now stored in ram, and we set it up here to
 // have enough space to put the 'name' (set via the 'NS' command) on the end 
-struct{BYTE bLength;BYTE bDscType;WORD string[27];}sd002={
-sizeof(sd002),USB_DESCRIPTOR_STRING,
-{'E','i','B','o','t','B','o','a','r','d',',',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}};
-
-struct{BYTE bLength;BYTE bDscType;WORD string[16];}sd003={
-sizeof(sd003),USB_DESCRIPTOR_STRING,
-{' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}};
-
-//Array of configuration descriptors
-ROM BYTE *ROM USB_CD_Ptr[]=
-{
-    (ROM BYTE *ROM)&configDescriptor1
+struct{BYTE bLength;BYTE bDscType;WORD string[27];}sd002 = {
+  sizeof(sd002),USB_DESCRIPTOR_STRING,
+  {'E','i','B','o','t','B','o','a','r','d',',',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}
 };
-//Array of string descriptors
-BYTE * USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS]=
-{
+
+struct{BYTE bLength;BYTE bDscType;WORD string[16];}sd003 = {
+  sizeof(sd003),USB_DESCRIPTOR_STRING,
+  {' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' '}
+};
+
+// Array of configuration descriptors
+ROM BYTE *ROM USB_CD_Ptr[] = {
+  (ROM BYTE *ROM)&configDescriptor1
+};
+
+// Array of string descriptors
+BYTE * USB_SD_Ptr[USB_NUM_STRING_DESCRIPTORS] = {
     (BYTE *)&sd000,
     (BYTE *)&sd001,
     (BYTE *)&sd002,

@@ -4,7 +4,7 @@
   <defaultConf>0</defaultConf>
   <confs>
     <conf name="EBBv13_with_bootloader" type="2">
-      <platformToolSN></platformToolSN>
+      <platformToolSN>noToolString</platformToolSN>
       <languageToolchainDir>C:\MCC18\bin</languageToolchainDir>
       <mdbdebugger version="1">
         <placeholder1>place holder 1</placeholder1>

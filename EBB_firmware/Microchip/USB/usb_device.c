@@ -507,7 +507,7 @@ void USBDeviceInit(void)
     USBPingPongBufferReset = 0;
 
     // Flush any pending transactions
-    while(USBTransactionCompleteIF == 1)      
+    while(USBTransactionCompleteIF == 1u)      
     {
         USBClearInterruptFlag(USBTransactionCompleteIFReg,USBTransactionCompleteIFBitNum);
         //Initialize USB stack software state variables
@@ -693,7 +693,7 @@ void USBDeviceTasks(void)
     //If the interrupt option is selected then the customer is required
     //  to notify the stack when the device is attached or removed from the
     //  bus by calling the USBDeviceAttach() and USBDeviceDetach() functions.
-    if (USB_BUS_SENSE != 1)
+    if (USB_BUS_SENSE != 1u)
     {
          // Disable module & detach from bus
          U1CON = 0;             
@@ -828,7 +828,7 @@ void USBDeviceTasks(void)
     /*
      * Pointless to continue servicing if the device is in suspend mode.
      */
-    if(USBSuspendControl==1)
+    if(USBSuspendControl==1u)
     {
         USBClearUSBInterrupt();
         return;
@@ -920,7 +920,7 @@ void USBDeviceTasks(void)
             //If so, auto-arm the status stage to ensure that the control 
             //transfer can [eventually] complete, within the timing limits
             //dictated by section 9.2.6 of the official USB 2.0 specifications.
-            if(USBStatusStageTimeoutCounter == 0)
+            if(USBStatusStageTimeoutCounter == 0u)
             {
                 USBCtrlEPAllowStatusStage();    //Does nothing if the status stage was already armed.
             } 
@@ -986,7 +986,7 @@ void USBDeviceTasks(void)
                 
                 //USBCtrlEPService only services transactions over EP0.
                 //It ignores all other EP transactions.
-                if(endpoint_number == 0)
+                if(endpoint_number == 0u)
                 {
                     USBCtrlEPService();
                 }
@@ -1174,7 +1174,7 @@ USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len)
     volatile BDT_ENTRY* handle;
 
     //If the direction is IN
-    if(dir != 0)
+    if(dir != 0u)
     {
         //point to the IN BDT of the specified endpoint
         handle = pBDTEntryIn[ep];
@@ -1250,7 +1250,7 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
 {
     BDT_ENTRY *p;
 
-    if(ep == 0)
+    if(ep == 0u)
     {
         //For control endpoints (ex: EP0), we need to STALL both IN and OUT
         //endpoints.  EP0 OUT must also be prepared to receive the next SETUP 
@@ -1301,7 +1301,7 @@ void USBStallEndpoint(BYTE ep, BYTE dir)
   **************************************************************************/
 void USBCancelIO(BYTE endpoint)
 {
-    if(USBPacketDisable == 1)
+    if(USBPacketDisable == 1u)
     {
     	//The PKTDIS bit is currently set right now.  It is therefore "safe"
     	//to mess with the BDT right now.
@@ -1794,9 +1794,9 @@ static void USBCtrlEPServiceComplete(void)
 	//control transfer is currently in progress.  We need to know the type of control
 	//transfer that is currently pending, in order to know how to properly arm the 
 	//EP0 IN and EP0 OUT endpoints.
-    if(inPipes[0].info.bits.busy == 0)
+    if(inPipes[0].info.bits.busy == 0u)
     {
-        if(outPipes[0].info.bits.busy == 1)
+        if(outPipes[0].info.bits.busy == 1u)
         {
             controlTransferState = CTRL_TRF_RX;
             /*
@@ -2044,11 +2044,11 @@ static void USBCtrlTrfRxService(void)
 
     //If there is more data to receive, prepare EP0 OUT so that it can receive 
 	//the next packet in the sequence.
-    if(outPipes[0].wCount.Val > 0)
+    if(outPipes[0].wCount.Val > 0u)
     {
         pBDTEntryEP0OutNext->CNT = USB_EP0_BUFF_SIZE;
         pBDTEntryEP0OutNext->ADR = ConvertToPhysicalAddress(&CtrlTrfData);
-        if(pBDTEntryEP0OutCurrent->STAT.DTS == 0)
+        if(pBDTEntryEP0OutCurrent->STAT.DTS == 0u)
         {
             pBDTEntryEP0OutNext->STAT.Val = _USIE|_DAT1|(_DTSEN & _DTS_CHECKING_ENABLED);
         }
@@ -2169,7 +2169,7 @@ static void USBStdSetCfgHandler(void)
     USBActiveConfiguration = SetupPkt.bConfigurationValue;
 
     //if the configuration value == 0
-    if(USBActiveConfiguration == 0)
+    if(USBActiveConfiguration == 0u)
     {
         //Go back to the addressed state
         USBDeviceState = ADDRESS_STATE;
@@ -2315,7 +2315,7 @@ static void USBStdGetStatusHandler(void)
             {
                 BDT_ENTRY *p;
 
-                if(SetupPkt.EPDir == 0)
+                if(SetupPkt.EPDir == 0u)
                 {
                     p = (BDT_ENTRY*)pBDTEntryOut[SetupPkt.EPNum];
                 }
@@ -2324,13 +2324,13 @@ static void USBStdGetStatusHandler(void)
                     p = (BDT_ENTRY*)pBDTEntryIn[SetupPkt.EPNum];
                 }
 
-                if((p->STAT.UOWN == 1) && (p->STAT.BSTALL == 1))
+                if((p->STAT.UOWN == 1u) && (p->STAT.BSTALL == 1u))
                     CtrlTrfData[0]=0x01;    // Set bit0
                 break;
             }
     }//end switch
 
-    if(inPipes[0].info.bits.busy == 1)
+    if(inPipes[0].info.bits.busy == 1u)
     {
         inPipes[0].pSrc.bRam = (BYTE*)&CtrlTrfData;            // Set Source
         inPipes[0].info.bits.ctrl_trf_mem = USB_EP0_RAM;               // Set memory type
@@ -2367,7 +2367,7 @@ static void USBStallHandler(void)
      */
 
     /* v2b fix */
-    if(U1EP0bits.EPSTALL == 1)
+    if(U1EP0bits.EPSTALL == 1u)
     {
         // UOWN - if 0, owned by CPU, if 1, owned by SIE
         if((pBDTEntryEP0OutCurrent->STAT.Val == _USIE) && (pBDTEntryIn[0]->STAT.Val == (_USIE|_BSTALL)))
@@ -2789,7 +2789,7 @@ static void USBCtrlTrfInHandler(void)
         }
         else
         {
-            if(lastDTS == 0)
+            if(lastDTS == 0u)
             {
                 pBDTEntryIn[0]->STAT.Val = _USIE|_DAT1|(_DTSEN & _DTS_CHECKING_ENABLED);
             }
@@ -2804,7 +2804,7 @@ static void USBCtrlTrfInHandler(void)
         //if someone is still expecting data from the control transfer
         //  then make sure to terminate that request and let them know that
         //  they are done
-        if(outPipes[0].info.bits.busy == 1)
+        if(outPipes[0].info.bits.busy == 1u)
         {
             if(outPipes[0].pFunc != NULL)
             {
@@ -2963,7 +2963,7 @@ static void USBStdFeatureReqHandler(void)
     //Check if the host sent a valid SET or CLEAR endpoint halt request.
     if((SetupPkt.bFeature == USB_FEATURE_ENDPOINT_HALT)&&
        (SetupPkt.Recipient == USB_SETUP_RECIPIENT_ENDPOINT_BITFIELD)&&
-       (SetupPkt.EPNum != 0) && (SetupPkt.EPNum <= USB_MAX_EP_NUMBER)&&
+       (SetupPkt.EPNum != 0u) && (SetupPkt.EPNum <= USB_MAX_EP_NUMBER)&&
        (USBDeviceState == CONFIGURED_STATE))
     {
 		//The request was valid.  Take control of the control transfer and
@@ -2986,7 +2986,7 @@ static void USBStdFeatureReqHandler(void)
         //to point to the one that is the active BDT entry which the SIE will 
         //use for the next attempted transaction on that EP number.
         #if (USB_PING_PONG_MODE == USB_PING_PONG__ALL_BUT_EP0) || (USB_PING_PONG_MODE == USB_PING_PONG__FULL_PING_PONG)   
-            if(current_ep_data.bits.ping_pong_state == 0) //Check if even
+            if(current_ep_data.bits.ping_pong_state == 0u) //Check if even
             {
                 USBHALPingPongSetToEven(&p);
             }
@@ -3010,7 +3010,7 @@ static void USBStdFeatureReqHandler(void)
 		//Check if it was a SET_FEATURE endpoint halt request
         if(SetupPkt.bRequest == USB_REQUEST_SET_FEATURE)
         {
-            if(p->STAT.UOWN == 1)
+            if(p->STAT.UOWN == 1u)
             {
                 //Mark that we are terminating this transfer and that the user
                 //  needs to be notified later
@@ -3034,7 +3034,7 @@ static void USBStdFeatureReqHandler(void)
                 //toggle over the to the non-active BDT
                 USBAdvancePingPongBuffer(&p);  
 
-                if(p->STAT.UOWN == 1)
+                if(p->STAT.UOWN == 1u)
                 {
                     //Clear UOWN and set DTS state so it will be correct the next time
                     //the application firmware uses USBTransferOnePacket() on the EP.
@@ -3056,7 +3056,7 @@ static void USBStdFeatureReqHandler(void)
                 //a transaction on the given endpoint.  If so, need to clear UOWN,
                 //set DTS to the proper state, and call the application callback
                 //function.
-                if((current_ep_data.bits.transfer_terminated != 0) || (p->STAT.UOWN == 1))
+                if((current_ep_data.bits.transfer_terminated != 0u) || (p->STAT.UOWN == 1u))
                 {
                     if(SetupPkt.EPDir == OUT_FROM_HOST)
                     {

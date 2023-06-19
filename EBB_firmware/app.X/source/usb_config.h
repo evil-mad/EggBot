@@ -2,15 +2,15 @@
  FileName:     	usb_config.h
  Dependencies: 	Always: GenericTypeDefs.h, usb_device.h
                	Situational: usb_function_hid.h, usb_function_cdc.h, usb_function_msd.h, etc.
- Processor:		PIC18 or PIC24 USB Microcontrollers
- Hardware:		The code is natively intended to be used on the following
- 				hardware platforms: PICDEM™ FS USB Demo Board, 
- 				PIC18F87J50 FS USB Plug-In Module, or
- 				Explorer 16 + PIC24 USB PIM.  The firmware may be
- 				modified for use on other USB platforms by editing the
- 				HardwareProfile.h file.
- Complier:  	Microchip C18 (for PIC18) or C30 (for PIC24)
- Company:		Microchip Technology, Inc.
+ Processor:   PIC18 or PIC24 USB Microcontrollers
+ Hardware:    The code is natively intended to be used on the following
+              hardware platforms: PICDEM™ FS USB Demo Board, 
+              PIC18F87J50 FS USB Plug-In Module, or
+              Explorer 16 + PIC24 USB PIM.  The firmware may be
+              modified for use on other USB platforms by editing the
+              HardwareProfile.h file.
+ Complier:    Microchip C18 (for PIC18) or C30 (for PIC24)
+ Company:     Microchip Technology, Inc.
 
  Software License Agreement:
 
@@ -55,14 +55,14 @@
 #define USBCFG_H
 
 /** DEFINITIONS ****************************************************/
-#define USB_EP0_BUFF_SIZE		64	// Valid Options: 8, 16, 32, or 64 bytes.
-								// Using larger options take more SRAM, but
-								// does not provide much advantage in most types
-								// of applications.  Exceptions to this, are applications
-								// that use EP0 IN or OUT for sending large amounts of
-								// application related data.
-									
-#define USB_MAX_NUM_INT     	1   // For tracking Alternate Setting
+#define USB_EP0_BUFF_SIZE   64u	// Valid Options: 8, 16, 32, or 64 bytes.
+                                // Using larger options take more SRAM, but
+                                // does not provide much advantage in most types
+                                // of applications.  Exceptions to this, are applications
+                                // that use EP0 IN or OUT for sending large amounts of
+                                // application related data.
+
+#define USB_MAX_NUM_INT     1u  // For tracking Alternate Setting
 
 //Device descriptor - if these two definitions are not defined then
 //  a ROM USB_DEVICE_DESCRIPTOR variable by the exact name of device_dsc
@@ -126,7 +126,7 @@
 //1.  Control transfers with no data stage: Status stage must complete within 
 //      50ms of the start of the control transfer.
 //2.  Control transfers with (IN) data stage: Status stage must complete within 
-//      50ms of sending the last IN data packet in fullfilment of the data stage.
+//      50ms of sending the last IN data packet in fulfillment of the data stage.
 //3.  Control transfers with (OUT) data stage: No specific status stage timing
 //      requirement.  However, the total time of the entire control transfer (ex:
 //      including the OUT data stage and IN status stage) must not exceed 5 seconds.
@@ -144,7 +144,7 @@
 
 #define USB_SUPPORT_DEVICE
 
-#define USB_NUM_STRING_DESCRIPTORS 4
+#define USB_NUM_STRING_DESCRIPTORS 4u
 
 //#define USB_INTERRUPT_LEGACY_CALLBACKS
 #define USB_ENABLE_ALL_HANDLERS
@@ -162,17 +162,17 @@
 #define USB_USE_CDC
 
 /** ENDPOINTS ALLOCATION *******************************************/
-#define USB_MAX_EP_NUMBER	    2
+#define USB_MAX_EP_NUMBER       2u
 
 /* CDC */
-#define CDC_COMM_INTF_ID        0x0
-#define CDC_COMM_EP              1
-#define CDC_COMM_IN_EP_SIZE      8
+#define CDC_COMM_INTF_ID        0x0u
+#define CDC_COMM_EP             1u
+#define CDC_COMM_IN_EP_SIZE     8u
 
-#define CDC_DATA_INTF_ID        0x01
-#define CDC_DATA_EP             2
-#define CDC_DATA_OUT_EP_SIZE    64
-#define CDC_DATA_IN_EP_SIZE     64
+#define CDC_DATA_INTF_ID        0x01u
+#define CDC_DATA_EP             2u
+#define CDC_DATA_OUT_EP_SIZE    64u
+#define CDC_DATA_IN_EP_SIZE     64u
 
 //#define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D2 //Send_Break command
 #define USB_CDC_SUPPORT_ABSTRACT_CONTROL_MANAGEMENT_CAPABILITIES_D1 //Set_Line_Coding, Set_Control_Line_State, Get_Line_Coding, and Serial_State commands

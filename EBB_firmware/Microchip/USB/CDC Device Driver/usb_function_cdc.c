@@ -789,7 +789,7 @@ void putsUSBUSART(char *data)
     do
     {
         len++;
-        if(len == 255) break;       // Break loop once max len is reached.
+        if(len == 255u) break;       // Break loop once max len is reached.
     }while(*pData++);
     
     /*
@@ -886,7 +886,7 @@ void putrsUSBUSART(const ROM char *data)
     do
     {
         len++;
-        if(len == 255) break;       // Break loop once max len is reached.
+        if(len == 255u) break;       // Break loop once max len is reached.
     }while(*pData++);
     
     /*
@@ -1036,7 +1036,7 @@ void CDCTxService(void)
          * Lastly, determine if a zero length packet state is necessary.
          * See explanation in USB Specification 2.0: Section 5.8.3
          */
-        if(cdc_tx_len == 0)
+        if(cdc_tx_len == 0u)
         {
             if(byte_to_send == CDC_DATA_IN_EP_SIZE)
                 cdc_trf_state = CDC_TX_BUSY_ZLP;
