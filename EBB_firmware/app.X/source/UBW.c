@@ -1639,6 +1639,7 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 10  {1|0} turns on or off the standardized string line ending (\n) (defatuls to off))
 // 50  {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
@@ -1698,6 +1699,22 @@ void parse_CU_packet(void)
     {
       bitsetzero(gRedLEDEmptyFIFO);
       mLED_2_Off()
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  // CU,10,1 or CU,10,0 to turn on/off standardized line ending
+  else if (10u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclrzero(gStandarizedLineEndings);
+    }
+    else if (1 == paramater_value)
+    {
+      bitsetzero(gStandardizedLineEndings);
     }
     else
     {
