@@ -143,6 +143,9 @@ extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 
 extern volatile UINT8 gRedLEDEmptyFIFO;
 extern BOOL gAutomaticMotorEnable;
+extern volatile UINT8 gLimitSwitchPortB;
+extern volatile UINT8 gLimitSwitchReplies;
+extern UINT8 gLimitSwitchReplyPrinted;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void UserInit (void);

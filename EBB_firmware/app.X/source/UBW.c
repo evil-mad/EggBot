@@ -158,7 +158,7 @@ const rom char st_LFCR[] = {"\r\n"};
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.03\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.04\r\n"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
 #endif
@@ -229,6 +229,11 @@ volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 // When true, any stepper motion command will automatically enable both motors
 BOOL gAutomaticMotorEnable = TRUE;
+
+// Global variables used for limit switch feature
+volatile UINT8 gLimitSwitchPortB = 0;     // Latched PortB value when trigger happens
+volatile UINT8 gLimitSwitchReplies = 0;   // Non-zero if we want a reply printed when limit switch trigger goes true
+ UINT8 gLimitSwitchReplyPrinted = 0;      // True if we've already printed a reply for this limit switch trigger
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
@@ -1051,6 +1056,20 @@ void ProcessIO(void)
     error_byte = 0;
   }
 
+  // Check to see if we need to print out a "Limit switch triggered" packet to the PC
+  if (gLimitSwitchReplies)
+  {
+    if (gLimitSwitchTriggered && !gLimitSwitchReplyPrinted)
+    {
+      printf((far rom char *)"Limit switch triggered. PortB=%02X\r\n", gLimitSwitchPortB);
+      gLimitSwitchReplyPrinted = TRUE;
+    }
+    else if (!gLimitSwitchTriggered && gLimitSwitchReplyPrinted)
+    {
+      gLimitSwitchReplyPrinted = FALSE;
+    }
+  }
+  
   // Go send any data that needs sending to PC
   check_and_send_TX_data();
 }
@@ -1620,7 +1639,10 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
-// 50 {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
+// 50  {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
+// 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
+// 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
+// 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
@@ -1692,6 +1714,33 @@ void parse_CU_packet(void)
     else
     {
       gAutomaticMotorEnable = TRUE;
+    }
+  }
+  // CU,51,<limit_switch_mask>
+  else if (51u == parameter_number)
+  {
+    gLimitSwitchMask = (paramater_value & 0xFF);
+    if (gLimitSwitchMask == 0u)
+    {
+      gLimitSwitchTriggered = FALSE;
+    }
+  }
+  // CU,52,<limit_siwtch_target>
+  else if (52u == parameter_number)
+  {
+    gLimitSwitchTarget = (paramater_value & 0xFF);
+  }
+  // CU,53,1 turns on the sending of "Limit switch trigger" replies
+  else if (53u == parameter_number)
+  {
+    if (1 == paramater_value)
+    {
+      gLimitSwitchReplies = TRUE;
+    }
+    else
+    {
+      gLimitSwitchReplies = FALSE;
+      gLimitSwitchReplyPrinted = FALSE;
     }
   }
   // CU,250,1 or CU,250,0 to turn on/off GPIO ISR timing debug
@@ -1829,6 +1878,39 @@ void parse_CU_packet(void)
         BSF 0x8c,0x0,0x0
       _endasm
     }
+  }
+  else
+  {
+    // parameter_number is not understood
+    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+  }
+  print_ack();
+}
+
+// QU is "Query Utility" and provides a simple mechanism for the PC reading 
+// certain values from the EBB.
+// "QU,<parameter_number><CR>"
+// Returns: Some value(s), dependant on what parameter_number is.
+// <parameter_number> <return_packet>
+// 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
+//              the PortB pins at the time of the last limit switch trigger
+void parse_QU_packet(void)
+{
+  UINT8 parameter_number;
+
+  extract_number(kUCHAR, &parameter_number, kREQUIRED);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  // QU,1 to read back current value of gLimitSwitchPortB
+  // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
+  if (1u == parameter_number)
+  {
+    printf((far rom char*)"QU,1,%02X\r\n", gLimitSwitchPortB);
   }
   else
   {
