@@ -544,16 +544,13 @@
                   <p>A Limit Switch Stop terminates any currently executing motion command and deletes any motion command in the motion FIFO. Further, new stepper motion commands will be ignored until the condition is cleared. To clear the Limit Switch Stop condition, set the Limit Switch Mask value to zero with <code>CU,51,0</code>. The Limit Switch Stop condition can also be cleared by executing any <a href="#EM">EM</a> command or by resetting (e.g., rebooting) the EBB.
                   </p>
                   <p>If Limit Switch Replies are enabled (<code>CU,53,1</code>) then a Limit Switch Stop will also cause the sending of a packet from the EBB. (See the Limit Switch Replies setting below.)</p>
-    <ul>
+                  <ul>
                     <li><code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at reset, thus disabling the Limit Switch feature.</li>
-
-   <li><span style="font-weight: bold;">Example 1:</span> 
-    A limit switch is connected to PortB pin 2 such that it is normally high but the switch closure brings the pin low. Send <code>CU,52,0</code> to set the target value of bit 2 to a 0, then <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use <code>CU,51,4</code> to set the mask value for bit 2, arming the limit switch system. If, at some point, subsequent stepper motion commands were to create motion that closed the limit switch, that would trigger a Limit Switch Stop and send a Limit Switch Reply. Before any further motion can occur, the PC would send a <code>CU,51,0</code> command to clear the limit switch condition.</li>
-
-    <li><span style="font-weight: bold;">Example 2:</span>
-    There are three limit switches on PortB pins 2, 5 and 7. Each is normally low
-    and high once closed. Send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target, and <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use  <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask, which enables the feature. If any of the three limit switches closes, the Limit Switch Stop would occur and the Limit Switch Reply would be sent. If it is important to know exactly which limit switch was the one that triggered the Limit Switch Stop, examine the response packet from the Limit Switch Reply.</li>
-                  </ul> 
+                    <li><span style="font-weight: bold;">Example 1:</span> 
+                    A limit switch is connected to PortB pin 2 such that it is normally high but the switch closure brings the pin low. Send <code>CU,52,0</code> to set the target value of bit 2 to a 0, then <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use <code>CU,51,4</code> to set the mask value for bit 2, arming the limit switch system. If, at some point, subsequent stepper motion commands were to create motion that closed the limit switch, that would trigger a Limit Switch Stop and send a Limit Switch Reply. Before any further motion can occur, the PC would send a <code>CU,51,0</code> command to clear the limit switch condition.</li>
+                    <li><span style="font-weight: bold;">Example 2:</span>
+                    There are three limit switches on PortB pins 2, 5 and 7. Each is normally low and high once closed. Send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target, and <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use  <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask, which enables the feature. If any of the three limit switches closes, the Limit Switch Stop would occur and the Limit Switch Reply would be sent. If it is important to know exactly which limit switch was the one that triggered the Limit Switch Stop, examine the response packet from the Limit Switch Reply.</li>
+                  </ul>
                 </li>
                 <li>
                 <code>Param_Number</code> = 52 : <b>Limit Switch Target</b>
@@ -572,69 +569,23 @@
                 </li>
                 <li>
                   <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
-                  <p>This command controls a debug feature used during software development and testing. When enabled, the following GPIO pins are used to output ISR related timing information.</p>
-                  <table border="1" cellpadding="2" cellspacing="2" style="margin-left:10%;width:80%;">
-                    <tbody>
-                      <tr style="font-weight:bold;">
-                        <td style="text-align:left">Pin</td>
-                        <td>Purpose</td>
-                      </tr>
-                      <tr>
-                        <td>RD1</td>
-                        <td>High when in ISR</td>
-                      </tr>
-                      <tr>
-                        <td>RD0</td>
-                        <td>High during loading of next motion command into ISR, to be executed on next ISR</td>
-                      </tr>
-                      <tr>
-                        <td>RA1</td>
-                        <td>High when FIFO is empty</td>
-                      </tr>
-                   </tbody>
-                  </table>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, the GPIO ISR Debug feature is turned off. (default at boot)</li>
-                    <li>If <code>Param_Value</code> = 1, the GPIO ISR Debug feature is turned on.</li>
-                  </ul>
+                  <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 251 : <b>Enable USART ISR Debug</b>
-                  <p>When enabled, this setting will output a string of data on the last ISR of each move. This string is output on USART 1 TX pin (RC6, J5 pin 1) at 1M baud. The ISR completion will be delayed until all characters of the string have been sent, so this option will not run motion commands in real time. When enabled, this option causes extra statistics to be collected in the ISR, which are then printed out at the end of each move. The output string can be collected via logic analzyer and compared to previously computed expected values to test the EBB software.</p>
-                  <p>The format of the output string is <code>T,<i>TickCount</i>,S,<i>StepCount</i>,C,<i>Accumulator1,</i>,R,<i>Rate1</i>,P,<i>Position</i>\n</code></p>
-                  <p><i>TickCount</i> is the total number of ISR ticks taken by this move.</p>
-                  <p><i>StepCount</i> is the total number of steps (in any direction) that Axis1 has taken during this move.</p>
-                  <p><i>Accumulator1</i> is the final value of the Axis1 accumulator.</p>
-                  <p><i>Rate1</i> is the final value of the Axis1 rate.</p>
-                  <p><i>Position</i> this is the global Axis1 position at the end of the move</p>
-                  <p>All of these values are printed out as eight character unsigned hexidecimal values (00000000 to FFFFFFFF) even if they represent a signed value (like the rate or accumulator). This means that post processing must be done to properly interpret these values.</p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then the USART ISR Debug feature is disabled. (default at boot)</li>
-                    <li>If <code>Param_Value</code> = 1, then the USART ISR Debug feature is enabled.</li>
-                  </ul>
+                  <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 252 : <b>Enable USART ISR Debug Full</b>
-                  <p>When enabled, this setting will output the same string of data as the <b>USART ISR Debug</b> setting, but instead of only ouptutting the string at the end of a move, it will output the string at the end of every ISR. See <b>USART ISR Debug</b> for details on what the string contains.</p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then the USART ISR Debug Full feature is disabled. (default at boot)</li>
-                    <li>If <code>Param_Value</code> = 1, then the USART ISR Debug Full feature is enabled.</li>
-                  </ul>
+                  <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 253 : <b>Enable UART Command Debug</b>
-                  <p>Enabling the UART Command Debug feature will cause the EBB to enable USART 1 TX pin (RC6, J5 pin 1) at 1M baud. </p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then no Limit Switch Reply packets will be sent when a limit switch condition is triggered (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then any time the limit switch feature is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of all eight pins of PortB at the time of the limit switch trigger expressed as a two digit hexadecimal value. These replies will come completely asynchronously, but they will not interrupt another reply from a command. They will only happen in between replies from command parsing.</li>
-                  </ul>
+                  <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 254 : <b>Enable Lock Up Mode</b>
-                  <p>Lock Up Mode is a special test mode used during software development and testing. When enabled, the code enters an infinite loop. Inside the loop PortD bit 0 is toggled as fast as possible (every instruction). All normal USB command processing stops and no more commands will be processed until the EBB is reset. The purpose of the command is to measure the actual time "taken away" from the mainline code by the ISR. Whenever the ISR fires, the toggles of PortD bit 0 will stop until the ISR returns. This can be viewed on a logic analzyer and the gap in pin toggles measured to determine the true time spent in the ISR.</p>
-                  <ul>
-                    <li><code>Param_Value</code> = any value. The <code>Param_Value</code> is required but its value is ignored.</li>
-                  </ul>
+                  <p>This is an internal software debugging and testing command.</p>
                 </li>
               </ul>
             </p>
