@@ -286,7 +286,7 @@ ul.no_bullets {
               Query all analog (ADC) input values.
             </p>
             <p>
-              When one or more analog channels are enabled (see <code><a href="#AC">AC</a></code> command below), the "A" command will cause the EBB to return a list of all enabled channels and their associated 10 bit values.
+              When one or more analog channels are enabled (see <code><a href="#AC">AC</a></code> command below), the "A" query will cause the EBB to return a list of all enabled channels and their associated 10 bit values.
             </p>
             <p>
               The list of channels and their data will always be in sorted order from least (channel) to greatest. Only enabled channels will be present in the list.
@@ -308,7 +308,7 @@ ul.no_bullets {
             NOTE 2: If you connect an ADC pin to GND (0.0 V) it will likely not read exactly 0. It will be a bit higher than that. (A typical value is 0023.) This is because of the way that the analog input reference voltages are supplied to the microcontroller.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> For firmware versions prior to v2.2.3, a different "A" command format is used, identical to the the UBW "A" command. (See <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">UBW documentation</a> for details.) These commands were rewritten for v2.2.3, with the AC command added and the A command modified to return a list that includes the channel number as well as the ADC value for each channel.
+            <span style="font-weight: bold;">Version History:</span> For firmware versions prior to v2.2.3, a different "A" query format is used, identical to the the UBW "A" query. (See <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">UBW documentation</a> for details.) These queries were rewritten for v2.2.3, with the AC command added and the A query modified to return a list that includes the channel number as well as the ADC value for each channel.
           </li>
         </ul>
    
@@ -642,10 +642,10 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Use this command to abort any in-progress motor move (SM) Command. This command will also delete any motor move command (SM) from the FIFO. It will immediately stop the motors, but leave them energized. In addition, the command queries several FIFO related status values and returns their values.
+              Use this query to abort any in-progress motor move (SM) Command. This query will also delete any motor move command (SM) from the FIFO. It will immediately stop the motors, but leave them energized. In addition, the it queries several FIFO related status values and returns their values.
             </p>
             <p>
-              For versions v2.8.0 and above there is an optional parameter <code>DisableMotors</code>. If <code>DisableMotors</code> is set to 1, then this command will not only stop all motion but will also disable both stepper motors.
+              For versions v2.8.0 and above there is an optional parameter <code>DisableMotors</code>. If <code>DisableMotors</code> is set to 1, then this query will not only stop all motion but will also disable both stepper motors.
             </p>
             <p>Returned values:</p>
             <ul>
@@ -680,7 +680,7 @@ ul.no_bullets {
               <li>
                 <p>Added in v2.2.7</p>
                 <p>
-                  Prior to v2.2.9, this command will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
+                  Prior to v2.2.9, this query will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
                 </p>
                 <p>Returned values:</p>
                 <ul>
@@ -756,10 +756,10 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command reads every PORTx register (where x is A through E) and prints out each byte-wide register value as a three digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
+              This query reads every PORTx register (where x is A through E) and prints out each byte-wide register value as a three digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
             </p>
             <p>
-              For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this command will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the processor datasheet) and return all of their values.
+              For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this query will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the processor datasheet) and return all of their values.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
@@ -1051,12 +1051,12 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command queries one byte from RAM and prints it out. The <i>Data</i> is always printed as a three digit decimal number.
+              This query reads one byte from RAM and prints it out. The <i>Data</i> is always printed as a three digit decimal number.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span><code>MR,422\r</code>
-            <p>This command would read from memory address 422 and print out its current value.</p>
+            <p>This query would read from memory address 422 and print out its current value.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
@@ -1291,11 +1291,11 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command queries the given port and pin as a digital input. No matter what direction the pin is set to, or even if the pin is being used as an analog input, the pin can still be read as a digital input.
+              This query reads the given port and pin as a digital input. No matter what direction the pin is set to, or even if the pin is being used as an analog input, the pin can still be read as a digital input.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>PI,D,2\r</code> This command would read pin RD2 (or Port D, pin 2) as a digital input and return the pin's value.
+            <span style="font-weight: bold;">Example:</span> <code>PI,D,2\r</code> This query would read pin RD2 (or Port D, pin 2) as a digital input and return the pin's value.
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
@@ -1347,7 +1347,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command asks the EBB if the PRG button has been pressed since the last QB query or not.</p>
+            <p>This query checks whether the PRG button on the EBB has been pressed since the last QB query or not. </p>
             <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
             <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event.
                 B0 is normally pulled high, but if it is taken low,
@@ -1370,7 +1370,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reads two analog voltages and returns their raw 10 bit values. You can use this to read the current setpoint for the stepper motor, and to read the input power that the board is receiving.
+              This query reads two analog voltages and returns their raw 10 bit values. You can use this to read the current setpoint for the stepper motor, and to read the input power that the board is receiving.
             </p>
             <p>The two returned values are:</p>
             <ul>
@@ -1413,9 +1413,9 @@ ul.no_bullets {
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
-            <p>This command was originally introduced in v2.0.0, but should not be considered functional until version 2.2.3.</p>
+            <p>This query was originally introduced in v2.0.0, but should not be considered functional until version 2.2.3.</p>
             <p>
-              Note also that this command only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
+              Note also that this query only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
             </p>
           </li>
         </ul>
@@ -1432,12 +1432,11 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Reads the current state of the motor enable pins and the microstep resolution pins. It then returns two values which encode the motor enable/disable
-              state and (if enabled) microstep resolution.
+              This query reads the current state of the motor enable pins and the microstep resolution pins. It then returns two values which encode the motor enable/disable state and (if enabled) microstep resolution.
             </p>
             <p>
               There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the
-              two values returned by this command will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
+              two values returned by this query will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
               never show that the two motors are both enabled and have different microstep resolutions.
             </p>
             <p>The two returned values are:</p>
@@ -1486,7 +1485,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reads the status of eight bits of information, and returns them as a bit field expressed as a single hexadecimal byte.
+              This query reads the status of eight bits of information, and returns them as a bit field expressed as a single hexadecimal byte.
             </p>
             <p>The returned status byte consists of the following status bits:</p>
             <p>
@@ -1533,7 +1532,7 @@ ul.no_bullets {
                 
             <p><div style="font-weight:bold;">Bit 7: RB5 &mdash; Status of GPIO pin RB5</div>
                 This bit is 1 when GPIO pin RB5 is high, and 0 when it is low. RB5 does not have to be set to an input to be read.
-                The <code>QG</code> command will read the  state even if it is an output. If the  pin is in use as an RC servo output,
+                The <code>QG</code> query will read the  state even if it is an output. If the  pin is in use as an RC servo output,
                 the bit will be toggling and that will be reflected in the response byte. Pin RB5 can be used for various useful purposes
                 as desired, for example as a home switch input or output to control a tool head. </p>
                 
@@ -1573,7 +1572,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Example Return Packet:</span>
             <code>3E&lt;CR&gt;&lt;NL&gt;</code>
-            <p>This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
+            <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
           </li>
         </ul>
 
@@ -1588,7 +1587,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This command asks the EBB to report back the current value of the Layer variable. This variable is set with the <code><a href="#SL">SL</a></code> command, as a single unsigned byte.
+              This query asks the EBB to report back the current value of the Layer variable. This variable is set with the <code><a href="#SL">SL</a></code> command, as a single unsigned byte.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
@@ -1610,7 +1609,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              Use this command to see what the EBB is currently doing. It will return the current state of the 'motion system', each motor's current state, and the state of the FIFO.
+              Use this query to see what the EBB is currently doing. It will return the current state of the 'motion system', each motor's current state, and the state of the FIFO.
             </p>
             <ul>
               <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
@@ -1622,7 +1621,7 @@ ul.no_bullets {
               The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
-              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM query can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
@@ -1637,7 +1636,7 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              Use this command to see what the EBB is currently doing. It will return the current state of the 'motion system' and each motor's current state.
+              Use this query to see what the EBB is currently doing. It will return the current state of the 'motion system' and each motor's current state.
             </p>
             <ul>
               <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
@@ -1648,7 +1647,7 @@ ul.no_bullets {
               The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
-              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM command can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM query can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
@@ -1666,7 +1665,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command queries the EBB for the current pen state. It will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a pen up/down command is pending in the FIFO, it will only report the new state of the pen after the pen move has been started.
+              This query reads the current pen state from the EBB. It will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a pen up/down command is pending in the FIFO, it will only report the new state of the pen after the pen move has been started.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QP\r</code></li>
@@ -1686,7 +1685,7 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command queries the EBB for the current RC Servo power control state. It will return <i>RCServoPowerState</i> of 1 if the RC Servo is receiving power and 0 if it is not.
+              This query reads the current RC Servo power control state from the EBB. It will return <i>RCServoPowerState</i> of 1 if the RC Servo is receiving power and 0 if it is not.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QR\r</code></li>
@@ -1709,13 +1708,13 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command prints out the current Motor 1 and Motor 2 global step positions. Each of these positions is a 32 bit signed integer, that keeps track of the positions of each axis. The <code>CS</code> command can be used to set these positions to zero.
+              This query prints out the current Motor 1 and Motor 2 global step positions. Each of these positions is a 32 bit signed integer, that keeps track of the positions of each axis. The <code>CS</code> command can be used to set these positions to zero.
             </p>
             <p>
               Every time a step is taken, the appropriate global step position is incremented or decremented depending on the direction of that step.
             </p>
             <p>
-              The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the command is executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is complete (you can use the <code>QM</code> command to check if the motors have stopped moving) before checking the current positions.
+              The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the query is executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is complete (you can use the <code>QM</code> query to check if the motors have stopped moving) before checking the current positions.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QS\r</code></li>
@@ -1737,13 +1736,13 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. 
+            <p>This query gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. 
             It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it
             will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>QT&lt;CR&gt;</code>
-            <p>If the EBB's nickname has been set to "East EBB" then the output of this command would be:</p>
+            <p>If the EBB's nickname has been set to "East EBB" then the output of this query would be:</p>
             <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
@@ -2496,16 +2495,16 @@ ul.no_bullets {
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command turns on (or off) the timed digital (I packet) or analog (A packet) queries of pins. Using the T command you can set up a repeated query of input pins, and the generation of an I or A packet back to the PC. Each of the two modes (analog/digital) is independent of the other and can have a different duration time.
+              This query turns on (or off) the timed digital (I packet) or analog (A packet) queries of pins. Using the T query you can set up a repeated query of input pins, and the generation of an I or A packet back to the PC. Each of the two modes (analog/digital) is independent of the other and can have a different duration time.
             </p>
             <p>
-              For example, to turn the digital queries of all pins on, with a time of 250 ms between queries, use "T,250,0". Then, every 250 ms, the EBB will query all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an "I" command, and simply contains the binary values of each pin of each port. To turn on the analog queries of any enabled analog inputs every 400 ms, use "T,400,1". This will cause the EBB to query all enabled analog inputs every 400 ms and send back an A packet (exactly the same as the reply to the "A" command) repeatedly. Note that while digital mode will query every pin, analog mode will only query (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be queried by this command - no matter what the pin is set to, the "I" response packet will query the pin's digital state.
+              For example, to turn the digital queries of all pins on, with a time of 250 ms between queries, use "T,250,0". Then, every 250 ms, the EBB will query all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an "I" query, and simply contains the binary values of each pin of each port. To turn on the analog queries of any enabled analog inputs every 400 ms, use "T,400,1". This will cause the EBB to query all enabled analog inputs every 400 ms and send back an A packet (exactly the same as the reply to the "A" query) repeatedly. Note that while digital mode will query every pin, analog mode will only query (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be queried - no matter what the pin is set to, the "I" response packet will query the pin's digital state.
             </p>
             <p>
               To turn off a mode, use 0 for the duration parameter. Thus "T,0,0" will turn off digital mode, and "T,0,1" will turn off analog mode.
             </p>
             <p>
-              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T command. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1 ms. Each time the "A" timer times out, the latest set of analog values is used to create a new "A" packet and that is then sent out.
+              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T query. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1 ms. Each time the "A" timer times out, the latest set of analog values is used to create a new "A" packet and that is then sent out.
             </p>
             <p>
               Just because the EBB can kick out I and A packets every 1 ms (at its fastest) doesn't mean that your PC app can read them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the data coming in. (Realizing that the last packet may not be complete.)
@@ -2520,7 +2519,7 @@ ul.no_bullets {
           </li>
           <li>
             <span style="font-weight: bold;">Note:</span>
-            If the "I" or "A" packet responses stop coming back after you've done a "T" command, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
+            If the "I" or "A" packet responses stop coming back after you've done a "T" query, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
           </li>
         </ul>
 
