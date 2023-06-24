@@ -146,21 +146,17 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-// ROM strings
-const rom char st_OK[] = {"OK\r\n"};
-const rom char st_LFCR[] = {"\r\n"};
-
 /// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
 #if defined(BOARD_EBB_V10)
-  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1"};
 #elif defined(BOARD_EBB_V11)
-  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1"};
 #elif defined(BOARD_EBB_V12)
-  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.04\r\n"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.05"};
 #elif defined(BOARD_UBW)
-  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1\r\n"};
+  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1"};
 #endif
 
 #pragma udata ISR_buf = 0x100
@@ -229,6 +225,10 @@ volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
 
 // When true, any stepper motion command will automatically enable both motors
 BOOL gAutomaticMotorEnable = TRUE;
+
+// These store the first and second characters of the latest command from the PC
+unsigned char gCommand_Char1;
+unsigned char gCommand_Char2;
 
 // Global variables used for limit switch feature
 volatile UINT8 gLimitSwitchPortB = 0;     // Latched PortB value when trigger happens
@@ -1021,37 +1021,45 @@ void ProcessIO(void)
     if (bittstzero(error_byte))
     {
       // Unused as of yet
-      printf((far rom char *)"!0 \r\n");
+      printf((far rom char *)"!0 ");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_STEPS_TO_FAST))
     {
       // Unused as of yet
-      printf((far rom char *)"!1 Err: Can't step that fast\r\n");
+      printf((far rom char *)"!1 Err: Can't step that fast");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
     {
-      printf((far rom char *)"!2 Err: TX Buffer overrun\r\n");
+      printf((far rom char *)"!2 Err: TX Buffer overrun");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
     {
-      printf((far rom char *)"!3 Err: RX Buffer overrun\r\n");
+      printf((far rom char *)"!3 Err: RX Buffer overrun");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_MISSING_PARAMETER))
     {
-      printf((far rom char *)"!4 Err: Missing parameter(s)\r\n");
+      printf((far rom char *)"!4 Err: Missing parameter(s)");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_PRINTED_ERROR))
     {
       // We don't need to do anything since something has already been printed out
-      //printf ((rom char *)"!5\r\n");
+      //printf ((rom char *)"!5");
+      //print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
     {
-      printf((far rom char *)"!6 Err: Invalid parameter value\r\n");
+      printf((far rom char *)"!6 Err: Invalid parameter value");
+      print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
     {
-      printf((far rom char *)"!7 Err: Extra parameter\r\n");
+      printf((far rom char *)"!7 Err: Extra parameter");
+      print_line_ending(kLE_NORM);
     }
     error_byte = 0;
   }
@@ -1061,7 +1069,8 @@ void ProcessIO(void)
   {
     if (gLimitSwitchTriggered && !gLimitSwitchReplyPrinted)
     {
-      printf((far rom char *)"Limit switch triggered. PortB=%02X\r\n", gLimitSwitchPortB);
+      printf((far rom char *)"Limit switch triggered. PortB=%02X", gLimitSwitchPortB);
+      print_line_ending(kLE_NORM);
       gLimitSwitchReplyPrinted = TRUE;
     }
     else if (!gLimitSwitchTriggered && gLimitSwitchReplyPrinted)
@@ -1166,20 +1175,20 @@ void check_and_send_TX_data(void)
 void parse_packet(void)
 {
   unsigned int command = 0;
-  unsigned char cmd1 = 0;
-  unsigned char cmd2 = 0;
+  gCommand_Char1 = 0;
+  gCommand_Char2 = 0;
 
   // Always grab the first character (which is the first byte of the command)
-  cmd1 = toupper(g_RX_buf[g_RX_buf_out]);
+  gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
   advance_RX_buf_out();
-  command = cmd1;
+  command = gCommand_Char1;
 
   // Only grab second one if it is not a comma
   if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR)
   {
-    cmd2 = toupper(g_RX_buf[g_RX_buf_out]);
+    gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
     advance_RX_buf_out();
-    command = ((unsigned int)(cmd1) << 8) + cmd2;
+    command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
   }
 
   // Now 'command' is equal to one or two bytes of our command
@@ -1573,26 +1582,27 @@ void parse_packet(void)
     }
     default:
     {
-      if (0u == cmd2)
+      if (0u == gCommand_Char2)
       {
         // Send back 'unknown command' error
         printf(
-           (far rom char *)"!8 Err: Unknown command '%c:%2X'\r\n"
-          ,cmd1
-          ,cmd1
+           (far rom char *)"!8 Err: Unknown command '%c:%2X'"
+          ,gCommand_Char1
+          ,gCommand_Char1
         );
       }
       else
       {
         // Send back 'unknown command' error
         printf(
-           (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'\r\n"
-          ,cmd1
-          ,cmd2
-          ,cmd1
-          ,cmd2
+           (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
+          ,gCommand_Char1
+          ,gCommand_Char2
+          ,gCommand_Char1
+          ,gCommand_Char2
         );
       }
+      print_line_ending(kLE_NORM);
       break;
     }
   }
@@ -1616,21 +1626,70 @@ void parse_packet(void)
   g_RX_buf_out = g_RX_buf_in;
 }
 
-// Print out the positive acknowledgment that the packet was received
-// if we have acks turned on.
-void print_ack(void)
+// This function will print out the two character command that was just parsed
+// if the New line ending mode is set (CU,10,1). Every time a command is sent
+// to the EBB, it will respond with the two character command code (at least,
+// some commands will return more than that).
+// If Legacy line ending mode is turned on this function will not print anything
+void print_command(BOOL print_comma)
 {
-  if (g_ack_enable)
+  if (bittstzero(gStandarizedCommandFormat))
   {
-    printf((far rom char *)st_OK);
+    putc(gCommand_Char1, NULL);
+    if (gCommand_Char2 != 0u)
+    {
+      putc(gCommand_Char2, NULL);
+    }
+    if (print_comma)
+    {
+      printf((far rom char *)",");
+    }
+  }
+}
+
+// This function prints out the common endings needed on text lines sent back
+// to the PC. It operates in two modes, Legacy and New. Legacy mode is used
+// when we need to emulate how the EBB's line endings have been done since
+// the beginning (as some PC software counts on this). New mode can be turned
+// on with CU,10,1 and makes every line ending exactly the same : "\n".
+// Because in Legacy mode we also need to print "OK", that is included
+// as an option here too.
+//   Legacy Mode:
+//     <type> = LE_OK_NORM : Print "OK\r\n"
+//     <type> = LE_NORM    : Print "\r\n"
+//     <type> = LE_REV     : Print "\n\r"
+//   New Mode:
+//     Regardless of the value of <type>, always print "\n"
+void print_line_ending(tLineEnding le_type)
+{
+  if (bittstzero(gStandarizedCommandFormat))
+  {
+    printf((far rom char *)"\n");
+  }
+  else
+  {
+    if ((g_ack_enable) && (le_type == kLE_OK_NORM))
+    {
+      printf((far rom char *)"OK");
+    }
+    if (le_type == kLE_REV)
+    {
+      printf((far rom char *)"\n\r");
+    }
+    else
+    {
+      // le_type == kLE_NORM
+      printf((far rom char *)"\r\n");
+    }
   }
 }
 
 // Return all I/Os to their default power-on values
 void parse_R_packet(void)
 {
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
   UserInit();
-  print_ack();
 }
 
 // CU is "Configure UBW" and controls system-wide configuration values
@@ -1639,7 +1698,7 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
-// 10  {1|0} turns on or off the standardized string line ending (\n) (defatuls to off))
+// 10  {1|0} turns on or off the standardized command format replies (defaults to off))
 // 50  {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
@@ -1653,6 +1712,8 @@ void parse_CU_packet(void)
 {
   UINT8 parameter_number;
   INT16 paramater_value;
+
+  print_command(FALSE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
   extract_number(kINT, &paramater_value, kREQUIRED);
@@ -1710,11 +1771,11 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclrzero(gStandarizedLineEndings);
+      bitclrzero(gStandarizedCommandFormat);
     }
     else if (1 == paramater_value)
     {
-      bitsetzero(gStandardizedLineEndings);
+      bitsetzero(gStandarizedCommandFormat);
     }
     else
     {
@@ -1901,7 +1962,7 @@ void parse_CU_packet(void)
     // parameter_number is not understood
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // QU is "Query Utility" and provides a simple mechanism for the PC reading 
@@ -1915,6 +1976,8 @@ void parse_QU_packet(void)
 {
   UINT8 parameter_number;
 
+  print_command(TRUE);
+
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
   // Bail if we got a conversion error
@@ -1927,14 +1990,15 @@ void parse_QU_packet(void)
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    printf((far rom char*)"QU,1,%02X\r\n", gLimitSwitchPortB);
+    printf((far rom char*)"QU,1,%02X", gLimitSwitchPortB);
+    print_line_ending(kLE_NORM);
   }
   else
   {
     // parameter_number is not understood
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // "T" Packet
@@ -1949,6 +2013,8 @@ void parse_T_packet(void)
 {
   unsigned int value;
   unsigned char mode = 0;
+
+  print_command(FALSE);
 
   // Extract the <TIME_BETWEEN_UPDATES_IN_MS> value
   extract_number(kUINT, (void *)&time_between_updates, kREQUIRED);
@@ -1994,7 +2060,7 @@ void parse_T_packet(void)
     }
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
@@ -2010,6 +2076,8 @@ void parse_T_packet(void)
 void parse_C_packet(void)
 {
   unsigned char PA, PB, PC, PD, PE;
+
+  print_command(FALSE);
 
   // Extract each of the four values.
   extract_number(kUCHAR, &PA, kREQUIRED);
@@ -2039,7 +2107,7 @@ void parse_C_packet(void)
   TRISJ = PJ;
 #endif
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // This function turns on or off an analog channel
@@ -2101,6 +2169,8 @@ void parse_AC_packet(void)
 {
   unsigned char Channel, Enable;
 
+  print_command(FALSE);
+
   // Extract each of the two values.
   extract_number(kUCHAR, &Channel, kREQUIRED);
   extract_number(kUCHAR, &Enable, kREQUIRED);
@@ -2113,7 +2183,7 @@ void parse_AC_packet(void)
 
   AnalogConfigure(Channel, Enable);
   
-  print_ack ();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Outputs values to the ports pins that are set up as outputs.
@@ -2122,6 +2192,8 @@ void parse_O_packet(void)
 {
   unsigned char Value;
   ExtractReturnType RetVal;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   RetVal = extract_number(kUCHAR,  &Value, kREQUIRED);
@@ -2183,7 +2255,7 @@ void parse_O_packet(void)
   }
 #endif
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Read in the three I/O ports (A,B,C) and create
@@ -2198,9 +2270,11 @@ void parse_O_packet(void)
 // The rest will be read in as zeros.
 void parse_I_packet(void)
 {
+  print_command(TRUE);
+
 #if defined(BOARD_EBB_V10)
   printf(
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i\r\n", 
+    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i", 
     PORTA,
     PORTB,
     PORTC,
@@ -2211,29 +2285,35 @@ void parse_I_packet(void)
     PORTH,
     PORTJ
   );
+  print_line_ending(kLE_NORM);
 #elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   printf(
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i\r\n", 
+    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i", 
     PORTA,
     PORTB,
     PORTC,
     PORTD,
     PORTE
   );
+  print_line_ending(kLE_NORM);
 #elif defined(BOARD_UBW)
   printf(
-    (far rom char*)"I,%03i,%03i,%03i\r\n", 
+    (far rom char*)"I,%03i,%03i,%03i", 
     PORTA,
     PORTB,
     PORTC
   );
+  print_line_ending(kLE_NORM);
 #endif
 }
 
 // All we do here is just print out our version number
 void parse_V_packet(void)
 {
+  print_command(TRUE);
+  
   printf((far rom char *)st_version);
+  print_line_ending(kLE_NORM);
 }
 
 // A is for read Analog inputs
@@ -2247,8 +2327,7 @@ void parse_A_packet(void)
   char channel = 0;
   unsigned int ChannelBit = 0x0001;
 
-  // Put the beginning of the packet in place
-  printf((far rom char *)"A");
+  print_command(FALSE);
 
   // Sit and spin, waiting for one set of analog conversions to complete
   while (PIE1bits.ADIE);
@@ -2267,8 +2346,10 @@ void parse_A_packet(void)
     ChannelBit = ChannelBit << 1;
   }
 
-  // Add \r\n and terminating zero.
-  printf((far rom char *)st_LFCR);
+  // Add \r\n (for line ending legacy mode : note this is backwards from how
+  // the rest of the code does legacy line endings) or just \n for new line 
+  // ending mode.
+  print_line_ending(kLE_REV);
 }
 
 // MW is for Memory Write
@@ -2279,6 +2360,8 @@ void parse_MW_packet(void)
 {
   unsigned int location;
   unsigned char value;
+
+  print_command(FALSE);
 
   extract_number(kUINT, &location, kREQUIRED);
   extract_number(kUCHAR, &value, kREQUIRED);
@@ -2294,7 +2377,7 @@ void parse_MW_packet(void)
     *((unsigned char *)location) = value;
   }
 
-  print_ack ();
+  print_line_ending(kLE_OK_NORM);
 }
 
 
@@ -2307,6 +2390,8 @@ void parse_MR_packet(void)
 {
   unsigned int location;
   unsigned char value;
+
+  print_command(TRUE);
 
   extract_number(kUINT, &location, kREQUIRED);
 
@@ -2324,9 +2409,10 @@ void parse_MR_packet(void)
 
   // Now send back the MR packet
   printf (
-    (far rom char *)"MR,%03u\r\n" 
+    (far rom char *)"MR,%03u" 
     ,value
   );
+  print_line_ending(kLE_NORM);
 }
 
 // PD is for Pin Direction
@@ -2339,6 +2425,8 @@ void parse_PD_packet(void)
   unsigned char port;
   unsigned char pin;
   unsigned char direction;
+
+  print_command(FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2470,7 +2558,7 @@ void parse_PD_packet(void)
     return;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // PI is for Pin Input
@@ -2485,6 +2573,8 @@ void parse_PI_packet(void)
   unsigned char port;
   unsigned char pin;
   unsigned char value = 0;
+
+  print_command(TRUE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2557,9 +2647,10 @@ void parse_PI_packet(void)
 
   // Now send back our response
   printf(
-   (far rom char *)"PI,%1u\r\n" 
+   (far rom char *)"PI,%1u" 
    ,value
   );
+  print_line_ending(kLE_NORM);
 }
 
 // PO is for Pin Output
@@ -2572,6 +2663,8 @@ void parse_PO_packet(void)
   unsigned char port;
   unsigned char pin;
   unsigned char value;
+
+  print_command(FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2703,7 +2796,7 @@ void parse_PO_packet(void)
     return;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // TX is for Serial Transmit
@@ -2719,7 +2812,8 @@ void parse_PO_packet(void)
 // software TX buffer.
 void parse_TX_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // RX is for Serial Receive
@@ -2752,14 +2846,16 @@ void parse_TX_packet(void)
 //    data to the UBW and you have the serial port set to a low baud rate.
 void parse_RX_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // CX is for setting up serial port parameters
 // TBD
 void parse_CX_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // RC is for outputting RC servo pulses on a pin
@@ -2781,6 +2877,8 @@ void parse_RC_packet(void)
   unsigned char port;
   unsigned char pin;
   unsigned int value;
+
+  print_command(FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2838,7 +2936,7 @@ void parse_RC_packet(void)
     g_RC_state[pin + port] = kWAITING;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // BC is for Bulk Configure
@@ -2874,7 +2972,8 @@ void parse_BC_packet(void)
 //  // And initialize Port A
 //  LATA = g_BO_init;
 //
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Bulk Output (BO)
@@ -2899,7 +2998,8 @@ void parse_BO_packet(void)
 //  // Check for comma where ptr points
 //  if (g_RX_buf[g_RX_buf_out] != ',')
 //  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+//    print_line_ending(kLE_NORM);
 //    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
 //    return;
 //  }
@@ -3007,7 +3107,8 @@ void parse_BO_packet(void)
 //      }
 //    }
 //  }
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Bulk Stream (BS) (he he, couldn't think of a better name)
@@ -3050,7 +3151,8 @@ void parse_BS_packet(void)
 //  // Check for comma where ptr points
 //  if (g_RX_buf[g_RX_buf_out] != ',')
 //  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+//    print_line_ending(kLE_NORM);
 //    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
 //    return;
 //  }
@@ -3123,37 +3225,43 @@ void parse_BS_packet(void)
 //      }
 //    }
 //  }
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // SS Send SPI
 void parse_SS_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // RS Receive SPI
 void parse_RS_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // SI Send I2C
 void parse_SI_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // RI Receive I2C
 void parse_RI_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // CI Configure I2C
 void parse_CI_packet(void)
 {
-  print_ack();
+  print_command(FALSE);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // PC Pulse Configure
@@ -3170,6 +3278,8 @@ void parse_PC_packet(void)
   unsigned int Length, Rate;
   unsigned char i;
   ExtractReturnType RetVal1, RetVal2;
+
+  print_command(FALSE);
 
   extract_number(kUINT, &Length, kREQUIRED);
   extract_number(kUINT, &Rate, kREQUIRED);
@@ -3200,7 +3310,7 @@ void parse_PC_packet(void)
     gPulseRate[i+1] = Rate;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // PG Pulse Go Command
@@ -3215,6 +3325,8 @@ void parse_PC_packet(void)
 void parse_PG_packet(void)
 {
   unsigned char Value;
+
+  print_command(FALSE);
 
   extract_number(kUCHAR, &Value, kREQUIRED);
 
@@ -3238,7 +3350,7 @@ void parse_PG_packet(void)
     gPulsesOn = FALSE;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 void LongDelay(void)
@@ -3301,8 +3413,10 @@ void parse_RB_packet(void)
 // 1 = power to RC servo on
 void parse_QR_packet(void)
 {
-  printf((far rom char *)"%1u\r\n", RCServoPowerIO_PORT);
-  print_ack();
+  print_command(TRUE);
+
+  printf((far rom char *)"%1u", RCServoPowerIO_PORT);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // SR Set RC Servo power timeout
@@ -3321,6 +3435,8 @@ void parse_SR_packet(void)
   unsigned long Value;
   UINT8 State;
   ExtractReturnType GotState;
+
+  print_command(FALSE);
 
   extract_number(kULONG, &Value, kREQUIRED);
   GotState = extract_number(kUCHAR, &State, kOPTIONAL);
@@ -3347,7 +3463,7 @@ void parse_SR_packet(void)
     }
   }
   
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Just used for testing/debugging the packet parsing routines
@@ -3362,6 +3478,9 @@ void parse_CK_packet(void)
   unsigned char UChar;
   unsigned char UCaseChar;
 
+  print_command(FALSE);
+  print_line_ending(kLE_NORM);
+
   extract_number(kCHAR, &SByte, kREQUIRED);
   extract_number(kUCHAR, &UByte, kREQUIRED);
   extract_number(kINT, &SInt, kREQUIRED);
@@ -3371,16 +3490,24 @@ void parse_CK_packet(void)
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
-  printf((rom char far *)"Param1=%d\r\n", SByte);
-  printf((rom char far *)"Param2=%d\r\n", UByte);
-  printf((rom char far *)"Param3=%d\r\n", SInt);
-  printf((rom char far *)"Param4=%u\r\n", UInt);
-  printf((rom char far *)"Param5=%ld\r\n", SLong);
-  printf((rom char far *)"Param6=%lu\r\n", ULong);
-  printf((rom char far *)"Param7=%c\r\n", UChar);
-  printf((rom char far *)"Param8=%c\r\n", UCaseChar);
+  printf((rom char far *)"Param1=%d", SByte);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param2=%d", UByte);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param3=%d", SInt);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param4=%u", UInt);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param5=%ld", SLong);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param6=%lu", ULong);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param7=%c", UChar);
+  print_line_ending(kLE_NORM);
+  printf((rom char far *)"Param8=%c", UCaseChar);
+  print_line_ending(kLE_NORM);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 void populateDeviceStringWithName(void)
@@ -3442,6 +3569,8 @@ void parse_ST_packet(void)
   UINT8 bytes = 0;
   UINT8 i;
   
+  print_command(FALSE);
+
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
   {
@@ -3458,7 +3587,7 @@ void parse_ST_packet(void)
   
   WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // QT command : Query Tag
@@ -3469,6 +3598,8 @@ void parse_QT_packet(void)
   unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 i;
   
+  print_command(TRUE);
+
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
   {
@@ -3479,15 +3610,12 @@ void parse_QT_packet(void)
   ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
   
   // Only print it out if the first character is printable ASCII
-  if (name[0] >= 128u || name[0] < 32u)
+  if (name[0] < 128u && name[0] > 32u)
   {
-    printf((rom char far *)"\r\n");
+    printf((rom char far *)"%s", name);
   }
-  else
-  {
-    printf((rom char far *)"%s\r\n", name);
-  }
-  print_ack();
+  print_line_ending(kLE_NORM);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Look at the string in g_RX_buf[]
@@ -3514,7 +3642,8 @@ UINT8 extract_string (
   // Check for comma where ptr points
   if (g_RX_buf[g_RX_buf_out] != ',')
   {
-    printf((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+    printf((rom char far *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+    print_line_ending(kLE_NORM);
     bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
     return(0);
   }
@@ -3578,7 +3707,8 @@ ExtractReturnType extract_number(
   {
     if (0u == Required)
     {
-      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'\r\n", g_RX_buf[g_RX_buf_out]);
+      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+      print_line_ending(kLE_NORM);
       bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     }
     return(kEXTRACT_COMMA_MISSING);
@@ -3794,9 +3924,10 @@ signed char extract_digit(unsigned long * acc, unsigned char digits)
 void print_status(void)
 {
   printf( 
-    (far rom char*)"Status=%i\r\n"
+    (far rom char*)"Status=%i"
     ,ISR_D_FIFO_length
   );
+  print_line_ending(kLE_NORM);
 }
 
 /******************************************************************************

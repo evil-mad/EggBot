@@ -290,7 +290,7 @@ void RCServo2_S2_command (void)
 
   RCServo2_Move(Duration, Pin, Rate, Delay);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Function to set up an RC Servo move. Takes Duration, RPn, and Rate

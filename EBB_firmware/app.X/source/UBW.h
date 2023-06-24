@@ -125,6 +125,14 @@ typedef enum {
   ,kTIMING
 } tRC_state;
 
+// Use as the <type> parmaeters to the print_line_ending() call.
+// These values only have meaning in "Legacy" mode, not in "New" mode.
+typedef enum {
+    kLE_OK_NORM
+   ,kLE_NORM
+   ,kLE_REV
+} tLineEnding;
+
 #define kRC_DATA_SIZE                 24u  // In structs, since there are 3 ports of 8 bits each
 
 extern unsigned char g_RX_buf[kRX_BUF_SIZE];
@@ -154,7 +162,8 @@ void low_ISR (void);
 void high_ISR (void);
 ExtractReturnType extract_number (ExtractType Type, void * ReturnValue, unsigned char Required);
 UINT8 extract_string (unsigned char * ReturnValue, UINT8 MaxBytes);
-void print_ack (void);
+void print_command(BOOL print_comma);
+void print_line_ending(tLineEnding);
 void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
 void AnalogConfigure (unsigned char Channel, unsigned char Enable);

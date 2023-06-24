@@ -394,7 +394,12 @@ static UINT StoredEngraverPower;
 // Set TRUE to enable solenoid output for pen up/down
 BOOL gUseSolenoid;
 // When FALSE, we skip parameter checks for motor move commands so they can run faster
-BOOL gLimitChecks = TRUE;
+BOOL gLimitChecks;
+
+// LSb set to enable all strings to use '\n' line endings, and use standardized
+// command reply format
+UINT8 gStandarizedCommandFormat;
+
 
 // Local function definitions
 UINT8 process_QM(void);
@@ -1427,6 +1432,8 @@ void EBB_Init(void)
   Layer = 0;
   NodeCount = 0;
   ButtonPushed = 0;
+  gStandarizedCommandFormat = 0;
+  gLimitChecks = TRUE;
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
   // Except for v1.1 hardware, use RB2
@@ -1478,6 +1485,8 @@ void parse_SC_packet (void)
   unsigned char Para1 = 0;
   unsigned int Para2 = 0;
 
+  print_command(FALSE);
+  
   // Extract each of the values.
   extract_number(kUCHAR, &Para1, kREQUIRED);
   extract_number(kUINT, &Para2, kREQUIRED);
@@ -1623,7 +1632,7 @@ void parse_SC_packet (void)
       bitclrzero(UseAltPause);
     }
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 #if 0
@@ -1633,13 +1642,15 @@ void fprint(float f)
   
   if (f > 2147483648.0)
   {
-      printf((far rom char *)"f too big\n\r");
+      printf((far rom char *)"f too big");
+      print_line_ending(kLE_REV);
   }
   else
   {
     if (f < -2147483648.0)
     {
-      printf((far rom char *)"f too small\n\r");
+      printf((far rom char *)"f too small");
+      print_line_ending(kLE_REV);
     }
     else
     {
@@ -1651,7 +1662,8 @@ void fprint(float f)
       {
         pf = f;
       }
-      printf((far rom char *)"%ld.%04lu\n\r", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
+      printf((far rom char *)"%ld.%04lu", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
+      print_line_ending(kLE_REV);
     }
   }
 }
@@ -1726,6 +1738,8 @@ void parse_LM_packet(void)
   MoveCommandType move;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
+
+  print_command(FALSE);
   
   // Extract each of the values.
   extract_number(kLONG,  &Rate1,     kREQUIRED);
@@ -1816,6 +1830,8 @@ void parse_L3_packet(void)
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
   
+  print_command(FALSE);
+
   // Extract each of the values.
   extract_number(kLONG,  &Rate1,     kREQUIRED);
   extract_number(kLONG,  &Steps1,    kREQUIRED);
@@ -1902,6 +1918,8 @@ void parse_T3_packet(void)
   MoveCommandType move;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
+
+  print_command(FALSE);
   
   // Extract each of the values.
   extract_number(kULONG, &Intervals, kREQUIRED);
@@ -1971,6 +1989,8 @@ void parse_LT_packet(void)
   INT32 Accel2 = 0;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Intervals, kREQUIRED);
@@ -2218,7 +2238,7 @@ void process_low_level_move(
   if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
     // Print the final values used by the ISR for this move
-    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld\n\r",
+    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld",
       move.Rate[0],       // Rate1 signed 32 bit
       move.Steps[0],      // Steps1 (now) unsigned 31 bit
       move.Accel[0],      // Accel1 signed 32 bit
@@ -2228,12 +2248,10 @@ void process_low_level_move(
       move.Accel[1],      // Accel2 signed 32 bit
       move.Jerk[1]        // Jerk2 signed 32 bit
     );
+    print_line_ending(kLE_REV);
   }
   
-  if (g_ack_enable)
-  {
-    print_ack();
-  }
+  print_line_ending(kLE_OK_NORM);
 }
 
 // The Stepper Motor command
@@ -2251,6 +2269,8 @@ void parse_SM_packet(void)
   INT32 A1Steps = 0, A2Steps = 0;
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Duration, kREQUIRED);
@@ -2273,7 +2293,8 @@ void parse_SM_packet(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
+      print_line_ending(kLE_REV);
       return;
     }
     // Check for too-fast step request (>25KHz)
@@ -2288,19 +2309,22 @@ void parse_SM_packet(void)
     }
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
       return;
     }
 
@@ -2315,17 +2339,20 @@ void parse_SM_packet(void)
 
     if (Steps > 0xFFFFFFl) 
     {
-     printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-     return;
+      printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
+      return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
       return;
     }
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
+      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
       return;
     }
     if (ClearAccs > 3u)
@@ -2338,10 +2365,7 @@ void parse_SM_packet(void)
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
 
-  if (g_ack_enable)
-  {
-    print_ack();
-  }
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Home the motors
@@ -2388,6 +2412,8 @@ void parse_HM_packet(void)
   UINT32 Duration = 0;
   BOOL   CommandExecuting = TRUE;
   INT32  XSteps = 0;
+
+  print_command(FALSE);
 
   // Extract the step rate.
   extract_number(kULONG, &StepRate, kREQUIRED);
@@ -2449,7 +2475,8 @@ void parse_HM_packet(void)
   // Check for too many steps to step
   if ((AbsSteps1 > 0xFFFFFFl) || (AbsSteps2 > 0xFFFFFFl))
   {
-    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.\n\r");
+    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.");
+    print_line_ending(kLE_REV);
     return;
   }
   
@@ -2461,7 +2488,8 @@ void parse_HM_packet(void)
     // Check for too fast 
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
       return;
     }
     // Check for too slow, on the non-primary axis
@@ -2502,7 +2530,8 @@ void parse_HM_packet(void)
     // Check for too fast
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
       return;
     }
     // Check for too slow, on the non-primary axis
@@ -2544,21 +2573,19 @@ void parse_HM_packet(void)
 
   if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
-    printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li\n\r",
+    printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li",
       Duration,
       Steps1,
       Steps2
     );
+    print_line_ending(kLE_REV);
   }
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   process_simple_motor_move(Duration, Steps1, Steps2, 3);
 
-  if (g_ack_enable)
-  {
-    print_ack();
-  }
+  print_line_ending(kLE_OK_NORM);
 }
 
 // The X Stepper Motor command
@@ -2575,6 +2602,8 @@ void parse_XM_packet(void)
   INT32 ASteps = 0, BSteps = 0;
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Duration, kREQUIRED);
@@ -2616,24 +2645,28 @@ void parse_XM_packet(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.\n\r");
+      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
+      print_line_ending(kLE_REV);
       return;
     }
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.\n\r");
+      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
       return;
     }
   }
@@ -2650,18 +2683,21 @@ void parse_XM_packet(void)
   {
     if (Steps > 0xFFFFFFl) 
     {
-     printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.\n\r");
-     return;
+      printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
+      return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-     printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.\n\r");
-     return;
+      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
+      return;
     }
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-     printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.\n\r");
-     return;
+      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
+      return;
     }
   }
   
@@ -2675,7 +2711,7 @@ void parse_XM_packet(void)
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Main stepper move function. This is the reason EBB exists.
@@ -2713,11 +2749,12 @@ static void process_simple_motor_move(
   }
     if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
   {
-    printf((far rom char *)"Duration=%lu SA1=%li SA2=%li\n\r",
+    printf((far rom char *)"Duration=%lu SA1=%li SA2=%li",
       Duration,
       A1Stp,
       A2Stp
     );
+    print_line_ending(kLE_REV);
   }
   
   if (ClearAccs > 3u)
@@ -2785,7 +2822,8 @@ static void process_simple_motor_move(
       {
         if (Duration > ((UINT32)A1Stp * 763u)) 
         {
-          printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
+          printf((far rom char *)"Major malfunction Axis1 duration too long : %lu", Duration);
+          print_line_ending(kLE_REV);
           temp = 0;
           A1Stp = 0;
         }
@@ -2817,12 +2855,14 @@ static void process_simple_motor_move(
       }
       if (temp > 0x8000) 
       {
-        printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu\n\r", temp);
+        printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu", temp);
+        print_line_ending(kLE_REV);
         temp = 0x8000;
       }
       if (temp == 0u && A1Stp != 0) 
       {
-        printf((far rom char *)"Major malfunction Axis1 StepCounter zero\n\r");
+        printf((far rom char *)"Major malfunction Axis1 StepCounter zero");
+        print_line_ending(kLE_REV);
         temp = 1;
       }
       if (Duration > 30u)
@@ -2866,12 +2906,14 @@ static void process_simple_motor_move(
       }
       if (temp > 0x8000) 
       {
-        printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu\n\r", temp);
+        printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu", temp);
+        print_line_ending(kLE_REV);
         temp = 0x8000;
       }
       if (temp == 0u && A2Stp != 0) 
       {
-        printf((far rom char *)"Major malfunction Axis2 StepCounter zero\n\r");
+        printf((far rom char *)"Major malfunction Axis2 StepCounter zero");
+        print_line_ending(kLE_REV);
         temp = 1;
       }
       if (Duration > 30u)
@@ -2895,12 +2937,13 @@ static void process_simple_motor_move(
 
     if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
     {
-      printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu\n\r",
+      printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu",
         move.Rate[0],
         move.Steps[0],
         move.Rate[1],
         move.Steps[1]
       );
+      print_line_ending(kLE_REV);
     }
   }
   
@@ -2945,6 +2988,8 @@ void parse_ES_packet(void)
   UINT32 remaining_steps2 = 0;
   UINT32 fifo_steps1 = 0;
   UINT32 fifo_steps2 = 0;
+
+  print_command(FALSE);
 
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
@@ -3015,15 +3060,16 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
-  printf((far rom char *)"%d,%lu,%lu,%lu,%lu\n\r", 
+  printf((far rom char *)"%d,%lu,%lu,%lu,%lu", 
     command_interrupted,
     fifo_steps1,
     fifo_steps2,
     remaining_steps1,
     remaining_steps2
   );
+  print_line_ending(kLE_REV);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query Pen
@@ -3031,9 +3077,12 @@ void parse_ES_packet(void)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
-  printf((far rom char *)"%d\n\r", PenState);
+  print_command(TRUE);
 
-  print_ack();
+  printf((far rom char *)"%d", PenState);
+  print_line_ending(kLE_REV);
+
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query motor Enables and resolution
@@ -3052,6 +3101,8 @@ void parse_QE_packet(void)
   UINT8 motor2_state = 0;
   UINT8 temp;
   
+  print_command(TRUE);
+
   if (MS1_IO_PORT == 0u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
   {
     temp = 1;
@@ -3096,9 +3147,10 @@ void parse_QE_packet(void)
     }
   }
 
-  printf((far rom char *)"%d,%d\n\r", motor1_state, motor2_state);
+  printf((far rom char *)"%d,%d", motor1_state, motor2_state);
+  print_line_ending(kLE_REV);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Toggle Pen
@@ -3110,6 +3162,8 @@ void parse_QE_packet(void)
 void parse_TP_packet(void)
 {
   UINT16 CommandDuration = 0;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number (kUINT, &CommandDuration, kOPTIONAL);
@@ -3129,7 +3183,7 @@ void parse_TP_packet(void)
     process_SP(PEN_UP, CommandDuration);
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Set Pen
@@ -3159,6 +3213,8 @@ void parse_SP_packet(void)
   UINT16 CommandDuration = 0;
   UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
   ExtractReturnType Ret;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number(kUCHAR, &State, kREQUIRED);
@@ -3196,7 +3252,7 @@ void parse_SP_packet(void)
   // Execute the servo state change
   process_SP(State, CommandDuration);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Internal use function -
@@ -3263,6 +3319,8 @@ void parse_EM_packet(void)
   unsigned char EA1, EA2;
   ExtractReturnType RetVal1, RetVal2;
 
+  print_command(FALSE);
+
   // Extract each of the values.
   RetVal1 = extract_number (kUCHAR, &EA1, kREQUIRED);
   // Bail if we got a conversion error
@@ -3288,29 +3346,33 @@ void parse_EM_packet(void)
 
   bitclrzero(FIFOEmpty);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Node counter increment
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
+  print_command(FALSE);
+
   if (NodeCount < 0xFFFFFFFEUL)
   {
     NodeCount++;
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Node counter Decrement
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
+  print_command(FALSE);
+
   if (NodeCount)
   {
     NodeCount--;
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Set Node counter
@@ -3321,12 +3383,14 @@ void parse_SN_packet(void)
   unsigned long Temp;
   ExtractReturnType RetVal;
 
+  print_command(FALSE);
+
   RetVal = extract_number(kULONG, &Temp, kREQUIRED);
   if (kEXTRACT_OK == RetVal)
   {
     NodeCount = Temp;
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query Node counter
@@ -3335,15 +3399,20 @@ void parse_SN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
-  printf((far rom char*)"%010lu\r\n", NodeCount);
+  print_command(TRUE);
 
-  print_ack();
+  printf((far rom char*)"%010lu", NodeCount);
+  print_line_ending(kLE_NORM);
+
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Set Layer
 // Usage: SL,<NewLayer><CR>
 void parse_SL_packet(void)
 {
+  print_command(FALSE);
+
   // Extract each of the values.
   extract_number(kUCHAR, &Layer, kREQUIRED);
 
@@ -3353,7 +3422,7 @@ void parse_SL_packet(void)
     return;
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query Layer
@@ -3362,9 +3431,12 @@ void parse_SL_packet(void)
 // OK<CR>
 void parse_QL_packet(void)
 {
-  printf((far rom char*)"%03i\r\n", Layer);
+  print_command(TRUE);
 
-  print_ack();
+  printf((far rom char*)"%03i", Layer);
+  print_line_ending(kLE_NORM);
+
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query Button
@@ -3373,12 +3445,15 @@ void parse_QL_packet(void)
 // OK<CR>
 void parse_QB_packet(void)
 {
-  printf((far rom char*)"%1i\r\n", ButtonPushed);
+  print_command(TRUE);
+
+  printf((far rom char*)"%1i", ButtonPushed);
+  print_line_ending(kLE_NORM);
   if (bittstzero(ButtonPushed))
   {
     bitclrzero(ButtonPushed);
   }
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query Current
@@ -3400,9 +3475,11 @@ void parse_QC_packet(void)
   while (PIE1bits.ADIE);
 
   // Print out our results
-  printf((far rom char*)"%04i,%04i\r\n", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+  print_command(TRUE);
+  printf((far rom char*)"%04i,%04i", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+  print_line_ending(kLE_NORM);
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Query General
@@ -3422,6 +3499,8 @@ void parse_QC_packet(void)
 void parse_QG_packet(void)
 {
   UINT8 result = process_QM();
+
+  print_command(TRUE);
 
   // process_QM() gives us the low 4 bits of our output result.
   result = result & 0x0F;
@@ -3443,7 +3522,8 @@ void parse_QG_packet(void)
     result = result | (1 << 7);
   }
 
-  printf((far rom char*)"%02X\r\n", result);
+  printf((far rom char*)"%02X", result);
+  print_line_ending(kLE_NORM);
   
   // Reset the button pushed flag
   if (bittstzero(ButtonPushed))
@@ -3472,6 +3552,8 @@ void parse_SE_packet(void)
   UINT16 Power = 0;
   UINT8 SEUseMotionQueue = FALSE;
   ExtractReturnType PowerExtract;
+
+  print_command(FALSE);
 
   // Extract each of the values.
   extract_number(kUCHAR, &State, kREQUIRED);
@@ -3570,7 +3652,7 @@ void parse_SE_packet(void)
     bitclrzero(FIFOEmpty);
   }
 
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
 
 // RM command
@@ -3641,6 +3723,8 @@ void parse_QM_packet(void)
   UINT8 FIFOStatus = 0;
   UINT8 result = process_QM();
 
+  print_command(TRUE);
+
   if (result & 0x01)
   {
     FIFOStatus = 1;
@@ -3658,7 +3742,8 @@ void parse_QM_packet(void)
     CommandExecuting = 1;
   }
 
-  printf((far ROM char *)"QM,%i,%i,%i,%i\n\r", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  printf((far ROM char *)"QM,%i,%i,%i,%i", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  print_line_ending(kLE_REV);
 }
 
 // QS command
@@ -3673,6 +3758,8 @@ void parse_QS_packet(void)
 {
   INT32 step1, step2;
 
+  print_command(TRUE);
+
   // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
 
@@ -3683,8 +3770,9 @@ void parse_QS_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 
-  printf((far ROM char *)"%li,%li\n\r", step1, step2);
-  print_ack();
+  printf((far ROM char *)"%li,%li", step1, step2);
+  print_line_ending(kLE_REV);
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Perform the actual clearing of the step counters (used from several places)
@@ -3713,7 +3801,9 @@ void clear_StepCounters(void)
 // Note, as of 2.7.0 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
+  print_command(FALSE);
+
   clear_StepCounters();
   
-  print_ack();
+  print_line_ending(kLE_OK_NORM);
 }
