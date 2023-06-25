@@ -1635,10 +1635,10 @@ void print_command(BOOL print_comma)
 {
   if (bittstzero(gStandarizedCommandFormat))
   {
-    putc(gCommand_Char1, NULL);
+    _user_putc(gCommand_Char1);
     if (gCommand_Char2 != 0u)
     {
-      putc(gCommand_Char2, NULL);
+      _user_putc(gCommand_Char2);
     }
     if (print_comma)
     {
