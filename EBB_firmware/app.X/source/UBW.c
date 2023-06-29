@@ -1633,7 +1633,7 @@ void parse_packet(void)
 // If Legacy line ending mode is turned on this function will not print anything
 void print_command(BOOL print_comma)
 {
-  if (bittstzero(gStandarizedCommandFormat))
+  if (bittstzero(gStandardizedCommandFormat))
   {
     _user_putc(gCommand_Char1);
     if (gCommand_Char2 != 0u)
@@ -1662,7 +1662,7 @@ void print_command(BOOL print_comma)
 //     Regardless of the value of <type>, always print "\n"
 void print_line_ending(tLineEnding le_type)
 {
-  if (bittstzero(gStandarizedCommandFormat))
+  if (bittstzero(gStandardizedCommandFormat))
   {
     printf((far rom char *)"\n");
   }
@@ -1771,11 +1771,11 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclrzero(gStandarizedCommandFormat);
+      bitclrzero(gStandardizedCommandFormat);
     }
     else if (1 == paramater_value)
     {
-      bitsetzero(gStandarizedCommandFormat);
+      bitsetzero(gStandardizedCommandFormat);
     }
     else
     {

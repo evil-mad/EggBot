@@ -282,7 +282,7 @@ extern volatile UINT8 TestMode;
 extern volatile UINT8 gLimitSwitchMask;
 extern volatile UINT8 gLimitSwitchTarget;
 extern volatile UINT8 gLimitSwitchTriggered;
-extern UINT8 gStandarizedCommandFormat;
+extern UINT8 gStandardizedCommandFormat;
 
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above

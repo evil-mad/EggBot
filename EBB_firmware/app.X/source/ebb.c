@@ -398,7 +398,7 @@ BOOL gLimitChecks;
 
 // LSb set to enable all strings to use '\n' line endings, and use standardized
 // command reply format
-UINT8 gStandarizedCommandFormat;
+UINT8 gStandardizedCommandFormat;
 
 
 // Local function definitions
@@ -1432,7 +1432,7 @@ void EBB_Init(void)
   Layer = 0;
   NodeCount = 0;
   ButtonPushed = 0;
-  gStandarizedCommandFormat = 0;
+  gStandardizedCommandFormat = 0;
   gLimitChecks = TRUE;
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
