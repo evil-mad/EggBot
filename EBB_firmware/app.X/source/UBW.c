@@ -154,7 +154,7 @@ volatile unsigned int ChannelBit;
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.05"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.06"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1"};
 #endif
@@ -1184,7 +1184,7 @@ void parse_packet(void)
   command = gCommand_Char1;
 
   // Only grab second one if it is not a comma
-  if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR)
+  if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
   {
     gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
     advance_RX_buf_out();
@@ -1631,9 +1631,9 @@ void parse_packet(void)
 // to the EBB, it will respond with the two character command code (at least,
 // some commands will return more than that).
 // If Legacy line ending mode is turned on this function will not print anything
-void print_command(BOOL print_comma)
+void print_command(BOOL print_always, BOOL print_comma)
 {
-  if (bittstzero(gStandardizedCommandFormat))
+  if (bittstzero(gStandardizedCommandFormat) || print_always)
   {
     _user_putc(gCommand_Char1);
     if (gCommand_Char2 != 0u)
@@ -1687,7 +1687,7 @@ void print_line_ending(tLineEnding le_type)
 // Return all I/Os to their default power-on values
 void parse_R_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
   UserInit();
 }
@@ -1713,7 +1713,7 @@ void parse_CU_packet(void)
   UINT8 parameter_number;
   INT16 paramater_value;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
   extract_number(kINT, &paramater_value, kREQUIRED);
@@ -1976,7 +1976,7 @@ void parse_QU_packet(void)
 {
   UINT8 parameter_number;
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
@@ -2014,7 +2014,7 @@ void parse_T_packet(void)
   unsigned int value;
   unsigned char mode = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract the <TIME_BETWEEN_UPDATES_IN_MS> value
   extract_number(kUINT, (void *)&time_between_updates, kREQUIRED);
@@ -2077,7 +2077,7 @@ void parse_C_packet(void)
 {
   unsigned char PA, PB, PC, PD, PE;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the four values.
   extract_number(kUCHAR, &PA, kREQUIRED);
@@ -2169,7 +2169,7 @@ void parse_AC_packet(void)
 {
   unsigned char Channel, Enable;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the two values.
   extract_number(kUCHAR, &Channel, kREQUIRED);
@@ -2193,7 +2193,7 @@ void parse_O_packet(void)
   unsigned char Value;
   ExtractReturnType RetVal;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   RetVal = extract_number(kUCHAR,  &Value, kREQUIRED);
@@ -2270,7 +2270,7 @@ void parse_O_packet(void)
 // The rest will be read in as zeros.
 void parse_I_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
 #if defined(BOARD_EBB_V10)
   printf(
@@ -2310,7 +2310,7 @@ void parse_I_packet(void)
 // All we do here is just print out our version number
 void parse_V_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
   
   printf((far rom char *)st_version);
   print_line_ending(kLE_NORM);
@@ -2327,7 +2327,7 @@ void parse_A_packet(void)
   char channel = 0;
   unsigned int ChannelBit = 0x0001;
 
-  print_command(FALSE);
+  print_command(TRUE, FALSE);
 
   // Sit and spin, waiting for one set of analog conversions to complete
   while (PIE1bits.ADIE);
@@ -2361,7 +2361,7 @@ void parse_MW_packet(void)
   unsigned int location;
   unsigned char value;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUINT, &location, kREQUIRED);
   extract_number(kUCHAR, &value, kREQUIRED);
@@ -2391,7 +2391,7 @@ void parse_MR_packet(void)
   unsigned int location;
   unsigned char value;
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   extract_number(kUINT, &location, kREQUIRED);
 
@@ -2426,7 +2426,7 @@ void parse_PD_packet(void)
   unsigned char pin;
   unsigned char direction;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2574,7 +2574,7 @@ void parse_PI_packet(void)
   unsigned char pin;
   unsigned char value = 0;
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2664,7 +2664,7 @@ void parse_PO_packet(void)
   unsigned char pin;
   unsigned char value;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2812,7 +2812,7 @@ void parse_PO_packet(void)
 // software TX buffer.
 void parse_TX_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -2846,7 +2846,7 @@ void parse_TX_packet(void)
 //    data to the UBW and you have the serial port set to a low baud rate.
 void parse_RX_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -2854,7 +2854,7 @@ void parse_RX_packet(void)
 // TBD
 void parse_CX_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -2878,7 +2878,7 @@ void parse_RC_packet(void)
   unsigned char pin;
   unsigned int value;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2972,7 +2972,7 @@ void parse_BC_packet(void)
 //  // And initialize Port A
 //  LATA = g_BO_init;
 //
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3107,7 +3107,7 @@ void parse_BO_packet(void)
 //      }
 //    }
 //  }
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3225,42 +3225,42 @@ void parse_BS_packet(void)
 //      }
 //    }
 //  }
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
 // SS Send SPI
 void parse_SS_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
 // RS Receive SPI
 void parse_RS_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
 // SI Send I2C
 void parse_SI_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
 // RI Receive I2C
 void parse_RI_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
 // CI Configure I2C
 void parse_CI_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3279,7 +3279,7 @@ void parse_PC_packet(void)
   unsigned char i;
   ExtractReturnType RetVal1, RetVal2;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUINT, &Length, kREQUIRED);
   extract_number(kUINT, &Rate, kREQUIRED);
@@ -3326,7 +3326,7 @@ void parse_PG_packet(void)
 {
   unsigned char Value;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &Value, kREQUIRED);
 
@@ -3413,7 +3413,7 @@ void parse_RB_packet(void)
 // 1 = power to RC servo on
 void parse_QR_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   printf((far rom char *)"%1u", RCServoPowerIO_PORT);
   print_line_ending(kLE_OK_NORM);
@@ -3436,7 +3436,7 @@ void parse_SR_packet(void)
   UINT8 State;
   ExtractReturnType GotState;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   extract_number(kULONG, &Value, kREQUIRED);
   GotState = extract_number(kUCHAR, &State, kOPTIONAL);
@@ -3478,7 +3478,7 @@ void parse_CK_packet(void)
   unsigned char UChar;
   unsigned char UCaseChar;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   print_line_ending(kLE_NORM);
 
   extract_number(kCHAR, &SByte, kREQUIRED);
@@ -3569,7 +3569,7 @@ void parse_ST_packet(void)
   UINT8 bytes = 0;
   UINT8 i;
   
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
@@ -3598,7 +3598,7 @@ void parse_QT_packet(void)
   unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 i;
   
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)

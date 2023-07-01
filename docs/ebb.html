@@ -278,7 +278,8 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -299,7 +300,10 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
           <li>
             NOTE 1: The EBB's analog inputs are only rated for up to 3.3 V. Be careful not to put higher voltages on them (including 5 V) or you may damage the pin.
@@ -318,7 +322,8 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>AC&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -345,15 +350,16 @@
    
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>BL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span>No response</li>
+          <li><span style="font-weight: bold;">Response (unified):</span>No response</li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>Enter bootloader mode.</p>
             <p>
-              This command turns off interrupts and jumps into the bootloader, so that new firmware may be uploaded. This particular method of entering bootloader mode is unique in that no physical button presses are required.
-            </p>  
+              This command turns off interrupts and jumps into the bootloader, so that new firmware may be uploaded. This particular method of entering bootloader mode is unique in that no physical button presses are required. Once the EBB receives this command, no response is sent back to the PC.
+            </p>
             <p>
               Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A special bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
             </p>
@@ -377,7 +383,8 @@
             <span style="font-weight: bold;">Command:</span> 
             <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>C&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>

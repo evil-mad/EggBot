@@ -1485,7 +1485,7 @@ void parse_SC_packet (void)
   unsigned char Para1 = 0;
   unsigned int Para2 = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   
   // Extract each of the values.
   extract_number(kUCHAR, &Para1, kREQUIRED);
@@ -1739,7 +1739,7 @@ void parse_LM_packet(void)
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   
   // Extract each of the values.
   extract_number(kLONG,  &Rate1,     kREQUIRED);
@@ -1830,7 +1830,7 @@ void parse_L3_packet(void)
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
   
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kLONG,  &Rate1,     kREQUIRED);
@@ -1919,7 +1919,7 @@ void parse_T3_packet(void)
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
   
   // Extract each of the values.
   extract_number(kULONG, &Intervals, kREQUIRED);
@@ -1990,7 +1990,7 @@ void parse_LT_packet(void)
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Intervals, kREQUIRED);
@@ -2270,7 +2270,7 @@ void parse_SM_packet(void)
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Duration, kREQUIRED);
@@ -2413,7 +2413,7 @@ void parse_HM_packet(void)
   BOOL   CommandExecuting = TRUE;
   INT32  XSteps = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract the step rate.
   extract_number(kULONG, &StepRate, kREQUIRED);
@@ -2603,7 +2603,7 @@ void parse_XM_packet(void)
   INT32 Steps = 0;
   UINT8 ClearAccs = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &Duration, kREQUIRED);
@@ -2989,7 +2989,7 @@ void parse_ES_packet(void)
   UINT32 fifo_steps1 = 0;
   UINT32 fifo_steps2 = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
@@ -3077,7 +3077,7 @@ void parse_ES_packet(void)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   printf((far rom char *)"%d", PenState);
   print_line_ending(kLE_REV);
@@ -3101,7 +3101,7 @@ void parse_QE_packet(void)
   UINT8 motor2_state = 0;
   UINT8 temp;
   
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   if (MS1_IO_PORT == 0u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
   {
@@ -3163,7 +3163,7 @@ void parse_TP_packet(void)
 {
   UINT16 CommandDuration = 0;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number (kUINT, &CommandDuration, kOPTIONAL);
@@ -3214,7 +3214,7 @@ void parse_SP_packet(void)
   UINT8 Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
   ExtractReturnType Ret;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kUCHAR, &State, kREQUIRED);
@@ -3319,7 +3319,7 @@ void parse_EM_packet(void)
   unsigned char EA1, EA2;
   ExtractReturnType RetVal1, RetVal2;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   RetVal1 = extract_number (kUCHAR, &EA1, kREQUIRED);
@@ -3353,7 +3353,7 @@ void parse_EM_packet(void)
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   if (NodeCount < 0xFFFFFFFEUL)
   {
@@ -3366,7 +3366,7 @@ void parse_NI_packet(void)
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   if (NodeCount)
   {
@@ -3383,7 +3383,7 @@ void parse_SN_packet(void)
   unsigned long Temp;
   ExtractReturnType RetVal;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   RetVal = extract_number(kULONG, &Temp, kREQUIRED);
   if (kEXTRACT_OK == RetVal)
@@ -3399,7 +3399,7 @@ void parse_SN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   printf((far rom char*)"%010lu", NodeCount);
   print_line_ending(kLE_NORM);
@@ -3411,7 +3411,7 @@ void parse_QN_packet(void)
 // Usage: SL,<NewLayer><CR>
 void parse_SL_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kUCHAR, &Layer, kREQUIRED);
@@ -3431,7 +3431,7 @@ void parse_SL_packet(void)
 // OK<CR>
 void parse_QL_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   printf((far rom char*)"%03i", Layer);
   print_line_ending(kLE_NORM);
@@ -3445,7 +3445,7 @@ void parse_QL_packet(void)
 // OK<CR>
 void parse_QB_packet(void)
 {
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   printf((far rom char*)"%1i", ButtonPushed);
   print_line_ending(kLE_NORM);
@@ -3475,7 +3475,7 @@ void parse_QC_packet(void)
   while (PIE1bits.ADIE);
 
   // Print out our results
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
   printf((far rom char*)"%04i,%04i", ISR_A_FIFO[0], ISR_A_FIFO[11]);
   print_line_ending(kLE_NORM);
 
@@ -3500,7 +3500,7 @@ void parse_QG_packet(void)
 {
   UINT8 result = process_QM();
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   // process_QM() gives us the low 4 bits of our output result.
   result = result & 0x0F;
@@ -3553,7 +3553,7 @@ void parse_SE_packet(void)
   UINT8 SEUseMotionQueue = FALSE;
   ExtractReturnType PowerExtract;
 
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kUCHAR, &State, kREQUIRED);
@@ -3723,7 +3723,7 @@ void parse_QM_packet(void)
   UINT8 FIFOStatus = 0;
   UINT8 result = process_QM();
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   if (result & 0x01)
   {
@@ -3758,7 +3758,7 @@ void parse_QS_packet(void)
 {
   INT32 step1, step2;
 
-  print_command(TRUE);
+  print_command(FALSE, TRUE);
 
   // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
@@ -3801,7 +3801,7 @@ void clear_StepCounters(void)
 // Note, as of 2.7.0 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
-  print_command(FALSE);
+  print_command(FALSE, FALSE);
 
   clear_StepCounters();
   

@@ -162,7 +162,7 @@ void low_ISR (void);
 void high_ISR (void);
 ExtractReturnType extract_number (ExtractType Type, void * ReturnValue, unsigned char Required);
 UINT8 extract_string (unsigned char * ReturnValue, UINT8 MaxBytes);
-void print_command(BOOL print_comma);
+void print_command(BOOL print_always, BOOL print_comma);
 void print_line_ending(tLineEnding);
 void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
