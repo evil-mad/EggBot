@@ -174,7 +174,7 @@
         <p />
 
         <h2><a name="EBB_Command_Reference"></a>EBB Command Reference</h2>
-  
+
         <h3><a name="syntax"></a>Syntax and conventions</h3>
 
         <p>
@@ -259,10 +259,10 @@
           <li><a href="#V">V</a> &mdash; Version Query</li>
           <li><a href="#XM">XM</a> &mdash; Stepper Move, for Mixed-axis Geometries</li>
         </ul>
-  
+
         <p/>
         <p/>
-       
+
         <hr class="short" />
         <h4><a name="A"></a>"A" &mdash; Analog value get</h4>
 
@@ -468,7 +468,7 @@
             </ul>
           </li>
           <li>
-            <span style="font-weight: bold;">Description:</span> 
+            <span style="font-weight: bold;">Description:</span>
             <p>
               This command is used to test out the various parameter parsing routines in the EBB. Each parameter is a different data type. The command simply prints out the values it parsed to allow the developer to confirm that the parsing code is working properly.
             </p>
@@ -1601,7 +1601,7 @@
             <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-        </ul>  
+        </ul>
 
         <hr class="short" />
         <h4><a name="QM"></a>"QM" &mdash; Query Motors</h4>
@@ -1655,6 +1655,38 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
+      
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
+            <p>
+              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
+            </p>
+            <p>
+              The value of the node counter can also be manipulated with the following commands:
+              <ul>
+                <li><code>SN</code> &mdash; Set Node count</li>
+                <li><code>NI</code> &mdash; Node count Increment</li>
+                <li><code>ND</code> &mdash; Node count Decrement</li>
+                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
+              </ul>
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then </span> <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v1.9.2
+          </li>
         </ul>
 
         <hr class="short" />
@@ -2484,38 +2516,6 @@
           </li>
         </ul>
 
-        <hr class="short" />
-        <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
-      
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li>
-            <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
-            <p>
-              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
-            </p>
-            <p>
-              The value of the node counter can also be manipulated with the following commands:
-              <ul>
-                <li><code>SN</code> &mdash; Set Node count</li>
-                <li><code>NI</code> &mdash; Node count Increment</li>
-                <li><code>ND</code> &mdash; Node count Decrement</li>
-                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
-              </ul>
-            </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet:</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then </span> <code>OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>  
-            Added in v1.9.2
-          </li>
-        </ul>
-     
         <hr class="short" />
         <h4><a name="V"></a> "V" &mdash; Version query</h4>
         
