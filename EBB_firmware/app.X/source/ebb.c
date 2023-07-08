@@ -2989,7 +2989,7 @@ void parse_ES_packet(void)
   UINT32 fifo_steps1 = 0;
   UINT32 fifo_steps2 = 0;
 
-  print_command(FALSE, FALSE);
+  print_command(FALSE, TRUE);
 
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
@@ -3067,7 +3067,10 @@ void parse_ES_packet(void)
     remaining_steps1,
     remaining_steps2
   );
-  print_line_ending(kLE_REV);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+      print_line_ending(kLE_REV);
+  }
 
   print_line_ending(kLE_OK_NORM);
 }

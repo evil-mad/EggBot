@@ -406,7 +406,7 @@
           <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Removed, as of v1.9.5 </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li><span style="font-weight: bold;">Description:</span> 
+          <li><span style="font-weight: bold;">Description:</span>
             <p>Clear the value of the Node Counter.</p>
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
@@ -416,11 +416,12 @@
         </ul>
 
         <hr class="short" />
-        <h4><a name="CS"></a>"CS" &mdash; Clear Step position</h4>      
+        <h4><a name="CS"></a>"CS" &mdash; Clear Step position</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>CS&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -442,7 +443,8 @@
             <span style="font-weight: bold;">Command:</span> <code>CK,<i>pVal_1</i>,<i>pVal_2</i>,<i>pVal_3</i>,<i>pVal_4</i>,<i>pVal_5</i>,<i>pVal_6</i>,<i>pVal_7</i>,<i>pVal_8</i>&lt;CR&gt;</code>
           </li>
           <li>
-            <span style="font-weight: bold;">Response:</span>
+            <span style="font-weight: bold;">Response (default):</span>
+            <p><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param1=</code><i>pVal_1</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param2=</code><i>pVal_2</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param3=</code><i>pVal_3</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
@@ -452,6 +454,18 @@
             <p><code>Param7=</code><i>pVal_7</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param8=</code><i>pVal_8</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>OK&lt;CR&gt;&lt;NL&gt;</code></p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Response (unified):</span>
+            <p><code>CK&lt;NL&gt;</code></p>
+            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;</code></p>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
@@ -482,7 +496,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>CU,<i>Param_Number</i>,<i>Param_Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response: </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default): </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified): </span><code>CU&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions: </span>All</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
@@ -534,13 +549,29 @@
                   </ul>
                 </li>
                 <li>
+                  <code>Param_Number</code> = 10 : <b>Enable Unified Line Ending Mode</b>
+                  <p>
+                    When enabled, Unified Line Ending Mode makes every line ending simply <code>&lt;NL&gt;</code>. When the EBB boots up, it will be in Default Line Ending Mode, which is how line endings have been done in all previous versions of EBB firmware. In Default mode there are some inconsistencies in the line endings of various commands. 
+                  </p>
+                  <p>
+                    Unified Line Ending Mode also changes the way that response packets are formed. Instead of an <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of the response, Unified mode will always print out the one or two character command, followed by <code>&lt;NL&gt;</code> if there is no additional data in the response packet. If there is additional data in the response packet, then the response packet will consist of the one or two letter command, followed by a comma, then any response data, then <code>&lt;NL&gt;</code>. 
+                  </p>
+                  <p>
+                    For example, when Unified Line Ending Mode is turned on, the response to the <code>QB</code> command will be <code>QB,1&lt;NL&gt;</code>. For comparison, the response to the <code>QB</code> command when Unified Line Ending Mode is turned off will be <code>1&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+                  </p>
+                  <ul>
+                    <li>If <code>Param_Value</code> = 0, line endings consistent with previous EBB firmware versions will be used (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, unified line endings will be used for all commands.</li>
+                  </ul>
+                </li>
+                <li>
                   <code>Param_Number</code> = 50 : <b>Auto Enable Motors</b>
                   <p>
                     The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you do turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
                   </p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motrion command.
+                      If <code>Param_Value</code> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motion command.
                     </li>
                     <li>
                       If <code>Param_Value</code> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
@@ -631,7 +662,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>,<i>Enable2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span><code>EM&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -678,7 +710,16 @@
             <span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2
           </li>
           <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2
+          </li>
+          <li>
             <span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set global step mode to 1/8 enable motor 1, and do not change motor 2's enable status. (<i>Enable2</i> is optional)
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set global step mode to 1/8 enable motor 1, and do not change motor 2's enable status. (<i>Enable2</i> is optional)
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set global step mode to 1/4 and enable both motors.
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set global step mode to 1/4 and enable both motors.
@@ -687,7 +728,16 @@
             <span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode
           </li>
           <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode
+          </li>
+          <li>
             <span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode
@@ -741,9 +791,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span><br />
-            <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
+          <li><span style="font-weight: bold;">Response (default):</span><br /><code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span><br /><code>ES,<i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -768,12 +817,20 @@
             </ul>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span>
+            <span style="font-weight: bold;">Example Return Packet (default):</span>
             <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span>
+            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <code>ES,0,0,0,0,0&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (default):</span>
             <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <code>ES,1,50,1200,18634,9848&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
@@ -808,7 +865,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>HM,<i>StepFrequency</i>[,<i>Position1</i>,<i>Position2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span>  <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span><code>HM&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -853,7 +911,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -867,8 +926,12 @@
           </li>
           <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span>
+            <span style="font-weight: bold;">Example Return Packet (default):</span>
             <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <code>I,128,255,130,000,007&lt;NL&gt;</code>
           </li>
         </ul>
 
@@ -876,9 +939,9 @@
         <h4><a name="LM"></a>"LM" &mdash; Low-level Move, Step-limited</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span><code>LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
-          </li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span><code>LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>LM&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1014,7 +1077,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>LT&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1075,7 +1139,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (default):</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (unified):</span> <code>MR,<i>Data</i>&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1094,8 +1159,12 @@
             <p>This command would read from memory address 422 and print out its current value.</p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet:</span>
+            <span style="font-weight: bold;">Example Return Packet (default):</span>
             <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <code>MR,071&lt;NL&gt;</code>
           </li>
         </ul>
         

@@ -1630,6 +1630,10 @@ void parse_packet(void)
 // if the New line ending mode is set (CU,10,1). Every time a command is sent
 // to the EBB, it will respond with the two character command code (at least,
 // some commands will return more than that).
+// print_always = true : always print command, even in Default Line Ending Mode
+// print_always = false : do not print command when in Unified Line Ending Mode
+// print_comma = true : if command printed, also print comma after
+// print_comma = false : if command printed, do not print comma after
 // If Legacy line ending mode is turned on this function will not print anything
 void print_command(BOOL print_always, BOOL print_comma)
 {
@@ -2270,25 +2274,10 @@ void parse_O_packet(void)
 // The rest will be read in as zeros.
 void parse_I_packet(void)
 {
-  print_command(FALSE, TRUE);
+  print_command(TRUE, TRUE);
 
-#if defined(BOARD_EBB_V10)
   printf(
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i,%03i", 
-    PORTA,
-    PORTB,
-    PORTC,
-    PORTD,
-    PORTE,
-    PORTF,
-    PORTG,
-    PORTH,
-    PORTJ
-  );
-  print_line_ending(kLE_NORM);
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  printf(
-    (far rom char*)"I,%03i,%03i,%03i,%03i,%03i", 
+    (far rom char*)"%03i,%03i,%03i,%03i,%03i", 
     PORTA,
     PORTB,
     PORTC,
@@ -2296,15 +2285,6 @@ void parse_I_packet(void)
     PORTE
   );
   print_line_ending(kLE_NORM);
-#elif defined(BOARD_UBW)
-  printf(
-    (far rom char*)"I,%03i,%03i,%03i", 
-    PORTA,
-    PORTB,
-    PORTC
-  );
-  print_line_ending(kLE_NORM);
-#endif
 }
 
 // All we do here is just print out our version number
@@ -2391,7 +2371,7 @@ void parse_MR_packet(void)
   unsigned int location;
   unsigned char value;
 
-  print_command(FALSE, TRUE);
+  print_command(TRUE, TRUE);
 
   extract_number(kUINT, &location, kREQUIRED);
 
@@ -2409,7 +2389,7 @@ void parse_MR_packet(void)
 
   // Now send back the MR packet
   printf (
-    (far rom char *)"MR,%03u" 
+    (far rom char *)"%03u" 
     ,value
   );
   print_line_ending(kLE_NORM);
