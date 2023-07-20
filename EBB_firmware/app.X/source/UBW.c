@@ -653,21 +653,6 @@ void UserInit(void)
   // Make all of PORTC inputs
   LATC = 0x00;
   TRISC = 0xFF;
-  // Make all of PORTD and PORTE inputs too
-#if defined(BOARD_EBB_V10)
-  LATD = 0x00;
-  TRISD = 0xFF;
-  LATE = 0x00;
-  TRISE = 0xFF;
-  LATF = 0x00;
-  TRISF = 0xFF;
-  LATG = 0x00;
-  TRISG = 0xFF;
-  LATH = 0x00;
-  TRISH = 0xFF;
-  LATJ = 0x00;
-  TRISJ = 0xFF;
-#endif
 
   // Initialize LED I/Os to outputs
   mInitAllLEDs();
@@ -784,9 +769,7 @@ void UserInit(void)
   // Call the ebb init function to setup whatever it needs
   EBB_Init();
 
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   RCServo2_Init();
-#endif
 
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
@@ -1497,9 +1480,7 @@ void parse_packet(void)
     case ('S' * 256) + '2':
     {
       // S2 for RC Servo method 2
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
       RCServo2_S2_command();
-#endif
       break;
     }
     case ('R' * 256) + 'M':
@@ -1693,6 +1674,7 @@ void parse_R_packet(void)
 {
   print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
+  check_and_send_TX_data();
   UserInit();
 }
 
@@ -1980,7 +1962,7 @@ void parse_QU_packet(void)
 {
   UINT8 parameter_number;
 
-  print_command(FALSE, TRUE);
+  print_command(TRUE, TRUE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
@@ -1991,10 +1973,10 @@ void parse_QU_packet(void)
   }
 
   // QU,1 to read back current value of gLimitSwitchPortB
-  // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
+  // Returns "QU,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    printf((far rom char*)"QU,1,%02X", gLimitSwitchPortB);
+    printf((far rom char*)"%02X", gLimitSwitchPortB);
     print_line_ending(kLE_NORM);
   }
   else
@@ -2554,7 +2536,7 @@ void parse_PI_packet(void)
   unsigned char pin;
   unsigned char value = 0;
 
-  print_command(FALSE, TRUE);
+  print_command(TRUE, TRUE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2585,7 +2567,6 @@ void parse_PI_packet(void)
   {
     value = bittst(PORTC, pin);
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     value = bittst(PORTD, pin);
@@ -2594,25 +2575,6 @@ void parse_PI_packet(void)
   {
     value = bittst(PORTE, pin);
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    value = bittst(PORTF, pin);
-  }
-  else if ('G' == port)
-  {
-    value = bittst(PORTG, pin);
-  }
-  else if ('H' == port)
-  {
-    value = bittst(PORTH, pin);
-  }
-  else if ('J' == port)
-  {
-    value = bittst(PORTJ, pin);
-  }
-#endif
   else
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2627,7 +2589,7 @@ void parse_PI_packet(void)
 
   // Now send back our response
   printf(
-   (far rom char *)"PI,%1u" 
+   (far rom char *)"%1u" 
    ,value
   );
   print_line_ending(kLE_NORM);
@@ -3396,6 +3358,10 @@ void parse_QR_packet(void)
   print_command(FALSE, TRUE);
 
   printf((far rom char *)"%1u", RCServoPowerIO_PORT);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_REV);
+  }
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3594,7 +3560,10 @@ void parse_QT_packet(void)
   {
     printf((rom char far *)"%s", name);
   }
-  print_line_ending(kLE_NORM);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_NORM);
+  }
   print_line_ending(kLE_OK_NORM);
 }
 

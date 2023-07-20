@@ -1453,7 +1453,7 @@ void EBB_Init(void)
   gLimitSwitchTriggered = 0;
 
   // Clear out global stepper positions
-  parse_CS_packet();
+  clear_StepCounters();
 }
 
 // Stepper (mode) Configure command
@@ -3083,7 +3083,10 @@ void parse_QP_packet(void)
   print_command(FALSE, TRUE);
 
   printf((far rom char *)"%d", PenState);
-  print_line_ending(kLE_REV);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_REV);
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3151,8 +3154,10 @@ void parse_QE_packet(void)
   }
 
   printf((far rom char *)"%d,%d", motor1_state, motor2_state);
-  print_line_ending(kLE_REV);
-
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_REV);
+  }
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3405,7 +3410,10 @@ void parse_QN_packet(void)
   print_command(FALSE, TRUE);
 
   printf((far rom char*)"%010lu", NodeCount);
-  print_line_ending(kLE_NORM);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_NORM);
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3437,7 +3445,10 @@ void parse_QL_packet(void)
   print_command(FALSE, TRUE);
 
   printf((far rom char*)"%03i", Layer);
-  print_line_ending(kLE_NORM);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_NORM);
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3451,7 +3462,10 @@ void parse_QB_packet(void)
   print_command(FALSE, TRUE);
 
   printf((far rom char*)"%1i", ButtonPushed);
-  print_line_ending(kLE_NORM);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_NORM);
+  }
   if (bittstzero(ButtonPushed))
   {
     bitclrzero(ButtonPushed);
@@ -3480,8 +3494,10 @@ void parse_QC_packet(void)
   // Print out our results
   print_command(FALSE, TRUE);
   printf((far rom char*)"%04i,%04i", ISR_A_FIFO[0], ISR_A_FIFO[11]);
-  print_line_ending(kLE_NORM);
-
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_NORM);
+  }
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3726,7 +3742,7 @@ void parse_QM_packet(void)
   UINT8 FIFOStatus = 0;
   UINT8 result = process_QM();
 
-  print_command(FALSE, TRUE);
+  print_command(TRUE, TRUE);
 
   if (result & 0x01)
   {
@@ -3745,7 +3761,7 @@ void parse_QM_packet(void)
     CommandExecuting = 1;
   }
 
-  printf((far ROM char *)"QM,%i,%i,%i,%i", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  printf((far ROM char *)"%i,%i,%i,%i", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
   print_line_ending(kLE_REV);
 }
 
@@ -3774,7 +3790,10 @@ void parse_QS_packet(void)
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 
   printf((far ROM char *)"%li,%li", step1, step2);
-  print_line_ending(kLE_REV);
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_REV);
+  }
   print_line_ending(kLE_OK_NORM);
 }
 

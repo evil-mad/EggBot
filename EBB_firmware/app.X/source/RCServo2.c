@@ -276,6 +276,8 @@ void RCServo2_S2_command (void)
   extract_number (kUINT, &Rate, kOPTIONAL);
   extract_number (kUINT, &Delay, kOPTIONAL);
 
+  print_command(FALSE, FALSE);
+
   // Bail if we got a conversion error
   if (error_byte)
   {
