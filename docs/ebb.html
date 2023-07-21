@@ -299,8 +299,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -320,12 +320,15 @@
               The channel number and ADC value are both padded to 2 and 4 characters respectively in the A response.
             </p>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
+
           <li>
             NOTE 1: The EBB's analog inputs are only rated for up to 3.3 V. Be careful not to put higher voltages on them (including 5 V) or you may damage the pin.
           </li>
@@ -342,8 +345,8 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>AC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>AC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -370,8 +373,8 @@
    
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>BL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span>No response</li>
-          <li><span style="font-weight: bold;">Response (unified):</span>No response</li>
+          <li><span style="font-weight: bold;">Response (future mode):</span>No response</li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span>No response</li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -402,8 +405,8 @@
             <span style="font-weight: bold;">Command:</span>
             <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>C&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>C&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -434,8 +437,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>CS&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>CS&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -456,8 +459,21 @@
           <li>
             <span style="font-weight: bold;">Command:</span> <code>CK,<i>pVal_1</i>,<i>pVal_2</i>,<i>pVal_3</i>,<i>pVal_4</i>,<i>pVal_5</i>,<i>pVal_6</i>,<i>pVal_7</i>,<i>pVal_8</i>&lt;CR&gt;</code>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Response (default):</span>
+            <span style="font-weight: bold;">Response (future mode):</span>
+            <p><code>CK&lt;NL&gt;</code></p>
+            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;</code></p>
+            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;</code></p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Response (legacy mode; default):</span>
             <p><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param1=</code><i>pVal_1</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param2=</code><i>pVal_2</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
@@ -468,18 +484,6 @@
             <p><code>Param7=</code><i>pVal_7</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param8=</code><i>pVal_8</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>OK&lt;CR&gt;&lt;NL&gt;</code></p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Response (unified):</span>
-            <p><code>CK&lt;NL&gt;</code></p>
-            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;</code></p>
           </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
@@ -505,13 +509,14 @@
           </li>
         </ul>
 
+
         <hr class="short" />
         <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>CU,<i>Param_Number</i>,<i>Param_Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default): </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified): </span><code>CU&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode): </span><code>CU&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions: </span>All</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
@@ -531,7 +536,7 @@
                 <li>
                   <code>Param_Number</code> = 1 : <b>Enable Command Response</b>
                   <p>
-                    This sub command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.
+                    This sub-command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back. This sub-command has no effect when Future Syntax Mode is active.
                   </p>
                   <ul>
                     <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
@@ -563,22 +568,35 @@
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 10 : <b>Enable Unified Line Ending Mode</b>
+                  <code>Param_Number</code> = 10 : <b>Enable Future Syntax Mode</b>
                   <p>
-                    When enabled, Unified Line Ending Mode makes every line ending simply <code>&lt;NL&gt;</code>. When the EBB boots up, it will be in Default Line Ending Mode, which is how line endings have been done in all previous versions of EBB firmware. In Default mode there are some inconsistencies in the line endings of various commands. 
+                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
                   </p>
                   <p>
-                    Unified Line Ending Mode also changes the way that response packets are formed. Instead of an <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of the response, Unified mode will always print out the one or two character command, followed by <code>&lt;NL&gt;</code> if there is no additional data in the response packet. If there is additional data in the response packet, then the response packet will consist of the one or two letter command, followed by a comma, then any response data, then <code>&lt;NL&gt;</code>. 
+                  When the EBB boots up, future syntax mode is disabled; which we can abbreviate as
+                  being in <b>legacy syntax mode</b>.
+                  Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor 
+                  line endings in those responses. However, it is backward
+                  compatible with previous EBB firmware versions. 
                   </p>
                   <p>
-                    For example, when Unified Line Ending Mode is turned on, the response to the <code>QB</code> command will be <code>QB,1&lt;NL&gt;</code>. For comparison, the response to the <code>QB</code> command when Unified Line Ending Mode is turned off will be <code>1&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+                  Whereas legacy syntax mode often (but not always) uses an
+                  <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of a response, 
+                  future syntax mode will always print out the one or two character command,
+                  followed by <code>&lt;NL&gt;</code> if there is no additional data in the response
+                  packet. If there is additional data in the response packet, then the response packet
+                  will consist of the one or two letter command, followed by a comma, then any response
+                  data, then <code>&lt;NL&gt;</code>. 
                   </p>
                   <p>
-                    Because part of the response back to the PC is generated before the command is executed, changing the line ending mode with <code>CU,10</code> produces a non-standard response. Sending <code>CU,10,1</code> when in Default mode will result in a response of <code>&lt;NL&gt;</code>. Sending <code>CU,10,0</code> when in Unified mode will result in a response of <code>CUOK&lt;CR&gt;&lt;NL&gt;</code>
+                    For example, when future syntax mode is turned on, the response to the <code>QR</code> command might be <code>QR,1&lt;NL&gt;</code>. For comparison, the response to the <code>QR</code> when it is off (in legacy syntax mode) would be <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+                  </p>
+                  <p>
+                    Because part of the response back to the PC is generated before the command is executed, changing the syntax mode with <code>CU,10</code> produces a non-standard response. Sending <code>CU,10,1</code> when in legacy mode will result in a response of <code>&lt;NL&gt;</code>. Sending <code>CU,10,0</code> when in future mode will result in a response of <code>CUOK&lt;CR&gt;&lt;NL&gt;</code>. (For future compatibility of your code, you may want to ensure that either response is acceptable.)
                   </p>
                   <ul>
-                    <li>If <code>Param_Value</code> = 0, Default Line Ending Mode : line endings consistent with previous EBB firmware versions will be used (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, Unified Line Ending Mode : unified line endings will be used for all commands.</li>
+                    <li>If <code>Param_Value</code> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
+                    <li>If <code>Param_Value</code> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
                   </ul>
                 </li>
                 <li>
@@ -671,6 +689,10 @@
             <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
             <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code>, <code>CU,251</code>, <code>CU,252</code>, <code>CU,253</code> and <code>CU,254</code> were added in v3.0.0</p>
           </li>
+
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
+
+
         </ul>
 
         <hr class="short" />
@@ -678,8 +700,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>,<i>Enable2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span><code>EM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span><code>EM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -770,8 +792,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span><br /><code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span><br /><code>ES,<i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span><br /><code>ES,<i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><br /><code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -795,22 +817,27 @@
               </li>
             </ul>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span>
-            <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
             <code>ES,0,0,0,0,0&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span>
-            <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
           </li>
+
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
             <code>ES,1,50,1200,18634,9848&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
+
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
+          </li>
+
           <li>
             <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.8.0
           </li>
@@ -821,8 +848,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>HM,<i>StepFrequency</i>[,<i>Position1</i>,<i>Position2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span><code>HM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span><code>HM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -865,8 +892,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -879,14 +906,16 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span>
-            <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
             <code>I,128,255,130,000,007&lt;NL&gt;</code>
           </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+
         </ul>
 
         <hr class="short" />
@@ -894,8 +923,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>LM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>LM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1031,8 +1060,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>LT&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>LT&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1093,8 +1122,9 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>MR,<i>Data</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>MR,<i>Data</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1113,13 +1143,14 @@
             <p>This query would read from memory address 422 and print out its current value.</p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span>
-            <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
             <code>MR,071&lt;NL&gt;</code>
           </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+
         </ul>
 
         <hr class="short" />
@@ -1127,8 +1158,9 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MW,<i>Address</i>,<i>Data</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>MW&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>MW&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1151,8 +1183,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ND&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>ND&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>ND&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1169,8 +1201,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>NI&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>NI&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>NI&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1187,8 +1219,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>O&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>O&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1215,8 +1247,8 @@
           <li>
             <span style="font-weight: bold;">Command:</span> <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1[,<i>Length2</i>,<i>Period2</i>[,<i>Length3</i>,<i>Period3</i>]]]</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>PC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1270,8 +1302,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PD,<i>Port</i>,<i>Pin</i>,<i>Direction</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>PD&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PD&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1298,8 +1330,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>PG&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PG&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1330,8 +1362,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PI,<i>Port</i>,<i>Pin</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>PI,<i>Value</i>&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>PI,<i>Value</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PI,<i>Value</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>PI,<i>Value</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1350,12 +1382,14 @@
           <li>
             <span style="font-weight: bold;">Example:</span> <code>PI,D,2\r</code> This query would read pin RD2 (or Port D, pin 2) as a digital input and return the pin's value.
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span><code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span><code>PI,1&lt;NL&gt;</code>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span><code>PI,1&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span><code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
           </li>
+
         </ul>
 
         <hr class="short"/>
@@ -1363,8 +1397,9 @@
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>PO&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PO&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1396,8 +1431,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QB,<i>state</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QB,<i>state</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1415,8 +1450,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QC&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QC,<i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;NL&gt</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QC,<i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;NL&gt</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1452,11 +1487,9 @@
               </li>
             </ul>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>0394,0300&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QC,0394,0300&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QC,0394,0300&lt;NL&gt;</code>
             <p>This query has returned values of 394 for RA0_VOLTAGE and 300 for V+_VOLTAGE.</p>
             <p>
               The first returned value, 0394, indicates a voltage of 1.27 V at REF_RA0. This indicates that the maximum motor current is currently set to 0.72 A.
@@ -1465,6 +1498,11 @@
               The second returned value, 0300, indicates a voltage of 0.96 V at the V+ ADC input. Scaling by 9.2 (for the voltage divider on an EBB v2.3) and adding 0.3 V (for the diode drop), this indicates that the "actual" input voltage is about 9.1 V. 
             </p>
           </li>
+
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0394,0300&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+
           <li>
             <span style="font-weight: bold;">Version History:</span> Unchanged since firmware  2.2.3.
             <p>
@@ -1478,8 +1516,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QE,<i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QE,<i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1513,20 +1551,26 @@
               </li>
             </ul>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QE,16,16&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,16,16&lt;NL&gt;</code>
             <p>Both motors are enabled and set to 1/16th microsteps.</p>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QE,0,4&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,0,4&lt;NL&gt;</code>
             <p>Motor 1 is disabled and motor 2 is enabled an set to 1/4 steps.</p>
           </li>
+
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+
+
         </ul>
 
         <hr class="short" />
@@ -1534,8 +1578,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QG&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>Status Byte</i>&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code><i>QG,Status Byte</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code><i>QG,Status Byte</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Status Byte</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1608,24 +1652,31 @@
               <div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div> This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO" motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is full, then a command is currently executing. Additional information about the motion queue can be found in the description of the <code><a href="#QM">QM</a></code> query.
             </p>
           </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-            <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QE,3E&lt;NL&gt;</code>
+           <li>
+           <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
+
             <p>
               This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
             </p>
           </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
+
+
+            <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
+           </li>
+
         </ul>
+
+
 
         <hr class="short" />
         <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QL,<i>CurrentLayerValue</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QL,<i>CurrentLayerValue</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -1634,11 +1685,14 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
+
+
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QL,4&lt;NL&gt;</code>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QL,4&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
         </ul>
@@ -1648,8 +1702,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.4.4 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -1679,8 +1733,8 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code><i>QN,NodeCount</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code><i>QN,NodeCount</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1698,11 +1752,12 @@
               </ul>
             </p>
           </li>
+
           <li>
-            <span style="font-weight: bold;">Example Return Packet (default):</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QN,1234567890&lt;NL&gt;</code>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QN,1234567890&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then <code>OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
@@ -1717,8 +1772,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QP&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QP,<i>PenStatus</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QP,<i>PenStatus</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1727,8 +1782,9 @@
               This query reads the current pen state from the EBB. It will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a pen up/down command is pending in the FIFO, it will only report the new state of the pen after the pen move has been started.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QP,1&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QP,1&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9</li>
           <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
@@ -1738,8 +1794,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QR&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>RCServoPowerState</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QR,<i>RCServoPowerState</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QR,<i>RCServoPowerState</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>RCServoPowerState</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1748,8 +1804,8 @@
               This query reads the current RC Servo power control state from the EBB. It will return <i>RCServoPowerState</i> of 1 if the RC Servo is receiving power and 0 if it is not.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QR,1&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QR,1&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.6.0</li>
         </ul>
 
@@ -1758,8 +1814,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>QS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span><code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span><code>QS,<i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span><code>QS,<i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1774,8 +1830,8 @@
               The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the query is executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is complete (you can use the <code>QM</code> query to check if the motors have stopped moving) before checking the current positions.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (default):</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (unified):</span> <code>QS,1421,-429&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QS,1421,-429&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
             <p>Added in v2.4.3</p>
@@ -1787,8 +1843,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QT&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>QT,<i>name</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QT,<i>name</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1797,16 +1853,18 @@
               This command gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.
             </p>
           </li>
+
+
           <li>
-            <span style="font-weight: bold;">Example (default):</span> <code>QT&lt;CR&gt;</code>
-            <p>If the EBB's nickname has been set to "East EBB" then the output of this query would be:</p>
-            <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example (unified):</span> <code>QT&lt;CR&gt;</code>
-            <p>If the EBB's nickname has been set to "East EBB" then the output of this command would be:</p>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> If the EBB's nickname has been set to "East EBB" then the output of this command would be:
             <code>QT,East EBB&lt;NL&gt;</code>
-          </li>
+            </li>
+
+          <li>
+          <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>             If the EBB's nickname has been set to "East EBB" then the output of this query would be:
+            <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            </li>
+
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
 
@@ -1815,8 +1873,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>RB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code></code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code></code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code></code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code></code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1835,8 +1893,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>R&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>R&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1846,8 +1904,8 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (unified):</span> <code>R&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>R&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
         </ul>
 
         <hr class="short" />
@@ -1856,8 +1914,8 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>S2&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>S2&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue (with one exception; see below)</li>
           <li>
@@ -2016,8 +2074,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SC,<i>value1</i>,<i>value2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SC&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2108,8 +2166,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SE,<i>state</i>[,<i>power</i>[,<i>use_motion_queue</i>]]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SE&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SE&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -2143,8 +2201,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SL&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SL&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2169,8 +2227,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>duration</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2212,8 +2270,8 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SN,<i>value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SN&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SN&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2235,8 +2293,8 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>          
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SP&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SP&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -2285,8 +2343,8 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>[,<i>state</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>SR&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SR&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>v2.6.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span>Immediate</li>
           <li>
@@ -2321,8 +2379,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ST,<i>NewNameString</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>ST&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>ST&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2353,8 +2411,8 @@
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>T&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>T&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2398,8 +2456,8 @@
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>TP[,<i>duration</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>TP&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>TP&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2435,8 +2493,8 @@
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>V,EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>V,EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -2452,8 +2510,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>XM,<i>duration</i>,<i>AxisStepsA</i>,<i>AxisStepsB</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (unified):</span> <code>XM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>XM&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
