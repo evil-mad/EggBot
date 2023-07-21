@@ -14,14 +14,15 @@
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    <style>
-    td {text-align: center}
-    ul.no_bullets {
-      list-style-type: none; /* Remove bullets */
-      padding-left: 50px;
-      padding-bottom: 15px;
-    }
-    </style>
+<style>
+td {text-align: center}
+ul.no_bullets {
+  list-style-type: none; /* Remove bullets */
+  padding-left: 50px;
+  padding-bottom: 15px;
+}
+</style>
+
   </head>
   <body>
     <div class="wrapper">
@@ -36,14 +37,14 @@
       <section>
         <h1>
           <a id="eggbot" class="anchor" href="#eggbot" aria-hidden="true">
-          <span aria-hidden="true" class="octicon octicon-link"></span></a>EBB (EiBotBoard) Command Set,  Firmware v3.0+
+          <span aria-hidden="true" class="octicon octicon-link"></span></a>EBB (EiBotBoard) Command Set, v1.8.0 - v2.8.1
         </h1>
-
+        
         <p>
-          This document details the serial command protocol used by the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard) with firmware v3.0.0 and higher. Legacy documentation for prior versions is <a href="ebb2.html">available here</a>.
+          This document details the serial command protocol used by the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard) with older firmware, firmware v1.8.0 - v2.8.1. Current documentation for firmware v3.0 and above is in separate documentation <a href="ebb.html">available here</a>.
         </p>
-        <p>
-          The EBB is an open source USB-based motor control board, designed to drive two stepper motors. The EBB may be used on its own, or found as the control board of such machines as <a href="http://egg-bot.com">The Original Egg-Bot</a>, <a href="http://watercolorbot.com">The WaterColorBot</a>, or <a href="http://axidraw.com">AxiDraw</a>.
+<p>
+ The EBB is an open source USB-based motor control board, designed to drive two stepper motors. The EBB may be used on its own, or found as the control board of such machines as <a href="http://egg-bot.com">The Original Egg-Bot</a>, <a href="http://watercolorbot.com">The WaterColorBot</a>, or <a href="http://axidraw.com">AxiDraw</a>.
         </p>
 
         <hr>
@@ -53,7 +54,7 @@
         <ol>
           <li><a href="#apis">Serial communication and APIs</a></li>
           <li><a href="#introduction">Introduction to the EBB firmware</a></li>
-          <li><a href="#version_differences">Major Changes in Firmware v3.0</a></li>
+          <li><a href="#version_differences">Differences between versions</a></li>
           <li><a href="#updating">Updating firmware</a></li>
           <li><a href="#issues">Addressing issues</a></li>
           <li><a href="#additional_resources">Additional resources</a></li>
@@ -91,7 +92,8 @@
             The <a href="http://processing.org">Processing</a>-based program <a href="https://github.com/evil-mad/robopaint-rt">RoboPaint RT</a> is designed to control the WaterColorBot through a real-time interface. This program is written in Processing (Java), and serves as a good example of how to manage the EBB through Processing.
           </li>
           <li>
-            <a href="https://github.com/evil-mad/robopaint">RoboPaint</a> is a stand-alone cross-platform program to drive the WaterColorBot (as well as EggBot and AxiDraw). RoboPaint is written in javascript and (while running) provides several APIs that can be used to control machines based on the EBB:
+            <a href="https://github.com/evil-mad/robopaint">RoboPaint</a> is a stand-alone cross-platform program to drive the WaterColorBot (as well as EggBot and AxiDraw). RoboPaint is written in javascript and (while running) provides several APIs that can be used to control machines 
+            based on the EBB:
             <ul>
               <li>
                 RoboPaint, under the hood, uses the <a href="https://github.com/techninja/cncserver/">cncserver</a> and its RESTful API to operate. It is a relatively low level interface, with similar functionality to the serial protocol, plus a few helpful utilities.
@@ -100,7 +102,8 @@
                 The higher-level <a href="https://github.com/evil-mad/robopaint-mode-remote/blob/master/API.md">RoboPaint remote print API</a> allows local or remote "printing" of SVG files to EBB based machines, when attached to a computer running RoboPaint.
               </li>
               <li>
-                The simplified ("GET only") <a href="https://github.com/techninja/cncserver/blob/master/scratch/SCRATCH.API.md">Scratch API</a> provides a method of controlling EBB based machines from the address bar of a web browser, or from simple programming languages that can retrieve data from an URL.
+                The simplified ("GET only") 
+                <a href="https://github.com/techninja/cncserver/blob/master/scratch/SCRATCH.API.md">Scratch API</a> provides a method of controlling EBB based machines from the address bar of a web browser, or from simple programming languages that can retrieve data from an URL.
               </li>
             </ul>
           </li>
@@ -116,76 +119,46 @@
         <h2><a name="introduction"></a>Introduction to the EBB firmware</h2>
  
         <p>
-          The documentation on this page is for the to EiBotBoard Firmware v3.0.0 and above. If you are using an older version of the firmware (most likely in the 2.0 series), please refer to the <a href="ebb2.html">EBB 2.8.1 documentation</a> which documents prior syntax and prior changes to the syntax between versions.
+          The EBB firmware is based on the <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">UBW</a> firmware. The same basic command processing framework is used, so the same type of commands are used, and the same type of errors are returned. See the <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">UBW command documentation</a> for an introduction to these topics.
         </p>
         <p>
-          The EBB firmware was originally based on the UBW firmware. Its <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">command documentation</a> has an introduction to the UBW command processing framework, but this stand-alone document does not refer to it further.
+          This command reference applies to EiBotBoard Firmware v1.8.0 - v2.8.1. (Any differences between firmware versions are noted below and in release notes.) The documentation for firmware v3.0 and above is in separate documentation <a href="ebb.html">available here</a>.
         </p>
-        <p>
-          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
-       </p>
-        <p>
-        There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we do encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
-        </p>
-        <p>
-        As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and the future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with EBB firmware v4.0. 
-        </p>
+  
+        <p />
+        <hr />
+        <p />
 
+        <h2><a name="version_differences"></a>Differences between firmware versions</h2>
+        
+        <p>
+          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot.
+          If you are using one of these machines, there is generally no particular benefit or compelling reason for you to update your firmware to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
+        </p>
+        <p>
+          That said, there have been <a href="EBBReleaseNotes.html">many smaller changes</a> in the code between the versions that ship preloaded on the EBB and the latest versions. Most of the changes have been minor bug fixes and new, minor functions that are helpful for less common applications. If you are developing new applications with the EBB, we do encourage you to update to the newest version. If, on the other hand, you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+        </p>
+        <p>
+          That this documentation refers not only to different versions of the EBB firmware, but also in some cases to legacy versions of the EBB hardware. For example, the "EM" command has different behaviors on different versions of the EBB hardware.  
+        </p>
 
         <p />
         <hr />
         <p />
 
-        <h2><a name="version_differences"></a>Major Changes in Firmware v3.0</h2>
 
-        <p>
-        EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in v4.0, and deprecating some commands and queries. 
-        </p>
-        <p>
-        The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for firmware v4.0 and higher, rather than the default "legacy" response format. The legacy response format will be removed in firmware v4.0, and should be considered to be deprecated. 
-        </p>
-        <p>
-
-        The following three queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but should be migrated to use <a href="#QG">QG</a> (Query General) instead.
-        <ul>
-          <li><a href="#QB">QB</a> &mdash; Query Button</li>
-          <li><a href="#QM">QM</a> &mdash; Query Motors</li>
-          <li><a href="#QP">QP</a> &mdash; Query Pen</li>
-        </ul>
-     </p>
-        <p>
-        The following three commands and queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but applications that use them should be migrated to use <a href="#SL">SL</a> and <a href="#QL">QL</a> instead.
-        <ul>
-          <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
-          <li><a href="#NI">NI</a> &mdash; Node count Increment</li>
-          <li><a href="#QN">QN</a> &mdash; Query Node count</li>
-        </ul>
-
-
-        </p>
-        <p>
-        Please see the <a href="EBBReleaseNotes.html">release notes</a> for additional information about differences between versions.
-        </p>
-
-
-        <p />
-        <hr />
-        <p />
 
         <h2><a name="updating"></a>Updating your firmware</h2>
         
-        <p>
-          Instructions for updating firmware, including easy installers for Mac and Windows, can be found on the <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">Evil Mad Scientist Wiki</a>.
+        <p>Instructions for updating firmware, including easy installers for Mac and Windows, can be found on the <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">Evil Mad Scientist Wiki</a>.
+
         </p>
-        
         <p />
         <hr />
         <p />
 
         <h2><a name="issues"></a>Addressing Issues</h2>
-
+        
         <p>
           If you discover something that does not work as expected in the EBB firmware, please contact us by <a href="http://shop.evilmadscientist.com/contact">e-mail</a>, in our forum, or (preferably) file an issue on GitHub : <a href="https://github.com/evil-mad/EggBot/issues">https://github.com/evil-mad/EggBot/issues</a>.
         </p>
@@ -196,7 +169,7 @@
         <p />
         <hr />
         <p />
-
+    
         <h2><a name="additional_resources"></a>Additional Resources</h2>
         <ul>
           <li><a href="http://www.schmalzhaus.com/EBB/EBBConfig.html">Boot up configuration information</a></li>
@@ -209,13 +182,13 @@
         <p />
 
         <h2><a name="EBB_Command_Reference"></a>EBB Command Reference</h2>
-
+  
         <h3><a name="syntax"></a>Syntax and conventions</h3>
-
+    
         <p>
           The following syntax conventions are established to assist with clarity of communication as we describe the EBB commands.
         </p>
-
+    
         <h4>EBB Syntax Conventions:</h4>
 
         <ul>
@@ -223,8 +196,12 @@
           <li>Query response format descriptions and examples are also set in the same <code>code font</code>.</li>
           <li><i>Italics</i> are used to represent variables and adjustable parameters.</li>
           <li>Square brackets (<code>[ ]</code>) are used to enclose optional items.</li>
-          <li>Angle brackets (<code>&lt; &gt;</code>) are used to represent individual control characters, such as <code>&lt;CR&gt;</code> for carriage return or <code>&lt;NL&gt;</code> for newline, in command and query format descriptions.</li>
-          <li>Individual control characters may also be given by their backslash-escaped representation, as in <code>\r</code> for carriage return or <code>\n</code> for linefeed, in the context of literal command examples.</li>
+          <li>
+            Angle brackets (<code>&lt; &gt;</code>) are used to represent individual control characters, such as <code>&lt;CR&gt;</code> for carriage return or <code>&lt;NL&gt;</code> for newline, in command and query format descriptions.
+          </li>
+          <li>
+            Individual control characters may also be given by their backslash-escaped representation, as in <code>\r</code> for carriage return or <code>\n</code> for linefeed, in the context of literal command examples.
+          </li>
           <li>All unitalicized text and punctuation within a command description must be used literally.</li>
         </ul>
 
@@ -236,14 +213,18 @@
           <li>No whitespace (including spaces, tabs, or returns) is allowed within a command.</li>
           <li>All commands must have a total length of 64 characters or fewer, including the terminating <code>&lt;CR&gt;</code> .</li>
         </ul>
-
+    
         <h3><a name="commands"></a>The EBB Command Set<br></h3>
 
         <ul>
           <li><a href="#A">A</a> &mdash; Analog value get</li>
           <li><a href="#AC">AC</a> &mdash; Analog Configure</li>
+          <!--
+          <li><a href="#AM">AM</a> &mdash; Accelerated stepper Move</li>
+          -->
           <li><a href="#BL">BL</a> &mdash; enter BootLoader</li>
           <li><a href="#C">C</a> &mdash; Configure</li>
+          <li><a href="#CN">CN</a> &mdash; Clear Node count</li>
           <li><a href="#CK">CK</a> &mdash; Check Input</li>
           <li><a href="#CU">CU</a> &mdash; Configure User Options</li>
           <li><a href="#CS">CS</a> &mdash; Clear Step position</li>
@@ -290,17 +271,17 @@
           <li><a href="#V">V</a> &mdash; Version Query</li>
           <li><a href="#XM">XM</a> &mdash; Stepper Move, for Mixed-axis Geometries</li>
         </ul>
-
+  
         <p/>
         <p/>
-
+       
         <hr class="short" />
+   
         <h4><a name="A"></a>"A" &mdash; Analog value get</h4>
-
+ 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -320,15 +301,9 @@
               The channel number and ADC value are both padded to 2 and 4 characters respectively in the A response.
             </p>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
-
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
-          </li>
-
           <li>
             NOTE 1: The EBB's analog inputs are only rated for up to 3.3 V. Be careful not to put higher voltages on them (including 5 V) or you may damage the pin.
           </li>
@@ -336,17 +311,17 @@
             NOTE 2: If you connect an ADC pin to GND (0.0 V) it will likely not read exactly 0. It will be a bit higher than that. (A typical value is 0023.) This is because of the way that the analog input reference voltages are supplied to the microcontroller.
           </li>
           <li>
-            <span style="font-weight: bold;">Unchanged since firmware v2.2.3.
+            <span style="font-weight: bold;">Version History:</span> For firmware versions prior to v2.2.3, a different "A" query format is used, identical to the the UBW "A" query. (See <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">UBW documentation</a> for details.) These queries were rewritten for v2.2.3, with the AC command added and the A query modified to return a list that includes the channel number as well as the ADC value for each channel.
           </li>
         </ul>
    
         <hr class="short" />
+    
         <h4><a name="AC"></a>"AC" &mdash; Analog Configure</h4>
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>AC&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -373,22 +348,21 @@
    
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>BL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span>No response</li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span>No response</li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>Enter bootloader mode.</p>
             <p>
-              This command turns off interrupts and jumps into the bootloader, so that new firmware may be uploaded. This particular method of entering bootloader mode is unique in that no physical button presses are required. Once the EBB receives this command, no response is sent back to the PC.
-            </p>
+              This command turns off interrupts and jumps into the bootloader, so that new firmware may be uploaded. This particular method of entering bootloader mode is unique in that no physical button presses are required.
+            </p>  
             <p>
               Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A special bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>
+            <span style="font-weight: bold;">Version History:</span>  
             Added in v1.9.5.
             <p>
               This command will ONLY work if you have a EBB bootloader version later than 7/3/2010 (the version released on 7/3/2010 has a distinct LED blink mode - the USB LED
@@ -398,15 +372,15 @@
         </ul>
 
         <hr class="short" />
+
         <h4><a name="C"></a>"C" &mdash; Configure (pin directions)</h4>
 
         <ul>
           <li>
-            <span style="font-weight: bold;">Command:</span>
+            <span style="font-weight: bold;">Command:</span> 
             <code>C,<i>PortA_IO</i>,<i>PortB_IO</i>,<i>PortC_IO</i>,<i>PortD_IO</i>,<i>PortE_IO</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>C&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -431,50 +405,55 @@
             </p>
           </li>
         </ul>
-
+  
         <hr class="short" />
-        <h4><a name="CS"></a>"CS" &mdash; Clear Step position</h4>
 
+        <h4><a name="CN"></a>"CN" &mdash; Clear node count [obsolete]</h4>
+      
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>CN&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Removed, as of v1.9.5 </li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Description:</span> 
+            <p>Clear the value of the Node Counter.</p>
+            <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
+          </li>
+          <li><span style="font-weight: bold;">Version History:</span> Obsolete.
+            <p>Added in v1.9.3, removed in v1.9.5</p>
+          </li>
+        </ul>
+       
+        <hr class="short" />
+        
+        <h4><a name="CS"></a>"CS" &mdash; Clear Step position</h4>      
+        
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>CS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>CS&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
-            <span style="font-weight: bold;">Description:</span>
+            <span style="font-weight: bold;">Description:</span> 
             <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
             <p>See the <code><a href="#QS">QS</a></code> command for a description of the global step positions.</p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>
+            <span style="font-weight: bold;">Version History:</span>  
             <p>Added in v2.4.3</p>
           </li>
         </ul>
 
         <hr class="short" />
+
         <h4><a name="CK"></a>"CK" &mdash; Check Input</h4> 
         
         <ul>
           <li>
             <span style="font-weight: bold;">Command:</span> <code>CK,<i>pVal_1</i>,<i>pVal_2</i>,<i>pVal_3</i>,<i>pVal_4</i>,<i>pVal_5</i>,<i>pVal_6</i>,<i>pVal_7</i>,<i>pVal_8</i>&lt;CR&gt;</code>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Response (future mode):</span>
-            <p><code>CK&lt;NL&gt;</code></p>
-            <p><code>Param1=</code><i>pVal_1</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param2=</code><i>pVal_2</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param3=</code><i>pVal_3</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param4=</code><i>pVal_4</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param5=</code><i>pVal_5</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param6=</code><i>pVal_6</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param7=</code><i>pVal_7</i><code>&lt;NL&gt;</code></p>
-            <p><code>Param8=</code><i>pVal_8</i><code>&lt;NL&gt;</code></p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Response (legacy mode; default):</span>
-            <p><code>&lt;CR&gt;&lt;NL&gt;</code></p>
+            <span style="font-weight: bold;">Response:</span>
             <p><code>Param1=</code><i>pVal_1</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param2=</code><i>pVal_2</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
             <p><code>Param3=</code><i>pVal_3</i><code>&lt;CR&gt;&lt;NL&gt;</code></p>
@@ -500,7 +479,7 @@
             </ul>
           </li>
           <li>
-            <span style="font-weight: bold;">Description:</span>
+            <span style="font-weight: bold;">Description:</span> 
             <p>
               This command is used to test out the various parameter parsing routines in the EBB. Each parameter is a different data type. The command simply prints out the values it parsed to allow the developer to confirm that the parsing code is working properly.
             </p>
@@ -509,219 +488,78 @@
           </li>
         </ul>
 
-
         <hr class="short" />
-        <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4>
+     
+        <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4> 
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>CU,<i>Param_Number</i>,<i>Param_Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode): </span><code>CU&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response: </span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions: </span>All</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>Param_Number</i> : See below for acceptable values. Specifies what <i>Param_Value</i> means.</li>
-              <li><i>Param_Value</i> : An integer from -32768 to 32767. Acceptable values depend on value of <i>Param_Number</i></li>
+              <li><i>Param_Number</i> The value 1 or 2. Specifies what <i>Param_Value</i> means.</li>
+              <li><i>Param_Value</i> An integer from -32768 to 32767. Acceptable values depend on value of <i>Param_Number</i></li>
             </ul>
           </li>
           <li>
-            <span style="font-weight: bold;">Description:</span>
+            <span style="font-weight: bold;">Description:</span> 
             <p>
-              The <code>CU</code> command allows for configuring various run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.
+              This command allows for configuring some run time options. The configuration options chosen with this command do not survive a reboot, and they will return to their default values on a reset or boot.
             </p>
             <p>
               <ul>
-                <li>
-                  <code>Param_Number</code> = 1 : <b>Enable Command Response</b>
-                  <p>
-                    This sub-command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back. This sub-command has no effect when Future Syntax Mode is active.
-                  </p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 0, then <code>OK</code> response to commands is disabled.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 2 : <b>Enable Command Parameter Limit Check</b>
-                  <p>
-                    Turning off the limit checking for the stepper motor motion commands will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier. It will also slightly speed up the command parsing of these commands.
-                  </p>
-                  <ul>
-                    <li>
-                      If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>) will not perform any parameter limit checking.
-                    </li>
-                    <li>
-                      If <code>Param_Value</code> = 1, then stepper motor motion commands will perform any parameter limit checking (default at boot).
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 3 : <b>Enable Empty FIFO Indication</b>
-                  <p>
-                    Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO. In other words, the LED will light any time there is no motion command waiting to be executed as soon as the current motion command is finished.
-                  </p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, then the red LED will not be used to indicate an empty FIFO (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then the red LED will be used to indicate an empty FIFO.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 10 : <b>Enable Future Syntax Mode</b>
-                  <p>
-                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
-                  </p>
-                  <p>
-                  When the EBB boots up, future syntax mode is disabled; which we can abbreviate as
-                  being in <b>legacy syntax mode</b>.
-                  Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor 
-                  line endings in those responses. However, it is backward
-                  compatible with previous EBB firmware versions. 
-                  </p>
-                  <p>
-                  Whereas legacy syntax mode often (but not always) uses an
-                  <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of a response, 
-                  future syntax mode will always print out the one or two character command,
-                  followed by <code>&lt;NL&gt;</code> if there is no additional data in the response
-                  packet. If there is additional data in the response packet, then the response packet
-                  will consist of the one or two letter command, followed by a comma, then any response
-                  data, then <code>&lt;NL&gt;</code>. 
-                  </p>
-                  <p>
-                    For example, when future syntax mode is turned on, the response to the <code>QR</code> command might be <code>QR,1&lt;NL&gt;</code>. For comparison, the response to the <code>QR</code> when it is off (in legacy syntax mode) would be <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-                  </p>
-                  <p>
-                    Because part of the response back to the PC is generated before the command is executed, changing the syntax mode with <code>CU,10</code> produces a non-standard response. Sending <code>CU,10,1</code> when in legacy mode will result in a response of <code>&lt;NL&gt;</code>. Sending <code>CU,10,0</code> when in future mode will result in a response of <code>CUOK&lt;CR&gt;&lt;NL&gt;</code>. (For future compatibility of your code, you may want to ensure that either response is acceptable.)
-                  </p>
-                  <ul>
-                    <li>If <code>Param_Value</code> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 50 : <b>Auto Enable Motors</b>
-                  <p>
-                    The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you do turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
-                  </p>
-                  <ul>
-                    <li>
-                      If <code>Param_Value</code> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motion command.
-                    </li>
-                    <li>
-                      If <code>Param_Value</code> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 51 : <b>Limit Switch Mask</b>
-                  <p>
-                    If the Limit Switch Mask is nonzero, the PortB pin states will be checked every 40 &mu;s. For any bit in the mask which is set, if that pin's state matches the corresponding bit state in the Limit Switch Target, then a Limit Switch Stop will be executed immediately.
-                  </p>
-                  <p>
-                    A Limit Switch Stop terminates any currently executing motion command and deletes any motion command in the motion FIFO. Further, new stepper motion commands will be ignored until the condition is cleared. To clear the Limit Switch Stop condition, set the Limit Switch Mask value to zero with <code>CU,51,0</code>. The Limit Switch Stop condition can also be cleared by executing any <a href="#EM">EM</a> command or by resetting (e.g., rebooting) the EBB.
-                  </p>
-                  <p>
-                    If Limit Switch Replies are enabled (<code>CU,53,1</code>) then a Limit Switch Stop will also cause the sending of a packet from the EBB. (See the Limit Switch Replies setting below.)
-                  </p>
-                  <ul>
-                    <li>
-                      <code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at reset, thus disabling the Limit Switch feature.
-                    </li>
-                    <li>
-                      <span style="font-weight: bold;">Example 1:</span>
-                      A limit switch is connected to PortB pin 2 such that it is normally high but the switch closure brings the pin low. Send <code>CU,52,0</code> to set the target value of bit 2 to a 0, then <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use <code>CU,51,4</code> to set the mask value for bit 2, arming the limit switch system. If, at some point, subsequent stepper motion commands were to create motion that closed the limit switch, that would trigger a Limit Switch Stop and send a Limit Switch Reply. Before any further motion can occur, the PC would send a <code>CU,51,0</code> command to clear the limit switch condition.
-                    </li>
-                    <li>
-                      <span style="font-weight: bold;">Example 2:</span>
-                      There are three limit switches on PortB pins 2, 5 and 7. Each is normally low and high once closed. Send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target, and <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use  <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask, which enables the feature. If any of the three limit switches closes, the Limit Switch Stop would occur and the Limit Switch Reply would be sent. If it is important to know exactly which limit switch was the one that triggered the Limit Switch Stop, examine the response packet from the Limit Switch Reply.
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 52 : <b>Limit Switch Target</b>
-                  <p>
-                    The Limit Switch Target is used along with the Limit Switch Mask (<code>CU,51</code>) to configure the limit switch function. For bits that are set in the limit switch mask, those portB digital input values are compared to the corresponding bits in this Limit Switch Target. If the input value matches the target value, the Limit Switch Stop will be triggered.
-                  </p>
-                  <ul>
-                    <li>
-                      <code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Target value. The default value for the Limit Switch Target is 0 at reset.
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                <code>Param_Number</code> = 53 : <b>Enable Limit Switch Reply</b>
-                  <p></p>
-                  <ul>
-                    <li>
-                      If <code>Param_Value</code> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boo
-                    </li>
-                    <li>
-                      If <code>Param_Value</code> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
-                  <p>This is an internal software debugging and testing command.</p>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 251 : <b>Enable USART ISR Debug</b>
-                  <p>This is an internal software debugging and testing command.</p>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 252 : <b>Enable USART ISR Debug Full</b>
-                  <p>This is an internal software debugging and testing command.</p>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 253 : <b>Enable UART Command Debug</b>
-                  <p>This is an internal software debugging and testing command.</p>
-                </li>
-                <li>
-                  <code>Param_Number</code> = 254 : <b>Enable Lock Up Mode</b>
-                  <p>This is an internal software debugging and testing command.</p>
-                </li>
+                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
+                <li>When <i>Param_Number</i> = 1 : If <i>Param_Value</i> = 1, then <code>OK</code> response to commands is enabled (default).</li>
+                <p>Turning off the <code>OK</code> response can help speed up the execution of many commands back to back.</p>
+                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 0, then <code>SM</code> command parameter limit checking is disabled.</li>
+                <li>When <i>Param_Number</i> = 2 : If <i>Param_Value</i> = 1, then <code>SM</code> command parameter limit checking is enabled (default).</li>
+                <p>
+                  Turning off the limit checking for the <code>SM</code> command will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier.
+                </p>
+                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 0, then the red LED will not be used to indicate an empty FIFO (default).</li>
+                <li>When <i>Param_Number</i> = 3 : If <i>Param_Value</i> = 1, then the red LED will be used to indicate an empty FIFO.</li>
+                <p>
+                  Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO.
+                </p>
               </ul>
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
-            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code>, <code>CU,251</code>, <code>CU,252</code>, <code>CU,253</code> and <code>CU,254</code> were added in v3.0.0</p>
           </li>
-
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
-
-
         </ul>
 
         <hr class="short" />
-        <h4><a name="EM"></a> "EM" &mdash; Enable Motors</h4>
 
+        <h4><a name="EM"></a> "EM" &mdash; Enable Motors</h4>
+ 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>Enable1</i>,<i>Enable2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><code>EM&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <p>
-              For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor. This command is also used to set the step resolution of the stepper motors.
+                For each stepper motor (<i>Enable1</i> for motor1 and <i>Enable2</i> for motor2), an integer in the range of 0 through 5, inclusive. An <i>Enable</i> value of 0 will disable that motor (making it freewheel), while a nonzero value will enable that motor. This command is also used to set the step resolution of the stepper motors.
             </p>
             <p>The allowed values of <i>Enable1</i> are as follows:</p>
-            <ul>
-              <li>0: Disable motor 1 </li>
-              <li>1: Enable motor 1, set global step mode to 1/16 step mode (default step mode upon reset)</li>
-              <li>2: Enable motor 1, set global step mode to  1/8 step mode</li>
-              <li>3: Enable motor 1, set global step mode to  1/4 step mode</li>
-              <li>4: Enable motor 1, set global step mode to  1/2 step mode</li>
-              <li>5: Enable motor 1, set global step mode to  full step mode</li>
-            </ul>
+              <ul>
+                <li>0: Disable motor 1 </li>
+                <li>1: Enable motor 1, set global step mode to 1/16 step mode (default step mode upon reset)</li>
+                <li>2: Enable motor 1, set global step mode to  1/8 step mode</li>
+                <li>3: Enable motor 1, set global step mode to  1/4 step mode</li>
+                <li>4: Enable motor 1, set global step mode to  1/2 step mode</li>
+                <li>5: Enable motor 1, set global step mode to  full step mode</li>
+              </ul>
             <p>The allowed values of <i>Enable2</i> are as follows:</p>
-            <ul>
-              <li>0: Disable motor 2</li>
-              <li>1 through 5: Enable motor 2 (at whatever the previously set global step mode is)</li>
-            </ul>
+              <ul>
+                <li>0: Disable motor 2</li>
+                <li>1 through 5: Enable motor 2 (at whatever the previously set global step mode is)</li>
+              </ul>
           </li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>Enable or disable stepper motors and set step mode.</p>
@@ -744,56 +582,64 @@
               Note that this version of the command is for current versions of the EBB hardware, v1.2 and newer. (This includes all versions manufactured since September 2010.)
             </p>
           </li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set global step mode to 1/8 enable motor 1, and do not change motor 2's enable status. (<i>Enable2</i> is optional)</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set global step mode to 1/4 and enable both motors.</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode</li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable motor 1, set global step mode to 1/16th and disable motor 2
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set global step mode to 1/8 enable motor 1, and do not change motor 2's enable status. (<i>Enable2</i> is optional)
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Set global step mode to 1/8 enable motor 1, and do not change motor 2's enable status. (<i>Enable2</i> is optional)
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set global step mode to 1/4 and enable both motors.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,3,3\r</code> Set global step mode to 1/4 and enable both motors.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,0,1\r</code> Enable motor 2, disable motor 1, and continue to use previously set global step mode
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,0,0\r</code> Disable both motors (both will freewheel)
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.8.0 
+            <span style="font-weight: bold;">Version History:</span>  
+            <p>Starting with v2.8.0, this command is placed on the motion FIFO along with the other motion commands so that
+            it occurs at a precise time in the motion sequence.</p>
+            <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
           </li>
         </ul>
       
+        <hr class="short" />
 
+     
+        <h4>"EM" &mdash; Enable Motors (Legacy version)</h4>
+ 
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>EM,<i>EnableAxis1</i>[,<i>EnableAxis2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Arguments:</span> For each stepper motor (<i>EnableAxis1</i> or <i>EnableAxis2</i>), an integer in the range of 0 through 4, inclusive. The allowed values and their effects are as follows:
+            <ul>
+              <li>0: Disable that axis (both axis disabled by default at boot)</li>
+              <li>1: Enable in 1/8 step mode</li>
+              <li>2: Enable in 1/4 step mode</li>
+              <li>3: Enable in 1/2 step mode</li>
+              <li>4: Enable in full step mode</li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>Enable or disable stepper motors and set step size.</p>
+            <p>
+              Each stepper motor axis may be enabled (energized) or disabled. When disabled, the driver will stop sending current to the motor, so the motor will "freewheel" &mdash; it will not be actively driven, but instead will present little resistance to being turned by external torques.
+            </p>
+            <p>
+              When enabled, the stepper motor axes may be configured to be in whole, half, quarter, or eighth step sizes. In a motor with a native resolution of 200 steps per revolution, these settings would produce effective stepping resolutions of 200, 400, 800, and 1600 steps per revolution, respectively. Using fine sub-steps ("microstepping") gives higher resolution at the cost of decreasing step size reproducibility. 
+            </p>
+            <p>Note that this version of the command is only for legacy EBB hardware, v1.1. </p>
+          </li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,1,0\r</code> Enable Axis 1 in 1/8 step mode, and disable Axis 2</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>EM,2\r</code> Enable Axis 1 in 1/4 step mode, disable Axis 2</li>
+        </ul>
          
         <hr class="short" />
+
         <h4><a name="ES"></a>"ES" &mdash; E Stop</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><br /><code>ES,<i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><br /><code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span><br />
+            <code><i>interrupted</i>,<i>fifo_steps1</i>,<i>fifo_steps2</i>,<i>steps_rem1</i>,<i>steps_rem2</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -817,83 +663,97 @@
               </li>
             </ul>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>ES,0,0,0,0,0&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <span style="font-weight: bold;">Example Return Packet:</span>
             <code>0,0,0,0,0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that no SM command was executing at the time, and no SM command was in the FIFO.
           </li>
-
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>ES,1,50,1200,18634,9848&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
+            <span style="font-weight: bold;">Example Return Packet:</span>
+              <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
-            <code>1,50,1200,18634,9848&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code> Indicates that a command was interrupted, and that the FIFO had steps of 50 and 1200 steps queued to execute next (in axes 1 and 2), as well as 18634 and 9848 steps remaining to move (in axes 1 and 1) on the current move.
-          </li>
-
-          <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.8.0
+            <span style="font-weight: bold;">Version History:</span>
+            <ul>
+              <li>
+                <p>v2.8.0</p>
+                <p>
+                  In versions v2.8.0 and beyond, the optional <code>DisableMotors</code> parameter is accepted.
+                </p>
+              </li>
+              <li>
+                <p>Added in v2.2.7</p>
+                <p>
+                  Prior to v2.2.9, this query will return a "1" if it had to stop an in-progress move command, or if it had to delete a move command from the FIFO. This could indicate that some steps might be lost, since the host application may think that moves have already completed, when in fact they were aborted partway through. It will return a "0" if no motor move commands were deleted or aborted.
+                </p>
+                <p>Returned values:</p>
+                <ul>
+                  <li>
+                    <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If an in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                  <li>
+                    <code>0&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>: If no in-progress move commands was interrupted or removed from the FIFO
+                  </li>
+                </ul>
+              </li>
+            </ul>
           </li>
         </ul>
-
+    
         <hr class="short" />
+
         <h4><a name="HM"></a>"HM" &mdash; Home or Absolute Move</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span><code>HM,<i>StepFrequency</i>[,<i>Position1</i>,<i>Position2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><code>HM&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span>
+          <code>HM,<i>StepFrequency</i>[,<i>Position1</i>,<i>Position2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span>  <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li>
-              <i>StepFrequency</i> is an unsigned integer in the range from 2 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.
-            </li>
-            <li>
-              <i>Position1</i> and <i>Position2</i> (optional) are signed integers in the range of &plusmn;4,294,967. If provided, they represents the position, relative to home, that motor1 and motor 2 will travel to.
-            </li>
+            <li> <i>StepFrequency</i> is an unsigned integer in the range from 2 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.</li>
+            <li> <i>Position1</i> and <i>Position2</i> (optional) are signed integers in the range of &plusmn;4,294,967. If provided, they represents the position, relative to home, that motor1 and motor 2 will travel to.</li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
               This command will cause the two stepper motors to move from their current position, as defined by the global step counters, either to Home (0, 0) or to a new position that you specify relative to the Home position. It is worth noting that this is the only EBB motion command for which you can specify an absolute position to move to; all other motion commands are relative to the current position. This command is intended for "utility" moves, to or from a specific point, rather than for smooth or fast motion.
             </p>
+            <p>The current position at any given moment is stored in the global step counters, and can be
+                read with the <code><a href="#QS">QS</a></code> query. This position <i>does not</i> refer to an absolute position in physical space, but rather the location where the motors were enabled.
+                The global step counters are reset to zero
+                whenever the motors are enabled, disabled, or have their microstep size changed (all via the <code>EM</code> command). The step counter can also be cleared directly by
+            the <code><a href="#CS">CS</a></code> command.
+                 </p>
             <p>
-              The current position at any given moment is stored in the global step counters, and can be read with the <code><a href="#QS">QS</a></code> query. This position <i>does not</i> refer to an absolute position in physical space, but rather the location where the motors were enabled. The global step counters are reset to zero whenever the motors are enabled, disabled, or have their microstep size changed (all via the <code>EM</code> command). The step counter can also be cleared directly by the <code><a href="#CS">CS</a></code> command.
-            </p>
-            <p>
-              The step rate at which the move should happen is specified as a parameter. If no destination position is specified, then the move is towards the Home position (0, 0).
+                The step rate at which the move should happen is specified as a parameter. If no destination position is specified, then the move is towards the Home position (0, 0).
             </p>
             <p>
               Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has many steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
             </p>
-            <p>
-              The command will wait until all previous motor motion ceases before executing. There is also a further delay, typically about 5 ms, between when the <code>HM</code> command begins execution and when its motion actually begins.
+            <p>The command will wait until all previous motor motion ceases before executing. There is also a further delay,
+                 typically about 5 ms, between when the <code>HM</code> command begins execution and when its motion actually begins.
             </p>
             <p>
               If either of the global step counter values or the distance to move is greater than 4,294,967, the command will error out. If you need to move a larger distance, multiple normal moves back to zero can be sent to accomplish the same thing.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.7.0
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.6.2, with only the ability to move to the Home position. Expanded in v2.7.0 to
+            allow for moves to any arbitrary position with respect to home.
           </li>
         </ul>
-
+    
         <hr class="short" />
+
         <h4><a name="I"></a>"I" &mdash; Input (digital)</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>I&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>I,<i>PortA</i>,<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -906,62 +766,56 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>I,128,255,130,000,007&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <span style="font-weight: bold;">Example Return Packet:</span>
             <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-
         </ul>
 
         <hr class="short" />
+
         <h4><a name="LM"></a>"LM" &mdash; Low-level Move, Step-limited</h4>
 
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span><code>LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>LM&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+      <ul>
+          <li><span style="font-weight: bold;">Command:</span> 
+            <code>
+              LM,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li>
-              <i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.
-            </li>
-            <li>
-              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.
-            </li>
-            <li>
-              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
-            </li>
-            <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            <li><i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.</li>
+            <li><i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.       </li>
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
           </ul>
           <li>
-            <span style="font-weight: bold;">Description:</span>
+            <span style="font-weight: bold;">Description:</span> 
             <p>
-              <b>Overview:</b> This low-level command causes one or both motors to move for a given number of steps, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of steps have been made, and the command is complete when the both motors have reached their targets.
+            <b>Overview:</b> This low-level command causes one or both motors to move for a given number of steps, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of steps have been made, and the command is complete when the both motors have reached their targets.
+            </p> <p>
+             This 
+            command, as compared to the similar <code><a href="#LT">LT</a></code> command, allows you to
+            specify an exact step position, but is more difficult to use since the moves for the
+            two axes may complete at different times.
+             </p> <p>
+            This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.) 
+            While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
             </p>
             <p>
-              This command, as compared to the similar <code><a href="#LT">LT</a></code> command, allows you to specify an exact step position, but is more difficult to use since the moves for the two axes may complete at different times.
-            </p>
-            <p>
-              This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved. (See <a href="https://github.com/evil-mad/EggBot/issues/73">GitHub issue #73</a> for more information about the motivation for this command.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
-            </p>
-            <p>
-              <b>Methods and consequences:</b>
-              Each axis has a separate 32 bit Accumulator to control its timing. When the <code>LM</code> command is called, the Accumulator may be initialized to zero or left alone, depending on the value of the <i>Clear</i> argument. The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it. Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:
-            </p>
-          <ol>
-          <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
-            <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
-            <li>The value of <i>Rate</i> is added to the Accumulator.</li>
-            <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
+	         <b>Methods and consequences:</b> 
+
+	         Each axis has a separate 32 bit Accumulator to control its timing. When the <code>LM</code> command is called, the Accumulator may be initialized to zero or left alone, depending on the value of the <i>Clear</i> argument.
+            The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 from it.
+	       Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:</p>
+	         <ol>
+    	     <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
+    	     <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
+    	     <li>The value of <i>Rate</i> is added to the Accumulator.</li>
+    	     <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup> (2147483648 decimal; 0x80000000 hex), then:
 
               <ul>
               <li>The motor on that axis moves one step.</li>
@@ -978,153 +832,218 @@
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
             </p>
+
             <p>
-              <b>Computing values:</b> The value of <i>Rate</i> can be computed from a motor step frequency <i>F</i>, in Hz, as:
+	        <b>Computing values:</b> 
+              The value of <i>Rate</i> can be computed from a motor step frequency <i>F</i>, in Hz, as:
             </p>
             <ul class="no_bullets">
               <li><i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s  &times; <i>F</i> , or</li>
               <li><i>Rate</i> &asymp; 85,899.35 s &times; <i>F</i>.</li>
             </ul>
+	        <p>In the case of constant velocity, where <i>Accel</i> is zero, the value of <i>Rate</i> can thus be computed from the number of steps and desired total travel time <i>t</i>, in seconds, as
+    	        <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s &times ( <i>Steps</i> / <i>t</i> ), or
+    	        <i>Rate</i> &asymp; 85,899.35 s &times; ( <i>Steps</i> / <i>t</i> ).
+    	        This computation (along with most of the others in the section) should be performed as a floating point operation, or at least with 64 bit precision, since <i>Steps</i> &times; 2<sup>31</sup> may take up to 63 bits.
+	        </p>
             <p>
-              In the case of constant velocity, where <i>Accel</i> is zero, the value of <i>Rate</i> can thus be computed from the number of steps and desired total travel time <i>t</i>, in seconds, as <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s &times ( <i>Steps</i> / <i>t</i> ), or <i>Rate</i> &asymp; 85,899.35 s &times; ( <i>Steps</i> / <i>t</i> ). This computation (along with most of the others in the section) should be performed as a floating point operation, or at least with 64 bit precision, since <i>Steps</i> &times; 2<sup>31</sup> may take up to 63 bits.
-            </p>
-            <p>
-              The <i>Accel</i> value is added to <i>Rate</i> every 40 &mu;s. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. The theoretical final "velocity rate" after <i>T</i> intervals of 40 &mu;s each, starting with initial rate <i>Rate</i> is:
-            </p>
+              The <i>Accel</i> value is added to <i>Rate</i> every 40 &mu;s. It can be positive or negative. This is used to cause an axis to accelerate or decelerate during a move. The theoretical final "velocity rate" after <i>T</i> intervals of 40 &mu;s each, starting with initial rate <i>Rate</i> is:</p>
             <ul class="no_bullets">
               <li><i>Rate</i><sub>Final</sub> = <i>Rate</i> + <i>Accel</i> &times; <i>T</i></li>
             </ul>
-            <p>
-              The value of <i>Accel</i> can be calculated from the initial value <i>Rate</i>, its desired final value <i>Rate</i><sub>Final</sub>, and the number <i>T</i> of 40 &mu;s intervals that the movement will take:
+            <p>The value of <i>Accel</i> can be calculated from the initial value <i>Rate</i>,
+                its desired final value <i>Rate</i><sub>Final</sub>, and the number <i>T</i>
+                of 40 &mu;s intervals that the movement will take:
             </p>
             <ul class="no_bullets">
               <li><i>Accel</i> = ( <i>Rate</i><sub>Final</sub> - <i>Rate</i> ) / <i>T</i></li>
             </ul>
             <p>
-              If an LM command begins with a specified <i>Rate</i> and <i>Accel</i>, as well as a (possibly unknown) initial Accumulator value <i>C</i><sub>0</sub>, then the Accumulator value <i>C</i><sub>T</sub> after <i>T</i> intervals of 40 &mu;s each is given by:
+            If an LM command begins with a specified <i>Rate</i> and <i>Accel</i>,
+            as well as a (possibly unknown) initial Accumulator value <i>C</i><sub>0</sub>,
+            then the Accumulator value <i>C</i><sub>T</sub> after 
+            <i>T</i> intervals of 40 &mu;s each is given by:
             </p>
             <ul class="no_bullets">
-              <li><i>C</i><sub>T</sub> = <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i> + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup></li>
+              <li><i>C</i><sub>T</sub> = <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i>
+              + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup>
+              </li>
             </ul>
             <p>
-              (This formula may look familiar from elementary physics, as it has the form: <i>x</i>(t) = <i>x</i><sub>0</sub> + <i>v</i><sub>0</sub><i>T</i> + (1/2) <i>a</i><i>T</i><sup>2</sup>.) The number of motor steps traveled along the axis during the command can be found from this by dividing the Accumulator value <i>C</i><sub>T</sub> by 2<sup>31</sup> and rounding down the result. Thus the step count after <i>T</i> intervals is given by:
+            (This formula may look familiar from elementary physics, as it has the form:
+            <i>x</i>(t) = <i>x</i><sub>0</sub> + <i>v</i><sub>0</sub><i>T</i>
+              + (1/2) <i>a</i><i>T</i><sup>2</sup>.)
+              The number of motor steps traveled along the axis during the command can be found
+              from this by dividing the Accumulator value <i>C</i><sub>T</sub> by 2<sup>31</sup>
+              and rounding down the result. Thus the step count after <i>T</i> intervals is given by:
             </p>
             <ul class="no_bullets">
-              <li><i>Steps</i> = <span style="font-weight: bold;">Floor</span>( ( <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i> + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup> ) / 2<sup>31</sup> ) 
-            </ul>
+              <li><i>Steps</i> = <span style="font-weight: bold;">Floor</span>( (
+              <i>C</i><sub>0</sub> + <i>Rate</i> &times; <i>T</i>
+              + (1/2) <i>Accel</i> &times; <i>T</i><sup>2</sup> ) / 2<sup>31</sup> ) 
+              </ul>
             <p>
-              This is a quadratic equation, and the exact movement time for a given number of steps can be computed by solving for <i>T</i> using the quadratic formula. If you already know the final speed, then the approximate movement time <i>t</i> in seconds can be found by dividing the number of steps by the average step frequency over the move:
+              This is a quadratic equation, and the exact movement time for a given number of
+              steps can be computed by solving for <i>T</i> using the quadratic formula.
+
+             If you already know the final speed, then the approximate movement time <i>t</i> in seconds can be found by dividing the number of steps by the average step frequency over the move:
             </p>
             <ul class="no_bullets">
-              <li><i>t</i> &asymp; <i>Steps</i>  /  <i>F</i><sub>AVE</sub> = 2 &times;  <i>Steps</i> / ( <i>F</i><sub>0</sub> + <i>F</i><sub><i>t</i></sub> )</li>
+              <li><i>t</i> &asymp; <i>Steps</i>  /  <i>F</i><sub>AVE</sub> = 
+              2 &times;  <i>Steps</i> / ( <i>F</i><sub>0</sub> + <i>F</i><sub><i>t</i></sub> )
+              </li>
             </ul>
-            <p>
-              Here, <i>F</i><sub>0</sub> and <i>F</i><sub><i>t</i></sub> are the initial and final step frequencies <i>F</i> for the move. From this, we can also calculate the approximate move duration <i>T</i> in terms of 40 &mu;s intervals, using <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s  &times; <i>F</i> and <i>t</i> = 40 &mu;s &times; <i>T</i>:
+            <p>Here, <i>F</i><sub>0</sub> and <i>F</i><sub><i>t</i></sub> are the initial and
+            final step frequencies <i>F</i> for the move. From this, we can also
+            calculate the approximate move duration <i>T</i> in terms of 40 &mu;s intervals,
+            using <i>Rate</i> = 2<sup>31</sup> &times; 40 &mu;s  &times; <i>F</i> and 
+            <i>t</i> = 40 &mu;s &times; <i>T</i>:
+            
             </p>
             <ul class="no_bullets">
-              <li><i>T</i> &asymp; 2<sup>31</sup> &times; <i>Steps</i> / <i>R</i><sub>AVE</sub> = 2<sup>32</sup> &times; <i>Steps</i> / ( <i>Rate</i> + <i>Rate</i><sub>Final</sub> )</li>
+              <li><i>T</i> &asymp; 2<sup>31</sup> &times; <i>Steps</i> / <i>R</i><sub>AVE</sub> = 
+              2<sup>32</sup> &times; <i>Steps</i> / ( <i>Rate</i> + <i>Rate</i><sub>Final</sub> )
+              </li>
             </ul>
+            
           </li>
           <li>
-            <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. We then have the following LM command:
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. By the above formulas, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+     We then have the following LM command:
             <ul class="no_bullets">
               <li><code>LM,3865471,60,1732,0,0,0</code></li>
             </ul>
             Notice that we are only using axis 1 in this example. You can of course use both axes at the same time, but you usually need to be careful that the times for each axis match up.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> 
+            This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
+            <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> 
+            This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,500,0,85899346,250,0\r</code> This example will step both axis at a 1 ms/step rate, and axis 1 will step for 500 steps and axis 2 will step for 250 steps. This is <i>usually</i> not what you want in practice; it's usually better if the moves for each axis terminate at the same time. This is a "constant-rate" move without acceleration or deceleration on either axis.
+            <span style="font-weight: bold;">Example 4:</span> <code>LM,85899346,500,0,85899346,250,0\r</code> 
+            This example will step both axis at a 1 ms/step rate, and axis 1 will step for 500 steps and axis 2 will step for 250 steps. This is <i>usually</i> not what you want in practice; it's usually better if the moves for each axis terminate at the same time. This is a "constant-rate" move without acceleration or deceleration on either axis.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 5:</span> <code>LM,17180814,6,0,57266231,20,0\r</code> This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis.
+            <span style="font-weight: bold;">Example 5:</span> <code>LM,17180814,6,0,57266231,20,0\r</code> 
+            This example will create a 30 ms long move, with axis 1 stepping 6 times and axis 2 stepping 20 times. There is no acceleration or deceleration on either axis. </li>
+          <li>
+            <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> 
+            This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 6:</span> <code>LM,42950000,50,13400,0,0,0\r</code> This example will start with axis 1 stepping at 500 steps/second and end with axis 1 stepping at 800 steps/second. It lasts for a duration of 50 steps. Axis 2 does not move. The move will take 77 ms to complete.
+            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms.
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.7.0.
+            <span style="font-weight: bold;">Version History:</span>  
+            First added in v2.5.0 with partial functionality, and revised in v2.5.3.
+             Clear parameter added in v2.7.0, along with updates to parameter definitions and detailed behavior.
+            This command should only be considered to be fully functional as of v2.7.0.
           </li>
         </ul>
-
+      
         <hr class="short" />
+
+
         <h4><a name="LT"></a>"LT" &mdash; Low-level Move, Time-limited</h4>
 
-        <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>LT&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+      <ul>
+          <li><span style="font-weight: bold;">Command:</span> 
+            <code>
+              LT,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Rate2</i>,<i>Accel2</i>[,<i>Clear</i>]&lt;CR&gt;</code>
+          </li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.7.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li>
-              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+            <li><i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.</li>
+            <li><i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn.
+            The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
             </li>
-            <li>
-              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn. The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
-            </li>
-            <li>
-              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
-            </li>
-            <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            <li><i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.</li>
+            <li><i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
             </li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              <b>Overview:</b> This low-level command causes one or both motors to move for a given duration of time, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of time intervals has elapsed.
-            </p>
-            <p>This command, as compared to the similar <code><a href="#LM">LM</a></code> command, makes it much easier to construct motion sequences that smoothly follow one another, but trades off the ability to exactly specify a destination in the process. You may wish to use sequences of LT commands, followed by a <code><a href="#HM">HM</a></code> command, in order to both move quickly and end up at a specific location.
-            </p>
-            <p>
-              This is a low-latency command where the input values are parsed and passed directly into motion control FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command throughput can be achieved.  While individual movement commands may be as short as a single 40 &mu;s time interval, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
-            </p>
-            <p>
-              <b>Methods and consequences:</b> The <code>LT</code> function is essentially identical to the <code><a href="#LM">LM</a></code> in every aspect of its operation <i>except</i> that it terminates after a set number of intervals rather than after a set number of steps. That is to say, in the sequence of operations executed every 40 &mu;s, when the check is made to see if the move is complete, the time elapsed &mdash; not the step count &mdash; is checked.
-            </p>
-            <p>
-              With that in mind, all of the formulas from the description of the <code><a href="#LM">LM</a></code> command, for computing step rates, acceleration, distance, and time are all still applicable when working with <code>LT</code>.
-            </p>
-            <p>
-              Once exception should be noted: Since there is no <i>Step</i> argument in this command to indicate the direction that each motor should turn, the input <i>Rate</i> arguments are given a sign. The sign of <i>Rate</i> indicates <i>only</i> which direction the motor should turn. Only its absolute value |<i>Rate</i>| is input to the routines that calculate and manage the motor step frequency. When using the formulas from the <code><a href="#LM">LM</a></code> command description, use the unsigned value |<i>Rate</i>|.
-            </p>
+            <b>Overview:</b> This low-level command causes one or both motors to move for a given duration of time, and allows the option of applying a constant acceleration to one or both motors during their movement. The motion terminates for each axis when the required number of time intervals has elapsed.
+             </p> <p>
+             This 
+            command, as compared to the similar <code><a href="#LM">LM</a></code> command, makes it
+            much easier to construct motion sequences that smoothly follow one another, but trades
+            off the ability to exactly specify a destination in the process. You may wish to use
+            sequences of LT commands, followed by a <code><a href="#HM">HM</a></code> command, in order to
+            both move quickly and end up at a specific location.
+            </p> <p>
+            This is a low-latency command where the input values are parsed and passed directly into motion control
+            FIFO of the EBB. No time is lost doing any math operations or limit checking, so maximum command
+            throughput can be achieved.  While individual movement commands may be as short as a single 40 &mu;s
+            time interval, there are practical limits to the rate at which commands can be issued,
+            as discussed under <a href="#performance">Performance</a>.
+            
+            </p><p>
+	         <b>Methods and consequences:</b>
+	         The <code>LT</code> function is essentially
+	          identical to the <code><a href="#LM">LM</a></code> in every
+	         aspect of its operation
+	         <i>except</i> that it terminates after a set number of intervals rather than after
+	         a set number of steps. That is to say, in the sequence of operations executed every
+	         40 &mu;s, when the check is made to see if the move is complete,
+	         the time elapsed &mdash; not the step count &mdash; is checked.
+	         </p> <p>
+	         With that in mind, all of the formulas from the description of the
+	       <code><a href="#LM">LM</a></code> command, for computing step rates, acceleration,
+	       distance, and time are all still applicable when working with <code>LT</code>.
+	        </p> <p>
+	         Once exception should be noted: Since there is no <i>Step</i> argument in this command to
+	         indicate the direction that each motor should turn, the input <i>Rate</i> arguments
+	         are given a sign. The sign of <i>Rate</i> indicates <i>only</i> which direction the 
+	         motor should turn. Only its absolute value |<i>Rate</i>| is input to the routines
+	         that calculate and manage the motor step
+	         frequency. When using the formulas from the <code><a href="#LM">LM</a></code> command
+	         description, use the unsigned value |<i>Rate</i>|.
+	        </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
+              
+              <span style="font-weight: bold;">Example 1:</span> Suppose that we wanted to start moving an axis at 45 steps/s, and end at 250 steps/s, over a total of 60 steps. Following Example 1 from <code><a href="#LM">LM</a></code>, we know that our starting <i>Rate</i> is 3865471, our ending <i>Rate</i><sub>Final</sub> is 21474836, and our move time is 60/((45 + 250)/2) = 0.4068 seconds (or <i>T</i> = 10169 intervals). We find <i>Accel</i> from the change in <i>Rate</i> over the number of intervals: (21474836 - 3865470)/10169 = 1732. 
+     We then have the following LT command, adding the <code>,3</code> value on the end to clear the Accumulator:
             <ul class="no_bullets">
               <li><code>LT,10169,3865471,1732,0,0,3</code></li>
             </ul>
-            Since this command does not explicitly specify the number of steps to be traveled, you may want to carefully check your math, or use tools like <code><a href="#QS">QS</a></code> or <code><a href="#HM">HM</a></code> command following a move like this.
+            Since this command does not explicitly specify the number of steps to be traveled,
+            you may want to
+            carefully check your math, or use tools like <code><a href="#QS">QS</a></code> or 
+            <code><a href="#HM">HM</a></code> command following a move like this.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
+            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> 
+            This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
+          </li>
+          <li><span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> 
+            This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
           </li>
           <li>
-            <span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span> Added in v2.7.0.
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.7.0.
+
           </li>
         </ul>
       
         <hr class="short" />
+
+
         <h4><a name="MR"></a>"MR" &mdash; Memory Read</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MR,<i>Address</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>MR,<i>Data</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
-
+          <li><span style="font-weight: bold;">Response:</span> <code>MR,<i>Data</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1143,24 +1062,18 @@
             <p>This query would read from memory address 422 and print out its current value.</p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>MR,071&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
+            <span style="font-weight: bold;">Example Return Packet:</span>
             <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-
         </ul>
-
+        
         <hr class="short" />
+
         <h4><a name="MW"></a>"MW" &mdash; Memory Write</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>MW,<i>Address</i>,<i>Data</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>MW&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1179,12 +1092,12 @@
         </ul>
 
         <hr class="short" />
-        <h4><a name="ND"></a>"ND" &mdash; Node Count Decrement</h4>
 
+        <h4><a name="ND"></a>"ND" &mdash; Node Count Decrement</h4>
+      
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ND&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>ND&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1193,16 +1106,15 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>ND</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
-
+                
         <hr class="short" />
+         
         <h4><a name="NI"></a>"NI" &mdash; Node Count Increment</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>NI&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>NI&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1211,16 +1123,15 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>NI</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
-
+     
         <hr class="short"/>
+
         <h4><a name="O"></a>"O" &mdash; Output (digital)</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>O&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1241,14 +1152,15 @@
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="PC"></a>"PC" &mdash; Pulse Configure</h4>
 
         <ul>
           <li>
-            <span style="font-weight: bold;">Command:</span> <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1[,<i>Length2</i>,<i>Period2</i>[,<i>Length3</i>,<i>Period3</i>]]]</i>&lt;CR&gt;</code>
+            <span style="font-weight: bold;">Command:</span>
+            <code>PC,<i>Length0</i>,<i>Period0</i>[,<i>Length1</i>,<i>Period1[,<i>Length2</i>,<i>Period2</i>[,<i>Length3</i>,<i>Period3</i>]]]</i>&lt;CR&gt;</code>
           </li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PC&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1293,17 +1205,23 @@
             <span style="font-weight: bold;">Example:</span> <code>PC,1,2,1,2,1,2,1,2\r</code> After sending a <code>S2,0,4</code> (to turn off RC servo output on pin RB1) and <code>PG,1</code> (to turn on pulse generation), these parameters would cause all four pins (RB0, RB1, RB2, and RB3) to output square waves with a 50% duty cycle and 500 Hz frequency.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.6.6
+            <span style="font-weight: bold;">Version History:</span>
+            <p>
+              Version 2.6.6 and later : The bug preventing some <code>PC</code> changes from acting immediately is fixed and <code>PC/PG</code> work properly.
+            </p>
+            <p>
+              Version 2.6.5 and before : There is a bug in the <code>PC/PG</code> functions which prevent some <code>PC</code> updates from taking effect immediately but instead requiring 64K milliseconds to elapse before the change takes effect.
+            </p>
           </li>
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="PD"></a>"PD" &mdash; Pin Direction</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PD,<i>Port</i>,<i>Pin</i>,<i>Direction</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PD&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1326,12 +1244,12 @@
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="PG"></a>"PG" &mdash; Pulse Go</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PG&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1358,12 +1276,12 @@
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="PI"></a>"PI" &mdash; Pin Input</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PI,<i>Port</i>,<i>Pin</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PI,<i>Value</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>PI,<i>Value</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>PI,<i>Value</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1382,24 +1300,19 @@
           <li>
             <span style="font-weight: bold;">Example:</span> <code>PI,D,2\r</code> This query would read pin RD2 (or Port D, pin 2) as a digital input and return the pin's value.
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span><code>PI,1&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span><code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="PO"></a>"PO" &mdash; Pin Output</h4>
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PO,<i>Port</i>,<i>Pin</i>,<i>Value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>PO&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -1427,31 +1340,34 @@
         </ul>
 
         <hr class="short"/>
+
         <h4><a name="QB"></a>"QB" &mdash; Query Button</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QB,<i>state</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This query checks whether the PRG button on the EBB has been pressed since the last QB query or not. </p>
             <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
-            <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event. B0 is normally pulled high, but if it is taken low, then that registers as though the PRG button itself was pressed. To ensure that a "button press" is registered, ensure that B0 is pulled low for at least 40 microseconds. This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
+            <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event.
+                B0 is normally pulled high, but if it is taken low,
+                then that registers as though the PRG button itself was pressed. 
+                To ensure that a "button press" is registered, ensure that B0 is pulled low for at least 40 microseconds.
+                This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QB</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
-
+     
         <hr class="short" />
+     
         <h4><a name="QC"></a>"QC" &mdash; Query Current</h4>
-
+  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QC&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QC,<i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;NL&gt</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>RA0_VOLTAGE</i>,<i>V+_VOLTAGE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1487,9 +1403,9 @@
               </li>
             </ul>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QC,0394,0300&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>0394,0300&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query has returned values of 394 for RA0_VOLTAGE and 300 for V+_VOLTAGE.</p>
             <p>
               The first returned value, 0394, indicates a voltage of 1.27 V at REF_RA0. This indicates that the maximum motor current is currently set to 0.72 A.
@@ -1498,13 +1414,9 @@
               The second returned value, 0300, indicates a voltage of 0.96 V at the V+ ADC input. Scaling by 9.2 (for the voltage divider on an EBB v2.3) and adding 0.3 V (for the diode drop), this indicates that the "actual" input voltage is about 9.1 V. 
             </p>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0394,0300&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-
-          <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware  2.2.3.
+            <span style="font-weight: bold;">Version History:</span>
+            <p>This query was originally introduced in v2.0.0, but should not be considered functional until version 2.2.3.</p>
             <p>
               Note also that this query only works properly on EBB hardware v1.3 and above. (White EBBs from Evil Mad Scientist are v2.0 or newer, and EBBs from SparkFun are v2.0 and above.)
             </p>
@@ -1512,12 +1424,12 @@
         </ul>
 
         <hr class="short" />
-        <h4><a name="QE"></a>"QE" &mdash; Query motor Enables and microstep resolutions</h4>
 
+        <h4><a name="QE"></a>"QE" &mdash; Query motor Enables and microstep resolutions</h4>
+  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QE,<i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1526,8 +1438,9 @@
               This query reads the current state of the motor enable pins and the microstep resolution pins. It then returns two values which encode the motor enable/disable state and (if enabled) microstep resolution.
             </p>
             <p>
-              There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the two values returned by this command will either be the same (if both motors are enabled) or one or both of them will be zero. But they will never show that the two motors are both enabled and have different microstep resolutions.
+              There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the
               two values returned by this query will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
+              never show that the two motors are both enabled and have different microstep resolutions.
             </p>
             <p>The two returned values are:</p>
             <ul>
@@ -1551,35 +1464,25 @@
               </li>
             </ul>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,16,16&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
             <p>Both motors are enabled and set to 1/16th microsteps.</p>
           </li>
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,0,4&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
             <p>Motor 1 is disabled and motor 2 is enabled an set to 1/4 steps.</p>
           </li>
-
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-
-
         </ul>
 
         <hr class="short" />
-        <h4><a name="QG"></a>"QG" &mdash; Query General</h4>
 
+        <h4><a name="QG"></a>"QG" &mdash; Query General</h4>
+  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QG&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code><i>QG,Status Byte</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Status Byte</i>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>Status Byte</i>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1589,94 +1492,100 @@
             </p>
             <p>The returned status byte consists of the following status bits:</p>
             <p>
-            <table border="1" cellpadding="2" cellspacing="2" style="margin-left:10%;width:80%;">
+
+            <table border="1" cellpadding="2" cellspacing="2"  
+                    style="margin-left:10%;width:80%;">
+
               <tbody>
-                <tr style="font-weight:bold;">
-                  <td style="text-align:left">Bit</td>
-                  <td>7</td>
-                  <td>6</td>
-                  <td>5</td>
-                  <td>4</td>
-                  <td>3</td>
-                  <td>2</td>
-                  <td>1</td>
-                  <td>0</td>
-                </tr>
-                <tr>
-                  <td style="font-weight:bold;text-align:left">Decimal Value</td>
-                  <td>128</td>
-                  <td>64</td>
-                  <td>32</td>
-                  <td>16</td>
-                  <td>8</td>
-                  <td>4</td>
-                  <td>2</td>
-                  <td>1</td>
-                </tr>
-                <tr>
-                  <td style="font-weight:bold;text-align:left;">Name</td>
-                  <td>RB5</td>
-                  <td>RB2</td>
-                  <td>PRG</td>
-                  <td>PEN</td>
-                  <td>CMD</td>
-                  <td>MTR1</td>
-                  <td>MTR2</td>
-                  <td>FIFO</td>
-                </tr>
-              </tbody>
+                    <tr style="font-weight:bold;">
+                        <td style="text-align:left">Bit</td>
+                        <td>7</td>
+                        <td>6</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>3</td>
+                        <td>2</td>
+                        <td>1</td>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;text-align:left">Decimal Value</td>
+                        <td>128</td>
+                        <td>64</td>
+                        <td>32</td>
+                        <td>16</td>
+                        <td>8</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td>1</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;text-align:left;">Name</td>
+                        <td>RB5</td>
+                        <td>RB2</td>
+                        <td>PRG</td>
+                        <td>PEN</td>
+                        <td>CMD</td>
+                        <td>MTR1</td>
+                        <td>MTR2</td>
+                        <td>FIFO</td>
+                    </tr>
+                 </tbody>
             </table>
-            <p>
-              <div style="font-weight:bold;">Bit 7: RB5 &mdash; Status of GPIO pin RB5</div> This bit is 1 when GPIO pin RB5 is high, and 0 when it is low. RB5 does not have to be set to an input to be read. The <code>QG</code> command will read the  state even if it is an output. If the  pin is in use as an RC servo output, the bit will be toggling and that will be reflected in the response byte. Pin RB5 can be used for various useful purposes as desired, for example as a home switch input or output to control a tool head.
+                
+            <p><div style="font-weight:bold;">Bit 7: RB5 &mdash; Status of GPIO pin RB5</div>
+                This bit is 1 when GPIO pin RB5 is high, and 0 when it is low. RB5 does not have to be set to an input to be read.
                 The <code>QG</code> query will read the  state even if it is an output. If the  pin is in use as an RC servo output,
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 6: RB2 &mdash; Status of GPIO pin RB2</div> This bit is 1 when GPIO pin RB2 is high, and 0 when it is low. Its properties are otherwise the same as the RB5 bit.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div> This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div> This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read with the <code><a href="#QP">QP</a></code> query. Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 3: CMD &mdash; Command Executing</div> This bit will be 1 when a command is being executed, and 0 otherwise. The command may be a command that causes motion (like a motor move command) or any other command listed in this document as 'Execution: Added to FIFO motion queue'.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 2: MTR1 &mdash; Motor 1 moving</div> This bit is 1 when Motor 1 is in motion and 0 when it is idle.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 1: MTR2 &mdash; Motor 2 moving</div> This bit is 1 when Motor 2 is in motion and 0 when it is idle.
-            </p>
-            <p>
-              <div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div> This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO" motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is full, then a command is currently executing. Additional information about the motion queue can be found in the description of the <code><a href="#QM">QM</a></code> query.
-            </p>
-          </li>
-           <li>
-           <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
+                the bit will be toggling and that will be reflected in the response byte. Pin RB5 can be used for various useful purposes
+                as desired, for example as a home switch input or output to control a tool head. </p>
+                
+            <p><div style="font-weight:bold;">Bit 6: RB2 &mdash; Status of GPIO pin RB2</div>
+                This bit is 1 when GPIO pin RB2 is high, and 0 when it is low. Its properties are otherwise the same as the RB5 bit.</p>
+                
+            <p><div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div>
+                This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. 
+                Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.</p>
 
-            <p>
-              This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
-            </p>
+            <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div>
+                This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift
+                servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read 
+                with the <code><a href="#QP">QP</a></code> query.
+                Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
+                </p>
+                
+            <p><div style="font-weight:bold;">Bit 3: CMD &mdash; Command Executing</div>
+                This bit will be 1 when a command is being executed, and 0 otherwise. The command may be a command that causes motion 
+                (like a motor move command) or any other command listed in this document as 'Execution: Added to FIFO motion queue'.
+                </p>
+
+            <p><div style="font-weight:bold;">Bit 2: MTR1 &mdash; Motor 1 moving</div>
+                This bit is 1 when Motor 1 is in motion and 0 when it is idle.</p>
+                
+            <p><div style="font-weight:bold;">Bit 1: MTR2 &mdash; Motor 2 moving</div>
+                This bit is 1 when Motor 2 is in motion and 0 when it is idle.</p>
+                
+            <p><div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div>
+                This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO"
+                motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is
+                full, then a command is currently executing. Additional information about the motion queue can be found in the
+                description of the <code><a href="#QM">QM</a></code> query.</p>
+
           </li>
+          
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
-
-
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>3E&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
-           </li>
-
+          </li>
         </ul>
 
-
-
         <hr class="short" />
+
         <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QL,<i>CurrentLayerValue</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -1685,25 +1594,20 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
-
-
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QL,4&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet:</span>
+            <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-        </ul>
-
+        </ul>  
+       
         <hr class="short" />
-        <h4><a name="QM"></a>"QM" &mdash; Query Motors</h4>
 
+        <h4><a name="QM"></a>"QM" &mdash; Query Motors</h4>
+        
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>,<i>FIFOStatus</i>&lt;NL&gt;&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.4.4 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -1724,56 +1628,41 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
-
-        <hr class="short" />
-        <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
-      
+        <h4>"QM" &mdash; Query Motors (Legacy version)</h4>
+        
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code><i>QN,NodeCount</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+          <li><span style="font-weight: bold;">Command:</span> <code>QM&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>QM,<i>CommandStatus</i>,<i>Motor1Status</i>,<i>Motor2Status</i>&lt;NL&gt;&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.6 to v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
-          <li>
-            <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
+          <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
+              Use this query to see what the EBB is currently doing. It will return the current state of the 'motion system' and each motor's current state.
+            </p>
+            <ul>
+              <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
+              <li><i>Motor1Status</i> is 1 if motor 1 is currently moving, and 0 if it is idle.</li>
+              <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>   
+            </ul>
+            <p>
+              The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
-              The value of the node counter can also be manipulated with the following commands:
-              <ul>
-                <li><code>SN</code> &mdash; Set Node count</li>
-                <li><code>NI</code> &mdash; Node count Increment</li>
-                <li><code>ND</code> &mdash; Node count Decrement</li>
-                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
-              </ul>
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM query can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
             </p>
           </li>
-
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QN,1234567890&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then <code>OK&lt;CR&gt;&lt;NL&gt;</code>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>  
-            Added in v1.9.2
-          </li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
-
+          <li><span style="font-weight: bold;">Version History:</span> Added in v2.2.6</li>
         </ul>
 
         <hr class="short" />
+        
         <h4><a name="QP"></a>"QP" &mdash; Query Pen</h4>
-
+  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QP&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QP,<i>PenStatus</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>PenStatus</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1782,20 +1671,18 @@
               This query reads the current pen state from the EBB. It will return <i>PenStatus</i> of 1 if the pen is up and 0 if the pen is down. If a pen up/down command is pending in the FIFO, it will only report the new state of the pen after the pen move has been started.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QP,1&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-
+          <li><span style="font-weight: bold;">Example:</span> <code>QP\r</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
+        
         <h4><a name="QR"></a>"QR" &mdash; Query RC Servo power state</h4>
-
+  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QR&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QR,<i>RCServoPowerState</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>RCServoPowerState</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>RCServoPowerState</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.6.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1804,18 +1691,21 @@
               This query reads the current RC Servo power control state from the EBB. It will return <i>RCServoPowerState</i> of 1 if the RC Servo is receiving power and 0 if it is not.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QR,1&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example:</span> <code>QR\r</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.6.0</li>
         </ul>
 
         <hr class="short" />
+    
         <h4><a name="QS"></a>"QS" &mdash; Query Step position</h4>
-
+    
         <ul>
           <li><span style="font-weight: bold;">Command:</span><code>QS&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><code>QS,<i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li>
+            <span style="font-weight: bold;">Response:</span>
+            <code><i>GlobalMotor1StepPosition</i>,<i>GlobalMotor2StepPosition</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
           <li><span style="font-weight: bold;">Firmware versions:</span>Added in v2.4.3</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1830,8 +1720,8 @@
               The global step positions can be be queried even while the motors are stepping, and it will be accurate the instant that the query is executed, but the values will change as soon as the next step is taken. It is normally good practice to wait until stepping motion is complete (you can use the <code>QM</code> query to check if the motors have stopped moving) before checking the current positions.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QS,1421,-429&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example:</span> <code>QS\r</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>1421,-429&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
             <p>Added in v2.4.3</p>
@@ -1839,42 +1729,35 @@
         </ul>
     
         <hr class="short" />
+
         <h4><a name="QT"></a>"QT" &mdash; Query EBB nickname Tag</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QT&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QT,<i>name</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This query gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. 
-              This command gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.
-            </p>
+            It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it
+            will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.</p>
           </li>
-
-
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> If the EBB's nickname has been set to "East EBB" then the output of this command would be:
-            <code>QT,East EBB&lt;NL&gt;</code>
-            </li>
-
-          <li>
-          <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>             If the EBB's nickname has been set to "East EBB" then the output of this query would be:
+            <span style="font-weight: bold;">Example:</span> <code>QT&lt;CR&gt;</code>
+            <p>If the EBB's nickname has been set to "East EBB" then the output of this query would be:</p>
             <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-            </li>
-
+          </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
-
+     
         <hr class="short"/>
+        
         <h4><a name="RB"></a>"RB" &mdash; ReBoot</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>RB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code></code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code></code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code></code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1884,17 +1767,18 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Added in v2.5.4
+            <span style="font-weight: bold;">Version History:</span>
+            <p>Added in v2.5.4</p>
           </li>
         </ul>
 
         <hr class="short" />
+        
         <h4><a name="R"></a>"R" &mdash; Reset</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>R&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1904,29 +1788,30 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>R&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Example Return Packet:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
         </ul>
 
-        <hr class="short" />
+        <hr class="short" />    
+
+
         <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span><code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code></li>
+          <li>
+            <span style="font-weight: bold;">Command:</span> 
+            <code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code>
+          </li>
           <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>S2&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.0 and later</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue (with one exception; see below)</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li>
-                <i>position</i>, a number in the range 0 to 65535.
+              <li><i>position</i>, a number in the range 0 to 65535.
                 <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83.3 ns).</p>
               </li>
-              <li>
-                <i>output_pin</i>, a number in the range 0 to 24.
+              <li><i>output_pin</i>, a number in the range 0 to 24.
                 <p>The physical RPx pin number to use for generating the servo pulses.<br></p>
               </li>
               <li>
@@ -1940,7 +1825,7 @@
             </ul>
           </li>
           <li>
-            <span style="font-weight: bold;">Description:</span>
+            <span style="font-weight: bold;">Description:</span> 
             <p>
               This command allows you to control the RC servo output system on the EBB, to configure generic RC servo outputs.
             </p>
@@ -1975,107 +1860,249 @@
               <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
             </p>
             <p>
-              <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>output_pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
+            <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>output_pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
             </p>
           </li>
           <li>
             RPx vs pin number (and label on the board) table:<br>
-            <table border="1" cellpadding="2" cellspacing="2" style="margin-left:10%;width:80%;">
+            <table border="1" cellpadding="2" cellspacing="2"
+                            style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
-                  <td valign="top"><b>RPx</b><b><br></b></td>
-                  <td valign="top">RP0<br></td>
-                  <td valign="top">RP1<br></td>
-                  <td valign="top">RP2<br></td>
-                  <td valign="top">RP3<br></td>
-                  <td valign="top">RP4<br></td>
-                  <td valign="top">RP5<br></td>
-                  <td valign="top">RP6<br></td>
-                  <td valign="top">RP7<br></td>
+                  <td valign="top"><b>RPx</b><b><br>
+                    </b></td>
+                  <td valign="top">RP0<br>
+                  </td>
+                  <td valign="top">RP1<br>
+                  </td>
+                  <td valign="top">RP2<br>
+                  </td>
+                  <td valign="top">RP3<br>
+                  </td>
+                  <td valign="top">RP4<br>
+                  </td>
+                  <td valign="top">RP5<br>
+                  </td>
+                  <td valign="top">RP6<br>
+                  </td>
+                  <td valign="top">RP7<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top"><b>Pin</b><b><br></b></td>
-                  <td valign="top">REF_RA0<br></td>
-                  <td valign="top">RA1<br></td>
-                  <td valign="top">RA5<br></td>
-                  <td valign="top">RB0<br></td>
-                  <td valign="top">RB1<br></td>
-                  <td valign="top">RB2<br></td>
-                  <td valign="top">RB3<br></td>
-                  <td valign="top">RB4<br></td>
+                  <td valign="top"><b>Pin</b><b><br>
+                    </b></td>
+                  <td valign="top">REF_RA0<br>
+                  </td>
+                  <td valign="top">RA1<br>
+                  </td>
+                  <td valign="top">RA5<br>
+                  </td>
+                  <td valign="top">RB0<br>
+                  </td>
+                  <td valign="top">RB1<br>
+                  </td>
+                  <td valign="top">RB2<br>
+                  </td>
+                  <td valign="top">RB3<br>
+                  </td>
+                  <td valign="top">RB4<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top"><b>Label</b><b><br></b></td>
-                  <td valign="top"><br></td>
-                  <td valign="top"><br></td>
-                  <td valign="top"><br></td>
-                  <td valign="top">B0<br></td>
-                  <td valign="top">B1<br></td>
-                  <td valign="top">B2<br></td>
-                  <td valign="top">B3<br></td>
-                  <td valign="top">B4<br></td>
+                  <td valign="top"><b>Label</b><b><br>
+                    </b></td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top">B0<br>
+                  </td>
+                  <td valign="top">B1<br>
+                  </td>
+                  <td valign="top">B2<br>
+                  </td>
+                  <td valign="top">B3<br>
+                  </td>
+                  <td valign="top">B4<br>
+                  </td>
                 </tr>
               </tbody>
             </table>
-            <table border="1" cellpadding="2" cellspacing="2" style="margin-left:10%;width:80%;">
+            <table border="1" cellpadding="2" cellspacing="2" 
+                style="margin-left:10%;width:80%;">
               <tbody>
                 <tr>
-                  <td valign="top"><b>RPx</b><b><br></b></td>
-                  <td valign="top">RP8<br></td>
-                  <td valign="top">RP9<br></td>
-                  <td valign="top">RP10<br></td>
-                  <td valign="top">RP11<br></td>
-                  <td valign="top">RP13<br></td>
-                  <td valign="top">RP17<br></td>
-                  <td valign="top">RP18<br></td>
+                  <td valign="top"><b>RPx</b><b><br>
+                    </b></td>
+                  <td valign="top">RP8<br>
+                  </td>
+                  <td valign="top">RP9<br>
+                  </td>
+                  <td valign="top">RP10<br>
+                  </td>
+                  <td valign="top">RP11<br>
+                  </td>
+                  <td valign="top">RP13<br>
+                  </td>
+                  <td valign="top">RP17<br>
+                  </td>
+                  <td valign="top">RP18<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top"><b>Pin</b><b><br></b></td>
-                  <td valign="top">RB5<br></td>
-                  <td valign="top">RB6<br></td>
-                  <td valign="top">RB7<br></td>
-                  <td valign="top">RC0<br></td>
-                  <td valign="top">RC2<br></td>
-                  <td valign="top">RC6<br></td>
-                  <td valign="top">RC7<br></td>
+                  <td valign="top"><b>Pin</b><b><br>
+                    </b></td>
+                  <td valign="top">RB5<br>
+                  </td>
+                  <td valign="top">RB6<br>
+                  </td>
+                  <td valign="top">RB7<br>
+                  </td>
+                  <td valign="top">RC0<br>
+                  </td>
+                  <td valign="top">RC2<br>
+                  </td>
+                  <td valign="top">RC6<br>
+                  </td>
+                  <td valign="top">RC7<br>
+                  </td>
                 </tr>
                 <tr>
-                  <td valign="top"><b>Label</b><b><br></b></td>
-                  <td valign="top">B5<br></td>
-                  <td valign="top">B6<br></td>
-                  <td valign="top">B7<br></td>
-                  <td valign="top"><br></td>
-                  <td valign="top"><br></td>
-                  <td valign="top"><br></td>
-                  <td valign="top"><br></td>
+                  <td valign="top"><b>Label</b><b><br>
+                    </b></td>
+                  <td valign="top">B5<br>
+                  </td>
+                  <td valign="top">B6<br>
+                  </td>
+                  <td valign="top">B7<br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
+                  <td valign="top"><br>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,24000,6\r</code> Use RP6 as a RC servo output, and set its on-time to 2 ms.
+            <span style="font-weight: bold;">Example:</span> <code>S2,24000,6\r</code>
+            Use RP6 as a RC servo output, and set its on-time to 2 ms.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,0,5\r</code> Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
+            <span style="font-weight: bold;">Example:</span> <code>S2,0,5\r</code> 
+            Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,100\r</code> Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
+            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,100\r</code>
+            Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,10,50\r</code> Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
+            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,10,50\r</code> 
+            Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.0 
+            <span style="font-weight: bold;">Version History:</span>
+            This version of the S2 command is only for firmware versions v2.2.0 and newer
+          </li>
+        </ul>
+  
+        <hr class="short" />
+
+        <h4> "S2"  &mdash; General RC Servo Output (Legacy version)</h4>
+ 
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>S2,<i>channel</i>,<i>position</i>,<i>output_pin</i>[,<i>rate</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>S2,0&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Prior to v2.2.0 </li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li>
+                <i>channel</i>, a number in the range 0 to 8.
+                <p>A value of 1 through 7 chooses a software-defined channel.</p>
+                <p>A value of 0 disables all S2 outputs.</p>
+              </li>
+              <li>
+                <i>position</i>, a number in the range 0 to 32000.
+                <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83.3 ns).</p>
+              </li>
+              <li>
+                <i>output_pin</i>, a number in the range 0 to 24.
+                <p>The physical RPx pin number to assign this channel to.</p>
+              </li>
+              <li>
+                <i>rate</i> (optional), a number in the range 0 to 65535.
+                <p>The rate at which to change to the new setting.</p>
+              </li> 
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              This command allows you to control the RC servo output system on the EBB, to configures a generic RC servo output.
+            </p>
+            <p>
+              <b>Servo channels and time slices:</b> There are eight software-defined RC servo 'channels', which have no physical meaning other than we can (by default) output up to 8 separate signals at once.  The available channels are numbered 1 though 8. Channel 1 is normally used as the "pen lift" servo motor, controlled through the SP and TP commands.
+            </p>
+            <p>(A selection of <i>channel</i> equal to 0 is a special command, used to disable all S2 functionality.)</p>
+            <p>
+              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins. You can assign any channel to any RPx pin.
+            </p>
+            <p>
+              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time, thus giving a 24 ms repeat period for the full RC system.
+            </p>
+            <p>
+              If the current channel is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be 2.666 ms. A value of 0 for <i>position</i> will produce zero length, without any pulse and disable servo output on the pin currently assigned to channel <i>channel</i>.
+            </p>
+            <p>
+              The number of available channels is normally (by default) 8. This can be reduced with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses.  The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the SC,9 command.
+            </p>
+            <p>
+              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms.
+            </p>
+            <p>
+              <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use S2 channel 1. If you wish to to use SP and TP, then ignore channel 1 and start with channel 2. If you do not need the SP and TP commands, then you can use channels 1 through <i>maximum_S2_channels</i>.
+            </p>
+            <p>
+              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
+            </p>
+            <p>
+              <b>Disabling S2 servo outputs:</b> The special command <code>S2,0&lt;CR&gt;</code> will turn off all RC servo support (freeing up CPU time, if that's important to you).
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example:</span>  <code>S2,3,24000,6\r</code>
+            Use RP6 as a RC servo output, and set its on-time to 2 ms, and using channel 3 of the RC system, including a <i>rate</i> argument of 6.
+            <li>
+              <span style="font-weight: bold;">Example:</span>  <code>S2,0\r</code>
+              Turn off all RC servo support.
+            </li>
+            <li>
+              <span style="font-weight: bold;">Example:</span>  <code>S2,3,0\r</code>
+              Turn off the output on whatever pin channel 3 was assigned to.
+            </li>
+            <li>
+              <span style="font-weight: bold;">Version History:</span>
+              This version of the S2 command is only for firmware versions prior to v2.2.0
+            </li>
           </li>
         </ul>
 
         <hr class="short" />
+
+
         <h4><a name="SC"></a> "SC" &mdash; Stepper and Servo Mode Configure</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SC,<i>value1</i>,<i>value2</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SC&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2157,17 +2184,25 @@
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
           <li><span style="font-weight: bold;">Example:</span> <code>SC,1,1\r</code> Enable only the RC servo for pen lift; disable solenoid control output.</li> 
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.2
+            <span style="font-weight: bold;">Version History:</span>
+            <ul>
+              <li>Mode <code>SC,11,<i>servo_rate_up</i></code> added in v1.9.2</li>
+              <li>Mode <code>SC,12,<i>servo_rate_down</i></code> added in v1.9.2</li>
+              <li>Mode <code>SC,13,<i>use_alt_prg</i></code> added in v2.0</li>
+              <li>Mode <code>SC,8,<i>maximum_S2_channels</i></code> added in v2.1.1</li>
+              <li>Mode <code>SC,9,<i>S2_channel_duration_ms</i></code> added in v2.1.1</li>
+              <li>Mode <code>SC,2,2</code> added in v2.2.2.</li>
+            </ul>
           </li>
         </ul>
  
         <hr class="short" />
+
         <h4><a name="SE"></a> "SE" &mdash; Set Engraver</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SE,<i>state</i>[,<i>power</i>[,<i>use_motion_queue</i>]]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SE&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -2193,16 +2228,23 @@
           <li><span style="font-weight: bold;">Example:</span> <code>SE,1,1023\r</code> Turns on the engraver output with maximum power</li>
           <li><span style="font-weight: bold;">Example:</span> <code>SE,0\r</code> Turns off the engraver output</li>
           <li><span style="font-weight: bold;">Example:</span> <code>SE,0,0,1\r</code> Adds a command to the motion queue, that (when executed) turns off the engraver output.</li>
-          <li><span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.4.1</li>
-        </ul>
+          <li><span style="font-weight: bold;">Version History:</span>  
+          <ul>
+            <li>Added in v2.1.0</li>
+            <li>Versions prior to v2.2.2 do not properly set power, and instead use fixed 50&percnt; PWM.</li>
+            <li>
+              Version 2.4.1 adds the option to use the motion queue. Versions prior to this do not have this option. The proper command format for earlier versions is: <code>SE,<i>state</i>[,<i>power</i>]&lt;CR&gt;</code>
+            </li>
+          </ul>
+        </ul> 
     
         <hr class="short" />    
+
         <h4><a name="SL"></a> "SL" &mdash; Set Layer</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SL&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2223,12 +2265,12 @@
         </ul>
 
         <hr class="short" />    
+
         <h4><a name="SM"></a> "SM" &mdash; Stepper Move</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>duration</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SM&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2261,17 +2303,31 @@
             Move axis 1 by 250 steps and axis2 by -766 steps, in 1000 ms of duration.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.8
+            <span style="font-weight: bold;">Version History:</span>
+            <ul>
+              <li>
+                In versions prior to 2.2.1, the <i>duration</i> parameter had a issue where values over 2621 would produce incorrect delays (when <i>AxisSteps1</i> and <i>AxisSteps2</i> are 0).
+              </li>
+              <li>
+                For versions prior to v2.2.5, <i>duration</i> must be a value in the range of 1 to 65535, and the <i>AxisSteps1</i> and <i>AxisSteps2</i> values must be in the range -32767 to +32767.
+              </li>
+              <li>
+                As of version 2.2.5, the <i>duration</i>, <i>AxisSteps1</i>, and <i>AxisSteps2</i> parameters for this command are full 24 bit numbers. <i>duration</i> is an unsigned 24-bit value, while <i>AxisSteps1</i> and <i>AxisSteps2</i> are signed. This allows for very long stepper moves.
+              </li>
+              <li>
+                As of version 2.2.8, the error messages for this command have been corrected. If an input parameter is too large (&gt;16777215) or a step rate is too fast (&gt;25 k steps/s) or too slow (&lt;1.31 steps/s) a proper error will be printed back to the host. 
+              </li>
+            </ul>
           </li>
         </ul>
       
         <hr class="short" />
+         
         <h4><a name="SN"></a>"SN" &mdash; Set node count </h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SN,<i>value</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SN&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2289,12 +2345,12 @@
         </ul>    
 
         <hr class="short" />
+   
         <h4><a name="SP"></a>"SP" &mdash; Set Pen State </h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>          
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SP&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -2334,17 +2390,25 @@
             <code>SP,1&lt;CR&gt;</code> Move pen-lift servo motor to <i>servo_min</i> position.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.2.4
+            <span style="font-weight: bold;">Version History:</span>
+            <ul>
+              <li>
+                The <i>portBpin</i> argument was added in firmware v2.1.1. Versions prior to this do not have this option. The proper command format for earlier versions is: <code>SP,<i>value</i>[,<i>duration</i>]&lt;CR&gt;</code>
+              </li>
+              <li>
+                In versions prior to 2.2.4, the <i>duration</i> parameter had two bugs. One was that the units for <i>duration</i> were 40 &mu;s (instead of the correct 1 ms). The second was that the change of state of the servo would happen AFTER the delay had elapsed. The servo move and the <i>duration</i> delay are both started simultaneously now.
+              </li>
+            </ul>
           </li>
         </ul>
    
         <hr class="short" />
+   
         <h4><a name="SR"></a>"SR" &mdash; Set RC Servo power timeout value</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>[,<i>state</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>SR&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>v2.6.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span>Immediate</li>
           <li>
@@ -2370,17 +2434,22 @@
             <code>SR,60000,1&lt;CR&gt;</code> Set new RC servo power timeout value to 1 minute and turn power to the servo on.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span>  Unchanged since firmware v2.6.5
+            <span style="font-weight: bold;">Version History:</span> 
+            <li>Added in v2.6.0.</li>
+            <li>Changed default power timeout value from 15 minutes to 60 seconds in v2.6.3.</li>
+            <li>Changed <code>SR</code> in v2.6.5 so that it no longer turned on power to the servo when stepper motor
+            motion was commanded. Instead, it only turns on power when a servo motion is commanded. From v2.6.0 to v2.6.4,
+            either stepper or servo motion would trigger power to the servo.</li>
           </li>
         </ul>
 
         <hr class="short" />
+
         <h4><a name="ST"></a>"ST" &mdash; Set EBB nickname Tag</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ST,<i>NewNameString</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>ST&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.5 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2390,29 +2459,35 @@
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command sets the EBB's "nickname". This is an arbitrary, user settable string, which is stored in flash memory across reboots.</p>
-            <p>
-              After setting the EBBs nickname and rebooting, the EBB's USB Device Name will have the nickname appended at the end, after a comma. So if no name is set the Device Name will be "EiBotBoard,". But if the nickname is set to "East EBB", then the Device Name will be "EiBotBoard,East EBB". (The exact device name that appears to your computer is platform dependent.) The nickname will also appear as the USB device's "serial number." Note that the change may not be recognized by your computer until after you reboot the EBB. See the <code><a href="#RB">RB</a></code> command.
-            </p>
-            <p>
-              The nickname string can be any combination of ASCII characters, including an empty string which will clear the EBB's nickname. For best compatibility, use a nickname that is 3-16 characters in length, without apostrophes or quotation marks (single or double quotes) within the name.
-            </p>
-            <p>
-              Since calling this command requires a change to a particular flash memory cell-- which can only be changed a finite number of times -- it is best practice to avoid any use that involves automated, repeated changes to the nickname tag.
-            </p>
+            <p>This command sets the EBB's "nickname". This is an arbitrary, user settable string,
+	            which is stored in flash memory across reboots.</p>
+            <p>After setting the EBBs nickname and rebooting, the EBB's USB Device Name will
+	           have the nickname appended at the end, after a comma. So if no name is set
+               the Device Name will be "EiBotBoard,". But if the nickname is set to "East EBB",
+               then the Device Name will be "EiBotBoard,East EBB". (The exact device name that
+               appears to your computer is platform dependent.) The nickname will also appear
+               as the USB device's "serial number."
+               Note that the change may not be recognized by your computer until after you reboot the
+               EBB. See the <code><a href="#RB">RB</a></code> command.</p>
+            <p>The nickname string can be any combination of ASCII characters, including an empty string which will clear the EBB's nickname.
+            For best compatibility, use a nickname that is 3-16 characters in length, without apostrophes or quotation marks 
+            (single or double quotes) within the name.</p>
+            <p>Since calling this command requires a change to a particular flash memory cell-- which can only be changed
+                a finite number of times -- it is best practice to avoid any use that involves automated,
+                repeated changes to the nickname tag.</p>
             <p>Use the <code><a href="#QT">QT</a></code> command to retrieve the nickname at any time.</p>
           </li>
-          <li><span style="font-weight: bold;">Version History:</span>  Unchanged since firmware v2.5.5
-</li>
+          <li><span style="font-weight: bold;">Version History:</span> 
+          This command was originally introduced in v2.5.4, but should not be considered functional until version 2.5.5</li>
         </ul>
      
         <hr class="short"/>
+        
         <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Query</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>T&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -2452,12 +2527,12 @@
         </ul>
 
         <hr class="short" />
+
         <h4><a name="TP"></a> "TP"  &mdash; Toggle Pen </h4>
  
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>TP[,<i>duration</i>]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>TP&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -2482,19 +2557,58 @@
             </p>
             <p>
               <li>
-                <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.1
+                <span style="font-weight: bold;">Version History:</span>
+                <ul>
+                  <li>Added in v1.9</li>
+                  <li>
+                    In versions prior to v2.2.1, the <i>duration</i> parameter had a bug and was in units of 40 &mu;s rather than 1 ms.
+                  </li>
+                </ul>
               </li>
             </p>
           </li>
         </ul>
 
         <hr class="short" />
+
+        <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
+      
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>QN&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code><i>NodeCount</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
+            <p>
+              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
+            </p>
+            <p>
+              The value of the node counter can also be manipulated with the following commands:
+              <ul>
+                <li><code>SN</code> &mdash; Set Node count</li>
+                <li><code>NI</code> &mdash; Node count Increment</li>
+                <li><code>ND</code> &mdash; Node count Decrement</li>
+                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
+              </ul>
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet:</span> <code>1234567890&lt;CR&gt;&lt;NL&gt;</code> then </span> <code>OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v1.9.2
+          </li>
+        </ul>
+     
+        <hr class="short" />
+    
         <h4><a name="V"></a> "V" &mdash; Version query</h4>
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>V,EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -2506,12 +2620,12 @@
         </ul>
 
         <hr class="short" />
+
         <h4><a name="XM"></a> "XM" &mdash; Stepper Move, for Mixed-axis Geometries</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>XM,<i>duration</i>,<i>AxisStepsA</i>,<i>AxisStepsB</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>XM&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response:</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
@@ -2545,7 +2659,8 @@
               <code>XM,1000,550,-1234\r</code> Move 550 steps in the A direction and -1234 steps in the B direction, in duration 1000 ms.
             </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Added in v2.3.0
+            <span style="font-weight: bold;">Version History:</span>  
+            Added in v2.3.0
           </li>
         </ul>
 
