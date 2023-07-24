@@ -137,6 +137,10 @@ class EggBot(inkex.Effect):
                                      action="store", type="inkbool",
                                      dest="revEggMotor", default=False,
                                      help="Reverse motion of egg motor.")
+        self.OptionParser.add_option("--commandLog",
+                                     action="store", type="string",
+                                     dest="commandLog", default="",
+                                     help="Log file for drawing commands.")
 
         self.allLayers = None
         self.plotCurrentLayer = None
@@ -202,6 +206,8 @@ class EggBot(inkex.Effect):
             self.serialPort = ebb_serial.openPort()
             if self.serialPort is None:
                 inkex.errormsg(gettext.gettext("Failed to connect to EggBot. :("))
+            if len(self.options.commandLog) > 0:
+                ebb_serial.startLogging(self.options.commandLog)
 
             if self.options.tab == "splash":
                 self.allLayers = True
@@ -251,6 +257,9 @@ class EggBot(inkex.Effect):
             if self.serialPort is not None:
                 ebb_motion.doTimedPause(self.serialPort, 10)  # Pause a moment for underway commands to finish...
                 ebb_serial.closePort(self.serialPort)
+
+            if len(self.options.commandLog) > 0:
+                ebb_serial.stopLogging()
 
         self.svgDataRead = False
         self.UpdateSVGEggbotData(self.svg)
