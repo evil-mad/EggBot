@@ -294,8 +294,11 @@
 
 #define MAX_RC_DURATION         11890
 
-// Maximum number of elements in the command FIFO
-#define COMMAND_FIFO_LENGTH     1
+// Maximum number of elements in the command FIFO (5 is largest we can have
+// in one bank. Growing larger is possible, but requires more refactoring.
+// See "Application: creating Large Data Objects and the USART" example in 
+// the hlpC18ug help file for how to do this.)
+#define COMMAND_FIFO_LENGTH     5u
 
 typedef enum
 {
@@ -339,7 +342,7 @@ volatile static INT32 globalStepCounter2;
 
 //static UINT8 TookStep;       // LSb set if a step was taken
 static UINT8 AllDone;        // LSb set if this command is complete
-static UINT8 i;
+static UINT8 isr_i;
 static UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
 
 static DriverConfigurationType DriverConfiguration;
@@ -373,6 +376,14 @@ volatile UINT8 gLimitSwitchTriggered; // Non-zero if limit switch trigger has fi
 // Variables used during debug printing within ISR
 static u32b4_t xx;
 static UINT8 nib;
+
+// Global variables for managing FIFO depth/indexes
+volatile UINT8 gFIFOLength;
+volatile UINT8 gFIFO_In;
+volatile UINT8 gFIFO_Out;
+
+// Holds a local copy of the Command from CommandFIFO[gFIFO_Out].Command 
+static UINT8 gFIFO_Command;
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -1090,7 +1101,13 @@ CheckForNextCommand:
       bitsetzero(AllDone);
       bitsetzero(FIFOEmpty);
 
+      // Flush the whole fifo (Update this if COMMAND_FIFO_LENGTH changes)
+      // This is about 1/3 the total instructions of making a for() loop
       CommandFIFO[0].Command = COMMAND_NONE_BIT;
+      CommandFIFO[1].Command = COMMAND_NONE_BIT;
+      CommandFIFO[2].Command = COMMAND_NONE_BIT;
+      CommandFIFO[3].Command = COMMAND_NONE_BIT;
+      CommandFIFO[4].Command = COMMAND_NONE_BIT;
     }
   }
 
@@ -1114,18 +1131,36 @@ CheckForNextCommand:
       // The order that we check these is the same as the main ISR check order
       // above, where we want to have the most common commands checked first
       // since they will then happen faster.
-      if (bittst(CommandFIFO[0].Command, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
+      gFIFO_Command = CommandFIFO[gFIFO_Out].Command;
+      
+      if (bittst(gFIFO_Command, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
+////      if (bittst([0].Command, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[0].Command;
-        CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
-        CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
-        CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
-        CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
-        CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
-        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[0].SEState;
+        CurrentCommand.Command        = CommandFIFO[gFIFO_Out].Command;
+        CurrentCommand.Rate[0]        = CommandFIFO[gFIFO_Out].Rate[0];
+        CurrentCommand.Rate[1]        = CommandFIFO[gFIFO_Out].Rate[1];
+        CurrentCommand.Steps[0]       = CommandFIFO[gFIFO_Out].Steps[0];
+        CurrentCommand.Steps[1]       = CommandFIFO[gFIFO_Out].Steps[1];
+        CurrentCommand.DirBits        = CommandFIFO[gFIFO_Out].DirBits;
+        CurrentCommand.DelayCounter   = CommandFIFO[gFIFO_Out].DelayCounter;
+        CurrentCommand.SEState        = CommandFIFO[gFIFO_Out].SEState;
       }
-      else if (bittst(CommandFIFO[0].Command, COMMAND_LM_MOVE_BIT_NUM))
+      else if (bittst(gFIFO_Command, COMMAND_LM_MOVE_BIT_NUM))
+      {
+        CurrentCommand.Command        = CommandFIFO[gFIFO_Out].Command;
+        CurrentCommand.Rate[0]        = CommandFIFO[gFIFO_Out].Rate[0];
+        CurrentCommand.Rate[1]        = CommandFIFO[gFIFO_Out].Rate[1];
+        CurrentCommand.Accel[0]       = CommandFIFO[gFIFO_Out].Accel[0];
+        CurrentCommand.Accel[1]       = CommandFIFO[gFIFO_Out].Accel[1];
+        CurrentCommand.Jerk[0]        = CommandFIFO[gFIFO_Out].Jerk[0];
+        CurrentCommand.Jerk[1]        = CommandFIFO[gFIFO_Out].Jerk[1];
+        CurrentCommand.Steps[0]       = CommandFIFO[gFIFO_Out].Steps[0];
+        CurrentCommand.Steps[1]       = CommandFIFO[gFIFO_Out].Steps[1];
+        CurrentCommand.DirBits        = CommandFIFO[gFIFO_Out].DirBits;
+        CurrentCommand.DelayCounter   = CommandFIFO[gFIFO_Out].DelayCounter;
+        CurrentCommand.SEState        = CommandFIFO[gFIFO_Out].SEState;
+      }
+      else if (bittst(gFIFO_Command, COMMAND_LT_MOVE_BIT_NUM))
       {
         CurrentCommand.Command        = CommandFIFO[0].Command;
         CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
@@ -1135,26 +1170,11 @@ CheckForNextCommand:
         CurrentCommand.Jerk[0]        = CommandFIFO[0].Jerk[0];
         CurrentCommand.Jerk[1]        = CommandFIFO[0].Jerk[1];
         CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
-        CurrentCommand.Steps[1]       = CommandFIFO[0].Steps[1];
         CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
         CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
         CurrentCommand.SEState        = CommandFIFO[0].SEState;
       }
-      else if (bittst(CommandFIFO[0].Command, COMMAND_LT_MOVE_BIT_NUM))
-      {
-        CurrentCommand.Command        = CommandFIFO[0].Command;
-        CurrentCommand.Rate[0]        = CommandFIFO[0].Rate[0];
-        CurrentCommand.Rate[1]        = CommandFIFO[0].Rate[1];
-        CurrentCommand.Accel[0]       = CommandFIFO[0].Accel[0];
-        CurrentCommand.Accel[1]       = CommandFIFO[0].Accel[1];
-        CurrentCommand.Jerk[0]        = CommandFIFO[0].Jerk[0];
-        CurrentCommand.Jerk[1]        = CommandFIFO[0].Jerk[1];
-        CurrentCommand.Steps[0]       = CommandFIFO[0].Steps[0];
-        CurrentCommand.DirBits        = CommandFIFO[0].DirBits;
-        CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[0].SEState;
-      }
-      else if (bittst(CommandFIFO[0].Command, COMMAND_SERVO_MOVE_BIT_NUM))
+      else if (bittst(gFIFO_Command, COMMAND_SERVO_MOVE_BIT_NUM))
       {
         CurrentCommand.Command        = CommandFIFO[0].Command;
         CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
@@ -1164,12 +1184,12 @@ CheckForNextCommand:
         CurrentCommand.ServoRate      = CommandFIFO[0].ServoRate;
       }
       // Note: bittst(CurrentCommand, COMMAND_DELAY_BIT_NUM)
-      else if (bittstzero(CommandFIFO[0].Command))
+      else if (bittstzero(gFIFO_Command))
       {
         CurrentCommand.Command        = CommandFIFO[0].Command;
         CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
       }
-      else if (bittst(CommandFIFO[0].Command, COMMAND_SE_BIT_NUM))
+      else if (bittst(gFIFO_Command, COMMAND_SE_BIT_NUM))
       {
         CurrentCommand.Command        = CommandFIFO[0].Command;
         CurrentCommand.DelayCounter   = CommandFIFO[0].DelayCounter;
@@ -1434,6 +1454,10 @@ void EBB_Init(void)
   ButtonPushed = 0;
   gStandardizedCommandFormat = 0;
   gLimitChecks = TRUE;
+  gFIFOLength = 0;
+  gFIFO_In = 0;
+  gFIFO_Out = 0;
+  
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
   // Except for v1.1 hardware, use RB2

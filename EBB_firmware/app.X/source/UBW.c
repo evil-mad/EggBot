@@ -154,7 +154,7 @@ volatile unsigned int ChannelBit;
 #elif defined(BOARD_EBB_V12)
   const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1"};
 #elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.06"};
+  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.07"};
 #elif defined(BOARD_UBW)
   const rom char st_version[] = {"UBW EB Firmware Version 2.2.1"};
 #endif
