@@ -385,6 +385,11 @@ volatile UINT8 gFIFO_Out;
 // Holds a local copy of the Command from CommandFIFO[gFIFO_Out].Command 
 static UINT8 gFIFO_Command;
 
+// Temporarily store FSR0 during command copy assembly (note these can be in any
+// bank)
+static UINT8 isr_FSR0L_temp;
+static UINT8 isr_FSR0H_temp;
+
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
 
@@ -433,7 +438,7 @@ static void process_low_level_move(
 static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk);
 
 
-// ISR
+// High ISR
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
@@ -1125,6 +1130,44 @@ CheckForNextCommand:
       {
         mLED_2_Off()
       }
+      
+      // Assembly Theory: 
+      // We want to copy out an entire Command structure as quickly as possible.
+      // To do this we will temporarily take over the FSR0 register to point 
+      // to the beginning of the source structure in RAM, and then hard code
+      // enough MOVFF POSTINC0, <location> instructions to copy out the whole thing.
+      // The <location> addresses are the static addresses of the CurrentCommand
+      // structure. We do need to save off FSR0 and restore it after to make sure
+      // we don't mess anything up that the compiler expects.
+      _asm
+      // First store off the current values in FSR0
+      MOVFF FSR0L, isr_FSR0L_temp
+      MOVFF FSR0H, isr_FSR0H_temp
+              
+      // Then load up FSR0 with the address of the beginning of the FIFO element
+      // currently pointed to by the FIFO out pointer
+      MOVFF FIFO_out_ptr_high, FSR0H
+      MOVFF FIFO_out_ptr_low, FSR0L
+              
+      // Now walk through the whole length of the FIFO element, copying to 
+      // the local CurrentCommand
+      
+              
+      // We've incremented FSR0 to the beginning of the next FIFO element now
+      // so save it back to the out pointer for the next time
+      // (We will check for wrap-around down in the C below)
+      MOVFF FSR0H, FIFO_out_ptr_high
+      MOVFF FSR0L, FIFO_out_ptr_low
+              
+      // Lastly retrieve the previous values in FSR0
+      MOVFF isr_FSR0L_temp, FSR0L
+      MOVFF isr_FSR0H_temp, FSR0H
+              
+      _endasm
+              
+      // Check to see if the FIFO_out_ptr needs wrapping
+      
+      
       // Instead of copying over the entire MoveCommandType every time, to save
       // time we will check which command is next in the FIFO, and then only 
       // copy over those fields that the new command actually uses.
