@@ -163,7 +163,7 @@ volatile unsigned int ChannelBit;
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
 volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];  // FIFO of actual data
 volatile tRC_state g_RC_state[kRC_DATA_SIZE];             // Stores states for each pin for RC command
-volatile unsigned int g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
+volatile UINT16 g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
 
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
@@ -1826,7 +1826,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing
+  // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing (On RC6)
   else if (251u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1854,7 +1854,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing
+  // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing (on RC6)
   else if (252u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1882,7 +1882,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing
+  // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing (on RC6)
   else if (253u == parameter_number)
   {
     if (0 == paramater_value)
@@ -2816,9 +2816,9 @@ void parse_CX_packet(void)
 // output if you want to use the pin for something else.
 void parse_RC_packet(void)
 {
-  unsigned char port;
-  unsigned char pin;
-  unsigned int value;
+  UINT8 port;
+  UINT8 pin;
+  UINT16 value;
 
   print_command(FALSE, FALSE);
 

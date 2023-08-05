@@ -77,6 +77,12 @@
 // How many stepper motors does this board support? (EBB is always 2)
 #define NUMBER_OF_STEPPERS  2u
 
+// Maximum number of elements in the command FIFO (5 is largest we can have
+// in one bank. Growing larger is possible, but requires more refactoring.
+// See "Application: creating Large Data Objects and the USART" example in 
+// the hlpC18ug help file for how to do this.)
+#define COMMAND_FIFO_LENGTH     5u
+
 typedef enum
 {
   PEN_DOWN = 0,
@@ -131,20 +137,21 @@ typedef union union32b4 {
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
+// Currently 47 bytes long
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           Command;                        // SM DL S2 SE EM LM LT
-  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
-  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
-  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
-  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
   UINT8           DirBits;                        // SM          EM LM LT
   UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
-  UINT16          ServoPosition;                  //       S2
+  UINT8           SEState;                        // SM       SE    LM LT
+  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
+  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
+  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT8           ServoRPn;                       //       S2    EM LM LT
+  UINT16          ServoPosition;                  //       S2
   UINT8           ServoChannel;                   //       S2
   UINT16          ServoRate;                      //       S2
-  UINT8           SEState;                        // SM       SE    LM LT
   UINT16          SEPower;                        //          SE
 } MoveCommandType;
 
@@ -273,8 +280,10 @@ typedef struct
 
 
 extern MoveCommandType CommandFIFO[];
+extern volatile UINT8 gFIFOLength;
+extern volatile UINT8 gFIFOIn;
+extern volatile UINT8 gFIFOOut;
 extern unsigned int DemoModeActive;
-extern UINT8 FIFOEmpty;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;

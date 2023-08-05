@@ -48,6 +48,7 @@
       <itemPath>source/UBW.c</itemPath>
       <itemPath>source/usb_descriptors.c</itemPath>
       <itemPath>source/ebb_demo.c</itemPath>
+      <itemPath>source/isr_helpers.asm</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -111,7 +112,7 @@
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
-        <makeCustomizationPostStep>"C:\MCC18\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\MCC18\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o</makeCustomizationPostStep>
+        <makeCustomizationPostStep>"C:\MCC18\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\MCC18\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o build/EBBv13_with_bootloader/production/source/isr_helpers.o</makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
@@ -122,7 +123,7 @@
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
         <property key="enable-ob" value="false"/>
         <property key="enable-od" value="false"/>
         <property key="enable-om" value="true"/>
@@ -147,7 +148,7 @@
       <C18-AS>
         <property key="cross.reference.file" value="out.lst"/>
         <property key="default.radix" value="HEX"/>
-        <property key="enable.case.sensitivity" value="false"/>
+        <property key="enable.case.sensitivity" value="true"/>
         <property key="hex.output.format" value="INHX32"/>
         <property key="preprocessor.macros" value=""/>
         <property key="warning.level" value="0"/>
