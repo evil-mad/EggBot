@@ -384,21 +384,21 @@ UINT8 RCServo2_Move(
       }
 
       // Now copy the values over into the FIFO element
-      CommandFIFO[gFIFOIn].Command = COMMAND_SERVO_MOVE_BIT;
-      CommandFIFO[gFIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      CommandFIFO[gFIFOIn].ServoChannel = Channel;
-      CommandFIFO[gFIFOIn].ServoRPn = RPn;
-      CommandFIFO[gFIFOIn].ServoPosition = Position;
-      CommandFIFO[gFIFOIn].ServoRate = Rate;
+      FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE_BIT;
+      FIFOPtr[gFIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+      FIFOPtr[gFIFOIn].ServoChannel = Channel;
+      FIFOPtr[gFIFOIn].ServoRPn = RPn;
+      FIFOPtr[gFIFOIn].ServoPosition = Position;
+      FIFOPtr[gFIFOIn].ServoRate = Rate;
 
       // Check that DelayCounter doesn't have a crazy high value (this was
       // being done in the ISR, now moved here for speed)
-      if (CommandFIFO[gFIFOIn].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+      if (FIFOPtr[gFIFOIn].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
       {
         // Ideally we would throw an error to the user here, but since we're in
         // the helper function that's not so easy. So we just set the delay time
         // to zero and hope they notice that their delays aren't doing anything.
-        CommandFIFO[gFIFOIn].DelayCounter = 0;
+        FIFOPtr[gFIFOIn].DelayCounter = 0;
       }
 
       gFIFOIn++;

@@ -81,7 +81,7 @@
 // in one bank. Growing larger is possible, but requires more refactoring.
 // See "Application: creating Large Data Objects and the USART" example in 
 // the hlpC18ug help file for how to do this.)
-#define COMMAND_FIFO_LENGTH     5u
+#define COMMAND_FIFO_LENGTH     20u
 
 typedef enum
 {
@@ -279,7 +279,7 @@ typedef struct
 
 
 
-extern MoveCommandType CommandFIFO[];
+extern MoveCommandType * FIFOPtr;
 extern volatile UINT8 gFIFOLength;
 extern volatile UINT8 gFIFOIn;
 extern volatile UINT8 gFIFOOut;

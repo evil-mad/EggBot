@@ -319,6 +319,10 @@ typedef enum
   EXTERNAL_CONTROLS_DRIVERS
 } DriverConfigurationType;
 
+// This is the FIFO that stores the motion commands. It spans multiple RAM
+// banks from 0x800 through 0xCFF, and must only be accessed via pointer
+#pragma udata FIFO_scn
+MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
 
 // These global variables are deliberately put into "Bank" 1 of RAM.
 // They are every global variable that the 25KHz ISR has to access.
@@ -389,9 +393,8 @@ UINT8 isr_FSR0H_temp;
 UINT8 FIFO_out_ptr_high;
 UINT8 FIFO_out_ptr_low;
 
-#pragma udata FIFO = 0x500
-MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
-
+// Pointer to a MoveCommandType element of the FIFO array
+MoveCommandType * FIFOPtr = &CommandFIFO[0];
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -1113,11 +1116,11 @@ CheckForNextCommand:
 
       // Flush the whole fifo (Update this if COMMAND_FIFO_LENGTH changes)
       // This is about 1/3 the total instructions of making a for() loop
-      CommandFIFO[0].Command = COMMAND_NONE_BIT;
-      CommandFIFO[1].Command = COMMAND_NONE_BIT;
-      CommandFIFO[2].Command = COMMAND_NONE_BIT;
-      CommandFIFO[3].Command = COMMAND_NONE_BIT;
-      CommandFIFO[4].Command = COMMAND_NONE_BIT;
+      FIFOPtr[0].Command = COMMAND_NONE_BIT;
+      FIFOPtr[1].Command = COMMAND_NONE_BIT;
+      FIFOPtr[2].Command = COMMAND_NONE_BIT;
+      FIFOPtr[3].Command = COMMAND_NONE_BIT;
+      FIFOPtr[4].Command = COMMAND_NONE_BIT;
     }
   }
 
@@ -1147,77 +1150,77 @@ CheckForNextCommand:
       // The order that we check these is the same as the main ISR check order
       // above, where we want to have the most common commands checked first
       // since they will then happen faster.
-      gFIFOCommand = CommandFIFO[gFIFOOut].Command;
+      gFIFOCommand = FIFOPtr[gFIFOOut].Command;
       
       if (bittst(gFIFOCommand, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.Rate[0]        = CommandFIFO[gFIFOOut].Rate[0];
-        CurrentCommand.Rate[1]        = CommandFIFO[gFIFOOut].Rate[1];
-        CurrentCommand.Steps[0]       = CommandFIFO[gFIFOOut].Steps[0];
-        CurrentCommand.Steps[1]       = CommandFIFO[gFIFOOut].Steps[1];
-        CurrentCommand.DirBits        = CommandFIFO[gFIFOOut].DirBits;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[gFIFOOut].SEState;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
+        CurrentCommand.Rate[1]        = FIFOPtr[gFIFOOut].Rate[1];
+        CurrentCommand.Steps[0]       = FIFOPtr[gFIFOOut].Steps[0];
+        CurrentCommand.Steps[1]       = FIFOPtr[gFIFOOut].Steps[1];
+        CurrentCommand.DirBits        = FIFOPtr[gFIFOOut].DirBits;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
+        CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
       else if (bittst(gFIFOCommand, COMMAND_LM_MOVE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.Rate[0]        = CommandFIFO[gFIFOOut].Rate[0];
-        CurrentCommand.Rate[1]        = CommandFIFO[gFIFOOut].Rate[1];
-        CurrentCommand.Accel[0]       = CommandFIFO[gFIFOOut].Accel[0];
-        CurrentCommand.Accel[1]       = CommandFIFO[gFIFOOut].Accel[1];
-        CurrentCommand.Jerk[0]        = CommandFIFO[gFIFOOut].Jerk[0];
-        CurrentCommand.Jerk[1]        = CommandFIFO[gFIFOOut].Jerk[1];
-        CurrentCommand.Steps[0]       = CommandFIFO[gFIFOOut].Steps[0];
-        CurrentCommand.Steps[1]       = CommandFIFO[gFIFOOut].Steps[1];
-        CurrentCommand.DirBits        = CommandFIFO[gFIFOOut].DirBits;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[gFIFOOut].SEState;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
+        CurrentCommand.Rate[1]        = FIFOPtr[gFIFOOut].Rate[1];
+        CurrentCommand.Accel[0]       = FIFOPtr[gFIFOOut].Accel[0];
+        CurrentCommand.Accel[1]       = FIFOPtr[gFIFOOut].Accel[1];
+        CurrentCommand.Jerk[0]        = FIFOPtr[gFIFOOut].Jerk[0];
+        CurrentCommand.Jerk[1]        = FIFOPtr[gFIFOOut].Jerk[1];
+        CurrentCommand.Steps[0]       = FIFOPtr[gFIFOOut].Steps[0];
+        CurrentCommand.Steps[1]       = FIFOPtr[gFIFOOut].Steps[1];
+        CurrentCommand.DirBits        = FIFOPtr[gFIFOOut].DirBits;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
+        CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
       else if (bittst(gFIFOCommand, COMMAND_LT_MOVE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.Rate[0]        = CommandFIFO[gFIFOOut].Rate[0];
-        CurrentCommand.Rate[1]        = CommandFIFO[gFIFOOut].Rate[1];
-        CurrentCommand.Accel[0]       = CommandFIFO[gFIFOOut].Accel[0];
-        CurrentCommand.Accel[1]       = CommandFIFO[gFIFOOut].Accel[1];
-        CurrentCommand.Jerk[0]        = CommandFIFO[gFIFOOut].Jerk[0];
-        CurrentCommand.Jerk[1]        = CommandFIFO[gFIFOOut].Jerk[1];
-        CurrentCommand.Steps[0]       = CommandFIFO[gFIFOOut].Steps[0];
-        CurrentCommand.DirBits        = CommandFIFO[gFIFOOut].DirBits;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[gFIFOOut].SEState;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
+        CurrentCommand.Rate[1]        = FIFOPtr[gFIFOOut].Rate[1];
+        CurrentCommand.Accel[0]       = FIFOPtr[gFIFOOut].Accel[0];
+        CurrentCommand.Accel[1]       = FIFOPtr[gFIFOOut].Accel[1];
+        CurrentCommand.Jerk[0]        = FIFOPtr[gFIFOOut].Jerk[0];
+        CurrentCommand.Jerk[1]        = FIFOPtr[gFIFOOut].Jerk[1];
+        CurrentCommand.Steps[0]       = FIFOPtr[gFIFOOut].Steps[0];
+        CurrentCommand.DirBits        = FIFOPtr[gFIFOOut].DirBits;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
+        CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
       else if (bittst(gFIFOCommand, COMMAND_SERVO_MOVE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
-        CurrentCommand.ServoPosition  = CommandFIFO[gFIFOOut].ServoPosition;
-        CurrentCommand.ServoRPn       = CommandFIFO[gFIFOOut].ServoRPn;
-        CurrentCommand.ServoChannel   = CommandFIFO[gFIFOOut].ServoChannel;
-        CurrentCommand.ServoRate      = CommandFIFO[gFIFOOut].ServoRate;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
+        CurrentCommand.ServoPosition  = FIFOPtr[gFIFOOut].ServoPosition;
+        CurrentCommand.ServoRPn       = FIFOPtr[gFIFOOut].ServoRPn;
+        CurrentCommand.ServoChannel   = FIFOPtr[gFIFOOut].ServoChannel;
+        CurrentCommand.ServoRate      = FIFOPtr[gFIFOOut].ServoRate;
       }
       // Note: bittst(CurrentCommand, COMMAND_DELAY_BIT_NUM)
       else if (bittstzero(gFIFOCommand))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
       }
       else if (bittst(gFIFOCommand, COMMAND_SE_BIT_NUM))
       {
-        CurrentCommand.Command        = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.DelayCounter   = CommandFIFO[gFIFOOut].DelayCounter;
-        CurrentCommand.SEState        = CommandFIFO[gFIFOOut].SEState;
-        CurrentCommand.SEPower        = CommandFIFO[gFIFOOut].SEPower;
+        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
+        CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
+        CurrentCommand.SEPower        = FIFOPtr[gFIFOOut].SEPower;
       }
       else // Note: We are assuming that if there is a command in the FIFO, and 
            // it is NOT one of the above 6 commands, then it MUST be a 
            // COMMAND_EM_BIT. We do NOT test explicitly for this to save time
       {
-        CurrentCommand.Command       = CommandFIFO[gFIFOOut].Command;
-        CurrentCommand.DirBits       = CommandFIFO[gFIFOOut].DirBits;
-        CurrentCommand.ServoRPn      = CommandFIFO[gFIFOOut].ServoRPn;
+        CurrentCommand.Command       = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.DirBits       = FIFOPtr[gFIFOOut].DirBits;
+        CurrentCommand.ServoRPn      = FIFOPtr[gFIFOOut].ServoRPn;
       }
 #endif
 
@@ -1289,7 +1292,7 @@ CheckForNextCommand:
       }
 
       // Zero out command in FIFO we just copied, but leave the rest of the fields alone
-      CommandFIFO[gFIFOOut].Command = COMMAND_NONE_BIT;
+      FIFOPtr[gFIFOOut].Command = COMMAND_NONE_BIT;
       
       // Increment gFIFO_Out
       gFIFOOut++;
@@ -2299,7 +2302,7 @@ void process_low_level_move(
   if (!bittstzero(gLimitSwitchTriggered))
   {
     // Now, quick copy over the computed command data to the command FIFO
-    CommandFIFO[gFIFOIn] = move;
+    FIFOPtr[gFIFOIn] = move;
     gFIFOIn++;
     if (gFIFOIn >= COMMAND_FIFO_LENGTH)
     {
@@ -3030,7 +3033,7 @@ static void process_simple_motor_move(
   if (!bittstzero(gLimitSwitchTriggered))
   {
     // Now, quick copy over the computed command data to the command FIFO
-    CommandFIFO[gFIFOIn] = move;
+    FIFOPtr[gFIFOIn] = move;
     gFIFOIn++;
     if (gFIFOIn >= COMMAND_FIFO_LENGTH)
     {
@@ -3084,16 +3087,16 @@ void parse_ES_packet(void)
 
   if 
   (
-    CommandFIFO[0].Command == COMMAND_SM_XM_HM_MOVE_BIT
+    FIFOPtr[0].Command == COMMAND_SM_XM_HM_MOVE_BIT
     ||
-    CommandFIFO[0].Command == COMMAND_LM_MOVE_BIT
+    FIFOPtr[0].Command == COMMAND_LM_MOVE_BIT
     ||
-    CommandFIFO[0].Command == COMMAND_LT_MOVE_BIT
+    FIFOPtr[0].Command == COMMAND_LT_MOVE_BIT
   )
   {
     command_interrupted = 1;
-    fifo_steps1 = CommandFIFO[0].Steps[0];
-    fifo_steps2 = CommandFIFO[0].Steps[1];
+    fifo_steps1 = FIFOPtr[0].Steps[0];
+    fifo_steps2 = FIFOPtr[0].Steps[1];
   }
 
   // Clear the currently executing motion command
@@ -3108,7 +3111,7 @@ void parse_ES_packet(void)
   // Clear out the entire FIFO
   for (i = 0; i < COMMAND_FIFO_LENGTH; i++)
   {
-    CommandFIFO[i].Command = COMMAND_NONE_BIT;
+    FIFOPtr[i].Command = COMMAND_NONE_BIT;
   }
   gFIFOIn = 0;
   gFIFOOut = 0;
@@ -3419,9 +3422,9 @@ void parse_EM_packet(void)
     ;
 
   // Set up the motion queue command
-  CommandFIFO[gFIFOIn].DirBits = EA1;
-  CommandFIFO[gFIFOIn].ServoRPn = EA2;
-  CommandFIFO[gFIFOIn].Command = COMMAND_EM_BIT;
+  FIFOPtr[gFIFOIn].DirBits = EA1;
+  FIFOPtr[gFIFOIn].ServoRPn = EA2;
+  FIFOPtr[gFIFOIn].Command = COMMAND_EM_BIT;
 
   gFIFOIn++;
   if (gFIFOIn >= COMMAND_FIFO_LENGTH)
@@ -3739,10 +3742,10 @@ void parse_SE_packet(void)
       ;
 
     // Set up the motion queue command
-    CommandFIFO[gFIFOIn].SEPower = StoredEngraverPower;
-    CommandFIFO[gFIFOIn].DelayCounter = 0;
-    CommandFIFO[gFIFOIn].SEState = State;
-    CommandFIFO[gFIFOIn].Command = COMMAND_SE_BIT;
+    FIFOPtr[gFIFOIn].SEPower = StoredEngraverPower;
+    FIFOPtr[gFIFOIn].DelayCounter = 0;
+    FIFOPtr[gFIFOIn].SEState = State;
+    FIFOPtr[gFIFOIn].Command = COMMAND_SE_BIT;
 
     gFIFOIn++;
     if (gFIFOIn >= COMMAND_FIFO_LENGTH)
