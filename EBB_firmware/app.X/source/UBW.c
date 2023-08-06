@@ -146,18 +146,7 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-/// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
-#if defined(BOARD_EBB_V10)
-  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V11)
-  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V12)
-  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.08"};
-#elif defined(BOARD_UBW)
-  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1"};
-#endif
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a1"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -329,6 +318,7 @@ void low_ISR(void)
         // we add (or subtract) gRC2Rate[] to try and get there.
         if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
+    LATCbits.LATC0 = 1;
           // If the rate is zero, then we always move instantly
           // to the target.
           if (gRC2Rate[gRC2Ptr] == 0u)
@@ -384,6 +374,7 @@ void low_ISR(void)
         INTCONbits.GIEH = 1;
       }
     }
+    LATCbits.LATC0 = 0;
 
     // See if it's time to fire off an I packet
     if (ISR_D_RepeatRate > 0u)
@@ -1820,6 +1811,7 @@ void parse_CU_packet(void)
       TRISDbits.TRISD1 = 0;   // D1 high when in ISR
       TRISDbits.TRISD0 = 0;   // D0 high when loading next command
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+      TRISCbits.TRISC0 = 0;
     }
     else
     {

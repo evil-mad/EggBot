@@ -825,6 +825,8 @@ NonStepperCommands:
   // Now check for all the other (non-stepper based) motion FIFO commands
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT_NUM))
   {
+    LATCbits.LATC0 = 1;
+    
     // Check to see if we should change the state of the pen
     if (bittstzero(gUseRCPenServo))
     {
