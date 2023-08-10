@@ -886,7 +886,6 @@ NonStepperCommands:
         }
       }
     }
-    goto CheckForNextCommand;
   }
 
   if (CurrentCommand.Command & (COMMAND_SERVO_MOVE_BIT | COMMAND_DELAY_BIT))
