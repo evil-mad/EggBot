@@ -149,7 +149,7 @@ extern volatile tRC_state g_RC_state[kRC_DATA_SIZE];
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;
 
-extern volatile UINT8 gRedLEDEmptyFIFO;
+extern volatile UINT8 near gRedLEDEmptyFIFO;
 extern BOOL gAutomaticMotorEnable;
 extern volatile UINT8 gLimitSwitchPortB;
 extern volatile UINT8 gLimitSwitchReplies;

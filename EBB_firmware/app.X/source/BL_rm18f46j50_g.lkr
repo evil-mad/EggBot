@@ -1,3 +1,43 @@
+// Ram Usage for EBB v3.0.0
+//
+//Name      Start   End      Purpose
+//accessram 0x000   0x05F 
+//           0x000   0x019   compiler temp
+//           0x020   0x03B   small ISR variables
+//           0x03C   0x05F   compiler temp
+//gpr0      0x060   0x0FF   
+//           0x060   0x0A6   RCServo2 variables
+//           0x0A7   0x0FF   [unused (88d)]
+//gpr1      0x100   0x1FF   
+//           0x100   0x17F   UBW.c, compiler startup variables
+//           0x180   0x1C2   Rest of ISR variables
+//           0x1C3   0x1FF   usb_device variables
+//gpr2      0x200   0x2FF   
+//           0x200   0x27F   TX and RX command buffers
+//           0x280   0x2FF   USB Descriptors
+//gpr3      0x300   0x3FF   
+//           0x300   0x3FF   RX buffer
+//gpr4      0x400   0x4FF   
+//           0x400   0x438   USB Buffer Description Tables (USB SIE hardware SFRs), usb_device.c variables
+//           0x439   0x4FF   [unused (198d)]
+//gpr5      0x500   0x5FF   
+//           0x500    0x5FF  UBW.c misc variables, EEPROM write/read variables
+//gpr6      0x600   0x6FF   
+//           0x600   0x6A0   CDC USB stack variables
+//           0x6A8   0x6E6   UBW.c variables
+//           0x6E7   0x6FF   [unused (24d)]
+//gpr7      0x700   0x7FF   CommandFIFO
+//gpr8      0x800   0x8FF   CommandFIFO
+//gpr9      0x900   0x9FF   CommandFIFO
+//gpr10     0xA00   0xAFF   CommandFIFO
+//gpr11     0xB00   0xBFF   CommandFIFO
+//gpr12     0xC00   0xCFF   CommandFIFO
+//gpr13     0xD00   0xDFF   CommandFIFO
+//gpr14     0xE00   0xEBF   Stack (note, not full 256 bytes anymore, only 192 now)
+//sfr14     0xEC0   0xEFF   SFRs
+//sfr15     0xF00   0xF5F   SFRs
+//accesssfr 0xF60   0xFFF   SFRs
+
 // File: 18f46j50_g.lkr
 // Generic linker script for the PIC18F46J50 processor
 
@@ -39,11 +79,7 @@ LIBPATH .
 CODEPAGE   NAME=config     START=0xFFF8            END=0xFFFF        PROTECTED
 CODEPAGE   NAME=devid      START=0x3FFFFE          END=0x3FFFFF      PROTECTED
 
-#IFDEF _EXTENDEDMODE
-  DATABANK   NAME=gpre       START=0x0               END=0x5F
-#ELSE
-  ACCESSBANK NAME=accessram  START=0x0               END=0x5F
-#FI
+ACCESSBANK NAME=accessram  START=0x0               END=0x5F
 
 DATABANK   NAME=gpr0       START=0x60              END=0xFF
 DATABANK   NAME=gpr1       START=0x100             END=0x1FF
@@ -52,23 +88,23 @@ DATABANK   NAME=gpr3       START=0x300             END=0x3FF
 DATABANK   NAME=gpr4       START=0x400             END=0x4FF
 DATABANK   NAME=gpr5       START=0x500             END=0x5FF
 DATABANK   NAME=gpr6       START=0x600             END=0x6FF
-DATABANK   NAME=gpr7       START=0x700             END=0x7FF
-// Command FIFO takes over all banks from 0x800 to 0xCFF
+// Command FIFO takes over all banks from 0x700 to 0xDFF
+//DATABANK   NAME=gpr7       START=0x700             END=0x7FF
 //DATABANK   NAME=gpr8       START=0x800             END=0x8FF
 //DATABANK   NAME=gpr9       START=0x900             END=0x9FF
 //DATABANK   NAME=gpr10      START=0xA00             END=0xAFF
 //DATABANK   NAME=gpr11      START=0xB00             END=0xBFF
 //DATABANK   NAME=gpr12      START=0xC00             END=0xCFF
-DATABANK    NAME=FIFO_scn   START=0x800             END=0xCFF
+//DATABANK   NAME=gpr13      START=0xD00             END=0xDFF
+DATABANK    NAME=FIFO_scn   START=0x700             END=0xDFF
 
 #IFDEF _DEBUGDATASTART
-  DATABANK   NAME=gpr13      START=0xD00             END=_DATAEND
+  DATABANK   NAME=gpr14      START=0xE00             END=_DATAEND
   DATABANK   NAME=dbgspr     START=_DEBUGDATASTART   END=_DEND           PROTECTED
 #ELSE //no debug
-  DATABANK   NAME=gpr13      START=0xD00             END=0xDFF
+  DATABANK   NAME=gpr14      START=0xE00             END=0xEBF
 #FI
 
-DATABANK   NAME=gpr14      START=0xE00             END=0xEBF
 DATABANK   NAME=sfr14      START=0xEC0             END=0xEFF          PROTECTED
 DATABANK   NAME=sfr15      START=0xF00             END=0xF5F          PROTECTED
 ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED
@@ -79,8 +115,8 @@ ACCESSBANK NAME=accesssfr  START=0xF60             END=0xFFF          PROTECTED
 #IFDEF _CRUNTIME
   SECTION    NAME=CONFIG     ROM=config
   #IFDEF _DEBUGDATASTART
-    STACK SIZE=0x100 RAM=gpr12
-  #ELSE
     STACK SIZE=0x100 RAM=gpr13
+  #ELSE
+    STACK SIZE=0x0C0 RAM=gpr14
   #FI
 #FI

@@ -78,11 +78,10 @@
 #define NUMBER_OF_STEPPERS  2u
 
 // Maximum number of elements in the command FIFO (5 is largest we can have
-// in one bank. Growing larger is possible, but requires more refactoring.
+// in one bank). Growing larger is possible, but requires more refactoring.
 // See "Application: creating Large Data Objects and the USART" example in 
 // the hlpC18ug help file for how to do this.)
-//#define COMMAND_FIFO_LENGTH     20u
-#define COMMAND_FIFO_LENGTH     20u
+#define COMMAND_FIFO_MAX_LENGTH     32u
 
 typedef enum
 {
@@ -281,17 +280,17 @@ typedef struct
 
 
 extern MoveCommandType * FIFOPtr;
-extern volatile UINT8 gFIFOLength;
-extern volatile UINT8 gFIFOIn;
-extern volatile UINT8 gFIFOOut;
+extern near volatile UINT8 gFIFOLength;
+extern near volatile UINT8 gFIFOIn;
+extern near volatile UINT8 gFIFOOut;
 extern unsigned int DemoModeActive;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
-extern volatile UINT8 TestMode;
-extern volatile UINT8 gLimitSwitchMask;
-extern volatile UINT8 gLimitSwitchTarget;
-extern volatile UINT8 gLimitSwitchTriggered;
+extern volatile near UINT8 TestMode;
+extern volatile near UINT8 gLimitSwitchMask;
+extern volatile near UINT8 gLimitSwitchTarget;
+extern volatile near UINT8 gLimitSwitchTriggered;
 extern UINT8 gStandardizedCommandFormat;
 
 

@@ -111,6 +111,8 @@
 #include "RCServo2.h"
 #include "HardwareProfile.h"
 
+#pragma udata RC2Servo_globals = 0x060
+
 // Counts from 0 to gRC2SlotMS
 UINT8  gRC2msCounter;
 // Current RC servo position in 83uS units for each channel
@@ -123,7 +125,7 @@ UINT16 gRC2Target[MAX_RC2_SERVOS];
 UINT16 gRC2Rate[MAX_RC2_SERVOS];
 // 
 UINT8  gRC2Ptr;
-// How many RC servos can we currently simultainously service (default 8)
+// How many RC servos can we currently simultaneously service (default 8)
 UINT8  gRC2Slots;
 // How many 1ms ISR ticks before switching to the next channel (default 3)
 UINT8  gRC2SlotMS;
@@ -371,7 +373,7 @@ UINT8 RCServo2_Move(
 
       // Wait until we have a free spot in the FIFO, and add our new
       // command in
-      while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+      while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
       ;
       
       // If the pin we're controlling is B1 (the normal servo output) then
@@ -402,7 +404,7 @@ UINT8 RCServo2_Move(
       }
 
       gFIFOIn++;
-      if (gFIFOIn >= COMMAND_FIFO_LENGTH)
+      if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
       {
         gFIFOIn = 0;
       }

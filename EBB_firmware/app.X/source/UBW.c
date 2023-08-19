@@ -146,7 +146,7 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a2"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a3"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions

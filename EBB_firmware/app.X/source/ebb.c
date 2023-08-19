@@ -322,79 +322,81 @@ typedef enum
 // This is the FIFO that stores the motion commands. It spans multiple RAM
 // banks from 0x800 through 0xCFF, and must only be accessed via pointer
 #pragma udata FIFO_scn
-MoveCommandType CommandFIFO[COMMAND_FIFO_LENGTH];
+MoveCommandType CommandFIFO[COMMAND_FIFO_MAX_LENGTH];
 
 // These global variables are deliberately put into "Bank" 1 of RAM.
 // They are every global variable that the 25KHz ISR has to access.
 // With them all being in bank 1, no bank switch instructions are needed
 // in the ISR save for one at the very top.
+#pragma udata access ISR_access
+
+//static UINT8 TookStep;       // LSb set if a step was taken
+static near UINT8 AllDone;        // LSb set if this command is complete
+static near UINT8 isr_i;
+static near UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
+
+static near DriverConfigurationType DriverConfiguration;
+// LSb set to enable RC Servo output for pen up/down
+static near UINT8 gUseRCPenServo;
+// LSb set to enable red LED lit when FIFO is empty
+volatile near UINT8 gRedLEDEmptyFIFO;
+// LSb set when user presses the PRG or alternate PRG button
+static volatile near UINT8 ButtonPushed;
+// LSb set to enable use of alternate PRG (pause) button
+static volatile near UINT8 UseAltPause;
+// Bitfield used to keep track of what test modes are enabled/disabled
+volatile near UINT8 TestMode;
+
+// Used as temporary variable inside ISR for servo channel index
+static near UINT8 ISR_Channel;
+
+// Temporary holder for PortB value in ISR so we don't have to sample more than once
+static near UINT8 PortBTemp;
+
+// Global variables used for limit switch feature
+volatile near UINT8 gLimitSwitchMask;      // 8-bit PortB mask
+volatile near UINT8 gLimitSwitchTarget;    // 8-bit PortB target values
+volatile near UINT8 gLimitSwitchTriggered; // Non-zero if limit switch trigger has fired
+
+// Variables used during debug printing within ISR
+static near u32b4_t xx;
+static near UINT8 nib;
+
+// Global variables for managing FIFO depth/indexes
+volatile near UINT8 gFIFOLength;
+volatile near UINT8 gFIFOIn;
+volatile near UINT8 gFIFOOut;
+
+// Holds a local copy of the Command from CommandFIFO[gFIFOOut].Command 
+static near UINT8 gFIFOCommand;
+
+// Temporarily store FSR0 during command copy assembly (note these can be in any
+// bank)
+UINT8 near isr_FSR0L_temp;
+UINT8 near isr_FSR0H_temp;
+
+// Pointer in RAM to the first byte of the next unplayed FIFO command
+UINT8 near FIFO_out_ptr_high;
+UINT8 near FIFO_out_ptr_low;
+
+// These values hold the global step position of each axis
+volatile static near INT32 globalStepCounter1;
+volatile static near INT32 globalStepCounter2;
+
 #pragma udata ISR_globals = 0x180
 
 MoveCommandType CurrentCommand;
 
+// Pointer to a MoveCommandType element of the FIFO array
+MoveCommandType  * FIFOPtr = &CommandFIFO[0];
 // Accumulator for each axis
 static u32b4_t acc_union[2];
 
-// These values hold the global step position of each axis
-volatile static INT32 globalStepCounter1;
-volatile static INT32 globalStepCounter2;
-
-//static UINT8 TookStep;       // LSb set if a step was taken
-static UINT8 AllDone;        // LSb set if this command is complete
-static UINT8 isr_i;
-static UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
-
-static DriverConfigurationType DriverConfiguration;
-// LSb set to enable RC Servo output for pen up/down
-static UINT8 gUseRCPenServo;
-// LSb set to enable red LED lit when FIFO is empty
-volatile UINT8 gRedLEDEmptyFIFO;
-// LSb set when user presses the PRG or alternate PRG button
-static volatile UINT8 ButtonPushed;
-// LSb set to enable use of alternate PRG (pause) button
-static volatile UINT8 UseAltPause;
-// Bitfield used to keep track of what test modes are enabled/disabled
-volatile UINT8 TestMode;
-
-// Used as temporary variable inside ISR for servo channel index
-static UINT8 ISR_Channel;
 
 // ISR globals used in test modes for keeping track of each move
 static UINT32 gISRTickCountForThisCommand;
 static UINT32 gISRStepCountForThisCommand;
 static INT32  gISRPositionForThisCommand;
-
-// Temporary holder for PortB value in ISR so we don't have to sample more than once
-static UINT8 PortBTemp;
-
-// Global variables used for limit switch feature
-volatile UINT8 gLimitSwitchMask;      // 8-bit PortB mask
-volatile UINT8 gLimitSwitchTarget;    // 8-bit PortB target values
-volatile UINT8 gLimitSwitchTriggered; // Non-zero if limit switch trigger has fired
-
-// Variables used during debug printing within ISR
-static u32b4_t xx;
-static UINT8 nib;
-
-// Global variables for managing FIFO depth/indexes
-volatile UINT8 gFIFOLength;
-volatile UINT8 gFIFOIn;
-volatile UINT8 gFIFOOut;
-
-// Holds a local copy of the Command from CommandFIFO[gFIFOOut].Command 
-static UINT8 gFIFOCommand;
-
-// Temporarily store FSR0 during command copy assembly (note these can be in any
-// bank)
-UINT8 isr_FSR0L_temp;
-UINT8 isr_FSR0H_temp;
-
-// Pointer in RAM to the first byte of the next unplayed FIFO command
-UINT8 FIFO_out_ptr_high;
-UINT8 FIFO_out_ptr_low;
-
-// Pointer to a MoveCommandType element of the FIFO array
-MoveCommandType * FIFOPtr = &CommandFIFO[0];
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -1115,7 +1117,7 @@ CheckForNextCommand:
       gFIFOIn = 0;
       gFIFOOut = 0;
 
-      // Flush the whole fifo (Update this if COMMAND_FIFO_LENGTH changes)
+      // Flush the whole fifo (Update this if COMMAND_FIFO_MAX_LENGTH changes)
       // This is about 1/3 the total instructions of making a for() loop
       FIFOPtr[0].Command = COMMAND_NONE_BIT;
       FIFOPtr[1].Command = COMMAND_NONE_BIT;
@@ -1297,7 +1299,7 @@ CheckForNextCommand:
       
       // Increment gFIFO_Out
       gFIFOOut++;
-      if (gFIFOOut >= COMMAND_FIFO_LENGTH)
+      if (gFIFOOut >= COMMAND_FIFO_MAX_LENGTH)
       {
         gFIFOOut = 0;
       }
@@ -2294,7 +2296,7 @@ void process_low_level_move(
   }
 
   // Spin here until there's space in the FIFO
-  while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
     ;
 
   // If the limit switch feature has triggered, then ignore this move command
@@ -2305,7 +2307,7 @@ void process_low_level_move(
     // Now, quick copy over the computed command data to the command FIFO
     FIFOPtr[gFIFOIn] = move;
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_LENGTH)
+    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
     {
       gFIFOIn = 0;
     }
@@ -2508,7 +2510,7 @@ void parse_HM_packet(void)
   }
   
   // Wait until FIFO is empty
-  while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
     ;
 
   // Then wait for motion command to finish (if one's running)
@@ -3025,7 +3027,7 @@ static void process_simple_motor_move(
   }
   
   // Spin here until there's space in the FIFO
-  while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
   ;
   
   // If the limit switch feature has triggered, then ignore this move command
@@ -3036,7 +3038,7 @@ static void process_simple_motor_move(
     // Now, quick copy over the computed command data to the command FIFO
     FIFOPtr[gFIFOIn] = move;
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_LENGTH)
+    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
     {
       gFIFOIn = 0;
     }
@@ -3110,7 +3112,7 @@ void parse_ES_packet(void)
   CurrentCommand.Accel[1] = 0;
 
   // Clear out the entire FIFO
-  for (i = 0; i < COMMAND_FIFO_LENGTH; i++)
+  for (i = 0; i < COMMAND_FIFO_MAX_LENGTH; i++)
   {
     FIFOPtr[i].Command = COMMAND_NONE_BIT;
   }
@@ -3419,7 +3421,7 @@ void parse_EM_packet(void)
   }
 
   // Trial: Spin here until there's space in the fifo
-  while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
     ;
 
   // Set up the motion queue command
@@ -3428,7 +3430,7 @@ void parse_EM_packet(void)
   FIFOPtr[gFIFOIn].Command = COMMAND_EM_BIT;
 
   gFIFOIn++;
-  if (gFIFOIn >= COMMAND_FIFO_LENGTH)
+  if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
   {
     gFIFOIn = 0;
   }
@@ -3739,7 +3741,7 @@ void parse_SE_packet(void)
   else
   {
     // Trial: Spin here until there's space in the FIFO
-    while(gFIFOLength >= COMMAND_FIFO_LENGTH)
+    while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
       ;
 
     // Set up the motion queue command
@@ -3749,7 +3751,7 @@ void parse_SE_packet(void)
     FIFOPtr[gFIFOIn].Command = COMMAND_SE_BIT;
 
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_LENGTH)
+    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
     {
       gFIFOIn = 0;
     }
