@@ -401,6 +401,8 @@ static INT32  gISRPositionForThisCommand;
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
 
+static MoveCommandType gMoveTemp;     // Commands fill this then copy to FIFO
+
 unsigned int DemoModeActive;
 unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
@@ -599,10 +601,12 @@ void high_ISR(void)
         if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
         {
           CurrentCommand.DirBits |= DIR1_BIT;
+          Dir1IO = 1;
         }
         else
         {
           CurrentCommand.DirBits &= ~DIR1_BIT;
+          Dir1IO = 0;
         }
 
         if (CurrentCommand.Steps[0] == 0u)
@@ -629,10 +633,12 @@ void high_ISR(void)
         if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
         {
           CurrentCommand.DirBits |= DIR2_BIT;
+          Dir2IO = 1;
         }
         else
         {
           CurrentCommand.DirBits &= ~DIR2_BIT;
+          Dir2IO = 0;
         }
 
         if (CurrentCommand.Steps[1] == 0u)
@@ -699,10 +705,12 @@ void high_ISR(void)
         if (CurrentCommand.Rate[0].bytes.b4 & 0x80)
         {
           CurrentCommand.DirBits |= DIR1_BIT;
+          Dir1IO = 1;
         }
         else
         {
           CurrentCommand.DirBits &= ~DIR1_BIT;
+          Dir1IO = 0;
         }
       }
       
@@ -721,10 +729,12 @@ void high_ISR(void)
         if (CurrentCommand.Rate[1].bytes.b4 & 0x80)
         {
           CurrentCommand.DirBits |= DIR2_BIT;
+          Dir2IO = 1;
         }
         else
         {
           CurrentCommand.DirBits &= ~DIR2_BIT;
+          Dir2IO = 0;
         }
       }
     }    
@@ -829,6 +839,7 @@ NonStepperCommands:
   {
     LATCbits.LATC0 = 1;
     
+    
     // Check to see if we should change the state of the pen
     if (bittstzero(gUseRCPenServo))
     {
@@ -888,6 +899,7 @@ NonStepperCommands:
         }
       }
     }
+    LATCbits.LATC0 = 0;
   }
 
   if (CurrentCommand.Command & (COMMAND_SERVO_MOVE_BIT | COMMAND_DELAY_BIT))
@@ -1809,7 +1821,6 @@ void parse_LM_packet(void)
   INT32 Steps2 = 0;
   INT32 Accel1 = 0;
   INT32 Accel2 = 0;
-  MoveCommandType move;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
@@ -1989,7 +2000,6 @@ void parse_T3_packet(void)
   INT32 Accel2 = 0;
   INT32 Jerk1 = 0;
   INT32 Jerk2 = 0;
-  MoveCommandType move;
   UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
@@ -2124,8 +2134,6 @@ void process_low_level_move(
   UINT32 ClearAccs,
   ExtractReturnType ClearRet)
 {
-  MoveCommandType move;
-
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
   {
@@ -2180,8 +2188,8 @@ void process_low_level_move(
     }
   }
   
-  move.DirBits = 0;       // Start by assuming motors start CW
-  move.DelayCounter = 0;  // No delay for motor moves
+  gMoveTemp.DirBits = 0;       // Start by assuming motors start CW
+  gMoveTemp.DelayCounter = 0;  // No delay for motor moves
 
   // Subtract off half of the Accel term and add 1/6th of the Jerk before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
@@ -2197,7 +2205,7 @@ void process_low_level_move(
   // if so, we need the FIFO to set the accumulator to 2^31-1 before
   // as the command is loaded. So we use two bits in SEState to indicate
   // this.
-  move.SEState = 0;           // Start with all bits clear
+  gMoveTemp.SEState = 0;           // Start with all bits clear
   
   if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
@@ -2205,8 +2213,8 @@ void process_low_level_move(
     // as the initial value for the accumulator.
     if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
     {
-      move.SEState = SESTATE_ARBITRARY_ACC_BIT;
-      move.DelayCounter = ClearAccs;
+      gMoveTemp.SEState = SESTATE_ARBITRARY_ACC_BIT;
+      gMoveTemp.DelayCounter = ClearAccs;
     }
     else
     {
@@ -2214,11 +2222,11 @@ void process_low_level_move(
       // wants the accumulator cleared
       if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
       {
-        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+        gMoveTemp.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
       else
       {
-        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+        gMoveTemp.SEState |= SESTATE_CLEAR_ACC1_BIT;
       }
     }
   }
@@ -2231,22 +2239,22 @@ void process_low_level_move(
     {
       if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
       {
-        move.SEState |= SESTATE_NEGATE_ACC1_BIT;
+        gMoveTemp.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
       else
       {
-        move.SEState |= SESTATE_CLEAR_ACC1_BIT;
+        gMoveTemp.SEState |= SESTATE_CLEAR_ACC1_BIT;
       }
     }
     if (ClearAccs & 0x02)
     {
       if (NeedNegativeAccumulator(Rate2, Accel2, Jerk2))
       {
-        move.SEState |= SESTATE_NEGATE_ACC2_BIT;
+        gMoveTemp.SEState |= SESTATE_NEGATE_ACC2_BIT;
       }
       else
       {
-        move.SEState |= SESTATE_CLEAR_ACC2_BIT;
+        gMoveTemp.SEState |= SESTATE_CLEAR_ACC2_BIT;
       }
     }
   }
@@ -2264,35 +2272,35 @@ void process_low_level_move(
   }
 
   // Load up the move structure with all needed values
-  move.Rate[0].value = Rate1;
+  gMoveTemp.Rate[0].value = Rate1;
   if (TimedMove)
   {
-    move.Steps[0] = Intervals;  
+    gMoveTemp.Steps[0] = Intervals;  
   }
   else
   {
-    move.Steps[0] = Steps1;    
+    gMoveTemp.Steps[0] = Steps1;    
   }
-  move.Accel[0] = Accel1;
-  move.Jerk[0] = Jerk1;
-  move.Rate[1].value = Rate2;
+  gMoveTemp.Accel[0] = Accel1;
+  gMoveTemp.Jerk[0] = Jerk1;
+  gMoveTemp.Rate[1].value = Rate2;
   if (TimedMove)
   {
-    move.Steps[1] = 0;
+    gMoveTemp.Steps[1] = 0;
   }
   else
   {
-    move.Steps[1] = Steps2;
+    gMoveTemp.Steps[1] = Steps2;
   }
-  move.Accel[1] = Accel2;
-  move.Jerk[1] = Jerk2;
+  gMoveTemp.Accel[1] = Accel2;
+  gMoveTemp.Jerk[1] = Jerk2;
   if (TimedMove)
   {
-    move.Command = COMMAND_LT_MOVE_BIT;
+    gMoveTemp.Command = COMMAND_LT_MOVE_BIT;
   }
   else
   {
-    move.Command = COMMAND_LM_MOVE_BIT;
+    gMoveTemp.Command = COMMAND_LM_MOVE_BIT;
   }
 
   // Spin here until there's space in the FIFO
@@ -2305,7 +2313,7 @@ void process_low_level_move(
   if (!bittstzero(gLimitSwitchTriggered))
   {
     // Now, quick copy over the computed command data to the command FIFO
-    FIFOPtr[gFIFOIn] = move;
+    FIFOPtr[gFIFOIn] = gMoveTemp;
     gFIFOIn++;
     if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
     {
@@ -2318,14 +2326,14 @@ void process_low_level_move(
   {
     // Print the final values used by the ISR for this move
     printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld",
-      move.Rate[0],       // Rate1 signed 32 bit
-      move.Steps[0],      // Steps1 (now) unsigned 31 bit
-      move.Accel[0],      // Accel1 signed 32 bit
-      move.Jerk[0],       // Jerk1 signed 32 bit
-      move.Rate[1],       // Rate2 signed 32 bit
-      move.Steps[1],      // Steps2 (now) unsigned 31 bit
-      move.Accel[1],      // Accel2 signed 32 bit
-      move.Jerk[1]        // Jerk2 signed 32 bit
+      gMoveTemp.Rate[0],       // Rate1 signed 32 bit
+      gMoveTemp.Steps[0],      // Steps1 (now) unsigned 31 bit
+      gMoveTemp.Accel[0],      // Accel1 signed 32 bit
+      gMoveTemp.Jerk[0],       // Jerk1 signed 32 bit
+      gMoveTemp.Rate[1],       // Rate2 signed 32 bit
+      gMoveTemp.Steps[1],      // Steps2 (now) unsigned 31 bit
+      gMoveTemp.Accel[1],      // Accel2 signed 32 bit
+      gMoveTemp.Jerk[1]        // Jerk2 signed 32 bit
     );
     print_line_ending(kLE_REV);
   }
@@ -2819,7 +2827,6 @@ static void process_simple_motor_move(
   UINT32 temp1 = 0;
   UINT32 temp2 = 0;
   UINT32 remainder = 0;
-  MoveCommandType move;
 
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
@@ -2840,30 +2847,30 @@ static void process_simple_motor_move(
   {
     ClearAccs = 3;
   }
-  move.SEState = ClearAccs;
+  gMoveTemp.SEState = ClearAccs;
 
   // Check for delay
   if (A1Stp == 0 && A2Stp == 0)
   {
-    move.Command = COMMAND_DELAY_BIT;
+    gMoveTemp.Command = COMMAND_DELAY_BIT;
     // This is OK because we only need to multiply the 3 byte Duration by
     // 25, so it fits in 4 bytes OK.
-    move.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+    gMoveTemp.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
     
     // Check that DelayCounter doesn't have a crazy high value (this was
     // being done in the ISR, now moved here for speed)
-    if (move.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+    if (gMoveTemp.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
     {
       // Ideally we would throw an error to the user here, but since we're in
       // the helper function that's not so easy. So we just set the delay time
       // to zero and hope they notice that their delays aren't doing anything.
-      move.DelayCounter = 0;
+      gMoveTemp.DelayCounter = 0;
     }
   }
   else
   {
-    move.DelayCounter = 0; // No delay for motor moves
-    move.DirBits = 0;
+    gMoveTemp.DelayCounter = 0; // No delay for motor moves
+    gMoveTemp.DirBits = 0;
 
     if (gAutomaticMotorEnable == TRUE)
     {
@@ -2875,12 +2882,12 @@ static void process_simple_motor_move(
     // First, set the direction bits
     if (A1Stp < 0)
     {
-      move.DirBits = move.DirBits | DIR1_BIT;
+      gMoveTemp.DirBits = gMoveTemp.DirBits | DIR1_BIT;
       A1Stp = -A1Stp;
     }
     if (A2Stp < 0)
     {
-      move.DirBits = move.DirBits | DIR2_BIT;
+      gMoveTemp.DirBits = gMoveTemp.DirBits | DIR2_BIT;
       A2Stp = -A2Stp;
     }
     // To compute StepAdd values from Duration.
@@ -2962,9 +2969,9 @@ static void process_simple_motor_move(
     {
       temp = 0x7FFFFFFF;
     }
-    move.Rate[0].value = temp;
-    move.Steps[0] = A1Stp;
-    move.Accel[0] = 0;
+    gMoveTemp.Rate[0].value = temp;
+    gMoveTemp.Steps[0] = A1Stp;
+    gMoveTemp.Accel[0] = 0;
 
     if (A2Stp != 0) 
     {
@@ -3009,18 +3016,18 @@ static void process_simple_motor_move(
     {
       temp = 0x7FFFFFFF;
     }
-    move.Rate[1].value = temp;
-    move.Steps[1] = A2Stp;
-    move.Accel[1] = 0;
-    move.Command = COMMAND_SM_XM_HM_MOVE_BIT;
+    gMoveTemp.Rate[1].value = temp;
+    gMoveTemp.Steps[1] = A2Stp;
+    gMoveTemp.Accel[1] = 0;
+    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 
     if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
     {
       printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu",
-        move.Rate[0],
-        move.Steps[0],
-        move.Rate[1],
-        move.Steps[1]
+        gMoveTemp.Rate[0],
+        gMoveTemp.Steps[0],
+        gMoveTemp.Rate[1],
+        gMoveTemp.Steps[1]
       );
       print_line_ending(kLE_REV);
     }
@@ -3036,7 +3043,7 @@ static void process_simple_motor_move(
   if (!bittstzero(gLimitSwitchTriggered))
   {
     // Now, quick copy over the computed command data to the command FIFO
-    FIFOPtr[gFIFOIn] = move;
+    FIFOPtr[gFIFOIn] = gMoveTemp;
     gFIFOIn++;
     if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
     {
