@@ -292,6 +292,7 @@ extern volatile near UINT8 gLimitSwitchMask;
 extern volatile near UINT8 gLimitSwitchTarget;
 extern volatile near UINT8 gLimitSwitchTriggered;
 extern UINT8 gStandardizedCommandFormat;
+extern volatile near UINT8 gCurrentFIFOLength;
 
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above

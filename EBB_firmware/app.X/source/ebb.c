@@ -370,10 +370,13 @@ volatile near UINT8 gFIFOOut;
 // Holds a local copy of the Command from CommandFIFO[gFIFOOut].Command 
 static near UINT8 gFIFOCommand;
 
+// Current length of FIFO
+volatile near UINT8 gCurrentFIFOLength;
+
 // Temporarily store FSR0 during command copy assembly (note these can be in any
 // bank)
-UINT8 near isr_FSR0L_temp;
-UINT8 near isr_FSR0H_temp;
+//UINT8 near isr_FSR0L_temp;
+//UINT8 near isr_FSR0H_temp;
 
 // Pointer in RAM to the first byte of the next unplayed FIFO command
 UINT8 near FIFO_out_ptr_high;
@@ -1129,13 +1132,11 @@ CheckForNextCommand:
       gFIFOIn = 0;
       gFIFOOut = 0;
 
-      // Flush the whole fifo (Update this if COMMAND_FIFO_MAX_LENGTH changes)
-      // This is about 1/3 the total instructions of making a for() loop
-      FIFOPtr[0].Command = COMMAND_NONE_BIT;
-      FIFOPtr[1].Command = COMMAND_NONE_BIT;
-      FIFOPtr[2].Command = COMMAND_NONE_BIT;
-      FIFOPtr[3].Command = COMMAND_NONE_BIT;
-      FIFOPtr[4].Command = COMMAND_NONE_BIT;
+      // Flush the whole FIFO by clearing each element's Command field
+      for (isr_i=0; isr_i < COMMAND_FIFO_MAX_LENGTH; isr_i++)
+      {
+        FIFOPtr[isr_i].Command = COMMAND_NONE_BIT;
+      }
     }
   }
 
@@ -1311,7 +1312,7 @@ CheckForNextCommand:
       
       // Increment gFIFO_Out
       gFIFOOut++;
-      if (gFIFOOut >= COMMAND_FIFO_MAX_LENGTH)
+      if (gFIFOOut >= gCurrentFIFOLength)
       {
         gFIFOOut = 0;
       }
@@ -1513,8 +1514,9 @@ void EBB_Init(void)
   gFIFOLength = 0;
   gFIFOIn = 0;
   gFIFOOut = 0;
-  isr_FSR0L_temp = 0;
-  isr_FSR0H_temp = 0;
+  gCurrentFIFOLength = 1; // Default the FIFO length to 1 on boot
+  //isr_FSR0L_temp = 0;
+  //isr_FSR0H_temp = 0;
   // Start out FIFO out pointer on first element in FIFO array, which starts at
   // address 0x500
   FIFO_out_ptr_high = 0x05;
@@ -2304,7 +2306,7 @@ void process_low_level_move(
   }
 
   // Spin here until there's space in the FIFO
-  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+  while(gFIFOLength >= gCurrentFIFOLength)
     ;
 
   // If the limit switch feature has triggered, then ignore this move command
@@ -2315,7 +2317,7 @@ void process_low_level_move(
     // Now, quick copy over the computed command data to the command FIFO
     FIFOPtr[gFIFOIn] = gMoveTemp;
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
+    if (gFIFOIn >= gCurrentFIFOLength)
     {
       gFIFOIn = 0;
     }
@@ -2518,7 +2520,7 @@ void parse_HM_packet(void)
   }
   
   // Wait until FIFO is empty
-  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+  while(gFIFOLength >= gCurrentFIFOLength)
     ;
 
   // Then wait for motion command to finish (if one's running)
@@ -3034,7 +3036,7 @@ static void process_simple_motor_move(
   }
   
   // Spin here until there's space in the FIFO
-  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+  while(gFIFOLength >= gCurrentFIFOLength)
   ;
   
   // If the limit switch feature has triggered, then ignore this move command
@@ -3045,7 +3047,7 @@ static void process_simple_motor_move(
     // Now, quick copy over the computed command data to the command FIFO
     FIFOPtr[gFIFOIn] = gMoveTemp;
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
+    if (gFIFOIn >= gCurrentFIFOLength)
     {
       gFIFOIn = 0;
     }
@@ -3428,7 +3430,7 @@ void parse_EM_packet(void)
   }
 
   // Trial: Spin here until there's space in the fifo
-  while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+  while(gFIFOLength >= gCurrentFIFOLength)
     ;
 
   // Set up the motion queue command
@@ -3437,7 +3439,7 @@ void parse_EM_packet(void)
   FIFOPtr[gFIFOIn].Command = COMMAND_EM_BIT;
 
   gFIFOIn++;
-  if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
+  if (gFIFOIn >= gCurrentFIFOLength)
   {
     gFIFOIn = 0;
   }
@@ -3748,7 +3750,7 @@ void parse_SE_packet(void)
   else
   {
     // Trial: Spin here until there's space in the FIFO
-    while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+    while(gFIFOLength >= gCurrentFIFOLength)
       ;
 
     // Set up the motion queue command
@@ -3758,7 +3760,7 @@ void parse_SE_packet(void)
     FIFOPtr[gFIFOIn].Command = COMMAND_SE_BIT;
 
     gFIFOIn++;
-    if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
+    if (gFIFOIn >= gCurrentFIFOLength)
     {
       gFIFOIn = 0;
     }

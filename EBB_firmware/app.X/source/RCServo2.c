@@ -373,7 +373,7 @@ UINT8 RCServo2_Move(
 
       // Wait until we have a free spot in the FIFO, and add our new
       // command in
-      while(gFIFOLength >= COMMAND_FIFO_MAX_LENGTH)
+      while(gFIFOLength >= gCurrentFIFOLength)
       ;
       
       // If the pin we're controlling is B1 (the normal servo output) then
@@ -404,7 +404,7 @@ UINT8 RCServo2_Move(
       }
 
       gFIFOIn++;
-      if (gFIFOIn >= COMMAND_FIFO_MAX_LENGTH)
+      if (gFIFOIn >= gCurrentFIFOLength)
       {
         gFIFOIn = 0;
       }

@@ -276,6 +276,8 @@ void parse_QT_packet(void);    // QT Query Tag command
 void parse_RB_packet(void);    // RB ReBoot command
 void parse_QR_packet(void);    // QR Query RC Servo power state
 void parse_SR_packet(void);    // SR Set RC Servo power timeout
+void parse_QU_packet(void);    // QU General Query
+
 void check_and_send_TX_data(void); // See if there is any data to send to PC, and if so, do it
 int _user_putc(char c);        // Our UBS based stream character printer
 
@@ -1612,6 +1614,13 @@ void parse_packet(void)
       parse_HM_packet();
       break;
     }
+    case ('Q' * 256) + 'U':
+    {
+      // QU is for General Query
+      parse_QU_packet();
+      break;
+    }
+
     default:
     {
       if (0u == gCommand_Char2)
@@ -2061,11 +2070,26 @@ void parse_QU_packet(void)
     printf((far rom char*)"%02X", gLimitSwitchPortB);
     print_line_ending(kLE_NORM);
   }
+  // QU,2 to read back the maximum supported FIFO length for this version
+  // Returns "QU,ddd" where ddd is one to three digit decimal value from 0 to 255
+  else if (2u == parameter_number)
+  {
+    printf((far rom char*)"%d", COMMAND_FIFO_MAX_LENGTH);
+    print_line_ending(kLE_NORM);
+  }
+  // QU,3 to read back the current FIFO length
+  // Returns "QU,ddd" where ddd is one to three digit decimal value from 0 to 255
+  else if (3u == parameter_number)
+  {
+    printf((far rom char*)"%d", gCurrentFIFOLength);
+    print_line_ending(kLE_NORM);
+  }
   else
   {
     // parameter_number is not understood
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
   }
+
   print_line_ending(kLE_OK_NORM);
 }
 
