@@ -78,9 +78,13 @@
 #define NUMBER_OF_STEPPERS  2u
 
 // Maximum number of elements in the command FIFO (5 is largest we can have
-// in one bank). Growing larger is possible, but requires more refactoring.
-// See "Application: creating Large Data Objects and the USART" example in 
-// the hlpC18ug help file for how to do this.)
+// in one bank). With the FIFO_scn in the linker file going from 0x600 to 0xE00
+// there is 2048 bytes of RAM available for the FIFO. At 47 bytes for each 
+// element (command) that gives us a maximum of 43 for the FIFO depth.
+// Because we want to leave some room for FIFO command expansion in the future,
+// we artifically set this to 32 elements. That gives us room to grow the size
+// of the command structure wihtout needing to decreasae the maximum size
+// of the FIFO in elements.
 #define COMMAND_FIFO_MAX_LENGTH     32u
 
 typedef enum

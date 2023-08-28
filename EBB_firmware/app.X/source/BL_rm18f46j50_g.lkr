@@ -1,16 +1,15 @@
-// Ram Usage for EBB v3.0.0-a4
+// Ram Usage for EBB v3.0.0-a5
 //
 //Name      Start   End      Purpose
 //accessram 0x000   0x05F 
 //           0x000   0x022   small ISR variables
 //           0x023   0x05F   compiler temp
 //gpr0      0x060   0x0FF   
-//           0x060   0x0A6   RCServo2 variables
-//           0x0A7   0x0FF   [unused (88d)]
+//           0x060   0x0E8   RCServo2 variables, ebb.c
+//           0x0E9   0x0FF   [unused (22d)]
 //gpr1      0x100   0x1FF   
 //           0x100   0x17F   UBW.c, compiler startup variables
-//           0x180   0x1C2   Rest of ISR variables
-//           0x1C3   0x1FF   usb_device variables
+//           0x180   0x1FF   Rest of ISR variables
 //gpr2      0x200   0x2FF   
 //           0x200   0x27F   TX and RX command buffers
 //           0x280   0x2FF   USB Descriptors
@@ -18,20 +17,17 @@
 //           0x300   0x3FF   RX buffer
 //gpr4      0x400   0x4FF   
 //           0x400   0x438   USB Buffer Description Tables (USB SIE hardware SFRs), usb_device.c variables
-//           0x439   0x4FF   [unused (198d)]
+//           0x439   0x4FF   UBW.c misc variables, compiler startup variables
 //gpr5      0x500   0x5FF   
-//           0x500    0x5FF  UBW.c misc variables, EEPROM write/read variables
-//gpr6      0x600   0x6FF   
-//           0x600   0x6A0   CDC USB stack variables
-//           0x6A8   0x6E6   UBW.c variables
-//           0x6E7   0x6FF   [unused (24d)]
+//           0x500    0x5F5  usb_function_cdc.c variables, UBW.c misc variables
+//gpr6      0x600   0x6FF   CommandFIFO
 //gpr7      0x700   0x7FF   CommandFIFO
 //gpr8      0x800   0x8FF   CommandFIFO
 //gpr9      0x900   0x9FF   CommandFIFO
 //gpr10     0xA00   0xAFF   CommandFIFO
 //gpr11     0xB00   0xBFF   CommandFIFO
 //gpr12     0xC00   0xCFF   CommandFIFO
-//gpr13     0xD00   0xDFF   CommandFIFO
+//gpr13     0xD00   0xDFF   CommandFIFO (spare/extra space)
 //gpr14     0xE00   0xEBF   Stack (note, not full 256 bytes anymore, only 192 now)
 //sfr14     0xEC0   0xEFF   SFRs
 //sfr15     0xF00   0xF5F   SFRs
@@ -86,8 +82,8 @@ DATABANK   NAME=gpr2       START=0x200             END=0x2FF
 DATABANK   NAME=gpr3       START=0x300             END=0x3FF
 DATABANK   NAME=gpr4       START=0x400             END=0x4FF
 DATABANK   NAME=gpr5       START=0x500             END=0x5FF
-DATABANK   NAME=gpr6       START=0x600             END=0x6FF
-// Command FIFO takes over all banks from 0x700 to 0xDFF
+// Command FIFO takes over all banks from 0x600 to 0xDFF
+//DATABANK   NAME=gpr6       START=0x600             END=0x6FF
 //DATABANK   NAME=gpr7       START=0x700             END=0x7FF
 //DATABANK   NAME=gpr8       START=0x800             END=0x8FF
 //DATABANK   NAME=gpr9       START=0x900             END=0x9FF
@@ -95,7 +91,7 @@ DATABANK   NAME=gpr6       START=0x600             END=0x6FF
 //DATABANK   NAME=gpr11      START=0xB00             END=0xBFF
 //DATABANK   NAME=gpr12      START=0xC00             END=0xCFF
 //DATABANK   NAME=gpr13      START=0xD00             END=0xDFF
-DATABANK    NAME=FIFO_scn   START=0x700             END=0xDFF
+DATABANK    NAME=FIFO_scn   START=0x600             END=0xDFF
 
 #IFDEF _DEBUGDATASTART
   DATABANK   NAME=gpr14      START=0xE00             END=_DATAEND

@@ -146,7 +146,7 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a4"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a5"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -1744,6 +1744,7 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 4   <new_fifo_size> sets the FIFO size, in commands. Defaults to 1 at boot
 // 10  {1|0} turns on or off the standardized command format replies (defaults to off))
 // 50  {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
@@ -1754,7 +1755,7 @@ void parse_R_packet(void)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
-// 255 {1|0} 0 prints out stack high water value, 1 prints it and resets it to zer
+// 255 {1|0} 0 prints out stack high water value, 1 prints it and resets it to zero
 void parse_CU_packet(void)
 {
   UINT8 parameter_number;
@@ -1812,6 +1813,15 @@ void parse_CU_packet(void)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
+  }
+  // CU,4,<new_FIFO_size>
+  else if (4u == parameter_number)
+  {
+    if (paramater_value > (INT16)COMMAND_FIFO_MAX_LENGTH)
+    {
+      paramater_value = COMMAND_FIFO_MAX_LENGTH;
+    }
+    gCurrentFIFOLength = paramater_value;
   }
   // CU,10,1 or CU,10,0 to turn on/off standardized line ending
   else if (10u == parameter_number)
@@ -2049,6 +2059,8 @@ void parse_CU_packet(void)
 // <parameter_number> <return_packet>
 // 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
 //              the PortB pins at the time of the last limit switch trigger
+// 2   QU,2,ddd to read back the maximum supported FIFO length for this version
+// 3   QU,3,ddd to read back the current FIFO length
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2064,24 +2076,24 @@ void parse_QU_packet(void)
   }
 
   // QU,1 to read back current value of gLimitSwitchPortB
-  // Returns "QU,XX" where XX is two digit hex value from 00 to FF
+  // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    printf((far rom char*)"%02X", gLimitSwitchPortB);
+    printf((far rom char*)"1,%02X", gLimitSwitchPortB);
     print_line_ending(kLE_NORM);
   }
   // QU,2 to read back the maximum supported FIFO length for this version
-  // Returns "QU,ddd" where ddd is one to three digit decimal value from 0 to 255
+  // Returns "QU,2,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (2u == parameter_number)
   {
-    printf((far rom char*)"%d", COMMAND_FIFO_MAX_LENGTH);
+    printf((far rom char*)"2,%d", COMMAND_FIFO_MAX_LENGTH);
     print_line_ending(kLE_NORM);
   }
   // QU,3 to read back the current FIFO length
-  // Returns "QU,ddd" where ddd is one to three digit decimal value from 0 to 255
+  // Returns "QU,3,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (3u == parameter_number)
   {
-    printf((far rom char*)"%d", gCurrentFIFOLength);
+    printf((far rom char*)"3,%d", gCurrentFIFOLength);
     print_line_ending(kLE_NORM);
   }
   else
@@ -4103,7 +4115,7 @@ void BlinkUSBStatus(void)
   }
 }
 
-volatile near unsigned char * RPnTRISPort[25] = {
+volatile near unsigned char * rom RPnTRISPort[25] = {
   &TRISA,     // RP0
   &TRISA,     // RP1
   &TRISA,     // RP2
@@ -4131,7 +4143,7 @@ volatile near unsigned char * RPnTRISPort[25] = {
   &TRISD,     // RP24
 };
 
-volatile near unsigned char * RPnLATPort[25] = {
+volatile near unsigned char * rom RPnLATPort[25] = {
   &LATA,      // RP0
   &LATA,      // RP1
   &LATA,      // RP2
@@ -4159,7 +4171,7 @@ volatile near unsigned char * RPnLATPort[25] = {
   &LATD,      // RP24
 };
 
-const char RPnBit[25] = {
+const char rom RPnBit[25] = {
   0,          // RP0
   1,          // RP1
   5,          // RP2
