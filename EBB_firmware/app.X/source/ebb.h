@@ -77,6 +77,16 @@
 // How many stepper motors does this board support? (EBB is always 2)
 #define NUMBER_OF_STEPPERS  2u
 
+// Maximum number of elements in the command FIFO (5 is largest we can have
+// in one bank). With the FIFO_scn in the linker file going from 0x600 to 0xE00
+// there is 2048 bytes of RAM available for the FIFO. At 47 bytes for each 
+// element (command) that gives us a maximum of 43 for the FIFO depth.
+// Because we want to leave some room for FIFO command expansion in the future,
+// we artifically set this to 32 elements. That gives us room to grow the size
+// of the command structure wihtout needing to decreasae the maximum size
+// of the FIFO in elements.
+#define COMMAND_FIFO_MAX_LENGTH     32u
+
 typedef enum
 {
   PEN_DOWN = 0,
@@ -131,20 +141,21 @@ typedef union union32b4 {
 
 // This structure defines the elements of the move commands in the FIFO that
 // are sent from the command parser to the ISR move engine.
+// Currently 47 bytes long
 typedef struct
 {                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           Command;                        // SM DL S2 SE EM LM LT
-  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
-  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
-  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
-  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
   UINT8           DirBits;                        // SM          EM LM LT
   UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
-  UINT16          ServoPosition;                  //       S2
+  UINT8           SEState;                        // SM       SE    LM LT
+  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
+  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
+  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
   UINT8           ServoRPn;                       //       S2    EM LM LT
+  UINT16          ServoPosition;                  //       S2
   UINT8           ServoChannel;                   //       S2
   UINT16          ServoRate;                      //       S2
-  UINT8           SEState;                        // SM       SE    LM LT
   UINT16          SEPower;                        //          SE
 } MoveCommandType;
 
@@ -272,17 +283,20 @@ typedef struct
 
 
 
-extern MoveCommandType CommandFIFO[];
+extern MoveCommandType * FIFOPtr;
+extern near volatile UINT8 gFIFOLength;
+extern near volatile UINT8 gFIFOIn;
+extern near volatile UINT8 gFIFOOut;
 extern unsigned int DemoModeActive;
-extern UINT8 FIFOEmpty;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
-extern volatile UINT8 TestMode;
-extern volatile UINT8 gLimitSwitchMask;
-extern volatile UINT8 gLimitSwitchTarget;
-extern volatile UINT8 gLimitSwitchTriggered;
+extern volatile near UINT8 TestMode;
+extern volatile near UINT8 gLimitSwitchMask;
+extern volatile near UINT8 gLimitSwitchTarget;
+extern volatile near UINT8 gLimitSwitchTriggered;
 extern UINT8 gStandardizedCommandFormat;
+extern volatile near UINT8 gCurrentFIFOLength;
 
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above

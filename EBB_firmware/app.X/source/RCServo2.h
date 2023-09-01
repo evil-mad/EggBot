@@ -53,25 +53,25 @@
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
 
-#define MAX_RC2_SERVOS                24u   // This is 24 because there are 24 RPn pins
+#define MAX_RC2_SERVOS                8u    // While there are 24 RPn pins, we never need more than 8 servos at once
 #define INITAL_RC2_SLOTS              8u    // Initial number of RC2 slots (determines repeat rate of pulses)
 #define DEFAULT_EBB_SERVO_PORTB_PIN   1u    // Note, this indicates a PortB pin number, not RPn number
 #define DEFAULT_EBB_SERVO_RPN         (DEFAULT_EBB_SERVO_PORTB_PIN + 3u) // RPn number for default pen up/down servo
 
 extern UINT8 gRC2msCounter;
-extern UINT16 gRC2Value[MAX_RC2_SERVOS];
-extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
 extern UINT8 gRC2Ptr;
-extern UINT16 gRC2Target[MAX_RC2_SERVOS];
-extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
-extern far ram UINT8 * gRC2RPORPtr;
-extern UINT16 g_servo2_max;
-extern UINT16 g_servo2_min;
+extern UINT8 g_servo2_RPn;
 extern UINT8 gRC2Slots;
 extern UINT8 gRC2SlotMS;
+extern UINT16 g_servo2_max;
+extern UINT16 g_servo2_min;
 extern UINT16 g_servo2_rate_up;
 extern UINT16 g_servo2_rate_down;
-extern UINT8 g_servo2_RPn;
+extern far ram UINT8 * gRC2RPORPtr;
+extern UINT16 gRC2Value[MAX_RC2_SERVOS];
+extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
+extern UINT16 gRC2Target[MAX_RC2_SERVOS];
+extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
 
 void RCServo2_Init(void);
 void RCServo2_S2_command(void);

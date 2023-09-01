@@ -48,6 +48,7 @@
       <itemPath>source/UBW.c</itemPath>
       <itemPath>source/usb_descriptors.c</itemPath>
       <itemPath>source/ebb_demo.c</itemPath>
+      <itemPath>source/isr_helpers.asm</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -122,7 +123,7 @@
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
         <property key="enable-ob" value="false"/>
         <property key="enable-od" value="false"/>
         <property key="enable-om" value="true"/>
@@ -147,7 +148,7 @@
       <C18-AS>
         <property key="cross.reference.file" value="out.lst"/>
         <property key="default.radix" value="HEX"/>
-        <property key="enable.case.sensitivity" value="false"/>
+        <property key="enable.case.sensitivity" value="true"/>
         <property key="hex.output.format" value="INHX32"/>
         <property key="preprocessor.macros" value=""/>
         <property key="warning.level" value="0"/>
@@ -167,6 +168,16 @@
         <property key="stack-analysis-mcc18" value="false"/>
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
+      <item path="source/isr_helpers.asm" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
       <item path="source/rm18f46j50_g.lkr" ex="true" overriding="false">
         <C18>
         </C18>
@@ -285,6 +296,16 @@
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
       <item path="source/BL_rm18f46j50_g.lkr" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
+      </item>
+      <item path="source/isr_helpers.asm" ex="true" overriding="false">
         <C18>
         </C18>
         <C18-AS>

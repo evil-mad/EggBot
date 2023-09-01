@@ -146,24 +146,13 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-/// TODO: Can we make this cleaner? Maybe using macros or something? One version number and one board rev.
-#if defined(BOARD_EBB_V10)
-  const rom char st_version[] = {"EBBv10 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V11)
-  const rom char st_version[] = {"EBBv11 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V12)
-  const rom char st_version[] = {"EBBv12 EB Firmware Version 2.2.1"};
-#elif defined(BOARD_EBB_V13_AND_ABOVE)
-  const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 2.9.06"};
-#elif defined(BOARD_UBW)
-  const rom char st_version[] = {"UBW EB Firmware Version 2.2.1"};
-#endif
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a6"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
 volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];  // FIFO of actual data
 volatile tRC_state g_RC_state[kRC_DATA_SIZE];             // Stores states for each pin for RC command
-volatile unsigned int g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
+volatile UINT16 g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
 
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
@@ -211,29 +200,40 @@ unsigned char g_USART_TX_buf_out;
 BOOL g_ack_enable;
 
 // Set to TRUE to turn Pulse Mode on
-unsigned char gPulsesOn = FALSE;
+unsigned char gPulsesOn;
 // For Pulse Mode, how long should each pulse be on for in ms?
-unsigned int gPulseLen[4] = {0,0,0,0};
+unsigned int gPulseLen[4];
 // For Pulse Mode, how many ms between rising edges of pulses?
-unsigned int gPulseRate[4] = {0,0,0,0};
+unsigned int gPulseRate[4];
 // For Pulse Mode, counters keeping track of where we are
-unsigned int gPulseCounters[4] = {0,0,0,0};
+unsigned int gPulseCounters[4];
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
-volatile UINT32 gRCServoPoweroffCounterMS = 0;
-volatile UINT32 gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+volatile UINT32 gRCServoPoweroffCounterMS;
+volatile UINT32 gRCServoPoweroffCounterReloadMS;
 
 // When true, any stepper motion command will automatically enable both motors
-BOOL gAutomaticMotorEnable = TRUE;
+BOOL gAutomaticMotorEnable;
 
 // These store the first and second characters of the latest command from the PC
 unsigned char gCommand_Char1;
 unsigned char gCommand_Char2;
 
 // Global variables used for limit switch feature
-volatile UINT8 gLimitSwitchPortB = 0;     // Latched PortB value when trigger happens
-volatile UINT8 gLimitSwitchReplies = 0;   // Non-zero if we want a reply printed when limit switch trigger goes true
- UINT8 gLimitSwitchReplyPrinted = 0;      // True if we've already printed a reply for this limit switch trigger
+volatile UINT8 gLimitSwitchPortB;     // Latched PortB value when trigger happens
+volatile UINT8 gLimitSwitchReplies;   // Non-zero if we want a reply printed when limit switch trigger goes true
+UINT8 gLimitSwitchReplyPrinted;        // True if we've already printed a reply for this limit switch trigger
+
+// Stack high water value
+static volatile UINT16 gStackHighWater;
+
+// Locals used in low ISR
+static INT16 RC2Difference;
+static UINT8 tempStackPointerHigh;
+static UINT8 tempStackPointerLow;
+static UINT16 tempStackPointer;
+
+static unsigned char gDeviceStringName[FLASH_NAME_LENGTH+1];
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
@@ -276,6 +276,8 @@ void parse_QT_packet(void);    // QT Query Tag command
 void parse_RB_packet(void);    // RB ReBoot command
 void parse_QR_packet(void);    // QR Query RC Servo power state
 void parse_SR_packet(void);    // SR Set RC Servo power timeout
+void parse_QU_packet(void);    // QU General Query
+
 void check_and_send_TX_data(void); // See if there is any data to send to PC, and if so, do it
 int _user_putc(char c);        // Our UBS based stream character printer
 
@@ -285,8 +287,7 @@ int _user_putc(char c);        // Our UBS based stream character printer
 #pragma interruptlow low_ISR
 void low_ISR(void)
 {
-  unsigned int i;
-  signed int RC2Difference = 0;
+  UINT8 i;
 
   // Do we have a Timer4 interrupt? (1ms rate)
   if (PIR3bits.TMR4IF)
@@ -329,6 +330,7 @@ void low_ISR(void)
         // we add (or subtract) gRC2Rate[] to try and get there.
         if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
+//LATAbits.LATA5 = 1;
           // If the rate is zero, then we always move instantly
           // to the target.
           if (gRC2Rate[gRC2Ptr] == 0u)
@@ -384,6 +386,7 @@ void low_ISR(void)
         INTCONbits.GIEH = 1;
       }
     }
+//LATAbits.LATA5 = 0;
 
     // See if it's time to fire off an I packet
     if (ISR_D_RepeatRate > 0u)
@@ -540,6 +543,20 @@ void low_ISR(void)
         RCServoPowerIO = RCSERVO_POWER_OFF;
       }
     }
+
+    // Read out the current value of FSR1 (stack pointer)
+    // If the new value is higher than gStackHighWater, then update gStackHighWater
+    // This will record the highest value the stack pointer attains
+    _asm
+      MOVFF FSR1H, tempStackPointerHigh
+      MOVFF FSR1L, tempStackPointerLow
+    _endasm
+    tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
+    if (tempStackPointer > gStackHighWater)
+    {
+LATAbits.LATA5 = 1;
+      gStackHighWater = tempStackPointer;
+    }
   } // end of 1ms interrupt
 
   // Do we have an analog interrupt?
@@ -632,11 +649,12 @@ void low_ISR(void)
       g_RC_state[g_RC_timing_ptr] = kWAITING;
     }
   }
+LATAbits.LATA5 = 0;
 }
 
 void UserInit(void)
 {
-  UINT32 i, j;
+  UINT16 i;
 
   // Make all of 3 digital inputs
   LATA = 0x00;
@@ -780,6 +798,40 @@ void UserInit(void)
   // If there's a name in FLASH for us, copy it over to the USB Device
   // descriptor before we enumerate
   populateDeviceStringWithName();
+
+  // Zero out limit switch variables
+  gLimitSwitchPortB = 0;
+  gLimitSwitchReplies = 0;
+  gLimitSwitchReplyPrinted = 0;
+
+  // Zero out pulse variables
+  gPulsesOn = FALSE;
+  gPulseLen[0] = 0;
+  gPulseLen[1] = 0;
+  gPulseLen[2] = 0;
+  gPulseLen[3] = 0;
+  gPulseRate[0] = 0;
+  gPulseRate[1] = 0;
+  gPulseRate[2] = 0;
+  gPulseRate[3] = 0;
+  gPulseCounters[0] = 0;
+  gPulseCounters[1] = 0;
+  gPulseCounters[2] = 0;
+  gPulseCounters[3] = 0;
+
+  gRCServoPoweroffCounterMS = 0;
+  gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
+  gAutomaticMotorEnable = TRUE;
+  gStackHighWater = 0;
+  
+//// JUST FOR TESTING! REMOVE!  
+TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+TRISCbits.TRISC0 = 0;
+TRISAbits.TRISA5 = 0;
+////
+
 }
 
 /******************************************************************************
@@ -814,13 +866,14 @@ void ProcessIO(void)
   static char esc_sequence[3] = {0};
   static BOOL in_cr = FALSE;
   static BYTE last_fifo_size;
-  unsigned char tst_char;
   static unsigned char button_state = 0;
   static unsigned int button_ctr = 0;
+
   BYTE i;
   BOOL done = FALSE;
   unsigned char rx_bytes = 0;
   unsigned char byte_cnt = 0;
+  unsigned char tst_char;
 
   BlinkUSBStatus();
 
@@ -1157,7 +1210,7 @@ void check_and_send_TX_data(void)
 // g_RX_buf_in may be less than g_RX_buf_out.
 void parse_packet(void)
 {
-  unsigned int command = 0;
+  UINT16 command = 0;
   gCommand_Char1 = 0;
   gCommand_Char2 = 0;
 
@@ -1561,6 +1614,13 @@ void parse_packet(void)
       parse_HM_packet();
       break;
     }
+    case ('Q' * 256) + 'U':
+    {
+      // QU is for General Query
+      parse_QU_packet();
+      break;
+    }
+
     default:
     {
       if (0u == gCommand_Char2)
@@ -1684,6 +1744,7 @@ void parse_R_packet(void)
 // 1   {1|0} turns on or off the 'ack' ("OK" at end of packets)
 // 2   {1|0} turns on or off parameter limit checking (defaults to on))
 // 3   {1|0} turns on or off the red LED acting as an empty FIFO indicator (defaults to off)
+// 4   <new_fifo_size> sets the FIFO size, in commands. Defaults to 1 at boot
 // 10  {1|0} turns on or off the standardized command format replies (defaults to off))
 // 50  {1|0} turns on or off the automatic enabling of both motors on any move command (defaults to on)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
@@ -1694,6 +1755,7 @@ void parse_R_packet(void)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
+
 void parse_CU_packet(void)
 {
   UINT8 parameter_number;
@@ -1751,6 +1813,15 @@ void parse_CU_packet(void)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
+  }
+  // CU,4,<new_FIFO_size>
+  else if (4u == parameter_number)
+  {
+    if (paramater_value > (INT16)COMMAND_FIFO_MAX_LENGTH)
+    {
+      paramater_value = COMMAND_FIFO_MAX_LENGTH;
+    }
+    gCurrentFIFOLength = paramater_value;
   }
   // CU,10,1 or CU,10,0 to turn on/off standardized line ending
   else if (10u == parameter_number)
@@ -1820,13 +1891,15 @@ void parse_CU_packet(void)
       TRISDbits.TRISD1 = 0;   // D1 high when in ISR
       TRISDbits.TRISD0 = 0;   // D0 high when loading next command
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+      TRISCbits.TRISC0 = 0;
+      TRISAbits.TRISA5 = 0;
     }
     else
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing
+  // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing (On RC6)
   else if (251u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1854,7 +1927,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing
+  // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing (on RC6)
   else if (252u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1882,7 +1955,7 @@ void parse_CU_packet(void)
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
-  // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing
+  // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing (on RC6)
   else if (253u == parameter_number)
   {
     if (0 == paramater_value)
@@ -1958,6 +2031,10 @@ void parse_CU_packet(void)
 // <parameter_number> <return_packet>
 // 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
 //              the PortB pins at the time of the last limit switch trigger
+// 2   QU,2,ddd to read back the maximum supported FIFO length for this version
+// 3   QU,3,ddd to read back the current FIFO length
+// 4   QU,4,XXX prints out stack high water value (as 3 digit hex value)
+// 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -1973,17 +2050,53 @@ void parse_QU_packet(void)
   }
 
   // QU,1 to read back current value of gLimitSwitchPortB
-  // Returns "QU,XX" where XX is two digit hex value from 00 to FF
+  // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    printf((far rom char*)"%02X", gLimitSwitchPortB);
+    printf((far rom char*)"1,%02X", gLimitSwitchPortB);
     print_line_ending(kLE_NORM);
+  }
+  // QU,2 to read back the maximum supported FIFO length for this version
+  // Returns "QU,2,ddd" where ddd is one to three digit decimal value from 0 to 255
+  else if (2u == parameter_number)
+  {
+    printf((far rom char*)"2,%d", COMMAND_FIFO_MAX_LENGTH);
+    print_line_ending(kLE_NORM);
+  }
+  // QU,3 to read back the current FIFO length
+  // Returns "QU,3,ddd" where ddd is one to three digit decimal value from 0 to 255
+  else if (3u == parameter_number)
+  {
+    printf((far rom char*)"3,%d", gCurrentFIFOLength);
+    print_line_ending(kLE_NORM);
+  }
+  // QU,4 prints out current stack high water value
+  else if (4u == parameter_number)
+  {
+    printf (
+      (far rom char *)"4,%03X" 
+      ,gStackHighWater
+    );
+    print_line_ending(kLE_NORM);
+  }
+  // CU,5 prints out current stack high water value and resets it to zero
+  else if (5u == parameter_number)
+  {
+    printf (
+      (far rom char *)"5,%03X" 
+      ,gStackHighWater
+    );
+    print_line_ending(kLE_NORM);
+    INTCONbits.GIEL = 0;  // Turn low priority interrupts off
+    gStackHighWater = 0;
+    INTCONbits.GIEL = 1;  // Turn low priority interrupts on
   }
   else
   {
     // parameter_number is not understood
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
   }
+
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -2816,9 +2929,9 @@ void parse_CX_packet(void)
 // output if you want to use the pin for something else.
 void parse_RC_packet(void)
 {
-  unsigned char port;
-  unsigned char pin;
-  unsigned int value;
+  UINT8 port;
+  UINT8 pin;
+  UINT16 value;
 
   print_command(FALSE, FALSE);
 
@@ -3321,8 +3434,8 @@ void LongDelay(void)
 void parse_BL_packet(void)
 {
   // First, kill interrupts though
-  INTCONbits.GIEH = 0;    // Turn high priority interrupts on
-  INTCONbits.GIEL = 0;    // Turn low priority interrupts on
+  INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+  INTCONbits.GIEL = 0;    // Turn low priority interrupts off
 
   UCONbits.SUSPND = 0;    // Disable USB module
   UCON = 0x00;            // Disable USB module
@@ -3337,8 +3450,8 @@ void parse_BL_packet(void)
 void parse_RB_packet(void)
 {
   // First, kill interrupts though
-  INTCONbits.GIEH = 0;    // Turn high priority interrupts on
-  INTCONbits.GIEL = 0;    // Turn low priority interrupts on
+  INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+  INTCONbits.GIEL = 0;    // Turn low priority interrupts off
 
   UCONbits.SUSPND = 0;    // Disable USB module
   UCON = 0x00;            // Disable USB module
@@ -3460,17 +3573,16 @@ void populateDeviceStringWithName(void)
 {
   extern BYTE * USB_SD_Ptr[];
 
-  unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 i;
 
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
   {
-    name[i] = 0x00;
+    gDeviceStringName[i] = 0x00;
   }
   
   // We always read 16, knowing that any unused bytes will be set to zero
-  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, gDeviceStringName);
 
   // The EEB's name is now in the 'name' local variable as a straight string
   // of bytes. We need to move it to the proper locations in the sd002
@@ -3488,10 +3600,10 @@ void populateDeviceStringWithName(void)
   {
     // Only copy over valid ASCII characters. On the first invalid
     // one, bail out.
-    if (name[i] <= 128u && name[i] >= 32u)
+    if (gDeviceStringName[i] <= 128u && gDeviceStringName[i] >= 32u)
     {
-      *(USB_SD_Ptr[2] + 24 + (i*2)) = name[i];
-      *(USB_SD_Ptr[3] + 2 + (i*2)) = name[i];
+      *(USB_SD_Ptr[2] + 24 + (i*2)) = gDeviceStringName[i];
+      *(USB_SD_Ptr[3] + 2 + (i*2)) = gDeviceStringName[i];
     }
     else
     {
@@ -3511,7 +3623,6 @@ void populateDeviceStringWithName(void)
 // well as being appended to the USB name that shows up in the OS
 void parse_ST_packet(void)
 {
-  unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 bytes = 0;
   UINT8 i;
   
@@ -3520,10 +3631,10 @@ void parse_ST_packet(void)
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
   {
-    name[i] = 0x00;
+    gDeviceStringName[i] = 0x00;
   }
   
-  bytes = extract_string(name, FLASH_NAME_LENGTH);
+  bytes = extract_string(gDeviceStringName, FLASH_NAME_LENGTH);
   
   // We have reserved FLASH addresses 0xF800 to 0xFBFF (1024 bytes) for
   // storing persistent variables like the EEB's name. Note that no wear-leveling
@@ -3531,7 +3642,7 @@ void parse_ST_packet(void)
   
   EraseFlash(FLASH_NAME_ADDRESS, FLASH_NAME_ADDRESS + 0x3FF);
   
-  WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+  WriteBytesFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, gDeviceStringName);
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3541,7 +3652,6 @@ void parse_ST_packet(void)
 // Prints out the 'tag' that was set with the "ST" command previously, if any
 void parse_QT_packet(void)
 {
-  unsigned char name[FLASH_NAME_LENGTH+1];
   UINT8 i;
   
   print_command(FALSE, TRUE);
@@ -3549,16 +3659,16 @@ void parse_QT_packet(void)
   // Clear out our name array
   for (i=0; i < FLASH_NAME_LENGTH+1; i++)
   {
-    name[i] = 0x00;
+    gDeviceStringName[i] = 0x00;
   }
   
   // We always read 16, knowing that any unused bytes will be set to zero
-  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, name);
+  ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, gDeviceStringName);
   
   // Only print it out if the first character is printable ASCII
-  if (name[0] < 128u && name[0] > 32u)
+  if (gDeviceStringName[0] < 128u && gDeviceStringName[0] > 32u)
   {
-    printf((rom char far *)"%s", name);
+    printf((rom char far *)"%s", gDeviceStringName);
   }
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -4000,7 +4110,7 @@ void BlinkUSBStatus(void)
   }
 }
 
-volatile near unsigned char * RPnTRISPort[25] = {
+volatile near unsigned char * rom RPnTRISPort[25] = {
   &TRISA,     // RP0
   &TRISA,     // RP1
   &TRISA,     // RP2
@@ -4028,7 +4138,7 @@ volatile near unsigned char * RPnTRISPort[25] = {
   &TRISD,     // RP24
 };
 
-volatile near unsigned char * RPnLATPort[25] = {
+volatile near unsigned char * rom RPnLATPort[25] = {
   &LATA,      // RP0
   &LATA,      // RP1
   &LATA,      // RP2
@@ -4056,7 +4166,7 @@ volatile near unsigned char * RPnLATPort[25] = {
   &LATD,      // RP24
 };
 
-const char RPnBit[25] = {
+const char rom RPnBit[25] = {
   0,          // RP0
   1,          // RP1
   5,          // RP2
