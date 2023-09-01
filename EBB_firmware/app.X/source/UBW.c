@@ -146,7 +146,7 @@ unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a5"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a6"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -1755,7 +1755,7 @@ void parse_R_packet(void)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
-// 255 {1|0} 0 prints out stack high water value, 1 prints it and resets it to zero
+
 void parse_CU_packet(void)
 {
   UINT8 parameter_number;
@@ -2016,34 +2016,6 @@ void parse_CU_packet(void)
       _endasm
     }
   }
-  // CU,255,0 prints out current stack high water value
-  // CU,255,1 prints out current stack high water value and resets it to zero
-  else if (255u == parameter_number)
-  {
-    if (0 == paramater_value)
-    {
-      printf (
-        (far rom char *)"%03X" 
-        ,gStackHighWater
-      );
-      print_line_ending(kLE_NORM);
-    }
-    else if (1 == paramater_value)
-    {
-      printf (
-        (far rom char *)"%03X" 
-        ,gStackHighWater
-      );
-      print_line_ending(kLE_NORM);
-      INTCONbits.GIEL = 0;  // Turn low priority interrupts off
-      gStackHighWater = 0;
-      INTCONbits.GIEL = 1;  // Turn low priority interrupts on
-    }
-    else
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-  }
   else
   {
     // parameter_number is not understood
@@ -2061,6 +2033,8 @@ void parse_CU_packet(void)
 //              the PortB pins at the time of the last limit switch trigger
 // 2   QU,2,ddd to read back the maximum supported FIFO length for this version
 // 3   QU,3,ddd to read back the current FIFO length
+// 4   QU,4,XXX prints out stack high water value (as 3 digit hex value)
+// 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2095,6 +2069,27 @@ void parse_QU_packet(void)
   {
     printf((far rom char*)"3,%d", gCurrentFIFOLength);
     print_line_ending(kLE_NORM);
+  }
+  // QU,4 prints out current stack high water value
+  else if (4u == parameter_number)
+  {
+    printf (
+      (far rom char *)"4,%03X" 
+      ,gStackHighWater
+    );
+    print_line_ending(kLE_NORM);
+  }
+  // CU,5 prints out current stack high water value and resets it to zero
+  else if (5u == parameter_number)
+  {
+    printf (
+      (far rom char *)"5,%03X" 
+      ,gStackHighWater
+    );
+    print_line_ending(kLE_NORM);
+    INTCONbits.GIEL = 0;  // Turn low priority interrupts off
+    gStackHighWater = 0;
+    INTCONbits.GIEL = 1;  // Turn low priority interrupts on
   }
   else
   {
