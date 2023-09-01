@@ -274,6 +274,7 @@
           <li><a href="#QR">QR</a> &mdash; Query RC Servo power state</li>
           <li><a href="#QS">QS</a> &mdash; Query Step position</li>
           <li><a href="#QT">QT</a> &mdash; Query EBB nickname Tag</li>
+          <li><a href="#QU">QU</a> &mdash; Query Utility</li>
           <li><a href="#RB">RB</a> &mdash; Reboot</li>
           <li><a href="#R">R</a> &mdash; Reset</li>
           <li><a href="#S2">S2</a> &mdash; General RC Servo Output</li>
@@ -568,6 +569,12 @@
                   </ul>
                 </li>
                 <li>
+                  <code>Param_Number</code> = 4 : <b>Set new FIFO size</b>
+                  <p>
+                    This command will set the FIFO to a new depth, measured in commands. <code>Param_Value</code> needs to be a decimal number between 0 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
+                  </p>
+                </li>
+                <li>
                   <code>Param_Number</code> = 10 : <b>Enable Future Syntax Mode</b>
                   <p>
                     When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
@@ -691,8 +698,6 @@
           </li>
 
           <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
-
-
         </ul>
 
         <hr class="short" />
@@ -1866,6 +1871,62 @@
             </li>
 
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="QU"></a>"QU" &mdash; Query Utility</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command: </span><code>QU,<i>Param_Number</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions: </span>v3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
+          <li>
+            <span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li><i>Param_Number</i> : See below for acceptable values. Specifies what <i>Return_Value</i> means.</li>
+            </ul>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+              The <code>QU</code> query returns one of several values based on <i>Param_Number</i>. It is used to retrieve miscellaneous internal values from the firmware. Rather than creating a new query for each value, <code>QU</code> is a single query to retrieve any of the following values:
+            </p>
+            <p>
+              <ul>
+                <li>
+                  <code>Param_Number</code> = 1 : <b>Read out captured PortB pin states at last limit switch trigger</b>
+                  <p><code>Return_Value</code> will be a two digit hexadecimal number from 00 to FF. It represents the state of all PortB pins at the exact time that the last limit switch trigger happened.
+                  </p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 2 : <b>Read out maximum supported FIFO length</b>
+                  <p>
+                    <code>Return_Value</code> will be a one to three digit decimal number from 0 to 255. It represents the maximum possible size of the motion FIFO in commands. Before using <code>CU,4,<i>New_FIFO_Size</i></code> to set the FIFO size, be sure to use this query to find out the maximum possible size for the FIFO for this version of firmware.
+                  </p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 3 : <b>Read out current FIFO length</b>
+                  <p>
+                    <code>Return_Value</code> will be a one to three digit decimal number from 0 to 255. It represents the current size of the motion FIFO in commands. On boot it starts out at 1. All firmware versions prior to v3.0.0 had a fixed FIFO size of 1. Starting with v3.0.0 the FIFO size starts out at 1 but can be increased using the <code>CU,4,<i>New_FIFO_Size</i></code> command. Increasing the FIFO size will allow for shorter commands and less chance of FIFO underrun.
+                  </p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 4 : <b>Read out software stack high water value</b>
+                  <p>
+                    Every millisecond the EBB samples the software stack pointer. It keeps track of the highest value seen. This is called the stack high water value. This query will return that stack high water value in <code>Return_Value</code> as a three digit hexadecimal number. In v3.0.0 of the firmware the stack starts at 0xE00 and grows up, so if <code>Return_Value</code> is E71, then the maximum stack pointer value seen indicates that 0x71 bytes of stack were used at that point. The stack overflows if it goes over 0xEBF.
+                  </p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 5 : <b>Read out software stack high water value and reset it to zero</b>
+                  <p>
+                    This query is identical to <code>QU,4</code> except that it also resets the stack high water value to zero.
+                  </p>
+                </li>
+              </ul>
+            </p>
+          </li>
         </ul>
 
         <hr class="short"/>
