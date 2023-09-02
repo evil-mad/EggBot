@@ -251,6 +251,7 @@
           <li><a href="#ES">ES</a> &mdash; E Stop</li>
           <li><a href="#HM">HM</a> &mdash; Home or Absolute Move</li>
           <li><a href="#I">I</a> &mdash; Input</li>
+          <li><a href="#L3">L3</a> &mdash; Low-level Move with Jerk</li>
           <li><a href="#LM">LM</a> &mdash; Low-level Move</li>
           <li><a href="#LT">LT</a> &mdash; Low-level Move, Time Limited</li>
           <li><a href="#MR">MR</a> &mdash; Memory Read</li>
@@ -287,6 +288,7 @@
           <li><a href="#SR">SR</a> &mdash; Set RC Servo power timeout</li>
           <li><a href="#ST">ST</a> &mdash; Set EBB nickname Tag</li>
           <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
+          <li><a href="#T3">T3</a> &mdash; Low-level Move with Jerk, Time Limited</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
           <li><a href="#V">V</a> &mdash; Version Query</li>
           <li><a href="#XM">XM</a> &mdash; Stepper Move, for Mixed-axis Geometries</li>
@@ -935,7 +937,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Rate1</i> and <i>Rate2</i> are unsigned 31 bit integers in the range from 0 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken.
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken. Negative values will start movement in the opposite direction.
             </li>
             <li>
               <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.
@@ -1057,6 +1059,46 @@
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.7.0.
+          </li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="L3"></a>"L3" &mdash; Low-level Move With Jerk</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span><code>L3,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>L3&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li>
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken. Negative values will start movement in the opposite direction.
+            </li>
+            <li>
+              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.
+            </li>
+            <li>
+              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+            </li>
+            <li>
+              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control jerk during a move.
+            </li>
+            <li>
+              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span>
+            <p>
+            <p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 1:</span> 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> 
           </li>
         </ul>
 
@@ -2463,8 +2505,7 @@
             </p>
             <p>Use the <code><a href="#QT">QT</a></code> command to retrieve the nickname at any time.</p>
           </li>
-          <li><span style="font-weight: bold;">Version History:</span>  Unchanged since firmware v2.5.5
-</li>
+          <li><span style="font-weight: bold;">Version History:</span>  Unchanged since firmware v2.5.5</li>
         </ul>
      
         <hr class="short"/>
@@ -2509,6 +2550,46 @@
           <li>
             <span style="font-weight: bold;">Note:</span>
             If the "I" or "A" packet responses stop coming back after you've done a "T" query, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
+          </li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="T3"></a>"T3" &mdash; Low-level Move With Jerk, Time-limited</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>T3,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>T3&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> 3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li>
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+            </li>
+            <li>
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn. The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
+            </li>
+            <li>
+              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+            </li>
+            <li>
+              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+            </li>
+            <li>
+              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 1:</span> 
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> 
           </li>
         </ul>
 
