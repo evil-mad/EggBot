@@ -169,6 +169,7 @@ void main(void)
     }
 #endif
 #if defined(USB_POLLING)
+  print_stack(2);
     // Check bus status and service USB interrupts.
     USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
                       // this function periodically.  This function will take care
@@ -183,10 +184,11 @@ void main(void)
                       // USBDeviceTasks() function does not take very long to
                       // execute (~50 instruction cycles) before it returns.
 #endif
-
+  print_stack(3);
     // Application-specific tasks.
     // Application related code may be added here, or in the ProcessIO() function.
     ProcessIO();
+  print_stack(4);  
   }
 }
 
@@ -299,6 +301,8 @@ static void InitializeSystem(void)
 
   USBDeviceInit();  // usb_device.c.  Initializes USB module SFRs and firmware
                     // variables to known states.
+  
+  print_stack(1);
 }
 
 // ******************************************************************************************************

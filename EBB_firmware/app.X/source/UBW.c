@@ -652,10 +652,114 @@ LATAbits.LATA5 = 1;
 LATAbits.LATA5 = 0;
 }
 
+//////// JUST FOR TESTING - DELETE
+
+// Print out the current stack pointer value, along with a tag number, 
+void print_stack(UINT8 tag)
+{
+  UINT8 nib2;
+
+  // Read out the current value of FSR1 (stack pointer)
+  // If the new value is higher than gStackHighWater, then update gStackHighWater
+  // This will record the highest value the stack pointer attains
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts off
+  _asm
+    MOVFF FSR1H, tempStackPointerHigh
+    MOVFF FSR1L, tempStackPointerLow
+  _endasm
+    
+  tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
+  if (tempStackPointer > gStackHighWater)
+  {
+    gStackHighWater = tempStackPointer;
+
+    // First print out tag value
+    nib2 = tag >> 4;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = tag & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    PrintChar(',');
+
+    nib2 = (gStackHighWater >> 8) & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = (gStackHighWater >> 4) & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = gStackHighWater & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    PrintChar('\n');
+  }
+    
+
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
+}
+
+
+
+
+///////
+
 void UserInit(void)
 {
   UINT16 i;
 
+  //// JUST FOR TESTING! REMOVE!  
+TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+TRISCbits.TRISC0 = 0;
+TRISAbits.TRISA5 = 0;
+
+
+Open1USART(
+  USART_TX_INT_OFF &
+  USART_RX_INT_OFF &
+  USART_ASYNCH_MODE &
+  USART_EIGHT_BIT &
+  USART_CONT_RX &
+  USART_BRGH_HIGH &
+  USART_ADDEN_OFF,
+  2                   // At 48 MHz, this creates 1 Mbaud output
+);
+
+ print_stack(0);
+////
+
+  
   // Make all of 3 digital inputs
   LATA = 0x00;
   TRISA = 0xFF;
@@ -789,8 +893,8 @@ void UserInit(void)
 
   RCServo2_Init();
 
-  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
-  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
+///  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+///  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 
   // Turn on the Timer4
   T4CONbits.TMR4ON = 1;
@@ -824,14 +928,6 @@ void UserInit(void)
   gAutomaticMotorEnable = TRUE;
   gStackHighWater = 0;
   
-//// JUST FOR TESTING! REMOVE!  
-TRISDbits.TRISD1 = 0;   // D1 high when in ISR
-TRISDbits.TRISD0 = 0;   // D0 high when loading next command
-TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-TRISCbits.TRISC0 = 0;
-TRISAbits.TRISA5 = 0;
-////
-
 }
 
 /******************************************************************************

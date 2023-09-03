@@ -156,6 +156,7 @@ extern volatile UINT8 gLimitSwitchReplies;
 extern UINT8 gLimitSwitchReplyPrinted;
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/
+void print_stack(UINT8 tag);
 void UserInit (void);
 void ProcessIO (void);
 void low_ISR (void);
