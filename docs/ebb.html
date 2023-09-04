@@ -1056,7 +1056,10 @@
             <span style="font-weight: bold;">Example 7:</span> <code>LM,17179000,75,-687,8592000,75,687\r</code> This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 75 steps each, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will take 500 ms.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.7.0.
+            <span style="font-weight: bold;">Version History:</span> Added in firmware v2.7.0.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> As of firmware v3.0.0, using a negative number for either <i>Rate</i> argument to control motion direction is depreciated. It will still work, but this functionality has been replaced by using a negative number to either <i>Step</i> argument. In version v4.0.0 the ability to use negative <i>Rate</i> arguments will be removed.
           </li>
         </ul>
 
