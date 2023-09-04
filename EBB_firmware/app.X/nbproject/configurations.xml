@@ -73,7 +73,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
