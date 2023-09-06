@@ -197,4 +197,9 @@
   #define mLED_Only_1_On()      {mLED_1_On(); mLED_2_Off();}
   #define mLED_Only_2_On()      {mLED_1_Off(); mLED_2_On();}
 
+  /** A N A L O G   I N P U T S ***************************************/
+  
+  #define RA0_CUR_ADJ_ADC_CHANNEL        0u
+  #define RA11_VPLUS_POWER_ADC_CHANNEL  11u
+
 #endif  //HARDWARE_PROFILE_EBB_V13_H

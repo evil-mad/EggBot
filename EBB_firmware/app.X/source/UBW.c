@@ -145,8 +145,10 @@ unsigned char A_cur_channel;
 unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
+volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
+volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a7"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a8"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -581,6 +583,16 @@ LATAbits.LATA5 = 1;
           |
           ((unsigned int)ADRESH << 8);
 
+      // If this is the V+_VOLTAGE ADC channel, then check to see if the value
+      // is below the threshold, and if so, set the bit to record this fact
+      if (A_cur_channel == RA11_VPLUS_POWER_ADC_CHANNEL)
+      {
+        if (ISR_A_FIFO[A_cur_channel] < g_PowerMonitorThresholdADC)
+        {
+          g_PowerDropDetected = TRUE;
+        }
+      }
+      
       // Increment the channel and mask bit
       ChannelBit = ChannelBit << 1;
       A_cur_channel++;
@@ -823,6 +835,9 @@ void UserInit(void)
   gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
   gAutomaticMotorEnable = TRUE;
   gStackHighWater = 0;
+  g_PowerMonitorThresholdADC = 0;
+  g_PowerDropDetected = FALSE;
+
   
 //// JUST FOR TESTING! REMOVE!  
 TRISDbits.TRISD1 = 0;   // D1 high when in ISR
@@ -1750,6 +1765,7 @@ void parse_R_packet(void)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
 // 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
+// 60  <NewThreshood> Set the power lost threshold. Set to 0 to disable.
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
@@ -1877,6 +1893,11 @@ void parse_CU_packet(void)
       gLimitSwitchReplies = FALSE;
       gLimitSwitchReplyPrinted = FALSE;
     }
+  }
+  // CU,60,<NewThreshold>
+  else if (60u == parameter_number)
+  {
+    g_PowerMonitorThresholdADC = (paramater_value & 0x03FF);
   }
   // CU,250,1 or CU,250,0 to turn on/off GPIO ISR timing debug
   else if (250u == parameter_number)
@@ -2035,6 +2056,7 @@ void parse_CU_packet(void)
 // 3   QU,3,ddd to read back the current FIFO length
 // 4   QU,4,XXX prints out stack high water value (as 3 digit hex value)
 // 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
+// 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2090,6 +2112,15 @@ void parse_QU_packet(void)
     INTCONbits.GIEL = 0;  // Turn low priority interrupts off
     gStackHighWater = 0;
     INTCONbits.GIEL = 1;  // Turn low priority interrupts on
+  }  
+  // CU,60 prints out current stack high water value and resets it to zero
+  else if (60u == parameter_number)
+  {
+    printf (
+      (far rom char *)"60,%d" 
+      ,g_PowerMonitorThresholdADC
+    );
+    print_line_ending(kLE_NORM);
   }
   else
   {

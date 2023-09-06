@@ -1436,9 +1436,9 @@ void EBB_Init(void)
   IPR1bits.ADIP = 0;
 
   // Turn on AN0 (RA0) as analog input
-  AnalogConfigure(0,1);
+  AnalogConfigure(RA0_CUR_ADJ_ADC_CHANNEL,1);
   // Turn on AN11 (V+) as analog input
-  AnalogConfigure(11,1);
+  AnalogConfigure(RA11_VPLUS_POWER_ADC_CHANNEL,1);
 
   MS1_IO = 1;
   MS1_IO_TRIS = OUTPUT_PIN;
@@ -3603,7 +3603,7 @@ void parse_QC_packet(void)
 // Bit 3 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
 // Bit 4 : Pen status (0 = up, 1 = down)
 // Bit 5 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
-// Bit 6 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 6 : Power Lost (1 = V+ went below g_PowerMonitorThresholdADC, 0 = it did not)
 // Bit 7 : gLimitSwitchTriggered
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
@@ -3623,9 +3623,10 @@ void parse_QG_packet(void)
   {
     result = result | (1 << 5);
   }
-  if (PORTBbits.RB2)
+  if (g_PowerDropDetected)
   {
     result = result | (1 << 6);
+    g_PowerDropDetected = FALSE;
   }
   if (gLimitSwitchTriggered)
   {

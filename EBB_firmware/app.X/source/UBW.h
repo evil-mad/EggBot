@@ -155,6 +155,10 @@ extern volatile UINT8 gLimitSwitchPortB;
 extern volatile UINT8 gLimitSwitchReplies;
 extern UINT8 gLimitSwitchReplyPrinted;
 
+extern volatile UINT16 g_PowerMonitorThresholdADC;
+extern volatile BOOL g_PowerDropDetected;
+
+
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void UserInit (void);
 void ProcessIO (void);
