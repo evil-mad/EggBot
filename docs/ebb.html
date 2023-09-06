@@ -671,6 +671,12 @@
                   </ul>
                 </li>
                 <li>
+                  <code>Param_Number</code> = 60 : <b>Set new power lost threshold</b>
+                  <p>
+                    This command will set a new <code>Power_Lost_Threshold</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <code>Power_Lost_Threshold</code> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <code>Power_Lost_Threshold</code>. If V+ is ever less than <code>Power_Lost_Threshold</code>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <code>Power_Lost_Threshold</code> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <code>Power_Lost_Threshold</code> at any time. After setting a new value of <code>Power_Lost_Threshold</code> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. So to set the <code>Power_Lost_Threshold</code> to 12V you would use <code>CU,60,404</code>.
+                  </p>
+                </li>
+                <li>
                   <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
@@ -1663,8 +1669,8 @@
                 </tr>
                 <tr>
                   <td style="font-weight:bold;text-align:left;">Name</td>
-                  <td>RB5</td>
-                  <td>RB2</td>
+                  <td>Limit Switch Triggered</td>
+                  <td>Power Lost Flag</td>
                   <td>PRG</td>
                   <td>PEN</td>
                   <td>CMD</td>
@@ -1675,11 +1681,10 @@
               </tbody>
             </table>
             <p>
-              <div style="font-weight:bold;">Bit 7: RB5 &mdash; Status of GPIO pin RB5</div> This bit is 1 when GPIO pin RB5 is high, and 0 when it is low. RB5 does not have to be set to an input to be read. The <code>QG</code> command will read the  state even if it is an output. If the  pin is in use as an RC servo output, the bit will be toggling and that will be reflected in the response byte. Pin RB5 can be used for various useful purposes as desired, for example as a home switch input or output to control a tool head.
-                The <code>QG</code> query will read the  state even if it is an output. If the  pin is in use as an RC servo output,
+              <div style="font-weight:bold;">Bit 7: Limit Switch Triggered</div> This bit is 1 if the limit switch triggered. It will be a 0 if the Limit Switch Trigger has not fired or if the limit switch feature is disabled. If set, executing this query will clear the bit.
             </p>
             <p>
-              <div style="font-weight:bold;">Bit 6: RB2 &mdash; Status of GPIO pin RB2</div> This bit is 1 when GPIO pin RB2 is high, and 0 when it is low. Its properties are otherwise the same as the RB5 bit.
+              <div style="font-weight:bold;">Bit 6: Post Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
             </p>
             <p>
               <div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div> This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.
@@ -1902,16 +1907,15 @@
             </p>
           </li>
 
-
-          <li>
+        <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span> If the EBB's nickname has been set to "East EBB" then the output of this command would be:
             <code>QT,East EBB&lt;NL&gt;</code>
-            </li>
+          </li>
 
           <li>
-          <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>             If the EBB's nickname has been set to "East EBB" then the output of this query would be:
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> If the EBB's nickname has been set to "East EBB" then the output of this query would be:
             <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
-            </li>
+          </li>
 
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
@@ -1965,6 +1969,12 @@
                   <code>Param_Number</code> = 5 : <b>Read out software stack high water value and reset it to zero</b>
                   <p>
                     This query is identical to <code>QU,4</code> except that it also resets the stack high water value to zero.
+                  </p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 60 : <b>Read out <code>Power_Lost_Threshold</code></b>
+                  <p>
+                    This query will print out the current value of <code>Power_Lost_Threshold</code> as a one to four digit decimal number.
                   </p>
                 </li>
               </ul>
