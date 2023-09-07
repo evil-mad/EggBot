@@ -3548,7 +3548,7 @@ void parse_QL_packet(void)
 // Usage: QB<CR>
 // Returns: <HasButtonBeenPushedSinceLastQB><CR> (0 or 1)
 // OK<CR>
-void parse_QB_packet(void)
+void  parse_QB_packet(void)
 {
   print_command(FALSE, TRUE);
 
@@ -3769,12 +3769,6 @@ void parse_SE_packet(void)
   }
 
   print_line_ending(kLE_OK_NORM);
-}
-
-// RM command
-// For Run Motor - allows completely independent running of the two stepper motors
-void parse_RM_packet(void)
-{
 }
 
 // Do the work of the QM command so we can use this same code for QM and

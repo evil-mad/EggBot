@@ -318,7 +318,6 @@ void parse_EM_packet(void);
 void parse_QC_packet(void);
 void parse_QG_packet(void);
 void parse_SE_packet(void);
-void parse_RM_packet(void);
 void parse_QM_packet(void);
 void parse_ES_packet(void);
 void parse_XM_packet(void);

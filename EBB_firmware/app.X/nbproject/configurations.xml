@@ -19,7 +19,6 @@
       <itemPath>source/RCServo2.h</itemPath>
       <itemPath>source/UBW.h</itemPath>
       <itemPath>source/usb_config.h</itemPath>
-      <itemPath>source/ebb_demo.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"

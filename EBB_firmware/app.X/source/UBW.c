@@ -91,9 +91,7 @@
 #include "HardwareProfile.h"
 #include "UBW.h"
 #include "ebb.h"
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  #include "RCServo2.h"
-#endif
+#include "RCServo2.h"
 
 /** D E F I N E S ********************************************************/
 
@@ -148,7 +146,7 @@ volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a8"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a9"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -244,7 +242,6 @@ void parse_packet(void);       // Take a full packet and dispatch it to the righ
 signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void parse_R_packet(void);     // R for resetting UBW
 void parse_C_packet(void);     // C for configuring I/O and analog pins
-void parse_CX_packet(void);    // CX For configuring serial port
 void parse_O_packet(void);     // O for output digital to pins
 void parse_I_packet(void);     // I for input digital from pins
 void parse_V_packet(void);     // V for printing version
@@ -255,18 +252,8 @@ void parse_PO_packet(void);    // PO for setting a single pin state
 void parse_PD_packet(void);    // PD for setting a pin's direction
 void parse_MR_packet(void);    // MR for Memory Read
 void parse_MW_packet(void);    // MW for Memory Write
-void parse_TX_packet(void);    // TX for transmitting serial
-void parse_RX_packet(void);    // RX for receiving serial
 void parse_RC_packet(void);    // RC is for outputting RC servo pulses 
-void parse_BO_packet(void);    // BO sends data to fast parallel output
-void parse_BC_packet(void);    // BC configures fast parallel outputs
-void parse_BS_packet(void);    // BS sends binary data to fast parallel output
 void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
-void parse_SS_packet(void);    // SS Send SPI
-void parse_RS_packet(void);    // RS Receive SPI
-void parse_SI_packet(void);    // SI Send I2C
-void parse_RI_packet(void);    // RI Receive I2C
-void parse_CI_packet(void);    // CI Configure I2C
 void parse_PG_packet(void);    // PG Pulse Go
 void parse_PC_packet(void);    // PC Pulse Configure
 void parse_BL_packet(void);    // BL Boot Load command
@@ -891,16 +878,7 @@ void ProcessIO(void)
   unsigned char tst_char;
 
   BlinkUSBStatus();
-
-#if defined(BUILD_WITH_DEMO)
-  // Demo code, for playing back array of points so we can run without PC.
-   
-  // Check for start of playback
-  if (!swProgram)
-  {
-  }
-#endif
-
+  
   // Check for any new I packets (from T command) ready to go out
   while (ISR_D_FIFO_length > 0u)
   {
@@ -1269,12 +1247,6 @@ void parse_packet(void)
       parse_LM_packet();
       break;
     }
-    case ('R' * 256) + 'X':
-    {
-      // For receiving serial
-      parse_RX_packet();
-      break;
-    }
     case 'R':
     {
       // Reset command (resets everything to power-on state)
@@ -1285,12 +1257,6 @@ void parse_packet(void)
     {
       // Configure command (configure ports for Input or Output)
       parse_C_packet();
-      break;
-    }
-    case ('C' * 256) + 'X':
-    {
-      // For configuring serial port
-      parse_CX_packet();
       break;
     }
     case ('C' * 256) + 'U':
@@ -1329,12 +1295,6 @@ void parse_packet(void)
       parse_T_packet();
       break;
     }
-    case ('T' * 256) + 'X':
-    {
-      // For transmitting serial
-      parse_TX_packet();
-      break;
-    }
     case ('P' * 256) + 'I':
     {
       // PI for reading a single pin
@@ -1363,60 +1323,6 @@ void parse_packet(void)
     {
       // MW for Memory Write
       parse_MW_packet();
-      break;
-    }
-    case ('B' * 256) + 'O':
-    {
-      // MR for Fast Parallel Output
-      parse_BO_packet();
-      break;
-    }
-    case ('R' * 256) + 'C':
-    {
-      // RC for RC servo output
-      parse_RC_packet();
-      break;
-    }
-    case ('B' * 256) + 'C':
-    {
-      // BC for Fast Parallel Configure
-      parse_BC_packet();
-      break;
-    }
-    case ('B' * 256) + 'S':
-    {
-      // BS for Fast Binary Stream output
-      parse_BS_packet();
-      break;
-    }
-    case ('S' * 256) + 'S':
-    {
-      // SS for Send SPI
-      parse_SS_packet();
-      break;
-    }
-    case ('R' * 256) + 'S':
-    {
-      // RS for Receive SPI
-      parse_RS_packet();
-      break;
-    }
-    case ('S' * 256) + 'I':
-    {
-      // SI for Send I2C
-      parse_SI_packet();
-      break;
-    }
-    case ('R' * 256) + 'I':
-    {
-      // RI for Receive I2C
-      parse_RI_packet();
-      break;
-    }
-    case ('C' * 256) + 'I':
-    {
-      // CI for Configure I2C
-      parse_CI_packet();
       break;
     }
     case ('P' * 256) + 'C':
@@ -1549,12 +1455,6 @@ void parse_packet(void)
     {
       // S2 for RC Servo method 2
       RCServo2_S2_command();
-      break;
-    }
-    case ('R' * 256) + 'M':
-    {
-      // RM for Run Motor
-      parse_RM_packet();
       break;
     }
     case ('Q' * 256) + 'M':
@@ -2226,16 +2126,8 @@ void parse_C_packet(void)
   TRISA = PA;
   TRISB = PB;
   TRISC = PC;
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   TRISD = PD;
   TRISE = PE;
-#endif
-#if defined(BOARD_EBB_V10)
-  TRISF = PF;
-  TRISG = PG;
-  TRISH = PH;
-  TRISJ = PJ;
-#endif
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2344,7 +2236,6 @@ void parse_O_packet(void)
   {
     LATC = Value;
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
@@ -2357,33 +2248,6 @@ void parse_O_packet(void)
   {
     LATE = Value;
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATF = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATG = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATH = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATJ = Value;
-  }
-#endif
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2588,7 +2452,6 @@ void parse_PD_packet(void)
       bitset(TRISC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     if (0u == direction)
@@ -2611,53 +2474,6 @@ void parse_PD_packet(void)
       bitset(TRISE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISF, pin);
-    }
-    else
-    {
-      bitset(TRISF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISG, pin);
-    }
-    else
-    {
-      bitset(TRISG, pin);
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISH, pin);
-    }
-    else
-    {
-      bitset(TRISH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISJ, pin);
-    }
-    else
-    {
-      bitset(TRISJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2806,7 +2622,6 @@ void parse_PO_packet(void)
       bitset(LATC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     if (0u == value)
@@ -2829,524 +2644,12 @@ void parse_PO_packet(void)
       bitset(LATE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATF, pin);
-    }
-    else
-    {
-      bitset(LATF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATG, pin);
-    }
-    else
-    {
-      bitset(LATG, pin);
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATH, pin);
-    }
-    else
-    {
-      bitset(LATH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATJ, pin);
-    }
-    else
-    {
-      bitset(LATJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
-  print_line_ending(kLE_OK_NORM);
-}
-
-// TX is for Serial Transmit
-// "TX,<data_length>,<variable_length_data><CR>"
-// <data_length> is a count of the number of bytes in the <variable_length_data> field.
-// It must never be larger than the number of bytes that are currently free in the
-// software TX buffer or some data will get lost.
-// <variable_length_data> are the bytes that you want the UBW to send. It will store them
-// in its software TX buffer until there is time to send them out the TX pin.
-// If you send in "0" for a <data_length" (and thus nothing for <variable_length_data>
-// then the UBW will send back a "TX,<free_buffer_space><CR>" packet,
-// where <free_buffer_space> is the number of bytes currently available in the 
-// software TX buffer.
-void parse_TX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RX is for Serial Receive
-// "RX,<length_request><CR>"
-// <length_request> is the maximum number of characters that you want the UBW to send
-// back to you in the RX packet. If you use "0" for <length_request> then the UBW
-// will just send you the current number of bytes in it's RX buffer, and if
-// there have been any buffer overruns since the last time a <length_request> of 
-// "0" was received by the UBW.
-// This command will send back a "RX,<length>,<variable_length_data><CR>"
-// or "RX,<buffer_fullness>,<status><CR>" packet depending upon if you send
-// "0" or something else for <length_request>
-// <length> in the returning RX packet is a count of the number of bytes
-// in the <variable_length_data> field. It will never be more than the
-// <length_request> you sent in.
-// <variable_length_data> is the data (in raw form - byte for byte what was received - 
-// i.e. not translated in any way, into ASCII values or anything else) that the UBW
-// received. This may include <CR>s and NULLs among any other bytes, so make sure
-// your PC application treats the RX packet coming back from the UBW in a special way
-// so as not to screw up normal packet processing if any special characters are received.
-// <buffer_fullness> is a value between 0 and MAX_SERIAL_RX_BUFFER_SIZE that records
-// the total number of bytes, at that point in time, that the UBW is holding, waiting
-// to pass on to the PC.
-// <status> has several bits. 
-//  Bit 0 = Software RX Buffer Overrun (1 means software RX buffer (on RX pin)
-//    has been overrun and data has been lost) This will happen if you don't
-//    read the data out of the UWB often enough and the data is coming in too fast.
-//  Bit 1 = Software TX Buffer Overrun (1 means software TX buffer (on TX pin)
-//    as been overrun and data has been lost. This will happen if you send too much
-//    data to the UBW and you have the serial port set to a low baud rate.
-void parse_RX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// CX is for setting up serial port parameters
-// TBD
-void parse_CX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RC is for outputting RC servo pulses on a pin
-// "RC,<port>,<pin>,<value><CR>"
-// <port> is "A", "B", "C" and indicates the port
-// <pin> is a number between 0 and 7 and indicates which pin to output the new value on
-// <value> is an unsigned 16 bit number between 0 and 11890.
-// If <value> is "0" then the RC output on that pin is disabled.
-// Otherwise <value> = 1 means 1ms pulse, <value> = 11890 means 2ms pulse,
-// any value in between means proportional pulse values between those two
-// Note: The pin used for RC output must be set as an output, or not much will happen.
-// The RC command will continue to send out pulses at the last set value on 
-// each pin that has RC output with a repetition rate of 1 pulse about every 19ms.
-// If you have RC output enabled on a pin, outputting a digital value to that pin
-// will be overwritten the next time the RC pulses. Make sure to turn off the RC
-// output if you want to use the pin for something else.
-void parse_RC_packet(void)
-{
-  UINT8 port;
-  UINT8 pin;
-  UINT16 value;
-
-  print_command(FALSE, FALSE);
-
-  extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
-  extract_number(kUCHAR, &pin, kREQUIRED);
-  extract_number(kUINT, &value, kREQUIRED);
-
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  // Max value user can input. (min is zero)
-  if (value > 11890u)
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-
-  // Now get Value in the form that TMR0 needs it
-  // TMR0 needs to get filled with values from 65490 (1ms) to 53600 (2ms)
-  if (value != 0u)
-  {
-    value = (65535 - (value + 45));
-  }
-
-  if (pin > 7u)
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-  if ('A' == port)
-  {
-    port = 0;
-  }
-  else if ('B' == port)
-  {
-    port = 8;
-  }
-  else if ('C' == port)
-  {
-    port = 16;
-  }
-  else
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-
-  // Store the new RC time value
-  g_RC_value[pin + port] = value;
-  // Only set this state if we are off - if we are already running on 
-  // this pin, then the new value will be picked up next time around (19ms)
-  if (kOFF == g_RC_state[pin + port])
-  {
-    g_RC_state[pin + port] = kWAITING;
-  }
-
-  print_line_ending(kLE_OK_NORM);
-}
-
-// BC is for Bulk Configure
-// BC,<port A init>,<waitmask>,<wait delay>,<strobemask>,<strobe delay><CR>
-// This command sets up the mask and strobe bits on port A for the
-// BO (Bulk Output) command below. Also suck in wait delay, strobe delay, etc.
-void parse_BC_packet(void)
-{
-//  unsigned char BO_init;
-//  unsigned char BO_strobe_mask;
-//  unsigned char BO_wait_mask;
-//  unsigned char BO_wait_delay;
-//  unsigned char BO_strobe_delay;
-//
-//  BO_init = extract_number(kUCHAR, kREQUIRED);
-//  BO_wait_mask = extract_number(kUCHAR, kREQUIRED);
-//  BO_wait_delay = extract_number(kUCHAR, kREQUIRED);
-//  BO_strobe_mask = extract_number(kUCHAR, kREQUIRED);
-//  BO_strobe_delay = extract_number(kUCHAR, kREQUIRED);
-//
-//  // Bail if we got a conversion error
-//  if (error_byte)
-//  {
-//    return;
-//  }
-//
-//  // Copy over values to their globals
-//  g_BO_init = BO_init;
-//  g_BO_wait_mask = BO_wait_mask;
-//  g_BO_strobe_mask = BO_strobe_mask;
-//  g_BO_wait_delay = BO_wait_delay;
-//  g_BO_strobe_delay = BO_strobe_delay;
-//  // And initialize Port A
-//  LATA = g_BO_init;
-//
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// Bulk Output (BO)
-// BO,4AF2C124<CR>
-// After the initial comma, pull in hex values and spit them out to port A
-// Note that the procedure here is as follows:
-//  1) Write new value to PortB
-//  2) Assert <strobemask>
-//  3) Wait for <strobdelay> (if not zero)
-//  4) De-assert <strobemask>
-//  5) Wait for <waitmask> to be asserted
-//  6) Wait for <waitmask> to be deasserted
-//  7) If 5) or 6) takes longer than <waitdelay> then just move on to next byte
-//  Repeat for each byte
-void parse_BO_packet(void)
-{
-//  unsigned char BO_data_byte;
-//  unsigned char new_port_A_value;
-//  unsigned char tmp;
-//  unsigned char wait_count = 0;
-//
-//  // Check for comma where ptr points
-//  if (g_RX_buf[g_RX_buf_out] != ',')
-//  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
-//    print_line_ending(kLE_NORM);
-//    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
-//    return;
-//  }
-//
-//  // Move to the next character
-//  advance_RX_buf_out();
-//
-//  // Make sure Port A is correct
-//  LATA = g_BO_init;
-//  new_port_A_value = ((~LATA & g_BO_strobe_mask)) | (LATA & ~g_BO_strobe_mask);
-//
-//  while (g_RX_buf[g_RX_buf_out] != 13)
-//  {
-//    // Pull in a nibble from the input buffer
-//    tmp = toupper(g_RX_buf[g_RX_buf_out]);
-//    if (tmp >= '0' && tmp <= '9')
-//    {
-//      tmp -= '0';
-//    }
-//    else if (tmp >= 'A' && tmp <= 'F')
-//    {
-//      tmp -= 55;
-//    }
-//    else 
-//    {
-//      bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//      return;
-//    }
-//    BO_data_byte = tmp << 4;
-//    advance_RX_buf_out();
-//
-//    // Check for CR next
-//    if (kCR == g_RX_buf[g_RX_buf_out])
-//    {
-//      bitset(error_byte, kERROR_BYTE_MISSING_PARAMETER);
-//      return;
-//    }
-//
-//    tmp =  toupper(g_RX_buf[g_RX_buf_out]);
-//    if (tmp >= '0' && tmp <= '9')
-//    {
-//      tmp -= '0';
-//    }
-//    else if (tmp >= 'A' && tmp <= 'F')
-//    {
-//      tmp -= 55;
-//    }
-//    else
-//    {
-//      bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//      return;
-//    }
-//    BO_data_byte = BO_data_byte + tmp;
-//    advance_RX_buf_out();
-//
-//    // Output the byte on Port B
-//    LATB = BO_data_byte;
-//
-//    // And strobe the Port A bits that we're supposed to
-//    LATA = new_port_A_value;
-//    if (g_BO_strobe_delay)
-//    {
-//      Delay10TCYx (g_BO_strobe_delay);
-//    }
-//    LATA = g_BO_init;
-//
-//    if (g_BO_wait_delay)
-//    {
-//      // Now we spin on the wait bit specified in WaitMask
-//      // (Used for Busy Bits) We also have to wait here
-//      // for a maximum of g_BO_wait_delay, which is in 10 clock units
-//      // First we wait for the wait mask to become asserted
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      while (
-//        ((g_BO_init & g_BO_wait_mask) == (PORTA & g_BO_wait_mask))
-//        && 
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      // Then we wait for the wait mask to become de-asserted
-//      while ( 
-//      ((g_BO_init & g_BO_wait_mask) != (PORTA & g_BO_wait_mask))
-//        &&
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//    }
-//  }
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// Bulk Stream (BS) (he he, couldn't think of a better name)
-// BS,<count>,<binary_data><CR>
-// This command is extremely similar to the BO command
-// except that instead of ASCII HEX values, it actually 
-// takes raw binary data.
-// So in order for the UBW to know when the end of the stream
-// is, we need to have a <count> of bytes.
-// <count> represents the number of bytes after the second comma
-// that will be the actual binary data to be streamed out port B.
-// Then, <binary_data> must be exactly that length.
-// <count> must be between 1 and 56 (currently - in the future
-// it would be nice to extend the upper limit)
-// The UBW will pull in one byte at a time within the <binary_data>
-// section and output it to PORTB exactly as the BO command does.
-// It will do this for <count> bytes. It will then pull in another
-// byte (which must be a carriage return) and be done.
-// The whole point of this command is to improve data throughput
-// from the PC to the UBW. This form of data is also more efficient
-// for the UBW to process.
-void parse_BS_packet(void)
-{
-//  unsigned char BO_data_byte;
-//  unsigned char new_port_A_value;
-//  unsigned char tmp;
-//  unsigned char wait_count = 0;
-//  unsigned char byte_count = 0;
-//
-//  // Get byte_count
-//  byte_count = extract_number(kUCHAR, kREQUIRED);
-//
-//  // Limit check it
-//  if (0 == byte_count || byte_count > 56)
-//  {
-//    bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//    return;
-//  }
-//
-//  // Check for comma where ptr points
-//  if (g_RX_buf[g_RX_buf_out] != ',')
-//  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
-//    print_line_ending(kLE_NORM);
-//    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
-//    return;
-//  }
-//
-//  // Move to the next character
-//  advance_RX_buf_out();
-//
-//  // Make sure Port A is correct
-//  LATA = g_BO_init;
-//  new_port_A_value = ((~LATA & g_BO_strobe_mask)) | (LATA & ~g_BO_strobe_mask);
-//
-//  while (byte_count != 0)
-//  {
-//    // Pull in a single byte from input buffer
-//    BO_data_byte = g_RX_buf[g_RX_buf_out];
-//    advance_RX_buf_out();
-//
-//    // Count this byte
-//    byte_count--;
-//
-//    // Output the byte on Port B
-//    LATB = BO_data_byte;
-//
-//    // And strobe the Port A bits that we're supposed to
-//    LATA = new_port_A_value;
-//    if (g_BO_strobe_delay)
-//    {
-//      Delay10TCYx(g_BO_strobe_delay);
-//    }
-//    LATA = g_BO_init;
-//
-//    if (g_BO_wait_delay)
-//    {
-//      // Now we spin on the wait bit specified in WaitMask
-//      // (Used for Busy Bits) We also have to wait here
-//      // for a maximum of g_BO_wait_delay, which is in 10 clock units
-//      // First we wait for the wait mask to become asserted
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      while (
-//        ((g_BO_init & g_BO_wait_mask) == (PORTA & g_BO_wait_mask))
-//        && 
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      // Then we wait for the wait mask to become de-asserted
-//      while ( 
-//      ((g_BO_init & g_BO_wait_mask) != (PORTA & g_BO_wait_mask))
-//        &&
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//    }
-//  }
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// SS Send SPI
-void parse_SS_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RS Receive SPI
-void parse_RS_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// SI Send I2C
-void parse_SI_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RI Receive I2C
-void parse_RI_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// CI Configure I2C
-void parse_CI_packet(void)
-{
-  print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
 }
 

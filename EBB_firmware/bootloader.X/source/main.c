@@ -117,92 +117,36 @@ project will have to be modified to make the BootPage section larger.
 #include "typedefs.h"
 #include "usb.h"
 #include "io_cfg.h"
-#if defined(EBB_V11) || defined(THREEBEEBEE_V10)
-  #include "Boot46J50Family.h"
-#elif defined(EBB_V10)
-  #include "Boot87J50Family.h"
-#endif
+#include "Boot46J50Family.h"
 
 /** C O N F I G U R A T I O N ************************************************/
 // Note: For a complete list of the available config pragmas and their values, 
 // see the compiler documentation, and/or click "Help --> Topics..." and then 
 // select "PIC18 Config Settings" in the Language Tools section.
 
-#if defined(PIC18F46J50_PIM)
-    #pragma config WDTEN = OFF          // WDT disabled (enabled by SWDTEN bit)
-    #pragma config PLLDIV = 3           // Divide by 3 (12 MHz oscillator input)
-    #pragma config STVREN = ON          // stack overflow/underflow reset enabled
-    #pragma config XINST = OFF          // Extended instruction set disabled
-    #pragma config CPUDIV = OSC1        // No CPU system clock divide
-    #pragma config CP0 = OFF            // Program memory is not code-protected
-    #pragma config OSC = HSPLL          // HS oscillator, PLL enabled, HSPLL used by USB
-    #pragma config T1DIG = OFF          // Sec Osc clock source may not be selected, unless T1OSCEN = 1
-    #pragma config LPT1OSC = OFF        // high power Timer1 mode
-    #pragma config FCMEN = OFF          // Fail-Safe Clock Monitor disabled
-    #pragma config IESO = OFF           // Two-Speed Start-up disabled
-    #pragma config WDTPS = 32768        // 1:32768
-    #pragma config DSWDTOSC = INTOSCREF // DSWDT uses INTOSC/INTRC as clock
-    #pragma config RTCOSC = T1OSCREF    // RTCC uses T1OSC/T1CKI as clock
-    #pragma config DSBOREN = OFF        // Zero-Power BOR disabled in Deep Sleep
-    #pragma config DSWDTEN = OFF        // Disabled
-    #pragma config DSWDTPS = 8192       // 1:8,192 (8.5 seconds)
-    #pragma config IOL1WAY = OFF        // IOLOCK bit can be set and cleared
-    #pragma config MSSP7B_EN = MSK7     // 7 Bit address masking
-    #pragma config WPFP = PAGE_1        // Write Protect Program Flash Page 0
-    #pragma config WPEND = PAGE_0       // Start protection at page 0
-    #pragma config WPCFG = OFF          // Write/Erase last page protect Disabled
-    #pragma config WPDIS = OFF          // WPFP[5:0], WPEND, and WPCFG bits ignored 
-//If using the YOUR_BOARD hardware platform (see usbcfg.h), uncomment below and add pragmas
-#elif defined(EBB_V11) || defined(THREEBEEBEE_V10)
-    #pragma config WDTEN = OFF          // WDT disabled (enabled by SWDTEN bit)
-    #pragma config PLLDIV = 2           // Divide by 2 (8 MHz internal oscillator)
-    #pragma config STVREN = ON          // stack overflow/underflow reset enabled
-    #pragma config XINST = OFF          // Extended instruction set disabled
-    #pragma config CPUDIV = OSC1        // No CPU system clock divide
-    #pragma config CP0 = OFF            // Program memory is not code-protected
-    #pragma config OSC = INTOSCPLL      // Internal oscillator, PLL enabled, PLL used by USB, RA6 and RA7 for I/O use
-    #pragma config T1DIG = ON           // Sec Osc clock source may be selected
-    #pragma config LPT1OSC = ON         // high power Timer1 mode
-    #pragma config FCMEN = OFF          // Fail-Safe Clock Monitor disabled
-    #pragma config IESO = OFF           // Two-Speed Start-up disabled
-    #pragma config WDTPS = 32768        // 1:32768
-    #pragma config DSWDTOSC = INTOSCREF // DSWDT uses INTOSC/INTRC as clock
-    #pragma config RTCOSC = T1OSCREF    // RTCC uses T1OSC/T1CKI as clock
-    #pragma config DSBOREN = OFF        // Zero-Power BOR disabled in Deep Sleep
-    #pragma config DSWDTEN = OFF        // Disabled
-    #pragma config DSWDTPS = 8192       // 1:8,192 (8.5 seconds)
-    #pragma config IOL1WAY = OFF        // IOLOCK bit can be set and cleared
-    #pragma config MSSP7B_EN = MSK7     // 7 Bit address masking
-    #pragma config WPFP = PAGE_1        // Write Protect Program Flash Page 0
-    #pragma config WPEND = PAGE_0       // Start protection at page 0
-    #pragma config WPCFG = ON           // Write/Erase last page protect enabled
-    #pragma config WPDIS = ON           // WPFP[5:0], WPEND, and WPCFG bits not ignored 
-#elif defined(EBB_V10)			// Configuration bits for EggBotBoard V1.0
-    #pragma config DEBUG	= OFF         // Disable debugger
-    #pragma config XINST    = OFF       // Extended instruction set
-    #pragma config STVREN   = ON        // Stack overflow reset
-    #pragma config PLLDIV   = 6         // (24 MHz crystal used on this board)
-    #pragma config WDTEN    = OFF       // Watch Dog Timer (WDT)
-    #pragma config CP0      = OFF       // Code protect
-    #pragma config CPUDIV   = OSC1      // OSC1 = divide by 1 mode
-    #pragma config IESO     = OFF       // Internal External (clock) Switchover
-    #pragma config FCMEN    = OFF       // Fail Safe Clock Monitor
-    #pragma config FOSC     = HSPLL     // Firmware must also set OSCTUNE<PLLEN> to start PLL!
-    #pragma config WDTPS    = 32768
-    #pragma config MSSPMSK  = MSK5
-    #pragma config CCP2MX   = DEFAULT
-  #if defined(__18F87J50)||defined(__18F86J55)|| \
-      defined(__18F86J50)||defined(__18F85J50)
-      #pragma config WAIT     = OFF     // 
-      #pragma config BW       = 16      // Only available on the
-      #pragma config MODE     = MM      // 80 pin devices in the 
-      #pragma config EASHFT   = OFF     // family.
-      #pragma config PMPMX    = DEFAULT //
-      #pragma config ECCPMX   = DEFAULT //
-  #endif
-#else	
-  #error Not a supported board (yet), make sure the proper board is selected in usbcfg.h, and if so, set configuration bits in __FILE__, line __LINE__
-#endif
+#pragma config WDTEN = OFF          // WDT disabled (enabled by SWDTEN bit)
+#pragma config PLLDIV = 2           // Divide by 2 (8 MHz internal oscillator)
+#pragma config STVREN = ON          // stack overflow/underflow reset enabled
+#pragma config XINST = OFF          // Extended instruction set disabled
+#pragma config CPUDIV = OSC1        // No CPU system clock divide
+#pragma config CP0 = OFF            // Program memory is not code-protected
+#pragma config OSC = INTOSCPLL      // Internal oscillator, PLL enabled, PLL used by USB, RA6 and RA7 for I/O use
+#pragma config T1DIG = ON           // Sec Osc clock source may be selected
+#pragma config LPT1OSC = ON         // high power Timer1 mode
+#pragma config FCMEN = OFF          // Fail-Safe Clock Monitor disabled
+#pragma config IESO = OFF           // Two-Speed Start-up disabled
+#pragma config WDTPS = 32768        // 1:32768
+#pragma config DSWDTOSC = INTOSCREF // DSWDT uses INTOSC/INTRC as clock
+#pragma config RTCOSC = T1OSCREF    // RTCC uses T1OSC/T1CKI as clock
+#pragma config DSBOREN = OFF        // Zero-Power BOR disabled in Deep Sleep
+#pragma config DSWDTEN = OFF        // Disabled
+#pragma config DSWDTPS = 8192       // 1:8,192 (8.5 seconds)
+#pragma config IOL1WAY = OFF        // IOLOCK bit can be set and cleared
+#pragma config MSSP7B_EN = MSK7     // 7 Bit address masking
+#pragma config WPFP = PAGE_1        // Write Protect Program Flash Page 0
+#pragma config WPEND = PAGE_0       // Start protection at page 0
+#pragma config WPCFG = ON           // Write/Erase last page protect enabled
+#pragma config WPDIS = ON           // WPFP[5:0], WPEND, and WPCFG bits not ignored 
 
 /** V A R I A B L E S ********************************************************/
 #pragma udata access fast_vars
@@ -381,26 +325,10 @@ static void InitializeSystem(void)
   // operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
   // power up the PLL.
 
-  #if defined(__18F87J50)||defined(__18F86J55)|| \
-      defined(__18F86J50)||defined(__18F85J50)|| \
-      defined(__18F67J50)||defined(__18F66J55)|| \
-      defined(__18F66J50)||defined(__18F65J50)|| \
-      defined(__18F24J50)||defined(__18F25J50)|| \
-      defined(__18F26J50)||defined(__18F44J50)|| \
-      defined(__18F45J50)||defined(__18F46J50) 
-
-    OSCTUNEbits.PLLEN = 1;  // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-    pll_startup_counter = 600;
-    while(pll_startup_counter--);
-    // Device switches over automatically to PLL output after PLL is locked and ready.
-
-  #else
-    #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
-    // Also make sure the correct board is selected in usbcfg.h.  If 
-    // everything is correct, comment out the above "#error ..." line
-    // to suppress the error message.
-  #endif
-
+  OSCTUNEbits.PLLEN = 1;  // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
+  pll_startup_counter = 600;
+  while(pll_startup_counter--);
+  // Device switches over automatically to PLL output after PLL is locked and ready.
 
   // USB module may have already been on if the application firmware calls the bootloader
   // without first disabling the USB module.  If this happens, need
@@ -459,17 +387,6 @@ static void InitializeSystem(void)
 
   mInitAllLEDs();                 // Init them off.
 
-#if defined(EBB_V10)
-  // Turn off digital input buffers on analog pins to minimize power consumption
-  // if the I/O pins happen to be floating in the target application.
-  WDTCONbits.ADSHR = 1;           // ANCON registers in shared address space region
-  ANCON0 = 0x00;                  // All analog, to disable the digital input buffers
-  ANCON1 = 0x00;                  // All analog, digital input buffers off
-  WDTCONbits.ADSHR = 0;
-  // Also to minimize sleep current consumption (sleep used in this bootloader
-  // firmware during USB Suspend conditions), use REGSLP feature
-  WDTCONbits.REGSLP = 1;
-#else
   // Initialize I/O pins for "lowest" power.  When in USB suspend mode, total +5V VBUS current consumption 
   // should reduce to <2.5mA in order to meet USB compliance specifications.
 
@@ -484,7 +401,6 @@ static void InitializeSystem(void)
 
   ANCON0 = 0x00;                  // All analog, to disable the digital input buffers
   ANCON1 = 0x00;                  // All analog, digital input buffers off, bandgap off
-#endif
 
 }// end InitializeSystem
 
