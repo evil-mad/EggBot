@@ -1714,40 +1714,45 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
-
-
             <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
            </li>
-
         </ul>
-
-
 
         <hr class="short" />
         <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>QL&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QL,<i>CurrentLayerValue</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>CurrentLayerValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+          <li><span style="font-weight: bold;">Command:</span> <code>QL[,<i>VariableIndex</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QL,<i>VariableValue</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>VariableValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0.0 has added <i>VariableIndex</i></li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li><i>VariableIndex</i> is an integer between 0 and 31 and is optional. If not provided, a <i>VariableIndex</i> of zero will be assumed.</li>
+            </ul>
+          </li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This query asks the EBB to report back the current value of the Layer variable. This variable is set with the <code><a href="#SL">SL</a></code> command, as a single unsigned byte.
+              This query allows retrieval of a temporary <i>VariableValue</i> stored in EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. Set the value of any of the variables with the <code><a href="#SL">SL</a></code> command. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>QL</code> command is backward compatible with the older version before v3.0.0. The <i>VariableValue</i> in the response is a decimal value from 0 to 255.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
-
-
-
           <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QL,4&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
+          <li><span style="font-weight: bold;">Example:</span> <code>QL,21&lt;CR&gt;</code></li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QL,242&lt;NL&gt;</code>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>242&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+          </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
+          <li><span style="font-weight: bold;">Version History:</span> V3.0.0 adds the <i>VariableIndex</i> parameter.</li>
         </ul>
 
         <hr class="short" />
@@ -2313,33 +2318,34 @@
           <li><span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.4.1</li>
         </ul>
     
-        <hr class="short" />    
-        <h4><a name="SL"></a> "SL" &mdash; Set Layer</h4>
+        <hr class="short" />
+        <h4><a name="SL"></a> "SL" &mdash; Set Variable</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>NewLayerValue</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>VariableValue</i>[,<i>VariableIndex</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SL&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0.0 has added <i>VariableIndex</i></li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>NewLayerValue</i> is an integer between 0 and 127.</li>
+              <li><i>VariableValue</i> is an integer between 0 and 255 and is required.</li>
+              <li><i>VariableIndex</i> is an integer between 0 and 31 and is optional. If not provided, a <i>VariableIndex</i> of zero will be assumed.</li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command sets the value of the Layer variable, which can be read by the <code><a href="#QL">QL</a></code> query.
-              This variable is a single unsigned byte, and is available for the user to store a single variable as needed.
+              This command allows storage of temporary values in the EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. The values can be read out by using the <code><a href="#QL">QL[,<i>VariableIndex</i>]</a></code> query. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>SL</code> command is backward compatible with the older version before v3.0.0. The values are not retained across EBB reboots or resets.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example:</span> <code>SL,4\r</code> Set the Layer variable to 4.</li>
-          <li><span style="font-weight: bold;">Example:</span> <code>SL,125\r</code> Set the Layer variable to 125.</li>
-          <li><span style="font-weight: bold;">Version History:</span>  Added in v1.9.2</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>SL,4\r</code> Sets the value of variable zero to the value of 4.</li>
+          <li><span style="font-weight: bold;">Example:</span> <code>SL,125,19\r</code> Sets the value of variable 19 to the value of 125.</li>
+          <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
+          <li><span style="font-weight: bold;">Version History:</span> In v3.0.0 the optional <i>VariableIndex</i> parameter was added.</li>
         </ul>
 
-        <hr class="short" />    
+        <hr class="short" />
         <h4><a name="SM"></a> "SM" &mdash; Stepper Move</h4>
 
         <ul>

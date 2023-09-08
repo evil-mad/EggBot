@@ -298,6 +298,10 @@
 
 #define MAX_RC_DURATION         11890
 
+// The number of individual addressable unsigned bytes that are available
+// in the SL and QL commands.
+#define SL_STORAGE_SIZE         32u
+
 typedef enum
 {
   SOLENOID_OFF = 0,
@@ -415,7 +419,7 @@ static unsigned int SolenoidDelay;
 static PenStateType PenState;
 
 static unsigned long NodeCount;
-static char Layer;
+static UINT8   gSL_Storage[32];
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
 // Set TRUE to enable solenoid output for pen up/down
@@ -1383,7 +1387,7 @@ CheckForNextCommand:
 // Init code
 void EBB_Init(void)
 {
-  BYTE i;
+  UINT8 i;
 
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
@@ -1506,7 +1510,10 @@ void EBB_Init(void)
   SolenoidState = SOLENOID_ON;
   DriverConfiguration = PIC_CONTROLS_DRIVERS;
   PenState = PEN_UP;
-  Layer = 0;
+  for (i=0; i < SL_STORAGE_SIZE; i++)
+  {
+    gSL_Storage[i] = 0;
+  }
   NodeCount = 0;
   ButtonPushed = 0;
   gStandardizedCommandFormat = 0;
@@ -3510,13 +3517,22 @@ void parse_QN_packet(void)
 }
 
 // Set Layer
-// Usage: SL,<NewLayer><CR>
+// Usage: SL,<Value>[,<Index>]<CR>
+// Where <Value> is an unsigned 8-bit decimal number and
+// <Index> is an optional parameter from 0 to 31. If not present then 
+// <index> is assumed to be 0.
+// Store <Value> in <Index> (variable space) in RAM
+// Retrieve the values using the QL command
 void parse_SL_packet(void)
 {
+  UINT8 Value = 0;
+  UINT8 Index = 0;
+  
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kUCHAR, &Layer, kREQUIRED);
+  extract_number(kUCHAR, &Value, kREQUIRED);
+  extract_number(kUCHAR, &Index, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -3524,23 +3540,46 @@ void parse_SL_packet(void)
     return;
   }
 
+  if (Index > (SL_STORAGE_SIZE - 1))
+  {
+    Index = (SL_STORAGE_SIZE - 1);
+  }
+  gSL_Storage[Index] = Value;
+  
   print_line_ending(kLE_OK_NORM);
 }
 
 // Query Layer
-// Usage: QL<CR>
-// Returns: <Layer><CR>
-// OK<CR>
+// Usage: QL[,<Index>]<CR>
+// Returns: QL,<ValueAtIndex><CR>
+// Where <Index> is an optional parameter from 0 to 31
+// If not present, <Index> is set to 0
+// The <ValueAtIndex> is an unsigned byte which was previously stored at <Index>
 void parse_QL_packet(void)
 {
+  UINT8 Value = 0;
+  UINT8 Index = 0;
+  
   print_command(FALSE, TRUE);
 
-  printf((far rom char*)"%03i", Layer);
+  extract_number(kUCHAR, &Index, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (Index > (SL_STORAGE_SIZE - 1))
+  {
+    Index = (SL_STORAGE_SIZE - 1);
+  }
+  
+  printf((far rom char*)"%03i", gSL_Storage[Index]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
   }
-
   print_line_ending(kLE_OK_NORM);
 }
 

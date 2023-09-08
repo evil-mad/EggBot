@@ -146,7 +146,7 @@ volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a9"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a10"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
