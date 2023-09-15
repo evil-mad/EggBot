@@ -341,6 +341,10 @@
           <li>
             <span style="font-weight: bold;">Unchanged since firmware v2.2.3.
           </li>
+          <li>
+            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
+            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+          </li>
         </ul>
    
         <hr class="short" />
@@ -368,6 +372,10 @@
             <p>
               The channel numbers correspond to lines ANx on the EBB schematic and on the datasheet of the microcontroller. For example, pin 11 of the PIC, which is labeled RB2 and comes out as the RB2 pin on the servo header, has the text "RB2/AN8/CTEDG1/PMA3/VMO/REFO/RP5" next to it on the CPU symbol. This means that this pin is internally connected to Analog Channel 8. See chapter 21 of the <a href="http://ww1.microchip.com/downloads/en/DeviceDoc/39931d.pdf">PIC18F46J50 datasheet</a> to read more about the ADC converter.
             </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
+            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
           </li>
         </ul>
 
@@ -926,6 +934,10 @@
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
             <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
           </li>
+          <li>
+            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
+            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+          </li>
 
         </ul>
 
@@ -1292,6 +1304,10 @@
               This command simply takes its arguments and write them to the LATx registers. This allows you to output digital values to any or all of the pins of the microcontroller. The pins must be configured as digital outputs before this command can have an effect on the actual voltage level on a pin.
             </p>
           </li>
+          <li>
+            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
+            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+          </li>
         </ul>
 
         <hr class="short"/>
@@ -1348,6 +1364,10 @@
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.6.6
+          </li>
+          <li>
+            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
 
@@ -1408,6 +1428,10 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>PG,0\r</code> This command would turn off pulse generation on any pins (RB0, RB1, RB2 or RB3) which have non-zero Length and Period values from the latest <code>PC</code> command.
+          </li>
+          <li>
+            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
 
@@ -2570,6 +2594,10 @@
           <li>
             <span style="font-weight: bold;">Note:</span>
             If the "I" or "A" packet responses stop coming back after you've done a "T" query, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
+          </li>
+          <li>
+            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
 
