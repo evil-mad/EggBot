@@ -111,7 +111,7 @@
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
-        <makeCustomizationPostStep>"C:\MCC18\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\MCC18\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o</makeCustomizationPostStep>
+        <makeCustomizationPostStep>"C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o</makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
@@ -157,6 +157,7 @@
         <property key="extra-lib-directories" value="./source"/>
         <property key="hex-output-format" value="INHX32"/>
         <property key="map-file" value="&quot;${DISTDIR}/EBF.X.${IMAGE_TYPE}.map&quot;"/>
+        <appendMe value="-p18f46j50"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="extended-mode" value="false"/>
@@ -194,13 +195,13 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool></platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.2.31"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
