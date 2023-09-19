@@ -146,7 +146,7 @@ volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a11"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a12"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -199,6 +199,7 @@ unsigned char g_USART_TX_buf_out;
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
 BOOL g_ack_enable;
 
+#if PC_PG_T_COMMANDS_ENABLED
 // Set to TRUE to turn Pulse Mode on
 unsigned char gPulsesOn;
 // For Pulse Mode, how long should each pulse be on for in ms?
@@ -207,6 +208,7 @@ unsigned int gPulseLen[4];
 unsigned int gPulseRate[4];
 // For Pulse Mode, counters keeping track of where we are
 unsigned int gPulseCounters[4];
+#endif
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS;
@@ -246,7 +248,6 @@ void parse_O_packet(void);     // O for output digital to pins
 void parse_I_packet(void);     // I for input digital from pins
 void parse_V_packet(void);     // V for printing version
 void parse_A_packet(void);     // A for requesting analog inputs
-void parse_T_packet(void);     // T for setting up timed I/O (digital or analog)
 void parse_PI_packet(void);    // PI for reading a single pin
 void parse_PO_packet(void);    // PO for setting a single pin state
 void parse_PD_packet(void);    // PD for setting a pin's direction
@@ -254,8 +255,11 @@ void parse_MR_packet(void);    // MR for Memory Read
 void parse_MW_packet(void);    // MW for Memory Write
 void parse_RC_packet(void);    // RC is for outputting RC servo pulses 
 void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
+#if PC_PG_T_COMMANDS_ENABLED
+void parse_T_packet(void);     // T for setting up timed I/O (digital or analog)
 void parse_PG_packet(void);    // PG Pulse Go
 void parse_PC_packet(void);    // PC Pulse Configure
+#endif
 void parse_BL_packet(void);    // BL Boot Load command
 void parse_CK_packet(void);    // CK ChecK command
 void parse_MR_packet(void);    // MR Motors Run command
@@ -466,6 +470,7 @@ void low_ISR(void)
       }
     }
 
+#if PC_PG_T_COMMANDS_ENABLED
     // Is Pulse Mode on?
     if (gPulsesOn)
     {
@@ -515,7 +520,8 @@ void low_ISR(void)
         }
       }
     }
-
+#endif
+    
     // Software timer for QC command
     if (QC_ms_timer)
     {
@@ -803,6 +809,7 @@ void UserInit(void)
   gLimitSwitchReplies = 0;
   gLimitSwitchReplyPrinted = 0;
 
+#if PC_PG_T_COMMANDS_ENABLED
   // Zero out pulse variables
   gPulsesOn = FALSE;
   gPulseLen[0] = 0;
@@ -817,7 +824,8 @@ void UserInit(void)
   gPulseCounters[1] = 0;
   gPulseCounters[2] = 0;
   gPulseCounters[3] = 0;
-
+#endif
+  
   gRCServoPoweroffCounterMS = 0;
   gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
   gAutomaticMotorEnable = TRUE;
@@ -1289,12 +1297,14 @@ void parse_packet(void)
       parse_A_packet();
       break;
     }
+#if PC_PG_T_COMMANDS_ENABLED
     case 'T':
     {
       // For timed I/O
       parse_T_packet();
       break;
     }
+#endif
     case ('P' * 256) + 'I':
     {
       // PI for reading a single pin
@@ -1325,6 +1335,7 @@ void parse_packet(void)
       parse_MW_packet();
       break;
     }
+#if PC_PG_T_COMMANDS_ENABLED
     case ('P' * 256) + 'C':
     {
       // PC for pulse configure
@@ -1337,6 +1348,7 @@ void parse_packet(void)
       parse_PG_packet();
       break;
     }
+#endif
     case ('S' * 256) + 'M':
     {
       // SM for stepper motor
@@ -2031,6 +2043,7 @@ void parse_QU_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
+#if PC_PG_T_COMMANDS_ENABLED
 // "T" Packet
 // Causes PIC to sample digital or analog inputs at a regular interval and send
 // I (or A) packets back at that interval.
@@ -2092,6 +2105,7 @@ void parse_T_packet(void)
 
   print_line_ending(kLE_OK_NORM);
 }
+#endif
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
 // UBW version. The analog config value is eliminated, replaced with the "AC"
@@ -2653,6 +2667,7 @@ void parse_PO_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
+#if PC_PG_T_COMMANDS_ENABLED
 // PC Pulse Configure
 // Pulses will be generated on PortB, bits 0 through 3
 // Pulses are in 1ms units, and can be from 0 (off) through 65535
@@ -2741,6 +2756,7 @@ void parse_PG_packet(void)
 
   print_line_ending(kLE_OK_NORM);
 }
+#endif
 
 void LongDelay(void)
 {
