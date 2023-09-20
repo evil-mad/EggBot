@@ -146,7 +146,7 @@ volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a12"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a13"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -224,7 +224,9 @@ unsigned char gCommand_Char2;
 // Global variables used for limit switch feature
 volatile UINT8 gLimitSwitchPortB;     // Latched PortB value when trigger happens
 volatile UINT8 gLimitSwitchReplies;   // Non-zero if we want a reply printed when limit switch trigger goes true
-UINT8 gLimitSwitchReplyPrinted;        // True if we've already printed a reply for this limit switch trigger
+UINT8 gLimitSwitchReplyPrinted;       // True if we've already printed a reply for this limit switch trigger
+
+UINT8 gCommandChecksumRequired;       // True if we are requiring checksums on all commands (defaults to off)
 
 // Stack high water value
 static volatile UINT16 gStackHighWater;
@@ -808,6 +810,7 @@ void UserInit(void)
   gLimitSwitchPortB = 0;
   gLimitSwitchReplies = 0;
   gLimitSwitchReplyPrinted = 0;
+  gCommandChecksumRequired = 0;
 
 #if PC_PG_T_COMMANDS_ENABLED
   // Zero out pulse variables
@@ -1207,387 +1210,499 @@ void check_and_send_TX_data(void)
 // route it appropriately. We come in knowing that
 // our packet is in g_RX_buf[], and that the beginning
 // of the packet is at g_RX_buf_out, and the end (CR) is at
-// g_RX_buf_in. Note that because of buffer wrapping,
+// g_RX_buf_in - 1. Note that because of buffer wrapping,
 // g_RX_buf_in may be less than g_RX_buf_out.
+// New for v3.0.0: if gCommandChecksumRequired is true, then look at the end
+// of the command packet for the checksum, and if it is not there or not
+// correct, error out.
 void parse_packet(void)
 {
   UINT16 command = 0;
+  UINT8 checksum_cmd = 0;
+  UINT8 checksum_calc = 0;
+  UINT8 checksum_ptr;
+  UINT8 checksum_len = 0;
+  BOOL checksumOK = TRUE;   // Starts out true for no checksum case
+  UINT8 old_rx_buf_out;
+  UINT8 i;
   gCommand_Char1 = 0;
   gCommand_Char2 = 0;
-
-  // Always grab the first character (which is the first byte of the command)
-  gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
-  advance_RX_buf_out();
-  command = gCommand_Char1;
-
-  // Only grab second one if it is not a comma
-  if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
+  
+  if (gCommandChecksumRequired)
   {
-    gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
-    advance_RX_buf_out();
-    command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
-  }
-
-  // Now 'command' is equal to one or two bytes of our command
-  switch (command)
-  {
-    case ('L' * 256) + 'T':
+    checksumOK = FALSE;
+    
+    // Walk backwards from the end of the packet, looking for the first found
+    // comma, then read out 
+    checksum_ptr = g_RX_buf_in;
+    if (checksum_ptr != 0u)
     {
-      // Low Level Timed Move
-      parse_LT_packet();
-      break;
+      checksum_ptr--;
     }
-    case ('L' * 256) + '3':
+    else
     {
-      // Low Level 3rd derivative (jerk) move
-      parse_L3_packet();
-      break;
+      checksum_ptr = kRX_BUF_SIZE - 1;
     }
-    case ('T' * 256) + '3':
+    
+    while ((g_RX_buf[checksum_ptr] != ',') && (checksum_len < 5u) && (checksum_ptr != g_RX_buf_out))
     {
-      // Timed 3rd derivative (jerk) move
-      parse_T3_packet();
-      break;
-    }
-    case ('L' * 256) + 'M':
-    {
-      // Low Level Move
-      parse_LM_packet();
-      break;
-    }
-    case 'R':
-    {
-      // Reset command (resets everything to power-on state)
-      parse_R_packet();
-      break;
-    }
-    case 'C':
-    {
-      // Configure command (configure ports for Input or Output)
-      parse_C_packet();
-      break;
-    }
-    case ('C' * 256) + 'U':
-    {
-      // For configuring UBW
-      parse_CU_packet();
-      break;
-    }
-    case 'O':
-    {
-      // Output command (tell the ports to output something)
-      parse_O_packet();
-      break;
-    }
-    case 'I':
-    {
-      // Input command (return the current status of the ports)
-      parse_I_packet();
-      break;
-    }
-    case 'V':
-    {
-      // Version command
-      parse_V_packet();
-      break;
-    }
-    case 'A':
-    {
-      // Analog command
-      parse_A_packet();
-      break;
-    }
-#if PC_PG_T_COMMANDS_ENABLED
-    case 'T':
-    {
-      // For timed I/O
-      parse_T_packet();
-      break;
-    }
-#endif
-    case ('P' * 256) + 'I':
-    {
-      // PI for reading a single pin
-      parse_PI_packet();
-      break;
-    }
-    case ('P' * 256) + 'O':
-    {
-      // PO for setting a single pin
-      parse_PO_packet();
-      break;
-    }
-    case ('P' * 256) + 'D':
-    {
-      // PD for setting a pin's direction
-      parse_PD_packet();
-      break;
-    }
-    case ('M' * 256) + 'R':
-    {
-      // MR for Memory Read
-      parse_MR_packet();
-      break;
-    }
-    case ('M' * 256) + 'W':
-    {
-      // MW for Memory Write
-      parse_MW_packet();
-      break;
-    }
-#if PC_PG_T_COMMANDS_ENABLED
-    case ('P' * 256) + 'C':
-    {
-      // PC for pulse configure
-      parse_PC_packet();
-      break;
-    }
-    case ('P' * 256) + 'G':
-    {
-      // PG for pulse go command
-      parse_PG_packet();
-      break;
-    }
-#endif
-    case ('S' * 256) + 'M':
-    {
-      // SM for stepper motor
-      parse_SM_packet();
-      break;
-    }
-    case ('S' * 256) + 'P':
-    {
-      // SP for set pen
-      parse_SP_packet();
-      break;
-    }
-    case ('T' * 256) + 'P':
-    {
-      // TP for toggle pen
-      parse_TP_packet();
-      break;
-    }
-    case ('Q' * 256) + 'P':
-    {
-      // QP for query pen
-      parse_QP_packet();
-      break;
-    }
-    case ('Q' * 256) + 'E':
-    {
-      // QE for Query motor Enable and resolution
-      parse_QE_packet();
-      break;
-    }
-    case ('E' * 256) + 'M':
-    {
-      // EM for enable motors
-      parse_EM_packet();
-      break;
-    }
-    case ('S' * 256) + 'C':
-    {
-      // SC for stepper mode configure
-      parse_SC_packet();
-      break;
-    }
-    case ('S' * 256) + 'N':
-    {
-      // SN for Clear Node count
-      parse_SN_packet();
-      break;
-    }
-    case ('Q' * 256) + 'N':
-    {
-      // QN for Query Node count
-      parse_QN_packet();
-      break;
-    }
-    case ('S' * 256) + 'L':
-    {
-      // SL for Set Layer
-      parse_SL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'L':
-    {
-      // QL for Query Layer count
-      parse_QL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'B':
-    {
-      // QL for Query Button (program)
-      parse_QB_packet();
-      break;
-    }
-    case ('N' * 256) + 'I':
-    {
-      // NI for Node count Increment
-      parse_NI_packet();
-      break;
-    }
-    case ('N' * 256) + 'D':
-    {
-      // ND Node count Decrement
-      parse_ND_packet();
-      break;
-    }
-    case ('B' * 256) + 'L':
-    {
-      // BL for Boot Load
-      parse_BL_packet();
-      break;
-    }
-    case ('C' * 256) + 'K':
-    {
-      // CL for Check
-      parse_CK_packet();
-      break;
-    }
-    case ('Q' * 256) + 'C':
-    {
-      // QC for Query Current
-      parse_QC_packet();
-      break;
-    }
-    case ('Q' * 256) + 'G':
-    {
-      // QG for Query General
-      parse_QG_packet();
-      break;
-    }
-    case ('S' * 256) + 'E':
-    {
-      // SE for Set Engraver
-      parse_SE_packet();
-      break;
-    }
-    case ('S' * 256) + '2':
-    {
-      // S2 for RC Servo method 2
-      RCServo2_S2_command();
-      break;
-    }
-    case ('Q' * 256) + 'M':
-    {
-      // QM for Query Motor
-      parse_QM_packet();
-      break;
-    }
-    case ('A' * 256) + 'C':
-    {
-      // AC for Analog Configure
-      parse_AC_packet();
-      break;
-    }
-    case ('E' * 256) + 'S':
-    {
-      // ES for E-Stop
-      parse_ES_packet();
-      break;
-    }
-    case ('X' * 256) + 'M':
-    {
-      // XM for X motor move
-      parse_XM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'S':
-    {
-      // QP for Query Step position
-      parse_QS_packet();
-      break;
-    }
-    case ('C' * 256) + 'S':
-    {
-      // CS for Clear Step position
-      parse_CS_packet();
-      break;
-    }
-    case ('S' * 256) + 'T':
-    {
-      // ST for Set Tag
-      parse_ST_packet();
-      break;
-    }
-    case ('Q' * 256) + 'T':
-    {
-      // QT for Query Tag
-      parse_QT_packet();
-      break;
-    }
-    case ('R' * 256) + 'B':
-    {
-      // RB for ReBoot
-      parse_RB_packet();
-      break;
-    }
-    case ('Q' * 256) + 'R':
-    {
-      // QR is for Query RC Servo power state
-      parse_QR_packet();
-      break;
-    }
-    case ('S' * 256) + 'R':
-    {
-      // SR is for Set RC Servo power timeout
-      parse_SR_packet();
-      break;
-    }
-    case ('H' * 256) + 'M':
-    {
-      // HM is for Home Motor
-      parse_HM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'U':
-    {
-      // QU is for General Query
-      parse_QU_packet();
-      break;
-    }
-
-    default:
-    {
-      if (0u == gCommand_Char2)
+      if (checksum_ptr != 0u)
       {
-        // Send back 'unknown command' error
-        printf(
-           (far rom char *)"!8 Err: Unknown command '%c:%2X'"
-          ,gCommand_Char1
-          ,gCommand_Char1
-        );
+        checksum_ptr--;
       }
       else
       {
-        // Send back 'unknown command' error
-        printf(
-           (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
-          ,gCommand_Char1
-          ,gCommand_Char2
-          ,gCommand_Char1
-          ,gCommand_Char2
-        );
+        checksum_ptr = kRX_BUF_SIZE - 1;
       }
+      checksum_len++;
+    }
+    
+printf(
+  (far rom char *)"out %d in %d csptr %d len %d char %d"
+        ,g_RX_buf_in
+        ,g_RX_buf_out
+        ,checksum_ptr
+        ,checksum_len
+        ,g_RX_buf[checksum_ptr]
+);
+print_line_ending(kLE_NORM);    
+
+    // If checksum_ptr isn't on a comma then there is no checksum for sure
+    // so let checksumOK stay FALSE
+    if (g_RX_buf[checksum_ptr] == ',')
+    {
+      // Last parameter found, hopefully it's a checksum. Read it in.
+      // We have to play some games with the buffer index values here
+      // since we're extracting a parameter at the very end of the packet
+      // before we extract any from the beginning (as part of normal command
+      // processing)
+      old_rx_buf_out = g_RX_buf_out;
+      g_RX_buf_out = checksum_ptr;
+      // We're going to ignore the return value from extract_number() since
+      // we'll get a failure anyway since the checksum value won't match.
+      extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      g_RX_buf_out = old_rx_buf_out;
+      
+      // Compute the checksum of the packet up to checksum_ptr
+      i = g_RX_buf_out;
+      while(i != checksum_ptr)
+      {
+        checksum_calc += g_RX_buf[i];
+        i++;
+        if (i == kRX_BUF_SIZE)
+        {
+          i = 0;
+        }
+      }
+      checksum_calc = ~checksum_calc;
+
+printf(
+  (far rom char *)"Checksum Computed %d Received %d"
+        ,checksum_calc
+        ,checksum_cmd
+);
+print_line_ending(kLE_NORM);
+
+      
+      // See if it matches
+      if (checksum_calc == checksum_cmd)
+      {
+        // All is good, allow command to proceed
+        checksumOK = TRUE;
+      }
+      else
+      {
+        printf(
+          (far rom char *)"!8 Err: Checksum incorrect"
+        );
+        print_line_ending(kLE_NORM);
+      }
+    }
+    else
+    {
+      printf(
+        (far rom char *)"!8 Err: Checksum not found but required"
+      );
       print_line_ending(kLE_NORM);
-      break;
     }
   }
 
-  // Double check that our output pointer is now at the ending <CR>
-  // If it is not, this indicates that there were extra characters that
-  // the command parsing routine didn't eat. This would be an error and needs
-  // to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
-  if (
-    (g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
-    &&
-    ('R' != command)
-  )
+  if (checksumOK)
   {
-    bitset(error_byte, kERROR_BYTE_EXTRA_CHARACTERS);
-  }
+    // Always grab the first character (which is the first byte of the command)
+    gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
+    advance_RX_buf_out();
+    command = gCommand_Char1;
 
+    // Only grab second one if it is not a comma
+    if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
+    {
+      gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
+      advance_RX_buf_out();
+      command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
+    }
+
+    // Now 'command' is equal to one or two bytes of our command
+    switch (command)
+    {
+      case ('L' * 256) + 'T':
+      {
+        // Low Level Timed Move
+        parse_LT_packet();
+        break;
+      }
+      case ('L' * 256) + '3':
+      {
+        // Low Level 3rd derivative (jerk) move
+        parse_L3_packet();
+        break;
+      }
+      case ('T' * 256) + '3':
+      {
+        // Timed 3rd derivative (jerk) move
+        parse_T3_packet();
+        break;
+      }
+      case ('L' * 256) + 'M':
+      {
+        // Low Level Move
+        parse_LM_packet();
+        break;
+      }
+      case 'R':
+      {
+        // Reset command (resets everything to power-on state)
+        parse_R_packet();
+        break;
+      }
+      case 'C':
+      {
+        // Configure command (configure ports for Input or Output)
+        parse_C_packet();
+        break;
+      }
+      case ('C' * 256) + 'U':
+      {
+        // For configuring UBW
+        parse_CU_packet();
+        break;
+      }
+      case 'O':
+      {
+        // Output command (tell the ports to output something)
+        parse_O_packet();
+        break;
+      }
+      case 'I':
+      {
+        // Input command (return the current status of the ports)
+        parse_I_packet();
+        break;
+      }
+      case 'V':
+      {
+        // Version command
+        parse_V_packet();
+        break;
+      }
+      case 'A':
+      {
+        // Analog command
+        parse_A_packet();
+        break;
+      }
+  #if PC_PG_T_COMMANDS_ENABLED
+      case 'T':
+      {
+        // For timed I/O
+        parse_T_packet();
+        break;
+      }
+  #endif
+      case ('P' * 256) + 'I':
+      {
+        // PI for reading a single pin
+        parse_PI_packet();
+        break;
+      }
+      case ('P' * 256) + 'O':
+      {
+        // PO for setting a single pin
+        parse_PO_packet();
+        break;
+      }
+      case ('P' * 256) + 'D':
+      {
+        // PD for setting a pin's direction
+        parse_PD_packet();
+        break;
+      }
+      case ('M' * 256) + 'R':
+      {
+        // MR for Memory Read
+        parse_MR_packet();
+        break;
+      }
+      case ('M' * 256) + 'W':
+      {
+        // MW for Memory Write
+        parse_MW_packet();
+        break;
+      }
+  #if PC_PG_T_COMMANDS_ENABLED
+      case ('P' * 256) + 'C':
+      {
+        // PC for pulse configure
+        parse_PC_packet();
+        break;
+      }
+      case ('P' * 256) + 'G':
+      {
+        // PG for pulse go command
+        parse_PG_packet();
+        break;
+      }
+  #endif
+      case ('S' * 256) + 'M':
+      {
+        // SM for stepper motor
+        parse_SM_packet();
+        break;
+      }
+      case ('S' * 256) + 'P':
+      {
+        // SP for set pen
+        parse_SP_packet();
+        break;
+      }
+      case ('T' * 256) + 'P':
+      {
+        // TP for toggle pen
+        parse_TP_packet();
+        break;
+      }
+      case ('Q' * 256) + 'P':
+      {
+        // QP for query pen
+        parse_QP_packet();
+        break;
+      }
+      case ('Q' * 256) + 'E':
+      {
+        // QE for Query motor Enable and resolution
+        parse_QE_packet();
+        break;
+      }
+      case ('E' * 256) + 'M':
+      {
+        // EM for enable motors
+        parse_EM_packet();
+        break;
+      }
+      case ('S' * 256) + 'C':
+      {
+        // SC for stepper mode configure
+        parse_SC_packet();
+        break;
+      }
+      case ('S' * 256) + 'N':
+      {
+        // SN for Clear Node count
+        parse_SN_packet();
+        break;
+      }
+      case ('Q' * 256) + 'N':
+      {
+        // QN for Query Node count
+        parse_QN_packet();
+        break;
+      }
+      case ('S' * 256) + 'L':
+      {
+        // SL for Set Layer
+        parse_SL_packet();
+        break;
+      }
+      case ('Q' * 256) + 'L':
+      {
+        // QL for Query Layer count
+        parse_QL_packet();
+        break;
+      }
+      case ('Q' * 256) + 'B':
+      {
+        // QL for Query Button (program)
+        parse_QB_packet();
+        break;
+      }
+      case ('N' * 256) + 'I':
+      {
+        // NI for Node count Increment
+        parse_NI_packet();
+        break;
+      }
+      case ('N' * 256) + 'D':
+      {
+        // ND Node count Decrement
+        parse_ND_packet();
+        break;
+      }
+      case ('B' * 256) + 'L':
+      {
+        // BL for Boot Load
+        parse_BL_packet();
+        break;
+      }
+      case ('C' * 256) + 'K':
+      {
+        // CL for Check
+        parse_CK_packet();
+        break;
+      }
+      case ('Q' * 256) + 'C':
+      {
+        // QC for Query Current
+        parse_QC_packet();
+        break;
+      }
+      case ('Q' * 256) + 'G':
+      {
+        // QG for Query General
+        parse_QG_packet();
+        break;
+      }
+      case ('S' * 256) + 'E':
+      {
+        // SE for Set Engraver
+        parse_SE_packet();
+        break;
+      }
+      case ('S' * 256) + '2':
+      {
+        // S2 for RC Servo method 2
+        RCServo2_S2_command();
+        break;
+      }
+      case ('Q' * 256) + 'M':
+      {
+        // QM for Query Motor
+        parse_QM_packet();
+        break;
+      }
+      case ('A' * 256) + 'C':
+      {
+        // AC for Analog Configure
+        parse_AC_packet();
+        break;
+      }
+      case ('E' * 256) + 'S':
+      {
+        // ES for E-Stop
+        parse_ES_packet();
+        break;
+      }
+      case ('X' * 256) + 'M':
+      {
+        // XM for X motor move
+        parse_XM_packet();
+        break;
+      }
+      case ('Q' * 256) + 'S':
+      {
+        // QP for Query Step position
+        parse_QS_packet();
+        break;
+      }
+      case ('C' * 256) + 'S':
+      {
+        // CS for Clear Step position
+        parse_CS_packet();
+        break;
+      }
+      case ('S' * 256) + 'T':
+      {
+        // ST for Set Tag
+        parse_ST_packet();
+        break;
+      }
+      case ('Q' * 256) + 'T':
+      {
+        // QT for Query Tag
+        parse_QT_packet();
+        break;
+      }
+      case ('R' * 256) + 'B':
+      {
+        // RB for ReBoot
+        parse_RB_packet();
+        break;
+      }
+      case ('Q' * 256) + 'R':
+      {
+        // QR is for Query RC Servo power state
+        parse_QR_packet();
+        break;
+      }
+      case ('S' * 256) + 'R':
+      {
+        // SR is for Set RC Servo power timeout
+        parse_SR_packet();
+        break;
+      }
+      case ('H' * 256) + 'M':
+      {
+        // HM is for Home Motor
+        parse_HM_packet();
+        break;
+      }
+      case ('Q' * 256) + 'U':
+      {
+        // QU is for General Query
+        parse_QU_packet();
+        break;
+      }
+
+      default:
+      {
+        if (0u == gCommand_Char2)
+        {
+          // Send back 'unknown command' error
+          printf(
+             (far rom char *)"!8 Err: Unknown command '%c:%2X'"
+            ,gCommand_Char1
+            ,gCommand_Char1
+          );
+        }
+        else
+        {
+          // Send back 'unknown command' error
+          printf(
+             (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
+            ,gCommand_Char1
+            ,gCommand_Char2
+            ,gCommand_Char1
+            ,gCommand_Char2
+          );
+        }
+        print_line_ending(kLE_NORM);
+        break;
+      }
+    }
+    
+    // Double check that our output pointer is now at the ending <CR>
+    // If it is not, this indicates that there were extra characters that
+    // the command parsing routine didn't eat. This would be an error and needs
+    // to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
+    if (
+      (g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
+      &&
+      ('R' != command)
+    )
+    {
+      bitset(error_byte, kERROR_BYTE_EXTRA_CHARACTERS);
+    }
+  }
+  
   // Clean up by skipping over any bytes we haven't eaten
   // This is safe since we parse each packet as we get a <CR>
   // (i.e. g_RX_buf_in doesn't move while we are in this routine)
@@ -1677,6 +1792,7 @@ void parse_R_packet(void)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
 // 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
+// 54  {1|0} turns on/off command checksum (defaults to off)
 // 60  <NewThreshood> Set the power lost threshold. Set to 0 to disable.
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
@@ -1804,6 +1920,18 @@ void parse_CU_packet(void)
     {
       gLimitSwitchReplies = FALSE;
       gLimitSwitchReplyPrinted = FALSE;
+    }
+  }
+  // CU,54,1 turns on command checksums
+  else if (54u == parameter_number)
+  {
+    if (1 == paramater_value)
+    {
+      gCommandChecksumRequired = TRUE;
+    }
+    else
+    {
+      gCommandChecksumRequired = FALSE;
     }
   }
   // CU,60,<NewThreshold>
@@ -3083,8 +3211,8 @@ UINT8 extract_string (
 }
 
 
-// Look at the string pointed to by ptr
-// There should be a comma where ptr points to upon entry.
+// Look at the string pointed to by g_RX_buf[g_RX_buf_out]
+// There should be a comma where g_RX_buf[g_RX_buf_out] points to upon entry.
 // If not, throw a comma error.
 // If so, then look for up to like a ton of bytes after the
 // comma for numbers, and put them all into one
