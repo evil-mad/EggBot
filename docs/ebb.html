@@ -583,6 +583,9 @@
                   <p>
                     This command will set the FIFO to a new depth, measured in commands. <code>Param_Value</code> needs to be a decimal number between 0 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
                   </p>
+                  <p>
+                    If there are any currently executing motion commands, or if there are any commands waiting in the FIFO, the execution of this command will block and wait for the FIFO to be completely empty and any executing motion commands to finish before allowing the change to FIFO size.
+                  </p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 10 : <b>Enable Future Syntax Mode</b>
@@ -1750,9 +1753,14 @@
               <div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div> This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO" motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is full, then a command is currently executing. Additional information about the motion queue can be found in the description of the <code><a href="#QM">QM</a></code> query.
             </p>
           </li>
-           <li>
-           <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
-
+          <li>
+            <span style="font-weight: bold;">Equivalence to <code><a href="#QM">QM</a></code> query:</span>
+            <p>
+              Bits 0, 1 2, and 3 are exactly identical to the <i>FIFOStatus</i>,<i>Motor2Status</i>,<i>Motor1Status</i> and <i>CommandStatus</i> result fields (respectively) of the <code>QM</code> query.
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
             <p>
               This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
             </p>

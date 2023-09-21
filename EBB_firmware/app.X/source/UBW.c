@@ -146,7 +146,7 @@ volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a13"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a15"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -684,6 +684,26 @@ void UserInit(void)
   // Initialize switch as an input
   mInitSwitch();
 
+  //// JUST FOR TESTING! REMOVE!  
+TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+TRISCbits.TRISC0 = 0;
+TRISAbits.TRISA5 = 0;
+
+
+Open1USART(
+  USART_TX_INT_OFF &
+  USART_RX_INT_OFF &
+  USART_ASYNCH_MODE &
+  USART_EIGHT_BIT &
+  USART_CONT_RX &
+  USART_BRGH_HIGH &
+  USART_ADDEN_OFF,
+  2                   // At 48 MHz, this creates 1 Mbaud output
+);
+////
+
   // Start off always using "OK" acknowledge.
   g_ack_enable = TRUE;
 
@@ -835,15 +855,6 @@ void UserInit(void)
   gStackHighWater = 0;
   g_PowerMonitorThresholdADC = 0;
   g_PowerDropDetected = FALSE;
-
-  
-//// JUST FOR TESTING! REMOVE!  
-TRISDbits.TRISD1 = 0;   // D1 high when in ISR
-TRISDbits.TRISD0 = 0;   // D0 high when loading next command
-TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-TRISCbits.TRISC0 = 0;
-TRISAbits.TRISA5 = 0;
-////
 
 }
 
@@ -1107,13 +1118,13 @@ void ProcessIO(void)
   // Check to see if we need to print out a "Limit switch triggered" packet to the PC
   if (gLimitSwitchReplies)
   {
-    if (gLimitSwitchTriggered && !gLimitSwitchReplyPrinted)
+    if (bittstzero(gLimitSwitchTriggered) && !gLimitSwitchReplyPrinted)
     {
       printf((far rom char *)"Limit switch triggered. PortB=%02X", gLimitSwitchPortB);
       print_line_ending(kLE_NORM);
       gLimitSwitchReplyPrinted = TRUE;
     }
-    else if (!gLimitSwitchTriggered && gLimitSwitchReplyPrinted)
+    else if (!bittstzero(gLimitSwitchTriggered) && gLimitSwitchReplyPrinted)
     {
       gLimitSwitchReplyPrinted = FALSE;
     }
@@ -1786,6 +1797,7 @@ void parse_R_packet(void)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
+// 255 {1|0} turns on or off command parsing debug printing on USB
 
 void parse_CU_packet(void)
 {
@@ -1852,6 +1864,11 @@ void parse_CU_packet(void)
     {
       paramater_value = COMMAND_FIFO_MAX_LENGTH;
     }
+    // Spin here until we're certain the FIFO is empty and there are no 
+    // command executing. We want the ISR to be completely idle while we
+    // change this value.
+    while (process_QM())
+      ;
     gCurrentFIFOLength = paramater_value;
   }
   // CU,10,1 or CU,10,0 to turn on/off standardized line ending
@@ -1888,7 +1905,7 @@ void parse_CU_packet(void)
     gLimitSwitchMask = (paramater_value & 0xFF);
     if (gLimitSwitchMask == 0u)
     {
-      gLimitSwitchTriggered = FALSE;
+      bitclrzero(gLimitSwitchTriggered);
     }
   }
   // CU,52,<limit_siwtch_target>
@@ -2062,6 +2079,32 @@ void parse_CU_packet(void)
         BCF 0x8c,0x0,0x0
         BSF 0x8c,0x0,0x0
       _endasm
+    }
+  }
+  // CU,255,1 or CU,255,0 to turn on/off command parsing debug printing on USB
+  else if (255u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+      Open1USART(
+        USART_TX_INT_OFF &
+        USART_RX_INT_OFF &
+        USART_ASYNCH_MODE &
+        USART_EIGHT_BIT &
+        USART_CONT_RX &
+        USART_BRGH_HIGH &
+        USART_ADDEN_OFF,
+        2                   // At 48 MHz, this creates 1 Mbaud output
+      );
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
   else

@@ -110,6 +110,7 @@
 #include "UBW.h"
 #include "RCServo2.h"
 #include "HardwareProfile.h"
+#include "ebb.h"
 
 #pragma udata RC2Servo_globals = 0x060
 
