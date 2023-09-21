@@ -433,7 +433,6 @@ UINT8 gStandardizedCommandFormat;
 
 
 // Local function definitions
-UINT8 process_QM(void);
 void clear_StepCounters(void);
 
 static void process_low_level_move(
@@ -1049,7 +1048,7 @@ NonStepperCommands:
     acc_union[1].value = 0;
 
     // All EM command clear the limit switch trigger
-    gLimitSwitchTriggered = FALSE;
+    bitclrzero(gLimitSwitchTriggered);
 
     // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
     bitsetzero(AllDone);
@@ -1545,7 +1544,7 @@ void EBB_Init(void)
   PortBTemp = 0;
   gLimitSwitchMask = 0;
   gLimitSwitchTarget = 0;
-  gLimitSwitchTriggered = 0;
+  bitclrzero(gLimitSwitchTriggered);
 
   // Clear out global stepper positions
   clear_StepCounters();
@@ -2331,7 +2330,7 @@ void process_low_level_move(
     gFIFOLength++;
   }
 
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     // Print the final values used by the ISR for this move
     printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld",
@@ -2667,7 +2666,7 @@ void parse_HM_packet(void)
     Duration = 10;
   }
 
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li",
       Duration,
@@ -2842,7 +2841,7 @@ static void process_simple_motor_move(
   {
     return;
   }
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     printf((far rom char *)"Duration=%lu SA1=%li SA2=%li",
       Duration,
@@ -2910,7 +2909,7 @@ static void process_simple_motor_move(
     // If A1Stp is 1, then duration must be 763 or less.
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
       // First check for duration to large.
       if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
@@ -3030,7 +3029,7 @@ static void process_simple_motor_move(
     gMoveTemp.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
       printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu",
         gMoveTemp.Rate[0],
@@ -3667,7 +3666,7 @@ void parse_QG_packet(void)
     result = result | (1 << 6);
     g_PowerDropDetected = FALSE;
   }
-  if (gLimitSwitchTriggered)
+  if (bittstzero(gLimitSwitchTriggered))
   {
     result = result | (1 << 7);
   }
