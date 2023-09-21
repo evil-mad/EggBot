@@ -1257,16 +1257,6 @@ void parse_packet(void)
       checksum_len++;
     }
     
-printf(
-  (far rom char *)"out %d in %d csptr %d len %d char %d"
-        ,g_RX_buf_in
-        ,g_RX_buf_out
-        ,checksum_ptr
-        ,checksum_len
-        ,g_RX_buf[checksum_ptr]
-);
-print_line_ending(kLE_NORM);    
-
     // If checksum_ptr isn't on a comma then there is no checksum for sure
     // so let checksumOK stay FALSE
     if (g_RX_buf[checksum_ptr] == ',')
@@ -1294,26 +1284,23 @@ print_line_ending(kLE_NORM);
           i = 0;
         }
       }
-      checksum_calc = ~checksum_calc;
-
-printf(
-  (far rom char *)"Checksum Computed %d Received %d"
-        ,checksum_calc
-        ,checksum_cmd
-);
-print_line_ending(kLE_NORM);
-
+      checksum_calc = (~checksum_calc)+1;
       
       // See if it matches
       if (checksum_calc == checksum_cmd)
       {
         // All is good, allow command to proceed
         checksumOK = TRUE;
+        // Need to fake out the command parsing, make it think the packet
+        // ends where it expects it to end. It doesn't want to see the comma
+        // before the checksum.
+        g_RX_buf[checksum_ptr] = kCR;
       }
       else
       {
         printf(
-          (far rom char *)"!8 Err: Checksum incorrect"
+          (far rom char *)"!8 Err: Checksum incorrect, expected %d"
+          ,checksum_calc
         );
         print_line_ending(kLE_NORM);
       }
@@ -1321,7 +1308,7 @@ print_line_ending(kLE_NORM);
     else
     {
       printf(
-        (far rom char *)"!8 Err: Checksum not found but required"
+        (far rom char *)"!8 Err: Checksum not found but required."
       );
       print_line_ending(kLE_NORM);
     }

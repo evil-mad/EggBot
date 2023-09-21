@@ -671,12 +671,30 @@
                   <p></p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boo
+                      If <code>Param_Value</code> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boot).
                     </li>
                     <li>
                       If <code>Param_Value</code> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
                     </li>
                   </ul>
+                </li>
+                <li>
+                <code>Param_Number</code> = 54 : <b>Enable Command Checksums</b>
+                  <p></p>
+                  <ul>
+                    <li>
+                      If <code>Param_Value</code> = 0, then checksums at the end of commands are not required. (Default at boot).
+                    </li>
+                    <li>
+                      If <code>Param_Value</code> = 1, then checksums at the end of commands are required.
+                    </li>
+                  </ul>
+                  <p>
+                    Turning on checksums for commands allows the EBB to check that all of the command bytes made it successfully across USB to the EBB. USB has it's own checksums/CRCs and so guarantees properly data delivery at a lower level, but these application level checksums provide a way for the PC to know that the full command string that it created was properly received by the EBB. If checksums have been turned on, and no checksum is provided or an incorrect checksum is provided, the EBB will return an error message and the command will be ignored.
+                  </p>
+                  <p>
+                    
+                  </p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 60 : <b>Set new power lost threshold</b>
