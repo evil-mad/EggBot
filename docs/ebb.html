@@ -590,20 +590,10 @@
                     When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
                   </p>
                   <p>
-                  When the EBB boots up, future syntax mode is disabled; which we can abbreviate as
-                  being in <b>legacy syntax mode</b>.
-                  Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor 
-                  line endings in those responses. However, it is backward
-                  compatible with previous EBB firmware versions. 
+                    When the EBB boots up, future syntax mode is disabled; which we can abbreviate as being in <b>legacy syntax mode</b>. Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor line endings in those responses. However, it is backward compatible with previous EBB firmware versions. 
                   </p>
                   <p>
-                  Whereas legacy syntax mode often (but not always) uses an
-                  <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of a response, 
-                  future syntax mode will always print out the one or two character command,
-                  followed by <code>&lt;NL&gt;</code> if there is no additional data in the response
-                  packet. If there is additional data in the response packet, then the response packet
-                  will consist of the one or two letter command, followed by a comma, then any response
-                  data, then <code>&lt;NL&gt;</code>. 
+                    Whereas legacy syntax mode often (but not always) uses an <code>OK&lt;CR&gt;&lt;NL&gt;</code> at the end of a response, future syntax mode will always print out the one or two character command, followed by <code>&lt;NL&gt;</code> if there is no additional data in the response packet. If there is additional data in the response packet, then the response packet will consist of the one or two letter command, followed by a comma, then any response data, then <code>&lt;NL&gt;</code>. 
                   </p>
                   <p>
                     For example, when future syntax mode is turned on, the response to the <code>QR</code> command might be <code>QR,1&lt;NL&gt;</code>. For comparison, the response to the <code>QR</code> when it is off (in legacy syntax mode) would be <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
@@ -690,10 +680,23 @@
                     </li>
                   </ul>
                   <p>
-                    Turning on checksums for commands allows the EBB to check that all of the command bytes made it successfully across USB to the EBB. USB has it's own checksums/CRCs and so guarantees properly data delivery at a lower level, but these application level checksums provide a way for the PC to know that the full command string that it created was properly received by the EBB. If checksums have been turned on, and no checksum is provided or an incorrect checksum is provided, the EBB will return an error message and the command will be ignored.
+                    Turning on checksums for commands allows the EBB to check that all of the command bytes made it successfully across USB to the EBB. USB has it's own checksums/CRCs and so guarantees proper data delivery at a lower level, but these application level checksums provide a way for the PC to know that the full command string that it created was properly received by the EBB. If checksums have been turned on, and no checksum is provided, an error message will be sent back to the PC and the command will not be executed. If checksums have been turned on and an incorrect checksum is provided, the EBB will return an error message back to the PC which will include the expected checksum and the command will not be executed.
                   </p>
                   <p>
-                    
+                    To add a checksum to a command, simply add a comma and a one to three digit decimal number (from 0 to 255) at the very end of the command. The checksum should be 0x100 - (sum of all command bytes up to but not including the comma preceding the checksum). This is commonly referred to as the '8-bit checksum 2s compliment'.
+                  </p>
+                  <p>
+                    Enabling checksums does add a small bit of additional processing time to each command, which reduces the maximum number of commands per second that the EBB can accept.
+                  </p>
+                  <p>
+                    The website <a href="https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/">https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/</a> can be used to compute checksums for a command. Take the desired command, paste it into the ASCII Input field, click AnalyzeDataAscii and then look at the CheckSum8 2s Complement field. Take that value (which is in hex) and convert it to decimal to use as the checksum for your command.
+                  </p>
+
+                  <p>
+                    <span style="font-weight: bold;">Example 1:</span> If you want to send the command <code>SM,1000,1000,1000</code> with a checksum, you would send <code>SM,1000,1000,1000,153</code>. The 153 on the end is the checksum of all of the bytes up to but not including the comma before the checksum.
+                  </p>
+                  <p>
+                    <span style="font-weight: bold;">Example 2:</span> If you want to send the command <code>CU,54,0</code> (to turn off checksums) with a checksum but you don't know what the checksum should be, you could send an invalid checksum like <code>CU,54,0,0</code>. This will result in the response <code>!8 Err: Checksum incorrect, expected 119</code>. So you would know that the proper checksum value for this command is 119 and could send <code>CU,4,0,119</code>.
                   </p>
                 </li>
                 <li>
