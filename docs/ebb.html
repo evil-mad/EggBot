@@ -709,23 +709,36 @@
                   </p>
                 </li>
                 <li>
+                  <code>Param_Number</code> = 61 : <b>Set new Stepper Disable Timeout value</b>
+                  <p>
+                    This command will set the <code>Stepper_Disable_Timeout</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 65534 and is in units of seconds. At boot the <code>Stepper_Disable_Timeout</code> is zero, which disables this feature. Any time <code>Stepper_Disable_Timeout</code> is not zero the feature is enabled.
+                  </p>
+                  <p>
+                    When enabled, this feature will count down <code>Stepper_Disable_Timeout</code> seconds after the last motion command. When the count reaches zero, it will disable the two stepper motor drivers. This makes the stepper motors freewheel as well as reduces the current draw of the EBB significantly. If a new <code>Stepper_Disable_Timeout</code> value is set while the countdown is already ongoing, the countdown will begin again using the new value. If a new motion command is executed while counting down, the countdown will be stopped and will start back at <code>Stepper_Disable_Timeout</code> when all motion commands are complete.
+                  </p>
+                </li>
+                <li>
                   <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 251 : <b>Enable USART ISR Debug</b>
+                  <code>Param_Number</code> = 251 : <b>Enable debug USART end of move values</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 252 : <b>Enable USART ISR Debug Full</b>
+                  <code>Param_Number</code> = 252 : <b>Enable debug USART all move values</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 253 : <b>Enable UART Command Debug</b>
+                  <code>Param_Number</code> = 253 : <b>Enable debug UART command echo</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
                   <code>Param_Number</code> = 254 : <b>Enable Lock Up Mode</b>
+                  <p>This is an internal software debugging and testing command.</p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 255 : <b>Enable command parsing USB debug</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
               </ul>
