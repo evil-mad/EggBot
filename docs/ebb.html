@@ -612,7 +612,7 @@
                 <li>
                   <code>Param_Number</code> = 50 : <b>Auto Enable Motors</b>
                   <p>
-                    The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you do turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
+                    The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you to turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
                   </p>
                   <ul>
                     <li>
@@ -629,7 +629,7 @@
                     If the Limit Switch Mask is nonzero, the PortB pin states will be checked every 40 &mu;s. For any bit in the mask which is set, if that pin's state matches the corresponding bit state in the Limit Switch Target, then a Limit Switch Stop will be executed immediately.
                   </p>
                   <p>
-                    A Limit Switch Stop terminates any currently executing motion command and deletes any motion command in the motion FIFO. Further, new stepper motion commands will be ignored until the condition is cleared. To clear the Limit Switch Stop condition, set the Limit Switch Mask value to zero with <code>CU,51,0</code>. The Limit Switch Stop condition can also be cleared by executing any <a href="#EM">EM</a> command or by resetting (e.g., rebooting) the EBB.
+                    A Limit Switch Stop terminates any currently executing motion command and deletes any motion command in the motion FIFO. New stepper motion commands will be ignored until the condition is cleared. To clear the Limit Switch Stop condition, set the Limit Switch Mask value to zero with <code>CU,51,0</code>. The Limit Switch Stop condition can also be cleared by executing any <a href="#EM">EM</a> command or by resetting (e.g., rebooting) the EBB.
                   </p>
                   <p>
                     If Limit Switch Replies are enabled (<code>CU,53,1</code>) then a Limit Switch Stop will also cause the sending of a packet from the EBB. (See the Limit Switch Replies setting below.)
