@@ -3068,7 +3068,7 @@ static void process_simple_motor_move(
 
 // E-Stop
 // Usage: ES,<disable_motors><CR>
-// Returns: <command_interrupted>,<fifo_steps1>,<fifo_steps2>,<steps_remaining1>,<steps_remaining2><CR>OK<CR>
+// Returns: <command_interrupted><CR>OK<CR>
 // This command will abort any in-progress motor move command.
 // It will also clear out any pending command(s) in the FIFO.
 // <disable_motors> This parameter is optional. If present, and if it is a 1,
@@ -3077,22 +3077,11 @@ static void process_simple_motor_move(
 //                  the motors will not be disabled. (added in v2.8.0)
 // <command_interrupted> = 0 if no FIFO or in-progress move commands were interrupted,
 //                         1 if a motor move command was in progress or in the FIFO
-// <fifo_steps1> and <fifo_steps1> = 24 bit unsigned integers with the number of steps
-//                         in any SM command sitting in the FIFO for axis1 and axis2.
-// <steps_remaining1> and <steps_remaining2> = 24 bit unsigned integers with the number of
-//                         steps left in the currently executing SM command (if any) for
-//                         axis1 and axis2.
-// It will return 0,0,0,0,0 if no SM command was executing at the time, and no SM
-// command was in the FIFO.
 void parse_ES_packet(void)
 {
   UINT8 disable_motors = 0;
   UINT8 command_interrupted = 0;
   UINT8 i;
-  UINT32 remaining_steps1 = 0;
-  UINT32 remaining_steps2 = 0;
-  UINT32 fifo_steps1 = 0;
-  UINT32 fifo_steps2 = 0;
 
   print_command(FALSE, TRUE);
 
@@ -3110,26 +3099,23 @@ void parse_ES_packet(void)
 
   if 
   (
-    FIFOPtr[0].Command == COMMAND_SM_XM_HM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE_BIT
     ||
-    FIFOPtr[0].Command == COMMAND_LM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LM_MOVE_BIT
     ||
-    FIFOPtr[0].Command == COMMAND_LT_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LT_MOVE_BIT
   )
   {
     command_interrupted = 1;
-    fifo_steps1 = FIFOPtr[0].Steps[0];
-    fifo_steps2 = FIFOPtr[0].Steps[1];
+  }
+  
+  if (gFIFOLength != 0)
+  {
+    command_interrupted = 1;
   }
 
   // Clear the currently executing motion command
   CurrentCommand.Command = COMMAND_NONE_BIT;
-  remaining_steps1 = CurrentCommand.Steps[0];
-  remaining_steps2 = CurrentCommand.Steps[1];
-  CurrentCommand.Steps[0] = 0;
-  CurrentCommand.Steps[1] = 0;
-  CurrentCommand.Accel[0] = 0;
-  CurrentCommand.Accel[1] = 0;
 
   // Clear out the entire FIFO
   for (i = 0; i < COMMAND_FIFO_MAX_LENGTH; i++)
@@ -3157,12 +3143,8 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
-  printf((far rom char *)"%d,%lu,%lu,%lu,%lu", 
-    command_interrupted,
-    fifo_steps1,
-    fifo_steps2,
-    remaining_steps1,
-    remaining_steps2
+  printf((far rom char *)"%d", 
+    command_interrupted
   );
   if (!bittstzero(gStandardizedCommandFormat))
   {
