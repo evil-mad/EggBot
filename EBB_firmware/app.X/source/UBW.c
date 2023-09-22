@@ -143,10 +143,15 @@ unsigned char A_cur_channel;
 unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
-volatile UINT16 g_PowerMonitorThresholdADC;    // 0-1023 ADC counts, below which
-volatile BOOL g_PowerDropDetected;             // True if power drops below PowerMonitorThreshold
+volatile UINT16 g_PowerMonitorThresholdADC;     // 0-1023 ADC counts, below which
+volatile BOOL g_PowerDropDetected;              // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a16"};
+volatile tStepperDisableTimeout g_StepperDisableState;  // Stores state of stepper timeout disable feature
+volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before motors are disabled
+volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
+volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
+
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a17"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -325,7 +330,6 @@ void low_ISR(void)
         // we add (or subtract) gRC2Rate[] to try and get there.
         if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
-//LATAbits.LATA5 = 1;
           // If the rate is zero, then we always move instantly
           // to the target.
           if (gRC2Rate[gRC2Ptr] == 0u)
@@ -381,7 +385,6 @@ void low_ISR(void)
         INTCONbits.GIEH = 1;
       }
     }
-//LATAbits.LATA5 = 0;
 
     // See if it's time to fire off an I packet
     if (ISR_D_RepeatRate > 0u)
@@ -540,6 +543,47 @@ void low_ISR(void)
         RCServoPowerIO = RCSERVO_POWER_OFF;
       }
     }
+    
+    // Check for stepper motor disable timeout if enabled
+    if (g_StepperDisableState == kSTEPPER_TIMEOUT_TIMING)
+    {
+      // Count the milliseconds until we get to 1 second
+      if (g_StepperDisableSecondCounter)
+      {
+        g_StepperDisableSecondCounter--;
+        
+        if (g_StepperDisableSecondCounter == 0u)
+        {
+          // Then count down the seconds
+          if (g_StepperDisableCountdownS)
+          {
+            g_StepperDisableCountdownS--;
+
+            if (g_StepperDisableCountdownS == 0u)
+            {
+              // If the countdown gets to zero, then it's time to disable 
+              // the steppers.
+              if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+              {
+                Enable1IO = DISABLE_MOTOR;
+                Enable2IO = DISABLE_MOTOR;
+              }
+              else
+              {
+                Enable1AltIO = DISABLE_MOTOR;
+                Enable2AltIO = DISABLE_MOTOR;
+              }
+              g_StepperDisableState = kSTEPPER_TIMEOUT_FIRED;
+            }
+            else
+            {
+              // Only count the next second if there are still seconds to count
+              g_StepperDisableSecondCounter = 1000u;
+            }
+          }
+        }
+      }
+    }
 
     // Read out the current value of FSR1 (stack pointer)
     // If the new value is higher than gStackHighWater, then update gStackHighWater
@@ -551,7 +595,6 @@ void low_ISR(void)
     tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
     if (tempStackPointer > gStackHighWater)
     {
-LATAbits.LATA5 = 1;
       gStackHighWater = tempStackPointer;
     }
   } // end of 1ms interrupt
@@ -656,7 +699,6 @@ LATAbits.LATA5 = 1;
       g_RC_state[g_RC_timing_ptr] = kWAITING;
     }
   }
-LATAbits.LATA5 = 0;
 }
 
 void UserInit(void)
@@ -683,26 +725,6 @@ void UserInit(void)
   mInitAllLEDs();
   // Initialize switch as an input
   mInitSwitch();
-
-  //// JUST FOR TESTING! REMOVE!  
-TRISDbits.TRISD1 = 0;   // D1 high when in ISR
-TRISDbits.TRISD0 = 0;   // D0 high when loading next command
-TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-TRISCbits.TRISC0 = 0;
-TRISAbits.TRISA5 = 0;
-
-
-Open1USART(
-  USART_TX_INT_OFF &
-  USART_RX_INT_OFF &
-  USART_ASYNCH_MODE &
-  USART_EIGHT_BIT &
-  USART_CONT_RX &
-  USART_BRGH_HIGH &
-  USART_ADDEN_OFF,
-  2                   // At 48 MHz, this creates 1 Mbaud output
-);
-////
 
   // Start off always using "OK" acknowledge.
   g_ack_enable = TRUE;
@@ -854,6 +876,10 @@ Open1USART(
   gAutomaticMotorEnable = TRUE;
   gStackHighWater = 0;
   g_PowerMonitorThresholdADC = 0;
+  g_StepperDisableTimeoutS = 0;
+  g_StepperDisableSecondCounter = 0;
+  g_StepperDisableCountdownS = 0;
+  g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
   g_PowerDropDetected = FALSE;
 
 }
@@ -1792,6 +1818,7 @@ void parse_R_packet(void)
 // 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
 // 54  {1|0} turns on/off command checksum (defaults to off)
 // 60  <NewThreshood> Set the power lost threshold. Set to 0 to disable.
+// 61  <NewStepperDisableTimeoutS> Sets the stepper timeout in seconds. 0 to disable.
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
@@ -1942,6 +1969,47 @@ void parse_CU_packet(void)
   else if (60u == parameter_number)
   {
     g_PowerMonitorThresholdADC = (paramater_value & 0x03FF);
+  }
+  // CU,61,<NewStepperDisableTimeoutThreshold>
+  else if (61u == parameter_number)
+  {
+    INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+    INTCONbits.GIEL = 0;    // Turn low priority interrupts off
+    
+    g_StepperDisableTimeoutS = paramater_value;
+    
+    if (g_StepperDisableTimeoutS == 0u)
+    {
+      // Turn feature completely off no matter what state we're in
+      g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
+      g_StepperDisableSecondCounter = 0;
+      g_StepperDisableCountdownS = 0;
+    }
+    else
+    {
+      // User wants feature enabled with new timeout. Do different things
+      // based on current state.
+      switch (g_StepperDisableState)
+      {
+        case kSTEPPER_TIMEOUT_TIMING:
+          // Always start over with new timeout value
+          g_StepperDisableCountdownS = g_StepperDisableTimeoutS;
+          g_StepperDisableSecondCounter = 1000u;
+          break;
+
+        default:
+        case kSTEPPER_TIMEOUT_PRIMED:
+        case kSTEPPER_TIMEOUT_DISABLED:
+          g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
+          // Note intentional fall-through
+        case kSTEPPER_TIMEOUT_FIRED:
+          g_StepperDisableSecondCounter = 0;
+          g_StepperDisableCountdownS = 0;
+          break;
+      }
+    }
+    INTCONbits.GIEL = 1;    // Turn low priority interrupts on
+    INTCONbits.GIEH = 1;    // Turn high priority interrupts on
   }
   // CU,250,1 or CU,250,0 to turn on/off GPIO ISR timing debug
   else if (250u == parameter_number)
@@ -2127,6 +2195,7 @@ void parse_CU_packet(void)
 // 4   QU,4,XXX prints out stack high water value (as 3 digit hex value)
 // 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
 // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
+// 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2183,12 +2252,21 @@ void parse_QU_packet(void)
     gStackHighWater = 0;
     INTCONbits.GIEL = 1;  // Turn low priority interrupts on
   }  
-  // CU,60 prints out current stack high water value and resets it to zero
+  // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
   else if (60u == parameter_number)
   {
     printf (
       (far rom char *)"60,%d" 
       ,g_PowerMonitorThresholdADC
+    );
+    print_line_ending(kLE_NORM);
+  }
+  // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
+  else if (61u == parameter_number)
+  {
+    printf (
+      (far rom char *)"61,%d" 
+      ,g_StepperDisableTimeoutS
     );
     print_line_ending(kLE_NORM);
   }

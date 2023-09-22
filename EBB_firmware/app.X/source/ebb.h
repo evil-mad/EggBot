@@ -119,6 +119,13 @@ typedef enum
 #define COMMAND_LM_MOVE_BIT               (1u << COMMAND_LM_MOVE_BIT_NUM)
 #define COMMAND_LT_MOVE_BIT               (1u << COMMAND_LT_MOVE_BIT_NUM)
 
+typedef enum
+{
+  PIC_CONTROLS_DRIVERS = 0,
+  PIC_CONTROLS_EXTERNAL,
+  EXTERNAL_CONTROLS_DRIVERS
+} DriverConfigurationType;
+
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
   struct byte_map {
@@ -299,7 +306,7 @@ extern volatile near UINT8 gLimitSwitchTarget;
 extern volatile near UINT8 gLimitSwitchTriggered;
 extern UINT8 gStandardizedCommandFormat;
 extern volatile near UINT8 gCurrentFIFOLength;
-
+extern near DriverConfigurationType DriverConfiguration;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;

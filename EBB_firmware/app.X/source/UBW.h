@@ -133,6 +133,15 @@ typedef enum {
    ,kLE_REV
 } tLineEnding;
 
+// States for the Stepper Disable Timeout feature
+typedef enum {
+    kSTEPPER_TIMEOUT_DISABLED   // Feature is not active and steppers won't disable
+   ,kSTEPPER_TIMEOUT_PRIMED     // Feature active, motion is happening, waiting for motion stopped
+   ,kSTEPPER_TIMEOUT_TIMING     // Counting down the seconds until time to disable steppers
+   ,kSTEPPER_TIMEOUT_FIRED      // Timeout happened, steppers disabled
+} tStepperDisableTimeout;
+
+
 #define kRC_DATA_SIZE                 24u  // In structs, since there are 3 ports of 8 bits each
 
 extern unsigned char g_RX_buf[kRX_BUF_SIZE];
@@ -157,6 +166,11 @@ extern UINT8 gLimitSwitchReplyPrinted;
 
 extern volatile UINT16 g_PowerMonitorThresholdADC;
 extern volatile BOOL g_PowerDropDetected;
+
+extern volatile UINT16 g_StepperDisableTimeoutS;
+extern volatile UINT16 g_StepperDisableSecondCounter;
+extern volatile UINT16 g_StepperDisableCountdownS;
+extern volatile tStepperDisableTimeout g_StepperDisableState;  // Stores state of stepper timeout disable feature
 
 
 /** P U B L I C  P R O T O T Y P E S *****************************************/

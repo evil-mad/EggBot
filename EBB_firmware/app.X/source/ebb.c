@@ -316,13 +316,6 @@ static void process_simple_motor_move(
   UINT8 ClearAccs
 );
 
-typedef enum
-{
-  PIC_CONTROLS_DRIVERS = 0,
-  PIC_CONTROLS_EXTERNAL,
-  EXTERNAL_CONTROLS_DRIVERS
-} DriverConfigurationType;
-
 // This is the FIFO that stores the motion commands. It spans multiple RAM
 // banks from 0x800 through 0xCFF, and must only be accessed via pointer
 #pragma udata FIFO_scn
@@ -339,7 +332,7 @@ static near UINT8 AllDone;        // LSb set if this command is complete
 static near UINT8 isr_i;
 static near UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
 
-static near DriverConfigurationType DriverConfiguration;
+near DriverConfigurationType DriverConfiguration;
 // LSb set to enable RC Servo output for pen up/down
 static near UINT8 gUseRCPenServo;
 // LSb set to enable red LED lit when FIFO is empty
@@ -843,9 +836,6 @@ NonStepperCommands:
   // Now check for all the other (non-stepper based) motion FIFO commands
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT_NUM))
   {
-    LATCbits.LATC0 = 1;
-    
-    
     // Check to see if we should change the state of the pen
     if (bittstzero(gUseRCPenServo))
     {
@@ -905,7 +895,6 @@ NonStepperCommands:
         }
       }
     }
-    LATCbits.LATC0 = 0;
   }
 
   if (CurrentCommand.Command & (COMMAND_SERVO_MOVE_BIT | COMMAND_DELAY_BIT))
@@ -1157,6 +1146,12 @@ CheckForNextCommand:
       {
         mLED_2_Off()
       }
+
+      // If enabled, move stepper disable state to primed
+      if (g_StepperDisableState != kSTEPPER_TIMEOUT_DISABLED)
+      {
+        g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
+      }
       
 //      FIFO_COPY();
 
@@ -1326,6 +1321,16 @@ CheckForNextCommand:
     }
     else 
     {
+      // Current command is done, and the FIFO is completely empty.
+      
+      // Start up stepper motor disable timeout (if enabled)
+      if (g_StepperDisableState == kSTEPPER_TIMEOUT_PRIMED)
+      {
+        g_StepperDisableSecondCounter = 1000u;
+        g_StepperDisableCountdownS = g_StepperDisableTimeoutS;
+        g_StepperDisableState = kSTEPPER_TIMEOUT_TIMING;
+      }
+
       CurrentCommand.DelayCounter = 0;
 
       if (bittstzero(gRedLEDEmptyFIFO))
