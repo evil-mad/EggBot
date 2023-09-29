@@ -64,7 +64,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -132,6 +132,7 @@
         <property key="extra-lib-directories" value=""/>
         <property key="hex-output-format" value="INHX32"/>
         <property key="map-file" value="&quot;${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map&quot;"/>
+        <appendMe value="-p18f46j50"/>
       </C18-LD>
       <C18LanguageToolchain>
         <property key="extended-mode" value="false"/>
@@ -203,13 +204,13 @@
         <targetDevice>PIC18F45J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool></platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.2.31"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -348,13 +349,13 @@
         <targetDevice>PIC18F46J50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>snap</platformTool>
+        <platformTool>noID</platformTool>
         <languageToolchain>C18</languageToolchain>
         <languageToolchainVersion>3.47</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.2.31"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -497,9 +498,14 @@
         <property key="communication.interface" value=""/>
         <property key="communication.interface.jtag" value="2wire"/>
         <property key="communication.speed" value="${communication.speed.default}"/>
+        <property key="debugoptions.debug-startup" value="Use system settings"/>
+        <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.simultaneous.debug" value="false"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
         <property key="freeze.timers" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>

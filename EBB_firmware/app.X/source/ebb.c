@@ -298,6 +298,10 @@
 
 #define MAX_RC_DURATION         11890
 
+// The number of individual addressable unsigned bytes that are available
+// in the SL and QL commands.
+#define SL_STORAGE_SIZE         32u
+
 typedef enum
 {
   SOLENOID_OFF = 0,
@@ -311,13 +315,6 @@ static void process_simple_motor_move(
   INT32 A2Stp,
   UINT8 ClearAccs
 );
-
-typedef enum
-{
-  PIC_CONTROLS_DRIVERS = 0,
-  PIC_CONTROLS_EXTERNAL,
-  EXTERNAL_CONTROLS_DRIVERS
-} DriverConfigurationType;
 
 // This is the FIFO that stores the motion commands. It spans multiple RAM
 // banks from 0x800 through 0xCFF, and must only be accessed via pointer
@@ -335,7 +332,7 @@ static near UINT8 AllDone;        // LSb set if this command is complete
 static near UINT8 isr_i;
 static near UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is not done stepping
 
-static near DriverConfigurationType DriverConfiguration;
+near DriverConfigurationType DriverConfiguration;
 // LSb set to enable RC Servo output for pen up/down
 static near UINT8 gUseRCPenServo;
 // LSb set to enable red LED lit when FIFO is empty
@@ -415,7 +412,7 @@ static unsigned int SolenoidDelay;
 static PenStateType PenState;
 
 static unsigned long NodeCount;
-static char Layer;
+static UINT8   gSL_Storage[32];
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
 // Set TRUE to enable solenoid output for pen up/down
@@ -429,7 +426,6 @@ UINT8 gStandardizedCommandFormat;
 
 
 // Local function definitions
-UINT8 process_QM(void);
 void clear_StepCounters(void);
 
 static void process_low_level_move(
@@ -840,9 +836,6 @@ NonStepperCommands:
   // Now check for all the other (non-stepper based) motion FIFO commands
   if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT_NUM))
   {
-    LATCbits.LATC0 = 1;
-    
-    
     // Check to see if we should change the state of the pen
     if (bittstzero(gUseRCPenServo))
     {
@@ -902,7 +895,6 @@ NonStepperCommands:
         }
       }
     }
-    LATCbits.LATC0 = 0;
   }
 
   if (CurrentCommand.Command & (COMMAND_SERVO_MOVE_BIT | COMMAND_DELAY_BIT))
@@ -1045,7 +1037,7 @@ NonStepperCommands:
     acc_union[1].value = 0;
 
     // All EM command clear the limit switch trigger
-    gLimitSwitchTriggered = FALSE;
+    bitclrzero(gLimitSwitchTriggered);
 
     // This is probably unnecessary, but it's critical to be sure to indicate that the current command is finished
     bitsetzero(AllDone);
@@ -1153,6 +1145,12 @@ CheckForNextCommand:
       if (bittstzero(gRedLEDEmptyFIFO))
       {
         mLED_2_Off()
+      }
+
+      // If enabled, move stepper disable state to primed
+      if (g_StepperDisableState != kSTEPPER_TIMEOUT_DISABLED)
+      {
+        g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
       }
       
 //      FIFO_COPY();
@@ -1323,6 +1321,16 @@ CheckForNextCommand:
     }
     else 
     {
+      // Current command is done, and the FIFO is completely empty.
+      
+      // Start up stepper motor disable timeout (if enabled)
+      if (g_StepperDisableState == kSTEPPER_TIMEOUT_PRIMED)
+      {
+        g_StepperDisableSecondCounter = 1000u;
+        g_StepperDisableCountdownS = g_StepperDisableTimeoutS;
+        g_StepperDisableState = kSTEPPER_TIMEOUT_TIMING;
+      }
+
       CurrentCommand.DelayCounter = 0;
 
       if (bittstzero(gRedLEDEmptyFIFO))
@@ -1383,7 +1391,7 @@ CheckForNextCommand:
 // Init code
 void EBB_Init(void)
 {
-  BYTE i;
+  UINT8 i;
 
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
@@ -1436,9 +1444,9 @@ void EBB_Init(void)
   IPR1bits.ADIP = 0;
 
   // Turn on AN0 (RA0) as analog input
-  AnalogConfigure(0,1);
+  AnalogConfigure(RA0_CUR_ADJ_ADC_CHANNEL,1);
   // Turn on AN11 (V+) as analog input
-  AnalogConfigure(11,1);
+  AnalogConfigure(RA11_VPLUS_POWER_ADC_CHANNEL,1);
 
   MS1_IO = 1;
   MS1_IO_TRIS = OUTPUT_PIN;
@@ -1506,7 +1514,10 @@ void EBB_Init(void)
   SolenoidState = SOLENOID_ON;
   DriverConfiguration = PIC_CONTROLS_DRIVERS;
   PenState = PEN_UP;
-  Layer = 0;
+  for (i=0; i < SL_STORAGE_SIZE; i++)
+  {
+    gSL_Storage[i] = 0;
+  }
   NodeCount = 0;
   ButtonPushed = 0;
   gStandardizedCommandFormat = 0;
@@ -1538,7 +1549,7 @@ void EBB_Init(void)
   PortBTemp = 0;
   gLimitSwitchMask = 0;
   gLimitSwitchTarget = 0;
-  gLimitSwitchTriggered = 0;
+  bitclrzero(gLimitSwitchTriggered);
 
   // Clear out global stepper positions
   clear_StepCounters();
@@ -2324,7 +2335,7 @@ void process_low_level_move(
     gFIFOLength++;
   }
 
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     // Print the final values used by the ISR for this move
     printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld",
@@ -2660,7 +2671,7 @@ void parse_HM_packet(void)
     Duration = 10;
   }
 
-  if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li",
       Duration,
@@ -2835,7 +2846,7 @@ static void process_simple_motor_move(
   {
     return;
   }
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     printf((far rom char *)"Duration=%lu SA1=%li SA2=%li",
       Duration,
@@ -2903,7 +2914,7 @@ static void process_simple_motor_move(
     // If A1Stp is 1, then duration must be 763 or less.
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
       // First check for duration to large.
       if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
@@ -3023,7 +3034,7 @@ static void process_simple_motor_move(
     gMoveTemp.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 
-    if(bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
       printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu",
         gMoveTemp.Rate[0],
@@ -3057,7 +3068,7 @@ static void process_simple_motor_move(
 
 // E-Stop
 // Usage: ES,<disable_motors><CR>
-// Returns: <command_interrupted>,<fifo_steps1>,<fifo_steps2>,<steps_remaining1>,<steps_remaining2><CR>OK<CR>
+// Returns: <command_interrupted><CR>OK<CR>
 // This command will abort any in-progress motor move command.
 // It will also clear out any pending command(s) in the FIFO.
 // <disable_motors> This parameter is optional. If present, and if it is a 1,
@@ -3066,22 +3077,11 @@ static void process_simple_motor_move(
 //                  the motors will not be disabled. (added in v2.8.0)
 // <command_interrupted> = 0 if no FIFO or in-progress move commands were interrupted,
 //                         1 if a motor move command was in progress or in the FIFO
-// <fifo_steps1> and <fifo_steps1> = 24 bit unsigned integers with the number of steps
-//                         in any SM command sitting in the FIFO for axis1 and axis2.
-// <steps_remaining1> and <steps_remaining2> = 24 bit unsigned integers with the number of
-//                         steps left in the currently executing SM command (if any) for
-//                         axis1 and axis2.
-// It will return 0,0,0,0,0 if no SM command was executing at the time, and no SM
-// command was in the FIFO.
 void parse_ES_packet(void)
 {
   UINT8 disable_motors = 0;
   UINT8 command_interrupted = 0;
   UINT8 i;
-  UINT32 remaining_steps1 = 0;
-  UINT32 remaining_steps2 = 0;
-  UINT32 fifo_steps1 = 0;
-  UINT32 fifo_steps2 = 0;
 
   print_command(FALSE, TRUE);
 
@@ -3099,26 +3099,23 @@ void parse_ES_packet(void)
 
   if 
   (
-    FIFOPtr[0].Command == COMMAND_SM_XM_HM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE_BIT
     ||
-    FIFOPtr[0].Command == COMMAND_LM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LM_MOVE_BIT
     ||
-    FIFOPtr[0].Command == COMMAND_LT_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LT_MOVE_BIT
   )
   {
     command_interrupted = 1;
-    fifo_steps1 = FIFOPtr[0].Steps[0];
-    fifo_steps2 = FIFOPtr[0].Steps[1];
+  }
+  
+  if (gFIFOLength != 0u)
+  {
+    command_interrupted = 1;
   }
 
   // Clear the currently executing motion command
   CurrentCommand.Command = COMMAND_NONE_BIT;
-  remaining_steps1 = CurrentCommand.Steps[0];
-  remaining_steps2 = CurrentCommand.Steps[1];
-  CurrentCommand.Steps[0] = 0;
-  CurrentCommand.Steps[1] = 0;
-  CurrentCommand.Accel[0] = 0;
-  CurrentCommand.Accel[1] = 0;
 
   // Clear out the entire FIFO
   for (i = 0; i < COMMAND_FIFO_MAX_LENGTH; i++)
@@ -3146,12 +3143,8 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
-  printf((far rom char *)"%d,%lu,%lu,%lu,%lu", 
-    command_interrupted,
-    fifo_steps1,
-    fifo_steps2,
-    remaining_steps1,
-    remaining_steps2
+  printf((far rom char *)"%d", 
+    command_interrupted
   );
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -3510,13 +3503,22 @@ void parse_QN_packet(void)
 }
 
 // Set Layer
-// Usage: SL,<NewLayer><CR>
+// Usage: SL,<Value>[,<Index>]<CR>
+// Where <Value> is an unsigned 8-bit decimal number and
+// <Index> is an optional parameter from 0 to 31. If not present then 
+// <index> is assumed to be 0.
+// Store <Value> in <Index> (variable space) in RAM
+// Retrieve the values using the QL command
 void parse_SL_packet(void)
 {
+  UINT8 Value = 0;
+  UINT8 Index = 0;
+  
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kUCHAR, &Layer, kREQUIRED);
+  extract_number(kUCHAR, &Value, kREQUIRED);
+  extract_number(kUCHAR, &Index, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -3524,23 +3526,46 @@ void parse_SL_packet(void)
     return;
   }
 
+  if (Index > (SL_STORAGE_SIZE - 1))
+  {
+    Index = (SL_STORAGE_SIZE - 1);
+  }
+  gSL_Storage[Index] = Value;
+  
   print_line_ending(kLE_OK_NORM);
 }
 
 // Query Layer
-// Usage: QL<CR>
-// Returns: <Layer><CR>
-// OK<CR>
+// Usage: QL[,<Index>]<CR>
+// Returns: QL,<ValueAtIndex><CR>
+// Where <Index> is an optional parameter from 0 to 31
+// If not present, <Index> is set to 0
+// The <ValueAtIndex> is an unsigned byte which was previously stored at <Index>
 void parse_QL_packet(void)
 {
+  UINT8 Value = 0;
+  UINT8 Index = 0;
+  
   print_command(FALSE, TRUE);
 
-  printf((far rom char*)"%03i", Layer);
+  extract_number(kUCHAR, &Index, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (Index > (SL_STORAGE_SIZE - 1))
+  {
+    Index = (SL_STORAGE_SIZE - 1);
+  }
+  
+  printf((far rom char*)"%03i", gSL_Storage[Index]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
   }
-
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -3548,7 +3573,7 @@ void parse_QL_packet(void)
 // Usage: QB<CR>
 // Returns: <HasButtonBeenPushedSinceLastQB><CR> (0 or 1)
 // OK<CR>
-void parse_QB_packet(void)
+void  parse_QB_packet(void)
 {
   print_command(FALSE, TRUE);
 
@@ -3603,7 +3628,7 @@ void parse_QC_packet(void)
 // Bit 3 : CommandExecuting (0 = no command currently executing, 1 = a command is currently executing)
 // Bit 4 : Pen status (0 = up, 1 = down)
 // Bit 5 : PRG button status (0 = not pressed since last query, 1 = pressed since last query)
-// Bit 6 : GPIO Pin RB2 state (0 = low, 1 = high)
+// Bit 6 : Power Lost (1 = V+ went below g_PowerMonitorThresholdADC, 0 = it did not)
 // Bit 7 : gLimitSwitchTriggered
 // Just like the QB command, the PRG button status is cleared (after being printed) if pressed since last QB/QG command
 void parse_QG_packet(void)
@@ -3623,11 +3648,12 @@ void parse_QG_packet(void)
   {
     result = result | (1 << 5);
   }
-  if (PORTBbits.RB2)
+  if (g_PowerDropDetected)
   {
     result = result | (1 << 6);
+    g_PowerDropDetected = FALSE;
   }
-  if (gLimitSwitchTriggered)
+  if (bittstzero(gLimitSwitchTriggered))
   {
     result = result | (1 << 7);
   }
@@ -3768,12 +3794,6 @@ void parse_SE_packet(void)
   }
 
   print_line_ending(kLE_OK_NORM);
-}
-
-// RM command
-// For Run Motor - allows completely independent running of the two stepper motors
-void parse_RM_packet(void)
-{
 }
 
 // Do the work of the QM command so we can use this same code for QM and

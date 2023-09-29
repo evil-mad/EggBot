@@ -158,6 +158,8 @@ void Remapped_Low_ISR (void)
  *****************************************************************************/
 void main(void)
 {
+  fill_stack();
+  
   InitializeSystem();
 
   while(1)
@@ -169,7 +171,7 @@ void main(void)
     }
 #endif
 #if defined(USB_POLLING)
-  print_stack(2);
+  print_high_water(2);
     // Check bus status and service USB interrupts.
     USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
                       // this function periodically.  This function will take care
@@ -184,11 +186,11 @@ void main(void)
                       // USBDeviceTasks() function does not take very long to
                       // execute (~50 instruction cycles) before it returns.
 #endif
-  print_stack(3);
+  print_high_water(3);
     // Application-specific tasks.
     // Application related code may be added here, or in the ProcessIO() function.
     ProcessIO();
-  print_stack(4);  
+  print_high_water(4);  
   }
 }
 
@@ -214,19 +216,6 @@ void main(void)
  *****************************************************************************/
 static void InitializeSystem(void)
 {
-#if defined(BOARD_EBB_V10)
-  unsigned int pll_startup_counter = 600;
-  OSCTUNEbits.PLLEN = 1;    // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
-  while(pll_startup_counter--);
-
-  // Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
-  // use the ANCONx registers to control this, which is different from other devices which
-  // use the ADCON1 register for this purpose.
-  WDTCONbits.ADSHR = 1;     // Select alternate SFR location to access ANCONx registers
-  ANCON0 = 0xFF;            // Default all pins to digital
-  ANCON1 = 0xFF;            // Default all pins to digital
-  WDTCONbits.ADSHR = 0;     // Select normal SFR locations
-#elif defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   unsigned int pll_startup_counter; //Used for software delay while PLL is starting up
 
   // Configure all I/O pins to use digital input buffers.  The PIC18F87J50 Family devices
@@ -244,22 +233,12 @@ static void InitializeSystem(void)
   // advantageous when powered from a source which is not guaranteed to be adequate for 48MHz
   // operation.  On these devices, user firmware needs to manually set the OSCTUNE<PLLEN> bit to
   // power up the PLL.
-  #if defined(__18F24J50)||defined(__18F25J50) || \
-      defined(__18F26J50)||defined(__18F44J50) || \
-      defined(__18F45J50)||defined(__18F46J50) 
 
   OSCTUNEbits.PLLEN = 1;  // Enable the PLL and wait 2+ms until the PLL locks before enabling USB module
   pll_startup_counter = 600;
   while(pll_startup_counter--)
     ;
   // Device switches over automatically to PLL output after PLL is locked and ready.
-  #else
-    #error Double Click this message.  Please make sure the InitializeSystem() function correctly configures your hardware platform.  
-    // Also make sure the correct board is selected in usbcfg.h.  If 
-    // everything is correct, comment out the above "#error ..." line
-    // to suppress the error message.
-  #endif
-#endif
 
   //  The USB specifications require that USB peripheral devices must never source
   //  current onto the Vbus pin.  Additionally, USB peripherals should not source
@@ -302,7 +281,7 @@ static void InitializeSystem(void)
   USBDeviceInit();  // usb_device.c.  Initializes USB module SFRs and firmware
                     // variables to known states.
   
-  print_stack(1);
+  print_high_water(1);
 }
 
 // ******************************************************************************************************

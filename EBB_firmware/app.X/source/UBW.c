@@ -91,9 +91,7 @@
 #include "HardwareProfile.h"
 #include "UBW.h"
 #include "ebb.h"
-#if defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
-  #include "RCServo2.h"
-#endif
+#include "RCServo2.h"
 
 /** D E F I N E S ********************************************************/
 
@@ -145,8 +143,15 @@ unsigned char A_cur_channel;
 unsigned char AnalogInitiate;
 volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
+volatile UINT16 g_PowerMonitorThresholdADC;     // 0-1023 ADC counts, below which
+volatile BOOL g_PowerDropDetected;              // True if power drops below PowerMonitorThreshold
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a6"};
+volatile tStepperDisableTimeout g_StepperDisableState;  // Stores state of stepper timeout disable feature
+volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before motors are disabled
+volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
+volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
+
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a19"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -199,6 +204,7 @@ unsigned char g_USART_TX_buf_out;
 // Normally set to TRUE. Able to set FALSE to not send "OK" message after packet reception
 BOOL g_ack_enable;
 
+#if PC_PG_T_COMMANDS_ENABLED
 // Set to TRUE to turn Pulse Mode on
 unsigned char gPulsesOn;
 // For Pulse Mode, how long should each pulse be on for in ms?
@@ -207,6 +213,7 @@ unsigned int gPulseLen[4];
 unsigned int gPulseRate[4];
 // For Pulse Mode, counters keeping track of where we are
 unsigned int gPulseCounters[4];
+#endif
 
 // Counts down milliseconds until zero. At zero shuts off power to RC servo (via RA3))
 volatile UINT32 gRCServoPoweroffCounterMS;
@@ -222,7 +229,9 @@ unsigned char gCommand_Char2;
 // Global variables used for limit switch feature
 volatile UINT8 gLimitSwitchPortB;     // Latched PortB value when trigger happens
 volatile UINT8 gLimitSwitchReplies;   // Non-zero if we want a reply printed when limit switch trigger goes true
-UINT8 gLimitSwitchReplyPrinted;        // True if we've already printed a reply for this limit switch trigger
+UINT8 gLimitSwitchReplyPrinted;       // True if we've already printed a reply for this limit switch trigger
+
+UINT8 gCommandChecksumRequired;       // True if we are requiring checksums on all commands (defaults to off)
 
 // Stack high water value
 static volatile UINT16 gStackHighWater;
@@ -242,31 +251,22 @@ void parse_packet(void);       // Take a full packet and dispatch it to the righ
 signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void parse_R_packet(void);     // R for resetting UBW
 void parse_C_packet(void);     // C for configuring I/O and analog pins
-void parse_CX_packet(void);    // CX For configuring serial port
 void parse_O_packet(void);     // O for output digital to pins
 void parse_I_packet(void);     // I for input digital from pins
 void parse_V_packet(void);     // V for printing version
 void parse_A_packet(void);     // A for requesting analog inputs
-void parse_T_packet(void);     // T for setting up timed I/O (digital or analog)
 void parse_PI_packet(void);    // PI for reading a single pin
 void parse_PO_packet(void);    // PO for setting a single pin state
 void parse_PD_packet(void);    // PD for setting a pin's direction
 void parse_MR_packet(void);    // MR for Memory Read
 void parse_MW_packet(void);    // MW for Memory Write
-void parse_TX_packet(void);    // TX for transmitting serial
-void parse_RX_packet(void);    // RX for receiving serial
 void parse_RC_packet(void);    // RC is for outputting RC servo pulses 
-void parse_BO_packet(void);    // BO sends data to fast parallel output
-void parse_BC_packet(void);    // BC configures fast parallel outputs
-void parse_BS_packet(void);    // BS sends binary data to fast parallel output
 void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
-void parse_SS_packet(void);    // SS Send SPI
-void parse_RS_packet(void);    // RS Receive SPI
-void parse_SI_packet(void);    // SI Send I2C
-void parse_RI_packet(void);    // RI Receive I2C
-void parse_CI_packet(void);    // CI Configure I2C
+#if PC_PG_T_COMMANDS_ENABLED
+void parse_T_packet(void);     // T for setting up timed I/O (digital or analog)
 void parse_PG_packet(void);    // PG Pulse Go
 void parse_PC_packet(void);    // PC Pulse Configure
+#endif
 void parse_BL_packet(void);    // BL Boot Load command
 void parse_CK_packet(void);    // CK ChecK command
 void parse_MR_packet(void);    // MR Motors Run command
@@ -330,7 +330,6 @@ void low_ISR(void)
         // we add (or subtract) gRC2Rate[] to try and get there.
         if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
-//LATAbits.LATA5 = 1;
           // If the rate is zero, then we always move instantly
           // to the target.
           if (gRC2Rate[gRC2Ptr] == 0u)
@@ -386,7 +385,6 @@ void low_ISR(void)
         INTCONbits.GIEH = 1;
       }
     }
-//LATAbits.LATA5 = 0;
 
     // See if it's time to fire off an I packet
     if (ISR_D_RepeatRate > 0u)
@@ -477,6 +475,7 @@ void low_ISR(void)
       }
     }
 
+#if PC_PG_T_COMMANDS_ENABLED
     // Is Pulse Mode on?
     if (gPulsesOn)
     {
@@ -526,7 +525,8 @@ void low_ISR(void)
         }
       }
     }
-
+#endif
+    
     // Software timer for QC command
     if (QC_ms_timer)
     {
@@ -543,20 +543,60 @@ void low_ISR(void)
         RCServoPowerIO = RCSERVO_POWER_OFF;
       }
     }
+    
+    // Check for stepper motor disable timeout if enabled
+    if (g_StepperDisableState == kSTEPPER_TIMEOUT_TIMING)
+    {
+      // Count the milliseconds until we get to 1 second
+      if (g_StepperDisableSecondCounter)
+      {
+        g_StepperDisableSecondCounter--;
+        
+        if (g_StepperDisableSecondCounter == 0u)
+        {
+          // Then count down the seconds
+          if (g_StepperDisableCountdownS)
+          {
+            g_StepperDisableCountdownS--;
+
+            if (g_StepperDisableCountdownS == 0u)
+            {
+              // If the countdown gets to zero, then it's time to disable 
+              // the steppers.
+              if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+              {
+                Enable1IO = DISABLE_MOTOR;
+                Enable2IO = DISABLE_MOTOR;
+              }
+              else
+              {
+                Enable1AltIO = DISABLE_MOTOR;
+                Enable2AltIO = DISABLE_MOTOR;
+              }
+              g_StepperDisableState = kSTEPPER_TIMEOUT_FIRED;
+            }
+            else
+            {
+              // Only count the next second if there are still seconds to count
+              g_StepperDisableSecondCounter = 1000u;
+            }
+          }
+        }
+      }
+    }
 
     // Read out the current value of FSR1 (stack pointer)
     // If the new value is higher than gStackHighWater, then update gStackHighWater
     // This will record the highest value the stack pointer attains
-    _asm
-      MOVFF FSR1H, tempStackPointerHigh
-      MOVFF FSR1L, tempStackPointerLow
-    _endasm
-    tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
-    if (tempStackPointer > gStackHighWater)
-    {
-LATAbits.LATA5 = 1;
-      gStackHighWater = tempStackPointer;
-    }
+///    _asm
+///      MOVFF FSR1H, tempStackPointerHigh
+///      MOVFF FSR1L, tempStackPointerLow
+///    _endasm
+///    tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
+///    if (tempStackPointer > gStackHighWater)
+///    {
+///      gStackHighWater = tempStackPointer;
+///    }
   } // end of 1ms interrupt
 
   // Do we have an analog interrupt?
@@ -581,6 +621,16 @@ LATAbits.LATA5 = 1;
           |
           ((unsigned int)ADRESH << 8);
 
+      // If this is the V+_VOLTAGE ADC channel, then check to see if the value
+      // is below the threshold, and if so, set the bit to record this fact
+      if (A_cur_channel == RA11_VPLUS_POWER_ADC_CHANNEL)
+      {
+        if (ISR_A_FIFO[A_cur_channel] < g_PowerMonitorThresholdADC)
+        {
+          g_PowerDropDetected = TRUE;
+        }
+      }
+      
       // Increment the channel and mask bit
       ChannelBit = ChannelBit << 1;
       A_cur_channel++;
@@ -649,10 +699,104 @@ LATAbits.LATA5 = 1;
       g_RC_state[g_RC_timing_ptr] = kWAITING;
     }
   }
-LATAbits.LATA5 = 0;
 }
 
 //////// JUST FOR TESTING - DELETE
+
+void fill_stack(void)
+{
+  UINT8 * stackPtr = (UINT8 *)0x000;
+
+  _asm
+    MOVFF FSR1H, tempStackPointerHigh
+    MOVFF FSR1L, tempStackPointerLow
+  _endasm
+
+  tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
+
+  stackPtr = (UINT8 *)tempStackPointer;
+  
+  stackPtr += 8;
+  
+  while ((UINT16)stackPtr <= 0xEBFu)
+  {
+    *stackPtr = 0xEE;
+    stackPtr++;
+  }
+}
+
+// Walk backwards in the stack RAM section looking of 0xEEs. When we stop
+// seeing them, then we know that's the highest value of the stack to this point.
+// Print that location out.
+void print_high_water(UINT8 tag)
+{
+  UINT8 nib2;
+  UINT8 * stackPtr = (UINT8 *)0xEBF;
+  
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts off
+  
+  while (*stackPtr == 0xEE)
+  {
+    stackPtr--;
+  }
+  
+  if ((UINT16)stackPtr > gStackHighWater)
+  {
+    gStackHighWater = (UINT16)stackPtr;
+
+    // First print out tag value
+    nib2 = tag >> 4;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = tag & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    PrintChar(',');
+
+    nib2 = (gStackHighWater >> 8) & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = (gStackHighWater >> 4) & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    nib2 = gStackHighWater & 0x0F;
+    if (nib2 <= 9u)
+    {
+      PrintChar(nib2 + '0');
+    }
+    else
+    {
+      PrintChar(nib2 + 'A' - 10);
+    }
+    PrintChar('\n');
+  }
+
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts on  
+}
 
 // Print out the current stack pointer value, along with a tag number, 
 void print_stack(UINT8 tag)
@@ -723,7 +867,6 @@ void print_stack(UINT8 tag)
     }
     PrintChar('\n');
   }
-    
 
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 }
@@ -737,29 +880,7 @@ void UserInit(void)
 {
   UINT16 i;
 
-  //// JUST FOR TESTING! REMOVE!  
-TRISDbits.TRISD1 = 0;   // D1 high when in ISR
-TRISDbits.TRISD0 = 0;   // D0 high when loading next command
-TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-TRISCbits.TRISC0 = 0;
-TRISAbits.TRISA5 = 0;
-
-
-Open1USART(
-  USART_TX_INT_OFF &
-  USART_RX_INT_OFF &
-  USART_ASYNCH_MODE &
-  USART_EIGHT_BIT &
-  USART_CONT_RX &
-  USART_BRGH_HIGH &
-  USART_ADDEN_OFF,
-  2                   // At 48 MHz, this creates 1 Mbaud output
-);
-
- print_stack(0);
-////
-
-  
+ 
   // Make all of 3 digital inputs
   LATA = 0x00;
   TRISA = 0xFF;
@@ -907,7 +1028,9 @@ Open1USART(
   gLimitSwitchPortB = 0;
   gLimitSwitchReplies = 0;
   gLimitSwitchReplyPrinted = 0;
+  gCommandChecksumRequired = 0;
 
+#if PC_PG_T_COMMANDS_ENABLED
   // Zero out pulse variables
   gPulsesOn = FALSE;
   gPulseLen[0] = 0;
@@ -922,12 +1045,41 @@ Open1USART(
   gPulseCounters[1] = 0;
   gPulseCounters[2] = 0;
   gPulseCounters[3] = 0;
-
+#endif
+  
   gRCServoPoweroffCounterMS = 0;
   gRCServoPoweroffCounterReloadMS = RCSERVO_POWEROFF_DEFAULT_MS;
   gAutomaticMotorEnable = TRUE;
   gStackHighWater = 0;
+  g_PowerMonitorThresholdADC = 0;
+  g_StepperDisableTimeoutS = 0;
+  g_StepperDisableSecondCounter = 0;
+  g_StepperDisableCountdownS = 0;
+  g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
+  g_PowerDropDetected = FALSE;
+
   
+  //// JUST FOR TESTING! REMOVE!  
+TRISDbits.TRISD1 = 0;   // D1 high when in ISR
+TRISDbits.TRISD0 = 0;   // D0 high when loading next command
+TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+TRISCbits.TRISC0 = 0;
+TRISAbits.TRISA5 = 0;
+
+
+Open1USART(
+  USART_TX_INT_OFF &
+  USART_RX_INT_OFF &
+  USART_ASYNCH_MODE &
+  USART_EIGHT_BIT &
+  USART_CONT_RX &
+  USART_BRGH_HIGH &
+  USART_ADDEN_OFF,
+  2                   // At 48 MHz, this creates 1 Mbaud output
+);
+
+////  
+
 }
 
 /******************************************************************************
@@ -972,16 +1124,7 @@ void ProcessIO(void)
   unsigned char tst_char;
 
   BlinkUSBStatus();
-
-#if defined(BUILD_WITH_DEMO)
-  // Demo code, for playing back array of points so we can run without PC.
-   
-  // Check for start of playback
-  if (!swProgram)
-  {
-  }
-#endif
-
+  
   // Check for any new I packets (from T command) ready to go out
   while (ISR_D_FIFO_length > 0u)
   {
@@ -1062,7 +1205,9 @@ void ProcessIO(void)
         {
           last_command[i] = g_RX_buf[i];
         }
+  print_high_water(6);
         parse_packet();
+  print_high_water(7);
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
       }
@@ -1199,13 +1344,13 @@ void ProcessIO(void)
   // Check to see if we need to print out a "Limit switch triggered" packet to the PC
   if (gLimitSwitchReplies)
   {
-    if (gLimitSwitchTriggered && !gLimitSwitchReplyPrinted)
+    if (bittstzero(gLimitSwitchTriggered) && !gLimitSwitchReplyPrinted)
     {
       printf((far rom char *)"Limit switch triggered. PortB=%02X", gLimitSwitchPortB);
       print_line_ending(kLE_NORM);
       gLimitSwitchReplyPrinted = TRUE;
     }
-    else if (!gLimitSwitchTriggered && gLimitSwitchReplyPrinted)
+    else if (!bittstzero(gLimitSwitchTriggered) && gLimitSwitchReplyPrinted)
     {
       gLimitSwitchReplyPrinted = FALSE;
     }
@@ -1302,461 +1447,490 @@ void check_and_send_TX_data(void)
 // route it appropriately. We come in knowing that
 // our packet is in g_RX_buf[], and that the beginning
 // of the packet is at g_RX_buf_out, and the end (CR) is at
-// g_RX_buf_in. Note that because of buffer wrapping,
+// g_RX_buf_in - 1. Note that because of buffer wrapping,
 // g_RX_buf_in may be less than g_RX_buf_out.
+// New for v3.0.0: if gCommandChecksumRequired is true, then look at the end
+// of the command packet for the checksum, and if it is not there or not
+// correct, error out.
 void parse_packet(void)
 {
   UINT16 command = 0;
+  UINT8 checksum_cmd = 0;
+  UINT8 checksum_calc = 0;
+  UINT8 checksum_ptr;
+  UINT8 checksum_len = 0;
+  BOOL checksumOK = TRUE;   // Starts out true for no checksum case
+  UINT8 old_rx_buf_out;
+  UINT8 i;
   gCommand_Char1 = 0;
   gCommand_Char2 = 0;
-
-  // Always grab the first character (which is the first byte of the command)
-  gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
-  advance_RX_buf_out();
-  command = gCommand_Char1;
-
-  // Only grab second one if it is not a comma
-  if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
+  
+  if (gCommandChecksumRequired)
   {
-    gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
-    advance_RX_buf_out();
-    command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
-  }
-
-  // Now 'command' is equal to one or two bytes of our command
-  switch (command)
-  {
-    case ('L' * 256) + 'T':
+    checksumOK = FALSE;
+    
+    // Walk backwards from the end of the packet, looking for the first found
+    // comma, then read out 
+    checksum_ptr = g_RX_buf_in;
+    if (checksum_ptr != 0u)
     {
-      // Low Level Timed Move
-      parse_LT_packet();
-      break;
+      checksum_ptr--;
     }
-    case ('L' * 256) + '3':
+    else
     {
-      // Low Level 3rd derivative (jerk) move
-      parse_L3_packet();
-      break;
+      checksum_ptr = kRX_BUF_SIZE - 1;
     }
-    case ('T' * 256) + '3':
+    
+    while ((g_RX_buf[checksum_ptr] != ',') && (checksum_len < 5u) && (checksum_ptr != g_RX_buf_out))
     {
-      // Timed 3rd derivative (jerk) move
-      parse_T3_packet();
-      break;
-    }
-    case ('L' * 256) + 'M':
-    {
-      // Low Level Move
-      parse_LM_packet();
-      break;
-    }
-    case ('R' * 256) + 'X':
-    {
-      // For receiving serial
-      parse_RX_packet();
-      break;
-    }
-    case 'R':
-    {
-      // Reset command (resets everything to power-on state)
-      parse_R_packet();
-      break;
-    }
-    case 'C':
-    {
-      // Configure command (configure ports for Input or Output)
-      parse_C_packet();
-      break;
-    }
-    case ('C' * 256) + 'X':
-    {
-      // For configuring serial port
-      parse_CX_packet();
-      break;
-    }
-    case ('C' * 256) + 'U':
-    {
-      // For configuring UBW
-      parse_CU_packet();
-      break;
-    }
-    case 'O':
-    {
-      // Output command (tell the ports to output something)
-      parse_O_packet();
-      break;
-    }
-    case 'I':
-    {
-      // Input command (return the current status of the ports)
-      parse_I_packet();
-      break;
-    }
-    case 'V':
-    {
-      // Version command
-      parse_V_packet();
-      break;
-    }
-    case 'A':
-    {
-      // Analog command
-      parse_A_packet();
-      break;
-    }
-    case 'T':
-    {
-      // For timed I/O
-      parse_T_packet();
-      break;
-    }
-    case ('T' * 256) + 'X':
-    {
-      // For transmitting serial
-      parse_TX_packet();
-      break;
-    }
-    case ('P' * 256) + 'I':
-    {
-      // PI for reading a single pin
-      parse_PI_packet();
-      break;
-    }
-    case ('P' * 256) + 'O':
-    {
-      // PO for setting a single pin
-      parse_PO_packet();
-      break;
-    }
-    case ('P' * 256) + 'D':
-    {
-      // PD for setting a pin's direction
-      parse_PD_packet();
-      break;
-    }
-    case ('M' * 256) + 'R':
-    {
-      // MR for Memory Read
-      parse_MR_packet();
-      break;
-    }
-    case ('M' * 256) + 'W':
-    {
-      // MW for Memory Write
-      parse_MW_packet();
-      break;
-    }
-    case ('B' * 256) + 'O':
-    {
-      // MR for Fast Parallel Output
-      parse_BO_packet();
-      break;
-    }
-    case ('R' * 256) + 'C':
-    {
-      // RC for RC servo output
-      parse_RC_packet();
-      break;
-    }
-    case ('B' * 256) + 'C':
-    {
-      // BC for Fast Parallel Configure
-      parse_BC_packet();
-      break;
-    }
-    case ('B' * 256) + 'S':
-    {
-      // BS for Fast Binary Stream output
-      parse_BS_packet();
-      break;
-    }
-    case ('S' * 256) + 'S':
-    {
-      // SS for Send SPI
-      parse_SS_packet();
-      break;
-    }
-    case ('R' * 256) + 'S':
-    {
-      // RS for Receive SPI
-      parse_RS_packet();
-      break;
-    }
-    case ('S' * 256) + 'I':
-    {
-      // SI for Send I2C
-      parse_SI_packet();
-      break;
-    }
-    case ('R' * 256) + 'I':
-    {
-      // RI for Receive I2C
-      parse_RI_packet();
-      break;
-    }
-    case ('C' * 256) + 'I':
-    {
-      // CI for Configure I2C
-      parse_CI_packet();
-      break;
-    }
-    case ('P' * 256) + 'C':
-    {
-      // PC for pulse configure
-      parse_PC_packet();
-      break;
-    }
-    case ('P' * 256) + 'G':
-    {
-      // PG for pulse go command
-      parse_PG_packet();
-      break;
-    }
-    case ('S' * 256) + 'M':
-    {
-      // SM for stepper motor
-      parse_SM_packet();
-      break;
-    }
-    case ('S' * 256) + 'P':
-    {
-      // SP for set pen
-      parse_SP_packet();
-      break;
-    }
-    case ('T' * 256) + 'P':
-    {
-      // TP for toggle pen
-      parse_TP_packet();
-      break;
-    }
-    case ('Q' * 256) + 'P':
-    {
-      // QP for query pen
-      parse_QP_packet();
-      break;
-    }
-    case ('Q' * 256) + 'E':
-    {
-      // QE for Query motor Enable and resolution
-      parse_QE_packet();
-      break;
-    }
-    case ('E' * 256) + 'M':
-    {
-      // EM for enable motors
-      parse_EM_packet();
-      break;
-    }
-    case ('S' * 256) + 'C':
-    {
-      // SC for stepper mode configure
-      parse_SC_packet();
-      break;
-    }
-    case ('S' * 256) + 'N':
-    {
-      // SN for Clear Node count
-      parse_SN_packet();
-      break;
-    }
-    case ('Q' * 256) + 'N':
-    {
-      // QN for Query Node count
-      parse_QN_packet();
-      break;
-    }
-    case ('S' * 256) + 'L':
-    {
-      // SL for Set Layer
-      parse_SL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'L':
-    {
-      // QL for Query Layer count
-      parse_QL_packet();
-      break;
-    }
-    case ('Q' * 256) + 'B':
-    {
-      // QL for Query Button (program)
-      parse_QB_packet();
-      break;
-    }
-    case ('N' * 256) + 'I':
-    {
-      // NI for Node count Increment
-      parse_NI_packet();
-      break;
-    }
-    case ('N' * 256) + 'D':
-    {
-      // ND Node count Decrement
-      parse_ND_packet();
-      break;
-    }
-    case ('B' * 256) + 'L':
-    {
-      // BL for Boot Load
-      parse_BL_packet();
-      break;
-    }
-    case ('C' * 256) + 'K':
-    {
-      // CL for Check
-      parse_CK_packet();
-      break;
-    }
-    case ('Q' * 256) + 'C':
-    {
-      // QC for Query Current
-      parse_QC_packet();
-      break;
-    }
-    case ('Q' * 256) + 'G':
-    {
-      // QG for Query General
-      parse_QG_packet();
-      break;
-    }
-    case ('S' * 256) + 'E':
-    {
-      // SE for Set Engraver
-      parse_SE_packet();
-      break;
-    }
-    case ('S' * 256) + '2':
-    {
-      // S2 for RC Servo method 2
-      RCServo2_S2_command();
-      break;
-    }
-    case ('R' * 256) + 'M':
-    {
-      // RM for Run Motor
-      parse_RM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'M':
-    {
-      // QM for Query Motor
-      parse_QM_packet();
-      break;
-    }
-    case ('A' * 256) + 'C':
-    {
-      // AC for Analog Configure
-      parse_AC_packet();
-      break;
-    }
-    case ('E' * 256) + 'S':
-    {
-      // ES for E-Stop
-      parse_ES_packet();
-      break;
-    }
-    case ('X' * 256) + 'M':
-    {
-      // XM for X motor move
-      parse_XM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'S':
-    {
-      // QP for Query Step position
-      parse_QS_packet();
-      break;
-    }
-    case ('C' * 256) + 'S':
-    {
-      // CS for Clear Step position
-      parse_CS_packet();
-      break;
-    }
-    case ('S' * 256) + 'T':
-    {
-      // ST for Set Tag
-      parse_ST_packet();
-      break;
-    }
-    case ('Q' * 256) + 'T':
-    {
-      // QT for Query Tag
-      parse_QT_packet();
-      break;
-    }
-    case ('R' * 256) + 'B':
-    {
-      // RB for ReBoot
-      parse_RB_packet();
-      break;
-    }
-    case ('Q' * 256) + 'R':
-    {
-      // QR is for Query RC Servo power state
-      parse_QR_packet();
-      break;
-    }
-    case ('S' * 256) + 'R':
-    {
-      // SR is for Set RC Servo power timeout
-      parse_SR_packet();
-      break;
-    }
-    case ('H' * 256) + 'M':
-    {
-      // HM is for Home Motor
-      parse_HM_packet();
-      break;
-    }
-    case ('Q' * 256) + 'U':
-    {
-      // QU is for General Query
-      parse_QU_packet();
-      break;
-    }
-
-    default:
-    {
-      if (0u == gCommand_Char2)
+      if (checksum_ptr != 0u)
       {
-        // Send back 'unknown command' error
-        printf(
-           (far rom char *)"!8 Err: Unknown command '%c:%2X'"
-          ,gCommand_Char1
-          ,gCommand_Char1
-        );
+        checksum_ptr--;
       }
       else
       {
-        // Send back 'unknown command' error
-        printf(
-           (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
-          ,gCommand_Char1
-          ,gCommand_Char2
-          ,gCommand_Char1
-          ,gCommand_Char2
-        );
+        checksum_ptr = kRX_BUF_SIZE - 1;
       }
+      checksum_len++;
+    }
+    
+    // If checksum_ptr isn't on a comma then there is no checksum for sure
+    // so let checksumOK stay FALSE
+    if (g_RX_buf[checksum_ptr] == ',')
+    {
+      // Last parameter found, hopefully it's a checksum. Read it in.
+      // We have to play some games with the buffer index values here
+      // since we're extracting a parameter at the very end of the packet
+      // before we extract any from the beginning (as part of normal command
+      // processing)
+      old_rx_buf_out = g_RX_buf_out;
+      g_RX_buf_out = checksum_ptr;
+      // We're going to ignore the return value from extract_number() since
+      // we'll get a failure anyway since the checksum value won't match.
+      extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      g_RX_buf_out = old_rx_buf_out;
+      
+      // Compute the checksum of the packet up to checksum_ptr
+      i = g_RX_buf_out;
+      while(i != checksum_ptr)
+      {
+        checksum_calc += g_RX_buf[i];
+        i++;
+        if (i == kRX_BUF_SIZE)
+        {
+          i = 0;
+        }
+      }
+      checksum_calc = (~checksum_calc)+1;
+      
+      // See if it matches
+      if (checksum_calc == checksum_cmd)
+      {
+        // All is good, allow command to proceed
+        checksumOK = TRUE;
+        // Need to fake out the command parsing, make it think the packet
+        // ends where it expects it to end. It doesn't want to see the comma
+        // before the checksum.
+        g_RX_buf[checksum_ptr] = kCR;
+      }
+      else
+      {
+        printf(
+          (far rom char *)"!8 Err: Checksum incorrect, expected %d"
+          ,checksum_calc
+        );
+        print_line_ending(kLE_NORM);
+      }
+    }
+    else
+    {
+      printf(
+        (far rom char *)"!8 Err: Checksum not found but required."
+      );
       print_line_ending(kLE_NORM);
-      break;
     }
   }
 
-  // Double check that our output pointer is now at the ending <CR>
-  // If it is not, this indicates that there were extra characters that
-  // the command parsing routine didn't eat. This would be an error and needs
-  // to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
-  if (
-    (g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
-    &&
-    ('R' != command)
-  )
+  print_high_water(8);
+  
+  if (checksumOK)
   {
-    bitset(error_byte, kERROR_BYTE_EXTRA_CHARACTERS);
-  }
+    // Always grab the first character (which is the first byte of the command)
+    gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
+    advance_RX_buf_out();
+    command = gCommand_Char1;
 
+    // Only grab second one if it is not a comma
+    if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
+    {
+      gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
+      advance_RX_buf_out();
+      command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
+    }
+
+    // Now 'command' is equal to one or two bytes of our command
+    switch (command)
+    {
+      case ('L' * 256) + 'T':
+      {
+        // Low Level Timed Move
+        parse_LT_packet();
+        break;
+      }
+      case ('L' * 256) + '3':
+      {
+        // Low Level 3rd derivative (jerk) move
+        parse_L3_packet();
+        break;
+      }
+      case ('T' * 256) + '3':
+      {
+        // Timed 3rd derivative (jerk) move
+        parse_T3_packet();
+        break;
+      }
+      case ('L' * 256) + 'M':
+      {
+        // Low Level Move
+        parse_LM_packet();
+        break;
+      }
+      case 'R':
+      {
+        // Reset command (resets everything to power-on state)
+        parse_R_packet();
+        break;
+      }
+      case 'C':
+      {
+        // Configure command (configure ports for Input or Output)
+        parse_C_packet();
+        break;
+      }
+      case ('C' * 256) + 'U':
+      {
+        // For configuring UBW
+        parse_CU_packet();
+        break;
+      }
+      case 'O':
+      {
+        // Output command (tell the ports to output something)
+        parse_O_packet();
+        break;
+      }
+      case 'I':
+      {
+        // Input command (return the current status of the ports)
+        parse_I_packet();
+        break;
+      }
+      case 'V':
+      {
+        // Version command
+  print_high_water(9);
+        parse_V_packet();
+  print_high_water(10);
+        break;
+      }
+      case 'A':
+      {
+        // Analog command
+        parse_A_packet();
+        break;
+      }
+  #if PC_PG_T_COMMANDS_ENABLED
+      case 'T':
+      {
+        // For timed I/O
+        parse_T_packet();
+        break;
+      }
+  #endif
+      case ('P' * 256) + 'I':
+      {
+        // PI for reading a single pin
+        parse_PI_packet();
+        break;
+      }
+      case ('P' * 256) + 'O':
+      {
+        // PO for setting a single pin
+        parse_PO_packet();
+        break;
+      }
+      case ('P' * 256) + 'D':
+      {
+        // PD for setting a pin's direction
+        parse_PD_packet();
+        break;
+      }
+      case ('M' * 256) + 'R':
+      {
+        // MR for Memory Read
+        parse_MR_packet();
+        break;
+      }
+      case ('M' * 256) + 'W':
+      {
+        // MW for Memory Write
+        parse_MW_packet();
+        break;
+      }
+  #if PC_PG_T_COMMANDS_ENABLED
+      case ('P' * 256) + 'C':
+      {
+        // PC for pulse configure
+        parse_PC_packet();
+        break;
+      }
+      case ('P' * 256) + 'G':
+      {
+        // PG for pulse go command
+        parse_PG_packet();
+        break;
+      }
+  #endif
+      case ('S' * 256) + 'M':
+      {
+        // SM for stepper motor
+        parse_SM_packet();
+        break;
+      }
+      case ('S' * 256) + 'P':
+      {
+        // SP for set pen
+        parse_SP_packet();
+        break;
+      }
+      case ('T' * 256) + 'P':
+      {
+        // TP for toggle pen
+        parse_TP_packet();
+        break;
+      }
+      case ('Q' * 256) + 'P':
+      {
+        // QP for query pen
+        parse_QP_packet();
+        break;
+      }
+      case ('Q' * 256) + 'E':
+      {
+        // QE for Query motor Enable and resolution
+        parse_QE_packet();
+        break;
+      }
+      case ('E' * 256) + 'M':
+      {
+        // EM for enable motors
+        parse_EM_packet();
+        break;
+      }
+      case ('S' * 256) + 'C':
+      {
+        // SC for stepper mode configure
+        parse_SC_packet();
+        break;
+      }
+      case ('S' * 256) + 'N':
+      {
+        // SN for Clear Node count
+        parse_SN_packet();
+        break;
+      }
+      case ('Q' * 256) + 'N':
+      {
+        // QN for Query Node count
+        parse_QN_packet();
+        break;
+      }
+      case ('S' * 256) + 'L':
+      {
+        // SL for Set Layer
+        parse_SL_packet();
+        break;
+      }
+      case ('Q' * 256) + 'L':
+      {
+        // QL for Query Layer count
+        parse_QL_packet();
+        break;
+      }
+      case ('Q' * 256) + 'B':
+      {
+        // QL for Query Button (program)
+        parse_QB_packet();
+        break;
+      }
+      case ('N' * 256) + 'I':
+      {
+        // NI for Node count Increment
+        parse_NI_packet();
+        break;
+      }
+      case ('N' * 256) + 'D':
+      {
+        // ND Node count Decrement
+        parse_ND_packet();
+        break;
+      }
+      case ('B' * 256) + 'L':
+      {
+        // BL for Boot Load
+        parse_BL_packet();
+        break;
+      }
+      case ('C' * 256) + 'K':
+      {
+        // CL for Check
+        parse_CK_packet();
+        break;
+      }
+      case ('Q' * 256) + 'C':
+      {
+        // QC for Query Current
+        parse_QC_packet();
+        break;
+      }
+      case ('Q' * 256) + 'G':
+      {
+        // QG for Query General
+        parse_QG_packet();
+        break;
+      }
+      case ('S' * 256) + 'E':
+      {
+        // SE for Set Engraver
+        parse_SE_packet();
+        break;
+      }
+      case ('S' * 256) + '2':
+      {
+        // S2 for RC Servo method 2
+        RCServo2_S2_command();
+        break;
+      }
+      case ('Q' * 256) + 'M':
+      {
+        // QM for Query Motor
+        parse_QM_packet();
+        break;
+      }
+      case ('A' * 256) + 'C':
+      {
+        // AC for Analog Configure
+        parse_AC_packet();
+        break;
+      }
+      case ('E' * 256) + 'S':
+      {
+        // ES for E-Stop
+        parse_ES_packet();
+        break;
+      }
+      case ('X' * 256) + 'M':
+      {
+        // XM for X motor move
+        parse_XM_packet();
+        break;
+      }
+      case ('Q' * 256) + 'S':
+      {
+        // QP for Query Step position
+        parse_QS_packet();
+        break;
+      }
+      case ('C' * 256) + 'S':
+      {
+        // CS for Clear Step position
+        parse_CS_packet();
+        break;
+      }
+      case ('S' * 256) + 'T':
+      {
+        // ST for Set Tag
+        parse_ST_packet();
+        break;
+      }
+      case ('Q' * 256) + 'T':
+      {
+        // QT for Query Tag
+        parse_QT_packet();
+        break;
+      }
+      case ('R' * 256) + 'B':
+      {
+        // RB for ReBoot
+        parse_RB_packet();
+        break;
+      }
+      case ('Q' * 256) + 'R':
+      {
+        // QR is for Query RC Servo power state
+        parse_QR_packet();
+        break;
+      }
+      case ('S' * 256) + 'R':
+      {
+        // SR is for Set RC Servo power timeout
+        parse_SR_packet();
+        break;
+      }
+      case ('H' * 256) + 'M':
+      {
+        // HM is for Home Motor
+        parse_HM_packet();
+        break;
+      }
+      case ('Q' * 256) + 'U':
+      {
+        // QU is for General Query
+        parse_QU_packet();
+        break;
+      }
+
+      default:
+      {
+        if (0u == gCommand_Char2)
+        {
+          // Send back 'unknown command' error
+          printf(
+             (far rom char *)"!8 Err: Unknown command '%c:%2X'"
+            ,gCommand_Char1
+            ,gCommand_Char1
+          );
+        }
+        else
+        {
+          // Send back 'unknown command' error
+          printf(
+             (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
+            ,gCommand_Char1
+            ,gCommand_Char2
+            ,gCommand_Char1
+            ,gCommand_Char2
+          );
+        }
+        print_line_ending(kLE_NORM);
+        break;
+      }
+    }
+    
+    // Double check that our output pointer is now at the ending <CR>
+    // If it is not, this indicates that there were extra characters that
+    // the command parsing routine didn't eat. This would be an error and needs
+    // to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
+    if (
+      (g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
+      &&
+      ('R' != command)
+    )
+    {
+      bitset(error_byte, kERROR_BYTE_EXTRA_CHARACTERS);
+    }
+  }
+  
   // Clean up by skipping over any bytes we haven't eaten
   // This is safe since we parse each packet as we get a <CR>
   // (i.e. g_RX_buf_in doesn't move while we are in this routine)
@@ -1846,11 +2020,15 @@ void parse_R_packet(void)
 // 51  <limit_switch_mask> sets the limit_switch_mask value for limit switch checking in ISR. Set to 0 to disable. Any high bit looks for a corresponding bit in the limit_switch_target on PORTB
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
 // 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
+// 54  {1|0} turns on/off command checksum (defaults to off)
+// 60  <NewThreshood> Set the power lost threshold. Set to 0 to disable.
+// 61  <NewStepperDisableTimeoutS> Sets the stepper timeout in seconds. 0 to disable.
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)
 // 252 {1|0} turns on or off the UART ISR DEBUG FULL (prints internal numbers at end of each ISR)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
+// 255 {1|0} turns on or off command parsing debug printing on USB
 
 void parse_CU_packet(void)
 {
@@ -1917,6 +2095,11 @@ void parse_CU_packet(void)
     {
       paramater_value = COMMAND_FIFO_MAX_LENGTH;
     }
+    // Spin here until we're certain the FIFO is empty and there are no 
+    // command executing. We want the ISR to be completely idle while we
+    // change this value.
+    while (process_QM())
+      ;
     gCurrentFIFOLength = paramater_value;
   }
   // CU,10,1 or CU,10,0 to turn on/off standardized line ending
@@ -1953,7 +2136,7 @@ void parse_CU_packet(void)
     gLimitSwitchMask = (paramater_value & 0xFF);
     if (gLimitSwitchMask == 0u)
     {
-      gLimitSwitchTriggered = FALSE;
+      bitclrzero(gLimitSwitchTriggered);
     }
   }
   // CU,52,<limit_siwtch_target>
@@ -1973,6 +2156,64 @@ void parse_CU_packet(void)
       gLimitSwitchReplies = FALSE;
       gLimitSwitchReplyPrinted = FALSE;
     }
+  }
+  // CU,54,1 turns on command checksums
+  else if (54u == parameter_number)
+  {
+    if (1 == paramater_value)
+    {
+      gCommandChecksumRequired = TRUE;
+    }
+    else
+    {
+      gCommandChecksumRequired = FALSE;
+    }
+  }
+  // CU,60,<NewThreshold>
+  else if (60u == parameter_number)
+  {
+    g_PowerMonitorThresholdADC = (paramater_value & 0x03FF);
+  }
+  // CU,61,<NewStepperDisableTimeoutThreshold>
+  else if (61u == parameter_number)
+  {
+    INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+    INTCONbits.GIEL = 0;    // Turn low priority interrupts off
+    
+    g_StepperDisableTimeoutS = paramater_value;
+    
+    if (g_StepperDisableTimeoutS == 0u)
+    {
+      // Turn feature completely off no matter what state we're in
+      g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
+      g_StepperDisableSecondCounter = 0;
+      g_StepperDisableCountdownS = 0;
+    }
+    else
+    {
+      // User wants feature enabled with new timeout. Do different things
+      // based on current state.
+      switch (g_StepperDisableState)
+      {
+        case kSTEPPER_TIMEOUT_TIMING:
+          // Always start over with new timeout value
+          g_StepperDisableCountdownS = g_StepperDisableTimeoutS;
+          g_StepperDisableSecondCounter = 1000u;
+          break;
+
+        default:
+        case kSTEPPER_TIMEOUT_PRIMED:
+        case kSTEPPER_TIMEOUT_DISABLED:
+          g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
+          // Note intentional fall-through
+        case kSTEPPER_TIMEOUT_FIRED:
+          g_StepperDisableSecondCounter = 0;
+          g_StepperDisableCountdownS = 0;
+          break;
+      }
+    }
+    INTCONbits.GIEL = 1;    // Turn low priority interrupts on
+    INTCONbits.GIEH = 1;    // Turn high priority interrupts on
   }
   // CU,250,1 or CU,250,0 to turn on/off GPIO ISR timing debug
   else if (250u == parameter_number)
@@ -2112,6 +2353,32 @@ void parse_CU_packet(void)
       _endasm
     }
   }
+  // CU,255,1 or CU,255,0 to turn on/off command parsing debug printing on USB
+  else if (255u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+      Open1USART(
+        USART_TX_INT_OFF &
+        USART_RX_INT_OFF &
+        USART_ASYNCH_MODE &
+        USART_EIGHT_BIT &
+        USART_CONT_RX &
+        USART_BRGH_HIGH &
+        USART_ADDEN_OFF,
+        2                   // At 48 MHz, this creates 1 Mbaud output
+      );
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
   else
   {
     // parameter_number is not understood
@@ -2131,6 +2398,8 @@ void parse_CU_packet(void)
 // 3   QU,3,ddd to read back the current FIFO length
 // 4   QU,4,XXX prints out stack high water value (as 3 digit hex value)
 // 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
+// 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
+// 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2186,6 +2455,24 @@ void parse_QU_packet(void)
     INTCONbits.GIEL = 0;  // Turn low priority interrupts off
     gStackHighWater = 0;
     INTCONbits.GIEL = 1;  // Turn low priority interrupts on
+  }  
+  // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
+  else if (60u == parameter_number)
+  {
+    printf (
+      (far rom char *)"60,%d" 
+      ,g_PowerMonitorThresholdADC
+    );
+    print_line_ending(kLE_NORM);
+  }
+  // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
+  else if (61u == parameter_number)
+  {
+    printf (
+      (far rom char *)"61,%d" 
+      ,g_StepperDisableTimeoutS
+    );
+    print_line_ending(kLE_NORM);
   }
   else
   {
@@ -2196,6 +2483,7 @@ void parse_QU_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
+#if PC_PG_T_COMMANDS_ENABLED
 // "T" Packet
 // Causes PIC to sample digital or analog inputs at a regular interval and send
 // I (or A) packets back at that interval.
@@ -2257,6 +2545,7 @@ void parse_T_packet(void)
 
   print_line_ending(kLE_OK_NORM);
 }
+#endif
 
 // IMPORTANT: As of EBB v2.2.3 firmware, this command is different from the
 // UBW version. The analog config value is eliminated, replaced with the "AC"
@@ -2291,16 +2580,8 @@ void parse_C_packet(void)
   TRISA = PA;
   TRISB = PB;
   TRISC = PC;
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   TRISD = PD;
   TRISE = PE;
-#endif
-#if defined(BOARD_EBB_V10)
-  TRISF = PF;
-  TRISG = PG;
-  TRISH = PH;
-  TRISJ = PJ;
-#endif
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2409,7 +2690,6 @@ void parse_O_packet(void)
   {
     LATC = Value;
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
   if (error_byte) return;
   if (kEXTRACT_OK == RetVal)
@@ -2422,33 +2702,6 @@ void parse_O_packet(void)
   {
     LATE = Value;
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATF = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATG = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATH = Value;
-  }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
-  if (kEXTRACT_OK == RetVal)
-  {
-    LATJ = Value;
-  }
-#endif
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2653,7 +2906,6 @@ void parse_PD_packet(void)
       bitset(TRISC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     if (0u == direction)
@@ -2676,53 +2928,6 @@ void parse_PD_packet(void)
       bitset(TRISE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISF, pin);
-    }
-    else
-    {
-      bitset(TRISF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISG, pin);
-    }
-    else
-    {
-      bitset(TRISG, pin);
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISH, pin);
-    }
-    else
-    {
-      bitset(TRISH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == direction)
-    {
-      bitclr(TRISJ, pin);
-    }
-    else
-    {
-      bitset(TRISJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2871,7 +3076,6 @@ void parse_PO_packet(void)
       bitset(LATC, pin);
     }
   }
-#if defined(BOARD_EBB_V10) || defined(BOARD_EBB_V11) || defined(BOARD_EBB_V12) || defined(BOARD_EBB_V13_AND_ABOVE)
   else if ('D' == port)
   {
     if (0u == value)
@@ -2894,53 +3098,6 @@ void parse_PO_packet(void)
       bitset(LATE, pin);
     }
   }
-#endif
-#if defined(BOARD_EBB_V10)
-  else if ('F' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATF, pin);
-    }
-    else
-    {
-      bitset(LATF, pin);
-    }
-  }
-  else if ('G' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATG, pin);
-    }
-    else
-    {
-      bitset(LATG, pin);
-    }
-  }
-  else if ('H' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATH, pin);
-    }
-    else
-    {
-      bitset(LATH, pin);
-    }
-  }
-  else if ('J' == port)
-  {
-    if (0 == value)
-    {
-      bitclr(LATJ, pin);
-    }
-    else
-    {
-      bitset(LATJ, pin);
-    }
-  }
-#endif
   else
   {
     bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -2950,471 +3107,7 @@ void parse_PO_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
-// TX is for Serial Transmit
-// "TX,<data_length>,<variable_length_data><CR>"
-// <data_length> is a count of the number of bytes in the <variable_length_data> field.
-// It must never be larger than the number of bytes that are currently free in the
-// software TX buffer or some data will get lost.
-// <variable_length_data> are the bytes that you want the UBW to send. It will store them
-// in its software TX buffer until there is time to send them out the TX pin.
-// If you send in "0" for a <data_length" (and thus nothing for <variable_length_data>
-// then the UBW will send back a "TX,<free_buffer_space><CR>" packet,
-// where <free_buffer_space> is the number of bytes currently available in the 
-// software TX buffer.
-void parse_TX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RX is for Serial Receive
-// "RX,<length_request><CR>"
-// <length_request> is the maximum number of characters that you want the UBW to send
-// back to you in the RX packet. If you use "0" for <length_request> then the UBW
-// will just send you the current number of bytes in it's RX buffer, and if
-// there have been any buffer overruns since the last time a <length_request> of 
-// "0" was received by the UBW.
-// This command will send back a "RX,<length>,<variable_length_data><CR>"
-// or "RX,<buffer_fullness>,<status><CR>" packet depending upon if you send
-// "0" or something else for <length_request>
-// <length> in the returning RX packet is a count of the number of bytes
-// in the <variable_length_data> field. It will never be more than the
-// <length_request> you sent in.
-// <variable_length_data> is the data (in raw form - byte for byte what was received - 
-// i.e. not translated in any way, into ASCII values or anything else) that the UBW
-// received. This may include <CR>s and NULLs among any other bytes, so make sure
-// your PC application treats the RX packet coming back from the UBW in a special way
-// so as not to screw up normal packet processing if any special characters are received.
-// <buffer_fullness> is a value between 0 and MAX_SERIAL_RX_BUFFER_SIZE that records
-// the total number of bytes, at that point in time, that the UBW is holding, waiting
-// to pass on to the PC.
-// <status> has several bits. 
-//  Bit 0 = Software RX Buffer Overrun (1 means software RX buffer (on RX pin)
-//    has been overrun and data has been lost) This will happen if you don't
-//    read the data out of the UWB often enough and the data is coming in too fast.
-//  Bit 1 = Software TX Buffer Overrun (1 means software TX buffer (on TX pin)
-//    as been overrun and data has been lost. This will happen if you send too much
-//    data to the UBW and you have the serial port set to a low baud rate.
-void parse_RX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// CX is for setting up serial port parameters
-// TBD
-void parse_CX_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RC is for outputting RC servo pulses on a pin
-// "RC,<port>,<pin>,<value><CR>"
-// <port> is "A", "B", "C" and indicates the port
-// <pin> is a number between 0 and 7 and indicates which pin to output the new value on
-// <value> is an unsigned 16 bit number between 0 and 11890.
-// If <value> is "0" then the RC output on that pin is disabled.
-// Otherwise <value> = 1 means 1ms pulse, <value> = 11890 means 2ms pulse,
-// any value in between means proportional pulse values between those two
-// Note: The pin used for RC output must be set as an output, or not much will happen.
-// The RC command will continue to send out pulses at the last set value on 
-// each pin that has RC output with a repetition rate of 1 pulse about every 19ms.
-// If you have RC output enabled on a pin, outputting a digital value to that pin
-// will be overwritten the next time the RC pulses. Make sure to turn off the RC
-// output if you want to use the pin for something else.
-void parse_RC_packet(void)
-{
-  UINT8 port;
-  UINT8 pin;
-  UINT16 value;
-
-  print_command(FALSE, FALSE);
-
-  extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
-  extract_number(kUCHAR, &pin, kREQUIRED);
-  extract_number(kUINT, &value, kREQUIRED);
-
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  // Max value user can input. (min is zero)
-  if (value > 11890u)
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-
-  // Now get Value in the form that TMR0 needs it
-  // TMR0 needs to get filled with values from 65490 (1ms) to 53600 (2ms)
-  if (value != 0u)
-  {
-    value = (65535 - (value + 45));
-  }
-
-  if (pin > 7u)
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-  if ('A' == port)
-  {
-    port = 0;
-  }
-  else if ('B' == port)
-  {
-    port = 8;
-  }
-  else if ('C' == port)
-  {
-    port = 16;
-  }
-  else
-  {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    return;
-  }
-
-  // Store the new RC time value
-  g_RC_value[pin + port] = value;
-  // Only set this state if we are off - if we are already running on 
-  // this pin, then the new value will be picked up next time around (19ms)
-  if (kOFF == g_RC_state[pin + port])
-  {
-    g_RC_state[pin + port] = kWAITING;
-  }
-
-  print_line_ending(kLE_OK_NORM);
-}
-
-// BC is for Bulk Configure
-// BC,<port A init>,<waitmask>,<wait delay>,<strobemask>,<strobe delay><CR>
-// This command sets up the mask and strobe bits on port A for the
-// BO (Bulk Output) command below. Also suck in wait delay, strobe delay, etc.
-void parse_BC_packet(void)
-{
-//  unsigned char BO_init;
-//  unsigned char BO_strobe_mask;
-//  unsigned char BO_wait_mask;
-//  unsigned char BO_wait_delay;
-//  unsigned char BO_strobe_delay;
-//
-//  BO_init = extract_number(kUCHAR, kREQUIRED);
-//  BO_wait_mask = extract_number(kUCHAR, kREQUIRED);
-//  BO_wait_delay = extract_number(kUCHAR, kREQUIRED);
-//  BO_strobe_mask = extract_number(kUCHAR, kREQUIRED);
-//  BO_strobe_delay = extract_number(kUCHAR, kREQUIRED);
-//
-//  // Bail if we got a conversion error
-//  if (error_byte)
-//  {
-//    return;
-//  }
-//
-//  // Copy over values to their globals
-//  g_BO_init = BO_init;
-//  g_BO_wait_mask = BO_wait_mask;
-//  g_BO_strobe_mask = BO_strobe_mask;
-//  g_BO_wait_delay = BO_wait_delay;
-//  g_BO_strobe_delay = BO_strobe_delay;
-//  // And initialize Port A
-//  LATA = g_BO_init;
-//
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// Bulk Output (BO)
-// BO,4AF2C124<CR>
-// After the initial comma, pull in hex values and spit them out to port A
-// Note that the procedure here is as follows:
-//  1) Write new value to PortB
-//  2) Assert <strobemask>
-//  3) Wait for <strobdelay> (if not zero)
-//  4) De-assert <strobemask>
-//  5) Wait for <waitmask> to be asserted
-//  6) Wait for <waitmask> to be deasserted
-//  7) If 5) or 6) takes longer than <waitdelay> then just move on to next byte
-//  Repeat for each byte
-void parse_BO_packet(void)
-{
-//  unsigned char BO_data_byte;
-//  unsigned char new_port_A_value;
-//  unsigned char tmp;
-//  unsigned char wait_count = 0;
-//
-//  // Check for comma where ptr points
-//  if (g_RX_buf[g_RX_buf_out] != ',')
-//  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
-//    print_line_ending(kLE_NORM);
-//    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
-//    return;
-//  }
-//
-//  // Move to the next character
-//  advance_RX_buf_out();
-//
-//  // Make sure Port A is correct
-//  LATA = g_BO_init;
-//  new_port_A_value = ((~LATA & g_BO_strobe_mask)) | (LATA & ~g_BO_strobe_mask);
-//
-//  while (g_RX_buf[g_RX_buf_out] != 13)
-//  {
-//    // Pull in a nibble from the input buffer
-//    tmp = toupper(g_RX_buf[g_RX_buf_out]);
-//    if (tmp >= '0' && tmp <= '9')
-//    {
-//      tmp -= '0';
-//    }
-//    else if (tmp >= 'A' && tmp <= 'F')
-//    {
-//      tmp -= 55;
-//    }
-//    else 
-//    {
-//      bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//      return;
-//    }
-//    BO_data_byte = tmp << 4;
-//    advance_RX_buf_out();
-//
-//    // Check for CR next
-//    if (kCR == g_RX_buf[g_RX_buf_out])
-//    {
-//      bitset(error_byte, kERROR_BYTE_MISSING_PARAMETER);
-//      return;
-//    }
-//
-//    tmp =  toupper(g_RX_buf[g_RX_buf_out]);
-//    if (tmp >= '0' && tmp <= '9')
-//    {
-//      tmp -= '0';
-//    }
-//    else if (tmp >= 'A' && tmp <= 'F')
-//    {
-//      tmp -= 55;
-//    }
-//    else
-//    {
-//      bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//      return;
-//    }
-//    BO_data_byte = BO_data_byte + tmp;
-//    advance_RX_buf_out();
-//
-//    // Output the byte on Port B
-//    LATB = BO_data_byte;
-//
-//    // And strobe the Port A bits that we're supposed to
-//    LATA = new_port_A_value;
-//    if (g_BO_strobe_delay)
-//    {
-//      Delay10TCYx (g_BO_strobe_delay);
-//    }
-//    LATA = g_BO_init;
-//
-//    if (g_BO_wait_delay)
-//    {
-//      // Now we spin on the wait bit specified in WaitMask
-//      // (Used for Busy Bits) We also have to wait here
-//      // for a maximum of g_BO_wait_delay, which is in 10 clock units
-//      // First we wait for the wait mask to become asserted
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      while (
-//        ((g_BO_init & g_BO_wait_mask) == (PORTA & g_BO_wait_mask))
-//        && 
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      // Then we wait for the wait mask to become de-asserted
-//      while ( 
-//      ((g_BO_init & g_BO_wait_mask) != (PORTA & g_BO_wait_mask))
-//        &&
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//    }
-//  }
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// Bulk Stream (BS) (he he, couldn't think of a better name)
-// BS,<count>,<binary_data><CR>
-// This command is extremely similar to the BO command
-// except that instead of ASCII HEX values, it actually 
-// takes raw binary data.
-// So in order for the UBW to know when the end of the stream
-// is, we need to have a <count> of bytes.
-// <count> represents the number of bytes after the second comma
-// that will be the actual binary data to be streamed out port B.
-// Then, <binary_data> must be exactly that length.
-// <count> must be between 1 and 56 (currently - in the future
-// it would be nice to extend the upper limit)
-// The UBW will pull in one byte at a time within the <binary_data>
-// section and output it to PORTB exactly as the BO command does.
-// It will do this for <count> bytes. It will then pull in another
-// byte (which must be a carriage return) and be done.
-// The whole point of this command is to improve data throughput
-// from the PC to the UBW. This form of data is also more efficient
-// for the UBW to process.
-void parse_BS_packet(void)
-{
-//  unsigned char BO_data_byte;
-//  unsigned char new_port_A_value;
-//  unsigned char tmp;
-//  unsigned char wait_count = 0;
-//  unsigned char byte_count = 0;
-//
-//  // Get byte_count
-//  byte_count = extract_number(kUCHAR, kREQUIRED);
-//
-//  // Limit check it
-//  if (0 == byte_count || byte_count > 56)
-//  {
-//    bitset(error_byte, kERROR_BYTE_PARAMATER_OUTSIDE_LIMIT);
-//    return;
-//  }
-//
-//  // Check for comma where ptr points
-//  if (g_RX_buf[g_RX_buf_out] != ',')
-//  {
-//    printf((far rom char *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
-//    print_line_ending(kLE_NORM);
-//    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
-//    return;
-//  }
-//
-//  // Move to the next character
-//  advance_RX_buf_out();
-//
-//  // Make sure Port A is correct
-//  LATA = g_BO_init;
-//  new_port_A_value = ((~LATA & g_BO_strobe_mask)) | (LATA & ~g_BO_strobe_mask);
-//
-//  while (byte_count != 0)
-//  {
-//    // Pull in a single byte from input buffer
-//    BO_data_byte = g_RX_buf[g_RX_buf_out];
-//    advance_RX_buf_out();
-//
-//    // Count this byte
-//    byte_count--;
-//
-//    // Output the byte on Port B
-//    LATB = BO_data_byte;
-//
-//    // And strobe the Port A bits that we're supposed to
-//    LATA = new_port_A_value;
-//    if (g_BO_strobe_delay)
-//    {
-//      Delay10TCYx(g_BO_strobe_delay);
-//    }
-//    LATA = g_BO_init;
-//
-//    if (g_BO_wait_delay)
-//    {
-//      // Now we spin on the wait bit specified in WaitMask
-//      // (Used for Busy Bits) We also have to wait here
-//      // for a maximum of g_BO_wait_delay, which is in 10 clock units
-//      // First we wait for the wait mask to become asserted
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      while (
-//        ((g_BO_init & g_BO_wait_mask) == (PORTA & g_BO_wait_mask))
-//        && 
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//
-//      // Set the wait counter to the number of delays we want
-//      wait_count = g_BO_wait_delay;
-//      // Then we wait for the wait mask to become de-asserted
-//      while ( 
-//      ((g_BO_init & g_BO_wait_mask) != (PORTA & g_BO_wait_mask))
-//        &&
-//        (wait_count != 0)
-//      )
-//      {
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        Delay1TCY();
-//        wait_count--;
-//      }
-//    }
-//  }
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// SS Send SPI
-void parse_SS_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RS Receive SPI
-void parse_RS_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// SI Send I2C
-void parse_SI_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// RI Receive I2C
-void parse_RI_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
-// CI Configure I2C
-void parse_CI_packet(void)
-{
-  print_command(FALSE, FALSE);
-  print_line_ending(kLE_OK_NORM);
-}
-
+#if PC_PG_T_COMMANDS_ENABLED
 // PC Pulse Configure
 // Pulses will be generated on PortB, bits 0 through 3
 // Pulses are in 1ms units, and can be from 0 (off) through 65535
@@ -3503,6 +3196,7 @@ void parse_PG_packet(void)
 
   print_line_ending(kLE_OK_NORM);
 }
+#endif
 
 void LongDelay(void)
 {
@@ -3829,8 +3523,8 @@ UINT8 extract_string (
 }
 
 
-// Look at the string pointed to by ptr
-// There should be a comma where ptr points to upon entry.
+// Look at the string pointed to by g_RX_buf[g_RX_buf_out]
+// There should be a comma where g_RX_buf[g_RX_buf_out] points to upon entry.
 // If not, throw a comma error.
 // If so, then look for up to like a ton of bytes after the
 // comma for numbers, and put them all into one

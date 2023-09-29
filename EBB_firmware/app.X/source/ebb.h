@@ -51,24 +51,26 @@
 #ifndef EBB_H
 #define EBB_H
 
+#include <usart.h>
 
 // Bitfield defines for the TestModes variable.
 #define TEST_MODE_GPIO_BIT_NUM            1u
 #define TEST_MODE_GPIO_BIT                (1u << TEST_MODE_GPIO_BIT_NUM)
-// Set for any ISR printing
+// Set for printing ISR debug info to UART at end of every move
 #define TEST_MODE_USART_ISR_BIT_NUM       2u
 #define TEST_MODE_USART_ISR_BIT           (1u << TEST_MODE_USART_ISR_BIT_NUM)
 // Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not just end of move
 #define TEST_MODE_USART_ISR_FULL_BIT_NUM  3u
 #define TEST_MODE_USART_ISR_FULL_BIT      (1u << TEST_MODE_USART_ISR_FULL_BIT_NUM)
+// Prints every received byte out to debug UART
 #define TEST_MODE_USART_COMMAND_BIT_NUM   4u
 #define TEST_MODE_USART_COMMAND_BIT       (1u << TEST_MODE_USART_COMMAND_BIT_NUM)
+// Prints additional command debugging info to USB back to PC
+#define TEST_MODE_DEBUG_COMMAND_BIT_NUM   5u
+#define TEST_MODE_DEBUG_COMMAND_BIT       (1u << TEST_MODE_DEBUG_COMMAND_BIT_NUM)
 // This last bit is used during the ISR and is not available as a general test mode bit
 #define TEST_MODE_PRINT_TRIGGER_BIT_NUM   7u
 #define TEST_MODE_PRINT_TRIGGER_BIT       (1u << TEST_MDOE_PRINT_TRIGGER_BIT_NUM)
-
-// Enable this line to compile with a lot of debug prints for motion commands
-//#define DEBUG_VALUE_PRINT
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0u
@@ -83,7 +85,7 @@
 // element (command) that gives us a maximum of 43 for the FIFO depth.
 // Because we want to leave some room for FIFO command expansion in the future,
 // we artifically set this to 32 elements. That gives us room to grow the size
-// of the command structure wihtout needing to decreasae the maximum size
+// of the command structure without needing to decrease the maximum size
 // of the FIFO in elements.
 #define COMMAND_FIFO_MAX_LENGTH     32u
 
@@ -116,6 +118,13 @@ typedef enum
 #define COMMAND_SM_XM_HM_MOVE_BIT         (1u << COMMAND_SM_XM_HM_MOVE_BIT_NUM)
 #define COMMAND_LM_MOVE_BIT               (1u << COMMAND_LM_MOVE_BIT_NUM)
 #define COMMAND_LT_MOVE_BIT               (1u << COMMAND_LT_MOVE_BIT_NUM)
+
+typedef enum
+{
+  PIC_CONTROLS_DRIVERS = 0,
+  PIC_CONTROLS_EXTERNAL,
+  EXTERNAL_CONTROLS_DRIVERS
+} DriverConfigurationType;
 
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
@@ -297,7 +306,7 @@ extern volatile near UINT8 gLimitSwitchTarget;
 extern volatile near UINT8 gLimitSwitchTriggered;
 extern UINT8 gStandardizedCommandFormat;
 extern volatile near UINT8 gCurrentFIFOLength;
-
+extern near DriverConfigurationType DriverConfiguration;
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
@@ -318,7 +327,6 @@ void parse_EM_packet(void);
 void parse_QC_packet(void);
 void parse_QG_packet(void);
 void parse_SE_packet(void);
-void parse_RM_packet(void);
 void parse_QM_packet(void);
 void parse_ES_packet(void);
 void parse_XM_packet(void);
@@ -331,4 +339,5 @@ void parse_T3_packet(void);
 void parse_L3_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
+UINT8 process_QM(void);
 #endif
