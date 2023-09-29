@@ -87,7 +87,7 @@
 // we artifically set this to 32 elements. That gives us room to grow the size
 // of the command structure without needing to decrease the maximum size
 // of the FIFO in elements.
-#define COMMAND_FIFO_MAX_LENGTH     32u
+#define COMMAND_FIFO_MAX_LENGTH     28u
 
 typedef enum
 {

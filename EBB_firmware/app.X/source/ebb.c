@@ -289,7 +289,7 @@
 #include "RCServo2.h"
 
 // Define this to enable the use of the C step (high) ISR. Undefine for
-// the assembly langauge version
+// the assembly language version
 #define USE_C_ISR
 
 // This is the value that gets multiplied by Steps/Duration to compute
