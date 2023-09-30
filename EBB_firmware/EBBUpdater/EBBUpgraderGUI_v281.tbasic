@@ -16,7 +16,7 @@ End ControlID
      
 Global hComm           As Long
 Global nBytes          As Long
-Global sBuffer         As String 
+Global sBuffer         As String
 Global gPortOpen       As Boolean
 Global pID             As Number
 Global vData()         As String
@@ -146,26 +146,17 @@ CallBack Function cbButton() As Long
             nItems = Parse( sBuffer, vData(), $CRLF)
             
             ReDim Ports()
-              
-            For Counter = 1 To nItems
-              Position = InStr(Ucase$(vData(Counter)),"(COM")
-              If Position Then
-                ReDim Preserve Ports(UBound(Ports)+1)
-                PortS(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
-              End If
-            Next
 
             For Counter = 1 To nItems
               Position = InStr(Ucase$(vData(Counter)),"(COM")
               If Position Then
-
-              console_printLine(vData(Counter))
-              Console_printLine(Ucase$(vData(Counter-1)))
+                console_printLine(vData(Counter))
+                Console_printLine(Ucase$(vData(Counter-1)))
                 ' If we have a "COMxx" port, then look for the PID/VID of EBB
                 If InStr(Ucase$(vData(Counter-1)), "VID_2198&PID_0813") Then
                   ReDim Preserve Ports(UBound(Ports)+1)
-                  PortS(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
-                  Console_PrintLine(PortS(UBound(Ports)))
+                  Ports(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
+                  Console_PrintLine(Ports(UBound(Ports)))
                   bHavePorts = TRUE
                 End If
               End If
