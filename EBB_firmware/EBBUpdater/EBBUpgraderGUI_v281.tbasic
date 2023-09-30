@@ -50,7 +50,7 @@ Function TBMain() As Long
 
   gPortOpen = FALSE
   '---Create a new dialog
-    hDlg = Dialog_New Pixels, 0, "EBB Update to frimware v" & sFirmwareNumber, -1, -1, 400, 400,
+    hDlg = Dialog_New Pixels, 0, "EBB Update to firmware v" & sFirmwareNumber, -1, -1, 400, 400,
                                                   %WS_DLGFRAME  | 
                                                   %DS_CENTER    | 
                                                   %WS_CAPTION   | 
@@ -124,7 +124,20 @@ CallBack Function cbDialog() As Long
   End Select
 
 End Function
-               
+
+function DoFirmwareUpdate() as Long
+  sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename
+  If (bConsole) Then Console_WriteLine sCommandLine
+  If (bUpdaterConsole) Then
+    pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
+  Else
+    pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_HIDE, %OS_SHELL_SYNC)
+  EndIf
+  Sleep 2000
+  If (bConsole) Then Console_WriteLine("pID = " & pID)
+  DoFirmwareUpdate = pID
+end function
+
 '------------------------------------------------------------------------------
 ' Callback procedure for button control
 '------------------------------------------------------------------------------
@@ -140,7 +153,7 @@ CallBack Function cbButton() As Long
         Select Case CBCTL
 
           Case %ID_StartUpdateButton
-            Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Building a list of COM ports ..." + Chr$(13) + Chr$(10)
+            Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Building a list of EBB COM ports ..." + Chr$(13) + Chr$(10)
             sBuffer = WMI_GetData(ComputerName, "", "", "", "Win32_PnPEntity", "", "Name" )
               
             nItems = Parse( sBuffer, vData(), $CRLF)
@@ -163,9 +176,18 @@ CallBack Function cbButton() As Long
 
             ' Check for no COM ports found
             If LBound(Ports) = 1 And UBound(Ports) = 1 Then
-              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No COM ports found on this computer. Click Exit." + Chr$(13) + Chr$(10)
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No EBB COM ports found on this computer." + Chr$(13) + Chr$(10)
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting recovery update directly into bootloader mode..." + Chr$(13) + Chr$(10)
+              
+              if (DoFirmwareUpdate() <> 0) then
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Update failed. Click Exit." + Chr$(13) + Chr$(10)
+              else
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Update succeded. Click Exit to quit," + Chr$(13) + Chr$(10)
+                Control Append Text CBHNDL, %ID_CommandOutputTexBox, "or click Start Update to restart normal firmware update process." + Chr$(13) + Chr$(10)
+              endif
+
             Else
-              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following ports:" + Chr$(13) + Chr$(10)
+              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found the following EBB COM ports:" + Chr$(13) + Chr$(10)
               For Counter = LBound(Ports) To UBound(Ports)
                 Control Append Text CBHNDL, %ID_CommandOutputTexBox, Ports(Counter) + Chr$(13) + Chr$(10)
               Next
@@ -184,7 +206,7 @@ CallBack Function cbButton() As Long
                   Sleep 100
                   nBytes = COMM_Get(hComm, %COMM_RXQUE)
                   COMM_TRecv(hComm, nBytes, sBuffer, 1000)
-                  
+
                   sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
                   If LEFT$(sBuffer, 3) = "EBB" Then
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
@@ -193,15 +215,9 @@ CallBack Function cbButton() As Long
                     Sleep 1000
                     COMM_Close(hComm)
                     Sleep 5000
-                    sCommandLine = "mphidflash-1.6-win-32.exe -r -w " & sHexFilename
-                    If (bConsole) Then Console_WriteLine sCommandLine
-                    If (bUpdaterConsole) Then
-                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_NORMAL, %OS_SHELL_SYNC)
-                    Else
-                      pID = OS_Shell(sCommandLine, %OS_WNDSTYLE_HIDE, %OS_SHELL_SYNC)   
-                    EndIf
-                    Sleep 2000 
-                    If (bConsole) Then Console_WriteLine("pID = " & pID)
+            
+                    DoFirmwareUpdate()
+
                     If pID = 0 Then
                       COMM_Open("\\.\" & Ports(Counter), hComm)
                       If Err = 0 Then
@@ -237,26 +253,6 @@ CallBack Function cbButton() As Long
               Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Click Exit (or click Start Upgrade again to update more EBBs)" + Chr$(13) + Chr$(10)
             End If
             
-''          Case %ID_OpenCommButton
-''            If (bConsole) Then Console_Writeline Time$, "OpenCommButton clicked" 
-''            Control Get Text CBHNDL, %ID_ComPortTextBox To sComPort
-''            If (bConsole) Then Console_WriteLine("Opening COM" & sComPort)
-''            hComm = COMM_FreeFile
-''            COMM_Open("\\.\COM" & sComPort, hComm)
-  
-''            If Err = 0 Then
-''              COMM_Set(hComm, %COMM_BAUD, 921600)
-''              COMM_Set(hComm, %COMM_BYTE, 8)
-''              COMM_Set(hComm, %COMM_PARITY, FALSE)
-''              COMM_Set(hComm, %COMM_STOP, 0)
-''              If (bConsole) Then Console_WriteLine("...open ok.")
-''              gPortOpen = TRUE
-''              Dialog Set Timer CBHNDL, %IDC_TIMER, %TIMER_DELAY 
-''              write_to_com("debug level all", CBHNDL)
-''            Else
-''              If (bConsole) Then Console_WriteLine("Error: " & Err)
-''            End If
-
           Case %ID_ExitButton
             If (bConsole) Then Console_WriteLine Time$, "CloseCommButton"
             If gPortOpen = TRUE Then
