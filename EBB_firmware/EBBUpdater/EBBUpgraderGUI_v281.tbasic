@@ -153,11 +153,10 @@ CallBack Function cbButton() As Long
                 console_printLine(vData(Counter))
                 Console_printLine(Ucase$(vData(Counter-1)))
                 ' If we have a "COMxx" port, then look for the PID/VID of EBB
-                If InStr(Ucase$(vData(Counter-1)), "VID_2198&PID_0813") Then
+                If InStr(Ucase$(vData(Counter-1)), "VID_04D8&PID_FD92") Then
                   ReDim Preserve Ports(UBound(Ports)+1)
                   Ports(UBound(Ports)) = Extract$(Position+1,vData(Counter),")")
                   Console_PrintLine(Ports(UBound(Ports)))
-                  bHavePorts = TRUE
                 End If
               End If
             Next
