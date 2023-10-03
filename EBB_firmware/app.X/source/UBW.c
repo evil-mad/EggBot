@@ -81,7 +81,6 @@
 /** I N C L U D E S **********************************************************/
 #include <p18cxxx.h>
 #include <usart.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <delays.h>
 #include <flash.h>
@@ -92,6 +91,7 @@
 #include "UBW.h"
 #include "ebb.h"
 #include "RCServo2.h"
+#include "ebb_print.h"
 
 /** D E F I N E S ********************************************************/
 
@@ -279,7 +279,6 @@ void parse_SR_packet(void);    // SR Set RC Servo power timeout
 void parse_QU_packet(void);    // QU General Query
 
 void check_and_send_TX_data(void); // See if there is any data to send to PC, and if so, do it
-int _user_putc(char c);        // Our UBS based stream character printer
 
 /** D E C L A R A T I O N S **************************************************/
 #pragma code
@@ -909,9 +908,6 @@ void UserInit(void)
   // set to zero.
   error_byte = 0;
   
-  // Use our own special output function for STDOUT
-  stdout = _H_USER;
-
   // Initialize all of the ISR FIFOs
   ISR_A_FIFO_out = 0;
   ISR_A_FIFO_in = 0;
@@ -1254,15 +1250,15 @@ void ProcessIO(void)
         g_RX_buf[g_RX_buf_in] = 0;
 
         // Also send 'down arrow' to counter act the affect of the up arrow
-        printf((far rom char *)"\x1b[B\x1b[1K\x1b[0G");
-        printf((far rom char *)"%s", g_RX_buf);
+        ebb_print((far rom char *)"\x1b[B\x1b[1K\x1b[0G");
+        ebb_print_ram((char *)g_RX_buf);
       }
       else if (tst_char == 8u && g_RX_buf_in > 0u)
       {
         // Handle the backspace thing
         g_RX_buf_in--;
         g_RX_buf[g_RX_buf_in] = 0x00;
-        printf((far rom char *)" \b");
+        ebb_print((far rom char *)" \b");
       }
       else if (
         tst_char != kCR
@@ -1298,28 +1294,28 @@ void ProcessIO(void)
     if (bittstzero(error_byte))
     {
       // Unused as of yet
-      printf((far rom char *)"!0 ");
+      ebb_print((far rom char *)"!0 ");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_STEPS_TO_FAST))
     {
       // Unused as of yet
-      printf((far rom char *)"!1 Err: Can't step that fast");
+      ebb_print((far rom char *)"!1 Err: Can't step that fast");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
     {
-      printf((far rom char *)"!2 Err: TX Buffer overrun");
+      ebb_print((far rom char *)"!2 Err: TX Buffer overrun");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
     {
-      printf((far rom char *)"!3 Err: RX Buffer overrun");
+      ebb_print((far rom char *)"!3 Err: RX Buffer overrun");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_MISSING_PARAMETER))
     {
-      printf((far rom char *)"!4 Err: Missing parameter(s)");
+      ebb_print((far rom char *)"!4 Err: Missing parameter(s)");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_PRINTED_ERROR))
@@ -1330,12 +1326,12 @@ void ProcessIO(void)
     }
     if (bittst(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
     {
-      printf((far rom char *)"!6 Err: Invalid parameter value");
+      ebb_print((far rom char *)"!6 Err: Invalid parameter value");
       print_line_ending(kLE_NORM);
     }
     if (bittst(error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
     {
-      printf((far rom char *)"!7 Err: Extra parameter");
+      ebb_print((far rom char *)"!7 Err: Extra parameter");
       print_line_ending(kLE_NORM);
     }
     error_byte = 0;
@@ -1346,7 +1342,9 @@ void ProcessIO(void)
   {
     if (bittstzero(gLimitSwitchTriggered) && !gLimitSwitchReplyPrinted)
     {
-      printf((far rom char *)"Limit switch triggered. PortB=%02X", gLimitSwitchPortB);
+      ebb_print((far rom char *)"Limit switch triggered. PortB=");
+      // We want 2 characters of hex
+      ebb_print_hex(gLimitSwitchPortB, 2);
       print_line_ending(kLE_NORM);
       gLimitSwitchReplyPrinted = TRUE;
     }
@@ -1361,9 +1359,9 @@ void ProcessIO(void)
 }
 
 // This is our replacement for the standard putc routine
-// This enables printf() and all related functions to print to
+// This enables ebb_print() and all related functions to print to
 // the USB output (i.e. to the PC) buffer
-int _user_putc(char c)
+int ebb_putc(char c)
 {
   BYTE OldPtr = g_TX_buf_in;
 
@@ -1535,18 +1533,14 @@ void parse_packet(void)
       }
       else
       {
-        printf(
-          (far rom char *)"!8 Err: Checksum incorrect, expected %d"
-          ,checksum_calc
-        );
+        ebb_print((far rom char *)"!8 Err: Checksum incorrect, expected ");
+        ebb_print_uint(checksum_calc);
         print_line_ending(kLE_NORM);
       }
     }
     else
     {
-      printf(
-        (far rom char *)"!8 Err: Checksum not found but required."
-      );
+      ebb_print((far rom char *)"!8 Err: Checksum not found but required.");
       print_line_ending(kLE_NORM);
     }
   }
@@ -1895,22 +1889,22 @@ void parse_packet(void)
         if (0u == gCommand_Char2)
         {
           // Send back 'unknown command' error
-          printf(
-             (far rom char *)"!8 Err: Unknown command '%c:%2X'"
-            ,gCommand_Char1
-            ,gCommand_Char1
-          );
+          ebb_print((far rom char *)"!8 Err: Unknown command '");
+          ebb_print_char(gCommand_Char1);
+          ebb_print_char(':');
+          ebb_print_hex(gCommand_Char1, 2);
+          ebb_print_char(0x27); // the ' character
         }
         else
         {
           // Send back 'unknown command' error
-          printf(
-             (far rom char *)"!8 Err: Unknown command '%c%c:%2X%2X'"
-            ,gCommand_Char1
-            ,gCommand_Char2
-            ,gCommand_Char1
-            ,gCommand_Char2
-          );
+          ebb_print((far rom char *)"!8 Err: Unknown command '");
+          ebb_print_char(gCommand_Char1);
+          ebb_print_char(gCommand_Char2);
+          ebb_print_char(':');
+          ebb_print_hex(gCommand_Char1, 2);
+          ebb_print_hex(gCommand_Char2, 2);
+          ebb_print_char(0x27); // the ' character
         }
         print_line_ending(kLE_NORM);
         break;
@@ -1948,16 +1942,18 @@ void parse_packet(void)
 // If Legacy line ending mode is turned on this function will not print anything
 void print_command(BOOL print_always, BOOL print_comma)
 {
+  char comma = ',';
+  
   if (bittstzero(gStandardizedCommandFormat) || print_always)
   {
-    _user_putc(gCommand_Char1);
+    ebb_putc(gCommand_Char1);
     if (gCommand_Char2 != 0u)
     {
-      _user_putc(gCommand_Char2);
+      ebb_putc(gCommand_Char2);
     }
     if (print_comma)
     {
-      printf((far rom char *)",");
+      ebb_putc(comma);
     }
   }
 }
@@ -1979,22 +1975,22 @@ void print_line_ending(tLineEnding le_type)
 {
   if (bittstzero(gStandardizedCommandFormat))
   {
-    printf((far rom char *)"\n");
+    ebb_print((far rom char *)"\n");
   }
   else
   {
     if ((g_ack_enable) && (le_type == kLE_OK_NORM))
     {
-      printf((far rom char *)"OK");
+      ebb_print((far rom char *)"OK");
     }
     if (le_type == kLE_REV)
     {
-      printf((far rom char *)"\n\r");
+      ebb_print((far rom char *)"\n\r");
     }
     else
     {
       // le_type == kLE_NORM
-      printf((far rom char *)"\r\n");
+      ebb_print((far rom char *)"\r\n");
     }
   }
 }
@@ -2418,39 +2414,43 @@ void parse_QU_packet(void)
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    printf((far rom char*)"1,%02X", gLimitSwitchPortB);
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_hex(gLimitSwitchPortB, 2);
     print_line_ending(kLE_NORM);
   }
   // QU,2 to read back the maximum supported FIFO length for this version
   // Returns "QU,2,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (2u == parameter_number)
   {
-    printf((far rom char*)"2,%d", COMMAND_FIFO_MAX_LENGTH);
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_uint(COMMAND_FIFO_MAX_LENGTH);
     print_line_ending(kLE_NORM);
   }
   // QU,3 to read back the current FIFO length
   // Returns "QU,3,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (3u == parameter_number)
   {
-    printf((far rom char*)"3,%d", gCurrentFIFOLength);
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_uint(gCurrentFIFOLength);
     print_line_ending(kLE_NORM);
   }
   // QU,4 prints out current stack high water value
   else if (4u == parameter_number)
   {
-    printf (
-      (far rom char *)"4,%03X" 
-      ,gStackHighWater
-    );
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
   }
   // CU,5 prints out current stack high water value and resets it to zero
   else if (5u == parameter_number)
   {
-    printf (
-      (far rom char *)"5,%03X" 
-      ,gStackHighWater
-    );
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
     INTCONbits.GIEL = 0;  // Turn low priority interrupts off
     gStackHighWater = 0;
@@ -2459,19 +2459,17 @@ void parse_QU_packet(void)
   // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
   else if (60u == parameter_number)
   {
-    printf (
-      (far rom char *)"60,%d" 
-      ,g_PowerMonitorThresholdADC
-    );
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_uint(g_PowerMonitorThresholdADC);
     print_line_ending(kLE_NORM);
   }
   // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
   else if (61u == parameter_number)
   {
-    printf (
-      (far rom char *)"61,%d" 
-      ,g_StepperDisableTimeoutS
-    );
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    ebb_print_uint(g_StepperDisableTimeoutS);
     print_line_ending(kLE_NORM);
   }
   else
@@ -2720,14 +2718,15 @@ void parse_I_packet(void)
 {
   print_command(TRUE, TRUE);
 
-  printf(
-    (far rom char*)"%03i,%03i,%03i,%03i,%03i", 
-    PORTA,
-    PORTB,
-    PORTC,
-    PORTD,
-    PORTE
-  );
+  ebb_print_uint(PORTA);
+  ebb_print_char(',');
+  ebb_print_uint(PORTB);
+  ebb_print_char(',');
+  ebb_print_uint(PORTC);
+  ebb_print_char(',');
+  ebb_print_uint(PORTD);
+  ebb_print_char(',');
+  ebb_print_uint(PORTE);
   print_line_ending(kLE_NORM);
 }
 
@@ -2736,7 +2735,7 @@ void parse_V_packet(void)
 {
   print_command(FALSE, TRUE);
   
-  printf((far rom char *)st_version);
+  ebb_print((far rom char *)st_version);
   print_line_ending(kLE_NORM);
 }
 
@@ -2761,11 +2760,10 @@ void parse_A_packet(void)
   {
     if (ChannelBit & AnalogEnabledChannels)
     {
-      printf(
-        (far rom char *)",%02u:%04u"
-        ,channel
-        ,ISR_A_FIFO[channel]
-      );
+      ebb_print_char(',');
+      ebb_print_uint(channel);
+      ebb_print_char(':');
+      ebb_print_uint(ISR_A_FIFO[channel]);
     }
     ChannelBit = ChannelBit << 1;
   }
@@ -2832,10 +2830,7 @@ void parse_MR_packet(void)
   }
 
   // Now send back the MR packet
-  printf (
-    (far rom char *)"%03u" 
-    ,value
-  );
+  ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }
 
@@ -2946,9 +2941,9 @@ void parse_PD_packet(void)
 // value for that pin.
 void parse_PI_packet(void)
 {
-  unsigned char port;
-  unsigned char pin;
-  unsigned char value = 0;
+  UINT8 port;
+  UINT8 pin;
+  UINT8 value = 0;
 
   print_command(TRUE, TRUE);
 
@@ -3002,10 +2997,7 @@ void parse_PI_packet(void)
   }
 
   // Now send back our response
-  printf(
-   (far rom char *)"%1u" 
-   ,value
-  );
+  ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }
 
@@ -3260,7 +3252,7 @@ void parse_QR_packet(void)
 {
   print_command(FALSE, TRUE);
 
-  printf((far rom char *)"%1u", RCServoPowerIO_PORT);
+  ebb_print_uint(RCServoPowerIO_PORT);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_REV);
@@ -3339,21 +3331,29 @@ void parse_CK_packet(void)
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
-  printf((rom char far *)"Param1=%d", SByte);
+  ebb_print((rom char far *)"Param1=");
+  ebb_print_int(SByte);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param2=%d", UByte);
+  ebb_print((rom char far *)"Param2=");
+  ebb_print_uint(UByte);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param3=%d", SInt);
+  ebb_print((rom char far *)"Param3=");
+  ebb_print_int(SInt);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param4=%u", UInt);
+  ebb_print((rom char far *)"Param4=");
+  ebb_print_uint(UInt);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param5=%ld", SLong);
+  ebb_print((rom char far *)"Param5=");
+  ebb_print_int(SLong);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param6=%lu", ULong);
+  ebb_print((rom char far *)"Param6=");
+  ebb_print_uint(ULong);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param7=%c", UChar);
+  ebb_print((rom char far *)"Param7=");
+  ebb_print_char(UChar);
   print_line_ending(kLE_NORM);
-  printf((rom char far *)"Param8=%c", UCaseChar);
+  ebb_print((rom char far *)"Param8=");
+  ebb_print_char(UCaseChar);
   print_line_ending(kLE_NORM);
 
   print_line_ending(kLE_OK_NORM);
@@ -3440,6 +3440,10 @@ void parse_ST_packet(void)
 // QT command : Query Tag
 // "QT<CR>"
 // Prints out the 'tag' that was set with the "ST" command previously, if any
+
+/// TODO: Optimize this by simply pointing ebb_print() at the string in FLASH?
+/// We could save 16 bytes of RAM that way and make the code simpler.
+
 void parse_QT_packet(void)
 {
   UINT8 i;
@@ -3458,7 +3462,7 @@ void parse_QT_packet(void)
   // Only print it out if the first character is printable ASCII
   if (gDeviceStringName[0] < 128u && gDeviceStringName[0] > 32u)
   {
-    printf((rom char far *)"%s", gDeviceStringName);
+    ebb_print_ram((char *)gDeviceStringName);
   }
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -3491,7 +3495,9 @@ UINT8 extract_string (
   // Check for comma where ptr points
   if (g_RX_buf[g_RX_buf_out] != ',')
   {
-    printf((rom char far *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+    ebb_print((rom char far *)"!5 Err: Need comma next, found: '");
+    ebb_print_char(g_RX_buf[g_RX_buf_out]);
+    ebb_print_char(0x27); // The ' character
     print_line_ending(kLE_NORM);
     bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
     return(0);
@@ -3772,10 +3778,8 @@ signed char extract_digit(unsigned long * acc, unsigned char digits)
 // For debugging, this command will spit out a bunch of values.
 void print_status(void)
 {
-  printf( 
-    (far rom char*)"Status=%i"
-    ,ISR_D_FIFO_length
-  );
+  ebb_print((far rom char*)"Status=");
+  ebb_print_uint(ISR_D_FIFO_length);
   print_line_ending(kLE_NORM);
 }
 

@@ -274,7 +274,6 @@
 
 #include <p18cxxx.h>
 #include <usart.h>
-#include <stdio.h>
 #include <ctype.h>
 #include <delays.h>
 #include <math.h>
@@ -287,6 +286,7 @@
 #include "delays.h"
 #include "ebb_demo.h"
 #include "RCServo2.h"
+#include "ebb_print.h"
 
 // Define this to enable the use of the C step (high) ISR. Undefine for
 // the assembly language version
@@ -1734,40 +1734,6 @@ void parse_SC_packet (void)
   print_line_ending(kLE_OK_NORM);
 }
 
-#if 0
-void fprint(float f)
-{
-  float pf = 0;
-  
-  if (f > 2147483648.0)
-  {
-      printf((far rom char *)"f too big");
-      print_line_ending(kLE_REV);
-  }
-  else
-  {
-    if (f < -2147483648.0)
-    {
-      printf((far rom char *)"f too small");
-      print_line_ending(kLE_REV);
-    }
-    else
-    {
-      if (f < 0.0)
-      {
-        pf = 0.0 - f;
-      }
-      else
-      {
-        pf = f;
-      }
-      printf((far rom char *)"%ld.%04lu", (INT32)f, (UINT32)((pf - (float)((INT32)pf)) * 10000));
-      print_line_ending(kLE_REV);
-    }
-  }
-}
-#endif
-
 // This function "looks ahead" at the start of a move (while it is being
 // parsed) to figure out if we need to negate the accumulator (i.e. start from
 // 0x7FFFFFFFUL). Since this is common to LM/LT/L3/T3, and once for each axis,
@@ -2338,16 +2304,22 @@ void process_low_level_move(
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     // Print the final values used by the ISR for this move
-    printf((far rom char *)"R1=%ld S1=%lu A1=%ld J1=%ld R2=%ld S2=%lu A2=%ld J2=%ld",
-      gMoveTemp.Rate[0],       // Rate1 signed 32 bit
-      gMoveTemp.Steps[0],      // Steps1 (now) unsigned 31 bit
-      gMoveTemp.Accel[0],      // Accel1 signed 32 bit
-      gMoveTemp.Jerk[0],       // Jerk1 signed 32 bit
-      gMoveTemp.Rate[1],       // Rate2 signed 32 bit
-      gMoveTemp.Steps[1],      // Steps2 (now) unsigned 31 bit
-      gMoveTemp.Accel[1],      // Accel2 signed 32 bit
-      gMoveTemp.Jerk[1]        // Jerk2 signed 32 bit
-    );
+    ebb_print((far rom char *)"R1=");
+    ebb_print_int(gMoveTemp.Rate[0].value);
+    ebb_print((far rom char *)" S1=");
+    ebb_print_uint(gMoveTemp.Steps[0]);
+    ebb_print((far rom char *)" A1=");
+    ebb_print_int(gMoveTemp.Accel[0]);
+    ebb_print((far rom char *)" J1=");
+    ebb_print_int(gMoveTemp.Jerk[0]);
+    ebb_print((far rom char *)" R2=");
+    ebb_print_int(gMoveTemp.Rate[1].value);
+    ebb_print((far rom char *)" A2=");
+    ebb_print_uint(gMoveTemp.Steps[1]);
+    ebb_print((far rom char *)" S2=");
+    ebb_print_int(gMoveTemp.Accel[1]);
+    ebb_print((far rom char *)" J2=");
+    ebb_print_int(gMoveTemp.Jerk[1]);
     print_line_ending(kLE_REV);
   }
   
@@ -2393,7 +2365,7 @@ void parse_SM_packet(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
+      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2409,21 +2381,21 @@ void parse_SM_packet(void)
     }
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
+      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
       print_line_ending(kLE_REV);
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2439,19 +2411,19 @@ void parse_SM_packet(void)
 
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
+      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
       print_line_ending(kLE_REV);
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2575,7 +2547,7 @@ void parse_HM_packet(void)
   // Check for too many steps to step
   if ((AbsSteps1 > 0xFFFFFFl) || (AbsSteps2 > 0xFFFFFFl))
   {
-    printf((far rom char *)"!0 Err: steps to home larger than 16,777,215.");
+    ebb_print((far rom char *)"!0 Err: steps to home larger than 16,777,215.");
     print_line_ending(kLE_REV);
     return;
   }
@@ -2588,7 +2560,7 @@ void parse_HM_packet(void)
     // Check for too fast 
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2630,7 +2602,7 @@ void parse_HM_packet(void)
     // Check for too fast
     if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
     {
-      printf((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2673,11 +2645,12 @@ void parse_HM_packet(void)
 
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
-    printf((far rom char *)"HM Duration=%lu SA1=%li SA2=%li",
-      Duration,
-      Steps1,
-      Steps2
-    );
+    ebb_print((far rom char *)"HM Duration=");
+    ebb_print_uint(Duration);
+    ebb_print((far rom char *)" SA1=");
+    ebb_print_int(Steps1);
+    ebb_print((far rom char *)" SA2=");
+    ebb_print_int(Steps2);
     print_line_ending(kLE_REV);
   }
 
@@ -2745,27 +2718,27 @@ void parse_XM_packet(void)
     // Limit each parameter to just 3 bytes
     if (Duration > 0xFFFFFF) 
     {
-      printf((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
+      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
       print_line_ending(kLE_REV);
       return;
     }
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
+      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
       print_line_ending(kLE_REV);
       return;
     }
     // Check for too fast
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2783,19 +2756,19 @@ void parse_XM_packet(void)
   {
     if (Steps > 0xFFFFFFl) 
     {
-      printf((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
+      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
       print_line_ending(kLE_REV);
       return;
     }
     if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
     {
-      printf((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
@@ -2848,11 +2821,12 @@ static void process_simple_motor_move(
   }
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
-    printf((far rom char *)"Duration=%lu SA1=%li SA2=%li",
-      Duration,
-      A1Stp,
-      A2Stp
-    );
+    ebb_print((far rom char *)"Duration=");
+    ebb_print_uint(Duration);
+    ebb_print((far rom char *)" SA1=");
+    ebb_print_int(A1Stp);
+    ebb_print((far rom char *)" SA2=");
+    ebb_print_int(A2Stp);
     print_line_ending(kLE_REV);
   }
   
@@ -2921,7 +2895,8 @@ static void process_simple_motor_move(
       {
         if (Duration > ((UINT32)A1Stp * 763u)) 
         {
-          printf((far rom char *)"Major malfunction Axis1 duration too long : %lu", Duration);
+          ebb_print((far rom char *)"Major malfunction Axis1 duration too long : ");
+          ebb_print_uint(Duration);
           print_line_ending(kLE_REV);
           temp = 0;
           A1Stp = 0;
@@ -2954,13 +2929,14 @@ static void process_simple_motor_move(
       }
       if (temp > 0x8000) 
       {
-        printf((far rom char *)"Major malfunction Axis1 StepCounter too high : %lu", temp);
+        ebb_print((far rom char *)"Major malfunction Axis1 StepCounter too high : ");
+        ebb_print_uint(temp);
         print_line_ending(kLE_REV);
         temp = 0x8000;
       }
       if (temp == 0u && A1Stp != 0) 
       {
-        printf((far rom char *)"Major malfunction Axis1 StepCounter zero");
+        ebb_print((far rom char *)"Major malfunction Axis1 StepCounter zero");
         print_line_ending(kLE_REV);
         temp = 1;
       }
@@ -3005,13 +2981,14 @@ static void process_simple_motor_move(
       }
       if (temp > 0x8000) 
       {
-        printf((far rom char *)"Major malfunction Axis2 StepCounter too high : %lu", temp);
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter too high : ");
+        ebb_print_uint(temp);
         print_line_ending(kLE_REV);
         temp = 0x8000;
       }
       if (temp == 0u && A2Stp != 0) 
       {
-        printf((far rom char *)"Major malfunction Axis2 StepCounter zero");
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter zero");
         print_line_ending(kLE_REV);
         temp = 1;
       }
@@ -3036,12 +3013,14 @@ static void process_simple_motor_move(
 
     if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
-      printf((far rom char *)"R1=%lu S1=%lu R2=%lu S2=%lu",
-        gMoveTemp.Rate[0],
-        gMoveTemp.Steps[0],
-        gMoveTemp.Rate[1],
-        gMoveTemp.Steps[1]
-      );
+      ebb_print((far rom char *)"R1=");
+      ebb_print_uint(gMoveTemp.Rate[0].value);
+      ebb_print((far rom char *)" S1=");
+      ebb_print_uint(gMoveTemp.Steps[0]);
+      ebb_print((far rom char *)" R2=");
+      ebb_print_uint(gMoveTemp.Rate[1].value);
+      ebb_print((far rom char *)" S2=");
+      ebb_print_uint(gMoveTemp.Steps[1]);
       print_line_ending(kLE_REV);
     }
   }
@@ -3143,9 +3122,7 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
-  printf((far rom char *)"%d", 
-    command_interrupted
-  );
+  ebb_print_uint(command_interrupted);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_REV);
@@ -3161,7 +3138,7 @@ void parse_QP_packet(void)
 {
   print_command(FALSE, TRUE);
 
-  printf((far rom char *)"%d", PenState);
+  ebb_print_uint(PenState);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_REV);
@@ -3232,7 +3209,9 @@ void parse_QE_packet(void)
     }
   }
 
-  printf((far rom char *)"%d,%d", motor1_state, motor2_state);
+  ebb_print_uint(motor1_state);
+  ebb_print_char(',');
+  ebb_print_uint(motor2_state);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_REV);
@@ -3493,7 +3472,7 @@ void parse_QN_packet(void)
 {
   print_command(FALSE, TRUE);
 
-  printf((far rom char*)"%010lu", NodeCount);
+  ebb_print_uint(NodeCount);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
@@ -3561,7 +3540,7 @@ void parse_QL_packet(void)
     Index = (SL_STORAGE_SIZE - 1);
   }
   
-  printf((far rom char*)"%03i", gSL_Storage[Index]);
+  ebb_print_uint(gSL_Storage[Index]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
@@ -3577,7 +3556,7 @@ void  parse_QB_packet(void)
 {
   print_command(FALSE, TRUE);
 
-  printf((far rom char*)"%1i", ButtonPushed);
+  ebb_print_uint(ButtonPushed);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
@@ -3609,7 +3588,9 @@ void parse_QC_packet(void)
 
   // Print out our results
   print_command(FALSE, TRUE);
-  printf((far rom char*)"%04i,%04i", ISR_A_FIFO[0], ISR_A_FIFO[11]);
+  ebb_print_int(ISR_A_FIFO[0]);
+  ebb_print_char(',');
+  ebb_print_int(ISR_A_FIFO[11]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_NORM);
@@ -3658,7 +3639,7 @@ void parse_QG_packet(void)
     result = result | (1 << 7);
   }
 
-  printf((far rom char*)"%02X", result);
+  ebb_print_hex(result, 2);
   print_line_ending(kLE_NORM);
   
   // Reset the button pushed flag
@@ -3877,7 +3858,13 @@ void parse_QM_packet(void)
     CommandExecuting = 1;
   }
 
-  printf((far ROM char *)"%i,%i,%i,%i", CommandExecuting, Motor1Running, Motor2Running, FIFOStatus);
+  ebb_print_int(CommandExecuting);
+  ebb_print_char(',');
+  ebb_print_int(Motor1Running);
+  ebb_print_char(',');
+  ebb_print_int(Motor2Running);
+  ebb_print_char(',');
+  ebb_print_int(FIFOStatus);
   print_line_ending(kLE_REV);
 }
 
@@ -3905,7 +3892,9 @@ void parse_QS_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
 
-  printf((far ROM char *)"%li,%li", step1, step2);
+  ebb_print_int(step1);
+  ebb_print_char(',');
+  ebb_print_int(step2);
   if (!bittstzero(gStandardizedCommandFormat))
   {
     print_line_ending(kLE_REV);

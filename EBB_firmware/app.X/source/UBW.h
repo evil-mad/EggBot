@@ -189,5 +189,6 @@ void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
 void AnalogConfigure (unsigned char Channel, unsigned char Enable);
 void populateDeviceStringWithName(void);
+int ebb_putc(char c);        // Our USB based stream character printer
 
 #endif //UBW_H

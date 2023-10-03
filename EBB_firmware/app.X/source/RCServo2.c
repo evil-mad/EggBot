@@ -54,7 +54,7 @@
  * Started by Brian Schmalz (www.schmalzhaus.com) on 8/22/09
  * For the Egg Bot Firmware
  *
- * There are several paarts of this file. It is written in a modular
+ * There are several parts of this file. It is written in a modular
  * way to ease incorporation into different UBW (www.schmalzhaus.com/UBW) 
  * hardware builds. Because we don't want to have any function calls in the ISR,
  * the part of the ISR that this module contributes is implemented as a big
@@ -62,7 +62,7 @@
  * on/off RC method 2 and to set values and configure outputs. Then there is the
  * user command section that handles parsing user input. This module (the .c and
  * .h files) should be able to be dropped into any UBW firmware that is 'module
- * aware' with minimial changes. There is also an init section that gets called
+ * aware' with minimal changes. There is also an init section that gets called
  * on bootup.
  *
  * MODULE THEORY
@@ -71,9 +71,9 @@
  * We want a maximum of resolution in their timing, and a minimum of CPU and ISR
  * overhead. We want maximum flexibility with respect to which pins receive the
  * output pulses. This 'method 2' only works with PICs that have the PPS
- * (Perhipheral Pin Select) hardware. Using this method, we will be able to
+ * (Peripheral Pin Select) hardware. Using this method, we will be able to
  * generate servo output pulses (positive going) on up to eight output pins
- * (selectable using PPS), with times from 0ms to 3ms, at a repitition rate of
+ * (selectable using PPS), with times from 0ms to 3ms, at a repetition rate of
  * 24ms. The resolution of the pulse will be 83ns (Fosc/4). So a value of 0 will
  * represent 0ms pulse, and 36000 will represent 3ms.
  *
@@ -93,8 +93,8 @@
  * queue and then 'executes' the command. (All it does there is transfer the
  * proper values to the data structures that the actual RC servo ISR uses to
  * update the various output pins for each servo pulse.) But the key here is
- * that the S2 command no longer takes effect immediatly - RC servo commands
- * are now handleded in the same way that SM commands are handled. Which means
+ * that the S2 command no longer takes effect immediately - RC servo commands
+ * are now handled in the same way that SM commands are handled. Which means
  * they can be queued up and delays added, etc.
  *
  * The other effect of this change is that the normal SP pen up/pen down
@@ -102,7 +102,6 @@
  */
 
 #include <p18cxxx.h>
-#include <stdio.h>
 #include <ctype.h>
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
@@ -148,7 +147,7 @@ can fire up to 8 RC servo's pulses (slots). Each pulse can be between
 0ms and 3ms long, controlled entirely by the ECCP2 hardware,
 so there is no jitter in the high time of the pulse.
 
-We want to go from 0ms to 3ms so we can accomodate RC servos
+We want to go from 0ms to 3ms so we can accommodate RC servos
 who need really short or really long pulses to reach the
 physical extremes of its motion.
 
