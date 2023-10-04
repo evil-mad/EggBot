@@ -19,6 +19,7 @@
       <itemPath>source/RCServo2.h</itemPath>
       <itemPath>source/UBW.h</itemPath>
       <itemPath>source/usb_config.h</itemPath>
+      <itemPath>source/ebb_print.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -48,6 +49,7 @@
       <itemPath>source/usb_descriptors.c</itemPath>
       <itemPath>source/ebb_demo.c</itemPath>
       <itemPath>source/isr_helpers.asm</itemPath>
+      <itemPath>source/ebb_print.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -111,7 +113,7 @@
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
-        <makeCustomizationPostStep>"C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o</makeCustomizationPostStep>
+        <makeCustomizationPostStep>"C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o build/EBBv13_with_bootloader/production/source/ebb_print.o</makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
