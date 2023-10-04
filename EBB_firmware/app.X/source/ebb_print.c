@@ -30,6 +30,19 @@
 #include "UBW.h"
 #include "ebb_print.h"
 
+// Maximum number of output characters, plus sign, plus trailing 0x00
+// hex needs FFFFFFFF = 9
+// uint needs 4294967296 = 11
+// int needs -2147483649 = 12
+#define EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS   12
+
+// String where we build up our output before printing it out
+static char gOutputStr[EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS];
+
+// Current position within gOutputStr
+static UINT8 gPos;
+
+static UINT8 i;
 
 /* Print a simple string */
 void ebb_print(far rom char * print_str)
@@ -53,18 +66,67 @@ void ebb_print_ram(char * print_str)
 // Print out <data> as a hex value, zero-padded to <length> digits
 void ebb_print_hex(UINT32 data, UINT8 length)
 {
+  gOutputStr[EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 1] = 0x00;  // Always add string terminator
+  gPos = (EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 2);
   
+  do
+  {
+    i = data & 0x0000000F;
+    
+    if (i <= 0x09u)
+    {
+      gOutputStr[gPos] = i + '0';
+    }
+    else
+    {
+      gOutputStr[gPos] = i + ('A' - 0x0A);
+    }
+    
+    data = data >> 4;
+    gPos--;
+    if (length)
+    {
+      length--;
+    }
+  }
+  while (data != 0u || length != 0u);
+  
+  gPos++;
+  // gPos now points to the beginning of where we need to print from
+  ebb_print_ram(&gOutputStr[gPos]);
 }
 
 // Print out <data> as an unsigned integer
 void ebb_print_uint(UINT32 data)
 {
+  gOutputStr[EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 1] = 0x00;  // Always add string terminator
+  gPos = (EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 2);
   
+  do 
+  {
+    i = data % 10;
+    
+    gOutputStr[gPos] = i + '0';
+    
+    data = data / 10;
+    gPos--;
+  }
+  while (data != 0u);
+  
+  gPos++;
+  // gPos now points to the beginning of where we need to print from
+  ebb_print_ram(&gOutputStr[gPos]);  
 }
 
 // Print out <data> as a signed integer
 void ebb_print_int(INT32 data)
 {
+  // Handle negative sign
+  if (data < 0)
+  {
+    ebb_print_char('-');
+    data = -data;
+  }
   
+  ebb_print_uint(data);
 }
-

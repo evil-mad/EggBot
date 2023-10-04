@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a20"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a22"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -3355,6 +3355,12 @@ void parse_CK_packet(void)
   ebb_print((rom char far *)"Param8=");
   ebb_print_char(UCaseChar);
   print_line_ending(kLE_NORM);
+  ebb_print((rom char far *)"Param6=");
+  ebb_print_hex(ULong, 8);
+  print_line_ending(kLE_NORM);
+  ebb_print((rom char far *)"Param6=");
+  ebb_print_hex(ULong, 0);
+  print_line_ending(kLE_NORM);
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3562,7 +3568,9 @@ ExtractReturnType extract_number(
   {
     if (0u == Required)
     {
-      printf ((rom char far *)"!5 Err: Need comma next, found: '%c'", g_RX_buf[g_RX_buf_out]);
+      ebb_print((rom char far *)"!5 Err: Need comma next, found: '");
+      ebb_print_char(g_RX_buf[g_RX_buf_out]);
+      ebb_print_char(0x27);     // The ' character
       print_line_ending(kLE_NORM);
       bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
     }
