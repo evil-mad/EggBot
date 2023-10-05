@@ -3672,7 +3672,6 @@ void parse_QG_packet(void)
 // The engraver motor is always assumed to be on RB3
 // So our init routine will map ECCP1
 //
-// Timer0 is RC command
 // Timer1 is stepper
 // Timer2 and ECCP1 is engraver PWM
 // Timer3 and ECCP2 is RC servo2 output

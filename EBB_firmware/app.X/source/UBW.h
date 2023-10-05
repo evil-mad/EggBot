@@ -141,9 +141,6 @@ typedef enum {
    ,kSTEPPER_TIMEOUT_FIRED      // Timeout happened, steppers disabled
 } tStepperDisableTimeout;
 
-
-#define kRC_DATA_SIZE                 24u  // In structs, since there are 3 ports of 8 bits each
-
 extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
 extern volatile unsigned int ISR_A_FIFO[16];      // Stores the most recent analog conversions
@@ -151,9 +148,6 @@ extern volatile unsigned int ISR_A_FIFO[16];      // Stores the most recent anal
 extern unsigned char error_byte;
 //extern unsigned char error_byte;
 extern BOOL	g_ack_enable;
-
-extern volatile UINT16 g_RC_value[kRC_DATA_SIZE];   // Stores reload values for TMR0
-extern volatile tRC_state g_RC_state[kRC_DATA_SIZE];
 
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
 extern volatile unsigned long int gRCServoPoweroffCounterReloadMS;

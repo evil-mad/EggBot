@@ -156,8 +156,6 @@ const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a23"}
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
 volatile unsigned char ISR_D_FIFO[3][kISR_FIFO_D_DEPTH];  // FIFO of actual data
-volatile tRC_state g_RC_state[kRC_DATA_SIZE];             // Stores states for each pin for RC command
-volatile UINT16 g_RC_value[kRC_DATA_SIZE];          // Stores reload values for TMR0
 
 #pragma udata com_tx_buf = 0x200
 // USB Transmit buffer for packets (back to PC)
@@ -260,7 +258,6 @@ void parse_PO_packet(void);    // PO for setting a single pin state
 void parse_PD_packet(void);    // PD for setting a pin's direction
 void parse_MR_packet(void);    // MR for Memory Read
 void parse_MW_packet(void);    // MW for Memory Write
-void parse_RC_packet(void);    // RC is for outputting RC servo pulses 
 void parse_CU_packet(void);    // CU configures UBW (system wide parameters)
 #if PC_PG_T_COMMANDS_ENABLED
 void parse_T_packet(void);     // T for setting up timed I/O (digital or analog)
@@ -664,40 +661,6 @@ void low_ISR(void)
       ADCON0bits.GO_DONE = 1;
     }
   }
-
-  // Do we have a TMR0 interrupt? (RC command)
-  // TMR0 is in 16 bit mode, and counts up to FFFF and overflows, generating
-  // this interrupt.
-  if (INTCONbits.TMR0IF)
-  {
-    // Turn off Timer0
-    T0CONbits.TMR0ON = 0;
-
-    // Clear the interrupt
-    INTCONbits.TMR0IF = 0;
-
-    // And disable it
-    INTCONbits.TMR0IE = 0;
-
-    // Only do our stuff if the pin is in the proper state
-    if (kTIMING == g_RC_state[g_RC_timing_ptr])
-    {
-      // All we need to do is clear the pin and change its state to kWAITING
-      if (g_RC_timing_ptr < 8u)
-      {
-        bitclr(LATA, g_RC_timing_ptr & 0x7);
-      }
-      else if (g_RC_timing_ptr < 16u)
-      {
-        bitclr(LATB, g_RC_timing_ptr & 0x7);
-      }
-      else
-      {
-        bitclr(LATC, g_RC_timing_ptr & 0x7);
-      }
-      g_RC_state[g_RC_timing_ptr] = kWAITING;
-    }
-  }
 }
 
 //////// JUST FOR TESTING - DELETE
@@ -846,21 +809,6 @@ void UserInit(void)
   g_RC_primed_ptr = 0;
   g_RC_next_ptr = 0;
   g_RC_timing_ptr = 0;
-
-  // Clear the RC data structure
-  for (i = 0; i < kRC_DATA_SIZE; i++)
-  {
-    g_RC_value[i] = 0;
-    g_RC_state[i] = kOFF;
-  }
-
-  // Enable TMR0 for our RC timing operation
-  T0CONbits.PSA = 1;      // Do NOT use the prescaler
-  T0CONbits.T0CS = 0;     // Use internal clock
-  T0CONbits.T08BIT = 0;   // 16 bit timer
-  INTCONbits.TMR0IF = 0;  // Clear the interrupt flag
-  INTCONbits.TMR0IE = 0;  // And clear the interrupt enable
-  INTCON2bits.TMR0IP = 0; // Low priority
 
   // Turn on band-gap
   ANCON1bits.VBGEN = 1;
