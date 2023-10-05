@@ -1899,7 +1899,6 @@ void parse_L3_packet(void)
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_T3_packet(void)
 {
-  UINT32 gTmpIntervals = 0;
   ExtractReturnType ClearRet;
 
   print_command(FALSE, FALSE);

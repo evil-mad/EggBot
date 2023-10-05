@@ -195,15 +195,14 @@ command_list = [
 response = ebb_serial.query(the_port, 'V\r')
 print("Firmware version: " + response)
 
-# response = ebb_serial.query(the_port, "QU,2\r") # EBB 3+: Read max FIFO depth
-# print("FIFO Max depth query: " + response.strip())
+response = ebb_serial.query(the_port, "QU,2\r") # EBB 3+: Read max FIFO depth
+print("FIFO Max depth query: " + response.strip())
 
-# ebb_serial.command(the_port, "CU,3,1" + '\r') # Enable data-low LED
-# ebb_serial.command(the_port, "CU,4,25" + '\r') # Set FIFO depth
+ebb_serial.command(the_port, "CU,3,1" + '\r') # Enable data-low LED
+ebb_serial.command(the_port, "CU,4,25" + '\r') # Set FIFO depth
 
-# response = ebb_serial.query(the_port, "QU,3\r") # EBB 3+: Read new FIFO depth
-# print("FIFO new depth query: " + response)
-
+response = ebb_serial.query(the_port, "QU,3\r") # EBB 3+: Read new FIFO depth
+print("FIFO new depth query: " + response)
 
 last_command = ""
 
@@ -226,10 +225,10 @@ block(ad)
 response = ebb_serial.query(the_port, 'QU,4\r')
 print("Final QU,4:: " + response.strip())
 
-# response = ebb_serial.query(the_port, "QU,4\r") # EBB 3+: Read EBB stack max depth
-# print("Max stack depth: " + response)
+response = ebb_serial.query(the_port, "QU,4\r") # EBB 3+: Read EBB stack max depth
+print("Max stack depth: " + response)
 
-# print(last_command + " :: ")
+print(last_command + " :: ")
 
 
 ad.disconnect()             # Close serial port to AxiDraw
