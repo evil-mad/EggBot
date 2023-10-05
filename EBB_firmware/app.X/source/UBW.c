@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a22"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a23"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -727,7 +727,7 @@ void fill_stack(void)
 // Walk backwards in the stack RAM section looking of 0xEEs. When we stop
 // seeing them, then we know that's the highest value of the stack to this point.
 // Print that location out.
-void print_high_water(UINT8 tag)
+void check_high_water(void)
 {
   UINT8 nib2;
   UINT8 * stackPtr = (UINT8 *)0xEBF;
@@ -742,136 +742,10 @@ void print_high_water(UINT8 tag)
   if ((UINT16)stackPtr > gStackHighWater)
   {
     gStackHighWater = (UINT16)stackPtr;
-
-    // First print out tag value
-    nib2 = tag >> 4;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = tag & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    PrintChar(',');
-
-    nib2 = (gStackHighWater >> 8) & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = (gStackHighWater >> 4) & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = gStackHighWater & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    PrintChar('\n');
   }
 
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on  
 }
-
-// Print out the current stack pointer value, along with a tag number, 
-void print_stack(UINT8 tag)
-{
-  UINT8 nib2;
-
-  // Read out the current value of FSR1 (stack pointer)
-  // If the new value is higher than gStackHighWater, then update gStackHighWater
-  // This will record the highest value the stack pointer attains
-  INTCONbits.GIEL = 1;  // Turn low priority interrupts off
-  _asm
-    MOVFF FSR1H, tempStackPointerHigh
-    MOVFF FSR1L, tempStackPointerLow
-  _endasm
-    
-  tempStackPointer = ((((UINT16)tempStackPointerHigh) << 8) | tempStackPointerLow);
-  if (tempStackPointer > gStackHighWater)
-  {
-    gStackHighWater = tempStackPointer;
-
-    // First print out tag value
-    nib2 = tag >> 4;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = tag & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    PrintChar(',');
-
-    nib2 = (gStackHighWater >> 8) & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = (gStackHighWater >> 4) & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    nib2 = gStackHighWater & 0x0F;
-    if (nib2 <= 9u)
-    {
-      PrintChar(nib2 + '0');
-    }
-    else
-    {
-      PrintChar(nib2 + 'A' - 10);
-    }
-    PrintChar('\n');
-  }
-
-  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
-}
-
-
-
 
 ///////
 
@@ -1201,9 +1075,7 @@ void ProcessIO(void)
         {
           last_command[i] = g_RX_buf[i];
         }
-  print_high_water(6);
         parse_packet();
-  print_high_water(7);
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
       }
@@ -1545,8 +1417,6 @@ void parse_packet(void)
     }
   }
 
-  print_high_water(8);
-  
   if (checksumOK)
   {
     // Always grab the first character (which is the first byte of the command)
@@ -1622,9 +1492,7 @@ void parse_packet(void)
       case 'V':
       {
         // Version command
-  print_high_water(9);
         parse_V_packet();
-  print_high_water(10);
         break;
       }
       case 'A':
@@ -2440,6 +2308,7 @@ void parse_QU_packet(void)
   // QU,4 prints out current stack high water value
   else if (4u == parameter_number)
   {
+    check_high_water();
     ebb_print_uint(parameter_number);
     ebb_print_char(',');
     ebb_print_hex(gStackHighWater, 3);

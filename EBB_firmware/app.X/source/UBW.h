@@ -176,7 +176,7 @@ extern volatile tStepperDisableTimeout g_StepperDisableState;  // Stores state o
 /** P U B L I C  P R O T O T Y P E S *****************************************/
 void print_stack(UINT8 tag);
 void fill_stack(void);
-void print_high_water(UINT8 tag);
+void check_high_water(void);
 void UserInit (void);
 void ProcessIO (void);
 void low_ISR (void);

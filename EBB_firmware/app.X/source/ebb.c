@@ -309,13 +309,6 @@ typedef enum
   SOLENOID_PWM
 } SolenoidStateType;
 
-static void process_simple_motor_move(
-  UINT32 Duration,
-  INT32 A1Stp,
-  INT32 A2Stp,
-  UINT8 ClearAccs
-);
-
 // This is the FIFO that stores the motion commands. It spans multiple RAM
 // banks from 0x800 through 0xCFF, and must only be accessed via pointer
 #pragma udata FIFO_scn
@@ -424,28 +417,34 @@ BOOL gLimitChecks;
 // command reply format
 UINT8 gStandardizedCommandFormat;
 
+// These globals replace the local (stack) variables used during processing
+// and parsing of stepper motor commands. They also take the place of parameters
+// for the two low-level (process_low_level and process_simple) move functions.
+// Since we know that we can never be working on more than one of these commands
+// at the same time, and since we have enough global RAM space, it makes some
+// sense to make these static globals. This reduces the change of a stack
+// overflow.
+
+static UINT32 gTmpDurationMS;
+static UINT32 gTmpIntervals;
+static INT32  gTmpRate1;
+static INT32  gTmpRate2;
+static INT32  gTmpSteps1;
+static INT32  gTmpSteps2;
+static INT32  gTmpAccel1;
+static INT32  gTmpAccel2;
+static INT32  gTmpJerk1;
+static INT32  gTmpJerk2;
+static UINT32 gTmpClearAccs;
+
+
 
 // Local function definitions
-void clear_StepCounters(void);
-
-static void process_low_level_move(
-  UINT32 Intervals,
-  INT32 Rate1, 
-  INT32 Steps1,
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Steps2,
-  INT32 Accel2, 
-  INT32 Jerk2,
-  BOOL TimedMove,
-  UINT32 ClearAccs,
-  ExtractReturnType ClearRet);
-
-static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk);
+static void clear_StepCounters(void);
+static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
+static void process_simple_motor_move(void);
 
 extern void FIFO_COPY(void);
-
 
 // High ISR
 #pragma interrupt high_ISR
@@ -1734,44 +1733,6 @@ void parse_SC_packet (void)
   print_line_ending(kLE_OK_NORM);
 }
 
-// This function "looks ahead" at the start of a move (while it is being
-// parsed) to figure out if we need to negate the accumulator (i.e. start from
-// 0x7FFFFFFFUL). Since this is common to LM/LT/L3/T3, and once for each axis,
-// it gets its own function.
-static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk)
-{
-  INT32 RateTemp = 0;
-  
-  RateTemp = Rate + Accel;
-  if (RateTemp < 0)
-  {
-    return(TRUE);
-  }
-  else
-  {
-    if (RateTemp == 0)
-    {
-      RateTemp = Accel + Jerk;
-      if (RateTemp < 0)
-      {
-        return(TRUE);
-      }
-      else
-      {
-        if (RateTemp == 0)
-        {
-          if (Jerk < 0)
-          {
-            return(TRUE);
-          }
-        }
-      }
-    }
-  }
-  return(FALSE);
-}
-
-
 // Low Level Move command
 // Usage: LM,<Rate1>,<Steps1>,<Accel1>,<Rate2>,<Steps2>,<Accel2>,<ClearAccs><CR>
 //
@@ -1794,25 +1755,18 @@ static BOOL NeedNegativeAccumulator(INT32 Rate, INT32 Accel, INT32 Jerk)
 // clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LM_packet(void)
 {
-  INT32 Rate1 = 0;
-  INT32 Rate2 = 0;
-  INT32 Steps1 = 0;
-  INT32 Steps2 = 0;
-  INT32 Accel1 = 0;
-  INT32 Accel2 = 0;
-  UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
 
   print_command(FALSE, FALSE);
   
   // Extract each of the values.
-  extract_number(kLONG,  &Rate1,     kREQUIRED);
-  extract_number(kLONG,  &Steps1,    kREQUIRED);
-  extract_number(kLONG,  &Accel1,    kREQUIRED);
-  extract_number(kLONG,  &Rate2,     kREQUIRED);
-  extract_number(kLONG,  &Steps2,    kREQUIRED);
-  extract_number(kLONG,  &Accel2,    kREQUIRED);
-  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+  extract_number(kLONG,  &gTmpRate1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpRate2,     kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps2,    kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel2,    kREQUIRED);
+  ClearRet = extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1826,15 +1780,15 @@ void parse_LM_packet(void)
     // like LM,1,0,2,0,0,0. Or LM,0,1,0,0,0,0,0 GH issue #78
     if (
       (
-        ((Rate1 == 0) && (Accel1 == 0))
+        ((gTmpRate1 == 0) && (gTmpAccel1 == 0))
         ||
-        (Steps1 == 0)
+        (gTmpSteps1 == 0)
       )
       &&
       (
-        ((Rate2 == 0) && (Accel2 == 0))
+        ((gTmpRate2 == 0) && (gTmpAccel2 == 0))
         ||
-        (Steps2 == 0)
+        (gTmpSteps2 == 0)
       )
     )
     {
@@ -1843,20 +1797,12 @@ void parse_LM_packet(void)
     }
   }
   
-  process_low_level_move(
-    0,
-    Rate1, 
-    Steps1, 
-    Accel1, 
-    0, 
-    Rate2, 
-    Steps2, 
-    Accel2, 
-    0, 
-    FALSE,
-    ClearAccs, 
-    ClearRet
-  );
+  // We don't need Intervals or Jerks, so set them to zero before calling low_level
+  gTmpIntervals = 0;
+  gTmpJerk1 = 0;
+  gTmpJerk2 = 0;
+  
+  process_low_level_move(FALSE, ClearRet);
 }
 
 // Low Level third derivative Move command
@@ -1883,29 +1829,20 @@ void parse_LM_packet(void)
 // clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_L3_packet(void)
 {
-  INT32 Rate1 = 0;
-  INT32 Rate2 = 0;
-  INT32 Steps1 = 0;
-  INT32 Steps2 = 0;
-  INT32 Accel1 = 0;
-  INT32 Accel2 = 0;
-  INT32 Jerk1 = 0;
-  INT32 Jerk2 = 0;
-  UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
   
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kLONG,  &Rate1,     kREQUIRED);
-  extract_number(kLONG,  &Steps1,    kREQUIRED);
-  extract_number(kLONG,  &Accel1,    kREQUIRED);
-  extract_number(kLONG,  &Jerk1,     kREQUIRED);
-  extract_number(kLONG,  &Rate2,     kREQUIRED);
-  extract_number(kLONG,  &Steps2,    kREQUIRED);
-  extract_number(kLONG,  &Accel2,    kREQUIRED);
-  extract_number(kLONG,  &Jerk2,     kREQUIRED);
-  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+  extract_number(kLONG,  &gTmpRate1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpJerk1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpRate2,     kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps2,    kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel2,    kREQUIRED);
+  extract_number(kLONG,  &gTmpJerk2,     kREQUIRED);
+  ClearRet = extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -1919,15 +1856,15 @@ void parse_L3_packet(void)
     // like L3,1,0,2,3,0,0,0,0. Or L3,0,1,0,0,0,0,0,0,0 GH issue #78
     if (
       (
-        ((Rate1 == 0) && (Accel1 == 0) && (Jerk1 == 0))
+        ((gTmpRate1 == 0) && (gTmpAccel1 == 0) && (gTmpJerk1 == 0))
         ||
-        (Steps1 == 0)
+        (gTmpSteps1 == 0)
       )
       &&
       (
-        ((Rate2 == 0) && (Accel2 == 0) && (Jerk1 == 0))
+        ((gTmpRate2 == 0) && (gTmpAccel2 == 0) && (gTmpJerk1 == 0))
         ||
-        (Steps2 == 0)
+        (gTmpSteps2 == 0)
       )
     )
     {
@@ -1936,20 +1873,10 @@ void parse_L3_packet(void)
     }
   }
   
-  process_low_level_move(
-    0, 
-    Rate1, 
-    Steps1, 
-    Accel1, 
-    Jerk1, 
-    Rate2, 
-    Steps2,
-    Accel2, 
-    Jerk2, 
-    FALSE, 
-    ClearAccs, 
-    ClearRet
-  );
+  // We don't use Intervals, so set it to zero here
+  gTmpIntervals = 0;
+  
+  process_low_level_move(FALSE, ClearRet);
 }
 
 // Low Level Timed third derivative Move command
@@ -1972,27 +1899,20 @@ void parse_L3_packet(void)
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_T3_packet(void)
 {
-  UINT32 Intervals = 0;
-  INT32 Rate1 = 0;
-  INT32 Rate2 = 0;
-  INT32 Accel1 = 0;
-  INT32 Accel2 = 0;
-  INT32 Jerk1 = 0;
-  INT32 Jerk2 = 0;
-  UINT32 ClearAccs = 0;
+  UINT32 gTmpIntervals = 0;
   ExtractReturnType ClearRet;
 
   print_command(FALSE, FALSE);
   
   // Extract each of the values.
-  extract_number(kULONG, &Intervals, kREQUIRED);
-  extract_number(kLONG,  &Rate1,     kREQUIRED);
-  extract_number(kLONG,  &Accel1,    kREQUIRED);
-  extract_number(kLONG,  &Jerk1,     kREQUIRED);
-  extract_number(kLONG,  &Rate2,     kREQUIRED);
-  extract_number(kLONG,  &Accel2,    kREQUIRED);
-  extract_number(kLONG,  &Jerk2,     kREQUIRED);
-  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &gTmpIntervals, kREQUIRED);
+  extract_number(kLONG,  &gTmpRate1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpJerk1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpRate2,     kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel2,    kREQUIRED);
+  extract_number(kLONG,  &gTmpJerk2,     kREQUIRED);
+  ClearRet = extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -2004,27 +1924,18 @@ void parse_T3_packet(void)
   {
     // Eliminate obvious invalid parameter combinations,
     // like LT,0,X,X,X,X,X
-    if (Intervals == 0u)
+    if (gTmpIntervals == 0u)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
 
-  process_low_level_move(
-    Intervals, 
-    Rate1, 
-    0,
-    Accel1, 
-    Jerk1, 
-    Rate2, 
-    0,
-    Accel2, 
-    Jerk2, 
-    TRUE,
-    ClearAccs,
-    ClearRet
-  );
+  // We don't use Steps so clear them here before calling low_level
+  gTmpSteps1 = 0;
+  gTmpSteps2 = 0;
+  
+  process_low_level_move(TRUE, ClearRet);
 }
 
 // Low Level Timed Move command
@@ -2045,23 +1956,17 @@ void parse_T3_packet(void)
 // starting the move. A value of 2 will clear Motor 2's accumulator. And a value of 3 will clear both.
 void parse_LT_packet(void)
 {
-  UINT32 Intervals = 0;
-  INT32 Rate1 = 0;
-  INT32 Rate2 = 0;
-  INT32 Accel1 = 0;
-  INT32 Accel2 = 0;
-  UINT32 ClearAccs = 0;
   ExtractReturnType ClearRet;
-
+  
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kULONG, &Intervals, kREQUIRED);
-  extract_number(kLONG,  &Rate1,     kREQUIRED);
-  extract_number(kLONG,  &Accel1,    kREQUIRED);
-  extract_number(kLONG,  &Rate2,     kREQUIRED);
-  extract_number(kLONG,  &Accel2,    kREQUIRED);
-  ClearRet = extract_number(kULONG, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &gTmpIntervals, kREQUIRED);
+  extract_number(kLONG,  &gTmpRate1,     kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel1,    kREQUIRED);
+  extract_number(kLONG,  &gTmpRate2,     kREQUIRED);
+  extract_number(kLONG,  &gTmpAccel2,    kREQUIRED);
+  ClearRet = extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
   if (error_byte)
@@ -2073,46 +1978,46 @@ void parse_LT_packet(void)
   {
     // Eliminate obvious invalid parameter combinations,
     // like LT,0,X,X,X,X,X
-    if (Intervals == 0u)
+    if (gTmpIntervals == 0u)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
   
-  process_low_level_move(
-    Intervals, 
-    Rate1, 
-    0,
-    Accel1, 
-    0, 
-    Rate2, 
-    0,
-    Accel2, 
-    0, 
-    TRUE,
-    ClearAccs,
-    ClearRet
-  );
+  // We don't use Steps or Jerk, so set them to zero here
+  gTmpSteps1 = 0;
+  gTmpSteps2 = 0;
+  gTmpJerk1 = 0;
+  gTmpJerk2 = 0;
+  
+  process_low_level_move(TRUE, ClearRet);
 }
 
 // Because the code for LM, L3, LT and T3 is really the same we call a common 
 // processing function from all of them once their parameters are parsed into 
 // variables.
-void process_low_level_move(
-  UINT32 Intervals,
-  INT32 Rate1, 
-  INT32 Steps1,
-  INT32 Accel1, 
-  INT32 Jerk1, 
-  INT32 Rate2, 
-  INT32 Steps2,
-  INT32 Accel2, 
-  INT32 Jerk2,
-  BOOL TimedMove,
-  UINT32 ClearAccs,
-  ExtractReturnType ClearRet)
+// The caller must understand that this function changes some/all of the
+// global values used to pass in parameters. If it needs to preserve any
+// of those values it should make copies.
+//
+// This function takes input parameters in:
+//   gTmpIntervals
+//   gTmpRate1
+//   gTmpRate2
+//   gTmpSteps1
+//   gTmpSteps2
+//   gTmpAccel1
+//   gTmpAccel2
+//   gTmpJerk1
+//   gTmpJerk2
+//   gTmpClearAccs
+
+void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
 {
+  INT32 RateTemp = 0;
+  BOOL NeedNegativeAccumulator;
+  
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
   {
@@ -2121,9 +2026,9 @@ void process_low_level_move(
 
   if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
   {
-    if (ClearAccs > 3u)
+    if (gTmpClearAccs > 3u)
     {
-      ClearAccs = 3;
+      gTmpClearAccs = 3;
     }
   }
   
@@ -2137,32 +2042,32 @@ void process_low_level_move(
     // acceleration too to compensate. After this step, the sign of rate completely
     // controls the direction.
 
-    if (Steps1 < 0)
+    if (gTmpSteps1 < 0)
     {
-      if (Rate1 < 0)
+      if (gTmpRate1 < 0)
       {
         bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
         return;
       }
       else
       {
-        Steps1 = -Steps1;
-        Rate1 = -Rate1;
-        Accel1 = -Accel1;
+        gTmpSteps1 = -gTmpSteps1;
+        gTmpRate1 = -gTmpRate1;
+        gTmpAccel1 = -gTmpAccel1;
       }
     }
-    if (Steps2 < 0)
+    if (gTmpSteps2 < 0)
     {
-      if (Rate2 < 0)
+      if (gTmpRate2 < 0)
       {
         bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
         return;
       }
       else
       {
-        Steps2 = -Steps2;
-        Rate2 = -Rate2;
-        Accel2 = -Accel2;
+        gTmpSteps2 = -gTmpSteps2;
+        gTmpRate2 = -gTmpRate2;
+        gTmpAccel2 = -gTmpAccel2;
       }
     }
   }
@@ -2173,8 +2078,8 @@ void process_low_level_move(
   // Subtract off half of the Accel term and add 1/6th of the Jerk before we add the
   // move to the queue. Why? Because it makes the math cleaner (see LM command
   // documentation)
-  Rate1 = Rate1 - (Accel1/2) + (Jerk1/6);
-  Rate2 = Rate2 - (Accel2/2) + (Jerk2/6);
+  gTmpRate1 = gTmpRate1 - (gTmpAccel1/2) + (gTmpJerk1/6);
+  gTmpRate2 = gTmpRate2 - (gTmpAccel2/2) + (gTmpJerk2/6);
   
   // We will use the SEState move parameter to hold a bitfield. This bitfield
   // will tell the ISR if the accumulators need any special treatment when
@@ -2193,13 +2098,48 @@ void process_low_level_move(
     if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
     {
       gMoveTemp.SEState = SESTATE_ARBITRARY_ACC_BIT;
-      gMoveTemp.DelayCounter = ClearAccs;
+      gMoveTemp.DelayCounter = gTmpClearAccs;
     }
     else
     {
       // But if we didn't get a Clear parameter, then treat it as if the user
       // wants the accumulator cleared
-      if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
+      
+      
+      // This block "looks ahead" at the start of a move (while it is being
+      // parsed) to figure out if we need to negate the accumulator (i.e. start from
+      // 0x7FFFFFFFUL). Since this is common to LM/LT/L3/T3, and once for each axis,
+      // it gets its own function.
+      NeedNegativeAccumulator = FALSE;
+
+      RateTemp = gTmpRate1 + gTmpAccel1;
+      if (RateTemp < 0)
+      {
+        NeedNegativeAccumulator = TRUE;
+      }
+      else
+      {
+        if (RateTemp == 0)
+        {
+          RateTemp = gTmpAccel1 + gTmpJerk1;
+          if (RateTemp < 0)
+          {
+            NeedNegativeAccumulator = TRUE;
+          }
+          else
+          {
+            if (RateTemp == 0)
+            {
+              if (gTmpJerk1 < 0)
+              {
+                NeedNegativeAccumulator = TRUE;
+              }
+            }
+          }
+        }
+      }
+      
+      if (NeedNegativeAccumulator)
       {
         gMoveTemp.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2214,9 +2154,38 @@ void process_low_level_move(
     // Test mode not active, so just check Clear parameter bits 0 and 1
     // to see if user wants to start move with cleared accumulator. If so,
     // check for need to invert accumulator when move loaded into FIFO.
-    if (ClearAccs & 0x01)
+    if (gTmpClearAccs & 0x01)
     {
-      if (NeedNegativeAccumulator(Rate1, Accel1, Jerk1))
+      NeedNegativeAccumulator = FALSE;
+
+      RateTemp = gTmpRate1 + gTmpAccel1;
+      if (RateTemp < 0)
+      {
+        NeedNegativeAccumulator = TRUE;
+      }
+      else
+      {
+        if (RateTemp == 0)
+        {
+          RateTemp = gTmpAccel1 + gTmpJerk1;
+          if (RateTemp < 0)
+          {
+            NeedNegativeAccumulator = TRUE;
+          }
+          else
+          {
+            if (RateTemp == 0)
+            {
+              if (gTmpJerk1 < 0)
+              {
+                NeedNegativeAccumulator = TRUE;
+              }
+            }
+          }
+        }
+      }
+
+      if (NeedNegativeAccumulator)
       {
         gMoveTemp.SEState |= SESTATE_NEGATE_ACC1_BIT;
       }
@@ -2225,9 +2194,39 @@ void process_low_level_move(
         gMoveTemp.SEState |= SESTATE_CLEAR_ACC1_BIT;
       }
     }
-    if (ClearAccs & 0x02)
+    if (gTmpClearAccs & 0x02)
     {
-      if (NeedNegativeAccumulator(Rate2, Accel2, Jerk2))
+      
+      NeedNegativeAccumulator = FALSE;
+
+      RateTemp = gTmpRate2 + gTmpAccel2;
+      if (RateTemp < 0)
+      {
+        NeedNegativeAccumulator = TRUE;
+      }
+      else
+      {
+        if (RateTemp == 0)
+        {
+          RateTemp = gTmpAccel2 + gTmpJerk2;
+          if (RateTemp < 0)
+          {
+            NeedNegativeAccumulator = TRUE;
+          }
+          else
+          {
+            if (RateTemp == 0)
+            {
+              if (gTmpJerk2 < 0)
+              {
+                NeedNegativeAccumulator = TRUE;
+              }
+            }
+          }
+        }
+      }
+      
+      if (NeedNegativeAccumulator)
       {
         gMoveTemp.SEState |= SESTATE_NEGATE_ACC2_BIT;
       }
@@ -2238,8 +2237,8 @@ void process_low_level_move(
     }
   }
  
-  Accel1 = Accel1 - Jerk1;
-  Accel2 = Accel2 - Jerk2;
+  gTmpAccel1 = gTmpAccel1 - gTmpJerk1;
+  gTmpAccel2 = gTmpAccel2 - gTmpJerk2;
 
   if (gAutomaticMotorEnable == TRUE)
   {
@@ -2251,28 +2250,28 @@ void process_low_level_move(
   }
 
   // Load up the move structure with all needed values
-  gMoveTemp.Rate[0].value = Rate1;
+  gMoveTemp.Rate[0].value = gTmpRate1;
   if (TimedMove)
   {
-    gMoveTemp.Steps[0] = Intervals;  
+    gMoveTemp.Steps[0] = gTmpIntervals;  
   }
   else
   {
-    gMoveTemp.Steps[0] = Steps1;    
+    gMoveTemp.Steps[0] = gTmpSteps1;    
   }
-  gMoveTemp.Accel[0] = Accel1;
-  gMoveTemp.Jerk[0] = Jerk1;
-  gMoveTemp.Rate[1].value = Rate2;
+  gMoveTemp.Accel[0] = gTmpAccel1;
+  gMoveTemp.Jerk[0] = gTmpJerk1;
+  gMoveTemp.Rate[1].value = gTmpRate2;
   if (TimedMove)
   {
     gMoveTemp.Steps[1] = 0;
   }
   else
   {
-    gMoveTemp.Steps[1] = Steps2;
+    gMoveTemp.Steps[1] = gTmpSteps2;
   }
-  gMoveTemp.Accel[1] = Accel2;
-  gMoveTemp.Jerk[1] = Jerk2;
+  gMoveTemp.Accel[1] = gTmpAccel2;
+  gMoveTemp.Jerk[1] = gTmpJerk2;
   if (TimedMove)
   {
     gMoveTemp.Command = COMMAND_LT_MOVE_BIT;
@@ -2337,23 +2336,20 @@ void process_low_level_move(
 // pauses before raising or lowering the pen, for example.
 void parse_SM_packet(void)
 {
-  UINT32 Duration = 0;
-  INT32 A1Steps = 0, A2Steps = 0;
   INT32 Steps = 0;
-  UINT8 ClearAccs = 0;
 
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kULONG, &Duration, kREQUIRED);
-  extract_number(kLONG,  &A1Steps,  kREQUIRED);
-  extract_number(kLONG,  &A2Steps,  kOPTIONAL);
-  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &gTmpDurationMS, kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps1,  kREQUIRED);
+  extract_number(kLONG,  &gTmpSteps2,  kOPTIONAL);
+  extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
   if (gLimitChecks)
   {
     // Check for invalid duration
-    if (Duration == 0u) 
+    if (gTmpDurationMS == 0u) 
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
@@ -2363,7 +2359,7 @@ void parse_SM_packet(void)
       return;
     }
     // Limit each parameter to just 3 bytes
-    if (Duration > 0xFFFFFF) 
+    if (gTmpDurationMS > 0xFFFFFF) 
     {
       ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
       print_line_ending(kLE_REV);
@@ -2371,13 +2367,13 @@ void parse_SM_packet(void)
     }
     // Check for too-fast step request (>25KHz)
     // First get absolute value of steps, then check if it's asking for >25KHz
-    if (A1Steps > 0) 
+    if (gTmpSteps1 > 0) 
     {
-      Steps = A1Steps;
+      Steps = gTmpSteps1;
     }
     else 
     {
-      Steps = -A1Steps;
+      Steps = -gTmpSteps1;
     }
     if (Steps > 0xFFFFFFl) 
     {
@@ -2386,27 +2382,27 @@ void parse_SM_packet(void)
       return;
     }
     // Check for too fast
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
     {
       ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
     {
       ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
 
-    if (A2Steps > 0) 
+    if (gTmpSteps2 > 0) 
     {
-      Steps = A2Steps;
+      Steps = gTmpSteps2;
     }
     else 
     {
-      Steps = -A2Steps;
+      Steps = -gTmpSteps2;
     }
 
     if (Steps > 0xFFFFFFl) 
@@ -2415,27 +2411,27 @@ void parse_SM_packet(void)
       print_line_ending(kLE_REV);
       return;
     }
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
     {
       ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
     {
       ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
       return;
     }
-    if (ClearAccs > 3u)
+    if (gTmpClearAccs > 3u)
     {
-      ClearAccs = 0;
+      gTmpClearAccs = 0;
     }
   }
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
+  process_simple_motor_move();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2472,30 +2468,31 @@ void parse_SM_packet(void)
 //
 // TODO: This code can't handle steps counts above 4,294,967 in either axis. Is
 // there a way to allow it to handle steps counts up to 16,777,215 easily?
+//
+// Some global variables are used instead of local ones:
+//  gTmpIntervals is used for StepRate
+//  gTmpJerk1 is used for Pos1
+//  gTmpJerk2 is used for Pos2
+//  gTmpAccel1 is used for AbsSteps1
+//  gTmpAccel2 is used for AbsSteps2
+//  gTmpRate1 is used for saving off gTmpSteps1
+//  gTmpRate2 is used for saving off gTmpSteps2
 void parse_HM_packet(void)
 {
-  UINT32 StepRate = 0;
-  INT32  Pos1 = 0;
-  INT32  Pos2 = 0;
-  INT32  Steps1 = 0;
-  INT32  Steps2 = 0;
-  INT32  AbsSteps1 = 0;
-  INT32  AbsSteps2 = 0;
-  UINT32 Duration = 0;
   BOOL   CommandExecuting = TRUE;
   INT32  XSteps = 0;
 
   print_command(FALSE, FALSE);
 
   // Extract the step rate.
-  extract_number(kULONG, &StepRate, kREQUIRED);
-  extract_number(kLONG,  &Pos1,     kOPTIONAL);
-  extract_number(kLONG,  &Pos2,     kOPTIONAL);
+  extract_number(kULONG, &gTmpIntervals, kREQUIRED);
+  extract_number(kLONG,  &gTmpJerk1,     kOPTIONAL);
+  extract_number(kLONG,  &gTmpJerk2,     kOPTIONAL);
 
   if (gLimitChecks)
   {
     // StepRate can't be zero
-    if (StepRate == 0u)
+    if (gTmpIntervals == 0u)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
       return;
@@ -2523,29 +2520,29 @@ void parse_HM_packet(void)
   }
 
   // Make a local copy of the things we care about. This is how far we need to move.
-  Steps1 = -globalStepCounter1 + Pos1;
-  Steps2 = -globalStepCounter2 + Pos2;
+  gTmpSteps1 = -globalStepCounter1 + gTmpJerk1;
+  gTmpSteps2 = -globalStepCounter2 + gTmpJerk2;
 
   // Compute absolute value versions of steps for computation
-  if (Steps1 < 0)
+  if (gTmpSteps1 < 0)
   {
-    AbsSteps1 = -Steps1;
+    gTmpAccel1 = -gTmpSteps1;
   }
   else
   {
-    AbsSteps1 = Steps1;
+    gTmpAccel1 = gTmpSteps1;
   }
-  if (Steps2 < 0)
+  if (gTmpSteps2 < 0)
   {
-    AbsSteps2 = -Steps2;
+    gTmpAccel2 = -gTmpSteps2;
   }
   else
   {
-    AbsSteps2 = Steps2;
+    gTmpAccel2 = gTmpSteps2;
   }
     
   // Check for too many steps to step
-  if ((AbsSteps1 > 0xFFFFFFl) || (AbsSteps2 > 0xFFFFFFl))
+  if ((gTmpAccel1 > 0xFFFFFFl) || (gTmpAccel2 > 0xFFFFFFl))
   {
     ebb_print((far rom char *)"!0 Err: steps to home larger than 16,777,215.");
     print_line_ending(kLE_REV);
@@ -2553,110 +2550,121 @@ void parse_HM_packet(void)
   }
   
   // Compute duration based on step rate user requested. Take bigger step count to use for calculation
-  if (AbsSteps1 > AbsSteps2)
+  if (gTmpAccel1 > gTmpAccel2)
   {
-    Duration = (AbsSteps1 * 1000) / StepRate;
+    gTmpDurationMS = (gTmpAccel1 * 1000) / gTmpIntervals;
     // Axis1 is primary
     // Check for too fast 
-    if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
+    if ((gTmpIntervals/1000) > HIGH_ISR_TICKS_PER_MS)
     {
       ebb_print((far rom char *)"!0 Err: HM <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // Check for too slow, on the non-primary axis
-    if ((INT32)(Duration/1311) >= AbsSteps2 && AbsSteps2 != 0)
+    if ((INT32)(gTmpDurationMS/1311) >= gTmpAccel2 && gTmpAccel2 != 0)
     {
       // We need to break apart the home into two moves.
       // The first will be to get the non-primary axis down to zero.
       // Recompute duration for the first move
-      Duration = (AbsSteps2 * 1000) / StepRate;
-      if (Steps1 > 0 && Steps2 > 0)       // C
+      gTmpDurationMS = (gTmpAccel2 * 1000) / gTmpIntervals;
+      if (gTmpSteps1 > 0 && gTmpSteps2 > 0)       // C
       {
-        XSteps = Steps2;
+        XSteps = gTmpSteps2;
       }
-      else if (Steps1 < 0 && Steps2 > 0)  // B
+      else if (gTmpSteps1 < 0 && gTmpSteps2 > 0)  // B
       {
-        XSteps = -Steps2;
+        XSteps = -gTmpSteps2;
       }
-      else if (Steps1 > 0 && Steps2 < 0)  // D
+      else if (gTmpSteps1 > 0 && gTmpSteps2 < 0)  // D
       {
-        XSteps = -Steps2;
+        XSteps = -gTmpSteps2;
       }
-      else if (Steps1 < 0 && Steps2 < 0)  // A
+      else if (gTmpSteps1 < 0 && gTmpSteps2 < 0)  // A
       {
-        XSteps = Steps2;
+        XSteps = gTmpSteps2;
       }
-      process_simple_motor_move(Duration, XSteps, Steps2, 3);
-      // Update both steps count for final move
-      Steps1 = Steps1 - XSteps;
-      Steps2 = 0;
+      // Save off a copy of Steps1 to restore after motor_move()
+      gTmpRate1 = gTmpSteps1;
+      // motor_move() needs steps for motor 1 in gTmpSteps1
+      gTmpSteps1 = XSteps;
+      gTmpClearAccs = 3;
+      process_simple_motor_move();
+      // Update both steps count for final move (use saved Steps1)
+      gTmpSteps1 = gTmpRate1 - XSteps;
+      gTmpSteps2 = 0;
       // Recompute duration
-      Duration = (AbsSteps1 * 1000) / StepRate;
+      gTmpDurationMS = (gTmpAccel1 * 1000) / gTmpIntervals;
     }
   }
   else
   {
-    Duration = (AbsSteps2 * 1000) / StepRate;
+    gTmpDurationMS = (gTmpAccel2 * 1000) / gTmpIntervals;
     // Axis2 is primary
     // Check for too fast
-    if ((StepRate/1000) > HIGH_ISR_TICKS_PER_MS)
+    if ((gTmpIntervals/1000) > HIGH_ISR_TICKS_PER_MS)
     {
       ebb_print((far rom char *)"!0 Err: HM <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // Check for too slow, on the non-primary axis
-    if ((INT32)(Duration/1311) >= AbsSteps1 && AbsSteps1 != 0)
+    if ((INT32)(gTmpDurationMS/1311) >= gTmpAccel1 && gTmpAccel1 != 0)
     {
       // We need to break apart the home into two moves.
       // The first will be to get the non-primary axis down to zero.
       // Recompute duration for the first move
-      Duration = (AbsSteps1 * 1000) / StepRate;
-      if (Steps2 > 0 && Steps1 > 0)       // C
+      gTmpDurationMS = (gTmpAccel1 * 1000) / gTmpIntervals;
+      if (gTmpSteps2 > 0 && gTmpSteps1 > 0)       // C
       {
-        XSteps = Steps1;
+        XSteps = gTmpSteps1;
       }
-      else if (Steps2 < 0 && Steps1 > 0)  // B
+      else if (gTmpSteps2 < 0 && gTmpSteps1 > 0)  // B
       {
-        XSteps = -Steps1;
+        XSteps = -gTmpSteps1;
       }
-      else if (Steps2 > 0 && Steps1 < 0)  // D
+      else if (gTmpSteps2 > 0 && gTmpSteps1 < 0)  // D
       {
-        XSteps = -Steps1;
+        XSteps = -gTmpSteps1;
       }
-      else if (Steps2 < 0 && Steps1 < 0)  // A
+      else if (gTmpSteps2 < 0 && gTmpSteps1 < 0)  // A
       {
-        XSteps = Steps1;
+        XSteps = gTmpSteps1;
       }
-      process_simple_motor_move(Duration, Steps1, XSteps, 3);
-      // Update both steps count for final move
-      Steps2 = Steps2 - XSteps;
-      Steps1 = 0;
+      // Save off a copy of Steps2 to restore after motor_move()
+      gTmpRate2 = gTmpSteps2;
+      // motor_move() needs steps for motor 2 in gTmpSteps2
+      gTmpSteps2 = XSteps;
+      gTmpClearAccs = 3;
+      process_simple_motor_move();
+      // Update both steps count for final move (use saved Steps2)
+      gTmpSteps2 = gTmpRate2 - XSteps;
+      gTmpSteps1 = 0;
       // Recompute duration
-      Duration = (AbsSteps2 * 1000) / StepRate;
+      gTmpDurationMS = (gTmpAccel2 * 1000) / gTmpIntervals;
     }
   }
 
-  if (Duration < 10u)
+  if (gTmpDurationMS < 10u)
   {
-    Duration = 10;
+    gTmpDurationMS = 10;
   }
 
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     ebb_print((far rom char *)"HM Duration=");
-    ebb_print_uint(Duration);
+    ebb_print_uint(gTmpDurationMS);
     ebb_print((far rom char *)" SA1=");
-    ebb_print_int(Steps1);
+    ebb_print_int(gTmpSteps1);
     ebb_print((far rom char *)" SA2=");
-    ebb_print_int(Steps2);
+    ebb_print_int(gTmpSteps2);
     print_line_ending(kLE_REV);
   }
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move(Duration, Steps1, Steps2, 3);
+  gTmpClearAccs = 3;
+  process_simple_motor_move();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2668,55 +2676,56 @@ void parse_HM_packet(void)
 // This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
 // machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
 // Axis2 = <axisA_steps> - <axisB_steps>.
+//
+// To save on RAM, we will re-use some of the 'gTmp' variables here which aren't
+// needed for their original purpose. 
+//   gTmpAccel1 will be used for ASteps
+//   gTmpAccel2 will be used for BSteps
 void parse_XM_packet(void)
 {
-  UINT32 Duration = 0;
-  INT32 A1Steps = 0, A2Steps = 0;
-  INT32 ASteps = 0, BSteps = 0;
   INT32 Steps = 0;
-  UINT8 ClearAccs = 0;
 
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  extract_number(kULONG, &Duration, kREQUIRED);
-  extract_number(kLONG, &ASteps, kREQUIRED);
-  extract_number(kLONG, &BSteps, kREQUIRED);
-  extract_number(kUCHAR, &ClearAccs, kOPTIONAL);
+  extract_number(kULONG, &gTmpDurationMS, kREQUIRED);
+  extract_number(kLONG, &gTmpAccel1, kREQUIRED);
+  extract_number(kLONG, &gTmpAccel2, kREQUIRED);
+  extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
   
-  if (ClearAccs > 3u)
+  if (gTmpClearAccs > 3u)
   {
-    ClearAccs = 3;
+    gTmpClearAccs = 3;
   }
 
   if (gLimitChecks)
   {
     // Check for invalid duration
-    if (Duration == 0u) 
+    if (gTmpDurationMS == 0u) 
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
   }
 
   // Do the math to convert to Axis1 and Axis2
-  A1Steps = ASteps + BSteps;
-  A2Steps = ASteps - BSteps;
+  gTmpSteps1 = gTmpAccel1 + gTmpAccel2;
+  gTmpSteps2 = gTmpAccel1 - gTmpAccel2;
   
   // Check for too-fast step request (>25KHz)
   // First get absolute value of steps, then check if it's asking for >25KHz
-  if (A1Steps > 0) 
+  if (gTmpSteps1 > 0) 
   {
-    Steps = A1Steps;
+    Steps = gTmpSteps1;
   }
   else 
   {
-    Steps = -A1Steps;
+    Steps = -gTmpSteps1;
   }
 
   if (gLimitChecks)
   {
     // Limit each parameter to just 3 bytes
-    if (Duration > 0xFFFFFF) 
+    if (gTmpDurationMS > 0xFFFFFF) 
     {
       ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
       print_line_ending(kLE_REV);
@@ -2729,14 +2738,14 @@ void parse_XM_packet(void)
       return;
     }
     // Check for too fast
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
     {
       ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
     // And check for too slow
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
     {
       ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
@@ -2744,13 +2753,13 @@ void parse_XM_packet(void)
     }
   }
   
-  if (A2Steps > 0) 
+  if (gTmpSteps2 > 0) 
   {
-    Steps = A2Steps;
+    Steps = gTmpSteps2;
   }
   else 
   {
-    Steps = -A2Steps;
+    Steps = -gTmpSteps2;
   }
   if (gLimitChecks)
   {
@@ -2760,13 +2769,13 @@ void parse_XM_packet(void)
       print_line_ending(kLE_REV);
       return;
     }
-    if ((Steps/Duration) > HIGH_ISR_TICKS_PER_MS) 
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
     {
       ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
       print_line_ending(kLE_REV);
       return;
     }
-    if ((INT32)(Duration/1311) >= Steps && Steps != 0) 
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
     {
       ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
       print_line_ending(kLE_REV);
@@ -2782,7 +2791,7 @@ void parse_XM_packet(void)
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move(Duration, A1Steps, A2Steps, ClearAccs);
+  process_simple_motor_move();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2800,18 +2809,24 @@ void parse_XM_packet(void)
 // Note that a Rate value of 0x8000000 is not allowed. The function will
 // subtract one if this value for Rate is seen due to step counts and duration.
 //
-// In the future, making the FIFO more elements deep may be cool.
-// 
-static void process_simple_motor_move(
-  UINT32 Duration,
-  INT32 A1Stp,
-  INT32 A2Stp,
-  UINT8 ClearAccs
-)
+// Because we are now using global values to pass in parameters to this
+// function, and because this function will modify the values 'passed in' to it
+// the caller should make copies of any parameter values that it requires
+// after the call.
+//
+// This function uses these as input parameters:
+//  gTmpDurationMS    (not modified)
+//  gTmpSteps1        (modified)
+//  gTmpSteps2        (modified)
+//  gTmpClearAccs     (modified)
+//
+// And it uses these as temporary values (not being used for their normal
+// purpose, thus the names aren't right):
+//  gTmpRate1 as temp1
+//  gTmpRate2 as temp2
+//  gTmpIntervals as temp
+static void process_simple_motor_move(void)
 {
-  UINT32 temp = 0;
-  UINT32 temp1 = 0;
-  UINT32 temp2 = 0;
   UINT32 remainder = 0;
 
   // If we have a triggered limit switch, then ignore this move command
@@ -2822,27 +2837,27 @@ static void process_simple_motor_move(
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     ebb_print((far rom char *)"Duration=");
-    ebb_print_uint(Duration);
+    ebb_print_uint(gTmpDurationMS);
     ebb_print((far rom char *)" SA1=");
-    ebb_print_int(A1Stp);
+    ebb_print_int(gTmpSteps1);
     ebb_print((far rom char *)" SA2=");
-    ebb_print_int(A2Stp);
+    ebb_print_int(gTmpSteps2);
     print_line_ending(kLE_REV);
   }
   
-  if (ClearAccs > 3u)
+  if (gTmpClearAccs > 3u)
   {
-    ClearAccs = 3;
+    gTmpClearAccs = 3;
   }
-  gMoveTemp.SEState = ClearAccs;
+  gMoveTemp.SEState = (UINT8)gTmpClearAccs;
 
   // Check for delay
-  if (A1Stp == 0 && A2Stp == 0)
+  if (gTmpSteps1 == 0 && gTmpSteps2 == 0)
   {
     gMoveTemp.Command = COMMAND_DELAY_BIT;
     // This is OK because we only need to multiply the 3 byte Duration by
     // 25, so it fits in 4 bytes OK.
-    gMoveTemp.DelayCounter = HIGH_ISR_TICKS_PER_MS * Duration;
+    gMoveTemp.DelayCounter = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
     
     // Check that DelayCounter doesn't have a crazy high value (this was
     // being done in the ISR, now moved here for speed)
@@ -2867,15 +2882,15 @@ static void process_simple_motor_move(
     }
     
     // First, set the direction bits
-    if (A1Stp < 0)
+    if (gTmpSteps1 < 0)
     {
       gMoveTemp.DirBits = gMoveTemp.DirBits | DIR1_BIT;
-      A1Stp = -A1Stp;
+      gTmpSteps1 = -gTmpSteps1;
     }
-    if (A2Stp < 0)
+    if (gTmpSteps2 < 0)
     {
       gMoveTemp.DirBits = gMoveTemp.DirBits | DIR2_BIT;
-      A2Stp = -A2Stp;
+      gTmpSteps2 = -gTmpSteps2;
     }
     // To compute StepAdd values from Duration.
     // A1Stp is from 0x000001 to 0xFFFFFF.
@@ -2891,123 +2906,123 @@ static void process_simple_motor_move(
     if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
       // First check for duration to large.
-      if ((UINT32)A1Stp < (0xFFFFFFu/763u)) 
+      if ((UINT32)gTmpSteps1 < (0xFFFFFFu/763u)) 
       {
-        if (Duration > ((UINT32)A1Stp * 763u)) 
+        if (gTmpDurationMS > ((UINT32)gTmpSteps1 * 763u)) 
         {
           ebb_print((far rom char *)"Major malfunction Axis1 duration too long : ");
-          ebb_print_uint(Duration);
+          ebb_print_uint(gTmpDurationMS);
           print_line_ending(kLE_REV);
-          temp = 0;
-          A1Stp = 0;
+          gTmpIntervals = 0;
+          gTmpSteps1 = 0;
         }
       }
     }
     
-    if (A1Stp != 0) 
+    if (gTmpSteps1 != 0) 
     {
-      if (A1Stp < 0x1FFFF) 
+      if (gTmpSteps1 < 0x1FFFF) 
       {
-        temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
-        temp = (A1Stp << 15)/temp1;
-        temp2 = (A1Stp << 15) % temp1;
+        gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
+        gTmpIntervals = (gTmpSteps1 << 15)/gTmpRate1;
+        gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
         // Because it takes us about 5ms extra time to do this division,
         // we only perform this extra step if our move is long enough to
         // warrant it. That way, for really short moves (where the extra
         // precision isn't necessary) we don't take up extra time. Without
         // this optimization, our minimum move time is 20ms. With it, it
         // drops down to about 15ms.
-        if (Duration > 30u)
+        if (gTmpDurationMS > 30u)
         {
-          remainder = (temp2 << 16) / temp1;
+          remainder = (gTmpRate2 << 16) / gTmpRate1;
         }
       }
       else 
       {
-        temp = (((A1Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        gTmpIntervals = (((gTmpSteps1/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         remainder = 0;
       }
-      if (temp > 0x8000) 
+      if (gTmpIntervals > 0x8000) 
       {
         ebb_print((far rom char *)"Major malfunction Axis1 StepCounter too high : ");
-        ebb_print_uint(temp);
+        ebb_print_uint(gTmpIntervals);
         print_line_ending(kLE_REV);
-        temp = 0x8000;
+        gTmpIntervals = 0x8000;
       }
-      if (temp == 0u && A1Stp != 0) 
+      if (gTmpIntervals == 0u && gTmpSteps1 != 0) 
       {
         ebb_print((far rom char *)"Major malfunction Axis1 StepCounter zero");
         print_line_ending(kLE_REV);
-        temp = 1;
+        gTmpIntervals = 1;
       }
-      if (Duration > 30u)
+      if (gTmpDurationMS > 30u)
       {
-        temp = (temp << 16) + remainder;
+        gTmpIntervals = (gTmpIntervals << 16) + remainder;
       }
       else
       {
-        temp = (temp << 16);
+        gTmpIntervals = (gTmpIntervals << 16);
       }
     }
     else
     {
-      temp = 0;
+      gTmpIntervals = 0;
     }
 
-    if (temp >= 0x7FFFFFFFu)
+    if (gTmpIntervals >= 0x7FFFFFFFu)
     {
-      temp = 0x7FFFFFFF;
+      gTmpIntervals = 0x7FFFFFFF;
     }
-    gMoveTemp.Rate[0].value = temp;
-    gMoveTemp.Steps[0] = A1Stp;
+    gMoveTemp.Rate[0].value = gTmpIntervals;
+    gMoveTemp.Steps[0] = gTmpSteps1;
     gMoveTemp.Accel[0] = 0;
 
-    if (A2Stp != 0) 
+    if (gTmpSteps2 != 0) 
     {
-      if (A2Stp < 0x1FFFF) 
+      if (gTmpSteps2 < 0x1FFFF) 
       {
-        temp1 = HIGH_ISR_TICKS_PER_MS * Duration;
-        temp = (A2Stp << 15)/temp1;
-        temp2 = (A2Stp << 15) % temp1; 
-        if (Duration > 30u)
+        gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
+        gTmpIntervals = (gTmpSteps2 << 15)/gTmpRate1;
+        gTmpRate2 = (gTmpSteps2 << 15) % gTmpRate1; 
+        if (gTmpDurationMS > 30u)
         {
-          remainder = (temp2 << 16) / temp1;
+          remainder = (gTmpRate2 << 16) / gTmpRate1;
         }
       }
       else 
       {
-        temp = (((A2Stp/Duration) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        gTmpIntervals = (((gTmpSteps2/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         remainder = 0;
       }
-      if (temp > 0x8000) 
+      if (gTmpIntervals > 0x8000) 
       {
         ebb_print((far rom char *)"Major malfunction Axis2 StepCounter too high : ");
-        ebb_print_uint(temp);
+        ebb_print_uint(gTmpIntervals);
         print_line_ending(kLE_REV);
-        temp = 0x8000;
+        gTmpIntervals = 0x8000;
       }
-      if (temp == 0u && A2Stp != 0) 
+      if (gTmpIntervals == 0u && gTmpSteps2 != 0) 
       {
         ebb_print((far rom char *)"Major malfunction Axis2 StepCounter zero");
         print_line_ending(kLE_REV);
-        temp = 1;
+        gTmpIntervals = 1;
       }
-      if (Duration > 30u)
+      if (gTmpDurationMS > 30u)
       {
-        temp = (temp << 16) + remainder;
+        gTmpIntervals = (gTmpIntervals << 16) + remainder;
       }
       else
       {
-        temp = (temp << 16);
+        gTmpIntervals = (gTmpIntervals << 16);
       }
     }
 
-    if (temp >= 0x7FFFFFFFu)
+    if (gTmpIntervals >= 0x7FFFFFFFu)
     {
-      temp = 0x7FFFFFFF;
+      gTmpIntervals = 0x7FFFFFFF;
     }
-    gMoveTemp.Rate[1].value = temp;
-    gMoveTemp.Steps[1] = A2Stp;
+    gMoveTemp.Rate[1].value = gTmpIntervals;
+    gMoveTemp.Steps[1] = gTmpSteps2;
     gMoveTemp.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 

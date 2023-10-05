@@ -113,7 +113,7 @@
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
         <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
-        <makeCustomizationPostStep>"C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_demo.o build/EBBv13_with_bootloader/production/source/ebb_print.o</makeCustomizationPostStep>
+        <makeCustomizationPostStep>"C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin\mplink.exe"  "source\BL_rm18f46j50_g.lkr"  -p18f46j50  -m"dist/EBBv13_with_bootloader/production/EBF.X.production.map" -i -l"./source"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l "C:\Program Files (x86)\Microchip\mplabc18\v3.47\bin"\\..\\lib  -o dist/EBBv13_with_bootloader/production/app.X.production.cof  build/EBBv13_with_bootloader/production/_ext/343710134/usb_device.o build/EBBv13_with_bootloader/production/_ext/131024517/usb_function_cdc.o build/EBBv13_with_bootloader/production/source/ebb.o build/EBBv13_with_bootloader/production/source/main.o build/EBBv13_with_bootloader/production/source/RCServo2.o build/EBBv13_with_bootloader/production/source/UBW.o build/EBBv13_with_bootloader/production/source/usb_descriptors.o build/EBBv13_with_bootloader/production/source/ebb_print.o</makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
@@ -124,7 +124,7 @@
         <property key="default-char-unsigned" value="false"/>
         <property key="enable-all-optimizations" value="true"/>
         <property key="enable-int-promotion" value="false"/>
-        <property key="enable-multi-bank-stack-model" value="true"/>
+        <property key="enable-multi-bank-stack-model" value="false"/>
         <property key="enable-ob" value="false"/>
         <property key="enable-od" value="false"/>
         <property key="enable-om" value="true"/>
@@ -170,6 +170,8 @@
         <property key="stack-analysis-mcc18" value="false"/>
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
+      <item path="source/ebb_demo.c" ex="true" overriding="false">
+      </item>
       <item path="source/isr_helpers.asm" ex="true" overriding="false">
         <C18>
         </C18>
