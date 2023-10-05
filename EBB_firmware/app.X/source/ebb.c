@@ -309,15 +309,21 @@ typedef enum
   SOLENOID_PWM
 } SolenoidStateType;
 
-// This is the FIFO that stores the motion commands. It spans multiple RAM
-// banks from 0x800 through 0xCFF, and must only be accessed via pointer
-#pragma udata FIFO_scn
-MoveCommandType CommandFIFO[COMMAND_FIFO_MAX_LENGTH];
 
-// These global variables are deliberately put into "Bank" 1 of RAM.
-// They are every global variable that the 25KHz ISR has to access.
-// With them all being in bank 1, no bank switch instructions are needed
-// in the ISR save for one at the very top.
+// This is the FIFO that stores the motion commands. It spans multiple RAM
+// banks from 0x600 through 0xDFF (length 0x800 or 2048d), and must only be 
+// accessed via pointer.
+// Note that no matter what COMMAND_FIFO_MAX_LENGTH is set to, we reserve the
+// entire 0x800 bytes of space in the FIFO_scn here. That prevents the linker
+// from putting variables after this section.
+#pragma udata FIFO_scn
+UINT8 CommandFIFO[COMMAND_FIFO_SIZE_BYTES];
+
+// These global variables are deliberately put into "Bank" 0 of RAM (the
+// access/near bank).
+// They are the small global variables that the 25KHz ISR has to access.
+// With them all being in bank 0, no bank switch instructions are needed
+// to access them.
 #pragma udata access ISR_access
 
 //static UINT8 TookStep;       // LSb set if a step was taken
@@ -376,28 +382,28 @@ UINT8 near FIFO_out_ptr_low;
 volatile static near INT32 globalStepCounter1;
 volatile static near INT32 globalStepCounter2;
 
-#pragma udata ISR_globals = 0x180
-
-MoveCommandType CurrentCommand;
-
 // Pointer to a MoveCommandType element of the FIFO array
-MoveCommandType  * FIFOPtr = &CommandFIFO[0];
-// Accumulator for each axis
-static u32b4_t acc_union[2];
+near MoveCommandType * FIFOPtr = (near MoveCommandType *)&CommandFIFO[0];
 
+// Accumulator for each axis
+static near u32b4_t acc_union[2];
 
 // ISR globals used in test modes for keeping track of each move
-static UINT32 gISRTickCountForThisCommand;
-static UINT32 gISRStepCountForThisCommand;
-static INT32  gISRPositionForThisCommand;
+static near UINT32 gISRTickCountForThisCommand;
+static near UINT32 gISRStepCountForThisCommand;
+static near INT32  gISRPositionForThisCommand;
 
-// These globals are now set to be put anywhere the linker can find space for them
-#pragma udata
 
-static MoveCommandType gMoveTemp;     // Commands fill this then copy to FIFO
+// Bank 1 is the "ISR Bank". By placing all variables that the ISR needs
+// access to either in the access bank (above) or in Bank 1, then the bank 
+// select register can be kept pointing to Bank 1 and no bank switch instructions
+// are needed in the iSR.
+#pragma udata ISR_globals = 0x180
+
+// The move command containing the currently executing move command in the ISR
+MoveCommandType CurrentCommand;
 
 unsigned int DemoModeActive;
-unsigned int comd_counter;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
 
@@ -405,7 +411,6 @@ static unsigned int SolenoidDelay;
 static PenStateType PenState;
 
 static unsigned long NodeCount;
-static UINT8   gSL_Storage[32];
 unsigned char QC_ms_timer;
 static UINT StoredEngraverPower;
 // Set TRUE to enable solenoid output for pen up/down
@@ -436,6 +441,16 @@ static INT32  gTmpAccel2;
 static INT32  gTmpJerk1;
 static INT32  gTmpJerk2;
 static UINT32 gTmpClearAccs;
+
+// These globals are now set to be put anywhere the linker can find space for them
+#pragma udata
+
+static MoveCommandType gMoveTemp;     // Commands fill this then copy to FIFO
+
+// Storage for the 32 bytes of "SL" command values
+static UINT8   gSL_Storage[32];
+
+
 
 
 

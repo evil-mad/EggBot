@@ -87,7 +87,12 @@
 // we artifically set this to 32 elements. That gives us room to grow the size
 // of the command structure without needing to decrease the maximum size
 // of the FIFO in elements.
-#define COMMAND_FIFO_MAX_LENGTH     28u
+#define COMMAND_FIFO_MAX_LENGTH     32u
+
+// The total number of bytes of space we want the FIFO to be (i.e. reserve
+// maximum 2048 bytes, even if we're not using all of it)
+#define COMMAND_FIFO_SIZE_BYTES 0x800
+
 
 typedef enum
 {
@@ -292,7 +297,7 @@ typedef struct
 
 
 
-extern MoveCommandType * FIFOPtr;
+extern near MoveCommandType * FIFOPtr;
 extern near volatile UINT8 gFIFOLength;
 extern near volatile UINT8 gFIFOIn;
 extern near volatile UINT8 gFIFOOut;
