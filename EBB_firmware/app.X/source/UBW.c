@@ -927,9 +927,6 @@ Open1USART(
  *****************************************************************************/
 void ProcessIO(void)
 {
-  static char last_command[64] = {0};
-  static BOOL in_esc = FALSE;
-  static char esc_sequence[3] = {0};
   static BOOL in_cr = FALSE;
   static BYTE last_fifo_size;
   static unsigned char button_state = 0;
@@ -972,8 +969,8 @@ void ProcessIO(void)
     }
     ISR_A_FIFO_length--;
   }
-    // Bail from here if we're not 'plugged in' to a PC or we're suspended
-    if(
+  // Bail from here if we're not 'plugged in' to a PC or we're suspended
+  if(
     (USBDeviceState < CONFIGURED_STATE)
     ||
     (USBSuspendControl == 1u)
@@ -1018,60 +1015,9 @@ void ProcessIO(void)
         // Now, if we've gotten a full command (user send <CR>) then
         // go call the code that deals with that command, and then
         // keep parsing. (This allows multiple small commands per packet)
-        // Copy the new command over into the 'up-arrow' buffer
-        for (i=0; i<g_RX_buf_in; i++)
-        {
-          last_command[i] = g_RX_buf[i];
-        }
         parse_packet();
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
-      }
-      else if (tst_char == 27u && in_esc == FALSE)
-      {
-        in_esc = TRUE;
-        esc_sequence[0] = 27;
-        esc_sequence[1] = 0;
-        esc_sequence[2] = 0;
-      }
-      else if (
-        in_esc == TRUE 
-        && 
-        tst_char == 91u 
-        && 
-        esc_sequence[0] == 27 
-        && 
-        esc_sequence[1] == 0
-      )
-      {
-        esc_sequence[1] = 91;
-      }
-      else if (
-        in_esc == TRUE 
-        && 
-        tst_char == 65u 
-        &&
-        esc_sequence[0] == 27 
-        && 
-        esc_sequence[1] == 91
-      )
-      {
-        esc_sequence[0] = 0;
-        esc_sequence[1] = 0;
-        esc_sequence[2] = 0;
-        in_esc = FALSE;
-
-        // We got an up arrow (d27, d91, d65) and now copy over last command
-        for (i = 0; g_RX_buf[i] != kCR; i++)
-        {
-          g_RX_buf[i] = last_command[i];
-        }
-        g_RX_buf_in = i;
-        g_RX_buf[g_RX_buf_in] = 0;
-
-        // Also send 'down arrow' to counter act the affect of the up arrow
-        ebb_print((far rom char *)"\x1b[B\x1b[1K\x1b[0G");
-        ebb_print_ram((char *)g_RX_buf);
       }
       else if (tst_char == 8u && g_RX_buf_in > 0u)
       {
@@ -1088,11 +1034,6 @@ void ProcessIO(void)
         tst_char >= 32u
       )
       {
-        esc_sequence[0] = 0;
-        esc_sequence[1] = 0;
-        esc_sequence[2] = 0;
-        in_esc = FALSE;
-
         // Only add a byte if it is not a CR or LF
         g_RX_buf[g_RX_buf_in] = tst_char;
         in_cr = FALSE;
