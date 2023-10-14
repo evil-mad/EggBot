@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a23"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a24"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -3307,7 +3307,7 @@ ExtractReturnType extract_number(
   unsigned char Required
 )
 {
-  unsigned long ULAccumulator;
+  UINT8 ULAccumulator[6];     // Space for up to 48 bits
   signed long Accumulator;
   BOOL Negative = FALSE;
 
@@ -3366,6 +3366,8 @@ ExtractReturnType extract_number(
       (kUINT == Type)
       ||
       (kULONG == Type)
+      ||
+      (kU48BIT == Type)
     )
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
@@ -3391,18 +3393,18 @@ ExtractReturnType extract_number(
   else
   {
     // Otherwise just copy the byte
-    ULAccumulator = g_RX_buf[g_RX_buf_out];
+    ULAccumulator[0] = g_RX_buf[g_RX_buf_out];
 
     // Force uppercase if that's what type we have
     if (kUCASE_ASCII_CHAR == Type)
     {
-      ULAccumulator = toupper(ULAccumulator);
+      ULAccumulator[0] = toupper(ULAccumulator[0]);
     }
     
     // Move to the next character
     advance_RX_buf_out();
   }
-
+#if 0
   // Range check absolute values
   if (Negative)
   {
@@ -3507,28 +3509,47 @@ ExtractReturnType extract_number(
     default:
       return(kEXTRACT_INVALID_TYPE);
   }
+#endif
   return(kEXTRACT_OK);
 }
 
+// Take the 48 bit number in x[] and multiply it by y, store result back to x[]
+void mul_48x8(UINT8 x[6], UINT8 y)
+{
+  
+  
+}
+
+// Take the 48 bit number in x[] and add y to it, store result back to x[]
+void add_48p8(UINT8 x[6], UINT8 y)
+{
+  
+}
+
+
 // Loop 'digits' number of times, looking at the
 // byte in input_buffer index *ptr, and if it is
-// a digit, adding it to acc. Take care of 
+// a digit, adding it to acc[]. Take care of 
 // powers of ten as well. If you hit a non-numerical
 // char, then return FALSE, otherwise return TRUE.
-// Store result as you go in *acc.
-signed char extract_digit(unsigned long * acc, unsigned char digits)
+// Store result as you go in acc[].
+signed char extract_digit(UINT8 acc[6], UINT8 digits)
 {
-  unsigned char val;
-  unsigned char digit_cnt;
-
-  *acc = 0;
+  UINT8 val;
+  UINT8 digit_cnt;
+  UINT8 acc_cnt;
+  
+  acc[0] = 0;
+  acc_cnt = 0;
 
   for (digit_cnt = 0; digit_cnt < digits; digit_cnt++)
   {
     val = g_RX_buf[g_RX_buf_out];
     if ((val >= 48u) && (val <= 57u))
     {
-      *acc = (*acc * 10) + (val - 48);
+      mul_48x8(acc, 10);
+      add_48p8(acc, (val - 48));
+//      *acc = (*acc * 10) + (val - 48);
       // Move to the next character
       advance_RX_buf_out();
     }
