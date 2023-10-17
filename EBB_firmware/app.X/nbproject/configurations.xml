@@ -171,6 +171,14 @@
         <property key="stack-analysis-mplink" value="false"/>
       </C18LanguageToolchain>
       <item path="source/ebb_demo.c" ex="true" overriding="false">
+        <C18>
+        </C18>
+        <C18-AS>
+        </C18-AS>
+        <C18-LD>
+        </C18-LD>
+        <C18LanguageToolchain>
+        </C18LanguageToolchain>
       </item>
       <item path="source/isr_helpers.asm" ex="true" overriding="false">
         <C18>

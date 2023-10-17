@@ -386,7 +386,7 @@ volatile static near INT32 globalStepCounter2;
 near MoveCommandType * FIFOPtr = (near MoveCommandType *)&CommandFIFO[0];
 
 // Accumulator for each axis
-static near u32b4_t acc_union[2];
+near u32b4_t acc_union[2];
 
 // ISR globals used in test modes for keeping track of each move
 static near UINT32 gISRTickCountForThisCommand;

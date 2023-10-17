@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a23"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a24"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -2153,6 +2153,8 @@ void parse_CU_packet(void)
 // 5   QU,5,XXX prints out stack high water value (as 3 digit hex value) and resets it to zero
 // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
 // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
+// 200 QU,200,dddddddddd,dddddddddd prints out the current value of acc_union[0] and acc_union[1] (the accumulators)
+
 void parse_QU_packet(void)
 {
   UINT8 parameter_number;
@@ -2228,6 +2230,18 @@ void parse_QU_packet(void)
     ebb_print_uint(parameter_number);
     ebb_print_char(',');
     ebb_print_uint(g_StepperDisableTimeoutS);
+    print_line_ending(kLE_NORM);
+  }
+// 200 QU,200,dddddddddd,dddddddddd prints out the current value of acc_union[0] and acc_union[1] (the accumulators)
+  else if (200u == parameter_number)
+  {
+    ebb_print_uint(parameter_number);
+    ebb_print_char(',');
+    INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+    ebb_print_uint(acc_union[0].value);
+    ebb_print_char(',');
+    ebb_print_uint(acc_union[1].value);
+    INTCONbits.GIEH = 1;    // Turn high priority interrupts on
     print_line_ending(kLE_NORM);
   }
   else
