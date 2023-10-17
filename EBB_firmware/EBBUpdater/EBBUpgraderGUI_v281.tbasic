@@ -218,23 +218,24 @@ CallBack Function cbButton() As Long
             
                     DoFirmwareUpdate()
 
+                    Sleep 2000
+
                     If pID = 0 Then
                       COMM_Open("\\.\" & Ports(Counter), hComm)
                       If Err = 0 Then
                         COMM_Print(hComm, "V" & Chr$(13))
-                        Sleep 200
+                        Sleep 500
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
-                        Sleep 200
                         COMM_Print(hComm, "V" & Chr$(13))
-                        Sleep 200
+                        Sleep 500
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
-                        sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
+                        sBuffer = Trim$(sBuffer, Any Chr$(13) & Chr$(10))
                         If (RIGHT$(sBuffer,5) = sFirmwareNumber) Then
                           Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Updated to version " & RIGHT$(sBuffer,5) & " successfully" + Chr$(13) + Chr$(10)
                         Else
-                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB= " & RIGHT$(sBuffer,5) & " File= " & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
+                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB=" & RIGHT$(sBuffer,5) & " File=" & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
                         EndIf
                         COMM_Close(hComm)
                       EndIf
