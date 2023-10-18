@@ -458,6 +458,7 @@ static UINT8   gSL_Storage[32];
 static void clear_StepCounters(void);
 static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
 static void process_simple_motor_move(void);
+static void clear_parmaeter_globals(void);
 
 extern void FIFO_COPY(void);
 
@@ -1402,6 +1403,23 @@ CheckForNextCommand:
   }
 }
 
+// Zero out all global variables used for parameter passing between motion
+// parsing commands
+static void clear_parmaeter_globals(void)
+{
+  gTmpDurationMS = 0;
+  gTmpIntervals = 0;
+  gTmpRate1 = 0;
+  gTmpRate2 = 0;
+  gTmpSteps1 = 0;
+  gTmpSteps2 = 0;
+  gTmpAccel1 = 0;
+  gTmpAccel2 = 0;
+  gTmpJerk1 = 0;
+  gTmpJerk2 = 0;
+  gTmpClearAccs = 0;
+}
+
 // Init code
 void EBB_Init(void)
 {
@@ -1772,6 +1790,8 @@ void parse_LM_packet(void)
 {
   ExtractReturnType ClearRet;
 
+  clear_parmaeter_globals();
+
   print_command(FALSE, FALSE);
   
   // Extract each of the values.
@@ -1845,6 +1865,8 @@ void parse_LM_packet(void)
 void parse_L3_packet(void)
 {
   ExtractReturnType ClearRet;
+
+  clear_parmaeter_globals();
   
   print_command(FALSE, FALSE);
 
@@ -1916,6 +1938,8 @@ void parse_T3_packet(void)
 {
   ExtractReturnType ClearRet;
 
+  clear_parmaeter_globals();
+  
   print_command(FALSE, FALSE);
   
   // Extract each of the values.
@@ -1972,6 +1996,8 @@ void parse_LT_packet(void)
 {
   ExtractReturnType ClearRet;
   
+  clear_parmaeter_globals();
+
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
@@ -2352,6 +2378,8 @@ void parse_SM_packet(void)
 {
   INT32 Steps = 0;
 
+  clear_parmaeter_globals();
+
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
@@ -2495,6 +2523,8 @@ void parse_HM_packet(void)
 {
   BOOL   CommandExecuting = TRUE;
   INT32  XSteps = 0;
+
+  clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
 
@@ -2698,6 +2728,8 @@ void parse_HM_packet(void)
 void parse_XM_packet(void)
 {
   INT32 Steps = 0;
+
+  clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
 
