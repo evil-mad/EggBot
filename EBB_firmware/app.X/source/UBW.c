@@ -246,7 +246,7 @@ static unsigned char gDeviceStringName[FLASH_NAME_LENGTH+1];
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
 BOOL SwitchIsPressed(void);    // Check to see if the user (PRG) switch is pressed
 void parse_packet(void);       // Take a full packet and dispatch it to the right function
-signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
+signed char extract_digit(UINT8 acc[6], UINT8 digits); // Pull a character out of the packet
 void parse_R_packet(void);     // R for resetting UBW
 void parse_C_packet(void);     // C for configuring I/O and analog pins
 void parse_O_packet(void);     // O for output digital to pins
@@ -3388,7 +3388,7 @@ ExtractReturnType extract_number(
     (kUCASE_ASCII_CHAR != Type)
   )
   {
-    extract_digit(&ULAccumulator, 10);
+    extract_digit(ULAccumulator, 10);
   }
   else
   {
@@ -3513,6 +3513,13 @@ ExtractReturnType extract_number(
   return(kEXTRACT_OK);
 }
 
+// Take the 48 bit number in x[] and divide it by y, store result back to x[]
+void div_48x8(UINT8 x[6], UINT8 y)
+{
+  
+  
+}
+
 // Take the 48 bit number in x[] and multiply it by y, store result back to x[]
 void mul_48x8(UINT8 x[6], UINT8 y)
 {
@@ -3524,6 +3531,20 @@ void mul_48x8(UINT8 x[6], UINT8 y)
 void add_48p8(UINT8 x[6], UINT8 y)
 {
   
+}
+
+// Return the result of taking x (48 bit number) % y (8 bit number)
+UINT8 mod_48x8(UINT8 x[6], UINT8 y)
+{
+  UINT8 i;
+  UINT8 res = 0;
+  
+  for (i = 0u; i < 6u; i++)
+  {
+    res = ((res * 16) + (x[i] % y)) % y;
+  }
+  
+  return(res);
 }
 
 

@@ -14,3 +14,5 @@ void ebb_print_ram(char * print_str);
 void ebb_print_hex(UINT32 data, UINT8 length);
 void ebb_print_uint(UINT32 data);
 void ebb_print_int(INT32 data);
+void ebb_print_48uint(UINT8 data[6]);
+void ebb_print_48int(UINT8 data[6]);

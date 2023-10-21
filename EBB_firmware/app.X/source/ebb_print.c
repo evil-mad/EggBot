@@ -130,3 +130,47 @@ void ebb_print_int(INT32 data)
   
   ebb_print_uint(data);
 }
+
+// Print out <data> as a 48 bit unsigned number
+void ebb_print_48uint(UINT8 data[6])
+{
+  UINT8 local_data[6];
+  UINT8 i;
+  
+  // Make a local copy of the big number so we can mess with it
+  for (i=0u; i < 6u; i++)
+  {
+    local_data[i] = data[i];
+  }
+  
+  gOutputStr[EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 1] = 0x00;  // Always add string terminator
+  gPos = (EBB_PRINT_MAX_OUTPUT_LENGTH_CHARS - 2);
+  
+  do 
+  {
+    i = mod_48x8(local_data, 10);
+    
+    gOutputStr[gPos] = i + '0';
+    
+    div_48x8(local_data, 10);
+    gPos--;
+  }
+  while ((local_data[0] != 0u) || (local_data[1] != 0u) || (local_data[2] != 0u) || (local_data[3] != 0u) || (local_data[4] != 0u) || (local_data[5] != 0u));
+  
+  gPos++;
+  // gPos now points to the beginning of where we need to print from
+  ebb_print_ram(&gOutputStr[gPos]);  
+}
+
+// Print out <data> as a 48 bit signed number
+void ebb_print_48int(UINT8 data[6])
+{
+  // Handle negative sign
+  if ((INT8)data[6] < 0)
+  {
+    ebb_print_char('-');
+  }
+  
+  ebb_print_48uint(data);
+}
+
