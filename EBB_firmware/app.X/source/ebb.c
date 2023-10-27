@@ -2478,6 +2478,131 @@ void parse_SM_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
+// The Circle Move command
+// Usage: CM,<dest_x>,<dest_y>,<center_x>,<center_y>,<rate>,<direction><CR>
+//
+// <dest_x>,<dest_y>,<center_x>,<center_y> are a signed 24 bit numbers
+// <rate> is an unsigned integer from 2 to 25000
+// <direction> is 0 for CW or 1 for CCW
+//
+// <dest_x>,<dest_y> are the relative coordinates where the arc should end up
+// <center_x>,<center_y> are the relative coordinates where the center of the arc is
+// <rate> is the step frequency in steps/second
+// <direction> specifies which direction the arc should take
+//
+void parse_CM_packet(void)
+{
+  UINT16 rate = 0;
+  INT32 dest_x = 0;
+  INT32 dest_y = 0;
+  INT32 center_x = 0;
+  INT32 center_y = 0;
+  UINT8 direction = 0;
+  
+  clear_parmaeter_globals();
+
+  print_command(FALSE, FALSE);
+
+  // Extract each of the values.
+  extract_number(kLONG,  &dest_x, kREQUIRED);
+  extract_number(kLONG,  &dest_y,  kREQUIRED);
+  extract_number(kLONG,  &center_x,  kREQUIRED);
+  extract_number(kLONG,  &center_y,  kREQUIRED);
+  extract_number(kUINT,  &rate,  kREQUIRED);
+  extract_number(kUCHAR, &direction,  kREQUIRED);
+
+#if 0
+  if (gLimitChecks)
+  {
+    // Check for invalid duration
+    if (gTmpDurationMS == 0u) 
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+      return;
+    }
+    // Limit each parameter to just 3 bytes
+    if (gTmpDurationMS > 0xFFFFFF) 
+    {
+      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    // Check for too-fast step request (>25KHz)
+    // First get absolute value of steps, then check if it's asking for >25KHz
+    if (gTmpSteps1 > 0) 
+    {
+      Steps = gTmpSteps1;
+    }
+    else 
+    {
+      Steps = -gTmpSteps1;
+    }
+    if (Steps > 0xFFFFFFl) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    // Check for too fast
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    // And check for too slow
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+
+    if (gTmpSteps2 > 0) 
+    {
+      Steps = gTmpSteps2;
+    }
+    else 
+    {
+      Steps = -gTmpSteps2;
+    }
+
+    if (Steps > 0xFFFFFFl) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
+    {
+      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
+      print_line_ending(kLE_REV);
+      return;
+    }
+    if (gTmpClearAccs > 3u)
+    {
+      gTmpClearAccs = 0;
+    }
+  }
+
+  // If we get here, we know that step rate for both A1 and A2 is
+  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  process_simple_motor_move();
+#endif
+  
+  print_line_ending(kLE_OK_NORM);
+}
+
 // Home the motors
 // "HM,<StepRate>,<Pos1>,<Pos2><CR>"
 // <StepRate> is the desired rate of the primary (larger) axis in steps/s.
