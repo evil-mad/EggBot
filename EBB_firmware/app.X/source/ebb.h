@@ -100,29 +100,18 @@ typedef enum
   PEN_UP
 } PenStateType;
 
-// Bitfield defines the CommandType BYTE in the MoveCommandType
-// We use bits now in this byte in order to trigger a command,
-// one bit per command. Thus we can only have 8 total commands that are passed
-// through the FIFO to the ISR. Note that three USB commands (SM, XM HM) are
-// all the same and represented by one bit.
-// Only one bit must be set at a time or undefined behavior will occur.
-// If no bits are set, then the command is effectively COMMAND_NONE.
-#define COMMAND_DELAY_BIT_NUM             0u
-#define COMMAND_SERVO_MOVE_BIT_NUM        1u
-#define COMMAND_SE_BIT_NUM                2u
-#define COMMAND_EM_BIT_NUM                3u
-#define COMMAND_SM_XM_HM_MOVE_BIT_NUM     4u
-#define COMMAND_LM_MOVE_BIT_NUM           5u
-#define COMMAND_LT_MOVE_BIT_NUM           6u
-
-#define COMMAND_NONE_BIT                  0u
-#define COMMAND_DELAY_BIT                 1u
-#define COMMAND_SERVO_MOVE_BIT            (1u << COMMAND_SERVO_MOVE_BIT_NUM)
-#define COMMAND_SE_BIT                    (1u << COMMAND_SE_BIT_NUM)
-#define COMMAND_EM_BIT                    (1u << COMMAND_EM_BIT_NUM)
-#define COMMAND_SM_XM_HM_MOVE_BIT         (1u << COMMAND_SM_XM_HM_MOVE_BIT_NUM)
-#define COMMAND_LM_MOVE_BIT               (1u << COMMAND_LM_MOVE_BIT_NUM)
-#define COMMAND_LT_MOVE_BIT               (1u << COMMAND_LT_MOVE_BIT_NUM)
+// Defines for the CommandType BYTE in the MoveCommandType
+// Note that three USB commands (SM, XM HM) are
+// all the same and represented by one command value.
+#define COMMAND_NONE                  0u
+#define COMMAND_DELAY                 1u
+#define COMMAND_SERVO_MOVE            2u
+#define COMMAND_SE                    3u
+#define COMMAND_EM                    4u
+#define COMMAND_SM_XM_HM_MOVE         5u
+#define COMMAND_LM_MOVE               6u
+#define COMMAND_LT_MOVE               7u
+#define COMMAND_CM_MOVE               8u
 
 typedef enum
 {

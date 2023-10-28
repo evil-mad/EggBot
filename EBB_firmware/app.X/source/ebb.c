@@ -511,7 +511,7 @@ void high_ISR(void)
   // acceleration and so that code is left out to save time. This is also
   // the most common command used by the various PC softwares so we check 
   // for it first.
-  if (bittst(CurrentCommand.Command, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE)
   {
     // Direction bits need to be output before step bits. Since we know step bis
     // are clear at this point, it's safe to always output direction bits here
@@ -586,7 +586,7 @@ void high_ISR(void)
 
   // Low level Move (LM) : This one uses acceleration, so take that
   // into account.
-  if (bittst(CurrentCommand.Command, COMMAND_LM_MOVE_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_LM_MOVE)
   {
     //// MOTOR 1   LM ////
 
@@ -678,7 +678,7 @@ void high_ISR(void)
   // ISR ticks (stored in .Steps[0]). Both axis continue to produce steps
   // until the time is used up. This affects how AxisActive is computed.
   // Only AxisActive[0] is used for this command, not AxisActive[1].
-  if (bittst(CurrentCommand.Command, COMMAND_LT_MOVE_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_LT_MOVE)
   {
     // Has time run out for this command yet?
     if (bittstzero(AxisActive[0]))
@@ -849,7 +849,7 @@ OutputBits:
 
 NonStepperCommands:
   // Now check for all the other (non-stepper based) motion FIFO commands
-  if (bittst(CurrentCommand.Command, COMMAND_SERVO_MOVE_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_SERVO_MOVE)
   {
     // Check to see if we should change the state of the pen
     if (bittstzero(gUseRCPenServo))
@@ -912,7 +912,11 @@ NonStepperCommands:
     }
   }
 
-  if (CurrentCommand.Command & (COMMAND_SERVO_MOVE_BIT | COMMAND_DELAY_BIT))
+  if (
+    (CurrentCommand.Command == COMMAND_SERVO_MOVE)
+    |
+    (CurrentCommand.Command == COMMAND_DELAY)
+  )
   {
     // NOTE: Intentional fall-through to COMMAND_DELAY here
     // Because the only two commands that ever use DelayCounter are
@@ -932,7 +936,7 @@ NonStepperCommands:
     goto CheckForNextCommand;
   }
 
-  if (bittst(CurrentCommand.Command, COMMAND_SE_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_SE)
   {
     // Check to see if we should start or stop the engraver
     // Now act on the State of the SE command
@@ -953,7 +957,7 @@ NonStepperCommands:
     goto CheckForNextCommand;
   }
 
-  if (bittst(CurrentCommand.Command, COMMAND_EM_BIT_NUM))
+  if (CurrentCommand.Command == COMMAND_EM)
   {
     // As of version 2.8.0, we now have the EM command transplanted here into
     // the motion queue. This is so that changes to motor enable or microstep
@@ -1070,7 +1074,13 @@ CheckForNextCommand:
       // If this is the end of an LM move, then print out all the important values
       // of everything (now that global step positions have been taken into
       // account) for checking that our math is working right
-      if (CurrentCommand.Command & (COMMAND_LM_MOVE_BIT | COMMAND_LT_MOVE_BIT | COMMAND_SM_XM_HM_MOVE_BIT))
+      if (
+        (CurrentCommand.Command == COMMAND_LM_MOVE)
+        | 
+        (CurrentCommand.Command == COMMAND_LT_MOVE)
+        | 
+        (CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE)
+      )
       {
         // Setting this bit when we have something to print out will cause the next
         // ISR to be rescheduled so we have as much time as we need to print
@@ -1142,7 +1152,7 @@ CheckForNextCommand:
       // Flush the whole FIFO by clearing each element's Command field
       for (isr_i=0; isr_i < COMMAND_FIFO_MAX_LENGTH; isr_i++)
       {
-        FIFOPtr[isr_i].Command = COMMAND_NONE_BIT;
+        FIFOPtr[isr_i].Command = COMMAND_NONE;
       }
     }
   }
@@ -1150,7 +1160,7 @@ CheckForNextCommand:
   // If we're done with our current command, load in the next one
   if (bittstzero(AllDone))
   {
-    CurrentCommand.Command = COMMAND_NONE_BIT;
+    CurrentCommand.Command = COMMAND_NONE;
     if (gFIFOLength != 0u)
     {
       if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
@@ -1181,7 +1191,7 @@ CheckForNextCommand:
       // since they will then happen faster.
       gFIFOCommand = FIFOPtr[gFIFOOut].Command;
       
-      if (bittst(gFIFOCommand, COMMAND_SM_XM_HM_MOVE_BIT_NUM))
+      if (gFIFOCommand == COMMAND_SM_XM_HM_MOVE)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
@@ -1192,7 +1202,7 @@ CheckForNextCommand:
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
         CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
-      else if (bittst(gFIFOCommand, COMMAND_LM_MOVE_BIT_NUM))
+      else if (gFIFOCommand == COMMAND_LM_MOVE)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
@@ -1207,7 +1217,7 @@ CheckForNextCommand:
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
         CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
-      else if (bittst(gFIFOCommand, COMMAND_LT_MOVE_BIT_NUM))
+      else if (gFIFOCommand == COMMAND_LT_MOVE)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.Rate[0]        = FIFOPtr[gFIFOOut].Rate[0];
@@ -1221,7 +1231,7 @@ CheckForNextCommand:
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
         CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
       }
-      else if (bittst(gFIFOCommand, COMMAND_SERVO_MOVE_BIT_NUM))
+      else if (gFIFOCommand == COMMAND_SERVO_MOVE)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
@@ -1230,26 +1240,27 @@ CheckForNextCommand:
         CurrentCommand.ServoChannel   = FIFOPtr[gFIFOOut].ServoChannel;
         CurrentCommand.ServoRate      = FIFOPtr[gFIFOOut].ServoRate;
       }
-      // Note: bittst(CurrentCommand, COMMAND_DELAY_BIT_NUM)
-      else if (bittstzero(gFIFOCommand))
+      else if (gFIFOCommand == COMMAND_DELAY)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
       }
-      else if (bittst(gFIFOCommand, COMMAND_SE_BIT_NUM))
+      else if (gFIFOCommand == COMMAND_SE)
       {
         CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.DelayCounter   = FIFOPtr[gFIFOOut].DelayCounter;
         CurrentCommand.SEState        = FIFOPtr[gFIFOOut].SEState;
         CurrentCommand.SEPower        = FIFOPtr[gFIFOOut].SEPower;
       }
-      else // Note: We are assuming that if there is a command in the FIFO, and 
-           // it is NOT one of the above 6 commands, then it MUST be a 
-           // COMMAND_EM_BIT. We do NOT test explicitly for this to save time
+      else if (gFIFOCommand == COMMAND_EM)
       {
         CurrentCommand.Command       = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.DirBits       = FIFOPtr[gFIFOOut].DirBits;
         CurrentCommand.ServoRPn      = FIFOPtr[gFIFOOut].ServoRPn;
+      }
+      else
+      {
+        // gFIFOCommand had a value that is not allowed
       }
 #endif
 
@@ -1268,7 +1279,13 @@ CheckForNextCommand:
 
       // Take care of clearing the step accumulators for the next move if
       // it's a motor move (of any type) - if the command requests it
-      if (CurrentCommand.Command & (COMMAND_SM_XM_HM_MOVE_BIT | COMMAND_LM_MOVE_BIT | COMMAND_LT_MOVE_BIT))
+      if (
+        (CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE)
+        | 
+        (CurrentCommand.Command == COMMAND_LM_MOVE)
+        | 
+        (CurrentCommand.Command == COMMAND_LT_MOVE)
+      )
       {
         if (CurrentCommand.SEState & SESTATE_ARBITRARY_ACC_BIT)
         {
@@ -1321,7 +1338,7 @@ CheckForNextCommand:
       }
 
       // Zero out command in FIFO we just copied, but leave the rest of the fields alone
-      FIFOPtr[gFIFOOut].Command = COMMAND_NONE_BIT;
+      FIFOPtr[gFIFOOut].Command = COMMAND_NONE;
       
       // Increment gFIFO_Out
       gFIFOOut++;
@@ -1432,7 +1449,7 @@ void EBB_Init(void)
     CurrentCommand.Steps[i] = 0;
     CurrentCommand.Accel[i] = 0;
   }
-  CurrentCommand.Command = COMMAND_NONE_BIT;
+  CurrentCommand.Command = COMMAND_NONE;
   CurrentCommand.DirBits = 0;
   CurrentCommand.DelayCounter = 0;
   CurrentCommand.ServoPosition = 0;
@@ -2314,11 +2331,11 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
   gMoveTemp.Jerk[1] = gTmpJerk2;
   if (TimedMove)
   {
-    gMoveTemp.Command = COMMAND_LT_MOVE_BIT;
+    gMoveTemp.Command = COMMAND_LT_MOVE;
   }
   else
   {
-    gMoveTemp.Command = COMMAND_LM_MOVE_BIT;
+    gMoveTemp.Command = COMMAND_LM_MOVE;
   }
 
   // Spin here until there's space in the FIFO
@@ -2511,6 +2528,8 @@ void parse_CM_packet(void)
   extract_number(kUINT,  &rate,  kREQUIRED);
   extract_number(kUCHAR, &direction,  kREQUIRED);
 
+  // 
+  
 #if 0
   if (gLimitChecks)
   {
@@ -2679,7 +2698,7 @@ void parse_HM_packet(void)
     INTCONbits.GIEH = 0;    // Turn high priority interrupts off
 
     // Create our output values to print back to the PC
-    if ((CurrentCommand.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE_BIT))
+    if ((CurrentCommand.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE))
     {
       CommandExecuting = FALSE;
     }
@@ -3025,7 +3044,7 @@ static void process_simple_motor_move(void)
   // Check for delay
   if (gTmpSteps1 == 0 && gTmpSteps2 == 0)
   {
-    gMoveTemp.Command = COMMAND_DELAY_BIT;
+    gMoveTemp.Command = COMMAND_DELAY;
     // This is OK because we only need to multiply the 3 byte Duration by
     // 25, so it fits in 4 bytes OK.
     gMoveTemp.DelayCounter = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
@@ -3195,7 +3214,7 @@ static void process_simple_motor_move(void)
     gMoveTemp.Rate[1].value = gTmpIntervals;
     gMoveTemp.Steps[1] = gTmpSteps2;
     gMoveTemp.Accel[1] = 0;
-    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
+    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
 
     if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
     {
@@ -3264,11 +3283,11 @@ void parse_ES_packet(void)
 
   if 
   (
-    CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_SM_XM_HM_MOVE
     ||
-    CurrentCommand.Command == COMMAND_LM_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LM_MOVE
     ||
-    CurrentCommand.Command == COMMAND_LT_MOVE_BIT
+    CurrentCommand.Command == COMMAND_LT_MOVE
   )
   {
     command_interrupted = 1;
@@ -3280,12 +3299,12 @@ void parse_ES_packet(void)
   }
 
   // Clear the currently executing motion command
-  CurrentCommand.Command = COMMAND_NONE_BIT;
+  CurrentCommand.Command = COMMAND_NONE;
 
   // Clear out the entire FIFO
   for (i = 0; i < COMMAND_FIFO_MAX_LENGTH; i++)
   {
-    FIFOPtr[i].Command = COMMAND_NONE_BIT;
+    FIFOPtr[i].Command = COMMAND_NONE;
   }
   gFIFOIn = 0;
   gFIFOOut = 0;
@@ -3594,7 +3613,7 @@ void parse_EM_packet(void)
   // Set up the motion queue command
   FIFOPtr[gFIFOIn].DirBits = EA1;
   FIFOPtr[gFIFOIn].ServoRPn = EA2;
-  FIFOPtr[gFIFOIn].Command = COMMAND_EM_BIT;
+  FIFOPtr[gFIFOIn].Command = COMMAND_EM;
 
   gFIFOIn++;
   if (gFIFOIn >= gCurrentFIFOLength)
@@ -3949,7 +3968,7 @@ void parse_SE_packet(void)
     FIFOPtr[gFIFOIn].SEPower = StoredEngraverPower;
     FIFOPtr[gFIFOIn].DelayCounter = 0;
     FIFOPtr[gFIFOIn].SEState = State;
-    FIFOPtr[gFIFOIn].Command = COMMAND_SE_BIT;
+    FIFOPtr[gFIFOIn].Command = COMMAND_SE;
 
     gFIFOIn++;
     if (gFIFOIn >= gCurrentFIFOLength)
@@ -3979,7 +3998,7 @@ UINT8 process_QM(void)
   {
     CommandExecuting = 1;
   }
-  if (CurrentCommand.Command != COMMAND_NONE_BIT) 
+  if (CurrentCommand.Command != COMMAND_NONE)
   {
     CommandExecuting = 1;
   }

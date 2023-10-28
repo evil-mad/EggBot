@@ -145,7 +145,7 @@ volatile unsigned int AnalogEnabledChannels;
 volatile unsigned int ChannelBit;
 volatile UINT16 g_PowerMonitorThresholdADC;     // 0-1023 ADC counts, below which
 volatile BOOL g_PowerDropDetected;              // True if power drops below PowerMonitorThreshold
-
+ 
 volatile tStepperDisableTimeout g_StepperDisableState;  // Stores state of stepper timeout disable feature
 volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before motors are disabled
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout

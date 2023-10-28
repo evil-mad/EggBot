@@ -386,7 +386,7 @@ UINT8 RCServo2_Move(
       }
 
       // Now copy the values over into the FIFO element
-      FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE_BIT;
+      FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE;
       FIFOPtr[gFIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
       FIFOPtr[gFIFOIn].ServoChannel = Channel;
       FIFOPtr[gFIFOIn].ServoRPn = RPn;
