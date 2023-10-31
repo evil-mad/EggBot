@@ -2496,25 +2496,28 @@ void parse_SM_packet(void)
 }
 
 // The Circle Move command
-// Usage: CM,<dest_x>,<dest_y>,<center_x>,<center_y>,<rate>,<direction><CR>
+// Usage: CM,<dest_x>,<dest_y>,<center_x>,<center_y>,<frequency>,<direction>,<ClearAccs><CR>
 //
-// <dest_x>,<dest_y>,<center_x>,<center_y> are a signed 24 bit numbers
-// <rate> is an unsigned integer from 2 to 25000
-// <direction> is 0 for CW or 1 for CCW
+// <dest_x>,<dest_y>,<center_x>,<center_y> are required signed 24 bit numbers
+// <frequency> is a required unsigned integer from 2 to 25000
+// <direction> is a required 0 for CW or 1 for CCW
+// <ClearAccs> is an optional 0, 1, 2 or 3
 //
 // <dest_x>,<dest_y> are the relative coordinates where the arc should end up
 // <center_x>,<center_y> are the relative coordinates where the center of the arc is
 // <rate> is the step frequency in steps/second
 // <direction> specifies which direction the arc should take
+// <ClearAccs> is the same as for SM
 //
 void parse_CM_packet(void)
 {
-  UINT16 rate = 0;
+  UINT16 frequency = 0;
   INT32 dest_x = 0;
   INT32 dest_y = 0;
   INT32 center_x = 0;
   INT32 center_y = 0;
   UINT8 direction = 0;
+  UINT32 rate = 0;
   
   clear_parmaeter_globals();
 
@@ -2525,99 +2528,265 @@ void parse_CM_packet(void)
   extract_number(kLONG,  &dest_y,  kREQUIRED);
   extract_number(kLONG,  &center_x,  kREQUIRED);
   extract_number(kLONG,  &center_y,  kREQUIRED);
-  extract_number(kUINT,  &rate,  kREQUIRED);
+  extract_number(kUINT,  &frequency,  kREQUIRED);
   extract_number(kUCHAR, &direction,  kREQUIRED);
+  extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
-  // 
-  
-#if 0
   if (gLimitChecks)
   {
-    // Check for invalid duration
-    if (gTmpDurationMS == 0u) 
+    // direction can only be 0 or 1
+    if (direction > 1u) 
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
-    // Bail if we got a conversion error
+    // All four position parameters need to be 24 bit signed values
+    if ((dest_x > 32767) || (dest_x < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((dest_y > 32767) || (dest_y < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((center_x > 32767) || (center_x < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((center_y > 32767) || (center_y < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    // Rate has to be from 2 to 25000
+    if ((frequency < 2u) || (frequency > 25000u))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    
+    // Bail if a there is a parameter limit error
     if (error_byte)
     {
       return;
     }
-    // Limit each parameter to just 3 bytes
-    if (gTmpDurationMS > 0xFFFFFF) 
-    {
-      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // Check for too-fast step request (>25KHz)
-    // First get absolute value of steps, then check if it's asking for >25KHz
-    if (gTmpSteps1 > 0) 
-    {
-      Steps = gTmpSteps1;
-    }
-    else 
-    {
-      Steps = -gTmpSteps1;
-    }
-    if (Steps > 0xFFFFFFl) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // Check for too fast
-    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // And check for too slow
-    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
+  }
 
-    if (gTmpSteps2 > 0) 
-    {
-      Steps = gTmpSteps2;
-    }
-    else 
-    {
-      Steps = -gTmpSteps2;
-    }
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
+  {
+    return;
+  }
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  {
+    ebb_print((far rom char *)"Dest_X=");
+    ebb_print_int(dest_x);
+    ebb_print((far rom char *)" Dest_Y=");
+    ebb_print_int(dest_y);
+    ebb_print((far rom char *)" Center_X=");
+    ebb_print_int(center_x);
+    ebb_print((far rom char *)" Center_Y=");
+    ebb_print_int(center_y);
+    ebb_print((far rom char *)" Rate=");
+    ebb_print_int(rate);
+    ebb_print((far rom char *)" Direction=");
+    ebb_print_int(direction);
+    print_line_ending(kLE_REV);
+  }
+  
+  // Compute the rate
+  rate = (2147483648ul/25000u) * frequency;
+  
+  
+  if (gTmpClearAccs > 3u)
+  {
+    gTmpClearAccs = 3;
+  }
+  gMoveTemp.SEState = (UINT8)gTmpClearAccs;
 
-    if (Steps > 0xFFFFFFl) 
+  
+  
+  
+  
+  gMoveTemp.DelayCounter = 0; // No delay for motor moves
+  gMoveTemp.DirBits = 0;
+
+  if (gAutomaticMotorEnable == TRUE)
+  {
+    // Enable both motors when we want to move them
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
+
+  // First, set the direction bits
+  if (gTmpSteps1 < 0)
+  {
+    gMoveTemp.DirBits = gMoveTemp.DirBits | DIR1_BIT;
+    gTmpSteps1 = -gTmpSteps1;
+  }
+  if (gTmpSteps2 < 0)
+  {
+    gMoveTemp.DirBits = gMoveTemp.DirBits | DIR2_BIT;
+    gTmpSteps2 = -gTmpSteps2;
+  }
+  // To compute StepAdd values from Duration.
+  // A1Stp is from 0x000001 to 0xFFFFFF.
+  // HIGH_ISR_TICKS_PER_MS = 25
+  // Duration is from 0x000001 to 0xFFFFFF.
+  // temp needs to be from 0x0001 to 0x7FFF.
+  // Temp is added to accumulator every 25KHz. So slowest step rate
+  // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+  // Fastest step rate is obviously 25KHz.
+  // If A1Stp is 1, then duration must be 763 or less.
+  // If A1Stp is 2, then duration must be 763 * 2 or less.
+  // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  {
+    // First check for duration to large.
+    if ((UINT32)gTmpSteps1 < (0xFFFFFFu/763u)) 
     {
-      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if (gTmpClearAccs > 3u)
-    {
-      gTmpClearAccs = 0;
+      if (gTmpDurationMS > ((UINT32)gTmpSteps1 * 763u)) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis1 duration too long : ");
+        ebb_print_uint(gTmpDurationMS);
+        print_line_ending(kLE_REV);
+        gTmpIntervals = 0;
+        gTmpSteps1 = 0;
+      }
     }
   }
 
-  // If we get here, we know that step rate for both A1 and A2 is
-  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move();
-#endif
+  if (gTmpSteps1 != 0) 
+  {
+    if (gTmpSteps1 < 0x1FFFF) 
+    {
+      gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
+      gTmpIntervals = (gTmpSteps1 << 15)/gTmpRate1;
+      // Because it takes us some time to do this division,
+      // we only perform this extra step if our move is long enough to
+      // warrant it. That way, for really short moves (where the extra
+      // precision isn't necessary) we don't take up extra time.
+      if (gTmpDurationMS > 30u)
+      {
+        gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
+        remainder = (gTmpRate2 << 16) / gTmpRate1;
+      }
+    }
+    else 
+    {
+      gTmpIntervals = (((UINT32)(gTmpSteps1/gTmpDurationMS) << 15u)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+      remainder = 0;
+    }
+    if (gTmpIntervals > 0x8000) 
+    {
+      ebb_print((far rom char *)"Major malfunction Axis1 StepCounter too high : ");
+      ebb_print_uint(gTmpIntervals);
+      print_line_ending(kLE_REV);
+      gTmpIntervals = 0x8000;
+    }
+    if (gTmpIntervals == 0u && gTmpSteps1 != 0) 
+    {
+      ebb_print((far rom char *)"Major malfunction Axis1 StepCounter zero");
+      print_line_ending(kLE_REV);
+      gTmpIntervals = 1;
+    }
+    if (gTmpDurationMS > 30u)
+    {
+      gTmpIntervals = (gTmpIntervals << 16) + remainder;
+    }
+    else
+    {
+      gTmpIntervals = (gTmpIntervals << 16);
+    }
+
+    if (gTmpIntervals >= 0x7FFFFFFFu)
+    {
+      gTmpIntervals = 0x7FFFFFFF;
+    }
+    gMoveTemp.Rate[0].value = gTmpIntervals;
+    gMoveTemp.Steps[0] = gTmpSteps1;
+    gMoveTemp.Accel[0] = 0;
+
+    if (gTmpSteps2 != 0) 
+    {
+      if (gTmpSteps2 < 0x1FFFF) 
+      {
+        gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
+        gTmpIntervals = (gTmpSteps2 << 15)/gTmpRate1;
+        gTmpRate2 = (gTmpSteps2 << 15) % gTmpRate1; 
+        if (gTmpDurationMS > 30u)
+        {
+          remainder = (gTmpRate2 << 16) / gTmpRate1;
+        }
+      }
+      else 
+      {
+        gTmpIntervals = (((gTmpSteps2/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        remainder = 0;
+      }
+      if (gTmpIntervals > 0x8000) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter too high : ");
+        ebb_print_uint(gTmpIntervals);
+        print_line_ending(kLE_REV);
+        gTmpIntervals = 0x8000;
+      }
+      if (gTmpIntervals == 0u && gTmpSteps2 != 0) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter zero");
+        print_line_ending(kLE_REV);
+        gTmpIntervals = 1;
+      }
+      if (gTmpDurationMS > 30u)
+      {
+        gTmpIntervals = (gTmpIntervals << 16) + remainder;
+      }
+      else
+      {
+        gTmpIntervals = (gTmpIntervals << 16);
+      }
+    }
+
+    if (gTmpIntervals >= 0x7FFFFFFFu)
+    {
+      gTmpIntervals = 0x7FFFFFFF;
+    }
+    gMoveTemp.Rate[1].value = gTmpIntervals;
+    gMoveTemp.Steps[1] = gTmpSteps2;
+    gMoveTemp.Accel[1] = 0;
+    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
+
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+    {
+      ebb_print((far rom char *)"R1=");
+      ebb_print_uint(gMoveTemp.Rate[0].value);
+      ebb_print((far rom char *)" S1=");
+      ebb_print_uint(gMoveTemp.Steps[0]);
+      ebb_print((far rom char *)" R2=");
+      ebb_print_uint(gMoveTemp.Rate[1].value);
+      ebb_print((far rom char *)" S2=");
+      ebb_print_uint(gMoveTemp.Steps[1]);
+      print_line_ending(kLE_REV);
+    }
+  }
+  
+  // Spin here until there's space in the FIFO
+  while(gFIFOLength >= gCurrentFIFOLength)
+  ;
+  
+  // If the limit switch feature has triggered, then ignore this move command
+  // Maybe the limit switch has become true between the top of this function 
+  // and here? Better check for it.
+  if (!bittstzero(gLimitSwitchTriggered))
+  {
+    // Now, quick copy over the computed command data to the command FIFO
+    FIFOPtr[gFIFOIn] = gMoveTemp;
+    gFIFOIn++;
+    if (gFIFOIn >= gCurrentFIFOLength)
+    {
+      gFIFOIn = 0;
+    }
+    gFIFOLength++;
+  }
+  
+  COMMAND_CM_MOVE
   
   print_line_ending(kLE_OK_NORM);
 }
@@ -3115,21 +3284,19 @@ static void process_simple_motor_move(void)
       {
         gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
         gTmpIntervals = (gTmpSteps1 << 15)/gTmpRate1;
-        gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
-        // Because it takes us about 5ms extra time to do this division,
+        // Because it takes us some time to do this division,
         // we only perform this extra step if our move is long enough to
         // warrant it. That way, for really short moves (where the extra
-        // precision isn't necessary) we don't take up extra time. Without
-        // this optimization, our minimum move time is 20ms. With it, it
-        // drops down to about 15ms.
+        // precision isn't necessary) we don't take up extra time.
         if (gTmpDurationMS > 30u)
         {
+          gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
           remainder = (gTmpRate2 << 16) / gTmpRate1;
         }
       }
       else 
       {
-        gTmpIntervals = (((gTmpSteps1/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        gTmpIntervals = (((UINT32)(gTmpSteps1/gTmpDurationMS) << 15u)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         remainder = 0;
       }
       if (gTmpIntervals > 0x8000) 

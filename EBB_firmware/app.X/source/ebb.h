@@ -123,12 +123,13 @@ typedef enum
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
   struct byte_map {
-    UINT8 b1; // Low byte
+    UINT8 b1; // Low bytegTmpIntervals =
     UINT8 b2;
     UINT8 b3;
     UINT8 b4; // High byte
   } bytes;
   UINT32 value;
+  UINT32 circle_accum;
 } u32b4_t;
 
 // Byte union used for rate (signed)
