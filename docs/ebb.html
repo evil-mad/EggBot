@@ -584,10 +584,10 @@ ul.no_bullets {
           <li><span style="font-weight: bold;">Example:</span> <code>EM,3,1\r</code> Enable both motors and set to 1/4 step mode</li>
           <li>
             <span style="font-weight: bold;">Version History:</span>
+            <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
+            <p>With all versions up to and including v2.7.0, the second parameter <code><i>Enable2</i></code> was optional. If it was not included in the command the motor 2's enable would not be changed.</p>
             <p>Starting with v2.8.0, this command is placed on the motion FIFO along with the other motion commands so that
             it occurs at a precise time in the motion sequence.</p>
-            <p>With all versions up to and including v2.7.0, the second parameter <code><i>Enable2</i></code> was optional. If it was not included in the command the motor 2's enable would not be changed.</p>
-            <p>Starting with v2.6.2, the global step counters (available with the <codea>QS</code> command) are zeroed out any time this command is executed.</p>
           </li>
         </ul>
       
