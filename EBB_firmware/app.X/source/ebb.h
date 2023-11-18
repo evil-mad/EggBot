@@ -147,21 +147,43 @@ typedef union union32b4 {
 // are sent from the command parser to the ISR move engine.
 // Currently 47 bytes long
 typedef struct
-{                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
+{
   UINT8           Command;                        // SM DL S2 SE EM LM LT
-  UINT8           DirBits;                        // SM          EM LM LT
-  UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
-  UINT8           SEState;                        // SM       SE    LM LT
-  s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
-  UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
-  INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
-  INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
-  UINT8           ServoRPn;                       //       S2    EM LM LT
-  UINT16          ServoPosition;                  //       S2
-  UINT8           ServoChannel;                   //       S2
-  UINT16          ServoRate;                      //       S2
-  UINT16          SEPower;                        //          SE
+  union {
+    struct {
+                                                      // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
+      UINT8           DirBits;                        // SM          EM LM LT
+      UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
+      UINT8           SEState;                        // SM       SE    LM LT
+      s32b4_t         Rate[NUMBER_OF_STEPPERS];       // SM             LM LT
+      UINT32          Steps[NUMBER_OF_STEPPERS];      // SM             LM LT
+      INT32           Jerk[NUMBER_OF_STEPPERS];       //                LM LT
+      INT32           Accel[NUMBER_OF_STEPPERS];      //                LM LT
+      UINT8           ServoRPn;                       //       S2    EM LM LT
+      UINT16          ServoPosition;                  //       S2
+      UINT8           ServoChannel;                   //       S2
+      UINT16          ServoRate;                      //       S2
+      UINT16          SEPower;                        //          SE
+    } sm;
+    struct {
+      UINT8           DirBits;
+      s32b4_t         Rate;
+      UINT32          Steps;
+      UINT16          VScaleK;
+      UINT8           m_alpha;
+      INT8            bits_left;
+      INT16           x_f;
+      INT16           y_f;
+      INT32           x_t;
+      INT32           y_t;
+      UINT8           direction;
+      INT16           x_pos_last;
+      INT16           y_pos_last;
+      UINT8           typ_seg;
+    } cm;  
+  } m;
 } MoveCommandType;
+
 
 // Define global things that depend on the board type
 // STEP2 = RD4
