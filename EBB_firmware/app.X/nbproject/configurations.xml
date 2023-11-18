@@ -30,6 +30,7 @@
                    projectFiles="true">
       <itemPath>source/BL_rm18f46j50_g.lkr</itemPath>
       <itemPath>source/rm18f46j50_g.lkr</itemPath>
+      <itemPath>source/squareroot.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ObjectFiles"
                    displayName="Object Files"
