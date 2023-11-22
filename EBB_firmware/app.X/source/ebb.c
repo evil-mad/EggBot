@@ -1124,7 +1124,7 @@ CheckForNextCommand:
   {
     PortBTemp = PORTB;
 
-    if ((~(PortBTemp ^ gLimitSwitchTarget)) & gLimitSwitchMask)
+    if ((~(PortBTemp ^ gLimitSwitchTarget)) & gLimitSwitchMask & !bittstzero(gLimitSwitchTriggered))
     {
       // At least one of the bits in PortB that we are looking at is in a state
       // now where it has 'triggered' and so we need to shut down the current
