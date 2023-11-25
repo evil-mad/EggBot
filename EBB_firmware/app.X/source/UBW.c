@@ -2516,8 +2516,21 @@ void parse_V_packet(void)
   ebb_print((far rom char *)st_version);
   print_line_ending(kLE_NORM);
   
+  // ; Sqrt(ARGA3:ARGA2:ARGA1:ARGA0) = RES1:RES0
+  ARGA0 = 0x40;
+  ARGA1 = 0xA1;
+  ARGA2 = 0x12;
+  ARGA3 = 0xE0;
+  
+  RES0 = 0xFF;
+  RES1 = 0xFF;
+  
   Sqrt();
   
+  ebb_print_uint(RES0);
+  ebb_print_char(',');
+  ebb_print_uint(RES1);
+  print_line_ending(kLE_NORM);
 }
 
 // A is for read Analog inputs

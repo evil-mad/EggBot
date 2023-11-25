@@ -326,7 +326,14 @@ extern volatile near UINT8 gCurrentFIFOLength;
 extern near DriverConfigurationType DriverConfiguration;
 extern near u32b4_t acc_union[2];
  
-// Extern for assembly square root function
+// Externs for assembly square root function
+extern UINT8 ARGA0;
+extern UINT8 ARGA1;
+extern UINT8 ARGA2;
+extern UINT8 ARGA3;
+extern UINT8 RES0;
+extern UINT8 RES1;
+
 extern void Sqrt(void);
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
