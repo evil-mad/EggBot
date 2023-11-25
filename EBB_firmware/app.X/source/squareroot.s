@@ -1,4 +1,4 @@
-#include <xc.inc>
+#include <p18F46J50.inc>
 
 ; When assembly code is placed in a psect, it can be manipulated as a
 ; whole by the linker and placed in memory.  
@@ -12,28 +12,28 @@
 ; psect which contains executable code.  PIC10/12/16 can use the default
 ; reloc value of 1.  Use one of the psects below for the device you use:
 
-psect   barfunc,local,class=CODE,delta=2 ; PIC10/12/16
-; psect   barfunc,local,class=CODE,reloc=2 ; PIC18
+; psect   barfunc,local,class=CODE,delta=2 ; PIC10/12/16
+;;;psect   barfunc,local,class=CODE,reloc=2 ; PIC18
 
-global _bar ; extern of bar function goes in the C source file
-_bar:
-    movf PORTA,w    ; here we use a symbol defined via xc.inc
-    return
+;;;global _bar ; extern of bar function goes in the C source file
+;;;_bar:
+;;;    movf PORTA,w    ; here we use a symbol defined via xc.inc
+;;;    return
 
     
     
     
-    RES0, RES1
-EXTERN Sqrt
+;;;    RES0, RES1
+;;;EXTERN Sqrt
 ; *******************************************************************
 ; *******************************************************************
-W equ 0 ; Standard constants
-F equ 1
-a equ 0
+;;;W equ 0 ; Standard constants
+;;;F equ 1
+;;;a equ 0
 ; *******************************************************************
 ; *******************************************************************
-R_Vctr CODE 0x0000
-goto Main
+;;;R_Vctr CODE 0x0000
+;;;goto Main
 ; *******************************************************************
 ;Software License Agreement
 ;The software supplied herewith by Microchip Technology Incorporated 
@@ -53,30 +53,30 @@ goto Main
 ;DAMAGES, FOR ANY REASON WHATSOEVER.
 ; *******************************************************************
 ; Calling Routine
-SRoot CODE
-Main
-movlw 0xCF
-movwf ARGA1, a
-movlw 0x48
-movwf ARGA0, a
-call Sqrt ; Sqrt(0xCF48)
+;;;SRoot CODE
+;;;Main
+;;;movlw 0xCF
+;;;movwf ARGA1, a
+;;;movlw 0x48
+;;;movwf ARGA0, a
+;;;call Sqrt ; Sqrt(0xCF48)
 ; RES0 should now contain 0xE6
-movlw 0xE0
-movwf ARGA3, a
-movlw 0x12
-movwf ARGA2, a
-movlw 0xA1
-movwf ARGA1, a
-movlw 0x40
-movwf ARGA0, a
-call Sqrt ; Sqrt(0xE012A140)
+;;;movlw 0xE0
+;;;movwf ARGA3, a
+;;;movlw 0x12
+;;;movwf ARGA2, a
+;;;movlw 0xA1
+;;;movwf ARGA1, a
+;;;movlw 0x40
+;;;movwf ARGA0, a
+;;;call Sqrt ; Sqrt(0xE012A140)
 ; RES1:RES0 should now contain 0xEF81
-bra Main
+;;;bra Main
 ; *******************************************************************
-END
+;;;END
 
 ; *******************************************************************
-Title"16/32 bit Integer Square Root"
+    Title"16/32 bit Integer Square Root"
 ; *******************************************************************
 ; *******************************************************************
 ; *** ***
@@ -94,38 +94,38 @@ Title"16/32 bit Integer Square Root"
 ; *** ***
 ; *******************************************************************
 ; *******************************************************************
-#include P18C252.INC
+;;;#include P18C252.INC
 ; *******************************************************************
 ; *******************************************************************
-MSB	equ 7		    ; general literal constants
-LSB	equ 0
-W	equ 0
-F	equ 1
-a	equ 0
+;;;MSB	equ 7		    ; general literal constants
+;;;LSB	equ 0
+;;;W	equ 0
+;;;F	equ 1
+;;;a	equ 0
 ; *******************************************************************
 ; *******************************************************************
-SimpMth UDATA_ACS
+gpr5	UDATA		    ; allocate RAM in grp5 section
 ARGA0	res 1		    ; various argument registers
 ARGA1	res 1
 ARGA2	res 1
 ARGA3	res 1
-GLOBAL ARGA0, ARGA1, ARGA2, ARGA3
+    GLOBAL ARGA0, ARGA1, ARGA2, ARGA3
 ARG1H	res 1
 ARG1L	res 1
 ARG2H	res 1
 ARG2L	res 1
-GLOBAL ARG1H, ARG1L, ARG2H, ARG2L
+    GLOBAL ARG1H, ARG1L, ARG2H, ARG2L
 SARG1	res 1		    ; signed arguments
 SARG2	res 1
-GLOBAL SARG1, SARG2
+    GLOBAL SARG1, SARG2
 RES1	res 1		    ; result registers
 RES0	res 1
-GLOBAL RES0, RES1
+    GLOBAL RES0, RES1
 SQRES0	res 1
 SQRES1	res 1
 SQRES2	res 1
 SQRES3	res 1
-GLOBAL SQRES0, SQRES1, SQRES2, SQRES3
+    GLOBAL SQRES0, SQRES1, SQRES2, SQRES3
 BITLOC0 res 1		    ; temporary registers
 BITLOC1 res 1
 TEMP0	res 1
@@ -138,134 +138,143 @@ TEMP1	res 1
 ; for the two basic sizes of numbers, 16-bit and 32-bit. The following
 ; differentiates the two and jumps to the appropriate function.
 ; Sqrt(ARGA3:ARGA2:ARGA1:ARGA0) = RES1:RES0
-S_ROOT CODE
-Sqrt	tstfsz	ARGA3, a	; determine if the number is 16-bit
+	CODE
+Sqrt	
+	movlb	5		; All our RAM is in bank 5
+	tstfsz	ARGA3, A	; determine if the number is 16-bit
 	bra	Sqrt32		; or 32-bit and call the best function
-	tstfsz	ARGA2, a
+	tstfsz	ARGA2, A
 	bra	Sqrt32
-	clrf	RES1, a
+	clrf	RES1, A
 	bra	Sqrt16
-GLOBAL Sqrt
+	
+	GLOBAL	Sqrt
 
 ; *******************************************************************
 ; ******************** Square Root **********************************
 ; Sqrt16(ARGA1:ARGA0) = RES0
-Sqrt16	clrf	TEMP0, a	; clear the temp solution
+Sqrt16	
+	movlb	5		; All our RAM is in bank 5
+	clrf	TEMP0, A	; clear the temp solution
 	movlw	0x80		; setup the first bit
-	movwf	BITLOC0, a
-	movwf	RES0, a
-Square8 movf	RES0, W, a	; square the guess
-	mulwf	RES0, a
-	movf	PRODL, W, a	; ARGA - PROD test
-	subwf	ARGA0, W, a
-	movf	PRODH, W, a
-	subwfb	ARGA1, W, a
-	btfsc	STATUS, C, a
+	movwf	BITLOC0, A
+	movwf	RES0, A
+Square8 movf	RES0, W, A	; square the guess
+	mulwf	RES0, A
+	movf	PRODL, W, A	; ARGA - PROD test
+	subwf	ARGA0, W, A
+	movf	PRODH, W, A
+	subwfb	ARGA1, W, A
+	btfsc	STATUS, C, A
 	bra	NextBit		; if positive then next bit
 				; if negative then rotate right
 	movff	TEMP0, RES0	; move last good value back into RES0
-	rrncf	BITLOC0, F, a	; then rotote the bit and put it
-	movf	BITLOC0, W, a	; back into RES0
-	iorwf	RES0, F, a
-	btfsc	BITLOC0, 7, a	; if last value was tested then get
+	rrncf	BITLOC0, F, A	; then rotote the bit and put it
+	movf	BITLOC0, W, A	; back into RES0
+	iorwf	RES0, F, A
+	btfsc	BITLOC0, 7, A	; if last value was tested then get
 	bra	Done		; out
 	bra	Square8		; elso go back for another test
 NextBit movff	RES0, TEMP0	; copy the last good approximation
-	rrncf	BITLOC0, F, a	; rotate the bit location register
-	movf	BITLOC0, W, a
-	iorwf	RES0, F, a
-	btfsc	BITLOC0, 7, a	; if last value was tested then get
+	rrncf	BITLOC0, F, A	; rotate the bit location register
+	movf	BITLOC0, W, A
+	iorwf	RES0, F, A
+	btfsc	BITLOC0, 7, A	; if last value was tested then get
 	bra	Done		; out
 	bra	Square8
 Done	movff	TEMP0,RES0	; put the final result in RES0
-return
+	return
 
-GLOBAL Sqrt16
+	GLOBAL Sqrt16
 ; *******************************************************************
 ; ******************** Square Root **********************************
 ; Sqrt32(ARGA3:ARGA2:ARGA1:ARGA0) = RES1:RES0
-Sqrt32	clrf	TEMP0, a	; clear the temp solution
-	clrf	TEMP1, a
-	clrf	BITLOC0, a	; setup the first bit
-	clrf	RES0, a
+Sqrt32	
+	movlb	5		; All our RAM is in bank 5
+	clrf	TEMP0, A	; clear the temp solution
+	clrf	TEMP1, A
+	clrf	BITLOC0, A	; setup the first bit
+	clrf	RES0, A
 	movlw	0x80
-	movwf	BITLOC1, a	; BitLoc = 0x8000
-	movwf	RES1, a		; RES = 0x8000
+	movwf	BITLOC1, A	; BitLoc = 0x8000
+	movwf	RES1, A		; RES = 0x8000
 Squar16 movff	RES0, ARG1L	; square the guess
 	movff	RES1, ARG1H
 	call	Sq16
-	movf	SQRES0, W, a	; ARGA - PROD test
-	subwf	ARGA0, W, a
-	movf	SQRES1, W, a
-	subwfb	ARGA1, W, a
-	movf	SQRES2, W, a
-	subwfb	ARGA2, W, a
-	movf	SQRES3, W, a
-	subwfb	ARGA3, W, a
-	btfsc	STATUS, C, a
+	movf	SQRES0, W, A	; ARGA - PROD test
+	subwf	ARGA0, W, A
+	movf	SQRES1, W, A
+	subwfb	ARGA1, W, A
+	movf	SQRES2, W, A
+	subwfb	ARGA2, W, A
+	movf	SQRES3, W, A
+	subwfb	ARGA3, W, A
+	btfsc	STATUS, C, A
 	bra	NxtBt16		; if positive then next bit
 				; if negative then rotate right
 	addlw	0x00		; clear carry
 	movff	TEMP0, RES0	; move last good value back into RES0
 	movff	TEMP1, RES1
-	rrcf	BITLOC1, F, a	; then rotote the bit and put it
-	rrcf	BITLOC0, F, a
-	movf	BITLOC1, W, a	; back into RES1:RES0
-	iorwf	RES1, F, a
-	movf	BITLOC0, W, a
-	iorwf	RES0, F, a
-	btfsc	STATUS, C, a	; if last value was tested then get
+	rrcf	BITLOC1, F, A	; then rotote the bit and put it
+	rrcf	BITLOC0, F, A
+	movf	BITLOC1, W, A	; back into RES1:RES0
+	iorwf	RES1, F, A
+	movf	BITLOC0, W, A
+	iorwf	RES0, F, A
+	btfsc	STATUS, C, A	; if last value was tested then get
 	bra	Done32		; out
 	bra	Squar16		; elso go back for another test
 NxtBt16 addlw	0x00		; clear carry
 	movff	RES0, TEMP0	; copy the last good approximation
 	movff	RES1, TEMP1
-	rrcf	BITLOC1, F, a	; rotate the bit location register
-	rrcf	BITLOC0, F, a
-	movf	BITLOC1, W, a	; and put back into RES1:RES0
-	iorwf	RES1, F, a
-	movf	BITLOC0, W, a
-	iorwf	RES0, F, a
-	btfsc	STATUS, C, a	; if last value was tested then get
+	rrcf	BITLOC1, F, A	; rotate the bit location register
+	rrcf	BITLOC0, F, A
+	movf	BITLOC1, W, A	; and put back into RES1:RES0
+	iorwf	RES1, F, A
+	movf	BITLOC0, W, A
+	iorwf	RES0, F, A
+	btfsc	STATUS, C, A	; if last value was tested then get
 	bra	Done32		; out
 	bra	Squar16
 Done32	movff	TEMP0,RES0	; put the final result in RES1:RES0
 	movff	TEMP1,RES1
 	return
-GLOBAL Sqrt32
+
+	GLOBAL Sqrt32
  
 ; *******************************************************************
 ; *********** 16 X 16 Unsigned Square *****************************
 ; SQRES3:SQRES0 = ARG1H:ARG1L ^2
-Sq16	movf	ARG1L, W, a
+Sq16	movf	ARG1L, W, A
 	mulwf	ARG1L		; ARG1L * ARG2L ->
 				; PRODH:PRODL
 	movff	PRODH, SQRES1	;
 	movff	PRODL, SQRES0	;
-	movf	ARG1H, W, a
+	movf	ARG1H, W, A
 	mulwf	ARG1H		; ARG1H * ARG2H ->
 				; PRODH:PRODL
 	movff	PRODH, SQRES3	;
 	movff	PRODL, SQRES2	;
-	movf	ARG1L, W, a
+	movf	ARG1L, W, A
 	mulwf	ARG1H		; ARG1L * ARG2H ->
 				; PRODH:PRODL
-	movf	PRODL, W, a	;
-	addwf	SQRES1, F, a	; Add cross
-	movf	PRODH, W, a	; products
-	addwfc	SQRES2, F, a	;
-	clrf	WREG, a		;
-	addwfc	SQRES3, F, a	;
-	movf	ARG1H, W, a	;
+	movf	PRODL, W, A	;
+	addwf	SQRES1, F, A	; Add cross
+	movf	PRODH, W, A	; products
+	addwfc	SQRES2, F, A	;
+	clrf	WREG, A		;
+	addwfc	SQRES3, F, A	;
+	movf	ARG1H, W, A	;
 	mulwf	ARG1L		; ARG1H * ARG2L ->
 				; PRODH:PRODL
-	movf	PRODL, W, a	;
-	addwf	SQRES1, F, a	; Add cross
-	movf	PRODH, W, a	; products
-	addwfc	SQRES2, F, a	;
+	movf	PRODL, W, A	;
+	addwf	SQRES1, F, A	; Add cross
+	movf	PRODH, W, A	; products
+	addwfc	SQRES2, F, A	;
 	clrf	WREG, W		;
-	addwfc	SQRES3, F, a	;
+	addwfc	SQRES3, F, A	;
 	return
-GLOBAL Sq16
+	
+	GLOBAL Sq16
 ; *******************************************************************
-end
+	end

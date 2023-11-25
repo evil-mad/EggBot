@@ -830,7 +830,7 @@ void UserInit(void)
   EBB_Init();
 
   RCServo2_Init();
-
+ 
   INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 
@@ -2515,6 +2515,9 @@ void parse_V_packet(void)
   
   ebb_print((far rom char *)st_version);
   print_line_ending(kLE_NORM);
+  
+  Sqrt();
+  
 }
 
 // A is for read Analog inputs

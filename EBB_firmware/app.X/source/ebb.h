@@ -325,6 +325,9 @@ extern UINT8 gStandardizedCommandFormat;
 extern volatile near UINT8 gCurrentFIFOLength;
 extern near DriverConfigurationType DriverConfiguration;
 extern near u32b4_t acc_union[2];
+ 
+// Extern for assembly square root function
+extern void Sqrt(void);
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
