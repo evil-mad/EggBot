@@ -715,8 +715,7 @@ void check_high_water(void)
 void UserInit(void)
 {
   UINT16 i;
-
- 
+  
   // Make all of 3 digital inputs
   LATA = 0x00;
   TRISA = 0xFF;
@@ -832,8 +831,8 @@ void UserInit(void)
 
   RCServo2_Init();
 
-///  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
-///  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 
   // Turn on the Timer4
   T4CONbits.TMR4ON = 1;
@@ -847,6 +846,7 @@ void UserInit(void)
   gLimitSwitchReplies = 0;
   gLimitSwitchReplyPrinted = 0;
   gCommandChecksumRequired = 0;
+  gLimitSwitchTriggered = 0;
 
 #if PC_PG_T_COMMANDS_ENABLED
   // Zero out pulse variables

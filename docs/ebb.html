@@ -1783,7 +1783,7 @@
           </li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This query allows retrieval of a temporary <i>VariableValue</i> stored in EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. Set the value of any of the variables with the <code><a href="#SL">SL</a></code> command. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>QL</code> command is backward compatible with the older version before v3.0.0. The <i>VariableValue</i> in the response is a decimal value from 0 to 255.
+              This query allows retrieval of a temporary <i>VariableValue</i> stored in EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. Set the value of any of the variables with the <code><a href="#SL">SL</a></code> command. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>QL</code> command is backward compatible with the older version before v3.0.0. The <i>VariableValue</i> in the response is a decimal value from 0 to 255. All 32 values are set to 0 at reset.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
@@ -2391,7 +2391,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command allows storage of temporary values in the EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. The values can be read out by using the <code><a href="#QL">QL[,<i>VariableIndex</i>]</a></code> query. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>SL</code> command is backward compatible with the older version before v3.0.0. The values are not retained across EBB reboots or resets.
+              This command allows storage of temporary values in the EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. The values can be read out by using the <code><a href="#QL">QL[,<i>VariableIndex</i>]</a></code> query. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>SL</code> command is backward compatible with the older version before v3.0.0. The values are not retained across EBB reboots or resets; they are all cleared to 0 at reset.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>SL,4\r</code> Sets the value of variable zero to the value of 4.</li>
