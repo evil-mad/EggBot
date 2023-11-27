@@ -334,7 +334,7 @@ extern UINT8 ARGA3;
 extern UINT8 RES0;
 extern UINT8 RES1;
 
-extern void Sqrt(void);
+extern UINT16 Sqrt(UINT32 val);
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;

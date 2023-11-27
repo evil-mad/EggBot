@@ -137,24 +137,30 @@ TEMP1	res 1
 ; best possible speed; therefore, the root is found a little differently
 ; for the two basic sizes of numbers, 16-bit and 32-bit. The following
 ; differentiates the two and jumps to the appropriate function.
-; Sqrt(ARGA3:ARGA2:ARGA1:ARGA0) = RES1:RES0
+; Sqrt(ARGA3:ARGA2:ARGA1:ARGA0) = PRODH:PRODL
 	CODE
 Sqrt	
+	movff	0xfd9, 0xfe6
+	movff	0xfe1, 0xfd9
 	movlb	5		    ; All our RAM is in bank 5
+	movlw	0xFB		    ; load -1 into W
+	movff	PLUSW2, ARGA0	    ; And offset FSR1 by W and store in ARGA3 
+	movlw	0xFC		    ; load -2 into W and do the same for the
+	movff	PLUSW2, ARGA1	    ; other bytes in the input parameter
+	movlw	0xFD
+	movff	PLUSW2, ARGA2
+	movlw	0xFE
+	movff	PLUSW2, ARGA3
 	tstfsz	ARGA3, BANKED	    ; determine if the number is 16-bit
 	bra	Sqrt32		    ; or 32-bit and call the best function
 	tstfsz	ARGA2, BANKED
 	bra	Sqrt32
-	clrf	RES1, BANKED
-	bra	Sqrt16
-	
-	GLOBAL	Sqrt
+				    ; Fallthrough to Sqrt16
 
 ; *******************************************************************
 ; ******************** Square Root **********************************
-; Sqrt16(ARGA1:ARGA0) = RES0
+; Sqrt16(ARGA1:ARGA0) = PRODL
 Sqrt16	
-	movlb	5		    ; All our RAM is in bank 5
 	clrf	TEMP0, BANKED	    ; clear the temp solution
 	movlw	0x80		    ; setup the first bit
 	movwf	BITLOC0, BANKED
@@ -182,15 +188,16 @@ NextBit movff	RES0, TEMP0	    ; copy the last good approximation
 	btfsc	BITLOC0, 7, BANKED  ; if last value was tested then get
 	bra	Done		    ; out
 	bra	Square8
-Done	movff	TEMP0,RES0	    ; put the final result in RES0
+Done	movff	TEMP0,PRODL	    ; put the final result in PRODL
+	clrf	PRODH, ACCESS	    ; clear out upper byte to be nice
+	movf	0xe5, 0x1, 0x0
+	movff	0xfe7, 0xfd9
 	return
 
-	GLOBAL Sqrt16
 ; *******************************************************************
 ; ******************** Square Root **********************************
-; Sqrt32(ARGA3:ARGA2:ARGA1:ARGA0) = RES1:RES0
+; Sqrt32(ARGA3:ARGA2:ARGA1:ARGA0) = PRODH:PRODL
 Sqrt32	
-	movlb	5		    ; All our RAM is in bank 5
 	clrf	TEMP0, BANKED	    ; clear the temp solution
 	clrf	TEMP1, BANKED
 	clrf	BITLOC0, BANKED	    ; setup the first bit
@@ -236,45 +243,46 @@ NxtBt16 addlw	0x00		    ; clear carry
 	btfsc	STATUS, C, ACCESS   ; if last value was tested then get
 	bra	Done32		    ; out
 	bra	Squar16
-Done32	movff	TEMP0,RES0	    ; put the final result in RES1:RES0
-	movff	TEMP1,RES1
+Done32	movff	TEMP0,PRODL	    ; put the final result in PRODL:PRODH
+	movff	TEMP1,PRODH
+	movf	0xe5, 0x1, 0x0
+	movff	0xfe7, 0xfd9
 	return
 
-	GLOBAL Sqrt32
- 
 ; *******************************************************************
 ; *********** 16 X 16 Unsigned Square *****************************
 ; SQRES3:SQRES0 = ARG1H:ARG1L ^2
 Sq16	movf	ARG1L, W, BANKED
 	mulwf	ARG1L		    ; ARG1L * ARG2L ->
 				    ; PRODH:PRODL
-	movff	PRODH, SQRES1	    ;
-	movff	PRODL, SQRES0	    ;
+	movff	PRODH, SQRES1
+	movff	PRODL, SQRES0
 	movf	ARG1H, W, BANKED
 	mulwf	ARG1H		    ; ARG1H * ARG2H ->
 				    ; PRODH:PRODL
-	movff	PRODH, SQRES3	    ;
-	movff	PRODL, SQRES2	    ;
+	movff	PRODH, SQRES3
+	movff	PRODL, SQRES2
 	movf	ARG1L, W, BANKED
 	mulwf	ARG1H		    ; ARG1L * ARG2H ->
 				    ; PRODH:PRODL
-	movf	PRODL, W, ACCESS    ;
+	movf	PRODL, W, ACCESS
 	addwf	SQRES1, F, BANKED   ; Add cross
 	movf	PRODH, W, ACCESS    ; products
-	addwfc	SQRES2, F, BANKED   ;
-	clrf	WREG, ACCESS	    ;
-	addwfc	SQRES3, F, BANKED   ;
-	movf	ARG1H, W, BANKED    ;
+	addwfc	SQRES2, F, BANKED
+	clrf	WREG, ACCESS
+	addwfc	SQRES3, F, BANKED
+	movf	ARG1H, W, BANKED
 	mulwf	ARG1L		    ; ARG1H * ARG2L ->
 				    ; PRODH:PRODL
-	movf	PRODL, W, ACCESS    ;
+	movf	PRODL, W, ACCESS
 	addwf	SQRES1, F, BANKED   ; Add cross
 	movf	PRODH, W, ACCESS    ; products
-	addwfc	SQRES2, F, BANKED   ;
-	clrf	WREG, ACCESS		    ;
-	addwfc	SQRES3, F, BANKED   ;
+	addwfc	SQRES2, F, BANKED
+	clrf	WREG, ACCESS
+	addwfc	SQRES3, F, BANKED
 	return
 	
-	GLOBAL Sq16
 ; *******************************************************************
+	GLOBAL	Sqrt
+
 	end

@@ -2495,27 +2495,6 @@ void parse_SM_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
-
-        /*
-        Integer square root routine from  https://stackoverflow.com/a/45744558
-        Produces floor(sqrt(n)).
-            n = number
-            shift = n.bit_length() // (shift = bit position of first set bit)
-            shift += shift & 1; # round up to next multiple of 2
-            result = 0;
-            while (shift != 0):
-                shift -= 2;
-                result <<= 1; # leftshift the result to make the next guess
-                result |= 1;  # guess that the next bit is 1
-                result ^= result * result > (n >> shift); # revert if guess too high
-            print(f"result: {result}")
-        */
-UINT32 floor_sqrt(UINT32 n)
-{
-  
-  return(n);
-}
-
 // The Circle Move command
 // Usage: CM,<frequency>,<dest_x>,<dest_y>,<center_x>,<center_y>,<direction><CR>
 //
@@ -2604,7 +2583,7 @@ void parse_CM_packet(void)
   
   temp = (center_x * center_x) + (center_y * center_y);
   
-  radius = floor_sqrt(temp);
+  radius = Sqrt(temp);
   
   
   
