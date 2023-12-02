@@ -1,0 +1,445 @@
+CM, StepFreq, dest_x, dest_y, center_x, center_y, direction.
+
+StepFreq: Range 1 - 25000  (uint16)
+    StepFreq has the same units as for http://evil-mad.github.io/EggBot/ebb.html#HM
+
+dest_x, dest_y, center_x and center_y  (int16)
+    These four values are are XY coordinates, relative to the initial position when CM is called. They may be positive or negative. The dest_x and dest_y represent where the move is headed to, and the center_x and center_y represent the center of the arc. It is the user's
+    responsibility to ensure that the arc with that center position will actually intersect that
+    final position (within a certain tolerance).
+
+    The radius of the arc must be in the range 5 - 32767; the total distance from the start
+        position to arc center must be in this range.
+    The total distance from start position to the destination must
+        be in the range [10, 32767] steps. (For moves shorter than 10 steps, use SM.)
+
+    The total amount of arc should be <= 180° or π radians. Larger can be used, at some cost of
+        motor-step accuracy. Best practice is to split longer moves into two arcs.
+
+Direction is 0 for CW and 1 for CCW.  (uint8)
+
+---------------------------------------------
+Initial parsing when command is called:
+    
+    # Current "turtle" position, relative to arc center: x_t, y_t:
+    
+    x_t = - center_x        # int32
+    y_t = - center_y        # int32
+    
+    
+    # Final ("target") position, relative to arc center: x_f, y_f
+    
+    x_f = dest_x - center_x # int16
+    y_f = dest_y - center_y # int16
+
+    # Here's that square root.
+    # The argument, (center_x * center_x + center_y * center_y), is up to 31 bits.
+    radius = floor(sqrt(center_x * center_x + center_y * center_y))
+
+        /*
+        Integer square root routine from  https://stackoverflow.com/a/45744558
+        Produces floor(sqrt(n)).
+            n = number
+            shift = n.bit_length()
+            shift += shift & 1; # round up to next multiple of 2
+            result = 0;
+            while (shift != 0):
+                shift -= 2;
+                result <<= 1; # leftshift the result to make the next guess
+                result |= 1;  # guess that the next bit is 1
+                result ^= result * result > (n >> shift); # revert if guess too high (what does this mean? ">"?)
+            print(f"result: {result}")
+        */
+
+    # Next calculate the "m_alpha" factor. This finds the smallest integer value m_alpha,
+    #       such that 2^(2 * m_alpha + 3) >= radius
+    #   Possible values of m_alpha: 0 - 6
+    #       The radius can be as small as 5, such that 2^(2*0 + 3) = 8, already > radius 5.
+    #           -> m_alpha = 0 if radius = 5.
+    #       Since the radius can be as large as 32767, (2^15), 2*alpha + 3 = 15
+    #           -> m_alpha = 6 if radius = 32767.
+    #
+    # Once m_alpha is computed, each straight subsegment around the circle spans an arc of
+    #   alpha = 1/(2^m_alpha) radians between its vertices. 
+    # Since m_alpha is in the range 0-6, each arc angle is between 0.9° and 57.3° degrees:
+    #   At smallest radius, (1/2^0) = 1; angle between vertices is 1 radian (57.3°).
+    #   At largest radius, (1/2^6) = 1/64; angle between vertices is 1/64 =0.15625 radian, (0.9°).
+    #
+    # Rather than computing alpha (usually fractional), we keep track of m_alpha, and use it
+    #   with bit shifts.
+
+    m_alpha = 0 # uint8
+    while True: 
+        temp = 2 ** (2 * m_alpha + 3) # temp is uint16 (use bit shift instead of power)
+        if temp >= radius:
+            break
+        m_alpha += 1
+
+    # Next, compute what 1.5 * the typical subsegment length is.
+    #
+    # If the final vertex is within this distance of the start, just use a single
+    #   move between them, rather than an arc with multiple subsegments.
+    # 
+    # The typical length of a subsegment around the circumference is:
+    # (radius * angle_between_vertices_in_radians) = radius * alpha 
+    #                                   = radius * (1/2^m_alpha) = radius >> m_alpha
+    # 0.5 times the length is radius >> (m_alpha + 1)
+    # Thus 1.5 times the length is (radius >> m_alpha) + (radius >> (m_alpha + 1)):
+
+    typ_seg = (radius >> m_alpha) + (radius >> (m_alpha + 1))   # uint8
+
+
+
+
+    if abs(x_t - x_f) < typ_seg_long and abs(y_t - y_f) < typ_seg_long:     // abs() function doesn't exist, will need if() instead
+        - This is a very short move; cannot make an arc here.
+        - Instead, process it like an SM or HM move with:
+            step_dist_x = x_f - x_t
+            step_dist_y = y_f - y_t
+            And step frequency given by StepFreq.
+        (I'm not sure the cleanest way to implement this; let's talk if it's not straightforward.)
+
+
+
+
+
+
+    # Next: Precompute VScaleK (Velocity Scaling Factor K):
+    # 
+    # This is a scaling factor that we will later use, in the ISR, to calculate the 
+    #   correct velocity in each axis from the number of steps in each axis.
+    #
+    # At a given vertex around the circle, the distance to the next vertex is (Dx, Dy).
+    #   The velocity at that vertex is (K * Dx, K * Dy), where the velocity scale factor K
+    #   is K = (Forward_velocity/typical_length_of_subsegment)
+    #        = (StepFreq * 2^31/ 25000) / (radius * alpha)
+    #        = (StepFreq * 2^28/ 3125) / (radius >> m_alpha)
+    #        = (StepFreq * 2^28 << m_alpha ) / ( 3125 * radius)
+    #   (Here, we have noted that 25000 = 8 * 3125 = 3125 * 2^3)
+    #
+    # To keep the multiplication within the ISR as 16 x 16 bit, we need a final VScaleK
+    #   that can be represented by uint16 (without losing too many digits of precision).
+    #   Most of the special cases are to manage the great variation in K that is possible
+    #   because radius can range from 5-32767, and StepFreq can range from 1-25000.
+
+
+    bits_left = 28                  # Counter for bits remaining to shift (int8)
+    bits_left += m_alpha
+
+    if (StepFreq >= 256):   # StepFreq is in range 256 - 25000
+                            # Possibly implement by checking that high byte != 0.
+
+        StepFreq = StepFreq << 17
+        bits_left -= 17
+        # StepFreq now in range 3.35E7 - 3.27E9 (Almost 2^25 - Almost 2^32)
+
+    else:                   # StepFreq is in range 1 - 255
+        StepFreq = StepFreq << 24
+        bits_left -= 24
+        # StepFreq now in range 1.67E7 - 4.27E9 (2^24 - Almost 2^32)
+
+
+    denom = 3125 * radius # uint32
+        # denom is in range 1.67E7 - 4.27E9 (2^24 - Almost 2^32)
+
+    if (radius >= 256):     # Radius is in range 256 - 32767
+                            # Possibly implement by checking that high byte != 0.
+
+        denom = denom >> 11
+        bits_left -= 11
+        # Denom now in range 3906 - 50000 (Almost 2^12 - Almost 2^16)
+
+    else:                   # Radius is in range 1 - 255
+        denom = denom >> 1
+        bits_left -= 1
+        # Denom now in range 1562 - 39843 (Almost 2^11 - Almost 2^16)
+
+
+    # Now the "big" division operation -- just one, thankfully.
+
+    VScaleK = int(StepFreq / denom) # (uint24?) 
+    # Largest possible VScaleK: 4.27E9 / 1562 = 2.733E6 (almost 2^22)
+    # Smallest possible VScaleK: 1.67E7 / 50000 = 334 (almost 2^9)
+
+    if VScaleK > 65536:             # possibly check that high bytes are nonzero.
+        VScaleK = VScaleK >> 4
+        bits_left += 4
+    # VScaleK value range is now 334 - 42,703, all < 2^16.
+    # ->  VScaleK can now be re-cast as a uint16.
+
+
+    # Finally, set up variables to manage "local" position in ISR.
+
+
+    x_pos_last = x_t # int16 Variables to store last (16-bit) position value
+    y_pos_last = y_t # int16
+
+
+    # Scale X, Y values up by 65536. The step positions are 16-bit signed, but
+    #   we need additional resolution to avoid adding rounding errors since we
+    #   do compute each new position from the last position.
+
+    x_t = x_t << 16
+    y_t = y_t << 16
+
+    -----------------------------------------
+    # This concludes the "precomputation" stage. We now -- still in the "parsing"
+    #   stage -- compute the velocities and step counts for the first subsegment only.
+    
+    # The nominal step distances to move are:
+    #   d_x = -1 * ( x_t >> (2 * m_alpha + 1)) - (y_t >> m_alpha)
+    #   d_y = -1 * ( y_t >> (2 * m_alpha + 1)) + (x_t >> m_alpha)
+    #
+    # HOWEVER, right-shift division of negative integers isn't "clean" (e.g., -1 >> 1 == -1),
+    #   so we instead use several cases with positive integers and right shifts.
+
+
+
+
+    alpha_shift = (m_alpha << 1) + 1
+    if x_t < 0:
+        x_1 = ( - x_t >> alpha_shift) 
+        x_2 = -( - x_t >> m_alpha) 
+    else:
+        x_1 = -( x_t >> alpha_shift) 
+        x_2 = ( x_t >> m_alpha) 
+
+    if y_t < 0:
+        y_1 = ( - y_t >> alpha_shift) 
+        y_2 = -( - y_t >> m_alpha) 
+    else:
+        y_1 = -( y_t >> alpha_shift) 
+        y_2 = ( y_t >> m_alpha) 
+
+    if direction:
+        d_x = x_1 + y_2
+        d_y = y_1 - x_2
+    else:
+        d_x = x_1 - y_2
+        d_y = y_1 + x_2
+
+
+
+
+
+    # Update 32-bit position values:
+    x_t += d_x
+    y_t += d_y
+
+    # Find new 16-bit position value. 
+    # In firmware, take two high bytes of position; do not actually shift/divide.
+
+    x_t_16 = x_t >> 16 # Psuedocode only;(DO NOT ACTUALLY SHIFT)
+    y_t_16 = y_t >> 16 # Psuedocode only;(DO NOT ACTUALLY SHIFT)
+
+    # Find Step count and directions.
+    x_steps = x_t_16 - x_pos_last
+    y_steps = y_t_16 - y_pos_last
+
+
+    if x_steps < 0:
+        stepdir_x = 0 # Set direction bits
+        x_stepcount = -x_steps
+    else:
+        stepdir_x = 1 # Set direction bits
+        x_stepcount = x_steps
+    if y_steps < 0:
+        stepdir_y = 0 # Set direction bits
+        y_stepcount = -y_steps
+    else:
+        stepdir_y = 1 # Set direction bits
+        y_stepcount = y_steps
+
+    # Rate factors: Rate_x, Rate_y : 32-bit unsigned
+    if bits_left >= 0:
+        Rate_x = (x_stepcount * VScaleK) << bits_left
+        Rate_y = (y_stepcount * VScaleK) << bits_left
+    else:
+        Rate_x = (x_stepcount * VScaleK) >> -bits_left
+        Rate_y = (y_stepcount * VScaleK) >> -bits_left
+
+    x_pos_last = x_t_16
+    y_pos_last = y_t_16
+
+    Now, begin an SM/XM/HM type linear move with:
+        * stepdir_x, stepdir_y
+        * x_stepcount, y_stepcount
+        * Rate_x, Rate_y
+
+
+    In addition to the step/direction/rate values (normally in the FIFO), 
+        I think we'll need the following values attached to this command:
+        
+            - VScaleK       # uint16
+            - m_alpha       # uint8
+            - bits_left     # int8
+            - x_f           # int16
+            - y_f           # int16
+            - x_t           # int32
+            - y_t           # int32
+            - direction     # uint8
+            - y_pos_last    # int16
+            - x_pos_last    # int16
+            - typ_seg       # uint8
+
+
+
+---------------------------------------------
+Inside the ISR!
+
+
+    When beginning the CM move -- when transferring it from the FIFO to being "the active move",
+    set:
+        ISR_Phase = 0           # uint8
+        last_seg = False        # Boolean (uint8?)
+
+
+
+
+    If move_type is CM:
+
+        if abs(x_f - x_pos_last) < typ_seg and abs(y_f - y_pos_last) < typ_seg:
+           last_seg = True
+
+        alpha_shift = (m_alpha << 1) + 1
+        if x_t < 0:
+            x_1 = ( - x_t >> alpha_shift) 
+            x_2 = -( - x_t >> m_alpha) 
+        else:
+            x_1 = -( x_t >> alpha_shift) 
+            x_2 = ( x_t >> m_alpha) 
+        if y_t < 0:
+            y_1 = ( - y_t >> alpha_shift) 
+            y_2 = -( - y_t >> m_alpha) 
+        else:
+            y_1 = -( y_t >> alpha_shift) 
+            y_2 = ( y_t >> m_alpha) 
+    
+        if direction:
+            d_x = x_1 + y_2
+            d_y = y_1 - x_2
+        else:
+            d_x = x_1 - y_2
+            d_y = y_1 + x_2
+
+
+
+        if ISR_Phase == 0: # Calculate "X" rate for the following motion segment.
+            ISR_Phase = 1
+
+            x_t_new = x_t + d_x
+            x_t_16 = [Take high_two_bytes of x_t_new]
+            x_steps = x_t_16 - x_pos_last
+
+            if last_seg:
+                x_steps_final = x_f - x_pos_last
+    
+                # Fine-tune step counts _for computing velocity_
+                if x_steps_final > 0:
+                    if x_steps > 0:
+                        x_steps = x_steps_final
+                    else:
+                        x_steps = 1
+                elif x_steps_final < 0:
+                    if x_steps < 0:
+                        x_steps = x_steps_final
+                    else:
+                        x_steps = -1
+                else:
+                    x_steps = 0
+
+            x_stepcount = abs(x_steps) # uint16
+
+            # Rate factors: Rate_x, Rate_y : 32-bit unsigned
+            # (This has our one 16u x 16u multiplication in the ISR)
+            if bits_left >= 0:
+                Rate_x = (x_stepcount * VScaleK) << bits_left
+            else:
+                Rate_x = (x_stepcount * VScaleK) >> -bits_left
+
+            Save Rate_x for future ISR when we will need it
+
+
+        else if ISR_Phase == 1:  # Calculate "Y" rate for the following motion segment.
+            ISR_Phase = 2
+
+            y_t_new = y_t + d_y
+            y_t_16 = [Take high_two_bytes of y_t_new]
+            y_steps = y_t_16 - y_pos_last
+
+            if last_seg:
+                y_steps_final = y_f - y_pos_last
+    
+                # Fine-tune step counts _for computing velocity_
+                if y_steps_final > 0:
+                    if y_steps > 0:
+                        y_steps = y_steps_final
+                    else:
+                        y_steps = 1
+                elif x_steps_final < 0:
+                    if y_steps < 0:
+                        y_steps = y_steps_final
+                    else:
+                        y_steps = -1
+                else:
+                    y_steps = 0
+
+            y_stepcount = abs(y_steps) # uint16
+
+            # Rate factors: Rate_x, Rate_y : 32-bit unsigned
+            if bits_left >= 0:
+                Rate_y = (y_stepcount * VScaleK) << bits_left
+            else:
+                Rate_y = (y_stepcount * VScaleK) >> -bits_left
+
+            Save Rate_y for future ISR when we will need it
+
+
+        If both axes are done with their steps:
+            if ISR_Phase == 3:
+                Mark "All Done"; We are OK to begin next queued FIFO command.
+            else:
+
+                if last_seg:
+                    ISR_Phase = 3 # Flag that we are starting last subsegment
+
+                x_t += d_x
+                x_t_16 = [Take high_two_bytes of x_t]
+                x_steps = x_t_16 - x_pos_last
+    
+                y_t += d_y
+                y_t_16 = [Take high_two_bytes of y_t]
+                y_steps = y_t_16 - y_pos_last
+
+                x_pos_last = x_t_16
+                y_pos_last = y_t_16
+
+                if x_steps < 0:
+                    stepdir_x = 0 # Set direction bits
+                    x_stepcount = -x_steps
+                else:
+                    stepdir_x = 1 # Set direction bits
+                    x_stepcount = x_steps
+                if y_steps < 0:
+                    stepdir_y = 0 # Set direction bits
+                    y_stepcount = -y_steps
+                else:
+                    stepdir_y = 1 # Set direction bits
+                    y_stepcount = y_steps
+
+
+                Begin an SM/XM/HM type linear move with:
+                    * stepdir_x, stepdir_y
+                    * x_stepcount, y_stepcount
+                    * Rate_x, Rate_y
+
+
+
+
+
+
+
+
+
+
+

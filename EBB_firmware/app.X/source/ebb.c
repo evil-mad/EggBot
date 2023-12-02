@@ -2519,7 +2519,10 @@ void parse_CM_packet(void)
   UINT8 direction = 0;
   UINT32 rate = 0;
   UINT32 temp;
+  INT16 sTemp16_1;
+  INT16 sTemp16_2;
   UINT32 radius;
+  UINT16 typ_seg_long;
   
   clear_parmaeter_globals();
 
@@ -2558,6 +2561,8 @@ void parse_CM_packet(void)
   {
     return;
   }
+  
+  // Print out input parameters for debugging
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     ebb_print((far rom char *)"Freq=");
@@ -2575,19 +2580,83 @@ void parse_CM_packet(void)
     print_line_ending(kLE_REV);
   }
 
-  gMoveTemp.m.cm.x_t = -center_x;
-  gMoveTemp.m.cm.y_t = -center_y;
+  // Current "turtle" position, relative to arc center: x_t, y_t:
+  gMoveTemp.m.cm.x_t = -center_x;   // int32
+  gMoveTemp.m.cm.y_t = -center_y;   // int32
   
-  gMoveTemp.m.cm.x_f = dest_x - center_x;
-  gMoveTemp.m.cm.y_f = dest_y - center_y;
+  // Final ("target") position, relative to arc center: x_f, y_f
+  gMoveTemp.m.cm.x_f = dest_x - center_x; // int16
+  gMoveTemp.m.cm.y_f = dest_y - center_y; // int16
   
-  temp = (center_x * center_x) + (center_y * center_y);
-  
+  // Here's that square root.
+  // The argument, (center_x * center_x + center_y * center_y), is up to 31 bits.
+  temp = (center_x * center_x) + (center_y * center_y);  
   radius = Sqrt(temp);
   
+  // Next calculate the "m_alpha" factor. This finds the smallest integer value m_alpha,
+  //       such that 2^(2 * m_alpha + 3) >= radius
+  //   Possible values of m_alpha: 0 - 6
+  //       The radius can be as small as 5, such that 2^(2*0 + 3) = 8, already > radius 5.
+  //           -> m_alpha = 0 if radius = 5.
+  //       Since the radius can be as large as 32767, (2^15), 2*alpha + 3 = 15
+  //           -> m_alpha = 6 if radius = 32767.
   
+  // Once m_alpha is computed, each straight subsegment around the circle spans an arc of
+  //   alpha = 1/(2^m_alpha) radians between its vertices. 
+  // Since m_alpha is in the range 0-6, each arc angle is between 0.9° and 57.3° degrees:
+  //   At smallest radius, (1/2^0) = 1; angle between vertices is 1 radian (57.3°).
+  //   At largest radius, (1/2^6) = 1/64; angle between vertices is 1/64 =0.15625 radian, (0.9°).
   
+  // Rather than computing alpha (usually fractional), we keep track of m_alpha, and use it
+  //   with bit shifts.
+
+  gMoveTemp.m.cm.m_alpha = 0; // uint8
+  temp = 1 << ((2 * 0) + 3);  // left this way for clarity
+  while (temp < radius)
+  {
+    gMoveTemp.m.cm.m_alpha += 1;
+    temp = (1 << ((2 * gMoveTemp.m.cm.m_alpha) + 3)); // temp is uint16 (use bit shift instead of power)
+  }
+
+  // Next, compute what 1.5 * the typical subsegment length is.
+  //
+  // If the final vertex is within this distance of the start, just use a single
+  //   move between them, rather than an arc with multiple subsegments.
+  // 
+  // The typical length of a subsegment around the circumference is:
+  // (radius * angle_between_vertices_in_radians) = radius * alpha 
+  //                                   = radius * (1/2^m_alpha) = radius >> m_alpha
+  // 0.5 times the length is radius >> (m_alpha + 1)
+  // Thus 1.5 times the length is (radius >> m_alpha) + (radius >> (m_alpha + 1)):
+
+  gMoveTemp.m.cm.typ_seg = (radius >> gMoveTemp.m.cm.m_alpha) + (radius >> (gMoveTemp.m.cm.m_alpha + 1));   // uint8
+
+  // Get absolute value of move length in X and Y
+  sTemp16_1 = (gMoveTemp.m.cm.x_t - gMoveTemp.m.cm.x_f);  // signed 32 = signed 16 - signed 16
+  if (sTemp16_1 < 0)
+  {
+    sTemp16_1 = -sTemp16_1;
+  }
+
+  sTemp16_2 = (gMoveTemp.m.cm.y_t - gMoveTemp.m.cm.y_f);  // signed 32 = signed 16 - signed 16
+  if (sTemp16_2 < 0)
+  {
+    sTemp16_2 = -sTemp16_2;
+  }
   
+  typ_seg_long = 10;
+  
+  // And if both x and y move length are too small, then just do an SM move
+  if ((sTemp16_1 < typ_seg_long) && (sTemp16_2 < typ_seg_long))
+  {
+    // This is a very short move; cannot make an arc here.
+    // Instead, process it like an SM or HM move with:
+    //      step_dist_x = x_f - x_t
+    //      step_dist_y = y_f - y_t
+    //      And step frequency given by StepFreq.
+    
+  }
+
 #if 0
   if (gAutomaticMotorEnable == TRUE)
   {
@@ -2878,7 +2947,11 @@ void parse_HM_packet(void)
   {
     gTmpAccel2 = gTmpSteps2;
   }
-    
+ }    
+  
+process_simple_rate_move()
+{  
+  
   // Check for too many steps to step
   if ((gTmpAccel1 > 0xFFFFFFl) || (gTmpAccel2 > 0xFFFFFFl))
   {

@@ -2511,8 +2511,6 @@ void parse_I_packet(void)
 // All we do here is just print out our version number
 void parse_V_packet(void)
 {
-  UINT32 i;
-  
   print_command(FALSE, TRUE);
   
   ebb_print((far rom char *)st_version);
