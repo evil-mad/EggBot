@@ -86,9 +86,9 @@ Initial parsing when command is called:
     # 0.5 times the length is radius >> (m_alpha + 1)
     # Thus 1.5 times the length is (radius >> m_alpha) + (radius >> (m_alpha + 1)):
 
-    typ_seg = (radius >> m_alpha) + (radius >> (m_alpha + 1))   # uint8
 
-
+    typ_seg = (radius >> alpha_factor) 
+    typ_seg_long = typ_seg + (radius >> (alpha_factor + 1))
 
 
     if abs(x_t - x_f) < typ_seg_long and abs(y_t - y_f) < typ_seg_long:     // abs() function doesn't exist, will need if() instead

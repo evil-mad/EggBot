@@ -2629,7 +2629,8 @@ void parse_CM_packet(void)
   // 0.5 times the length is radius >> (m_alpha + 1)
   // Thus 1.5 times the length is (radius >> m_alpha) + (radius >> (m_alpha + 1)):
 
-  gMoveTemp.m.cm.typ_seg = (radius >> gMoveTemp.m.cm.m_alpha) + (radius >> (gMoveTemp.m.cm.m_alpha + 1));   // uint8
+  gMoveTemp.m.cm.typ_seg = (radius >> gMoveTemp.m.cm.m_alpha);   // uint8
+  typ_seg_long = gMoveTemp.m.cm.typ_seg + (radius >> (gMoveTemp.m.cm.m_alpha + 1));
 
   // Get absolute value of move length in X and Y
   sTemp16_1 = (gMoveTemp.m.cm.x_t - gMoveTemp.m.cm.x_f);  // signed 32 = signed 16 - signed 16
@@ -2644,17 +2645,16 @@ void parse_CM_packet(void)
     sTemp16_2 = -sTemp16_2;
   }
   
-  typ_seg_long = 10;
-  
-  // And if both x and y move length are too small, then just do an SM move
-  if ((sTemp16_1 < typ_seg_long) && (sTemp16_2 < typ_seg_long))
+  // And if both x and y move length are too small, then just do a simple
+  // straight move by calling process_simple_rate_move()
+  if ((sTemp16_1 < (INT16)typ_seg_long) && (sTemp16_2 < (INT16)typ_seg_long))
   {
     // This is a very short move; cannot make an arc here.
     // Instead, process it like an SM or HM move with:
     //      step_dist_x = x_f - x_t
     //      step_dist_y = y_f - y_t
     //      And step frequency given by StepFreq.
-    
+    process_simple_rate_move();
   }
 
 #if 0
@@ -2867,7 +2867,7 @@ void parse_CM_packet(void)
 // lots.
 // When parsing this command, always wait until both the FIFO is empty and the motion 
 // commands are finished. That way two SM commands can be issued back to back to take 
-// care of both moves (or just one if a 'dog leg' move is needed)
+// care of both moves (or just one if a 'dog leg' move is not needed)
 // By waiting until both the FIFO (queue) and motion commands are empty, we also
 // get a true picture of where the global step
 //
@@ -2947,9 +2947,26 @@ void parse_HM_packet(void)
   {
     gTmpAccel2 = gTmpSteps2;
   }
- }    
-  
-process_simple_rate_move()
+}
+
+// This is the generic function for processing simple moves which use a 
+// 'rate' input parameter rather than a duration. It basically converts the 
+// input 'rate' to a 'duration' and then calls the base process_simple_motor_move().
+//
+// Note: This is a big optimization opportunity. Why? Because it would be much
+// less computation to duplicate the full process_simple_motor_move()
+// functionality but with a 'rate' rather than 'duration' input. The way it's
+// being done now - converting from 'rate' to 'duration' and then within
+// process_simple_motor_move() from there to the raw motor1 and motor2
+// low level 'rate' values is inefficient. However, refactoring to implement
+// this optimization will require touching the HM code quite a bit.
+// 
+// This function uses these as input parameters:
+//  gTmpDurationMS    (not modified)
+//  gTmpSteps1        (modified)
+//  gTmpSteps2        (modified)
+//  gTmpClearAccs     (modified)
+void process_simple_rate_move(void)
 {  
   
   // Check for too many steps to step
