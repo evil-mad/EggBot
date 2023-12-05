@@ -258,53 +258,53 @@ class SpiroSine(inkex.Effect):
 
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option("--tab",  # NOTE: value is not used.
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",  # NOTE: value is not used.
+                                     action="store", type=str,
                                      dest="tab", default="splash",
                                      help="The active tab when Apply was pressed")
 
-        self.OptionParser.add_option('--fCycles', dest='fCycles',
-                                     type='float', default=10.0, action='store',
+        self.arg_parser.add_argument('--fCycles', dest='fCycles',
+                                     type=float, default=10.0, action='store',
                                      help='Number of cycles (periods)')
 
-        self.OptionParser.add_option('--nrN', dest='nrN',
-                                     type='int', default=0, action='store',
+        self.arg_parser.add_argument('--nrN', dest='nrN',
+                                     type=int, default=0, action='store',
                                      help='Start x at 2 * pi * n / m')
 
-        self.OptionParser.add_option('--nrM', dest='nrM',
-                                     type='int', default=0, action='store',
+        self.arg_parser.add_argument('--nrM', dest='nrM',
+                                     type=int, default=0, action='store',
                                      help='Start x at 2 * pi * n / m')
 
-        self.OptionParser.add_option('--fRecess', dest='fRecess',
-                                     type='float', default=2.0, action='store',
+        self.arg_parser.add_argument('--fRecess', dest='fRecess',
+                                     type=float, default=2.0, action='store',
                                      help='Recede from envelope by factor')
 
-        self.OptionParser.add_option("--nSamples", dest="nSamples",
-                                     type="int", default=50.0, action="store",
+        self.arg_parser.add_argument("--nSamples", dest="nSamples",
+                                     type=int, default=50.0, action="store",
                                      help="Number of points to sample")
 
-        self.OptionParser.add_option("--nWidth", dest="nWidth",
-                                     type="int", default=3200, action="store",
+        self.arg_parser.add_argument("--nWidth", dest="nWidth",
+                                     type=int, default=3200, action="store",
                                      help="Width in pixels")
 
-        self.OptionParser.add_option("--nHeight", dest="nHeight",
-                                     type="int", default=100, action="store",
+        self.arg_parser.add_argument("--nHeight", dest="nHeight",
+                                     type=int, default=100, action="store",
                                      help="Height in pixels")
 
-        self.OptionParser.add_option("--nOffsetX", dest="nOffsetX",
-                                     type="int", default=0, action="store",
+        self.arg_parser.add_argument("--nOffsetX", dest="nOffsetX",
+                                     type=int, default=0, action="store",
                                      help="Starting x coordinate (pixels)")
 
-        self.OptionParser.add_option("--nOffsetY", dest="nOffsetY",
-                                     type="int", default=400, action="store",
+        self.arg_parser.add_argument("--nOffsetY", dest="nOffsetY",
+                                     type=int, default=400, action="store",
                                      help="Starting y coordinate (pixels)")
 
-        self.OptionParser.add_option('--bLace', dest='bLace',
-                                     type='inkbool', default=False, action='store',
+        self.arg_parser.add_argument('--bLace', dest='bLace',
+                                     type=inkex.boolean_option, default=False, action='store',
                                      help='Lace')
 
-        self.OptionParser.add_option('--bSpline', dest='bSpline',
-                                     type='inkbool', default=True, action='store',
+        self.arg_parser.add_argument('--bSpline', dest='bSpline',
+                                     type=inkex.boolean_option, default=True, action='store',
                                      help='Spline')
 
         self.recess = 0.95

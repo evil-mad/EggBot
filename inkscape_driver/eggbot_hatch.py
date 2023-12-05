@@ -615,46 +615,46 @@ class Eggbot_Hatch(inkex.Effect):
         self.docHeight = float(N_PAGE_HEIGHT)
         self.docTransform = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]
 
-        self.OptionParser.add_option(
-                "--inset_dist", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--inset_dist", action="store", type=float,
                 dest="inset_dist", default=3.0,
                 help="How far hatch strokes stay from boundary")
-        self.OptionParser.add_option(
-                "--hatchScope", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--hatchScope", action="store", type=float,
                 dest="hatchScope", default=3.0,
                 help="Radius searched for segments to join (units of hatch width)")
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
                 "--inset_bool", action="store", dest="inset_bool",
-                type="inkbool", default=True,
+                type=inkex.boolean_option, default=True,
                 help="Stay away from edges, so no need for inset")
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
                 "--connect_bool", action="store", dest="connect_bool",
-                type="inkbool", default=True,
+                type=inkex.boolean_option, default=True,
                 help="Reduce plotting time by joining some hatches")
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
                 "--crossHatch", action="store", dest="crossHatch",
-                type="inkbool", default=False,
+                type=inkex.boolean_option, default=False,
                 help="Generate a cross hatch pattern")
-        self.OptionParser.add_option(
-                "--hatchAngle", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--hatchAngle", action="store", type=float,
                 dest="hatchAngle", default=90.0,
                 help="Angle of inclination for hatch lines")
-        self.OptionParser.add_option(
-                "--hatchSpacing", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--hatchSpacing", action="store", type=float,
                 dest="hatchSpacing", default=10.0,
                 help="Spacing between hatch lines")
-        self.OptionParser.add_option(
-                "--tolerance", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--tolerance", action="store", type=float,
                 dest="tolerance", default=3.0,
                 help="Allowed deviation from original paths")
-        self.OptionParser.add_option(
+        self.arg_parser.add_argument(
                 "--units",
-                 action="store",  type="int",
+                 action="store",  type=int,
                  dest="units", default=1,
                  help="Units to use for hatches. 1: line width. 2: px. 3: mm. 4: inch")
 
-        self.OptionParser.add_option("--tab",  # NOTE: value is not used.
-                                     action="store", type="string", dest="_tab", default="splash",
+        self.arg_parser.add_argument("--tab",  # NOTE: value is not used.
+                                     action="store", type=str, dest="_tab", default="splash",
                                      help="The active tab when Apply was pressed")
                                      
 
