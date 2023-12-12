@@ -146,12 +146,12 @@ class Map(inkex.Effect):
 
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option('--smoothness', dest='smoothness',
-                                     type='float', default=float(0.2), action='store',
+        self.arg_parser.add_argument('--smoothness', dest='smoothness',
+                                     type=float, default=float(0.2), action='store',
                                      help='Curve smoothing (less for more)')
 
-        self.OptionParser.add_option('--maxDy', dest='maxDy',
-                                     type='float', default=float(5.0), action='store',
+        self.arg_parser.add_argument('--maxDy', dest='maxDy',
+                                     type=float, default=float(5.0), action='store',
                                      help='Vertical smoothing (less for more)')
 
         self.cx = float(N_PAGE_WIDTH) / 2.0

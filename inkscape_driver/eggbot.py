@@ -57,84 +57,84 @@ class EggBot(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option("--smoothness",
-                                     action="store", type="float",
+        self.arg_parser.add_argument("--smoothness",
+                                     action="store", type=float,
                                      dest="smoothness", default=.2,
                                      help="Smoothness of curves")
-        self.OptionParser.add_option("--returnToHome",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--returnToHome",
+                                     action="store", type=inkex.boolean_option,
                                      dest="returnToHome", default=True,
                                      help="Return to home at end of plot.")
-        self.OptionParser.add_option("--wraparound",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--wraparound",
+                                     action="store", type=inkex.boolean_option,
                                      dest="wraparound", default=True,
                                      help="Egg (x) axis wraps around-- take shortcuts!")
-        self.OptionParser.add_option("--penUpSpeed",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penUpSpeed",
+                                     action="store", type=int,
                                      dest="penUpSpeed", default=F_DEFAULT_SPEED,
                                      help="Speed (step/sec) while pen is up.")
-        self.OptionParser.add_option("--penDownSpeed",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penDownSpeed",
+                                     action="store", type=int,
                                      dest="penDownSpeed", default=F_DEFAULT_SPEED,
                                      help="Speed (step/sec) while pen is down.")
-        self.OptionParser.add_option("--penDownDelay",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penDownDelay",
+                                     action="store", type=int,
                                      dest="penDownDelay", default=N_PEN_DOWN_DELAY,
                                      help="Delay after pen down (msec).")
-        self.OptionParser.add_option("--penUpDelay",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penUpDelay",
+                                     action="store", type=int,
                                      dest="penUpDelay", default=N_PEN_UP_DELAY,
                                      help="Delay after pen up (msec).")
-        self.OptionParser.add_option("--engraving",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--engraving",
+                                     action="store", type=inkex.boolean_option,
                                      dest="engraving", default=False,
                                      help="Enable optional engraving tool.")
-        self.OptionParser.add_option("--tab",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--tab",
+                                     action="store", type=str,
                                      dest="tab", default="controls",
                                      help="The active tab when Apply was pressed")
-        self.OptionParser.add_option("--penUpPosition",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penUpPosition",
+                                     action="store", type=int,
                                      dest="penUpPosition", default=N_PEN_UP_POS,
                                      help="Position of pen when lifted")
-        self.OptionParser.add_option("--ServoDownSpeed",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--ServoDownSpeed",
+                                     action="store", type=int,
                                      dest="ServoDownSpeed", default=N_SERVOSPEED,
                                      help="Rate of lowering pen ")
-        self.OptionParser.add_option("--ServoUpSpeed",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--ServoUpSpeed",
+                                     action="store", type=int,
                                      dest="ServoUpSpeed", default=N_SERVOSPEED,
                                      help="Rate of lifting pen ")
-        self.OptionParser.add_option("--penDownPosition",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--penDownPosition",
+                                     action="store", type=int,
                                      dest="penDownPosition", default=N_PEN_DOWN_POS,
                                      help="Position of pen when lowered")
-        self.OptionParser.add_option("--layernumber",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--layernumber",
+                                     action="store", type=int,
                                      dest="layernumber", default=N_DEFAULT_LAYER,
                                      help="Selected layer for multilayer plotting")
-        self.OptionParser.add_option("--setupType",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--setupType",
+                                     action="store", type=str,
                                      dest="setupType", default="controls",
                                      help="The active option when Apply was pressed")
-        self.OptionParser.add_option("--manualType",
-                                     action="store", type="string",
+        self.arg_parser.add_argument("--manualType",
+                                     action="store", type=str,
                                      dest="manualType", default="controls",
                                      help="The active option when Apply was pressed")
-        self.OptionParser.add_option("--WalkDistance",
-                                     action="store", type="int",
+        self.arg_parser.add_argument("--WalkDistance",
+                                     action="store", type=int,
                                      dest="WalkDistance", default=N_WALK_DEFAULT,
                                      help="Selected layer for multilayer plotting")
-        self.OptionParser.add_option("--cancelOnly",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--cancelOnly",
+                                     action="store", type=inkex.boolean_option,
                                      dest="cancelOnly", default=False,
                                      help="Cancel plot and return home only.")
-        self.OptionParser.add_option("--revPenMotor",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--revPenMotor",
+                                     action="store", type=inkex.boolean_option,
                                      dest="revPenMotor", default=False,
                                      help="Reverse motion of pen motor.")
-        self.OptionParser.add_option("--revEggMotor",
-                                     action="store", type="inkbool",
+        self.arg_parser.add_argument("--revEggMotor",
+                                     action="store", type=inkex.boolean_option,
                                      dest="revEggMotor", default=False,
                                      help="Reverse motion of egg motor.")
 

@@ -97,12 +97,12 @@ class Twist(inkex.Effect):
     def __init__(self):
 
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option(
-                "--nSteps", action="store", type="int",
+        self.arg_parser.add_argument(
+                "--nSteps", action="store", type=int,
                 dest="nSteps", default=8,
                 help="Number of iterations to take")
-        self.OptionParser.add_option(
-                "--fRatio", action="store", type="float",
+        self.arg_parser.add_argument(
+                "--fRatio", action="store", type=float,
                 dest="fRatio", default=0.2,
                 help="Some ratio")
 

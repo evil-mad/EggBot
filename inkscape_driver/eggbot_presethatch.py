@@ -26,7 +26,7 @@ inkex = from_dependency_import('ink_extensions.inkex')
 class PresetHatch(inkex.Effect):
     def __init__(self):
         inkex.Effect.__init__(self)
-        self.OptionParser.add_option("--title")
+        self.arg_parser.add_argument("--title")
         self.svgDefRead = None
         self.svg = None
 
