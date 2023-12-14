@@ -2854,8 +2854,9 @@ void parse_CM_packet(void)
 }
 
 // Home the motors
-// "HM,<StepRate>,<Pos1>,<Pos2><CR>"
-// <StepRate> is the desired rate of the primary (larger) axis in steps/s.
+// "HM,<StepFrequency>,<Pos1>,<Pos2><CR>"
+// <StepFrequency> is the desired rate of the primary (larger) axis in steps/s.
+//   It is allowed to be from 2 to 25000. 
 // <Pos1> and <Pos2> are both optional. If <Pos1> is present, <Pos2> must
 // also be present. If not present they are both assumed to be 0 (i.e.
 // a true 'home' move). If present, they will instruct the EBB to perform
@@ -2865,28 +2866,33 @@ void parse_CM_packet(void)
 // This command uses the current global step counts compute the number of
 // steps necessary to reach the target position. (either 0,0 or Pos1,Pos2)
 //
-// To figure out what the duration of the move should be, look at the axis
-// with more steps to move (the 'primary' axis).
-// There are a couple of special cases to consider:
-// 1) If <step_rate> causes a step rate that's too high on the primary axis, 
-//    then just use a duration which is slow enough.
-// 2) If the <step_rate> causes the non-primary axis to need to move too slowly,
-//    break the move into two parts. (i.e. "dog-leg" it) First move will move
-//    with a duration such that the minor axis moves at the minimum step rate.
-//    Second move will move at <step_rate> but with minor axis moving zero steps.
-// If the step rate is too high or too low, don't error out, just use a legal value
-// May need to make 2 moves if one of the axis has few steps to go and the other has
-// lots.
-// When parsing this command, always wait until both the FIFO is empty and the motion 
-// commands are finished. That way two SM commands can be issued back to back to take 
-// care of both moves (or just one if a 'dog leg' move is not needed)
-// By waiting until both the FIFO (queue) and motion commands are empty, we also
-// get a true picture of where the global step
+// The primary axis will be the one that has to move more steps.
+// The secondary axis will be the other one.
+//
+// There is a special cases to consider:
+//  * If the <StepFrequency> causes the secondary axis to need to move too 
+//    slowly, then the move will be broken into two parts.
+//    The first move will be chosen such that the secondary axis moves at the 
+//    minimum step rate (2Hz).
+//    The second move will consist of the remaining steps on the primary axis
+//    (as there are zero steps left on the secondary axis) at <StepFrequency>.
+// 
+// If <StepFrequency> is too high or too low, don't error out, just use a legal 
+//    value.
+//
+// When parsing this command, always wait until both the FIFO is empty and the
+// motion commands are finished. By waiting until both the FIFO (queue) and 
+// motion commands are empty, we also get a true picture of where the global 
+// step position is.
+//
+// Once the one or two moves has been figured out, call
+// process_simple_rate_move() for each.
 //
 // TODO: This code can't handle steps counts above 4,294,967 in either axis. Is
 // there a way to allow it to handle steps counts up to 16,777,215 easily?
+// TODO: Is the above todo actually accurate? The math has changed . . . 
 //
-// Some global variables are used instead of local ones:
+// Some global variables are used in this function instead of local ones:
 //  gTmpIntervals is used for StepRate
 //  gTmpJerk1 is used for Pos1
 //  gTmpJerk2 is used for Pos2
@@ -2897,25 +2903,25 @@ void parse_CM_packet(void)
 void parse_HM_packet(void)
 {
   BOOL   CommandExecuting = TRUE;
-  INT32  XSteps = 0;
+  UINT32  SecRate;
 
-  clear_parmaeter_globals();
+  clear_parmaeter_globals();  // Note: clears gHM_Pos1 and 2
 
   print_command(FALSE, FALSE);
 
-  // Extract the step rate.
+  // Extract the three parameters
   extract_number(kULONG, &gHM_StepRate, kREQUIRED);
   extract_number(kLONG,  &gHM_Pos1,     kOPTIONAL);
   extract_number(kLONG,  &gHM_Pos2,     kOPTIONAL);
 
-  if (gLimitChecks)
+  // StepRate must be from 2 to 25000
+  if (gHM_StepRate < 2u)
   {
-    // StepRate can't be zero
-    if (gIntervals == 0u)
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-      return;
-    }
+    gHM_StepRate = 2;
+  }
+  else if (gHM_StepRate > 25000u)
+  {
+    gHM_StepRate = 25000;
   }
   
   // Wait until FIFO is empty
@@ -2928,7 +2934,7 @@ void parse_HM_packet(void)
     // Need to turn off high priority interrupts briefly here to read out value that ISR uses
     INTCONbits.GIEH = 0;    // Turn high priority interrupts off
 
-    // Create our output values to print back to the PC
+    // See if there is either a delay or a command executing
     if ((CurrentCommand.m.sm.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE))
     {
       CommandExecuting = FALSE;
@@ -2939,11 +2945,12 @@ void parse_HM_packet(void)
   }
 
   // Make a local copy of the things we care about. This is how far we need to move.
+  // TODO: Based on how many steps can be taken in one move, range check this addition???
   gHM_TmpSteps1 = -globalStepCounter1 + gHM_Pos1;
   gHM_TmpSteps2 = -globalStepCounter2 + gHM_Pos2;
 
   // Compute absolute value versions of steps for computation
-  if (gSteps1 < 0)
+  if (gHM_TmpSteps1 < 0)
   {
     gHM_AbsStep1 = -gHM_TmpSteps1;
   }
@@ -2951,7 +2958,7 @@ void parse_HM_packet(void)
   {
     gHM_AbsStep1 = gHM_TmpSteps1;
   }
-  if (gSteps2 < 0)
+  if (gHM_TmpSteps2 < 0)
   {
     gHM_AbsStep2 = -gHM_TmpSteps2;
   }
@@ -2959,37 +2966,135 @@ void parse_HM_packet(void)
   {
     gHM_AbsStep2 = gHM_TmpSteps2;
   }
+  
+  // Generate an error if the total number of steps to move in either axis
+  // is more than 0x007FFFFF (+/- 23 bits)
+  if (gHM_AbsStep1 > 0x007FFFFFl)
+  {
+    ebb_print((far rom char *)"!0 Err: Axis1 steps larger than 8388607 steps.");
+    print_line_ending(kLE_REV);
+    return;
+  }
+  if (gHM_AbsStep2 > 0x007FFFFFl)
+  {
+    ebb_print((far rom char *)"!0 Err: Axis2 steps larger than 8388607 steps.");
+    print_line_ending(kLE_REV);
+    return;
+  }
+  // No need to proceed if there is nothing to do
+  if ((gHM_AbsStep1 == 0) && (gHM_AbsStep2 == 0))
+  {
+    // This is not actually an error, so print out the OK
+    print_line_ending(kLE_OK_NORM);
+    return;
+  }
+  
+  // If either of them is zero, then our move becomes very simple, so bypass
+  // all of this complex mathy-math-math stuff.
+  if ((gHM_AbsStep1 != 0) && (gHM_AbsStep2 != 0))
+  {
+    // How do we know if the secondary axis will move slower than 2s/s?
+    if (gHM_AbsStep1 > gHM_AbsStep2)
+    {
+      // Motor1 is the primary axis
+      //
+      // The ratio of steps/rate will need to be the same for both axis
+      // to make a straight line. So if S1 is axis1 steps, S2 is axis2 steps,
+      // R1 is axis1 rate and R2 is axis2 rate, then
+      // S1/R1 = S2/R2.
+      // We know all but R2, so solving for R2 we get
+      // R2 = (S2*R1)/S1
+      // Because S2 can be up to 24 bits, and R1 can be up to 25000,
+      // the multiplication can push us over 32 bits. So we have to break it
+      // apart into a couple of manageable ranges.
+      // 
+      // If R1 <= 256, then S2 can be any 24 bit value 
+      if (gHM_StepRate <= 256)
+      {
+        SecRate = (gHM_AbsStep2 * gHM_StepRate) / gHM_AbsStep1;
+      }
+      else
+      {
+        // R1 > 256, but if S2 < (0x7FFFFFFF/25000) then we're still going to fit
+        if (gHM_AbsStep2 < (0x7FFFFFFFl/25000u))
+        {
+          SecRate = (gHM_AbsStep2 * gHM_StepRate) / gHM_AbsStep1;
+        }
+        else
+        {
+          // Doing the multiply first will overflow 32 bits. So we do the divide first
+          SecRate = (gHM_AbsStep2 / gHM_AbsStep1) * gHM_StepRate;
+        }
+      }
+
+
+        ((gHM_StepRate > 255) || (gHM_AbsStep2 > (0xFFFFFFFFl/25000u)))
+      {
+
+      }
+      else
+      {
+      }
+    }
+    else
+    {
+      SecRate = (gHM_AbsStep1 * gHM_StepRate) / gHM_AbsStep2;
+    }
+    if (SecRate < 2)
+    {
+      // Need two moves
+    }
+  }
+  else
+  {
+    // One of our axis doesn't need to move, so just do one simple move
+    if (gHM_AbsStep2 == 0)
+    {
+      
+    }
+    else
+    {
+      
+    }
+    process_simple_rate_move();
+  }
 }
 
 // This is the generic function for processing simple moves which use a 
-// 'rate' input parameter rather than a duration. It basically converts the 
-// input 'rate' to a 'duration' and then calls the base process_simple_motor_move().
+// 'rate' input parameter rather than a duration. The 'rate' parameter
+// is applied to the axis that has more steps. The other axis gets a rate which
+// is appropriate to making a straight line.
+// gHM_StepRate can be between 2 and 25000 inclusive
+// gSteps1 and gSteps2 are signed and can't have an absolute value more than 
+// 0x007FFFFF.
 //
-// Note: This is a big optimization opportunity. Why? Because it would be much
-// less computation to duplicate the full process_simple_motor_move()
-// functionality but with a 'rate' rather than 'duration' input. The way it's
-// being done now - converting from 'rate' to 'duration' and then within
-// process_simple_motor_move() from there to the raw motor1 and motor2
-// low level 'rate' values is inefficient. However, refactoring to implement
-// this optimization will require touching the HM code quite a bit.
-// 
 // This function uses these as input parameters:
-//  gDurationMS    (not modified)
+//  gHM_StepRate   (not modified)
 //  gSteps1        (modified)
 //  gSteps2        (modified)
-//  gClearAccs     (modified)
 void process_simple_rate_move(void)
 {  
+  INT32  XSteps = 0;
   
-  // Check for too many steps to step
-  if ((gAccel1 > 0xFFFFFFl) || (gAccel2 > 0xFFFFFFl))
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
   {
-    ebb_print((far rom char *)"!0 Err: steps to home larger than 16,777,215.");
+    return;
+  }
+  // Check for too many steps to step
+  if ((gAccel1 > 8388607l) || (gAccel1 < -83886071l))
+  {
+    ebb_print((far rom char *)"!0 Err: axis1 more than 8,388,607 steps.");
+    print_line_ending(kLE_REV);
+    return;
+  }
+  if ((gAccel2 > 8388607l) || (gAccel2 < -83886071l))
+  {
+    ebb_print((far rom char *)"!0 Err: axis2 more than 8,388,607 steps.");
     print_line_ending(kLE_REV);
     return;
   }
   
-  // Compute duration based on step rate user requested. Take bigger step count to use for calculation
   if (gAccel1 > gAccel2)
   {
     gDurationMS = (gAccel1 * 1000) / gIntervals;
@@ -3104,8 +3209,239 @@ void process_simple_rate_move(void)
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   gClearAccs = 3;
-  process_simple_motor_move();
 
+  
+  
+// TOP OF SIMPLE MOVE COMMAND  
+  
+
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
+  {
+    return;
+  }
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  {
+    ebb_print((far rom char *)"Duration=");
+    ebb_print_uint(gDurationMS);
+    ebb_print((far rom char *)" SA1=");
+    ebb_print_int(gSteps1);
+    ebb_print((far rom char *)" SA2=");
+    ebb_print_int(gSteps2);
+    print_line_ending(kLE_REV);
+  }
+  
+  if (gClearAccs > 3u)
+  {
+    gClearAccs = 3;
+  }
+  gMoveTemp.m.sm.SEState = (UINT8)gClearAccs;
+
+  // Check for delay
+  if (gSteps1 == 0 && gSteps2 == 0)
+  {
+    gMoveTemp.Command = COMMAND_DELAY;
+    // This is OK because we only need to multiply the 3 byte Duration by
+    // 25, so it fits in 4 bytes OK.
+    gMoveTemp.m.sm.DelayCounter = HIGH_ISR_TICKS_PER_MS * gDurationMS;
+    
+    // Check that DelayCounter doesn't have a crazy high value (this was
+    // being done in the ISR, now moved here for speed)
+    if (gMoveTemp.m.sm.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+    {
+      // Ideally we would throw an error to the user here, but since we're in
+      // the helper function that's not so easy. So we just set the delay time
+      // to zero and hope they notice that their delays aren't doing anything.
+      gMoveTemp.m.sm.DelayCounter = 0;
+    }
+  }
+  else
+  {
+    gMoveTemp.m.sm.DelayCounter = 0; // No delay for motor moves
+    gMoveTemp.m.sm.DirBits = 0;
+
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      // Enable both motors when we want to move them
+      Enable1IO = ENABLE_MOTOR;
+      Enable2IO = ENABLE_MOTOR;
+    }
+    
+    // First, set the direction bits
+    if (gSteps1 < 0)
+    {
+      gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR1_BIT;
+      gSteps1 = -gSteps1;
+    }
+    if (gSteps2 < 0)
+    {
+      gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR2_BIT;
+      gSteps2 = -gSteps2;
+    }
+    // To compute StepAdd values from Duration.
+    // gTmpSteps1 is from 0x000001 to 0xFFFFFF.
+    // HIGH_ISR_TICKS_PER_MS = 25
+    // gTmpDurationMS is from 0x000001 to 0xFFFFFF.
+    // temp needs to be from 0x0001 to 0x7FFF.
+    // Temp is added to accumulator every 25KHz. So slowest step rate
+    // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
+    // Fastest step rate is obviously 25KHz.
+    // If gTmpSteps1 is 1, then duration must be 763 or less.
+    // If gTmpSteps1 is 2, then duration must be 763 * 2 or less.
+    // If gTmpSteps1 is 0xFFFFFF, then duration must be at least 671088.
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+    {
+      // First check for duration to large.
+      if ((UINT32)gSteps1 < (0xFFFFFFu/763u)) 
+      {
+        if (gDurationMS > ((UINT32)gSteps1 * 763u)) 
+        {
+          ebb_print((far rom char *)"Major malfunction Axis1 duration too long : ");
+          ebb_print_uint(gDurationMS);
+          print_line_ending(kLE_REV);
+          gIntervals = 0;
+          gSteps1 = 0;
+        }
+      }
+    }
+    
+    if (gSteps1 != 0) 
+    {
+      if (gSteps1 < 0x1FFFF) 
+      {
+        gRate1 = HIGH_ISR_TICKS_PER_MS * gDurationMS;
+        gIntervals = (gSteps1 << 15)/gRate1;
+        // Because it takes us some time to do this division,
+        // we only perform this extra step if our move is long enough to
+        // warrant it. That way, for really short moves (where the extra
+        // precision isn't necessary) we don't take up extra time.
+        if (gDurationMS > 30u)
+        {
+          gRate2 = (gSteps1 << 15) % gRate1;
+          remainder = (gRate2 << 16) / gRate1;
+        }
+      }
+      else 
+      {
+        gIntervals = (((UINT32)(gSteps1/gDurationMS) << 15u)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        remainder = 0;
+      }
+      if (gIntervals > 0x8000) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis1 StepCounter too high : ");
+        ebb_print_uint(gIntervals);
+        print_line_ending(kLE_REV);
+        gIntervals = 0x8000;
+      }
+      if (gIntervals == 0u && gSteps1 != 0) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis1 StepCounter zero");
+        print_line_ending(kLE_REV);
+        gIntervals = 1;
+      }
+      if (gDurationMS > 30u)
+      {
+        gIntervals = (gIntervals << 16) + remainder;
+      }
+      else
+      {
+        gIntervals = (gIntervals << 16);
+      }
+    }
+    else
+    {
+      gIntervals = 0;
+    }
+
+    if (gIntervals >= 0x7FFFFFFFu)
+    {
+      gIntervals = 0x7FFFFFFF;
+    }
+    gMoveTemp.m.sm.Rate[0].value = gIntervals;
+    gMoveTemp.m.sm.Steps[0] = gSteps1;
+    gMoveTemp.m.sm.Accel[0] = 0;
+
+    if (gSteps2 != 0) 
+    {
+      if (gSteps2 < 0x1FFFF) 
+      {
+        gRate1 = HIGH_ISR_TICKS_PER_MS * gDurationMS;
+        gIntervals = (gSteps2 << 15)/gRate1;
+        gRate2 = (gSteps2 << 15) % gRate1; 
+        if (gDurationMS > 30u)
+        {
+          remainder = (gRate2 << 16) / gRate1;
+        }
+      }
+      else 
+      {
+        gIntervals = (((gSteps2/gDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        remainder = 0;
+      }
+      if (gIntervals > 0x8000) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter too high : ");
+        ebb_print_uint(gIntervals);
+        print_line_ending(kLE_REV);
+        gIntervals = 0x8000;
+      }
+      if (gIntervals == 0u && gSteps2 != 0) 
+      {
+        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter zero");
+        print_line_ending(kLE_REV);
+        gIntervals = 1;
+      }
+      if (gDurationMS > 30u)
+      {
+        gIntervals = (gIntervals << 16) + remainder;
+      }
+      else
+      {
+        gIntervals = (gIntervals << 16);
+      }
+    }
+
+    if (gIntervals >= 0x7FFFFFFFu)
+    {
+      gIntervals = 0x7FFFFFFF;
+    }
+    gMoveTemp.m.sm.Rate[1].value = gIntervals;
+    gMoveTemp.m.sm.Steps[1] = gSteps2;
+    gMoveTemp.m.sm.Accel[1] = 0;
+    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
+
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+    {
+      ebb_print((far rom char *)"R1=");
+      ebb_print_uint(gMoveTemp.m.sm.Rate[0].value);
+      ebb_print((far rom char *)" S1=");
+      ebb_print_uint(gMoveTemp.m.sm.Steps[0]);
+      ebb_print((far rom char *)" R2=");
+      ebb_print_uint(gMoveTemp.m.sm.Rate[1].value);
+      ebb_print((far rom char *)" S2=");
+      ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
+      print_line_ending(kLE_REV);
+    }
+  }
+  
+  // Spin here until there's space in the FIFO
+  while(gFIFOLength >= gCurrentFIFOLength)
+  ;
+  
+  // If the limit switch feature has triggered, then ignore this move command
+  // Maybe the limit switch has become true between the top of this function 
+  // and here? Better check for it.
+  if (!bittstzero(gLimitSwitchTriggered))
+  {
+    // Now, quick copy over the computed command data to the command FIFO
+    FIFOPtr[gFIFOIn] = gMoveTemp;
+    gFIFOIn++;
+    if (gFIFOIn >= gCurrentFIFOLength)
+    {
+      gFIFOIn = 0;
+    }
+    gFIFOLength++;
+  }
   print_line_ending(kLE_OK_NORM);
 }
 
