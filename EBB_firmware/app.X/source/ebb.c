@@ -354,10 +354,6 @@ volatile near UINT8 gLimitSwitchMask;      // 8-bit PortB mask
 volatile near UINT8 gLimitSwitchTarget;    // 8-bit PortB target values
 volatile near UINT8 gLimitSwitchTriggered; // Non-zero if limit switch trigger has fired
 
-// Variables used during debug printing within ISR
-static near u32b4_t xx;
-static near UINT8 nib;
-
 // Global variables for managing FIFO depth/indexes
 volatile near UINT8 gFIFOLength;
 volatile near UINT8 gFIFOIn;
@@ -399,6 +395,10 @@ static near INT32  gISRPositionForThisCommand;
 // select register can be kept pointing to Bank 1 and no bank switch instructions
 // are needed in the iSR.
 #pragma udata ISR_globals = 0x180
+
+// Variables used during debug printing within ISR
+static u32b4_t xx;
+static UINT8 nib;
 
 // The move command containing the currently executing move command in the ISR
 MoveCommandType CurrentCommand;
@@ -460,7 +460,7 @@ static INT32   gInt32_8;
 
 // For simple_move
 #define gDurationMS     gUInt32_1
-#define gIntervals      gUint32_2
+#define gIntervals      gUInt32_2
 #define gClearAccs      gUInt32_3
 #define gRate1          gInt32_1
 #define gSteps1         gInt32_2
@@ -489,6 +489,8 @@ static void clear_StepCounters(void);
 static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
 static void process_simple_motor_move(void);
 static void clear_parmaeter_globals(void);
+static void process_simple_rate_move(void);
+
 
 extern void FIFO_COPY(void);
 
@@ -2988,7 +2990,7 @@ void parse_HM_packet(void)
     print_line_ending(kLE_OK_NORM);
     return;
   }
-  
+#if 0
   // If either of them is zero, then our move becomes very simple, so bypass
   // all of this complex mathy-math-math stuff.
   if ((gHM_AbsStep1 != 0) && (gHM_AbsStep2 != 0))
@@ -3058,6 +3060,61 @@ void parse_HM_packet(void)
     }
     process_simple_rate_move();
   }
+#endif
+}
+
+// Test Rate
+void parse_TR_packet(void)
+{
+  BOOL   CommandExecuting = TRUE;
+  UINT32  TR_StepRate;
+  UINT32  TR_Pos1;
+  UINT32  TR_Pos2;
+  
+  clear_parmaeter_globals();  // Note: clears gHM_Pos1 and 2
+
+  print_command(FALSE, FALSE);
+
+  // Extract the three parameters
+  extract_number(kULONG, &TR_StepRate, kREQUIRED);
+  extract_number(kLONG,  &TR_Pos1,     kOPTIONAL);
+  extract_number(kLONG,  &TR_Pos2,     kOPTIONAL);
+
+  // StepRate must be from 2 to 25000
+  if (TR_StepRate < 2u)
+  {
+    TR_StepRate = 2;
+  }
+  else if (TR_StepRate > 25000u)
+  {
+    TR_StepRate = 25000;
+  }
+  
+  // Wait until FIFO is empty
+  while(gFIFOLength >= gCurrentFIFOLength)
+    ;
+
+  // Then wait for motion command to finish (if one's running)
+  while (CommandExecuting == TRUE)
+  {
+    // Need to turn off high priority interrupts briefly here to read out value that ISR uses
+    INTCONbits.GIEH = 0;    // Turn high priority interrupts off
+
+    // See if there is either a delay or a command executing
+    if ((CurrentCommand.m.sm.DelayCounter == 0u) && (CurrentCommand.Command == COMMAND_NONE))
+    {
+      CommandExecuting = FALSE;
+    }
+
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;    // Turn high priority interrupts on
+  }
+
+  gSteps1 = TR_Pos1;
+  gSteps2 = TR_Pos2;
+  gHM_StepRate = TR_StepRate;
+
+  process_simple_rate_move();
 }
 
 // This is the generic function for processing simple moves which use a 
@@ -3073,16 +3130,14 @@ void parse_HM_packet(void)
 //  gSteps1        (modified)
 //  gSteps2        (modified)
 void process_simple_rate_move(void)
-{  
-  INT32  XSteps = 0;
-  
+{
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     ebb_print((far rom char *)"Rate=");
     ebb_print_uint(gHM_StepRate);
-    ebb_print((far rom char *)" SA1=");
+    ebb_print((far rom char *)" S1=");
     ebb_print_int(gSteps1);
-    ebb_print((far rom char *)" SA2=");
+    ebb_print((far rom char *)" S2=");
     ebb_print_int(gSteps2);
     print_line_ending(kLE_REV);
   }
@@ -3092,13 +3147,13 @@ void process_simple_rate_move(void)
     return;
   }
   // Check for too many steps to step
-  if ((gSteps1 > 8388607l) || (gSteps1 < -83886071l))
+  if ((gSteps1 > 8388607l) || (gSteps1 < -8388607l))
   {
     ebb_print((far rom char *)"!0 Err: axis1 more than 8,388,607 steps.");
     print_line_ending(kLE_REV);
     return;
   }
-  if ((gSteps2 > 8388607l) || (gSteps2 < -83886071l))
+  if ((gSteps2 > 8388607l) || (gSteps2 < -8388607l))
   {
     ebb_print((far rom char *)"!0 Err: axis2 more than 8,388,607 steps.");
     print_line_ending(kLE_REV);
@@ -3106,7 +3161,7 @@ void process_simple_rate_move(void)
   }
   
   // If, for some reason, we're called with zero steps for both axis, then bail
-  if ((gSteps1 == 0) && (gSteps1 == 0))
+  if ((gSteps1 == 0) && (gSteps2 == 0))
   {
     return;
   }
@@ -3115,8 +3170,8 @@ void process_simple_rate_move(void)
   // clear the accumulators each move
   gMoveTemp.m.sm.SEState = (UINT8)gClearAccs;
 
-  gMoveTemp.m.sm.DelayCounter = 0; // A rate move is never a delay
-  gMoveTemp.m.sm.DirBits = 0;
+  gMoveTemp.m.sm.DelayCounter = 0;    // A rate move is never a delay, so clear
+  gMoveTemp.m.sm.DirBits = 0;         // Start with positive direction for both
 
   if (gAutomaticMotorEnable == TRUE)
   {
@@ -3139,12 +3194,7 @@ void process_simple_rate_move(void)
   // Both Steps values are now positive because our directions are set. From 
   // now on we're dealing only with step counts and rates, no directions.
   
-  // There are four type of moves we could need to make:
-  // - Just Axis1 (Axis2 is zero steps)
-  // - Just Axis2 (Axis1 is zero steps)
-  // - Axis1 primary, Axis2 secondary
-  // - Axis2 primary, Axis1 secondary
-  if (gSteps1 > gSteps2)
+  if (gSteps1 >= gSteps2)
   {
     // Axis1 is major, Axis2 is minor
     // Computing the gMoveTemp.m.sm.Rate value for the primary axis is simple.
@@ -3153,49 +3203,110 @@ void process_simple_rate_move(void)
     // should be * 85899.34592)
     gMoveTemp.m.sm.Rate[0].value = gHM_StepRate * 85899u;
 
-    if (gMoveTemp.m.sm.Rate[0].value >= 0x7FFFFFFFu)
+    if (gMoveTemp.m.sm.Rate[0].value >= 0x7FFFFFFFl)
     {
       gMoveTemp.m.sm.Rate[0].value = 0x7FFFFFFF;
     }
-    gMoveTemp.m.sm.Steps[0] = gSteps1;
-    gMoveTemp.m.sm.Accel[0] = 0;
 
     if (gSteps2 != 0)
     {
       // We know secondary axis is non-zero move length, so compute it's rate
       // such that the ratio of primary steps/rate is the same as secondary
       // steps/rate.
+      //
+      // The ratio of steps/rate will need to be the same for both axis
+      // to make a straight line. So if S1 is axis1 steps, S2 is axis2 steps,
+      // R1 is axis1 rate and R2 is axis2 rate, then
+      // S1/R1 = S2/R2.
+      // We know all but R2, so solving for R2 we get
+      // R2 = (S2*R1)/S1
+      // Because S2 can be up to 24 bits, and R1 can be up to 25000,
+      // the multiplication can push us over 32 bits. So we have to break it
+      // apart into a couple of manageable ranges.
+      // 
+      // If R1 <= 256, then S2 can be any 24 bit value and no chance of overflow 
+      // or
+      // If S2 < (0x7FFFFFFF/25000) then we're also going to fit fine
+      if (
+        (gHM_StepRate <= 256u)
+        ||
+        (gSteps2 < (0x7FFFFFFFl/25000u))
+      )
+      {
+        gMoveTemp.m.sm.Rate[1].value = (gSteps2 * gHM_StepRate) / gSteps1;
+      }
+      else
+      {
+        // Doing the multiply first will overflow 32 bits. So we do the divide first
+        // This will result in a bit of lost resolution, but that's just how it is
+        gMoveTemp.m.sm.Rate[1].value = (gSteps2 / gSteps1) * gHM_StepRate;
+      }
+      // Check to make sure our secondary axis rate won't be too high
+      if (gMoveTemp.m.sm.Rate[1].value > 25000)
+      {
+        ebb_print((far rom char *)"!0 Err: Rate2 more than 25000 s/s");
+        print_line_ending(kLE_REV);
+        return;
+      }
+      else
+      {
+        // Now convert from s/s to ISR Rate
+        gMoveTemp.m.sm.Rate[1].value = gMoveTemp.m.sm.Rate[1].value * 85899u;
+      }
     }
     else
     {
       // Because we know Axis2 doesn't need to move, zero everything out
       gMoveTemp.m.sm.Rate[1].value = 0;
-      gMoveTemp.m.sm.Steps[1] = 0;
-      gMoveTemp.m.sm.Accel[1] = 0;
     }
   }
   else
   {
-    // Axis2 is major, Axis1 minor
-    if (gSteps1 == 0)
-    {
-      gMoveTemp.m.sm.Rate[1].value = gHM_StepRate * 85899u;
+    // Axis2 is major, Axis1 is minor
+    gMoveTemp.m.sm.Rate[1].value = gHM_StepRate * 85899u;
 
-      if (gMoveTemp.m.sm.Rate[1].value >= 0x7FFFFFFFu)
+    if (gMoveTemp.m.sm.Rate[1].value >= 0x7FFFFFFFl)
+    {
+      gMoveTemp.m.sm.Rate[1].value = 0x7FFFFFFF;
+    }
+
+    if (gSteps1 != 0)
+    {
+      if (
+        (gHM_StepRate <= 256u)
+        ||
+        (gSteps1 < (0x7FFFFFFFl/25000u))
+      )
       {
-        gMoveTemp.m.sm.Rate[1].value = 0x7FFFFFFF;
+        gMoveTemp.m.sm.Rate[0].value = ((gSteps1 * gHM_StepRate) / gSteps2) * 85899u;
       }
-      gMoveTemp.m.sm.Rate[1].value = gSteps1;
-      gMoveTemp.m.sm.Accel[1] = 0;
-      // Because we know Axis1 doesn't need to move
+      else
+      {
+        gMoveTemp.m.sm.Rate[0].value = ((gSteps1 / gSteps2) * gHM_StepRate) * 85899u;
+      }
+      // Check to make sure our secondary axis rate won't be too high
+      if (gMoveTemp.m.sm.Rate[0].value > 25000)
+      {
+        ebb_print((far rom char *)"!0 Err: Rate1 more than 25000 s/s");
+        print_line_ending(kLE_REV);
+        return;
+      }
+      else
+      {
+        gMoveTemp.m.sm.Rate[0].value = gMoveTemp.m.sm.Rate[0].value * 85899u;
+      }
+    }
+    else
+    {
       gMoveTemp.m.sm.Rate[0].value = 0;
-      gMoveTemp.m.sm.Steps[0] = 0;
-      gMoveTemp.m.sm.Accel[0] = 0;
     }
   }
 
+  gMoveTemp.m.sm.Steps[0] = gSteps1;
+  gMoveTemp.m.sm.Accel[0] = 0;
+  gMoveTemp.m.sm.Steps[1] = gSteps2;
+  gMoveTemp.m.sm.Accel[1] = 0;
   gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
-
 
   if (bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {

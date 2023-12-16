@@ -1646,6 +1646,12 @@ void parse_packet(void)
         parse_QU_packet();
         break;
       }
+      case ('T' * 256) + 'R':
+      {
+        parse_TR_packet();
+        break;
+      }
+
 
       default:
       {
