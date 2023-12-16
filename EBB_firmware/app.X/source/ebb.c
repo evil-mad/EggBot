@@ -3278,11 +3278,11 @@ void process_simple_rate_move(void)
         (gSteps1 < (0x7FFFFFFFl/25000u))
       )
       {
-        gMoveTemp.m.sm.Rate[0].value = ((gSteps1 * gHM_StepRate) / gSteps2) * 85899u;
+        gMoveTemp.m.sm.Rate[0].value = (gSteps1 * gHM_StepRate) / gSteps2;
       }
       else
       {
-        gMoveTemp.m.sm.Rate[0].value = ((gSteps1 / gSteps2) * gHM_StepRate) * 85899u;
+        gMoveTemp.m.sm.Rate[0].value = (gSteps1 / gSteps2) * gHM_StepRate;
       }
       // Check to make sure our secondary axis rate won't be too high
       if (gMoveTemp.m.sm.Rate[0].value > 25000)
