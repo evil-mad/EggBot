@@ -3136,54 +3136,62 @@ void process_simple_rate_move(void)
     gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR2_BIT;
     gSteps2 = -gSteps2;
   }
-  // Both Steps values are now positive because our directions are set
+  // Both Steps values are now positive because our directions are set. From 
+  // now on we're dealing only with step counts and rates, no directions.
   
-  // There are four type of moves we could make:
-  // - Just Axis1
-  // - Just Axis2
+  // There are four type of moves we could need to make:
+  // - Just Axis1 (Axis2 is zero steps)
+  // - Just Axis2 (Axis1 is zero steps)
   // - Axis1 primary, Axis2 secondary
   // - Axis2 primary, Axis1 secondary
-  if (gSteps2 == 0)
+  if (gSteps1 > gSteps2)
   {
+    // Axis1 is major, Axis2 is minor
     // Computing the gMoveTemp.m.sm.Rate value for the primary axis is simple.
-    // gMoveTemp.m.sm.Rate is simple gHM_StepRate * 85899. It's not exact, but
+    // gMoveTemp.m.sm.Rate is simply gHM_StepRate * 85899. It's not exact, but
     // completely good enough for this move. (If we had floating point, it 
     // should be * 85899.34592)
     gMoveTemp.m.sm.Rate[0].value = gHM_StepRate * 85899u;
-    
+
     if (gMoveTemp.m.sm.Rate[0].value >= 0x7FFFFFFFu)
     {
       gMoveTemp.m.sm.Rate[0].value = 0x7FFFFFFF;
     }
     gMoveTemp.m.sm.Steps[0] = gSteps1;
     gMoveTemp.m.sm.Accel[0] = 0;
-    // Because we know Axis2 doesn't need to move
-    gMoveTemp.m.sm.Rate[1].value = 0;
-    gMoveTemp.m.sm.Steps[1] = 0;
-    gMoveTemp.m.sm.Accel[1] = 0;
-  }
-  else if (gSteps1 == 0)
-  {
-    gMoveTemp.m.sm.Rate[1].value = gHM_StepRate * 85899u;
-    
-    if (gMoveTemp.m.sm.Rate[1].value >= 0x7FFFFFFFu)
+
+    if (gSteps2 != 0)
     {
-      gMoveTemp.m.sm.Rate[1].value = 0x7FFFFFFF;
+      // We know secondary axis is non-zero move length, so compute it's rate
+      // such that the ratio of primary steps/rate is the same as secondary
+      // steps/rate.
     }
-    gMoveTemp.m.sm.Rate[1].value = gSteps1;
-    gMoveTemp.m.sm.Accel[1] = 0;
-    // Because we know Axis1 doesn't need to move
-    gMoveTemp.m.sm.Rate[0].value = 0;
-    gMoveTemp.m.sm.Steps[0] = 0;
-    gMoveTemp.m.sm.Accel[0] = 0;
-  }
-  else if (gSteps1 > gSteps2)
-  {
-    // Axis1 is major, Axis2 is minor
+    else
+    {
+      // Because we know Axis2 doesn't need to move, zero everything out
+      gMoveTemp.m.sm.Rate[1].value = 0;
+      gMoveTemp.m.sm.Steps[1] = 0;
+      gMoveTemp.m.sm.Accel[1] = 0;
+    }
   }
   else
   {
     // Axis2 is major, Axis1 minor
+    if (gSteps1 == 0)
+    {
+      gMoveTemp.m.sm.Rate[1].value = gHM_StepRate * 85899u;
+
+      if (gMoveTemp.m.sm.Rate[1].value >= 0x7FFFFFFFu)
+      {
+        gMoveTemp.m.sm.Rate[1].value = 0x7FFFFFFF;
+      }
+      gMoveTemp.m.sm.Rate[1].value = gSteps1;
+      gMoveTemp.m.sm.Accel[1] = 0;
+      // Because we know Axis1 doesn't need to move
+      gMoveTemp.m.sm.Rate[0].value = 0;
+      gMoveTemp.m.sm.Steps[0] = 0;
+      gMoveTemp.m.sm.Accel[0] = 0;
+    }
   }
 
   gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
