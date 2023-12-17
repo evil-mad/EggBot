@@ -3113,6 +3113,7 @@ void parse_TR_packet(void)
   gSteps1 = TR_Pos1;
   gSteps2 = TR_Pos2;
   gHM_StepRate = TR_StepRate;
+  gClearAccs = 3;   // Always clear accumulators for testing
 
   process_simple_rate_move();
 }
@@ -3126,9 +3127,10 @@ void parse_TR_packet(void)
 // 0x007FFFFF.
 //
 // This function uses these as input parameters:
-//  gHM_StepRate   (not modified)
-//  gSteps1        (modified)
-//  gSteps2        (modified)
+//  gHM_StepRate    (not modified)
+//  gSteps1         (modified)
+//  gSteps2         (modified)
+//  gClearAccs      (not modified)
 void process_simple_rate_move(void)
 {
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
