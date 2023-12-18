@@ -3133,6 +3133,12 @@ void parse_TR_packet(void)
 //  gClearAccs      (not modified)
 void process_simple_rate_move(void)
 {
+  BOOL RateOverflow = FALSE;
+  BOOL RateUnderflow = FALSE;
+  float f;
+
+LATDbits.LATD0 = 1;
+  
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
     ebb_print((far rom char *)"Rate=");
@@ -3161,7 +3167,13 @@ void process_simple_rate_move(void)
     print_line_ending(kLE_REV);
     return;
   }
-  
+  // And check for a bad rate value
+  if ((gHM_StepRate > 25000u) || (gHM_StepRate == 0u))
+  {
+    ebb_print((far rom char *)"!0 Err: StepRate invalid value.");
+    print_line_ending(kLE_REV);
+    return;
+  }
   // If, for some reason, we're called with zero steps for both axis, then bail
   if ((gSteps1 == 0) && (gSteps2 == 0))
   {
@@ -3203,12 +3215,7 @@ void process_simple_rate_move(void)
     // gMoveTemp.m.sm.Rate is simply gHM_StepRate * 85899. It's not exact, but
     // completely good enough for this move. (If we had floating point, it 
     // should be * 85899.34592)
-    gMoveTemp.m.sm.Rate[0].value = gHM_StepRate * 85899u;
-
-    if (gMoveTemp.m.sm.Rate[0].value >= 0x7FFFFFFFl)
-    {
-      gMoveTemp.m.sm.Rate[0].value = 0x7FFFFFFF;
-    }
+    gMoveTemp.m.sm.Rate[0].value = (INT32)((float)gHM_StepRate * 85899.34592f);
 
     if (gSteps2 != 0)
     {
@@ -3225,35 +3232,21 @@ void process_simple_rate_move(void)
       // Because S2 can be up to 24 bits, and R1 can be up to 25000,
       // the multiplication can push us over 32 bits. So we have to break it
       // apart into a couple of manageable ranges.
-      // 
-      // If R1 <= 256, then S2 can be any 24 bit value and no chance of overflow 
-      // or
-      // If S2 < (0x7FFFFFFF/25000) then we're also going to fit fine
-      if (
-        (gHM_StepRate <= 256u)
-        ||
-        (gSteps2 < (0x7FFFFFFFl/25000u))
-      )
+      
+      f = gSteps2 * gHM_StepRate;
+      f /= gSteps1;
+      f *= 85899.34592f;
+      if (f < 1.0f)
       {
-        gMoveTemp.m.sm.Rate[1].value = (gSteps2 * gHM_StepRate) / gSteps1;
+        gMoveTemp.m.sm.Rate[1].value = 1;
+      }
+      else if (f > 2147483647.0f)
+      {
+        gMoveTemp.m.sm.Rate[1].value = 2147483647u;
       }
       else
       {
-        // Doing the multiply first will overflow 32 bits. So we do the divide first
-        // This will result in a bit of lost resolution, but that's just how it is
-        gMoveTemp.m.sm.Rate[1].value = (gSteps2 / gSteps1) * gHM_StepRate;
-      }
-      // Check to make sure our secondary axis rate won't be too high
-      if (gMoveTemp.m.sm.Rate[1].value > 25000)
-      {
-        ebb_print((far rom char *)"!0 Err: Rate2 more than 25000 s/s");
-        print_line_ending(kLE_REV);
-        return;
-      }
-      else
-      {
-        // Now convert from s/s to ISR Rate
-        gMoveTemp.m.sm.Rate[1].value = gMoveTemp.m.sm.Rate[1].value * 85899u;
+        gMoveTemp.m.sm.Rate[1].value = (INT32)f;
       }
     }
     else
@@ -3264,38 +3257,25 @@ void process_simple_rate_move(void)
   }
   else
   {
-    // Axis2 is major, Axis1 is minor
+    // Axis2 is major, Axis1 is minor, other than that same as above
     gMoveTemp.m.sm.Rate[1].value = gHM_StepRate * 85899u;
-
-    if (gMoveTemp.m.sm.Rate[1].value >= 0x7FFFFFFFl)
-    {
-      gMoveTemp.m.sm.Rate[1].value = 0x7FFFFFFF;
-    }
 
     if (gSteps1 != 0)
     {
-      if (
-        (gHM_StepRate <= 256u)
-        ||
-        (gSteps1 < (0x7FFFFFFFl/25000u))
-      )
+      f = gSteps1 * gHM_StepRate;
+      f /= gSteps2;
+      f *= 85899.34592f;
+      if (f < 1.0f)
       {
-        gMoveTemp.m.sm.Rate[0].value = (gSteps1 * gHM_StepRate) / gSteps2;
+        gMoveTemp.m.sm.Rate[0].value = 1;
+      }
+      else if (f > 2147483647.0f)
+      {
+        gMoveTemp.m.sm.Rate[0].value = 2147483647u;
       }
       else
       {
-        gMoveTemp.m.sm.Rate[0].value = (gSteps1 / gSteps2) * gHM_StepRate;
-      }
-      // Check to make sure our secondary axis rate won't be too high
-      if (gMoveTemp.m.sm.Rate[0].value > 25000)
-      {
-        ebb_print((far rom char *)"!0 Err: Rate1 more than 25000 s/s");
-        print_line_ending(kLE_REV);
-        return;
-      }
-      else
-      {
-        gMoveTemp.m.sm.Rate[0].value = gMoveTemp.m.sm.Rate[0].value * 85899u;
+        gMoveTemp.m.sm.Rate[0].value = (INT32)f;
       }
     }
     else
@@ -3303,7 +3283,20 @@ void process_simple_rate_move(void)
       gMoveTemp.m.sm.Rate[0].value = 0;
     }
   }
-
+  
+  if (RateUnderflow)
+  {
+    ebb_print((far rom char *)"!0 Err: Secondary rate less than 0.0000116 s/s");
+    print_line_ending(kLE_REV);
+    return;
+  }
+  if (RateOverflow)
+  {
+    ebb_print((far rom char *)"!0 Err: Secondary rate more than 25000 s/s");
+    print_line_ending(kLE_REV);
+    return;
+  }
+  
   gMoveTemp.m.sm.Steps[0] = gSteps1;
   gMoveTemp.m.sm.Accel[0] = 0;
   gMoveTemp.m.sm.Steps[1] = gSteps2;
@@ -3322,6 +3315,7 @@ void process_simple_rate_move(void)
     ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
     print_line_ending(kLE_REV);
   }
+LATDbits.LATD0 = 0;
   
   // Spin here until there's space in the FIFO
   while (gFIFOLength >= gCurrentFIFOLength)
