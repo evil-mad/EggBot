@@ -2553,8 +2553,25 @@ void parse_CM_packet(void)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
-    // Rate has to be from 2 to 25000
-    if ((frequency < 2u) || (frequency > 25000u))
+    // Rate has to be from 1 to 25000
+    if ((frequency < 1u) || (frequency > 25000u))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    // Check four positions for out of bounds
+    if ((dest_x > 32768) || (dest_x < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((dest_y > 32768) || (dest_y < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((center_x > 32768) || (center_x < -32768))
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if ((center_y > 32768) || (center_y < -32768))
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
@@ -2664,10 +2681,200 @@ void parse_CM_packet(void)
     //      step_dist_x = x_f - x_t
     //      step_dist_y = y_f - y_t
     //      And step frequency given by StepFreq.
+    gSteps1 = gMoveTemp.m.cm.x_f - gMoveTemp.m.cm.x_t;
+    gSteps2 = gMoveTemp.m.cm.y_f - gMoveTemp.m.cm.y_t;
+    gHM_StepRate = frequency;
+    gClearAccs = 0;
+    
     process_simple_rate_move();
+  
+    // After making our short straight line, we're done.
+    print_line_ending(kLE_OK_NORM);
+    return;
   }
 
 #if 0
+   # Next: Precompute VScaleK (Velocity Scaling Factor K):
+    # 
+    # This is a scaling factor that we will later use, in the ISR, to calculate the 
+    #   correct velocity in each axis from the number of steps in each axis.
+    #
+    # At a given vertex around the circle, the distance to the next vertex is (Dx, Dy).
+    #   The velocity at that vertex is (K * Dx, K * Dy), where the velocity scale factor K
+    #   is K = (Forward_velocity/typical_length_of_subsegment)
+    #        = (StepFreq * 2^31/ 25000) / (radius * alpha)
+    #        = (StepFreq * 2^28/ 3125) / (radius >> m_alpha)
+    #        = (StepFreq * 2^28 << m_alpha ) / ( 3125 * radius)
+    #   (Here, we have noted that 25000 = 8 * 3125 = 3125 * 2^3)
+    #
+    # To keep the multiplication within the ISR as 16 x 16 bit, we need a final VScaleK
+    #   that can be represented by uint16 (without losing too many digits of precision).
+    #   Most of the special cases are to manage the great variation in K that is possible
+    #   because radius can range from 5-32767, and StepFreq can range from 1-25000.
+
+
+    bits_left = 28                  # Counter for bits remaining to shift (int8)
+    bits_left += m_alpha
+
+    if (StepFreq >= 256):   # StepFreq is in range 256 - 25000
+                            # Possibly implement by checking that high byte != 0.
+
+        StepFreq = StepFreq << 17
+        bits_left -= 17
+        # StepFreq now in range 3.35E7 - 3.27E9 (Almost 2^25 - Almost 2^32)
+
+    else:                   # StepFreq is in range 1 - 255
+        StepFreq = StepFreq << 24
+        bits_left -= 24
+        # StepFreq now in range 1.67E7 - 4.27E9 (2^24 - Almost 2^32)
+
+
+    denom = 3125 * radius # uint32
+        # denom is in range 1.67E7 - 4.27E9 (2^24 - Almost 2^32)
+
+    if (radius >= 256):     # Radius is in range 256 - 32767
+                            # Possibly implement by checking that high byte != 0.
+
+        denom = denom >> 11
+        bits_left -= 11
+        # Denom now in range 3906 - 50000 (Almost 2^12 - Almost 2^16)
+
+    else:                   # Radius is in range 1 - 255
+        denom = denom >> 1
+        bits_left -= 1
+        # Denom now in range 1562 - 39843 (Almost 2^11 - Almost 2^16)
+
+
+    # Now the "big" division operation -- just one, thankfully.
+
+    VScaleK = int(StepFreq / denom) # (uint24?) 
+    # Largest possible VScaleK: 4.27E9 / 1562 = 2.733E6 (almost 2^22)
+    # Smallest possible VScaleK: 1.67E7 / 50000 = 334 (almost 2^9)
+
+    if VScaleK > 65536:             # possibly check that high bytes are nonzero.
+        VScaleK = VScaleK >> 4
+        bits_left += 4
+    # VScaleK value range is now 334 - 42,703, all < 2^16.
+    # ->  VScaleK can now be re-cast as a uint16.
+
+
+    # Finally, set up variables to manage "local" position in ISR.
+
+
+    x_pos_last = x_t # int16 Variables to store last (16-bit) position value
+    y_pos_last = y_t # int16
+
+
+    # Scale X, Y values up by 65536. The step positions are 16-bit signed, but
+    #   we need additional resolution to avoid adding rounding errors since we
+    #   do compute each new position from the last position.
+
+    x_t = x_t << 16
+    y_t = y_t << 16
+
+    -----------------------------------------
+    # This concludes the "precomputation" stage. We now -- still in the "parsing"
+    #   stage -- compute the velocities and step counts for the first subsegment only.
+    
+    # The nominal step distances to move are:
+    #   d_x = -1 * ( x_t >> (2 * m_alpha + 1)) - (y_t >> m_alpha)
+    #   d_y = -1 * ( y_t >> (2 * m_alpha + 1)) + (x_t >> m_alpha)
+    #
+    # HOWEVER, right-shift division of negative integers isn't "clean" (e.g., -1 >> 1 == -1),
+    #   so we instead use several cases with positive integers and right shifts.
+
+
+
+
+    alpha_shift = (m_alpha << 1) + 1
+    if x_t < 0:
+        x_1 = ( - x_t >> alpha_shift) 
+        x_2 = -( - x_t >> m_alpha) 
+    else:
+        x_1 = -( x_t >> alpha_shift) 
+        x_2 = ( x_t >> m_alpha) 
+
+    if y_t < 0:
+        y_1 = ( - y_t >> alpha_shift) 
+        y_2 = -( - y_t >> m_alpha) 
+    else:
+        y_1 = -( y_t >> alpha_shift) 
+        y_2 = ( y_t >> m_alpha) 
+
+    if direction:
+        d_x = x_1 + y_2
+        d_y = y_1 - x_2
+    else:
+        d_x = x_1 - y_2
+        d_y = y_1 + x_2
+
+
+
+
+
+    # Update 32-bit position values:
+    x_t += d_x
+    y_t += d_y
+
+    # Find new 16-bit position value. 
+    # In firmware, take two high bytes of position; do not actually shift/divide.
+
+    x_t_16 = x_t >> 16 # Psuedocode only;(DO NOT ACTUALLY SHIFT)
+    y_t_16 = y_t >> 16 # Psuedocode only;(DO NOT ACTUALLY SHIFT)
+
+    # Find Step count and directions.
+    x_steps = x_t_16 - x_pos_last
+    y_steps = y_t_16 - y_pos_last
+
+
+    if x_steps < 0:
+        stepdir_x = 0 # Set direction bits
+        x_stepcount = -x_steps
+    else:
+        stepdir_x = 1 # Set direction bits
+        x_stepcount = x_steps
+    if y_steps < 0:
+        stepdir_y = 0 # Set direction bits
+        y_stepcount = -y_steps
+    else:
+        stepdir_y = 1 # Set direction bits
+        y_stepcount = y_steps
+
+    # Rate factors: Rate_x, Rate_y : 32-bit unsigned
+    if bits_left >= 0:
+        Rate_x = (x_stepcount * VScaleK) << bits_left
+        Rate_y = (y_stepcount * VScaleK) << bits_left
+    else:
+        Rate_x = (x_stepcount * VScaleK) >> -bits_left
+        Rate_y = (y_stepcount * VScaleK) >> -bits_left
+
+    x_pos_last = x_t_16
+    y_pos_last = y_t_16
+
+    Now, begin an SM/XM/HM type linear move with:
+        * stepdir_x, stepdir_y
+        * x_stepcount, y_stepcount
+        * Rate_x, Rate_y
+
+
+    In addition to the step/direction/rate values (normally in the FIFO), 
+        I think we'll need the following values attached to this command:
+        
+            - VScaleK       # uint16
+            - m_alpha       # uint8
+            - bits_left     # int8
+            - x_f           # int16
+            - y_f           # int16
+            - x_t           # int32
+            - y_t           # int32
+            - direction     # uint8
+            - y_pos_last    # int16
+            - x_pos_last    # int16
+            - typ_seg       # uint8
+
+
+#endif
+
   if (gAutomaticMotorEnable == TRUE)
   {
     // Enable both motors when we want to move them
@@ -2676,155 +2883,39 @@ void parse_CM_packet(void)
   }
 
   // First, set the direction bits
-  if (gTmpSteps1 < 0)
-  {
-    gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR1_BIT;
-    gTmpSteps1 = -gTmpSteps1;
-  }
-  if (gTmpSteps2 < 0)
-  {
-    gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR2_BIT;
-    gTmpSteps2 = -gTmpSteps2;
-  }
-  // To compute StepAdd values from Duration.
-  // A1Stp is from 0x000001 to 0xFFFFFF.
-  // HIGH_ISR_TICKS_PER_MS = 25
-  // Duration is from 0x000001 to 0xFFFFFF.
-  // temp needs to be from 0x0001 to 0x7FFF.
-  // Temp is added to accumulator every 25KHz. So slowest step rate
-  // we can do is 1 step every 25KHz / 0x7FFF or 1 every 763mS. 
-  // Fastest step rate is obviously 25KHz.
-  // If A1Stp is 1, then duration must be 763 or less.
-  // If A1Stp is 2, then duration must be 763 * 2 or less.
-  // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
+  /// For CM, how do we know which direction we need to move first?
+///  if (gTmpSteps1 < 0)
+///  {
+///    gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR1_BIT;
+///    gTmpSteps1 = -gTmpSteps1;
+///  }
+///  if (gTmpSteps2 < 0)
+///  {
+///    gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR2_BIT;
+///    gTmpSteps2 = -gTmpSteps2;
+///  }
+
+///  gMoveTemp.m.sm.Rate[0].value = gTmpIntervals;
+///  gMoveTemp.m.sm.Steps[0] = gTmpSteps1;
+///  gMoveTemp.m.sm.Accel[0] = 0;
+
+
+///  gMoveTemp.m.sm.Rate[1].value = gTmpIntervals;
+///  gMoveTemp.m.sm.Steps[1] = gTmpSteps2;
+///  gMoveTemp.m.sm.Accel[1] = 0;
+  gMoveTemp.Command = COMMAND_CM_MOVE;
+
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
   {
-    // First check for duration to large.
-    if ((UINT32)gTmpSteps1 < (0xFFFFFFu/763u)) 
-    {
-      if (gTmpDurationMS > ((UINT32)gTmpSteps1 * 763u)) 
-      {
-        ebb_print((far rom char *)"Major malfunction Axis1 duration too long : ");
-        ebb_print_uint(gTmpDurationMS);
-        print_line_ending(kLE_REV);
-        gTmpIntervals = 0;
-        gTmpSteps1 = 0;
-      }
-    }
-  }
-
-  if (gTmpSteps1 != 0) 
-  {
-    if (gTmpSteps1 < 0x1FFFF) 
-    {
-      gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
-      gTmpIntervals = (gTmpSteps1 << 15)/gTmpRate1;
-      // Because it takes us some time to do this division,
-      // we only perform this extra step if our move is long enough to
-      // warrant it. That way, for really short moves (where the extra
-      // precision isn't necessary) we don't take up extra time.
-      if (gTmpDurationMS > 30u)
-      {
-        gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
-        remainder = (gTmpRate2 << 16) / gTmpRate1;
-      }
-    }
-    else 
-    {
-      gTmpIntervals = (((UINT32)(gTmpSteps1/gTmpDurationMS) << 15u)/(UINT32)HIGH_ISR_TICKS_PER_MS);
-      remainder = 0;
-    }
-    if (gTmpIntervals > 0x8000) 
-    {
-      ebb_print((far rom char *)"Major malfunction Axis1 StepCounter too high : ");
-      ebb_print_uint(gTmpIntervals);
-      print_line_ending(kLE_REV);
-      gTmpIntervals = 0x8000;
-    }
-    if (gTmpIntervals == 0u && gTmpSteps1 != 0) 
-    {
-      ebb_print((far rom char *)"Major malfunction Axis1 StepCounter zero");
-      print_line_ending(kLE_REV);
-      gTmpIntervals = 1;
-    }
-    if (gTmpDurationMS > 30u)
-    {
-      gTmpIntervals = (gTmpIntervals << 16) + remainder;
-    }
-    else
-    {
-      gTmpIntervals = (gTmpIntervals << 16);
-    }
-
-    if (gTmpIntervals >= 0x7FFFFFFFu)
-    {
-      gTmpIntervals = 0x7FFFFFFF;
-    }
-    gMoveTemp.m.sm.Rate[0].value = gTmpIntervals;
-    gMoveTemp.m.sm.Steps[0] = gTmpSteps1;
-    gMoveTemp.m.sm.Accel[0] = 0;
-
-    if (gTmpSteps2 != 0) 
-    {
-      if (gTmpSteps2 < 0x1FFFF) 
-      {
-        gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
-        gTmpIntervals = (gTmpSteps2 << 15)/gTmpRate1;
-        gTmpRate2 = (gTmpSteps2 << 15) % gTmpRate1; 
-        if (gTmpDurationMS > 30u)
-        {
-          remainder = (gTmpRate2 << 16) / gTmpRate1;
-        }
-      }
-      else 
-      {
-        gTmpIntervals = (((gTmpSteps2/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
-        remainder = 0;
-      }
-      if (gTmpIntervals > 0x8000) 
-      {
-        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter too high : ");
-        ebb_print_uint(gTmpIntervals);
-        print_line_ending(kLE_REV);
-        gTmpIntervals = 0x8000;
-      }
-      if (gTmpIntervals == 0u && gTmpSteps2 != 0) 
-      {
-        ebb_print((far rom char *)"Major malfunction Axis2 StepCounter zero");
-        print_line_ending(kLE_REV);
-        gTmpIntervals = 1;
-      }
-      if (gTmpDurationMS > 30u)
-      {
-        gTmpIntervals = (gTmpIntervals << 16) + remainder;
-      }
-      else
-      {
-        gTmpIntervals = (gTmpIntervals << 16);
-      }
-    }
-
-    if (gTmpIntervals >= 0x7FFFFFFFu)
-    {
-      gTmpIntervals = 0x7FFFFFFF;
-    }
-    gMoveTemp.m.sm.Rate[1].value = gTmpIntervals;
-    gMoveTemp.m.sm.Steps[1] = gTmpSteps2;
-    gMoveTemp.m.sm.Accel[1] = 0;
-    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
-
-    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
-    {
-      ebb_print((far rom char *)"R1=");
-      ebb_print_uint(gMoveTemp.m.sm.Rate[0].value);
-      ebb_print((far rom char *)" S1=");
-      ebb_print_uint(gMoveTemp.m.sm.Steps[0]);
-      ebb_print((far rom char *)" R2=");
-      ebb_print_uint(gMoveTemp.m.sm.Rate[1].value);
-      ebb_print((far rom char *)" S2=");
-      ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
-      print_line_ending(kLE_REV);
-    }
+    ebb_print((far rom char *)"R1=");
+    ebb_print_uint(gMoveTemp.m.sm.Rate[0].value);
+    ebb_print((far rom char *)" S1=");
+    ebb_print_uint(gMoveTemp.m.sm.Steps[0]);
+    ebb_print((far rom char *)" R2=");
+    ebb_print_uint(gMoveTemp.m.sm.Rate[1].value);
+    ebb_print((far rom char *)" S2=");
+    ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
+    print_line_ending(kLE_REV);
   }
   
   // Spin here until there's space in the FIFO
@@ -2846,8 +2937,6 @@ void parse_CM_packet(void)
     gFIFOLength++;
   }
   
-///  COMMAND_CM_MOVE
-#endif
   print_line_ending(kLE_OK_NORM);
 }
 

@@ -111,7 +111,8 @@ typedef enum
 #define COMMAND_SM_XM_HM_MOVE         5u
 #define COMMAND_LM_MOVE               6u
 #define COMMAND_LT_MOVE               7u
-#define COMMAND_CM_MOVE               8u
+#define COMMAND_CM_OUTER_MOVE         8u
+#define COMMAND_CM_INNER_MOVE         9u
 
 typedef enum
 {
@@ -165,10 +166,10 @@ typedef struct
       UINT16          ServoRate;                      //       S2
       UINT16          SEPower;                        //          SE
     } sm;
-    struct {
+    struct {  // Currently 39 bytes long
       UINT8           DirBits;
-      s32b4_t         Rate;
-      UINT32          Steps;
+      s32b4_t         Rate[NUMBER_OF_STEPPERS];
+      UINT32          Steps[NUMBER_OF_STEPPERS];
       UINT16          VScaleK;
       UINT8           m_alpha;
       INT8            bits_left;
