@@ -1083,11 +1083,12 @@ CheckForNextCommand:
         /// TODO: This could use some MASSIVE cleanup - turn this into a buffered
         /// ISR driven serial output for best efficiency. Or at the very least
         /// make signed and unsigned printing macros.
-
+#define ISR_DEBUG_PRINT_ASCII 1
+#if ISR_DEBUG_PRINT_ASCII
         // Write out the total ISR ticks for this move (unsigned)
         PrintChar('T')
         PrintChar(',')
-        HexPrint(gISRTickCountForThisCommand) // Macro for printing HEX value
+        HexPrint(gISRTickCountForThisCommand) // Macro for printing HEX value in ASCII
         PrintChar(',')
 
         // Write out the total steps made during this move (unsigned)
@@ -1112,7 +1113,23 @@ CheckForNextCommand:
         PrintChar('P')
         PrintChar(',')
         HexPrint(gISRPositionForThisCommand);
+#else
+        // Print all values using raw binary
+        // Write out the total ISR ticks for this move (unsigned)
+        BinPrint(gISRTickCountForThisCommand) // Macro for printing raw binary value
 
+        // Write out the total steps made during this move (unsigned)
+        BinPrint(gISRStepCountForThisCommand)
+
+        // Write out the accumulator1 value after all math is complete (unsigned)
+        BinPrint(acc_union[0].value)
+
+        // Write out the rate1 value (signed)
+        BinPrint(CurrentCommand.Rate[0].value)
+
+        // Write out the current position for this command (signed)
+        BinPrint(gISRPositionForThisCommand);        
+#endif
         PrintChar('\n')
       }
     }

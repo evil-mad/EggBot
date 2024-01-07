@@ -219,7 +219,7 @@ typedef struct
   TXREG1 = print_val;
 
 
-// A define to print out a 32-bit hex value
+// A define to print out a 32-bit hex value as eight ASCII characters
 #define HexPrint(print_val)           \
         xx.value = print_val;         \
         nib = xx.bytes.b4 >> 4;       \
@@ -295,6 +295,14 @@ typedef struct
           PrintChar(nib + 'A' - 10)   \
         }                             
 
+
+// A define to print out a 32-bit hex value in binary (4 bytes), MSB first
+#define BinPrint(print_val)           \
+        xx.value = print_val;         \
+        PrintChar(xx.bytes.b4)        \
+        PrintChar(xx.bytes.b3)        \
+        PrintChar(xx.bytes.b2)        \
+        PrintChar(xx.bytes.b1)        \
 
 
 extern near MoveCommandType * FIFOPtr;
