@@ -2387,6 +2387,11 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
 // <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
 // <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
+// <ClearAccs> is an optional value of 0, 1, 2 or 3. 
+//    0 will leave accumulators alone at the beginning of the move
+//    1 will clear Motor1 accumulator and leave Motor2 accumulator
+//    2 will clear Motor2 accumulator and leave Motor1 accumulator
+//    3 will clear both Motor1 and Motor2 accumulators
 // If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
 // i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
