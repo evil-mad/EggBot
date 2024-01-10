@@ -1,6 +1,6 @@
 import csv, sys
 
-filename = 'output-2024-01-07_15-15-08'
+filename = 'output-2024-01-09_18-04-48'
 
 line_time = 0.0
 step1 = 0
@@ -160,7 +160,7 @@ print("  Min Low Time: " + str(int(step2_min_low_time*1000000)) + " uS")
 print("  Ave Low Time: " + str(int((step2_ave_low_time_acc/step2_count)*1000000)) + " uS")
 print("  Ave Frequency: " + str(1.0/(step2_freq_acc/step2_count)) + " Hz")
 
-'''
+
 output_str = ''
 
 with open(filename+'/async_serial_export.csv', newline='') as f:
@@ -188,15 +188,32 @@ with open(filename+'/async_serial_export.csv', newline='') as f:
 #move_rate1 = int.from_bytes(bytes(output_str[12:16],"utf-8"), "big", signed=False)
 #move_position1 = int.from_bytes(bytes(output_str[16:20],"utf-8"), "big", signed=False)
 
-move_ticks = int(output_str[2:10], 16)
-move_steps = int(output_str[13:21], 16)
-move_accumulator1 = int(output_str[24:32], 16) 
-move_rate1 = int(output_str[35:43], 16)
-move_position1 = int(output_str[46:54], 16)
+# We now have a string that looks like "0x000x000x610xA80x000x000x040xD20x060x500xC40xB00x060x510x6D0xB00x000x000x040xD20x0A"
+
+# I know this is super inefficient an inelegant. When you have time, rewrite to be cleaner. But this works.
+move_ticks = int(output_str[2:4], 16)
+move_ticks = (move_ticks * 256) + int(output_str[6:8], 16)
+move_ticks = (move_ticks * 256) + int(output_str[10:12], 16)
+move_ticks = (move_ticks * 256) + int(output_str[14:16], 16)
+move_steps = int(output_str[18:20], 16)
+move_steps = (move_steps * 256) + int(output_str[22:24], 16)
+move_steps = (move_steps * 256) + int(output_str[26:28], 16)
+move_steps = (move_steps * 256) + int(output_str[30:32], 16)
+move_accumulator1 = int(output_str[34:36], 16) 
+move_accumulator1 = (move_accumulator1 * 256) + int(output_str[38:40], 16)
+move_accumulator1 = (move_accumulator1 * 256) + int(output_str[42:44], 16)
+move_accumulator1 = (move_accumulator1 * 256) + int(output_str[46:48], 16)
+move_rate1 = int(output_str[50:52], 16)
+move_rate1 = (move_rate1 * 256) + int(output_str[54:56], 16)
+move_rate1 = (move_rate1 * 256) + int(output_str[58:60], 16)
+move_rate1 = (move_rate1 * 256) + int(output_str[62:64], 16)
+move_position1 = int(output_str[66:68], 16)
+move_position1 = (move_position1 * 256) + int(output_str[70:72], 16)
+move_position1 = (move_position1 * 256) + int(output_str[74:76], 16)
+move_position1 = (move_position1 * 256) + int(output_str[78:80], 16)
 
 print("ticks=" + str(move_ticks))
 print("steps=" + str(move_steps))
 print("acc1=" + str(move_accumulator1))
 print("rate1=" + str(move_rate1))
 print("pos1=" + str(move_position1))
-'''

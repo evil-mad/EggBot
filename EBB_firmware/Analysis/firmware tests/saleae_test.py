@@ -150,11 +150,14 @@ with automation.Manager.connect(port=10430) as manager:
         # This will take about 5 seconds because we are using a timed capture mode
         capture.wait()
 
+        analyzers = []
+
         # Add an analyzer to the capture
         async_analyzer = capture.add_analyzer('Async Serial', label=f'ISR Serial', settings={
             'Input Channel': 7,
             'Bit Rate (Bits/s)': 3000000,
         })
+        analyzers.append(automation.DataTableExportConfiguration(async_analyzer, automation.RadixType.HEXADECIMAL))
 
         # Store output in a timestamped directory
         output_dir = os.path.join(os.getcwd(), f'output-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
@@ -164,7 +167,7 @@ with automation.Manager.connect(port=10430) as manager:
         analyzer_export_filepath = os.path.join(output_dir, 'async_serial_export.csv')
         capture.export_data_table(
             filepath=analyzer_export_filepath,
-            analyzers=[async_analyzer]
+            analyzers=analyzers
         )
 
         # Export raw digital data to a CSV file

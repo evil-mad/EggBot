@@ -1083,7 +1083,7 @@ CheckForNextCommand:
         /// TODO: This could use some MASSIVE cleanup - turn this into a buffered
         /// ISR driven serial output for best efficiency. Or at the very least
         /// make signed and unsigned printing macros.
-#define ISR_DEBUG_PRINT_ASCII 1
+//#define ISR_DEBUG_PRINT_ASCII 1
 #if ISR_DEBUG_PRINT_ASCII
         // Write out the total ISR ticks for this move (unsigned)
         PrintChar('T')
