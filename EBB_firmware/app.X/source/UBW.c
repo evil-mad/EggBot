@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a33"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a34"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -875,29 +875,6 @@ void UserInit(void)
   g_StepperDisableCountdownS = 0;
   g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
   g_PowerDropDetected = FALSE;
-
-  
-  //// JUST FOR TESTING! REMOVE!  
-TRISDbits.TRISD1 = 0;   // D1 high when in ISR
-TRISDbits.TRISD0 = 0;   // D0 high when loading next command
-TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-TRISCbits.TRISC0 = 0;
-TRISAbits.TRISA5 = 0;
-
-
-Open1USART(
-  USART_TX_INT_OFF &
-  USART_RX_INT_OFF &
-  USART_ASYNCH_MODE &
-  USART_EIGHT_BIT &
-  USART_CONT_RX &
-  USART_BRGH_HIGH &
-  USART_ADDEN_OFF,
-  2                   // At 48 MHz, this creates 1 Mbaud output
-);
-
-////  
-
 }
 
 /******************************************************************************
@@ -1983,6 +1960,7 @@ void parse_CU_packet(void)
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
       TRISCbits.TRISC0 = 0;
       TRISAbits.TRISA5 = 0;
+      TRISCbits.TRISC6 = 0;   // C6 for misc if not used for serial
     }
     else
     {
@@ -2015,7 +1993,7 @@ void parse_CU_packet(void)
         USART_CONT_RX &
         USART_BRGH_HIGH &
         USART_ADDEN_OFF,
-        3                   // At 48 MHz, this creates 1 Mbaud output
+        2                   // At 48 MHz, this creates 1 Mbaud output
       );
     }
     else
@@ -2067,6 +2045,12 @@ void parse_CU_packet(void)
     else if (1 == paramater_value)
     {
       bitset(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM);
+      baud1USART(
+        BAUD_IDLE_CLK_LOW &
+        BAUD_16_BIT_RATE &
+        BAUD_WAKEUP_OFF &
+        BAUD_AUTO_OFF
+      );
       Open1USART(
         USART_TX_INT_OFF &
         USART_RX_INT_OFF &
@@ -2128,16 +2112,6 @@ void parse_CU_packet(void)
     else if (1 == paramater_value)
     {
       bitset(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
-      Open1USART(
-        USART_TX_INT_OFF &
-        USART_RX_INT_OFF &
-        USART_ASYNCH_MODE &
-        USART_EIGHT_BIT &
-        USART_CONT_RX &
-        USART_BRGH_HIGH &
-        USART_ADDEN_OFF,
-        2                   // At 48 MHz, this creates 1 Mbaud output
-      );
     }
     else
     {

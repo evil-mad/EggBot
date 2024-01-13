@@ -277,6 +277,7 @@
 #include <ctype.h>
 #include <delays.h>
 #include <math.h>
+#include <float.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
 #include "usb_config.h"
@@ -453,11 +454,11 @@ static UINT8   gSL_Storage[32];
 
 
 
-
 // Local function definitions
 static void clear_StepCounters(void);
 static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
 static void process_simple_motor_move(void);
+static void process_simple_motor_move_fp(void);
 static void clear_parmaeter_globals(void);
 
 extern void FIFO_COPY(void);
@@ -477,7 +478,6 @@ void high_ISR(void)
 
   if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
   {
-    // Note: enabling this slightly disturbs the 25KHz timing
     LATDbits.LATD1 = 1;
   }
   
@@ -2384,8 +2384,8 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
 
 // The Stepper Motor command
 // Usage: SM,<move_duration>,<axis1_steps>,<axis2_steps>,<CleaAccs><CR>
-// <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
-// <axisX_steps> is a signed 24 bit number indicating how many steps (and what direction) the axis should take
+// <move_duration> is 32 bit unsigned, indicating the number of milliseconds this move should take
+// <axisX_steps> is a signed 32 bit number indicating how many steps (and what direction) the axis should take
 // NOTE1: <axis2_steps> is optional and can be left off
 // <ClearAccs> is an optional value of 0, 1, 2 or 3. 
 //    0 will leave accumulators alone at the beginning of the move
@@ -2398,8 +2398,6 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
 // pauses before raising or lowering the pen, for example.
 void parse_SM_packet(void)
 {
-  INT32 Steps = 0;
-
   clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
@@ -2410,92 +2408,7 @@ void parse_SM_packet(void)
   extract_number(kLONG,  &gTmpSteps2,  kOPTIONAL);
   extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
-  if (gLimitChecks)
-  {
-    // Check for invalid duration
-    if (gTmpDurationMS == 0u) 
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-    // Bail if we got a conversion error
-    if (error_byte)
-    {
-      return;
-    }
-    // Limit each parameter to just 3 bytes
-    if (gTmpDurationMS > 0xFFFFFF) 
-    {
-      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // Check for too-fast step request (>25KHz)
-    // First get absolute value of steps, then check if it's asking for >25KHz
-    if (gTmpSteps1 > 0) 
-    {
-      Steps = gTmpSteps1;
-    }
-    else 
-    {
-      Steps = -gTmpSteps1;
-    }
-    if (Steps > 0xFFFFFFl) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // Check for too fast
-    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // And check for too slow
-    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-
-    if (gTmpSteps2 > 0) 
-    {
-      Steps = gTmpSteps2;
-    }
-    else 
-    {
-      Steps = -gTmpSteps2;
-    }
-
-    if (Steps > 0xFFFFFFl) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((Steps/gTmpDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((INT32)(gTmpDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if (gTmpClearAccs > 3u)
-    {
-      gTmpClearAccs = 0;
-    }
-  }
-
-  // If we get here, we know that step rate for both A1 and A2 is
-  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move();
+  process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2655,7 +2568,7 @@ void parse_HM_packet(void)
       // motor_move() needs steps for motor 1 in gTmpSteps1
       gTmpSteps1 = XSteps;
       gTmpClearAccs = 3;
-      process_simple_motor_move();
+      process_simple_motor_move_fp();
       // Update both steps count for final move (use saved Steps1)
       gTmpSteps1 = gTmpRate1 - XSteps;
       gTmpSteps2 = 0;
@@ -2702,7 +2615,7 @@ void parse_HM_packet(void)
       // motor_move() needs steps for motor 2 in gTmpSteps2
       gTmpSteps2 = XSteps;
       gTmpClearAccs = 3;
-      process_simple_motor_move();
+      process_simple_motor_move_fp();
       // Update both steps count for final move (use saved Steps2)
       gTmpSteps2 = gTmpRate2 - XSteps;
       gTmpSteps1 = 0;
@@ -2730,7 +2643,7 @@ void parse_HM_packet(void)
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
   gTmpClearAccs = 3;
-  process_simple_motor_move();
+  process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2859,7 +2772,7 @@ void parse_XM_packet(void)
 
   // If we get here, we know that step rate for both A1 and A2 is
   // between 25KHz and 1.31Hz which are the limits of what EBB can do.
-  process_simple_motor_move();
+  process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2870,9 +2783,8 @@ void parse_XM_packet(void)
 //  <Duration> mS, as 3 byte signed values, where the sign determines the motor
 //  direction.
 // <ClearAccs> clears the accumulators (both if 3, none if 0)
-// This function waits until there is room in the 1-deep FIFO before placing
-// the data in the FIFO. The ISR then sees this data when it is done with its
-// current move, and starts this new move.
+// This function waits until there is room in the FIFO before placing
+// the data in the FIFO.
 //
 // Note that a Rate value of 0x8000000 is not allowed. The function will
 // subtract one if this value for Rate is seen due to step counts and duration.
@@ -2897,6 +2809,7 @@ static void process_simple_motor_move(void)
 {
   UINT32 remainder = 0;
 
+  LATCbits.LATC6 = 1;
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
   {
@@ -2992,22 +2905,22 @@ static void process_simple_motor_move(void)
       if (gTmpSteps1 < 0x1FFFF) 
       {
         gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
-        gTmpIntervals = (gTmpSteps1 << 15)/gTmpRate1;
-        gTmpRate2 = (gTmpSteps1 << 15) % gTmpRate1;
-        // Because it takes us about 5ms extra time to do this division,
-        // we only perform this extra step if our move is long enough to
-        // warrant it. That way, for really short moves (where the extra
-        // precision isn't necessary) we don't take up extra time. Without
-        // this optimization, our minimum move time is 20ms. With it, it
-        // drops down to about 15ms.
+        gTmpIntervals = ((UINT32)gTmpSteps1 << 15)/gTmpRate1;
+        gTmpRate2 = ((UINT32)gTmpSteps1 << 15) % gTmpRate1;
+        // Because it takes us about 111 us (when ISR is idle) extra time to do 
+        // this division, we only perform this extra step if our move is long 
+        // enough to warrant it. That way, for really short moves (where the 
+        // extra precision isn't necessary) we don't take up extra time.
         if (gTmpDurationMS > 30u)
         {
+          LATCbits.LATC6 = 1;
           remainder = (gTmpRate2 << 16) / gTmpRate1;
+          LATCbits.LATC6 = 0;
         }
       }
       else 
       {
-        gTmpIntervals = (((gTmpSteps1/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        gTmpIntervals = ((((UINT32)gTmpSteps1/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         remainder = 0;
       }
       if (gTmpIntervals > 0x8000) 
@@ -3042,7 +2955,7 @@ static void process_simple_motor_move(void)
       gTmpIntervals = 0x7FFFFFFF;
     }
     gMoveTemp.Rate[0].value = gTmpIntervals;
-    gMoveTemp.Steps[0] = gTmpSteps1;
+    gMoveTemp.Steps[0] = (UINT32)gTmpSteps1;
     gMoveTemp.Accel[0] = 0;
 
     if (gTmpSteps2 != 0) 
@@ -3050,8 +2963,8 @@ static void process_simple_motor_move(void)
       if (gTmpSteps2 < 0x1FFFF) 
       {
         gTmpRate1 = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
-        gTmpIntervals = (gTmpSteps2 << 15)/gTmpRate1;
-        gTmpRate2 = (gTmpSteps2 << 15) % gTmpRate1; 
+        gTmpIntervals = ((UINT32)gTmpSteps2 << 15)/gTmpRate1;
+        gTmpRate2 = ((UINT32)gTmpSteps2 << 15) % gTmpRate1; 
         if (gTmpDurationMS > 30u)
         {
           remainder = (gTmpRate2 << 16) / gTmpRate1;
@@ -3059,7 +2972,7 @@ static void process_simple_motor_move(void)
       }
       else 
       {
-        gTmpIntervals = (((gTmpSteps2/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
+        gTmpIntervals = (((UINT32)(gTmpSteps2/gTmpDurationMS) * (UINT32)0x8000)/(UINT32)HIGH_ISR_TICKS_PER_MS);
         remainder = 0;
       }
       if (gTmpIntervals > 0x8000) 
@@ -3090,7 +3003,7 @@ static void process_simple_motor_move(void)
       gTmpIntervals = 0x7FFFFFFF;
     }
     gMoveTemp.Rate[1].value = gTmpIntervals;
-    gMoveTemp.Steps[1] = gTmpSteps2;
+    gMoveTemp.Steps[1] = (UINT32)gTmpSteps2;
     gMoveTemp.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
 
@@ -3107,7 +3020,7 @@ static void process_simple_motor_move(void)
       print_line_ending(kLE_REV);
     }
   }
-  
+#if 1 
   // Spin here until there's space in the FIFO
   while(gFIFOLength >= gCurrentFIFOLength)
   ;
@@ -3126,6 +3039,217 @@ static void process_simple_motor_move(void)
     }
     gFIFOLength++;
   }
+#endif
+  LATCbits.LATC6 = 0;
+}
+
+// Main stepper move function. This is the reason EBB exists.
+// <Duration> is a 32 bit unsigned int, the number of mS that the move should take
+// <A1Stp> and <A2Stp> are the Axis 1 and Axis 2 number of steps to take in
+//  <Duration> mS, as 32 bit signed values, where the sign determines the motor
+//  direction.
+// <ClearAccs> clears the accumulators (both if 3, none if 0)
+// This function waits until there is room in the FIFO before placing
+// the data in the FIFO.
+//
+// <Duration>, <A1Stp> and <A2Stp> can accept any values. However, if a step 
+// rate of more than 25kHz is asked for, it will be capped at 25kHz. And if
+// a step rate of less than 0.00001164 Hz it will be set to 0.00001164 Hz.
+//
+// Note that if used as a delay, the duration value is capped at 100000ms.
+//
+// Because we are now using global values to pass in parameters to this
+// function, and because this function will modify the values 'passed in' to it
+// the caller should make copies of any parameter values that it requires
+// after the call.
+//
+// This function uses these as input parameters:
+//  gTmpDurationMS    (UINT32) (not modified)
+//  gTmpSteps1        (INT32)  (modified)
+//  gTmpSteps2        (INT32)  (modified)
+//  gTmpClearAccs     (UINT32) (modified)
+//
+// And it uses (clobbers) these as temporary values (not being used for their 
+// normal purpose, thus the names aren't right):
+//  gTmpIntervals as temp
+static void process_simple_motor_move_fp(void)
+{
+  float tempF;
+  
+  LATCbits.LATC6 = 1;
+  // If we have a triggered limit switch, then ignore this move command
+  if (bittstzero(gLimitSwitchTriggered))
+  {
+    return;
+  }
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  {
+    ebb_print((far rom char *)"Duration=");
+    ebb_print_uint(gTmpDurationMS);
+    ebb_print((far rom char *)" SA1=");
+    ebb_print_int(gTmpSteps1);
+    ebb_print((far rom char *)" SA2=");
+    ebb_print_int(gTmpSteps2);
+    print_line_ending(kLE_REV);
+  }
+  
+  if (gLimitChecks)
+  {
+    // Check for invalid duration
+    if (gTmpDurationMS == 0u) 
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    if (gTmpClearAccs > 3u)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+    // Bail if we got a conversion error
+    if (error_byte)
+    {
+      return;
+    }
+  }
+  
+  gMoveTemp.SEState = (UINT8)gTmpClearAccs;
+
+  // Check for delay
+  if (gTmpSteps1 == 0 && gTmpSteps2 == 0)
+  {
+    gMoveTemp.Command = COMMAND_DELAY_BIT;
+    
+    // Delays over 100000ms long are capped at 100000ms.
+    if (gTmpDurationMS >= 100000u)
+    {
+      gTmpDurationMS = 100000u;
+    }
+    gMoveTemp.DelayCounter = HIGH_ISR_TICKS_PER_MS * gTmpDurationMS;
+  }
+  else
+  {
+    gMoveTemp.DelayCounter = 0; // No delay for motor moves
+    gMoveTemp.DirBits = 0;
+
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      // Enable both motors when we want to move them
+      Enable1IO = ENABLE_MOTOR;
+      Enable2IO = ENABLE_MOTOR;
+    }
+    
+    // First, set the direction bits
+    if (gTmpSteps1 < 0)
+    {
+      gMoveTemp.DirBits = gMoveTemp.DirBits | DIR1_BIT;
+      gTmpSteps1 = -gTmpSteps1;
+    }
+    if (gTmpSteps2 < 0)
+    {
+      gMoveTemp.DirBits = gMoveTemp.DirBits | DIR2_BIT;
+      gTmpSteps2 = -gTmpSteps2;
+    }
+
+    // As an optimization, pre-compute the common term used for both axes
+    tempF = 85899350.0f / (float)gTmpDurationMS;
+    
+    if (gTmpSteps1 != 0)
+    {
+      // We need the Rate values for the ISR. We have the duration and the
+      // number of steps. Use the formula:
+      // rate = (steps/duration)*85899.35
+      // Rearranging a bit, we can also use:
+      // rate = steps * ((85899.35 * 1000)/duration)
+      gTmpIntervals = (UINT32)((float)(gTmpSteps1) * tempF);
+      
+      if (gTmpIntervals >= 0x7FFFFFFFu)
+      {
+        if (gLimitChecks)
+        {
+          ebb_print((far rom char *)"!0 Err: <axis1> step rate too high.");
+          print_line_ending(kLE_REV);
+          return;
+        }
+        gTmpIntervals = 0x7FFFFFFF;
+      }
+      if (gTmpIntervals == 0u)
+      {
+        if (gLimitChecks)
+        {
+          ebb_print((far rom char *)"!0 Err: <axis1> step rate too slow.");
+          print_line_ending(kLE_REV);
+          return;
+        }
+        gTmpIntervals = 1;
+      }
+    }
+    gMoveTemp.Rate[0].value = gTmpIntervals;
+    gMoveTemp.Steps[0] = (UINT32)gTmpSteps1;
+    gMoveTemp.Accel[0] = 0;
+
+    if (gTmpSteps2 != 0)
+    {
+      gTmpIntervals = (UINT32)((float)(gTmpSteps2) * tempF);
+
+      if (gTmpIntervals >= 0x7FFFFFFFu)
+      {
+        if (gLimitChecks)
+        {
+          ebb_print((far rom char *)"!0 Err: <axis2> step rate too high.");
+          print_line_ending(kLE_REV);
+          return;
+        }
+        gTmpIntervals = 0x7FFFFFFF;
+      }
+      if (gTmpIntervals == 0u)
+      {
+        if (gLimitChecks)
+        {
+          ebb_print((far rom char *)"!0 Err: <axis2> step rate too slow.");
+          print_line_ending(kLE_REV);
+          return;
+        }
+        gTmpIntervals = 1;
+      }
+    }
+    gMoveTemp.Rate[1].value = gTmpIntervals;
+    gMoveTemp.Steps[1] = (UINT32)gTmpSteps2;
+    gMoveTemp.Accel[1] = 0;
+    gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
+
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+    {
+      ebb_print((far rom char *)"R1=");
+      ebb_print_uint(gMoveTemp.Rate[0].value);
+      ebb_print((far rom char *)" S1=");
+      ebb_print_uint(gMoveTemp.Steps[0]);
+      ebb_print((far rom char *)" R2=");
+      ebb_print_uint(gMoveTemp.Rate[1].value);
+      ebb_print((far rom char *)" S2=");
+      ebb_print_uint(gMoveTemp.Steps[1]);
+      print_line_ending(kLE_REV);
+    }
+  }
+#if 0
+  // Spin here until there's space in the FIFO
+  while(gFIFOLength >= gCurrentFIFOLength)
+  ;
+  
+  // If the limit switch feature has triggered, then ignore this move command
+  // Maybe the limit switch has become true between the top of this function 
+  // and here? Better check for it.
+  if (!bittstzero(gLimitSwitchTriggered))
+  {
+    // Now, quick copy over the computed command data to the command FIFO
+    FIFOPtr[gFIFOIn] = gMoveTemp;
+    gFIFOIn++;
+    if (gFIFOIn >= gCurrentFIFOLength)
+    {
+      gFIFOIn = 0;
+    }
+    gFIFOLength++;
+  }
+#endif
+  LATCbits.LATC6 = 0;
 }
 
 // E-Stop
