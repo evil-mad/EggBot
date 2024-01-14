@@ -136,9 +136,10 @@ outputRate2 = 0
 
 outFile = open("SMRateCheckOutput.csv", "w")
 
+for i in range(4235292):        # 20hrs
 #for i in range(1694117):        # 8hrs
-#for i in range(10):
-for i in range(211764):          # 1hr
+#for i in range(10):             # just test
+#for i in range(211764):         # 1hr
     # Create a set of input parameters
 
     # AxiDraw SE/A3 has drawing size of 430 mm x 297 mm
@@ -208,6 +209,11 @@ for i in range(211764):          # 1hr
         # Compare them with the ideal and print the result
         diffRate1 = idealRate1 - outputRate1
         diffRate2 = idealRate2 - outputRate2
+        if idealRate1 == 0:
+            continue
+        if idealRate2 == 0:
+            continue            
+        
         diffPercent1 = (diffRate1/idealRate1) * 100
         diffPercent2 = (diffRate2/idealRate2) * 100
 
