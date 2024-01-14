@@ -3154,18 +3154,18 @@ static void process_simple_motor_move_fp(void)
     }
 
     // As an optimization, pre-compute the common term used for both axes
-    tempF = 85899350.0f / (float)gTmpDurationMS;
+    tempF = 85899345.92f / (float)gTmpDurationMS;
     
     if (gTmpSteps1 != 0)
     {
       // We need the Rate values for the ISR. We have the duration and the
       // number of steps. Use the formula:
-      // rate = (steps/duration)*85899.35
+      // rate = (steps/duration)*85899.34592
       // Rearranging a bit, we can also use:
-      // rate = steps * ((85899.35 * 1000)/duration)
+      // rate = steps * ((85899.34592 * 1000)/duration)
       gTmpIntervals = (UINT32)((float)(gTmpSteps1) * tempF);
       
-      if (gTmpIntervals >= 0x7FFFFFFFu)
+      if (gTmpIntervals > 0x80000000u)
       {
         if (gLimitChecks)
         {
@@ -3173,7 +3173,7 @@ static void process_simple_motor_move_fp(void)
           print_line_ending(kLE_REV);
           return;
         }
-        gTmpIntervals = 0x7FFFFFFF;
+        gTmpIntervals = 0x80000000;
       }
       if (gTmpIntervals == 0u)
       {
@@ -3198,7 +3198,7 @@ static void process_simple_motor_move_fp(void)
     {
       gTmpIntervals = (UINT32)((float)(gTmpSteps2) * tempF);
 
-      if (gTmpIntervals >= 0x7FFFFFFFu)
+      if (gTmpIntervals > 0x80000000u)
       {
         if (gLimitChecks)
         {
@@ -3206,7 +3206,7 @@ static void process_simple_motor_move_fp(void)
           print_line_ending(kLE_REV);
           return;
         }
-        gTmpIntervals = 0x7FFFFFFF;
+        gTmpIntervals = 0x80000000;
       }
       if (gTmpIntervals == 0u)
       {
