@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a34"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a35"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -1758,15 +1758,16 @@ void parse_R_packet(void)
 // 253 {1|0} turns on or off the UART COMMAND DEBUG (prints all received command bytes)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
 // 255 {1|0} turns on or off command parsing debug printing on USB
+// 256 {1|0} 1=don't add any moves to FIFO, 0=(default) add moves to FIFO (used for testing of parse functions)
 
 void parse_CU_packet(void)
 {
-  UINT8 parameter_number;
+  UINT16 parameter_number;
   INT16 paramater_value;
 
   print_command(FALSE, FALSE);
 
-  extract_number(kUCHAR, &parameter_number, kREQUIRED);
+  extract_number(kUINT, &parameter_number, kREQUIRED);
   extract_number(kINT, &paramater_value, kREQUIRED);
 
   // Bail if we got a conversion error
@@ -2111,6 +2112,22 @@ void parse_CU_packet(void)
     else if (1 == paramater_value)
     {
       bitset(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  // CU,256,1 or CU,256,0 to turn on/off sending parsed commands to FIFO
+  else if (256u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclr(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM);
+    }
+    else if (1 == paramater_value)
+    {
+      bitset(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM);
     }
     else
     {

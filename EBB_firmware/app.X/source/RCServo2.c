@@ -385,30 +385,33 @@ UINT8 RCServo2_Move(
         gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
       }
 
-      // Now copy the values over into the FIFO element
-      FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE_BIT;
-      FIFOPtr[gFIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      FIFOPtr[gFIFOIn].ServoChannel = Channel;
-      FIFOPtr[gFIFOIn].ServoRPn = RPn;
-      FIFOPtr[gFIFOIn].ServoPosition = Position;
-      FIFOPtr[gFIFOIn].ServoRate = Rate;
-
-      // Check that DelayCounter doesn't have a crazy high value (this was
-      // being done in the ISR, now moved here for speed)
-      if (FIFOPtr[gFIFOIn].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+      if (!bittst(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM))
       {
-        // Ideally we would throw an error to the user here, but since we're in
-        // the helper function that's not so easy. So we just set the delay time
-        // to zero and hope they notice that their delays aren't doing anything.
-        FIFOPtr[gFIFOIn].DelayCounter = 0;
-      }
+        // Now copy the values over into the FIFO element
+        FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE_BIT;
+        FIFOPtr[gFIFOIn].DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+        FIFOPtr[gFIFOIn].ServoChannel = Channel;
+        FIFOPtr[gFIFOIn].ServoRPn = RPn;
+        FIFOPtr[gFIFOIn].ServoPosition = Position;
+        FIFOPtr[gFIFOIn].ServoRate = Rate;
 
-      gFIFOIn++;
-      if (gFIFOIn >= gCurrentFIFOLength)
-      {
-        gFIFOIn = 0;
+        // Check that DelayCounter doesn't have a crazy high value (this was
+        // being done in the ISR, now moved here for speed)
+        if (FIFOPtr[gFIFOIn].DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+        {
+          // Ideally we would throw an error to the user here, but since we're in
+          // the helper function that's not so easy. So we just set the delay time
+          // to zero and hope they notice that their delays aren't doing anything.
+          FIFOPtr[gFIFOIn].DelayCounter = 0;
+        }
+
+        gFIFOIn++;
+        if (gFIFOIn >= gCurrentFIFOLength)
+        {
+          gFIFOIn = 0;
+        }
+        gFIFOLength++;
       }
-      gFIFOLength++;
     }
   }
   return Channel;

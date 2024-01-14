@@ -68,6 +68,9 @@
 // Prints additional command debugging info to USB back to PC
 #define TEST_MODE_DEBUG_COMMAND_BIT_NUM   5u
 #define TEST_MODE_DEBUG_COMMAND_BIT       (1u << TEST_MODE_DEBUG_COMMAND_BIT_NUM)
+// When 1, commands are parsed but not sent to FIFO. 0 (default) has commands go to FIFO
+#define TEST_MODE_DEBUG_BLOCK_FIFO_NUM    6u
+#define TEST_MODE_DEBUG_BLOCK_FIFO_BIT    (1u << TEST_MODE_DEBUG_BLOCK_FIFO_NUM)
 // This last bit is used during the ISR and is not available as a general test mode bit
 #define TEST_MODE_PRINT_TRIGGER_BIT_NUM   7u
 #define TEST_MODE_PRINT_TRIGGER_BIT       (1u << TEST_MDOE_PRINT_TRIGGER_BIT_NUM)
