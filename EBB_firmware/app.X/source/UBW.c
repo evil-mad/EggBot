@@ -1031,7 +1031,6 @@ void ProcessIO(void)
   {
     if (bittstzero(error_byte))
     {
-      // Unused as of yet
       ebb_print((far rom char *)"!0 ");
       print_line_ending(kLE_NORM);
     }

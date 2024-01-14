@@ -2408,6 +2408,11 @@ void parse_SM_packet(void)
   extract_number(kLONG,  &gTmpSteps2,  kOPTIONAL);
   extract_number(kULONG, &gTmpClearAccs, kOPTIONAL);
 
+  if (error_byte)
+  {
+    return;
+  }
+
   process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
@@ -3104,7 +3109,6 @@ static void process_simple_motor_move_fp(void)
     {
       bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
     }
-    // Bail if we got a conversion error
     if (error_byte)
     {
       return;
@@ -3181,8 +3185,12 @@ static void process_simple_motor_move_fp(void)
         }
         gTmpIntervals = 1;
       }
+      gMoveTemp.Rate[0].value = gTmpIntervals;
     }
-    gMoveTemp.Rate[0].value = gTmpIntervals;
+    else
+    {
+      gMoveTemp.Rate[0].value = 0;
+    }
     gMoveTemp.Steps[0] = (UINT32)gTmpSteps1;
     gMoveTemp.Accel[0] = 0;
 
@@ -3210,8 +3218,12 @@ static void process_simple_motor_move_fp(void)
         }
         gTmpIntervals = 1;
       }
+      gMoveTemp.Rate[1].value = gTmpIntervals;
     }
-    gMoveTemp.Rate[1].value = gTmpIntervals;
+    else
+    {
+      gMoveTemp.Rate[1].value = 0;
+    }
     gMoveTemp.Steps[1] = (UINT32)gTmpSteps2;
     gMoveTemp.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE_BIT;
