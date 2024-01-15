@@ -52,7 +52,7 @@
 #define EBB_H
 
 // Enable this line to compile with a lot of debug prints for motion commands
-//#define DEBUG_VALUE_PRINT
+#define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
 //#define GPIO_DEBUG

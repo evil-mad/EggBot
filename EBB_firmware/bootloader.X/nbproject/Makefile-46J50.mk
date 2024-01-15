@@ -30,24 +30,18 @@ ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 IMAGE_TYPE=debug
 OUTPUT_SUFFIX=cof
 DEBUGGABLE_SUFFIX=cof
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+FINAL_IMAGE=${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 else
 IMAGE_TYPE=production
 OUTPUT_SUFFIX=hex
 DEBUGGABLE_SUFFIX=cof
-FINAL_IMAGE=dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+FINAL_IMAGE=${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 endif
 
 ifeq ($(COMPARE_BUILD), true)
 COMPARISON_BUILD=
 else
 COMPARISON_BUILD=
-endif
-
-ifdef SUB_IMAGE_ADDRESS
-
-else
-SUB_IMAGE_ADDRESS_COMMAND=
 endif
 
 # Object Directory
@@ -88,7 +82,7 @@ FIXDEPS=fixDeps
 ifneq ($(INFORMATION_MESSAGE), )
 	@echo $(INFORMATION_MESSAGE)
 endif
-	${MAKE}  -f nbproject/Makefile-46J50.mk dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+	${MAKE}  -f nbproject/Makefile-46J50.mk ${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_PROCESSOR_OPTION=18F46J50
 MP_PROCESSOR_OPTION_LD=18f46j50
@@ -102,7 +96,7 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o.d 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o 
@@ -110,7 +104,7 @@ ${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makef
 	@${DEP_GEN} -d ${OBJECTDIR}/source/Boot46J50Family.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Boot46J50Family.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/hid.o.d 
 	@${RM} ${OBJECTDIR}/source/hid.o 
@@ -118,7 +112,7 @@ ${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/hid.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/hid.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
@@ -126,7 +120,7 @@ ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usb9.o.d 
 	@${RM} ${OBJECTDIR}/source/usb9.o 
@@ -134,7 +128,7 @@ ${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb9.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb9.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o.d 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o 
@@ -142,7 +136,7 @@ ${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbctrltrf.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbctrltrf.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o 
@@ -150,7 +144,7 @@ ${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdrv.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdrv.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o 
@@ -158,7 +152,7 @@ ${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdsc.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdsc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o.d 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o 
@@ -167,7 +161,7 @@ ${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.
 	@${FIXDEPS} "${OBJECTDIR}/source/usbmmap.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
 else
-${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o.d 
 	@${RM} ${OBJECTDIR}/source/Boot46J50Family.o 
@@ -175,7 +169,7 @@ ${OBJECTDIR}/source/Boot46J50Family.o: source/Boot46J50Family.c  nbproject/Makef
 	@${DEP_GEN} -d ${OBJECTDIR}/source/Boot46J50Family.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Boot46J50Family.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/hid.o.d 
 	@${RM} ${OBJECTDIR}/source/hid.o 
@@ -183,7 +177,7 @@ ${OBJECTDIR}/source/hid.o: source/hid.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/hid.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/hid.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
@@ -191,7 +185,7 @@ ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usb9.o.d 
 	@${RM} ${OBJECTDIR}/source/usb9.o 
@@ -199,7 +193,7 @@ ${OBJECTDIR}/source/usb9.o: source/usb9.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usb9.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usb9.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o.d 
 	@${RM} ${OBJECTDIR}/source/usbctrltrf.o 
@@ -207,7 +201,7 @@ ${OBJECTDIR}/source/usbctrltrf.o: source/usbctrltrf.c  nbproject/Makefile-${CND_
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbctrltrf.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbctrltrf.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdrv.o 
@@ -215,7 +209,7 @@ ${OBJECTDIR}/source/usbdrv.o: source/usbdrv.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdrv.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdrv.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o.d 
 	@${RM} ${OBJECTDIR}/source/usbdsc.o 
@@ -223,7 +217,7 @@ ${OBJECTDIR}/source/usbdsc.o: source/usbdsc.c  nbproject/Makefile-${CND_CONF}.mk
 	@${DEP_GEN} -d ${OBJECTDIR}/source/usbdsc.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/usbdsc.o.d" $(SILENT) -rsi ${MP_CC_DIR}../ -c18 
 	
-${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/source/usbmmap.o: source/usbmmap.c  nbproject/Makefile-${CND_CONF}.mk 
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o.d 
 	@${RM} ${OBJECTDIR}/source/usbmmap.o 
@@ -236,13 +230,13 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: link
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    source/BootModified.rm18f46j50_g.lkr
-	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    source/BootModified.rm18f46j50_g.lkr
+	@${MKDIR} ${DISTDIR} 
+	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w -x -u_DEBUG -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -z__MPLAB_DEBUG=1 $(MP_LINKER_DEBUG_OPTION) -l ${MP_CC_DIR}\\..\\lib  -o ${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 else
-dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/BootModified.rm18f46j50_g.lkr
-	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o dist/${CND_CONF}/${IMAGE_TYPE}/bootloader.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
+${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   source/BootModified.rm18f46j50_g.lkr
+	@${MKDIR} ${DISTDIR} 
+	${MP_LD} $(MP_EXTRA_LD_PRE) "source\BootModified.rm18f46j50_g.lkr"  -p$(MP_PROCESSOR_OPTION_LD)  -w  -m"${DISTDIR}/bootloader.X.${IMAGE_TYPE}.map"  -z__MPLAB_BUILD=1  -u_CRUNTIME -l ${MP_CC_DIR}\\..\\lib  -o ${DISTDIR}/bootloader.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}   
 endif
 
 
@@ -255,13 +249,13 @@ endif
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
-	${RM} -r build/46J50
-	${RM} -r dist/46J50
+	${RM} -r ${OBJECTDIR}
+	${RM} -r ${DISTDIR}
 
 # Enable dependency checking
 .dep.inc: .depcheck-impl
 
-DEPFILES=$(shell mplabwildcard ${POSSIBLE_DEPFILES})
+DEPFILES=$(wildcard ${POSSIBLE_DEPFILES})
 ifneq (${DEPFILES},)
 include ${DEPFILES}
 endif

@@ -2050,16 +2050,16 @@ static void process_SM(
     // If A1Stp is 2, then duration must be 763 * 2 or less.
     // If A1Stp is 0xFFFFFF, then duration must be at least 671088.
 #if defined(DEBUG_VALUE_PRINT)
-  // First check for duration to large.
-  if (A1Stp < (0xFFFFFF/763)) 
-  {
-    if (Duration > (A1Stp * 763)) 
-    {
-      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
-      temp = 0;
-      A1Stp = 0;
-    }
-  }
+//  // First check for duration to large.
+//  if (A1Stp < (0xFFFFFF/763)) 
+//  {
+//    if (Duration > (A1Stp * 763)) 
+//    {
+//      printf((far rom char *)"Major malfunction Axis1 duration too long : %lu\n\r", Duration);
+//      temp = 0;
+//      A1Stp = 0;
+//    }
+//  }
 #endif
     if (A1Stp != 0) 
     {
@@ -2173,7 +2173,7 @@ static void process_SM(
         );
 #endif
   }
-  
+#if 0  
   // Spin here until there's space in the fifo
   while(!FIFOEmpty)
   ;
@@ -2182,6 +2182,7 @@ static void process_SM(
   CommandFIFO[0] = move;
 
   FIFOEmpty = FALSE;
+#endif
 }
 
 // E-Stop
