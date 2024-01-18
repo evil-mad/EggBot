@@ -1,0 +1,44 @@
+Ideas for EBB v3.0.0 firmware tests
+
+1 Command Tests
+
+  1.1 Test command responses
+
+    * Start with default power on state
+    * Execute each command
+    * Confirm that proper response is sent by each command
+    * Switch to new response mode
+    * Execute each command
+    * Confirm that the proper response is sent by each command
+  
+  
+2 Move Command Tests
+
+  2.1 Test step counts
+
+    * For each of the types of move commands:
+      * Create a series of moves
+      * Record the beginning and ending global positions, confirm it is correct
+      * Use Saleae to record each set of moves
+        * Analyze step and direction pulses
+        * Confirm that proper number of steps in each direction were taken
+      
+      
+  2.2 Test step rates (speed of steps pulses correct?)
+  
+    * For each of the types of move commands:
+      * Create a series of moves with space between them
+      * Run the moves, capture the output using Saleae
+      * Confirm that step rates at beginning, middle, and end of each move are within acceptable tolerance
+      
+  2.3 Test move command rates (how fast can various move commands be processed/executed?)
+  
+    * For each of the types of move commands:
+      * Starting with longer moves and getting shorter
+        * Execute a string of move commands back to back
+        * Measure how many commands per second
+        * Find out where gaps begin
+      
+3 FIFO Tests
+
+  3.1 Test 
