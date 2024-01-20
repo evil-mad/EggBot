@@ -1993,7 +1993,7 @@ void parse_CU_packet(void)
         USART_CONT_RX &
         USART_BRGH_HIGH &
         USART_ADDEN_OFF,
-        2                   // At 48 MHz, this creates 1 Mbaud output
+        2                   // At 48 MHz, this creates 4 Mbaud output
       );
     }
     else
@@ -2027,7 +2027,7 @@ void parse_CU_packet(void)
         USART_CONT_RX &
         USART_BRGH_HIGH &
         USART_ADDEN_OFF,
-        2                   // At 48 MHz, this creates 3 Mbaud output
+        2                   // At 48 MHz, this creates 4 Mbaud output
       );
     }
     else
@@ -2059,7 +2059,7 @@ void parse_CU_packet(void)
         USART_CONT_RX &
         USART_BRGH_HIGH &
         USART_ADDEN_OFF,
-        2                   // At 48 MHz, this creates 3 Mbaud output
+        2                   // At 48 MHz, this creates 4 Mbaud output
       );
     }
     else
