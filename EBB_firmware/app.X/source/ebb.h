@@ -103,29 +103,19 @@ typedef enum
   PEN_UP
 } PenStateType;
 
-// Bitfield defines the CommandType BYTE in the MoveCommandType
-// We use bits now in this byte in order to trigger a command,
-// one bit per command. Thus we can only have 8 total commands that are passed
-// through the FIFO to the ISR. Note that three USB commands (SM, XM HM) are
-// all the same and represented by one bit.
-// Only one bit must be set at a time or undefined behavior will occur.
-// If no bits are set, then the command is effectively COMMAND_NONE.
-#define COMMAND_DELAY_BIT_NUM             0u
-#define COMMAND_SERVO_MOVE_BIT_NUM        1u
-#define COMMAND_SE_BIT_NUM                2u
-#define COMMAND_EM_BIT_NUM                3u
-#define COMMAND_SM_XM_HM_MOVE_BIT_NUM     4u
-#define COMMAND_LM_MOVE_BIT_NUM           5u
-#define COMMAND_LT_MOVE_BIT_NUM           6u
-
-#define COMMAND_NONE_BIT                  0u
-#define COMMAND_DELAY_BIT                 1u
-#define COMMAND_SERVO_MOVE_BIT            (1u << COMMAND_SERVO_MOVE_BIT_NUM)
-#define COMMAND_SE_BIT                    (1u << COMMAND_SE_BIT_NUM)
-#define COMMAND_EM_BIT                    (1u << COMMAND_EM_BIT_NUM)
-#define COMMAND_SM_XM_HM_MOVE_BIT         (1u << COMMAND_SM_XM_HM_MOVE_BIT_NUM)
-#define COMMAND_LM_MOVE_BIT               (1u << COMMAND_LM_MOVE_BIT_NUM)
-#define COMMAND_LT_MOVE_BIT               (1u << COMMAND_LT_MOVE_BIT_NUM)
+// Defines for the CommandType BYTE in the MoveCommandType
+// Note that three USB commands (SM, XM HM) are
+// all the same and represented by one command value.
+#define COMMAND_NONE                  0u
+#define COMMAND_DELAY                 1u
+#define COMMAND_SERVO_MOVE            2u
+#define COMMAND_SE                    3u
+#define COMMAND_EM                    4u
+#define COMMAND_SM_XM_HM_MOVE         5u
+#define COMMAND_LM_MOVE               6u
+#define COMMAND_LT_MOVE               7u
+#define COMMAND_CM_OUTER_MOVE         8u
+#define COMMAND_CM_INNER_MOVE         9u
 
 typedef enum
 {
@@ -137,12 +127,13 @@ typedef enum
 // Byte union used for accumulator (unsigned))
 typedef union union32b4 {
   struct byte_map {
-    UINT8 b1; // Low byte
+    UINT8 b1; // Low bytegTmpIntervals =
     UINT8 b2;
     UINT8 b3;
     UINT8 b4; // High byte
   } bytes;
   UINT32 value;
+  UINT32 circle_accum;
 } u32b4_t;
 
 // Byte union used for rate (signed)
@@ -160,8 +151,11 @@ typedef union union32b4 {
 // are sent from the command parser to the ISR move engine.
 // Currently 47 bytes long
 typedef struct
-{                                                 // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
+{
   UINT8           Command;                        // SM DL S2 SE EM LM LT
+  union {
+    struct {
+                                                      // Used in which commands? (SM = SM/XM/HM, DL = Delay, S2 = any servo move)
   UINT8           DirBits;                        // SM          EM LM LT
   UINT32          DelayCounter;                   // SM DL S2 SE    LM LT   NOT Milliseconds! In 25KHz units
   UINT8           SEState;                        // SM       SE    LM LT
@@ -174,7 +168,26 @@ typedef struct
   UINT8           ServoChannel;                   //       S2
   UINT16          ServoRate;                      //       S2
   UINT16          SEPower;                        //          SE
+    } sm;
+    struct {  // Currently 39 bytes long
+      UINT8           DirBits;
+      s32b4_t         Rate[NUMBER_OF_STEPPERS];
+      UINT32          Steps[NUMBER_OF_STEPPERS];
+      UINT16          VScaleK;
+      UINT8           m_alpha;
+      INT8            bits_left;
+      INT16           x_f;
+      INT16           y_f;
+      INT32           x_t;
+      INT32           y_t;
+      UINT8           direction;
+      INT16           x_pos_last;
+      INT16           y_pos_last;
+      UINT8           typ_seg;
+    } cm;  
+  } m;
 } MoveCommandType;
+
 
 // Define global things that depend on the board type
 // STEP2 = RD4
@@ -324,6 +337,17 @@ extern UINT8 gStandardizedCommandFormat;
 extern volatile near UINT8 gCurrentFIFOLength;
 extern near DriverConfigurationType DriverConfiguration;
 extern near u32b4_t acc_union[2];
+extern UINT16 Sqrt(UINT32 val);
+
+// Externs for assembly square root function
+extern UINT8 ARGA0;
+extern UINT8 ARGA1;
+extern UINT8 ARGA2;
+extern UINT8 ARGA3;
+extern UINT8 RES0;
+extern UINT8 RES1;
+
+extern UINT16 Sqrt(UINT32 val);
 
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
@@ -354,6 +378,8 @@ void parse_LT_packet(void);
 void parse_HM_packet(void);
 void parse_T3_packet(void);
 void parse_L3_packet(void);
+void parse_CM_packet(void);
+void parse_TR_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 UINT8 process_QM(void);

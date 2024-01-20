@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a35"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a37"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -1300,6 +1300,12 @@ void parse_packet(void)
     // Now 'command' is equal to one or two bytes of our command
     switch (command)
     {
+      case ('C' * 256) + 'M':
+      {
+        // CM for circle move
+        parse_CM_packet();
+        break;
+      }
       case ('L' * 256) + 'T':
       {
         // Low Level Timed Move
@@ -1616,6 +1622,12 @@ void parse_packet(void)
         parse_QU_packet();
         break;
       }
+      case ('T' * 256) + 'R':
+      {
+        parse_TR_packet();
+        break;
+      }
+
 
       default:
       {
