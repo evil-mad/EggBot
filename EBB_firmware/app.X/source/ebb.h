@@ -338,6 +338,16 @@ extern volatile near UINT8 gCurrentFIFOLength;
 extern near DriverConfigurationType DriverConfiguration;
 extern near u32b4_t acc_union[2];
 
+// Externs for assembly square root function
+extern UINT8 ARGA0;
+extern UINT8 ARGA1;
+extern UINT8 ARGA2;
+extern UINT8 ARGA3;
+extern UINT8 RES0;
+extern UINT8 RES1;
+
+extern UINT16 Sqrt(UINT32 val);
+
 // Default to on, comes out on pin RB4 for EBB v1.3 and above
 extern BOOL gUseSolenoid;
 void parse_SM_packet(void);
@@ -367,6 +377,8 @@ void parse_LT_packet(void);
 void parse_HM_packet(void);
 void parse_T3_packet(void);
 void parse_L3_packet(void);
+void parse_CM_packet(void);
+void parse_TR_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 UINT8 process_QM(void);
