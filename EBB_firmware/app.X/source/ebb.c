@@ -2567,6 +2567,11 @@ void parse_CM_packet(void)
     print_line_ending(kLE_REV);
   }
 
+#if 1
+  ebb_print((far rom char *)"CM command disabled in this build");
+  print_line_ending(kLE_REV);
+#else  
+  
   // Current "turtle" position, relative to arc center: x_t, y_t:
   gMoveTemp.m.cm.x_t = -center_x;   // int32
   gMoveTemp.m.cm.y_t = -center_y;   // int32
@@ -2896,6 +2901,7 @@ void parse_CM_packet(void)
     }
     gFIFOLength++;
   }
+#endif
   
   print_line_ending(kLE_OK_NORM);
 }
