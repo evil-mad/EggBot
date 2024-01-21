@@ -65,7 +65,7 @@
 // Set for printing ISR debug info to UART at end of every move
 #define TEST_MODE_USART_ISR_NUM           2u
 #define TEST_MODE_USART_ISR_BIT           (1u << TEST_MODE_USART_ISR_BIT_NUM)
-// Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not just end of move
+// Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not jus t end of move
 #define TEST_MODE_USART_ISR_FULL_NUM      3u
 #define TEST_MODE_USART_ISR_FULL_BIT      (1u << TEST_MODE_USART_ISR_FULL_BIT_NUM)
 // Prints every received byte out to debug UART

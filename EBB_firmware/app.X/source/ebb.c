@@ -433,40 +433,74 @@ UINT8 gStandardizedCommandFormat;
 static UINT32  gUInt32_1;
 static UINT32  gUInt32_2;
 static UINT32  gUInt32_3;
-static INT32   gInt32_1;
-static INT32   gInt32_2;
-static INT32   gInt32_3;
 static INT32   gInt32_4;
 static INT32   gInt32_5;
 static INT32   gInt32_6;
 static INT32   gInt32_7;
 static INT32   gInt32_8;
+static INT32   gInt32_9;
+static INT32   gInt32_10;
+static INT32   gInt32_11;
 
 // These next set of defines create local, meaningful names. They reference the
 // above globals, but in ways that make sense for the routine they are used in.
 
 // For HM
 #define gHM_StepRate    gUInt32_2
-#define gHM_Pos1        gInt32_3
-#define gHM_Pos2        gInt32_7
+#define gHM_Pos1        gInt32_6
+#define gHM_Pos2        gInt32_10
 
 // For XM
-#define gXM_ASteps      gInt32_3
-#define gXM_BSteps      gInt32_7
+#define gXM_ASteps      gInt32_6
+#define gXM_BSteps      gInt32_10
 
-// For simple_move
+// For simple_motor_move_fp
 #define gDurationMS     gUInt32_1
 #define gIntervals      gUInt32_2
 #define gClearAccs      gUInt32_3
-#define gRate1          gInt32_1
-#define gSteps1         gInt32_2
-#define gAccel1         gInt32_3
-#define gJerk1          gInt32_4
-#define gRate2          gInt32_5
-#define gSteps2         gInt32_6
-#define gAccel2         gInt32_7
-#define gJerk2          gInt32_8
+#define gRate1          gInt32_4
+#define gSteps1         gInt32_5
+#define gAccel1         gInt32_6
+#define gJerk1          gInt32_7
+#define gRate2          gInt32_8
+#define gSteps2         gInt32_9
+#define gAccel2         gInt32_10
+#define gJerk2          gInt32_11
 
+// For simple_rate_move_fp()
+#define gSRM_Rate       gUInt32_2
+
+/* List of functions which use (in some way) the above globals/defines
+
+process_simple_motor_move_fp()
+  Inputs:
+    gDurationMS   UINT32  gUInt32_1 not modified
+    gSteps1       INT32   gInt32_5  modified
+    gSteps2       INT32   gInt32_9  modified
+    gClearAccs    UINT32  gUInt32_3 not modified
+  Working values:
+    gIntervals    UINT32  gUInt32_2 modified
+
+process_simple_rate_move_fp()
+  Inputs:
+    gSRM_Rate     UINT32  gUInt32_2 not modified
+    gSteps1       INT32   gInt32_5  modified
+    gSteps2       INT32   gInt32_9  modified
+    gClearAccs    UINT32  gUInt32_3 not modified
+  Working values:
+    (none)
+
+parse_XM_packet()
+  Working values:
+    gDurationMS   UINT32  gUInt32_1 modified
+    gSteps1       INT32   gInt32_5  modified
+    gSteps2       INT32   gInt32_9  modified
+    gClearAccs    UINT32  gUInt32_3 modified
+  Working values:
+    gXM_ASteps    INT32   gInt32_6  modified
+    gXM_BSteps    INT32   gInt32_10 modified
+  
+*/
 
 // These globals are now set to be put anywhere the linker can find space for them
 #pragma udata
@@ -485,7 +519,7 @@ static void clear_StepCounters(void);
 static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
 static void process_simple_motor_move_fp(void);
 static void clear_parmaeter_globals(void);
-static void process_simple_rate_move(void);
+static void process_simple_rate_move_fp(void);
 
 
 extern void FIFO_COPY(void);
@@ -1471,14 +1505,14 @@ static void clear_parmaeter_globals(void)
   gUInt32_1 = 0;
   gUInt32_2 = 0;
   gUInt32_3 = 0;
-  gInt32_1 = 0;
-  gInt32_2 = 0;
-  gInt32_3 = 0;
   gInt32_4 = 0;
   gInt32_5 = 0;
   gInt32_6 = 0;
   gInt32_7 = 0;
   gInt32_8 = 0;
+  gInt32_9 = 0;
+  gInt32_10 = 0;
+  gInt32_11 = 0;
 }
 
 // Init code
@@ -2460,6 +2494,7 @@ void parse_SM_packet(void)
     return;
   }
 
+  // Input parameters: gDurationMS, gSteps1, gSteps2, gClearAccs
   process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
@@ -2638,7 +2673,7 @@ void parse_CM_packet(void)
   }
   
   // And if both x and y move length are too small, then just do a simple
-  // straight move by calling process_simple_rate_move()
+  // straight move by calling process_simple_rate_move_fp()
   if ((sTemp16_1 < (INT16)typ_seg_long) && (sTemp16_2 < (INT16)typ_seg_long))
   {
     // This is a very short move; cannot make an arc here.
@@ -2651,7 +2686,7 @@ void parse_CM_packet(void)
     gHM_StepRate = frequency;
     gClearAccs = 0;
     
-    process_simple_rate_move();
+    process_simple_rate_move_fp();
   
     // After making our short straight line, we're done.
     print_line_ending(kLE_OK_NORM);
@@ -2939,7 +2974,7 @@ void parse_CM_packet(void)
 // motion commands are empty, we get an accurate picture of where the global 
 // step position is.
 //
-// Once the move has been figured out, we call process_simple_rate_move().
+// Once the move has been figured out, we call process_simple_rate_move_fp().
 //
 // Some global variables are used in this function instead of local ones:
 //  gHM_StepRate is used for StepRate
@@ -2951,7 +2986,7 @@ void parse_HM_packet(void)
 {
   BOOL   CommandExecuting = TRUE;
 
-  clear_parmaeter_globals();  // Note: clears gHM_Pos1 and 2
+  clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
 
@@ -2998,17 +3033,18 @@ void parse_HM_packet(void)
   gClearAccs = 0;
   
   // Set up these values as input parameters
-  //  gHM_StepRate
+  //  gSRM_Rate
   //  gSteps1
   //  gSteps2
   //  gClearAccs
-  process_simple_rate_move();
+  gSRM_Rate = gHM_StepRate;
+  process_simple_rate_move_fp();
 
   print_line_ending(kLE_OK_NORM);
 }
 
 // Test Rate
-// Simple function to allow testing of the process_simple_rate_move() command.
+// Simple function to allow testing of the process_simple_rate_move_fp() command.
 // Simply take the parameters from the user and pass them on to the move.
 void parse_TR_packet(void)
   {
@@ -3027,7 +3063,7 @@ void parse_TR_packet(void)
   //  gSteps1
   //  gSteps2
   //  gClearAccs
-  process_simple_rate_move();
+  process_simple_rate_move_fp();
 
   print_line_ending(kLE_OK_NORM);
   }
@@ -3040,13 +3076,14 @@ void parse_TR_packet(void)
 // gSteps1 and gSteps2 are signed 32 bit numbers
 //
 // This function uses these as input parameters:
-//  gHM_StepRate    (not modified)
-//  gSteps1         (modified)
-//  gSteps2         (modified)
-//  gClearAccs      (not modified)
-void process_simple_rate_move(void)
+//  gSRM_Rate   UINT32  not modified
+//  gSteps1     INT32   modified
+//  gSteps2     INT32   modified
+//  gClearAccs  UINT32  not modified
+//
+void process_simple_rate_move_fp(void)
 {
-  float f;
+  float tempF;
   
   if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
@@ -3129,22 +3166,22 @@ void process_simple_rate_move(void)
       // even that slow - both the above primary rate multiply and the following
       // two multiplies and a divide, this whole function take less than 350 uS.
       
-      f = (float)gSteps2 * (float)gHM_StepRate;
-      f /= (float)gSteps1;
-      f *= 85899.34592f;
+      tempF = (float)gSteps2 * (float)gHM_StepRate;
+      tempF /= (float)gSteps1;
+      tempF *= 85899.34592f;
       
       // Limit check out results
-      if (f < 1.0f)
+      if (tempF < 1.0f)
       {
         gMoveTemp.m.sm.Rate[1].value = 1;
       }
-      else if (f > 2147483647.0f)
+      else if (tempF > 2147483647.0f)
       {
         gMoveTemp.m.sm.Rate[1].value = 2147483647u;
       }
       else
       {
-        gMoveTemp.m.sm.Rate[1].value = (INT32)f;
+        gMoveTemp.m.sm.Rate[1].value = (INT32)tempF;
       }
     }
     else
@@ -3160,21 +3197,21 @@ void process_simple_rate_move(void)
 
     if (gSteps1 != 0)
     {
-      f = (float)gSteps1 * (float)gHM_StepRate;
-      f /= (float)gSteps2;
-      f *= 85899.34592f;
+      tempF = (float)gSteps1 * (float)gHM_StepRate;
+      tempF /= (float)gSteps2;
+      tempF *= 85899.34592f;
       
-      if (f < 1.0f)
+      if (tempF < 1.0f)
       {
         gMoveTemp.m.sm.Rate[0].value = 1;
       }
-      else if (f > 2147483647.0f)
+      else if (tempF > 2147483647.0f)
       {
         gMoveTemp.m.sm.Rate[0].value = 2147483647u;
       }
       else
       {
-        gMoveTemp.m.sm.Rate[0].value = (INT32)f;
+        gMoveTemp.m.sm.Rate[0].value = (INT32)tempF;
       }
     }
     else
@@ -3224,128 +3261,35 @@ void process_simple_rate_move(void)
 
 // The X Stepper Motor command
 // Usage: XM,<move_duration>,<axisA_steps>,<axisB_steps><CR>
-// <move_duration> is a number from 1 to 16777215, indicating the number of milliseconds this move should take
-// <axisA_steps> and <axisB_stetsp> are signed 24 bit numbers.
+// <move_duration> an unsigned 32 bit value indicating the number of milliseconds this move should take
+// <axisA_steps> and <axisB_stetsp> are signed 32 bit numbers
 // This command differs from the normal "SM" command in that it is designed to drive 'mixed-axis' geometry
 // machines like H-Bot and CoreXY. Using XM will effectively call SM with Axis1 = <axisA_steps> + <axisB_steps> and
 // Axis2 = <axisA_steps> - <axisB_steps>.
+// Because of this, the caller must make sure that <axisA_steps> + <axisB_steps> and <axisA_steps> - <axisB_steps>
+// do not overflow or underflow a 32 bit signed value.
 //
-// To save on RAM, we will re-use some of the 'gTmp' variables here which aren't
-// needed for their original purpose. 
-//   gTmpAccel1 will be used for ASteps
-//   gTmpAccel2 will be used for BSteps
+// Temporary globals used in this function
+//   gXM_ASteps will be used for ASteps
+//   gXM_BSteps will be used for BSteps
+
 void parse_XM_packet(void)
 {
-  INT32 Steps = 0;
-
   clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number(kULONG, &gDurationMS, kREQUIRED);
-  extract_number(kLONG, &gAccel1, kREQUIRED);
-  extract_number(kLONG, &gAccel2, kREQUIRED);
+  extract_number(kLONG, &gXM_ASteps, kREQUIRED);
+  extract_number(kLONG, &gXM_BSteps, kREQUIRED);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
   
-  if (gClearAccs > 3u)
-  {
-    gClearAccs = 3;
-  }
-
-  if (gLimitChecks)
-  {
-    // Check for invalid duration
-    if (gDurationMS == 0u) 
-    {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-  }
-
   // Do the math to convert to Axis1 and Axis2
-  gSteps1 = gAccel1 + gAccel2;
-  gSteps2 = gAccel1 - gAccel2;
-  
-  // Check for too-fast step request (>25KHz)
-  // First get absolute value of steps, then check if it's asking for >25KHz
-  if (gSteps1 > 0) 
-  {
-    Steps = gSteps1;
-  }
-  else 
-  {
-    Steps = -gSteps1;
-  }
-
-  if (gLimitChecks)
-  {
-    // Limit each parameter to just 3 bytes
-    if (gDurationMS > 0xFFFFFF) 
-    {
-      ebb_print((far rom char *)"!0 Err: <move_duration> larger than 16777215 ms.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if (Steps > 0xFFFFFFl) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // Check for too fast
-    if ((Steps/gDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    // And check for too slow
-    if ((INT32)(gDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis1> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-  }
-  
-  if (gSteps2 > 0) 
-  {
-    Steps = gSteps2;
-  }
-  else 
-  {
-    Steps = -gSteps2;
-  }
-  if (gLimitChecks)
-  {
-    if (Steps > 0xFFFFFFl) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> larger than 16777215 steps.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((Steps/gDurationMS) > HIGH_ISR_TICKS_PER_MS) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate > 25K steps/second.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-    if ((INT32)(gDurationMS/1311) >= Steps && Steps != 0) 
-    {
-      ebb_print((far rom char *)"!0 Err: <axis2> step rate < 1.31Hz.");
-      print_line_ending(kLE_REV);
-      return;
-    }
-  }
-  
-  // Bail if we got a conversion error
-  if (error_byte)
-  {
-    return;
-  }
-
-  // If we get here, we know that step rate for both A1 and A2 is
-  // between 25KHz and 1.31Hz which are the limits of what EBB can do.
+  gSteps1 = gXM_ASteps + gXM_BSteps;
+  gSteps2 = gXM_ASteps - gXM_BSteps;
+    
+  // Input parameters: gDurationMS, gSteps1, gSteps2, gClearAccs
   process_simple_motor_move_fp();
 
   print_line_ending(kLE_OK_NORM);
@@ -3372,14 +3316,14 @@ void parse_XM_packet(void)
 // after the call.
 //
 // This function uses these as input parameters:
-//  gTmpDurationMS    (UINT32) (not modified)
-//  gTmpSteps1        (INT32)  (modified)
-//  gTmpSteps2        (INT32)  (modified)
-//  gTmpClearAccs     (UINT32) (modified)
+//  gTmpDurationMS    UINT32 not modified
+//  gTmpSteps1        INT32  modified
+//  gTmpSteps2        INT32  modified
+//  gTmpClearAccs     UINT32 modified
 //
-// And it uses (clobbers) these as temporary values (not being used for their 
-// normal purpose, thus the names aren't right):
-//  gTmpIntervals as temp
+// Working values:
+//  gTmpIntervals     UINT32 modified
+//
 static void process_simple_motor_move_fp(void)
 {
   float tempF;
