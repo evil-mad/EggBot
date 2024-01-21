@@ -53,26 +53,32 @@
 
 #include <usart.h>
 
-// Bitfield defines for the TestModes variable.
-#define TEST_MODE_GPIO_BIT_NUM            1u
+/*
+ *  Bitfield defines for the TestModes variable.
+ */
+// Set to use RC0 as indicator that a command is being parsed
+#define TEST_MODE_PARSING_COMMAND_NUM     0u
+#define TEST_MODE_PARSING_COMMAND_BIT     (1u)
+// Set to make D0, D1, A1 outputs for Next Command, In ISR and FIFO Empty
+#define TEST_MODE_GPIO_NUM                1u
 #define TEST_MODE_GPIO_BIT                (1u << TEST_MODE_GPIO_BIT_NUM)
 // Set for printing ISR debug info to UART at end of every move
-#define TEST_MODE_USART_ISR_BIT_NUM       2u
+#define TEST_MODE_USART_ISR_NUM           2u
 #define TEST_MODE_USART_ISR_BIT           (1u << TEST_MODE_USART_ISR_BIT_NUM)
 // Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not just end of move
-#define TEST_MODE_USART_ISR_FULL_BIT_NUM  3u
+#define TEST_MODE_USART_ISR_FULL_NUM      3u
 #define TEST_MODE_USART_ISR_FULL_BIT      (1u << TEST_MODE_USART_ISR_FULL_BIT_NUM)
 // Prints every received byte out to debug UART
-#define TEST_MODE_USART_COMMAND_BIT_NUM   4u
+#define TEST_MODE_USART_COMMAND_NUM       4u
 #define TEST_MODE_USART_COMMAND_BIT       (1u << TEST_MODE_USART_COMMAND_BIT_NUM)
 // Prints additional command debugging info to USB back to PC
-#define TEST_MODE_DEBUG_COMMAND_BIT_NUM   5u
+#define TEST_MODE_DEBUG_COMMAND_NUM       5u
 #define TEST_MODE_DEBUG_COMMAND_BIT       (1u << TEST_MODE_DEBUG_COMMAND_BIT_NUM)
 // When 1, commands are parsed but not sent to FIFO. 0 (default) has commands go to FIFO
 #define TEST_MODE_DEBUG_BLOCK_FIFO_NUM    6u
 #define TEST_MODE_DEBUG_BLOCK_FIFO_BIT    (1u << TEST_MODE_DEBUG_BLOCK_FIFO_NUM)
 // This last bit is used during the ISR and is not available as a general test mode bit
-#define TEST_MODE_PRINT_TRIGGER_BIT_NUM   7u
+#define TEST_MODE_PRINT_TRIGGER_NUM       7u
 #define TEST_MODE_PRINT_TRIGGER_BIT       (1u << TEST_MDOE_PRINT_TRIGGER_BIT_NUM)
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver

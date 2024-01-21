@@ -503,7 +503,7 @@ void high_ISR(void)
   TMR1H = TIMER1_H_RELOAD;
   TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
 
-  if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+  if (bittst(TestMode, TEST_MODE_GPIO_NUM))
   {
     LATDbits.LATD1 = 1;
   }
@@ -556,7 +556,7 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
-      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
       {
         gISRTickCountForThisCommand++;
       }
@@ -569,7 +569,7 @@ void high_ISR(void)
         CurrentCommand.m.sm.DirBits |= STEP1_BIT;
         CurrentCommand.m.sm.Steps[0]--;
 
-        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
           gISRStepCountForThisCommand++;
         }
@@ -620,7 +620,7 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
-      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
       {
         gISRTickCountForThisCommand++;
       }
@@ -634,7 +634,7 @@ void high_ISR(void)
         CurrentCommand.m.sm.DirBits |= STEP1_BIT;
         CurrentCommand.m.sm.Steps[0]--;
         
-        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
           gISRStepCountForThisCommand++;
         }
@@ -725,7 +725,7 @@ void high_ISR(void)
 
       //// MOTOR 1   LT ////
       
-      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
       {
         gISRTickCountForThisCommand++;
       }
@@ -737,7 +737,7 @@ void high_ISR(void)
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.m.sm.DirBits |= STEP1_BIT;
-        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
           gISRStepCountForThisCommand++;
         }
@@ -841,7 +841,7 @@ OutputBits:
       if (bittst(CurrentCommand.m.sm.DirBits, DIR1_BIT_NUM))
       {
         globalStepCounter1--;
-        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
           gISRPositionForThisCommand--;
         }
@@ -849,7 +849,7 @@ OutputBits:
       else
       {
         globalStepCounter1++;
-        if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
           gISRPositionForThisCommand++;
         }
@@ -1094,9 +1094,9 @@ CheckForNextCommand:
   // Deal with printing out internal ISR values
   // Note that TEST_MODE_USART_ISR_BIT is set for both normal (only end of move)
   // and full (every ISR tick) printing.
-  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+  if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
   {
-    if (bittstzero(AllDone) || bittst(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM))
+    if (bittstzero(AllDone) || bittst(TestMode, TEST_MODE_USART_ISR_FULL_NUM))
     {
       // If this is the end of an LM move, then print out all the important values
       // of everything (now that global step positions have been taken into
@@ -1111,7 +1111,7 @@ CheckForNextCommand:
       {
         // Setting this bit when we have something to print out will cause the next
         // ISR to be rescheduled so we have as much time as we need to print
-        bitset(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM);
+        bitset(TestMode, TEST_MODE_PRINT_TRIGGER_NUM);
 
         // Move is complete, output "T:" (ISR ticks), "Steps:" (total steps from 
         // this move) "C:" (accumulator value), "R:" (rate value), "Pos:" 
@@ -1207,7 +1207,7 @@ CheckForNextCommand:
     CurrentCommand.Command = COMMAND_NONE;
     if (gFIFOLength != 0u)
     {
-      if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_GPIO_NUM))
       {
         LATDbits.LATD0 = 1;
       }
@@ -1374,7 +1374,7 @@ CheckForNextCommand:
           bitclrzero(AxisActive[1]);
         }
       }
-      if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
       {
         gISRTickCountForThisCommand = 0;
         gISRStepCountForThisCommand = 0;
@@ -1413,7 +1413,7 @@ CheckForNextCommand:
       {
         mLED_2_On()
       }
-      if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_GPIO_NUM))
       {
         LATAbits.LATA1 = 1;
       }
@@ -1447,16 +1447,16 @@ CheckForNextCommand:
     Step2AltIO = 0;
   }
 
-  if (bittst(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM))
+  if (bittst(TestMode, TEST_MODE_PRINT_TRIGGER_NUM))
   {
     // Clear the interrupt as the last thing we do. This allows us to have
     // arbitrarily long interrupts to print debug information out
     PIR1bits.TMR1IF = 0;
     TMR1H = TIMER1_H_RELOAD;
     TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
-    bitclr(TestMode, TEST_MODE_PRINT_TRIGGER_BIT_NUM);
+    bitclr(TestMode, TEST_MODE_PRINT_TRIGGER_NUM);
   }
-  if (bittst(TestMode, TEST_MODE_GPIO_BIT_NUM))
+  if (bittst(TestMode, TEST_MODE_GPIO_NUM))
   {
     LATAbits.LATA1 = 0;
     LATDbits.LATD0 = 0;
@@ -2125,7 +2125,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     return;
   }
 
-  if (!bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+  if (!bittst(TestMode, TEST_MODE_USART_ISR_NUM))
   {
     if (gClearAccs > 3u)
     {
@@ -2192,7 +2192,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
   // this.
   gMoveTemp.m.sm.SEState = 0;           // Start with all bits clear
   
-  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
+  if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
   {
     // If the ISR_BIT_NUM test mode is on, then interpret the Clear parameter
     // as the initial value for the accumulator.
@@ -2382,7 +2382,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     gMoveTemp.Command = COMMAND_LM_MOVE;
   }
   
-  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
     // Print the final values used by the ISR for this move
     ebb_print((far rom char *)"R1=");
@@ -2550,7 +2550,7 @@ void parse_CM_packet(void)
   }
   
   // Print out input parameters for debugging
-  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
     ebb_print((far rom char *)"Freq=");
     ebb_print_int(frequency);
@@ -2939,7 +2939,7 @@ void parse_CM_packet(void)
 // motion commands are empty, we get an accurate picture of where the global 
 // step position is.
 //
-// Once the moves has been figured out, call process_simple_rate_move().
+// Once the move has been figured out, we call process_simple_rate_move().
 //
 // Some global variables are used in this function instead of local ones:
 //  gHM_StepRate is used for StepRate
@@ -2966,7 +2966,7 @@ void parse_HM_packet(void)
     gHM_StepRate = 1;
   }
   else if (gHM_StepRate > 25000u)
-    {
+  {
     gHM_StepRate = 25000;
   }
   
@@ -2997,6 +2997,11 @@ void parse_HM_packet(void)
   // Always clear accumulators for this type of move
   gClearAccs = 0;
   
+  // Set up these values as input parameters
+  //  gHM_StepRate
+  //  gSteps1
+  //  gSteps2
+  //  gClearAccs
   process_simple_rate_move();
 
   print_line_ending(kLE_OK_NORM);
@@ -3007,7 +3012,7 @@ void parse_HM_packet(void)
 // Simply take the parameters from the user and pass them on to the move.
 void parse_TR_packet(void)
   {
-  clear_parmaeter_globals();  // Note: clears gHM_Pos1, 2 and ClearAccs
+  clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
 
@@ -3017,6 +3022,11 @@ void parse_TR_packet(void)
   extract_number(kLONG,  &gSteps2,      kREQUIRED);
   extract_number(kULONG, &gClearAccs,   kOPTIONAL);
 
+  // Set up these values as input parameters
+  //  gHM_StepRate
+  //  gSteps1
+  //  gSteps2
+  //  gClearAccs
   process_simple_rate_move();
 
   print_line_ending(kLE_OK_NORM);
@@ -3026,7 +3036,7 @@ void parse_TR_packet(void)
 // 'rate' input parameter rather than a duration. The 'rate' parameter
 // is applied to the axis that has more steps (primary axis). The other axis
 // (secondary axis) gets a rate which is appropriate to making a straight line.
-// gHM_StepRate can be between 2 and 25000 inclusive
+// gHM_StepRate can be between 1 and 25000 inclusive
 // gSteps1 and gSteps2 are signed 32 bit numbers
 //
 // This function uses these as input parameters:
@@ -3035,12 +3045,10 @@ void parse_TR_packet(void)
 //  gSteps2         (modified)
 //  gClearAccs      (not modified)
 void process_simple_rate_move(void)
-  {
+{
   float f;
-
-LATDbits.LATD0 = 1;
   
-  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
     ebb_print((far rom char *)"Rate=");
     ebb_print_uint(gHM_StepRate);
@@ -3064,9 +3072,9 @@ LATDbits.LATD0 = 1;
   }
   // If, for some reason, we're called with zero steps for both axis, then bail
   if ((gSteps1 == 0) && (gSteps2 == 0))
-    {
-      return;
-    }
+  {
+    return;
+  }
 
   gMoveTemp.m.sm.SEState = (UINT8)gClearAccs;
 
@@ -3074,7 +3082,7 @@ LATDbits.LATD0 = 1;
   gMoveTemp.m.sm.DirBits = 0;         // Start with positive direction for both
 
   if (gAutomaticMotorEnable == TRUE)
-    {
+  {
     // Enable both motors when we want to move them
     Enable1IO = ENABLE_MOTOR;
     Enable2IO = ENABLE_MOTOR;
@@ -3082,22 +3090,22 @@ LATDbits.LATD0 = 1;
 
   // First, set the direction bits
   if (gSteps1 < 0)
-      {
+  {
     gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR1_BIT;
     gSteps1 = -gSteps1;
-      }
+  }
   if (gSteps2 < 0)
-      {
+  {
     gMoveTemp.m.sm.DirBits = gMoveTemp.m.sm.DirBits | DIR2_BIT;
     gSteps2 = -gSteps2;
-      }
+  }
   
   // Both Steps values are now positive because our directions are set. From 
   // now on we're dealing only with step counts and rates, no directions.
   
   // Figure out which axis is major
   if (gSteps1 >= gSteps2)
-      {
+  {
     // Axis1 is major, Axis2 is minor
     // Computing the gMoveTemp.m.sm.Rate value for the primary axis is simple.
     // gMoveTemp.m.sm.Rate is simply gHM_StepRate * 85899.34592.
@@ -3137,21 +3145,21 @@ LATDbits.LATD0 = 1;
       else
       {
         gMoveTemp.m.sm.Rate[1].value = (INT32)f;
+      }
     }
-  }
-  else
-  {
+    else
+    {
       // Because we know Axis2 doesn't need to move, zero everything out
       gMoveTemp.m.sm.Rate[1].value = 0;
     }
   }
   else
-    {
+  {
     // Axis2 is major, Axis1 is minor, other than that same as above
     gMoveTemp.m.sm.Rate[1].value = (INT32)((float)gHM_StepRate * 85899.34592f);
 
     if (gSteps1 != 0)
-      {
+    {
       f = (float)gSteps1 * (float)gHM_StepRate;
       f /= (float)gSteps2;
       f *= 85899.34592f;
@@ -3170,7 +3178,7 @@ LATDbits.LATD0 = 1;
       }
     }
     else
-      {
+    {
       gMoveTemp.m.sm.Rate[0].value = 0;
     }
   }
@@ -3181,7 +3189,7 @@ LATDbits.LATD0 = 1;
   gMoveTemp.m.sm.Accel[1] = 0;
   gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
 
-  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
     ebb_print((far rom char *)"R1=");
     ebb_print_uint(gMoveTemp.m.sm.Rate[0].value);
@@ -3193,7 +3201,6 @@ LATDbits.LATD0 = 1;
     ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
     print_line_ending(kLE_REV);
   }
-LATDbits.LATD0 = 0;
 
   // Spin here until there's space in the FIFO
   while (gFIFOLength >= gCurrentFIFOLength)
@@ -3377,13 +3384,12 @@ static void process_simple_motor_move_fp(void)
 {
   float tempF;
   
-  LATCbits.LATC6 = 1;
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
   {
     return;
   }
-  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+  if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
   {
     ebb_print((far rom char *)"Duration=");
     ebb_print_uint(gDurationMS);
@@ -3524,7 +3530,7 @@ static void process_simple_motor_move_fp(void)
     gMoveTemp.m.sm.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
 
-    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM))
+    if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
     {
       ebb_print((far rom char *)"R1=");
       ebb_print_uint(gMoveTemp.m.sm.Rate[0].value);
@@ -3559,7 +3565,6 @@ static void process_simple_motor_move_fp(void)
       gFIFOLength++;
     }
   }
-  LATCbits.LATC6 = 0;
 }
 
 // E-Stop

@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a38"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a39"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -966,7 +966,7 @@ void ProcessIO(void)
     {
       tst_char = g_RX_command_buf[byte_cnt];
       
-      if (bittst(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM))
+      if (bittst(TestMode, TEST_MODE_USART_COMMAND_NUM))
       {
         Write1USART(tst_char);
       }
@@ -992,7 +992,15 @@ void ProcessIO(void)
         // Now, if we've gotten a full command (user send <CR>) then
         // go call the code that deals with that command, and then
         // keep parsing. (This allows multiple small commands per packet)
+        if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+        {
+          LATCbits.LATC0 = 1;
+        }
         parse_packet();
+        if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+        {
+          LATCbits.LATC0 = 0;
+        }
         g_RX_buf_in = 0;
         g_RX_buf_out = 0;
       }
@@ -1771,6 +1779,7 @@ void parse_R_packet(void)
 // 254 {1} turns on lock up mode. Tight loop of I/O toggles shows true ISR timing. Reset to exit.
 // 255 {1|0} turns on or off command parsing debug printing on USB
 // 256 {1|0} 1=don't add any moves to FIFO, 0=(default) add moves to FIFO (used for testing of parse functions)
+// 257 {1|0} turns on or off RC7 as indicator of parsing any command (when high) - defaults to off
 
 void parse_CU_packet(void)
 {
@@ -1962,17 +1971,14 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclr(TestMode, TEST_MODE_GPIO_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_GPIO_NUM);
     }
     else if (1 == paramater_value)
     {
-      bitset(TestMode, TEST_MODE_GPIO_BIT_NUM);
+      bitset(TestMode, TEST_MODE_GPIO_NUM);
       TRISDbits.TRISD1 = 0;   // D1 high when in ISR
       TRISDbits.TRISD0 = 0;   // D0 high when loading next command
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
-      TRISCbits.TRISC0 = 0;
-      TRISAbits.TRISA5 = 0;
-      TRISCbits.TRISC6 = 0;   // C6 for misc if not used for serial
     }
     else
     {
@@ -1984,13 +1990,13 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
-      bitclr(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_NUM);
     }
     else if (1 == paramater_value)
     {
-      bitset(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
-      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
+      bitset(TestMode, TEST_MODE_USART_ISR_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_NUM);
       baud1USART(
         BAUD_IDLE_CLK_LOW &
         BAUD_16_BIT_RATE &
@@ -2018,13 +2024,13 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
-      bitclr(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_FULL_NUM);
+      bitclr(TestMode, TEST_MODE_USART_ISR_NUM);
     }
     else if (1 == paramater_value)
     {
-      bitset(TestMode, TEST_MODE_USART_ISR_FULL_BIT_NUM);
-      bitset(TestMode, TEST_MODE_USART_ISR_BIT_NUM);
+      bitset(TestMode, TEST_MODE_USART_ISR_FULL_NUM);
+      bitset(TestMode, TEST_MODE_USART_ISR_NUM);
       baud1USART(
         BAUD_IDLE_CLK_LOW &
         BAUD_16_BIT_RATE &
@@ -2052,11 +2058,11 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclr(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_USART_COMMAND_NUM);
     }
     else if (1 == paramater_value)
     {
-      bitset(TestMode, TEST_MODE_USART_COMMAND_BIT_NUM);
+      bitset(TestMode, TEST_MODE_USART_COMMAND_NUM);
       baud1USART(
         BAUD_IDLE_CLK_LOW &
         BAUD_16_BIT_RATE &
@@ -2084,7 +2090,7 @@ void parse_CU_packet(void)
   // can be seen for the ISR and measured.
   else if (254u == parameter_number)
   {
-    bitset(TestMode, TEST_MODE_GPIO_BIT_NUM);
+    bitset(TestMode, TEST_MODE_GPIO_NUM);
     TRISDbits.TRISD1 = 0;   // D1 high when in ISR
     TRISDbits.TRISD0 = 0;   // D0 high when loading next command
     TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
@@ -2119,11 +2125,11 @@ void parse_CU_packet(void)
   {
     if (0 == paramater_value)
     {
-      bitclr(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+      bitclr(TestMode, TEST_MODE_DEBUG_COMMAND_NUM);
     }
     else if (1 == paramater_value)
     {
-      bitset(TestMode, TEST_MODE_DEBUG_COMMAND_BIT_NUM);
+      bitset(TestMode, TEST_MODE_DEBUG_COMMAND_NUM);
     }
     else
     {
@@ -2140,6 +2146,24 @@ void parse_CU_packet(void)
     else if (1 == paramater_value)
     {
       bitset(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM);
+    }
+    else
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    }
+  }
+  // CU,257,1 or CU,257,0 to turn on/off RC0 as indicator of command is parsing
+  else if (257u == parameter_number)
+  {
+    if (0 == paramater_value)
+    {
+      bitclrzero(TestMode); // TEST_MODE_PARSING_COMMAND_NUM
+      TRISCbits.TRISC0 = 1;
+    }
+    else if (1 == paramater_value)
+    {
+      bitsetzero(TestMode); // TEST_MODE_PARSING_COMMAND_NUM
+      TRISCbits.TRISC0 = 0;   // C0 high when parsing command
     }
     else
     {
