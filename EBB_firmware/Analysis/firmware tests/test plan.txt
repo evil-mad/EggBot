@@ -16,12 +16,15 @@ Ideas for EBB v3.0.0 firmware tests
 
   2.1 Test step counts
 
-    * For each of the types of move commands:
-      * Create a series of moves
+    * For SM, XM, HM, LM, L3, T3 and LT:
+      * Create a series of pre-defined moves
       * Record the beginning and ending global positions, confirm it is correct
       * Use Saleae to record each set of moves
         * Analyze step and direction pulses
-        * Confirm that proper number of steps in each direction were taken
+        * Confirm that proper number of steps were taken
+        * Confirm that the the proper directions were used
+        * Confirm that the overall move time is correct
+        * Confirm that the beginning step rate and ending step rate are correct
       
       
   2.2 Test step rates (speed of steps pulses correct?)
@@ -38,7 +41,30 @@ Ideas for EBB v3.0.0 firmware tests
         * Execute a string of move commands back to back
         * Measure how many commands per second
         * Find out where gaps begin
-      
+  
+  2.4 Test XM command
+    
+    * Generate small set of input parameters
+    * Send to EBB, record step/dir as Saleae .csv file
+    * Analyze file and confirm proper step count, proper direction, total time, and step rate
+    
+  
 3 FIFO Tests
 
   3.1 Test 
+  
+4 Fuzz testing
+
+  4.1 Test that SM command produces the proper inputs to the FIFO
+    * Put EBB into test mode
+      * Do not put actual data onto FIFO
+      * Output computed/parsed results (rate values) over USB
+    * Generate some number of random SM parameter sets, over a given range of possible values
+    * Send those values in to EBB
+    * Read back results
+    * Compute expected (ideal) results
+    * Compare computed vs ideal results
+    * Store everything into an output file
+    * Test passes if all computed results are less than some threshold away from ideal results
+    
+  4.2 Test that LM command
