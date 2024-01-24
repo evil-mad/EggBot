@@ -2516,6 +2516,7 @@ void parse_SM_packet(void)
 //
 void parse_CM_packet(void)
 {
+  /// TODO: This burden on the stack is huge - use globals for some of this
   UINT16 frequency = 0;
   INT32 dest_x = 0;
   INT32 dest_y = 0;
@@ -3047,7 +3048,7 @@ void parse_HM_packet(void)
 // Simple function to allow testing of the process_simple_rate_move_fp() command.
 // Simply take the parameters from the user and pass them on to the move.
 void parse_TR_packet(void)
-  {
+{
   clear_parmaeter_globals();
 
   print_command(FALSE, FALSE);
@@ -3066,7 +3067,7 @@ void parse_TR_packet(void)
   process_simple_rate_move_fp();
 
   print_line_ending(kLE_OK_NORM);
-  }
+}
 
 // This is the generic function for processing simple moves which use a 
 // 'rate' input parameter rather than a duration. The 'rate' parameter
