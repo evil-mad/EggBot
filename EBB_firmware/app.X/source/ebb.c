@@ -386,9 +386,10 @@ near u32b4_t acc_union[2];
 
 // ISR globals used in test modes for keeping track of each move
 static near UINT32 gISRTickCountForThisCommand;
-static near UINT32 gISRStepCountForThisCommand;
-static near INT32  gISRPositionForThisCommand;
-
+static near UINT32 gISRStepCount0ForThisCommand;
+static near INT32  gISRPosition0ForThisCommand;
+static near UINT32 gISRStepCount1ForThisCommand;
+static near INT32  gISRPosition1ForThisCommand;
 
 // Bank 1 is the "ISR Bank". By placing all variables that the ISR needs
 // access to either in the access bank (above) or in Bank 1, then the bank 
@@ -585,15 +586,21 @@ void high_ISR(void)
       LATD = (PORTD & ~(DIR1_BIT | DIR2_BIT)) | CurrentCommand.m.sm.DirBits;
     }
 
+    // If the test mode is active, count this tick as part of the move if there
+    // are steps to take in either axis. 
+    if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+    {
+      if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+      {
+        gISRTickCountForThisCommand++;
+      }
+    }
+    
     //// MOTOR 1     SM XM HM ////
     
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
-      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
-      {
-        gISRTickCountForThisCommand++;
-      }
       // Add the rate to the accumulator and see if the MSb got set. If so
       // then take a step and record that the step was taken
       acc_union[0].value += CurrentCommand.m.sm.Rate[0].value;
@@ -605,7 +612,7 @@ void high_ISR(void)
 
         if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
-          gISRStepCountForThisCommand++;
+          gISRStepCount0ForThisCommand++;
         }
 
         // For these stepper motion commands zero steps left means
@@ -627,6 +634,12 @@ void high_ISR(void)
         acc_union[1].bytes.b4 &= 0x7F;
         CurrentCommand.m.sm.DirBits |= STEP2_BIT;
         CurrentCommand.m.sm.Steps[1]--;
+
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+        {
+          gISRStepCount1ForThisCommand++;
+        }
+
         if (CurrentCommand.m.sm.Steps[1] == 0u)
         {
           bitclrzero(AxisActive[1]);
@@ -654,10 +667,6 @@ void high_ISR(void)
     // Only do this if there are steps left to take
     if (bittstzero(AxisActive[0]))
     {
-      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
-      {
-        gISRTickCountForThisCommand++;
-      }
       CurrentCommand.m.sm.Accel[0] += CurrentCommand.m.sm.Jerk[0];
       CurrentCommand.m.sm.Rate[0].value += CurrentCommand.m.sm.Accel[0];
       acc_union[0].value += CurrentCommand.m.sm.Rate[0].value;
@@ -670,7 +679,7 @@ void high_ISR(void)
         
         if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
-          gISRStepCountForThisCommand++;
+          gISRStepCount0ForThisCommand++;
         }
         // Set the direction bit based on the sign of rate
         if (CurrentCommand.m.sm.Rate[0].bytes.b4 & 0x80)
@@ -704,6 +713,12 @@ void high_ISR(void)
         acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
         CurrentCommand.m.sm.DirBits |= STEP2_BIT;
         CurrentCommand.m.sm.Steps[1]--;
+
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+        {
+          gISRStepCount1ForThisCommand++;
+        }
+
         // Set the direction bit based on the sign of rate
         if (CurrentCommand.m.sm.Rate[1].bytes.b4 & 0x80)
         {
@@ -759,10 +774,6 @@ void high_ISR(void)
 
       //// MOTOR 1   LT ////
       
-      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
-      {
-        gISRTickCountForThisCommand++;
-      }
       CurrentCommand.m.sm.Accel[0] += CurrentCommand.m.sm.Jerk[0];
       CurrentCommand.m.sm.Rate[0].value += CurrentCommand.m.sm.Accel[0];
       acc_union[0].value += CurrentCommand.m.sm.Rate[0].value;
@@ -771,9 +782,10 @@ void high_ISR(void)
       {
         acc_union[0].bytes.b4 = acc_union[0].bytes.b4 & 0x7F;
         CurrentCommand.m.sm.DirBits |= STEP1_BIT;
+        
         if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
-          gISRStepCountForThisCommand++;
+          gISRStepCount0ForThisCommand++;
         }
         
         // Set the direction bit based on the sign of rate
@@ -799,6 +811,11 @@ void high_ISR(void)
       {
         acc_union[1].bytes.b4 = acc_union[1].bytes.b4 & 0x7F;
         CurrentCommand.m.sm.DirBits |= STEP2_BIT;
+
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+        {
+          gISRStepCount1ForThisCommand++;
+        }
 
         // Set the direction bit based on the sign of rate
         if (CurrentCommand.m.sm.Rate[1].bytes.b4 & 0x80)
@@ -877,7 +894,7 @@ OutputBits:
         globalStepCounter1--;
         if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
-          gISRPositionForThisCommand--;
+          gISRPosition0ForThisCommand--;
         }
       }
       else
@@ -885,7 +902,7 @@ OutputBits:
         globalStepCounter1++;
         if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
         {
-          gISRPositionForThisCommand++;
+          gISRPosition0ForThisCommand++;
         }
       }
     }
@@ -1165,7 +1182,7 @@ CheckForNextCommand:
         // Write out the total steps made during this move (unsigned)
         PrintChar('S')
         PrintChar(',')
-        HexPrint(gISRStepCountForThisCommand)
+        HexPrint(gISRStepCount0ForThisCommand)
         PrintChar(',')
 
         // Write out the accumulator1 value after all math is complete (unsigned)
@@ -1183,14 +1200,37 @@ CheckForNextCommand:
         // Write out the current position for this command (signed)
         PrintChar('P')
         PrintChar(',')
-        HexPrint(gISRPositionForThisCommand);
+        HexPrint(gISRPosition0ForThisCommand);
+
+        // Write out the total steps made during this move (unsigned)
+        PrintChar('S')
+        PrintChar(',')
+        HexPrint(gISRStepCount1ForThisCommand)
+        PrintChar(',')
+
+        // Write out the accumulator2 value after all math is complete (unsigned)
+        PrintChar('C')
+        PrintChar(',')
+        HexPrint(acc_union[1].value)
+        PrintChar(',')
+
+        // Write out the rate2 value (signed)
+        PrintChar('R')
+        PrintChar(',')
+        HexPrint(CurrentCommand.m.sm.Rate[1].value)
+        PrintChar(',')
+
+        // Write out the current position2 for this command (signed)
+        PrintChar('P')
+        PrintChar(',')
+        HexPrint(gISRPosition1ForThisCommand);
 #else
         // Print all values using raw binary
         // Write out the total ISR ticks for this move (unsigned)
         BinPrint(gISRTickCountForThisCommand) // Macro for printing raw binary value
 
         // Write out the total steps made during this move (unsigned)
-        BinPrint(gISRStepCountForThisCommand)
+        BinPrint(gISRStepCount0ForThisCommand)
 
         // Write out the accumulator1 value after all math is complete (unsigned)
         BinPrint(acc_union[0].value)
@@ -1199,7 +1239,19 @@ CheckForNextCommand:
         BinPrint(CurrentCommand.m.sm.Rate[0].value)
 
         // Write out the current position for this command (signed)
-        BinPrint(gISRPositionForThisCommand);        
+        BinPrint(gISRPosition0ForThisCommand);        
+
+        // Write out the total steps2 made during this move (unsigned)
+        BinPrint(gISRStepCount1ForThisCommand)
+
+        // Write out the accumulator2 value after all math is complete (unsigned)
+        BinPrint(acc_union[1].value)
+
+        // Write out the rate2 value (signed)
+        BinPrint(CurrentCommand.m.sm.Rate[1].value)
+
+        // Write out the current position2 for this command (signed)
+        BinPrint(gISRPosition1ForThisCommand);        
 #endif
         PrintChar('\n')
       }
@@ -1411,8 +1463,10 @@ CheckForNextCommand:
       if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
       {
         gISRTickCountForThisCommand = 0;
-        gISRStepCountForThisCommand = 0;
-        gISRPositionForThisCommand = 0;
+        gISRStepCount0ForThisCommand = 0;
+        gISRPosition0ForThisCommand = 0;
+        gISRStepCount1ForThisCommand = 0;
+        gISRPosition1ForThisCommand = 0;
       }
 
       // Zero out command in FIFO we just copied, but leave the rest of the fields alone
