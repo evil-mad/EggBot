@@ -13,7 +13,7 @@
 # D7        C6      Dbg Serial
 # D8        C0      Parsing
 #
-# This code requires version 3.0.0-a39 or above on the EBB
+# This code requires version 3.0.0-a40 or above on the EBB
 # This code requires that the Saleae Logic2 software have the Automation feature turned on and 
 # software installed as called out here : https://saleae.github.io/logic2-automation/
 # This code requires a 16 channel Saleae - either the "Logic 16" or the "Logic Pro 16" as we
@@ -26,7 +26,10 @@
 #   Each line of the input file must contain
 #   <EBB command to send> <
 
-
+# TODO List
+#   Check for 0x0A at end of debug uart string to check for framing problems
+#   Create time/date directory for every test run, put individual test directories inside that
+#   Don't require Saleae Logic to be running but fire it up here 
 
 from saleae import automation
 import os
@@ -105,49 +108,39 @@ def check_debug_serial(serial_filepath, parameter_str):
         try:
             for row in reader:
                 if reader.line_num > 1:
-                    output_str = output_str + row[4]
+                    if row[4][0:2] != '0x':
+                        print('Debug UART csv parse error: csv line ' + str(reader.line_num) + ' is not 0x but instead is ' + row[4][0:2])
+                    else:
+                        # Put all four bytes of each 32 bit int together, with a comma between the 32 bit values
+                        if (reader.line_num >= 6) & ((reader.line_num - 6) % 4 == 0):
+                            output_str = output_str + ',' + row[4][2:4]
+                        else:
+                            output_str = output_str + row[4][2:4]
 
         except csv.Error as e:
             sys.exit('file {}, line {}: {}'.format(serial_filepath, reader.line_num, e))
 
-    # we now have a string like "T,000061A9,S,000004D2,C,06511930,R,06516DB0,P,000004D2"
-    # Convert that into separate variables and decimal values
+    # We now have a string that looks like "000009C5,00000064,051EA590,051EB850,00000064,00000000,00000000,00000000,00000000,0A"
+    
+    move_ticks =        int(output_str[ 0: 8], 16)
+    move_steps1 =       int(output_str[ 9:17], 16)
+    move_accumulator1 = int(output_str[18:26], 16) 
+    move_rate1 =        int(output_str[27:35], 16)
+    move_position1 =    int(output_str[36:44], 16)
+    move_steps2 =       int(output_str[45:53], 16)
+    move_accumulator2 = int(output_str[54:62], 16) 
+    move_rate2 =        int(output_str[63:71], 16)
+    move_position2 =    int(output_str[72:80], 16)
 
-    #print(int.from_bytes(bytes(output_str[0:1],"utf-8"), "big", signed=False))
-    #print(int.from_bytes(bytes(output_str[1:2],"utf-8"), "big", signed=False))
-    #print(int.from_bytes(bytes(output_str[2:3],"utf-8"), "big", signed=False))
-    #print(int.from_bytes(bytes(output_str[3:4],"utf-8"), "big", signed=False))
-
-
-    #move_ticks = int.from_bytes(bytes(output_str[0:4],"utf-8"), "big", signed=False)
-    #move_steps = int.from_bytes(bytes(output_str[4:8],"utf-8"), "big", signed=False)
-    #move_accumulator1 = int.from_bytes(bytes(output_str[8:12],"utf-8"), "big", signed=False)
-    #move_rate1 = int.from_bytes(bytes(output_str[12:16],"utf-8"), "big", signed=False)
-    #move_position1 = int.from_bytes(bytes(output_str[16:20],"utf-8"), "big", signed=False)
-
-    # We now have a string that looks like "0x000x000x610xA80x000x000x040xD20x060x500xC40xB00x060x510x6D0xB00x000x000x040xD20x0A"
-
-    # I know this is super inefficient and inelegant. When you have time, rewrite to be cleaner. But this works.
-    move_ticks = int(output_str[2:4], 16)
-    move_ticks = (move_ticks * 256) + int(output_str[6:8], 16)
-    move_ticks = (move_ticks * 256) + int(output_str[10:12], 16)
-    move_ticks = (move_ticks * 256) + int(output_str[14:16], 16)
-    move_steps = int(output_str[18:20], 16)
-    move_steps = (move_steps * 256) + int(output_str[22:24], 16)
-    move_steps = (move_steps * 256) + int(output_str[26:28], 16)
-    move_steps = (move_steps * 256) + int(output_str[30:32], 16)
-    move_accumulator1 = int(output_str[34:36], 16) 
-    move_accumulator1 = (move_accumulator1 * 256) + int(output_str[38:40], 16)
-    move_accumulator1 = (move_accumulator1 * 256) + int(output_str[42:44], 16)
-    move_accumulator1 = (move_accumulator1 * 256) + int(output_str[46:48], 16)
-    move_rate1 = int(output_str[50:52], 16)
-    move_rate1 = (move_rate1 * 256) + int(output_str[54:56], 16)
-    move_rate1 = (move_rate1 * 256) + int(output_str[58:60], 16)
-    move_rate1 = (move_rate1 * 256) + int(output_str[62:64], 16)
-    move_position1 = int(output_str[66:68], 16)
-    move_position1 = (move_position1 * 256) + int(output_str[70:72], 16)
-    move_position1 = (move_position1 * 256) + int(output_str[74:76], 16)
-    move_position1 = (move_position1 * 256) + int(output_str[78:80], 16)
+    # Rate and Position are signed numbers, so take care of negating if their top most bit is set
+    if (move_rate1 > 0x7FFFFFFF):
+        move_rate1 = move_rate1 - 0x100000000
+    if (move_position1 > 0x7FFFFFFF):
+        move_position1 = move_position1 - 0x100000000
+    if (move_rate2 > 0x7FFFFFFF):
+        move_rate2 = move_rate2 - 0x100000000
+    if (move_position2 > 0x7FFFFFFF):
+        move_position2 = move_position2 - 0x100000000
 
     #print("ticks=" + str(move_ticks))
     #print("steps=" + str(move_steps))
@@ -157,20 +150,40 @@ def check_debug_serial(serial_filepath, parameter_str):
 
     # Parse apart the correct parameter string
     para_list = parameter_str.split(",")
-    para_ticks = int(para_list[0])
-    para_steps = int(para_list[1])
-    para_accumulator1 = int(para_list[2])
-    para_rate1 = int(para_list[3])
-    para_position1 = int(para_list[4])
+    para_ticks =         int(para_list[0])
+    para_steps1 =        int(para_list[1])
+    para_accumulator1 =  int(para_list[2])
+    para_rate1 =         int(para_list[3])
+    para_position1 =     int(para_list[4])
+    para_steps2 =        int(para_list[5])
+    para_accumulator2 =  int(para_list[6])
+    para_rate2 =         int(para_list[7])
+    para_position2 =     int(para_list[8])
 
-    if (move_ticks == para_ticks) & (move_steps == para_steps) & (move_accumulator1 == para_accumulator1) & (move_rate1 == para_rate1) & (move_position1 == para_position1):
+    if (move_ticks == para_ticks)                   \
+       &                                            \
+       (move_steps1 == para_steps1)                 \
+       &                                            \
+       (move_accumulator1 == para_accumulator1)     \
+       &                                            \
+       (move_rate1 == para_rate1)                   \
+       &                                            \
+       (move_position2 == para_position2)           \
+       &                                            \
+       (move_steps2 == para_steps2)                 \
+       &                                            \
+       (move_accumulator2 == para_accumulator2)     \
+       &                                            \
+       (move_rate2 == para_rate2)                   \
+       &                                            \
+       (move_position2 == para_position2):
         print ("Pass")
 
     if (move_ticks != para_ticks):
         print("Fail: measured ticks " + str(move_ticks) + " != expected ticks " + str(para_ticks))
 
-    if (move_steps != para_steps):
-        print("Fail: measured steps " + str(move_steps) + " != expected steps " + str(para_steps))
+    if (move_steps1 != para_steps1):
+        print("Fail: measured steps1 " + str(move_steps1) + " != expected steps1 " + str(para_steps1))
     
     if (move_accumulator1 != para_accumulator1):
         print("Fail: measured accumulator1 " + str(move_accumulator1) + " != expected accumulator1 " + str(para_accumulator1))
@@ -181,6 +194,17 @@ def check_debug_serial(serial_filepath, parameter_str):
     if (move_position1 != para_position1):
         print("Fail: measured position1 " + str(move_position1) + " != expected position1 " + str(para_position1))
 
+    if (move_steps2 != para_steps2):
+        print("Fail: measured steps2 " + str(move_steps2) + " != expected steps2 " + str(para_steps2))
+    
+    if (move_accumulator2 != para_accumulator2):
+        print("Fail: measured accumulator2 " + str(move_accumulator2) + " != expected accumulator2 " + str(para_accumulator2))
+    
+    if (move_rate2 != para_rate2):
+        print("Fail: measured rate2 " + str(move_rate2) + " != expected rate2 " + str(para_rate2))
+    
+    if (move_position2 != para_position2):
+        print("Fail: measured position2 " + str(move_position2) + " != expected position2 " + str(para_position2))
 
 
 
@@ -271,10 +295,10 @@ def capture_command(EBB_command, capture_dir_name, capture_time, expected_params
 
 # Temporary list of commands to send (will get from file eventually)
 param_list = [
-["SM,100,100,0,3",     "test1", 1, "2500,100,20054816,85899344,100"],
-["SM,100,-100,0,3",    "test2", 1, "2500,100,20035616,85899344,4294967196"],
-["SM,100,0,100,3",     "test3", 1, "-1,-1,-1,-1,-1"],
-#["SM,100,0,-100,3",    "test4" ,1, ""],
+["SM,100,100,0,3",     "test1", 1, "2501,100,85894544,85899344,100,0,0,0,0"],
+["SM,100,-100,0,3",    "test2", 1, "2501,100,85894544,85899344,-100,0,0,0,0"],
+["SM,100,0,100,3",     "test3", 1, "2501,0,0,0,0,100,85894544,85899344,100"],
+["SM,100,0,-100,3",    "test4" ,1, "2501,0,0,0,0,100,85894544,85899344,-100"],
 #["SM,100,100,100,3",   "test5" ,1, ""],
 #["SM,100,-100,-100,3", "test6" ,1, ""],
 #["XM,100,100,0,3",     "test1" ,1, ""],
