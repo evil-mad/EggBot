@@ -911,10 +911,18 @@ OutputBits:
       if (bittst(CurrentCommand.m.sm.DirBits, DIR2_BIT_NUM))
       {
         globalStepCounter2--;
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+        {
+          gISRPosition1ForThisCommand--;
+        }
       }
       else
       {
         globalStepCounter2++;
+        if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+        {
+          gISRPosition1ForThisCommand++;
+        }
       }
     }
    
@@ -1229,7 +1237,7 @@ CheckForNextCommand:
         // Write out the total ISR ticks for this move (unsigned)
         BinPrint(gISRTickCountForThisCommand) // Macro for printing raw binary value
 
-        // Write out the total steps made during this move (unsigned)
+        // Write out the total steps1 made during this move (unsigned)
         BinPrint(gISRStepCount0ForThisCommand)
 
         // Write out the accumulator1 value after all math is complete (unsigned)
@@ -1238,7 +1246,7 @@ CheckForNextCommand:
         // Write out the rate1 value (signed)
         BinPrint(CurrentCommand.m.sm.Rate[0].value)
 
-        // Write out the current position for this command (signed)
+        // Write out the current position1 for this command (signed)
         BinPrint(gISRPosition0ForThisCommand);        
 
         // Write out the total steps2 made during this move (unsigned)
