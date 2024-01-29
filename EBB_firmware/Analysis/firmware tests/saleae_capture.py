@@ -28,7 +28,6 @@
 
 # TODO List
 #   Check for 0x0A at end of debug uart string to check for framing problems
-#   Create time/date directory for every test run, put individual test directories inside that
 #   Don't require Saleae Logic to be running but fire it up here 
 
 from saleae import automation
@@ -148,64 +147,87 @@ def check_debug_serial(serial_filepath, parameter_str):
     #print("rate1=" + str(move_rate1))
     #print("pos1=" + str(move_position1))
 
+    para_ticks = 0
+    para_steps1 = 0
+    para_accumulator1 = 0
+    para_rate1 = 0
+    para_position1 = 0
+    para_steps2 = 0
+    para_accumulator2 = 0
+    para_rate2 = 0
+    para_position2 = 0
+
     # Parse apart the correct parameter string
     para_list = parameter_str.split(",")
-    para_ticks =         int(para_list[0])
-    para_steps1 =        int(para_list[1])
-    para_accumulator1 =  int(para_list[2])
-    para_rate1 =         int(para_list[3])
-    para_position1 =     int(para_list[4])
-    para_steps2 =        int(para_list[5])
-    para_accumulator2 =  int(para_list[6])
-    para_rate2 =         int(para_list[7])
-    para_position2 =     int(para_list[8])
+    if len(para_list) >= 9:
+        if (para_list[0] != "") & (para_list[0] != '*'):
+            para_ticks =         int(para_list[0])
+        if (para_list[1] != "") & (para_list[1] != '*'):
+            para_steps1 =        int(para_list[1])
+        if (para_list[2] != "") & (para_list[2] != '*'):
+            para_accumulator1 =  int(para_list[2])
+        if (para_list[3] != "") & (para_list[3] != '*'):
+            para_rate1 =         int(para_list[3])
+        if (para_list[4] != "") & (para_list[4] != '*'):
+            para_position1 =     int(para_list[4])
+        if (para_list[5] != "") & (para_list[5] != '*'):
+            para_steps2 =        int(para_list[5])
+        if (para_list[6] != "") & (para_list[6] != '*'):
+            para_accumulator2 =  int(para_list[6])
+        if (para_list[7] != "") & (para_list[7] != '*'):
+            para_rate2 =         int(para_list[7])
+        if (para_list[8] != "") & (para_list[8] != '*'):
+            para_position2 =     int(para_list[8])
 
-    if (move_ticks == para_ticks)                   \
-       &                                            \
-       (move_steps1 == para_steps1)                 \
-       &                                            \
-       (move_accumulator1 == para_accumulator1)     \
-       &                                            \
-       (move_rate1 == para_rate1)                   \
-       &                                            \
-       (move_position2 == para_position2)           \
-       &                                            \
-       (move_steps2 == para_steps2)                 \
-       &                                            \
-       (move_accumulator2 == para_accumulator2)     \
-       &                                            \
-       (move_rate2 == para_rate2)                   \
-       &                                            \
-       (move_position2 == para_position2):
-        print ("Pass")
+        if ((move_ticks == para_ticks) | (para_list[0] == '*'))                \
+        &                                                                      \
+        ((move_steps1 == para_steps1) | (para_list[1] == '*'))                 \
+        &                                                                      \
+        ((move_accumulator1 == para_accumulator1) | (para_list[2] == '*'))     \
+        &                                                                      \
+        ((move_rate1 == para_rate1) | (para_list[3] == '*'))                   \
+        &                                                                      \
+        ((move_position2 == para_position2) | (para_list[4] == '*'))           \
+        &                                                                      \
+        ((move_steps2 == para_steps2) | (para_list[5] == '*'))                 \
+        &                                                                      \
+        ((move_accumulator2 == para_accumulator2) | (para_list[6] == '*'))     \
+        &                                                                      \
+        ((move_rate2 == para_rate2) | (para_list[7] == '*'))                   \
+        &                                                                      \
+        ((move_position2 == para_position2) | (para_list[8] == '*')):
+                print ("Pass")
 
-    if (move_ticks != para_ticks):
-        print("Fail: measured ticks " + str(move_ticks) + " != expected ticks " + str(para_ticks))
+        if ((move_ticks != para_ticks) & (para_list[0] != '*')):
+            print("Fail: measured ticks " + str(move_ticks) + " != expected ticks " + str(para_ticks))
 
-    if (move_steps1 != para_steps1):
-        print("Fail: measured steps1 " + str(move_steps1) + " != expected steps1 " + str(para_steps1))
-    
-    if (move_accumulator1 != para_accumulator1):
-        print("Fail: measured accumulator1 " + str(move_accumulator1) + " != expected accumulator1 " + str(para_accumulator1))
-    
-    if (move_rate1 != para_rate1):
-        print("Fail: measured rate1 " + str(move_rate1) + " != expected rate1 " + str(para_rate1))
-    
-    if (move_position1 != para_position1):
-        print("Fail: measured position1 " + str(move_position1) + " != expected position1 " + str(para_position1))
+        if ((move_steps1 != para_steps1) & (para_list[1] != '*')):
+            print("Fail: measured steps1 " + str(move_steps1) + " != expected steps1 " + str(para_steps1))
+        
+        if ((move_accumulator1 != para_accumulator1) & (para_list[2] != '*')):
+            print("Fail: measured accumulator1 " + str(move_accumulator1) + " != expected accumulator1 " + str(para_accumulator1))
+        
+        if ((move_rate1 != para_rate1) & (para_list[3] != '*')):
+            print("Fail: measured rate1 " + str(move_rate1) + " != expected rate1 " + str(para_rate1))
+        
+        if ((move_position1 != para_position1) & (para_list[4] != '*')):
+            print("Fail: measured position1 " + str(move_position1) + " != expected position1 " + str(para_position1))
 
-    if (move_steps2 != para_steps2):
-        print("Fail: measured steps2 " + str(move_steps2) + " != expected steps2 " + str(para_steps2))
-    
-    if (move_accumulator2 != para_accumulator2):
-        print("Fail: measured accumulator2 " + str(move_accumulator2) + " != expected accumulator2 " + str(para_accumulator2))
-    
-    if (move_rate2 != para_rate2):
-        print("Fail: measured rate2 " + str(move_rate2) + " != expected rate2 " + str(para_rate2))
-    
-    if (move_position2 != para_position2):
-        print("Fail: measured position2 " + str(move_position2) + " != expected position2 " + str(para_position2))
-
+        if ((move_steps2 != para_steps2) & (para_list[5] != '*')):
+            print("Fail: measured steps2 " + str(move_steps2) + " != expected steps2 " + str(para_steps2))
+        
+        if ((move_accumulator2 != para_accumulator2) & (para_list[6] != '*')):
+            print("Fail: measured accumulator2 " + str(move_accumulator2) + " != expected accumulator2 " + str(para_accumulator2))
+        
+        if ((move_rate2 != para_rate2) & (para_list[7] != '*')):
+            print("Fail: measured rate2 " + str(move_rate2) + " != expected rate2 " + str(para_rate2))
+        
+        if ((move_position2 != para_position2) & (para_list[8] != '*')):
+            print("Fail: measured position2 " + str(move_position2) + " != expected position2 " + str(para_position2))
+    else:
+        print("Incomplete test description. Measured values = ", end='')
+        print(str(move_ticks) + "," + str(move_steps1) + "," + str(move_accumulator1) + "," + str(move_rate1) + "," + str(move_position1), end='')
+        print("," + str(move_steps2) + "," + str(move_accumulator2) + "," + str(move_rate2) + "," + str(move_position2))
 
 
 # Pass in an EBB command a file path name and a time and this function
@@ -214,7 +236,7 @@ def check_debug_serial(serial_filepath, parameter_str):
 # .csv file of the bytes on the debug serial port into the capture_dir_name 
 # directory
 
-def capture_command(EBB_command, capture_dir_name, capture_time, expected_params):
+def capture_command(EBB_command : str, capture_dir_path : str, capture_time : float, expected_params : str):
     # Connect to the running Logic 2 Application on port `10430`.
     # Alternatively you can use automation.Manager.launch() to launch a new Logic 2 process - see
     # the API documentation for more details.
@@ -248,7 +270,8 @@ def capture_command(EBB_command, capture_dir_name, capture_time, expected_params
 
             # The capture has started. We now need to send our EBB command:
             response = str(query(the_port, EBB_command + '\r'))
-            print(last_command + " :: " + response.strip())
+            # TODO: Confirm that response was "OK\r\n", print error and actual response if not
+            #print(last_command + " :: " + response.strip())
 
             # Wait until the capture has finished
             capture.wait()
@@ -263,59 +286,43 @@ def capture_command(EBB_command, capture_dir_name, capture_time, expected_params
             analyzers.append(automation.DataTableExportConfiguration(async_analyzer, automation.RadixType.HEXADECIMAL))
 
             # Create a directory name to store our output files in
-            # output_dir = os.path.join(os.getcwd(), f'output-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
-            output_dir = os.path.join(os.getcwd(), capture_dir_name)
-            os.makedirs(output_dir, exist_ok = True)
+            os.makedirs(capture_dir_path, exist_ok = True)
 
             # Export analyzer data to a CSV file
-            analyzer_export_filepath = os.path.join(output_dir, 'debug_serial.csv')
+            analyzer_export_filepath = os.path.join(capture_dir_path, 'debug_serial.csv')
             capture.export_data_table(
                 filepath=analyzer_export_filepath,
                 analyzers=analyzers
             )
 
-            # Export raw digital data to a CSV file
-            capture.export_raw_data_csv(directory=output_dir, digital_channels=[0, 1, 2, 3, 4, 5, 6, 7, 8])
+            # Export raw digital data to a CSV file 
+            capture.export_raw_data_csv(directory=capture_dir_path, digital_channels=[0, 1, 2, 3, 4, 5, 6, 7, 8])
 
             # Save the capture to a file
-            capture_filepath = os.path.join(output_dir, 'capture.sal')
+            capture_filepath = os.path.join(capture_dir_path, 'capture.sal')
             capture.save_capture(filepath=capture_filepath)
 
             # Gather up the debug serial output
             check_debug_serial(analyzer_export_filepath, expected_params)
 
             # Save off text file with EBB command and parameters
-            with open(os.path.join(output_dir, 'param.csv'), 'w') as param_file:
+            with open(os.path.join(capture_dir_path, 'param.csv'), 'w') as param_file:
                 param_file.write(EBB_version.decode() + '\n')
                 param_file.write(EBB_command + '\n')
-                param_file.write(output_dir + '\n')
-                param_file.write(capture_dir_name + '\n')
+                param_file.write(capture_dir_path + '\n')
                 param_file.write(str(capture_time) + '\n')
 
 
-# Temporary list of commands to send (will get from file eventually)
-param_list = [
-["SM,100,100,0,3",     "test1", 1, "2501,100,85894544,85899344,100,0,0,0,0"],
-["SM,100,-100,0,3",    "test2", 1, "2501,100,85894544,85899344,-100,0,0,0,0"],
-["SM,100,0,100,3",     "test3", 1, "2501,0,0,0,0,100,85894544,85899344,100"],
-["SM,100,0,-100,3",    "test4" ,1, "2501,0,0,0,0,100,85894544,85899344,-100"],
-#["SM,100,100,100,3",   "test5" ,1, ""],
-#["SM,100,-100,-100,3", "test6" ,1, ""],
-#["XM,100,100,0,3",     "test1" ,1, ""],
-#["XM,100,-100,0,3",    "test1" ,1, ""],
-#["XM,100,0,100,3",     "test1" ,1, ""],
-#["XM,100,0,-100,3",    "test1" ,1, ""],
-#["XM,100,100,100,3",   "test1" ,1, ""],
-#["XM,100,-100,-100,3", "test1" ,1, ""],
-]
 
+# Create new test artifact directory
+# Each test will create a directory within this directory with its artifacts
 
-#
+artifact_dir = os.path.join(os.getcwd(), f'output-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
+os.makedirs(artifact_dir, exist_ok = True)
+
 # Connect to EBB
-#
 
 ad = axidraw.AxiDraw() # Initialize class
-
 ad.interactive()
 
 if not ad.connect():                # Open serial port to AxiDraw;
@@ -328,12 +335,11 @@ if the_port is None:
     sys.exit() # end script
 
 the_port.reset_input_buffer()
-
 print("connected")
-
 EBB_version = query(the_port, 'V\r')
-
 last_command = ""
+
+# Turn on the debug features we need in order to run our tests
 
 response = str(query(the_port, "CU,250,1" + '\r'))
 print(last_command + " :: " + response.strip())
@@ -342,22 +348,18 @@ print(last_command + " :: " + response.strip())
 response = str(query(the_port, "CU,257,1" + '\r'))
 print(last_command + " :: " + response.strip())
 
+# Walk through each line of the tests from the test input file
+# and execute them
 
-for param in param_list:
-    print(param[1], end='')
-    capture_command(param[0], param[1], param[2], param[3])
-
-
-#    #block(ad)
-#    response = str(query(the_port, command + '\r'))
-#    print(last_command + " :: " + response.strip())
-#    last_command = command
-    
-#print(last_command + " :: ")
-
-print("Complete")
+#for data_line in test_input_file:
+with open(sys.argv[1], "r", newline='') as test_input_file:
+    reader = csv.reader(test_input_file, quotechar='"', doublequote=True, skipinitialspace=True)
+    for param in reader:
+        if (len(param) >= 5) & (param[0] != '0'):
+            print(param[2] + ": ", end='')
+            test_dir = os.path.join(artifact_dir, param[2])
+            capture_command(param[1], test_dir, float(param[3]), param[4])
 
 ad.disconnect()             # Close serial port to AxiDraw
-
-
-
+test_input_file.close()
+print("Complete")
