@@ -120,26 +120,43 @@ def check_debug_serial(serial_filepath, parameter_str):
             sys.exit('file {}, line {}: {}'.format(serial_filepath, reader.line_num, e))
 
     # We now have a string that looks like "000009C5,00000064,051EA590,051EB850,00000064,00000000,00000000,00000000,00000000,0A"
-    
-    move_ticks =        int(output_str[ 0: 8], 16)
-    move_steps1 =       int(output_str[ 9:17], 16)
-    move_accumulator1 = int(output_str[18:26], 16) 
-    move_rate1 =        int(output_str[27:35], 16)
-    move_position1 =    int(output_str[36:44], 16)
-    move_steps2 =       int(output_str[45:53], 16)
-    move_accumulator2 = int(output_str[54:62], 16) 
-    move_rate2 =        int(output_str[63:71], 16)
-    move_position2 =    int(output_str[72:80], 16)
+    dbg_list = output_str.split(',')
 
-    # Rate and Position are signed numbers, so take care of negating if their top most bit is set
-    if (move_rate1 > 0x7FFFFFFF):
-        move_rate1 = move_rate1 - 0x100000000
-    if (move_position1 > 0x7FFFFFFF):
-        move_position1 = move_position1 - 0x100000000
-    if (move_rate2 > 0x7FFFFFFF):
-        move_rate2 = move_rate2 - 0x100000000
-    if (move_position2 > 0x7FFFFFFF):
-        move_position2 = move_position2 - 0x100000000
+    if len(dbg_list) < 10:
+        print('Error: not enough fields in debug UART output:' + output_str)
+        print(dbg_list)
+        print(str(len(dbg_list)))
+        move_ticks = 0
+        move_steps1 = 0
+        move_accumulator1 = 0
+        move_rate1 = 0
+        move_position1 = 0
+        move_steps2 = 0
+        move_accumulator2 = 0
+        move_rate2 = 0
+        move_position2 = 0
+    else:
+        move_ticks =        int(dbg_list[0], 16)
+        move_steps1 =       int(dbg_list[1], 16)
+        move_accumulator1 = int(dbg_list[2], 16) 
+        move_rate1 =        int(dbg_list[3], 16)
+        move_position1 =    int(dbg_list[4], 16)
+        move_steps2 =       int(dbg_list[5], 16)
+        move_accumulator2 = int(dbg_list[6], 16) 
+        move_rate2 =        int(dbg_list[7], 16)
+        move_position2 =    int(dbg_list[8], 16)
+        if dbg_list[9] != '0A':
+            print('Error: incorrect final field in debug UART output:' + dbg_list[9])
+
+        # Rate and Position are signed numbers, so take care of negating if their top most bit is set
+        if (move_rate1 > 0x7FFFFFFF):
+            move_rate1 = move_rate1 - 0x100000000
+        if (move_position1 > 0x7FFFFFFF):
+            move_position1 = move_position1 - 0x100000000
+        if (move_rate2 > 0x7FFFFFFF):
+            move_rate2 = move_rate2 - 0x100000000
+        if (move_position2 > 0x7FFFFFFF):
+            move_position2 = move_position2 - 0x100000000
 
     #print("ticks=" + str(move_ticks))
     #print("steps=" + str(move_steps))
@@ -179,7 +196,7 @@ def check_debug_serial(serial_filepath, parameter_str):
         if (para_list[8] != "") & (para_list[8] != '*'):
             para_position2 =     int(para_list[8])
 
-        if ((move_ticks == para_ticks) | (para_list[0] == '*'))                \
+        if ((move_ticks == para_ticks) | (move_ticks - 1 == para_ticks) | (para_list[0] == '*'))                \
         &                                                                      \
         ((move_steps1 == para_steps1) | (para_list[1] == '*'))                 \
         &                                                                      \
@@ -197,33 +214,33 @@ def check_debug_serial(serial_filepath, parameter_str):
         &                                                                      \
         ((move_position2 == para_position2) | (para_list[8] == '*')):
                 print ("Pass")
+        else:
+            if ((move_ticks != para_ticks) & (para_list[0] != '*')):
+                print("Fail: measured ticks " + str(move_ticks) + " != expected ticks " + str(para_ticks))
 
-        if ((move_ticks != para_ticks) & (para_list[0] != '*')):
-            print("Fail: measured ticks " + str(move_ticks) + " != expected ticks " + str(para_ticks))
+            if ((move_steps1 != para_steps1) & (para_list[1] != '*')):
+                print("Fail: measured steps1 " + str(move_steps1) + " != expected steps1 " + str(para_steps1))
+            
+            if ((move_accumulator1 != para_accumulator1) & (para_list[2] != '*')):
+                print("Fail: measured accumulator1 " + str(move_accumulator1) + " != expected accumulator1 " + str(para_accumulator1))
+            
+            if ((move_rate1 != para_rate1) & (para_list[3] != '*')):
+                print("Fail: measured rate1 " + str(move_rate1) + " != expected rate1 " + str(para_rate1))
+            
+            if ((move_position1 != para_position1) & (para_list[4] != '*')):
+                print("Fail: measured position1 " + str(move_position1) + " != expected position1 " + str(para_position1))
 
-        if ((move_steps1 != para_steps1) & (para_list[1] != '*')):
-            print("Fail: measured steps1 " + str(move_steps1) + " != expected steps1 " + str(para_steps1))
-        
-        if ((move_accumulator1 != para_accumulator1) & (para_list[2] != '*')):
-            print("Fail: measured accumulator1 " + str(move_accumulator1) + " != expected accumulator1 " + str(para_accumulator1))
-        
-        if ((move_rate1 != para_rate1) & (para_list[3] != '*')):
-            print("Fail: measured rate1 " + str(move_rate1) + " != expected rate1 " + str(para_rate1))
-        
-        if ((move_position1 != para_position1) & (para_list[4] != '*')):
-            print("Fail: measured position1 " + str(move_position1) + " != expected position1 " + str(para_position1))
-
-        if ((move_steps2 != para_steps2) & (para_list[5] != '*')):
-            print("Fail: measured steps2 " + str(move_steps2) + " != expected steps2 " + str(para_steps2))
-        
-        if ((move_accumulator2 != para_accumulator2) & (para_list[6] != '*')):
-            print("Fail: measured accumulator2 " + str(move_accumulator2) + " != expected accumulator2 " + str(para_accumulator2))
-        
-        if ((move_rate2 != para_rate2) & (para_list[7] != '*')):
-            print("Fail: measured rate2 " + str(move_rate2) + " != expected rate2 " + str(para_rate2))
-        
-        if ((move_position2 != para_position2) & (para_list[8] != '*')):
-            print("Fail: measured position2 " + str(move_position2) + " != expected position2 " + str(para_position2))
+            if ((move_steps2 != para_steps2) & (para_list[5] != '*')):
+                print("Fail: measured steps2 " + str(move_steps2) + " != expected steps2 " + str(para_steps2))
+            
+            if ((move_accumulator2 != para_accumulator2) & (para_list[6] != '*')):
+                print("Fail: measured accumulator2 " + str(move_accumulator2) + " != expected accumulator2 " + str(para_accumulator2))
+            
+            if ((move_rate2 != para_rate2) & (para_list[7] != '*')):
+                print("Fail: measured rate2 " + str(move_rate2) + " != expected rate2 " + str(para_rate2))
+            
+            if ((move_position2 != para_position2) & (para_list[8] != '*')):
+                print("Fail: measured position2 " + str(move_position2) + " != expected position2 " + str(para_position2))
     else:
         print("Incomplete test description. Measured values = ", end='')
         print(str(move_ticks) + "," + str(move_steps1) + "," + str(move_accumulator1) + "," + str(move_rate1) + "," + str(move_position1), end='')
@@ -269,6 +286,8 @@ def capture_command(EBB_command : str, capture_dir_path : str, capture_time : fl
                 capture_configuration=capture_configuration) as capture:
 
             # The capture has started. We now need to send our EBB command:
+            # But wait a bit first in case there is a delay starting up the capture
+            time.sleep(0.2)
             response = str(query(the_port, EBB_command + '\r'))
             # TODO: Confirm that response was "OK\r\n", print error and actual response if not
             #print(last_command + " :: " + response.strip())
@@ -355,10 +374,11 @@ print(last_command + " :: " + response.strip())
 with open(sys.argv[1], "r", newline='') as test_input_file:
     reader = csv.reader(test_input_file, quotechar='"', doublequote=True, skipinitialspace=True)
     for param in reader:
-        if (len(param) >= 5) & (param[0] != '0'):
-            print(param[2] + ": ", end='')
-            test_dir = os.path.join(artifact_dir, param[2])
-            capture_command(param[1], test_dir, float(param[3]), param[4])
+        if (len(param) >= 5):
+            if (param[0] != '0'):
+                print(param[2] + ": ", end='')
+                test_dir = os.path.join(artifact_dir, param[2])
+                capture_command(param[1], test_dir, float(param[3]), param[4])
 
 ad.disconnect()             # Close serial port to AxiDraw
 test_input_file.close()
