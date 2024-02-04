@@ -662,6 +662,16 @@ void high_ISR(void)
   // into account.
   if (CurrentCommand.Command == COMMAND_LM_MOVE)
   {
+    // If the test mode is active, count this tick as part of the move if there
+    // are steps to take in either axis. 
+    if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+    {
+      if (bittstzero(AxisActive[0]) || bittstzero(AxisActive[1]))
+      {
+        gISRTickCountForThisCommand++;
+      }
+    }
+
     //// MOTOR 1   LM ////
 
     // Only do this if there are steps left to take
@@ -759,6 +769,13 @@ void high_ISR(void)
     // Has time run out for this command yet?
     if (bittstzero(AxisActive[0]))
     {
+      // If the test mode is active, count this tick as part of the move if there
+      // are steps to take. 
+      if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
+      {
+        gISRTickCountForThisCommand++;
+      }
+      
       // A simple optimization: we only have one 'count' for LT, to know
       // when we're done, so we can directly clear AllDone here if we are
       // not yet done with this move.
@@ -1402,19 +1419,6 @@ CheckForNextCommand:
       }
 #endif
 
-#if 0
-  if (bittst(TestMode, TEST_MODE_USART_ISR_BIT_NUM))
-  {
-
-        HexPrint((UINT32)CurrentCommand.Command)
-        PrintChar(',')
-        HexPrint(CurrentCommand.m.sm.Rate[0].value)
-        PrintChar(',')
-        HexPrint(CurrentCommand.m.sm.Steps[0])
-        PrintChar('\n')
-  }
-#endif      
-
       // Take care of clearing the step accumulators for the next move if
       // it's a motor move (of any type) - if the command requests it
       if (
@@ -1425,29 +1429,32 @@ CheckForNextCommand:
         (CurrentCommand.Command == COMMAND_LT_MOVE)
       )
       {
-        if (CurrentCommand.m.sm.SEState & SESTATE_ARBITRARY_ACC_BIT)
+        // These are used in TEST_MODE_USART_ISR_NUM to allow an arbitrary 
+        // value to be loaded into one or both accumulators for testing
+        if (CurrentCommand.m.sm.SEState & SESTATE_ARBITRARY_ACC1_BIT)
         {
-            acc_union[0].value = CurrentCommand.m.sm.DelayCounter;
+          acc_union[0].value = CurrentCommand.m.sm.DelayCounter;
         }
-        else
+        if (CurrentCommand.m.sm.SEState & SESTATE_ARBITRARY_ACC2_BIT)
         {
-          // Use the SEState to determine which accumulators to clear.
-          if (CurrentCommand.m.sm.SEState & SESTATE_CLEAR_ACC1_BIT)
-          {
-            acc_union[0].value = 0;
-          }
-          if (CurrentCommand.m.sm.SEState & SESTATE_CLEAR_ACC2_BIT)
-          {
-            acc_union[1].value = 0;
-          }
-          if (CurrentCommand.m.sm.SEState & SESTATE_NEGATE_ACC1_BIT)
-          {
-            acc_union[0].value = 0x7FFFFFFFUL;
-          }
-          if (CurrentCommand.m.sm.SEState & SESTATE_NEGATE_ACC2_BIT)
-          {
-            acc_union[1].value = 0x7FFFFFFFUL;
-          }
+          acc_union[1].value = CurrentCommand.m.sm.DelayCounter;
+        }
+        // Use the SEState to determine which accumulators to clear.
+        if (CurrentCommand.m.sm.SEState & SESTATE_CLEAR_ACC1_BIT)
+        {
+          acc_union[0].value = 0;
+        }
+        if (CurrentCommand.m.sm.SEState & SESTATE_CLEAR_ACC2_BIT)
+        {
+          acc_union[1].value = 0;
+        }
+        if (CurrentCommand.m.sm.SEState & SESTATE_NEGATE_ACC1_BIT)
+        {
+          acc_union[0].value = 0x7FFFFFFFUL;
+        }
+        if (CurrentCommand.m.sm.SEState & SESTATE_NEGATE_ACC2_BIT)
+        {
+          acc_union[1].value = 0x7FFFFFFFUL;
         }
         
         // Set the "Active" flags for this move based on steps for each axis
@@ -2280,157 +2287,154 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
   
   // We will use the SEState move parameter to hold a bitfield. This bitfield
   // will tell the ISR if the accumulators need any special treatment when
-  // the command is loaded. We can zero it, or set it to 2^31-1, or leave
-  // it alone.
-  // We need to check to see if the rate at the first step < 0, and
-  // if so, we need the FIFO to set the accumulator to 2^31-1 before
-  // as the command is loaded. So we use two bits in SEState to indicate
-  // this.
-  gMoveTemp.m.sm.SEState = 0;           // Start with all bits clear
+  // the command is loaded. We can zero it, or set it to 2^31-1, leave
+  // it alone, or set it to an arbitrary value (when testing).
+  // If clearing the accumulator, there are certain conditions which require 
+  // us to start the accumulator at 2^31-1, so we check for those 
+  // conditions and we use two bits in SEState to indicate this.
+
+  gMoveTemp.m.sm.SEState = 0;           // Start with all bits clear  
   
+  // Determine what to do with the accumulators in UART_ISR_NUM test mode.
+  //
+  // In this test mode, we are outputting all of the relevant variables after
+  // each move, over the debug UART pin, for collection by the HIL test 
+  // system for comparison to the correct values (which are pre-computed on
+  // the PC).
+  //
+  // This test mode gives the user the ability to 'preload' the accumulators
+  // before the move begins, thus allowing a test where you can simulate 
+  // the move beginning with any arbitrary value of the accumulator. This is
+  // critical as certain tests require this ability to correctly check the 
+  // math in those situations.
+  //
+  // This ability is implemented by overloading the last parameter sent in
+  // for this command, gClearAccs. This is an optional parameter. If the
+  // parameter is not present, then in this test mode that fact is interpreted
+  // as a command to clear both accumulators to zero before the move begins.
+  //
+  // However, if any value is present for this parameter, then ClearRet will
+  // be set to kEXTRACT_OK, and gClearAccs will hold the desired starting value
+  // of the accumulators. When this is true, both accumulators are set to 
+  // the value of gClearAccs before the move begins.
+  //
+  // Because this extra logic is only triggered when the test mode is active, 
+  // it does not impact normal operation at all.
   if (bittst(TestMode, TEST_MODE_USART_ISR_NUM))
   {
     // If the ISR_BIT_NUM test mode is on, then interpret the Clear parameter
-    // as the initial value for the accumulator.
-    if (ClearRet == kEXTRACT_OK)  // We got a Clear parameter
+    // as the initial value for Axis1 accumulator. There is no way currently
+    // to perform this same trick for Axis2.
+    
+    // We got a Clear parameter
+    if (ClearRet == kEXTRACT_OK)
     {
-      gMoveTemp.m.sm.SEState = SESTATE_ARBITRARY_ACC_BIT;
+      gMoveTemp.m.sm.SEState |= SESTATE_ARBITRARY_ACC1_BIT;
+      gMoveTemp.m.sm.SEState |= SESTATE_ARBITRARY_ACC2_BIT;
       gMoveTemp.m.sm.DelayCounter = gClearAccs;
+      
+      // We want to fall through to the 'normal' code that deals with
+      // accumulator clearing (looking ahead and negating, etc.). Since we know
+      // that we are setting the accumulators to a pre-calculated value and
+      // have told the ISR this with the two SEState bits above, we can set
+      // gClearAccs to zero, which will mean the 'normal' code below ignores
+      // the accumulators and doesn't zero or negate them.
+      gClearAccs = 0;
     }
     else
     {
-      // But if we didn't get a Clear parameter, then treat it as if the user
-      // wants the accumulator cleared
-      
-      
-      // This block "looks ahead" at the start of a move (while it is being
-      // parsed) to figure out if we need to negate the accumulator (i.e. start from
-      // 0x7FFFFFFFUL). Since this is common to LM/LT/L3/T3, and once for each axis,
-      // it gets its own function.
-      NeedNegativeAccumulator = FALSE;
-
-      RateTemp = gRate1 + gAccel1;
-      if (RateTemp < 0)
-      {
-        NeedNegativeAccumulator = TRUE;
-      }
-      else
-      {
-        if (RateTemp == 0)
-        {
-          RateTemp = gAccel1 + gJerk1;
-          if (RateTemp < 0)
-          {
-            NeedNegativeAccumulator = TRUE;
-          }
-          else
-          {
-            if (RateTemp == 0)
-            {
-              if (gJerk1 < 0)
-              {
-                NeedNegativeAccumulator = TRUE;
-              }
-            }
-          }
-        }
-      }
-      
-      if (NeedNegativeAccumulator)
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_NEGATE_ACC1_BIT;
-      }
-      else
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_CLEAR_ACC1_BIT;
-      }
+      // But if we didn't get a Clear parameter AND we are in UART_ISR test 
+      // mode, then treat it as if the user wants  both accumulators cleared.
+      // We're going to fall through to the 'normal' code below that handles
+      // this situation, by setting gClearAccs to 0x03, which tells the code
+      // to clear (or negate) both accumulators.
+      gClearAccs = 3;
     }
   }
-  else
+  
+  // 'Normal' accumulator clear/negate logic:
+  //
+  // Test mode not active, so just check Clear parameter bits 0 and 1
+  // to see if user wants to start move with cleared accumulator. If so,
+  // check for need to invert accumulator when move loaded into FIFO.
+  if (gClearAccs & 0x01)
   {
-    // Test mode not active, so just check Clear parameter bits 0 and 1
-    // to see if user wants to start move with cleared accumulator. If so,
-    // check for need to invert accumulator when move loaded into FIFO.
-    if (gClearAccs & 0x01)
-    {
-      NeedNegativeAccumulator = FALSE;
+    NeedNegativeAccumulator = FALSE;
 
-      RateTemp = gRate1 + gAccel1;
-      if (RateTemp < 0)
+    RateTemp = gRate1 + gAccel1;
+    if (RateTemp < 0)
+    {
+      NeedNegativeAccumulator = TRUE;
+    }
+    else
+    {
+      if (RateTemp == 0)
       {
-        NeedNegativeAccumulator = TRUE;
-      }
-      else
-      {
-        if (RateTemp == 0)
+        RateTemp = gAccel1 + gJerk1;
+        if (RateTemp < 0)
         {
-          RateTemp = gAccel1 + gJerk1;
-          if (RateTemp < 0)
+          NeedNegativeAccumulator = TRUE;
+        }
+        else
+        {
+          if (RateTemp == 0)
           {
-            NeedNegativeAccumulator = TRUE;
-          }
-          else
-          {
-            if (RateTemp == 0)
+            if (gJerk1 < 0)
             {
-              if (gJerk1 < 0)
-              {
-                NeedNegativeAccumulator = TRUE;
-              }
+              NeedNegativeAccumulator = TRUE;
             }
           }
         }
-      }
-
-      if (NeedNegativeAccumulator)
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_NEGATE_ACC1_BIT;
-      }
-      else
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_CLEAR_ACC1_BIT;
       }
     }
-    if (gClearAccs & 0x02)
-    {
-      
-      NeedNegativeAccumulator = FALSE;
 
-      RateTemp = gRate2 + gAccel2;
-      if (RateTemp < 0)
+    if (NeedNegativeAccumulator)
+    {
+      gMoveTemp.m.sm.SEState |= SESTATE_NEGATE_ACC1_BIT;
+    }
+    else
+    {
+      gMoveTemp.m.sm.SEState |= SESTATE_CLEAR_ACC1_BIT;
+    }
+  }
+  if (gClearAccs & 0x02)
+  {
+    NeedNegativeAccumulator = FALSE;
+
+    RateTemp = gRate2 + gAccel2;
+    if (RateTemp < 0)
+    {
+      NeedNegativeAccumulator = TRUE;
+    }
+    else
+    {
+      if (RateTemp == 0)
       {
-        NeedNegativeAccumulator = TRUE;
-      }
-      else
-      {
-        if (RateTemp == 0)
+        RateTemp = gAccel2 + gJerk2;
+        if (RateTemp < 0)
         {
-          RateTemp = gAccel2 + gJerk2;
-          if (RateTemp < 0)
+          NeedNegativeAccumulator = TRUE;
+        }
+        else
+        {
+          if (RateTemp == 0)
           {
-            NeedNegativeAccumulator = TRUE;
-          }
-          else
-          {
-            if (RateTemp == 0)
+            if (gJerk2 < 0)
             {
-              if (gJerk2 < 0)
-              {
-                NeedNegativeAccumulator = TRUE;
-              }
+              NeedNegativeAccumulator = TRUE;
             }
           }
         }
       }
-      
-      if (NeedNegativeAccumulator)
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_NEGATE_ACC2_BIT;
-      }
-      else
-      {
-        gMoveTemp.m.sm.SEState |= SESTATE_CLEAR_ACC2_BIT;
-      }
+    }
+
+    if (NeedNegativeAccumulator)
+    {
+      gMoveTemp.m.sm.SEState |= SESTATE_NEGATE_ACC2_BIT;
+    }
+    else
+    {
+      gMoveTemp.m.sm.SEState |= SESTATE_CLEAR_ACC2_BIT;
     }
   }
  
@@ -2491,12 +2495,14 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     ebb_print_int(gMoveTemp.m.sm.Jerk[0]);
     ebb_print((far rom char *)" R2=");
     ebb_print_int(gMoveTemp.m.sm.Rate[1].value);
-    ebb_print((far rom char *)" A2=");
-    ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
     ebb_print((far rom char *)" S2=");
+    ebb_print_uint(gMoveTemp.m.sm.Steps[1]);
+    ebb_print((far rom char *)" A2=");
     ebb_print_int(gMoveTemp.m.sm.Accel[1]);
     ebb_print((far rom char *)" J2=");
     ebb_print_int(gMoveTemp.m.sm.Jerk[1]);
+    ebb_print((far rom char *)" SE=");
+    ebb_print_int(gMoveTemp.m.sm.SEState);
     print_line_ending(kLE_REV);
   }
 

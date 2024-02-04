@@ -65,7 +65,7 @@
 // Set for printing ISR debug info to UART at end of every move
 #define TEST_MODE_USART_ISR_NUM           2u
 #define TEST_MODE_USART_ISR_BIT           (1u << TEST_MODE_USART_ISR_BIT_NUM)
-// Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not jus t end of move
+// Set this and TEST_MODE_USART_ISR_BIT_NUM for printing every ISR, not just end of move
 #define TEST_MODE_USART_ISR_FULL_NUM      3u
 #define TEST_MODE_USART_ISR_FULL_BIT      (1u << TEST_MODE_USART_ISR_FULL_BIT_NUM)
 // Prints every received byte out to debug UART
@@ -211,11 +211,12 @@ typedef struct
 
 // Bitfield used in motion commands for communicating accumulator handling
 // messages to ISR
-#define SESTATE_CLEAR_ACC1_BIT    0x01
-#define SESTATE_CLEAR_ACC2_BIT    0x02
-#define SESTATE_NEGATE_ACC1_BIT   0x04
-#define SESTATE_NEGATE_ACC2_BIT   0x08
-#define SESTATE_ARBITRARY_ACC_BIT 0x10
+#define SESTATE_CLEAR_ACC1_BIT      0x01
+#define SESTATE_CLEAR_ACC2_BIT      0x02
+#define SESTATE_NEGATE_ACC1_BIT     0x04
+#define SESTATE_NEGATE_ACC2_BIT     0x08
+#define SESTATE_ARBITRARY_ACC1_BIT  0x10
+#define SESTATE_ARBITRARY_ACC2_BIT  0x20
 
 // Reload value for TIMER1
 // We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
