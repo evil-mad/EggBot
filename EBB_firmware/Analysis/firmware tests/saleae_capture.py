@@ -265,9 +265,16 @@ def capture_command(EBB_command : str, capture_dir_path : str, capture_time : fl
         # with a sampling rate of 10 MSa/s, and a logic level of 3.3V.
         # The settings chosen here will depend on your device's capabilities and what
         # you can configure in the Logic 2 UI.
+        
+        # This one is for Saleae 16
+        #device_configuration = automation.LogicDeviceConfiguration(
+        #    enabled_digital_channels=[0, 1, 2, 3, 4, 5, 6, 7, 8],
+        #    digital_sample_rate=32_000_000,
+        #)
+        # This one is for Saleae 16 Pro
         device_configuration = automation.LogicDeviceConfiguration(
             enabled_digital_channels=[0, 1, 2, 3, 4, 5, 6, 7, 8],
-            digital_sample_rate=32_000_000,
+            digital_sample_rate=50_000_000,
         )
 
         # Record 5 seconds of data before stopping the capture
