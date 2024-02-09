@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a41"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a42"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -831,9 +831,6 @@ void UserInit(void)
 
   RCServo2_Init();
 
-  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
-  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
-
   // Turn on the Timer4
   T4CONbits.TMR4ON = 1;
 
@@ -875,6 +872,9 @@ void UserInit(void)
   g_StepperDisableCountdownS = 0;
   g_StepperDisableState = kSTEPPER_TIMEOUT_DISABLED;
   g_PowerDropDetected = FALSE;
+
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+  INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 }
 
 /******************************************************************************

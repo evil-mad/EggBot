@@ -218,20 +218,18 @@ typedef struct
 #define SESTATE_ARBITRARY_ACC1_BIT  0x10
 #define SESTATE_ARBITRARY_ACC2_BIT  0x20
 
-// Reload value for TIMER1
-// We need a 25KHz ISR to fire, so we take Fosc (48Mhz), divide by 4
-// (normal CPU instruction rate of Fosc/4)
-// Then we use a reload value of 480 (0x1E0) to give us
-// a rate of 48MHz/4/480 = 25KHz.
-// Note that because we can't reload the timer _exactly_ after it fires,
-// we have to decrease our 480 value by a few to account for the instructions
-// that happen after the timer fires but before we can reload the timer with new
-// values.
-// The values here are hand tuned for 25KHz ISR operation
-// 0xFE36 = 25.00 KHz   (as of v3.0.0-a33)
+// Reload value for TIMER0
+// We need a 25KHz ISR to fire, so we take Fosc (48Mhz) and divide by 4
+// (normal CPU instruction rate of Fosc/4). We then set up Timer0 so that it
+// has a 1:4 clock prescaler. Thus Timer0 is being clocked by a 
+// 3MHz clock. We use a reload value of 0x8A to give us an ISR rate of 
+// 48MHz/4/4/120 = 25KHz. In order to get the timer to count 120 clocks,
+// we give it a reload value of 256-120=136 (since it's a count up timer)
+// but we also need to add 2 timer counts to bring it to 138 in order to account
+// for the additional time required to get into the ISR and read out the value
+// of the timer in order to compute the next reload value.
 
-#define TIMER1_L_RELOAD 0x36
-#define TIMER1_H_RELOAD 0xFE
+#define TIMER0_RELOAD 0x8A
 
 #define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
 

@@ -423,6 +423,9 @@ BOOL gLimitChecks;
 // command reply format
 UINT8 gStandardizedCommandFormat;
 
+// Temp storage in ISR for late ISR compensation value
+UINT8 CurTime;
+
 // These globals replace the local (stack) variables used during processing
 // and parsing of stepper motor commands. They also take the place of parameters
 // for the two low-level (process_low_level and process_simple) move functions.
@@ -511,10 +514,6 @@ static MoveCommandType gMoveTemp;     // Commands fill this then copy to FIFO
 // Storage for the 32 bytes of "SL" command values
 static UINT8   gSL_Storage[32];
 
-
-
-
-
 // Local function definitions
 static void clear_StepCounters(void);
 static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
@@ -529,14 +528,27 @@ extern void FIFO_COPY(void);
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
-  // 25KHz ISR fire. Note: For speed, we don't check that PIR1bits.TMR1IF is set
+  // 25KHz ISR fire. Note: For speed, we don't check that INTCONbits.TMR0IF is set
   // here. We assume it is, as it's the only interrupt that should be triggering
   // calls to high_ISR()
   
   // Clear the interrupt 
-  PIR1bits.TMR1IF = 0;
-  TMR1H = TIMER1_H_RELOAD;
-  TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
+  INTCONbits.TMR0IF = 0;
+  
+  // Load the current value of the timer (it will be above zero) so we know
+  // how long it took from when the interrupt fired until we actually 
+  // serviced the interrupted. 
+  CurTime = TMR0L;
+
+  // Because the timer is a 'count up' timer, and because it generates an 
+  // interrupt when it rolls over at 0x00, our TIMER0_RELOAD value is effectively
+  // a negative value. By adding CurTime to that reload value, we decrease the
+  // amount of time we want to wait until the next ISR fires by the exact 
+  // amount that we were delayed by in getting to this ISR tick. Thus any
+  // 'lateness' in this ISR tick is compensated for in the next tick, keeping
+  // an overall steady 40uS between ticks even if one or two ISRs take too long
+  // and delay the start of the next tick by some amount.
+  TMR0L = TIMER0_RELOAD + CurTime;  // Reload for 25KHz ISR fire
 
   if (bittst(TestMode, TEST_MODE_GPIO_NUM))
   {
@@ -1554,9 +1566,8 @@ CheckForNextCommand:
   {
     // Clear the interrupt as the last thing we do. This allows us to have
     // arbitrarily long interrupts to print debug information out
-    PIR1bits.TMR1IF = 0;
-    TMR1H = TIMER1_H_RELOAD;
-    TMR1L = TIMER1_L_RELOAD;  // Reload for 25KHz ISR fire
+    INTCONbits.TMR0IF = 0;
+    TMR0L = TIMER0_RELOAD;  // Reload for 25KHz ISR fire
     bitclr(TestMode, TEST_MODE_PRINT_TRIGGER_NUM);
   }
   if (bittst(TestMode, TEST_MODE_GPIO_NUM))
@@ -1607,23 +1618,6 @@ void EBB_Init(void)
   bitclrzero(gRedLEDEmptyFIFO);
 
   TestMode = 0;
-  
-  // Set up TMR1 for our 25KHz High ISR for stepping
-  T1CONbits.RD16 = 1;       // Set 16 bit mode
-  T1CONbits.TMR1CS1 = 0;    // System clocked from Fosc/4
-  T1CONbits.TMR1CS0 = 0;
-  T1CONbits.T1CKPS1 = 0;    // Use 1:1 Prescale value
-  T1CONbits.T1CKPS0 = 0;
-  T1CONbits.T1OSCEN = 0;    // Don't use external osc
-  T1CONbits.T1SYNC = 0;
-  TMR1H = 0x00;             //
-  TMR1L = 0x00;             // Give the timer about 5ms before it fires the first time
-
-  IPR1bits.TMR1IP = 1;      // Use high priority interrupt
-  PIR1bits.TMR1IF = 0;      // Clear the interrupt
-  PIE1bits.TMR1IE = 1;      // Turn on the interrupt
-
-  T1CONbits.TMR1ON = 1;     // Turn the timer on
   
 //  PORTA = 0;
   RefRA0_IO_TRIS = INPUT_PIN;
@@ -1749,6 +1743,23 @@ void EBB_Init(void)
 
   // Clear out global stepper positions
   clear_StepCounters();
+
+// Set up TMR0 for our 25KHz High ISR for stepping
+  T0CONbits.T08BIT = 1;     // Set 8 bit mode
+  T0CONbits.T0CS = 0;       // System clocked from Fosc/4
+  T0CONbits.PSA = 0;        // Use prescaler
+  T0CONbits.T0PS2 = 0;      // Use 4:1 Prescale value
+  T0CONbits.T0PS1 = 0;
+  T0CONbits.T0PS0 = 1;
+  TMR0L = 0x00;             // Give the timer some time before it fires the first time
+
+  T0CONbits.TMR0ON = 1;     // Turn the timer on
+
+  INTCON2bits.TMR0IP = 1;   // Use high priority interrupt for Timer 0
+  INTCONbits.TMR0IF = 0;    // Clear the interrupt
+  INTCONbits.TMR0IE = 1;    // Turn on the interrupt
+
+  
 }
 
 // Stepper (mode) Configure command
@@ -4196,7 +4207,8 @@ void parse_QG_packet(void)
 // The engraver motor is always assumed to be on RB3
 // So our init routine will map ECCP1
 //
-// Timer1 is stepper
+// Timer0 is stepper
+// Timer1 is unused
 // Timer2 and ECCP1 is engraver PWM
 // Timer3 and ECCP2 is RC servo2 output
 // Timer4 is 1ms ISR
