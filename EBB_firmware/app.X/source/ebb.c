@@ -277,6 +277,7 @@
 #include <ctype.h>
 #include <delays.h>
 #include <math.h>
+#include <string.h>
 #include "Usb\usb.h"
 #include "Usb\usb_function_cdc.h"
 #include "usb_config.h"
@@ -397,6 +398,9 @@ static near INT32  gISRPosition1ForThisCommand;
 // are needed in the iSR.
 #pragma udata ISR_globals = 0x180
 
+char * p1;
+char * p2;
+
 // Variables used during debug printing within ISR
 static u32b4_t xx;
 static UINT8 nib;
@@ -404,7 +408,6 @@ static UINT8 nib;
 // The move command containing the currently executing move command in the ISR
 MoveCommandType CurrentCommand;
 
-unsigned int DemoModeActive;
 static SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
 
@@ -525,6 +528,7 @@ static void process_simple_rate_move_fp(void);
 extern void FIFO_COPY(void);
 
 // High ISR
+#if defined(USE_C_ISR)
 #pragma interrupt high_ISR
 void high_ISR(void)
 {
@@ -1347,9 +1351,34 @@ CheckForNextCommand:
       
 //      FIFO_COPY();
 
-      // Check to see if the FIFO_out_ptr needs wrapping
       
-#if defined(USE_C_ISR)
+#if 1
+    // memcpy() doesn't work because it introduces a function, which blows up the ISR (much longer, even best case, because of entry/exit code)
+    // memcpy((void *)&CurrentCommand, (void *)&FIFOPtr[gFIFOOut], sizeof(CurrentCommand));
+
+    p1 = (char *)&CurrentCommand;
+    p2 = (char *)&FIFOPtr[gFIFOOut];
+    
+    for (isr_i = 0; isr_i < 0x2Fu; isr_i++)
+    {
+      *p1 = *p2;
+      p1++;
+      p2++;
+    }
+      
+/*
+ * gFIFOCommand = FIFOPtr[gFIFOOut].Command;
+      
+      CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+      CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
+      CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
+      CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
+      CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
+      CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
+      CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
+      CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
+*/
+#else 
       // Instead of copying over the entire MoveCommandType every time, to save
       // time we will check which command is next in the FIFO, and then only 
       // copy over those fields that the new command actually uses.
@@ -1430,7 +1459,8 @@ CheckForNextCommand:
         // gFIFOCommand had a value that is not allowed
       }
 #endif
-
+    LATDbits.LATD0 = 0;
+      
       // Take care of clearing the step accumulators for the next move if
       // it's a motor move (of any type) - if the command requests it
       if (
@@ -1577,6 +1607,10 @@ CheckForNextCommand:
     LATDbits.LATD1 = 0;
   }
 }
+#else
+  // If USE_C_ISR is not defined, then we want the assembly version of the ISR
+
+#endif
 
 // Zero out all global variables used for parameter passing between motion
 // parsing commands

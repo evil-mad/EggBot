@@ -20,6 +20,7 @@
       <itemPath>source/UBW.h</itemPath>
       <itemPath>source/usb_config.h</itemPath>
       <itemPath>source/ebb_print.h</itemPath>
+      <itemPath>source/AsmDefines.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"

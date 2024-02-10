@@ -53,6 +53,19 @@
 
 #include <usart.h>
 
+// Reload value for TIMER0
+// We need a 25KHz ISR to fire, so we take Fosc (48Mhz) and divide by 4
+// (normal CPU instruction rate of Fosc/4). We then set up Timer0 so that it
+// has a 1:4 clock prescaler. Thus Timer0 is being clocked by a 
+// 3MHz clock. We use a reload value of 0x8A to give us an ISR rate of 
+// 48MHz/4/4/120 = 25KHz. In order to get the timer to count 120 clocks,
+// we give it a reload value of 256-120=136 (since it's a count up timer)
+// but we also need to add 2 timer counts to bring it to 138 in order to account
+// for the additional time required to get into the ISR and read out the value
+// of the timer in order to compute the next reload value.
+
+#define TIMER0_RELOAD 0x8A
+
 /*
  *  Bitfield defines for the TestModes variable.
  */
@@ -218,19 +231,6 @@ typedef struct
 #define SESTATE_ARBITRARY_ACC1_BIT  0x10
 #define SESTATE_ARBITRARY_ACC2_BIT  0x20
 
-// Reload value for TIMER0
-// We need a 25KHz ISR to fire, so we take Fosc (48Mhz) and divide by 4
-// (normal CPU instruction rate of Fosc/4). We then set up Timer0 so that it
-// has a 1:4 clock prescaler. Thus Timer0 is being clocked by a 
-// 3MHz clock. We use a reload value of 0x8A to give us an ISR rate of 
-// 48MHz/4/4/120 = 25KHz. In order to get the timer to count 120 clocks,
-// we give it a reload value of 256-120=136 (since it's a count up timer)
-// but we also need to add 2 timer counts to bring it to 138 in order to account
-// for the additional time required to get into the ISR and read out the value
-// of the timer in order to compute the next reload value.
-
-#define TIMER0_RELOAD 0x8A
-
 #define HIGH_ISR_TICKS_PER_MS (25u)  // Note: computed by hand, could be formula
 
 // A define to wait until the transmit register is empty, the print one byte
@@ -330,7 +330,6 @@ extern near MoveCommandType * FIFOPtr;
 extern near volatile UINT8 gFIFOLength;
 extern near volatile UINT8 gFIFOIn;
 extern near volatile UINT8 gFIFOOut;
-extern unsigned int DemoModeActive;
 extern unsigned int comd_counter;
 extern unsigned char QC_ms_timer;
 extern BOOL gLimitChecks;
