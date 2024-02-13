@@ -982,7 +982,7 @@
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
             </li>
           </ul>
           <li>
@@ -1113,10 +1113,10 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken. Negative values will start movement in the opposite direction.
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter can determine the initial motor direction. See direction note below.
             </li>
             <li>
-              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.
+              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter can determine the initial motor direction. See direction note below.
             </li>
             <li>
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
@@ -1125,9 +1125,14 @@
               <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control jerk during a move.
             </li>
             <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared.
             </li>
           </ul>
+          <li>
+            <span style="font-weight: bold;">Direction note:</span>
+            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i> and <i>Steps</i> as well as <i>Accel</i>.
+            </p>
+          </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
@@ -1156,13 +1161,13 @@
               <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
             </li>
             <li>
-              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn. The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn initially. The absolute value abs(<i>Rate</i>) of each <i>Rate</i> is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
             </li>
             <li>
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
             </li>
           </ul>
           <li>
@@ -2656,7 +2661,7 @@
               <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
-              <i>Clear</i> is an integer in the range 0 - 3. If it is 1 then the step Accumulator for motor1 is zeroed at the start of the command.  If it is 2, then the step Accumulator for motor2 is zeroed at the start of the command.  If <i>Clear</i> is 3, then both are cleared.
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
             </li>
           </ul>
           <li>
