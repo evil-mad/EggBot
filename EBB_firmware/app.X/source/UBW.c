@@ -1770,7 +1770,7 @@ void parse_R_packet(void)
 // 52  <limit_switch_target> set the limit_switch_value for limit switch checking in ISR. 
 // 53  {1|0} turns on or off the sending of "Limit switch triggered" replies (defaults to off)
 // 54  {1|0} turns on/off command checksum (defaults to off)
-// 60  <NewThreshood> Set the power lost threshold. Set to 0 to disable.
+// 60  <NewThreshold> Set the power lost threshold. Set to 0 to disable.
 // 61  <NewStepperDisableTimeoutS> Sets the stepper timeout in seconds. 0 to disable.
 // 250 {1|0} turns on or off the GPIO DEBUG (i/o pins to time moves and the ISR)
 // 251 {1|0} turns on or off the UART ISR DEBUG (prints internal numbers at end of each move)

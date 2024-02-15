@@ -547,7 +547,7 @@
                 <li>
                   <code>Param_Number</code> = 1 : <b>Enable Command Response</b>
                   <p>
-                    This sub-command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many commands back to back. This sub-command has no effect when Future Syntax Mode is active.
+                    This sub-command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many back to back commands. This sub-command has no effect when Future Syntax Mode is active.
                   </p>
                   <ul>
                     <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
@@ -561,10 +561,10 @@
                   </p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>) will not perform any parameter limit checking.
+                      If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>,<code>T3</code>,<code>L3</code>,) will limit their parameter limit checking.
                     </li>
                     <li>
-                      If <code>Param_Value</code> = 1, then stepper motor motion commands will perform any parameter limit checking (default at boot).
+                      If <code>Param_Value</code> = 1, then stepper motor motion commands will perform all parameter limit checking and return error messages if any parameter limits are exceeded (default at boot).
                     </li>
                   </ul>
                 </li>
@@ -581,7 +581,7 @@
                 <li>
                   <code>Param_Number</code> = 4 : <b>Set new FIFO size</b>
                   <p>
-                    This command will set the FIFO to a new depth, measured in commands. <code>Param_Value</code> needs to be a decimal number between 0 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
+                    This command will set the FIFO to a new depth, measured in commands. <code>Param_Value</code> needs to be a decimal number between 1 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
                   </p>
                   <p>
                     If there are any currently executing motion commands, or if there are any commands waiting in the FIFO, the execution of this command will block and wait for the FIFO to be completely empty and any executing motion commands to finish before allowing the change to FIFO size.
@@ -694,7 +694,6 @@
                   <p>
                     The website <a href="https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/">https://www.scadacore.com/tools/programming-calculators/online-checksum-calculator/</a> can be used to compute checksums for a command. Take the desired command, paste it into the ASCII Input field, click AnalyzeDataAscii and then look at the CheckSum8 2s Complement field. Take that value (which is in hex) and convert it to decimal to use as the checksum for your command.
                   </p>
-
                   <p>
                     <span style="font-weight: bold;">Example 1:</span> If you want to send the command <code>SM,1000,1000,1000</code> with a checksum, you would send <code>SM,1000,1000,1000,153</code>. The 153 on the end is the checksum of all of the bytes up to but not including the comma before the checksum.
                   </p>
@@ -705,7 +704,7 @@
                 <li>
                   <code>Param_Number</code> = 60 : <b>Set new power lost threshold</b>
                   <p>
-                    This command will set a new <code>Power_Lost_Threshold</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <code>Power_Lost_Threshold</code> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <code>Power_Lost_Threshold</code>. If V+ is ever less than <code>Power_Lost_Threshold</code>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <code>Power_Lost_Threshold</code> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <code>Power_Lost_Threshold</code> at any time. After setting a new value of <code>Power_Lost_Threshold</code> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. So to set the <code>Power_Lost_Threshold</code> to 12V you would use <code>CU,60,404</code>.
+                    This command will set a new <code>Power_Lost_Threshold</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <code>Power_Lost_Threshold</code> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <code>Power_Lost_Threshold</code>. If V+ is ever less than <code>Power_Lost_Threshold</code>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <code>Power_Lost_Threshold</code> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <code>Power_Lost_Threshold</code> at any time. After setting a new value of <code>Power_Lost_Threshold</code> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. For example to set the <code>Power_Lost_Threshold</code> to 12V you would use <code>CU,60,404</code>.
                   </p>
                 </li>
                 <li>
@@ -718,15 +717,15 @@
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug</b>
+                  <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug pins</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 251 : <b>Enable debug USART end of move values</b>
+                  <code>Param_Number</code> = 251 : <b>Enable debug USART end of move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 252 : <b>Enable debug USART all move values</b>
+                  <code>Param_Number</code> = 252 : <b>Enable debug USART every ISR move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
@@ -738,7 +737,15 @@
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 255 : <b>Enable command parsing USB debug</b>
+                  <code>Param_Number</code> = 255 : <b>Enable command parsing USB debug printing</b>
+                  <p>This is an internal software debugging and testing command.</p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 256 : <b>Disable parsed moves from entering FIFO</b>
+                  <p>This is an internal software debugging and testing command.</p>
+                </li>
+                <li>
+                  <code>Param_Number</code> = 257 : <b>Enable RC7 indicator of command parsing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
               </ul>
@@ -973,18 +980,26 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step Accumulator every 40 &mu;s to determine when steps are taken. Negative values will start movement in the opposite direction.
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter can determine the initial motor direction. See direction note below.
             </li>
             <li>
-              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter controls the direction that the axis should turn.
+              <i>Steps1</i> and <i>Steps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. Each number gives the movement distance &mdash; the total number of steps &mdash; for the given axis, axis 1 or axis 2. The sign of each <i>Steps</i> parameter can determine the initial motor direction. See direction note below.
             </li>
             <li>
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared.
+            </li>
+            <li>
               <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
             </li>
           </ul>
+          <li>
+            <span style="font-weight: bold;">Direction note:</span>
+            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i> and <i>Steps</i> as well as <i>Accel</i> to make the math work out.
+            </p>
+          </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
@@ -1130,7 +1145,7 @@
           </ul>
           <li>
             <span style="font-weight: bold;">Direction note:</span>
-            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i> and <i>Steps</i> as well as <i>Accel</i>.
+            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i> and <i>Steps</i> as well as <i>Accel</i> to make the math work out.
             </p>
           </li>
           <li>
@@ -2079,7 +2094,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command reinitializes the the internal state of the EBB to the default power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not reinitialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
+              This command re-initializes the the internal state of the EBB to the default power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not re-initialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
@@ -2652,13 +2667,13 @@
               <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
             </li>
             <li>
-              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483647 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn. The absolute value abs(<i>Rate</i>) of each is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
+              <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction.
             </li>
             <li>
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
-              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control jerk during a move.
             </li>
             <li>
               <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
