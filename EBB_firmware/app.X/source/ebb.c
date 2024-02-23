@@ -2553,7 +2553,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
 //    2 will clear Motor2 accumulator and leave Motor1 accumulator
 //    3 will clear both Motor1 and Motor2 accumulators
 // If the EBB can not make the move in the specified time, it will take as long as it needs to at max speed
-// i.e. SM,1,1000 will not produce 1000steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
+// i.e. SM,1,1000 will not produce 1000 steps in 1ms. Instead, it will take 40ms (25KHz max step rate)
 // NOTE2: If you specify zero steps for the axis, then you effectively create a delay. Use for small
 // pauses before raising or lowering the pen, for example.
 void parse_SM_packet(void)
@@ -3904,12 +3904,6 @@ void process_SP(PenStateType NewState, UINT16 CommandDuration)
 // Everything after EnableAxis1 is optional
 // Each parameter can have a value of
 //    0 to disable that motor driver
-// FOR OLD DRIVER CHIP (A3967) - can do separate enables for each axis
-//    1 to enable the driver in 1/8th step mode
-//    2 to enable the driver in 1/4 step mode
-//    3 to enable the driver in 1/2 step mode
-//    4 to enable the driver in full step mode
-// FOR NEW DRIVER CHIP (A4988/A4983)
 // (only first parameter applies, and it applies to both drivers)
 //    1 to enable the driver in 1/16th step mode
 //    2 to enable the driver in 1/8 step mode
@@ -3954,9 +3948,9 @@ void parse_EM_packet(void)
       ;
 
     // Set up the motion queue command
-  FIFOPtr[gFIFOIn].m.sm.DirBits = EA1;
-  FIFOPtr[gFIFOIn].m.sm.ServoRPn = EA2;
-  FIFOPtr[gFIFOIn].Command = COMMAND_EM;
+    FIFOPtr[gFIFOIn].m.sm.DirBits = EA1;
+    FIFOPtr[gFIFOIn].m.sm.ServoRPn = EA2;
+    FIFOPtr[gFIFOIn].Command = COMMAND_EM;
 
     gFIFOIn++;
     if (gFIFOIn >= gCurrentFIFOLength)

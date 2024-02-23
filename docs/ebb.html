@@ -1634,8 +1634,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QE,<i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>MOTOR1_STATE</i>,<i>MOTOR2_STATE</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QE,<i>Motor1_State</i>,<i>Motor2_State</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Motor1_State</i>,<i>Motor2_State</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1645,12 +1645,11 @@
             </p>
             <p>
               There is only one value for the microstepping resolution since both motor drivers share the same MS1, MS2 and MS3 lines on the EBB. So the two values returned by this command will either be the same (if both motors are enabled) or one or both of them will be zero. But they will never show that the two motors are both enabled and have different microstep resolutions.
-              two values returned by this query will either be the same (if both motors are enabled) or one or both of them will be zero. But they will
             </p>
             <p>The two returned values are:</p>
             <ul>
               <li>
-                <i>MOTOR1_STATE</i>
+                <i>Motor1_State</i>
                 <p>
                 <ul>
                   <li>0: Motor 1 is disabled</li>
@@ -1663,8 +1662,8 @@
                 </p>
               </li>
               <li>
-                <i>MOTOR2_STATE</i>
-                <p>Same as for MOTOR1_STATE but for Motor 2.
+                <i>Motor2_State</i>
+                <p>Same as for Motor1_State but for Motor 2.
                 </p>
               </li>
             </ul>
@@ -1681,7 +1680,7 @@
 
           <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,0,4&lt;NL&gt;</code>
-            <p>Motor 1 is disabled and motor 2 is enabled an set to 1/4 steps.</p>
+            <p>Motor 1 is disabled and motor 2 is enabled and set to 1/4 steps.</p>
           </li>
 
           <li>
@@ -2270,7 +2269,7 @@
         <h4><a name="SC"></a> "SC" &mdash; Stepper and Servo Mode Configure</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SC,<i>value1</i>,<i>value2</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SC,<i>Value1</i>,<i>Value2</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SC&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
@@ -2278,9 +2277,9 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>value1</i> is an integer in the range from 0 to 255, which specifies the parameter that you are adjusting.</li>
-              <li><i>value2</i> is an integer in the range from 0 to 65535. It specifies the value of the parameter given by <i>value1</i>.</li>
-              <li>See the list of these parameters (<i>value1</i>) and allowed values (<i>value2</i>), below.</li>
+              <li><i>Value1</i> is an integer in the range from 0 to 255, which specifies the parameter that you are adjusting.</li>
+              <li><i>Value2</i> is an integer in the range from 0 to 65535. It specifies the value of the parameter given by <i>Value1</i>.</li>
+              <li>See the list of these parameters (<i>Value1</i>) and allowed values (<i>Value2</i>), below.</li>
             </ul>
           <li>
             <span style="font-weight: bold;">Description:</span>
@@ -2291,7 +2290,7 @@
           </li>
           <ul>
             <li>
-              <code>SC,1,<i>value2</i></code> Pen lift mechanism. <i>value2</i> may be 0, 1 or 2. Early EggBot models used a small solenoid, driven from an output signal on pin RB4. 
+              <code>SC,1,<i>Value2</i></code> Pen lift mechanism. <i>Value2</i> may be 0, 1 or 2. Early EggBot models used a small solenoid, driven from an output signal on pin RB4. 
               <ul>
                 <li><code>SC,1,0</code> Enable only the solenoid output (RB4) for pen up/down movement.</li>
                 <li><code>SC,1,1</code> Enable only the RC servo output (RB1) for pen up/down movement.</li>
@@ -2299,7 +2298,7 @@
               </ul>
             </li>
             <li>
-              <code>SC,2,<i>value2</i></code> Stepper signal control. <i>value2</i> may be 0, 1 or 2. 
+              <code>SC,2,<i>Value2</i></code> Stepper signal control. <i>Value2</i> may be 0, 1 or 2. 
               <ul>
                 <li><code>SC,2,0</code> Use microcontroller to control on-board stepper driver chips (default)</li>
                 <li>
@@ -2320,41 +2319,42 @@
               </ul>
             </li>
             <li>
-              <code>SC,4,<i>servo_min</i></code> Set the minimum value for the RC servo output position. <i>servo_min</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Up" position. <br />Default: 12000 (1.0 ms) on reset.
+              <code>SC,4,<i>Servo_Min</i></code> Set the minimum value for the RC servo output position. <i>Servo_Min</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Up" position. 
+              <br />
+              Default: 12000 (1.0 ms) on reset.
             </li>
             <li>
-              <code>SC,5,<i>servo_max</i></code> Set the maximum value for the RC servo output position. <i>servo_max</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. 
-              This sets the "Pen Down" position. 
+              <code>SC,5,<i>Servo_Max</i></code> Set the maximum value for the RC servo output position. <i>Servo_Max</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Down" position. 
               <br />
               Default: 16000 (1.33 ms) on reset.
             </li>
             <li>
-              <code>SC,8,<i>maximum_S2_channels</i></code> Sets the number of RC servo PWM channels, each of <i>S2_channel_duration_ms</i> before cycling back to channel 1 for S2 command. Values from 1 to 24 are valid for <i>maximum_S2_channels</i>.
+              <code>SC,8,<i>Maximum_S2_Channels</i></code> Sets the number of RC servo PWM channels, each of <i>S2_Channel_Duration_MS</i> before cycling back to channel 1 for S2 command. Values from 1 to 4 are valid for <i>Maximum_S2_Channels</i>.
               <br />
-              Default: 8 on reset.
+              Default: 4 on reset.
             </li>
             <li>
-              <code>SC,9,<i>S2_channel_duration_ms</i></code> Set the number of milliseconds before firing the next enabled channel for the S2 command. Values from 1 to 6 are valid for <i>S2_channel_duration_ms</i>.
+              <code>SC,9,<i>S2_Channel_Duration_MS</i></code> Set the number of milliseconds before firing the next enabled channel for the S2 command. Values from 1 to 6 are valid for <i>S2_Channel_Duration_MS</i>.
               <br />
               Default: 3 ms on reset.
             </li>
             <li>
-              <code>SC,10,<i>servo_rate</i></code> Set rate of change of the servo position, for both raising and lowering movements. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
+              <code>SC,10,<i>Servo_Rate</i></code> Set rate of change of the servo position, for both raising and lowering movements. Same units as <i>Rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,11,<i>servo_rate_up</i></code> Set the rate of change of the servo when going up. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
+              <code>SC,11,<i>Servo_Rate_Up</i></code> Set the rate of change of the servo when going up. Same units as <i>Rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,12,<i>servo_rate_down</i></code> Set the rate of change of the servo when going down. Same units as <i>rate</i> parameter in <code><a href="#S2">S2</a></code> command.
+              <code>SC,12,<i>Servo_Rate_Down</i></code> Set the rate of change of the servo when going down. Same units as <i>Rate</i> parameter in <code><a href="#S2">S2</a></code> command.
             </li>
             <li>
-              <code>SC,13,<i>use_alt_prg</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead.  See the description of <code><a href="#QB">QB</a></code> for more information.
+              <code>SC,13,<i>Use_Alt_Prg</i></code> - turns on (1) or off (0) alternate pause button function on RB0. On by default. For EBB v1.1 boards, it uses RB2 instead. See the description of <code><a href="#QB">QB</a></code> for more information.
             </li>
           </ul>
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
           <li><span style="font-weight: bold;">Example:</span> <code>SC,1,1\r</code> Enable only the RC servo for pen lift; disable solenoid control output.</li> 
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.2
+            <span style="font-weight: bold;">Version History:</span> Maximum_S2_Channels maximum value changed from 24 to 4 in version 3.0.0.
           </li>
         </ul>
  
@@ -2424,15 +2424,22 @@
         <h4><a name="SM"></a> "SM" &mdash; Stepper Move</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>duration</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SM,<i>Duration</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>[,<i>Clear</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SM&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
-            <li><i>AxisSteps1</i> and <i>AxisSteps2</i> are integers, each in the range from -16777215 to 16777215, giving movement distance in steps.</li>
+            <li>
+              <i>Duration</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of milliseconds, that the command executes for.
+            </li>
+            <li>
+              <i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647, giving movement distance in steps.
+            </li>
+            <li>
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
+            </li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
@@ -2440,26 +2447,31 @@
               Use this command to make the motors draw a straight line at constant velocity, or to add a delay to the motion queue.
             </p>
             <p>
-              If both <i>AxisSteps1</i> and <i>AxisSteps2</i> are zero, then a delay of <i>duration</i> ms is executed. <i>AxisSteps2</i> is an optional value, and if it is not included in the command, zero steps are assumed for axis 2.
+              If both <i>AxisSteps1</i> and <i>AxisSteps2</i> are zero, then a delay of <i>Duration</i> ms is executed. <i>AxisSteps2</i> is an optional value, and if it is not included in the command, zero steps are assumed for axis 2. If <i>Clear</i> is used, then <i>AxisSteps2</i> is required.
             </p>
             <p>
               The sign of <i>AxisSteps1</i> and <i>AxisSteps2</i> represent the direction each motor should turn.
             </p>
             <p>
-              The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move.
+              The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that this speed range will be violated on either axis, it will use the maximum (or minimum) speed to complete the move.
+            </p>
+            <p>
               While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
+            </p>
+            <p>
+              If the command is used as a delay, <i>Duration</i> is capped at 100000 ms.
             </p>
             <p>
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
-            <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
+            <p>A value of 0 for <i>Duration</i> is invalid and will be rejected.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
             Move axis 1 by 250 steps and axis2 by -766 steps, in 1000 ms of duration.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.8
+            <span style="font-weight: bold;">Version History:</span> Parameter values expanded to 32 bits and minimum speed lowered in v3.0.0
           </li>
         </ul>
       

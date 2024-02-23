@@ -2514,16 +2514,9 @@ void parse_O_packet(void)
   print_line_ending(kLE_OK_NORM);
 }
 
-// Read in the three I/O ports (A,B,C) and create
+// Read in the five I/O ports (A,B,C,D,E) and creates
 // a packet to send back with all of values.
-// Example: "I,143,221,010<CR>"
-// Remember that on UBW 28 pin boards, we only have
-// Port A bits 0 through 5
-// Port B bits 0 through 7
-// Port C bits 0,1,2 and 6,7
-// And that Port C bits 0,1,2 are used for
-// User1 LED, User2 LED and Program switch respectively.
-// The rest will be read in as zeros.
+// Example: "I,143,221,010,008,179<CR>"
 void parse_I_packet(void)
 {
   print_command(TRUE, TRUE);
