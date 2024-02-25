@@ -290,6 +290,7 @@
           <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
           <li><a href="#T3">T3</a> &mdash; Low-level Move with Jerk, Time Limited</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
+          <li><a href="#TR">TR</a> &mdash; Test Rate</li>
           <li><a href="#V">V</a> &mdash; Version Query</li>
           <li><a href="#XM">XM</a> &mdash; Stepper Move, for Mixed-axis Geometries</li>
         </ul>
@@ -302,8 +303,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>channel</i>:<i>value</i>,<i>channel</i>:<i>value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>A,<i>Channel</i>:<i>Value</i>,<i>Channel</i>:<i>Value</i></code> . . . <code>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>Channel</i>:<i>Value</i>,<i>Channel</i>:<i>Value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -317,7 +318,7 @@
               The list of channels and their data will always be in sorted order from least (channel) to greatest. Only enabled channels will be present in the list.
             </p>
             <p>
-              The <i>value</i> returned for each enabled channel will range from 0 (for 0.0 V on the input) to 1023 (for 3.3 V on the input).
+              The <i>Value</i> returned for each enabled channel will range from 0 (for 0.0 V on the input) to 1023 (for 3.3 V on the input).
             </p>
             <p>
               The channel number and ADC value are both padded to 2 and 4 characters respectively in the A response.
@@ -351,7 +352,7 @@
         <h4><a name="AC"></a>"AC" &mdash; Analog Configure</h4>
  
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>channel</i>,<i>enable</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>AC,<i>Channel</i>,<i>Enable</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>AC&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
@@ -359,8 +360,8 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>channel</i>: An integer in the range of 0 to 15 (inclusive). The analog input channel number that you wish to enable or disable. </li>
-              <li><i>enable</i>: A value of either 1 or 0. A value of 1 will enable the channel. A value of 0 will disable the channel.</li>
+              <li><i>Channel</i>: An integer in the range of 0 to 15 (inclusive). The analog input channel number that you wish to enable or disable. </li>
+              <li><i>Enable</i>: A value of either 1 or 0. A value of 1 will enable the channel. A value of 0 will disable the channel.</li>
             </ul>
           </li>
           <li>
@@ -520,7 +521,6 @@
           </li>
         </ul>
 
-
         <hr class="short" />
         <h4><a name="CU"></a>"CU" &mdash; Configure User Options</h4>
 
@@ -545,50 +545,50 @@
             <p>
               <ul>
                 <li>
-                  <code>Param_Number</code> = 1 : <b>Enable Command Response</b>
+                  <i>Param_Number</i> = 1 : <b>Enable Command Response</b>
                   <p>
                     This sub-command enables or disables the <code>OK</code> response after the EBB receives and parses a command. Turning off the <code>OK</code> response can help speed up the execution of many back to back commands. This sub-command has no effect when Future Syntax Mode is active.
                   </p>
                   <ul>
-                    <li>If <code>Param_Value</code> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 0, then <code>OK</code> response to commands is disabled.</li>
+                    <li>If <i>Param_Value</i> = 1, then <code>OK</code> response to commands is enabled (default at boot).</li>
+                    <li>If <i>Param_Value</i> = 0, then <code>OK</code> response to commands is disabled.</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 2 : <b>Enable Command Parameter Limit Check</b>
+                  <i>Param_Number</i> = 2 : <b>Enable Command Parameter Limit Check</b>
                   <p>
                     Turning off the limit checking for the stepper motor motion commands will prevent error messages from being sent back to the PC, which may make processing of the data returned from the EBB easier. It will also slightly speed up the command parsing of these commands.
                   </p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>,<code>T3</code>,<code>L3</code>,) will limit their parameter limit checking.
+                      If <i>Param_Value</i> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>,<code>T3</code>,<code>L3</code>,) will limit their parameter limit checking.
                     </li>
                     <li>
-                      If <code>Param_Value</code> = 1, then stepper motor motion commands will perform all parameter limit checking and return error messages if any parameter limits are exceeded (default at boot).
+                      If <i>Param_Value</i> = 1, then stepper motor motion commands will perform all parameter limit checking and return error messages if any parameter limits are exceeded (default at boot).
                     </li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 3 : <b>Enable Empty FIFO Indication</b>
+                  <i>Param_Number</i> = 3 : <b>Enable Empty FIFO Indication</b>
                   <p>
                     Using the red LED to indicate an empty FIFO can aid in debugging certain types of problems. When enabled, this option will cause the red LED (labeled "USR" on the board) to light any time there is no motion command in the FIFO. In other words, the LED will light any time there is no motion command waiting to be executed as soon as the current motion command is finished.
                   </p>
                   <ul>
-                    <li>If <code>Param_Value</code> = 0, then the red LED will not be used to indicate an empty FIFO (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, then the red LED will be used to indicate an empty FIFO.</li>
+                    <li>If <i>Param_Value</i> = 0, then the red LED will not be used to indicate an empty FIFO (default at boot).</li>
+                    <li>If <i>Param_Value</i> = 1, then the red LED will be used to indicate an empty FIFO.</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 4 : <b>Set new FIFO size</b>
+                  <i>Param_Number</i> = 4 : <b>Set new FIFO size</b>
                   <p>
-                    This command will set the FIFO to a new depth, measured in commands. <code>Param_Value</code> needs to be a decimal number between 1 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
+                    This command will set the FIFO to a new depth, measured in commands. <i>Param_Value</i> needs to be a decimal number between 1 and the maximum possible FIFO size. At boot, the FIFO will be one command deep. This command allows setting the FIFO depth to be larger, up to the limit returned from the <code>QU,2</code> query. Trying to set the FIFO size larger than the maximum possible FIFO size will result in the FIFO size being set to the maximum possible FIFO size. The <code>QU,3</code> query can be used to read out the current FIFO size.
                   </p>
                   <p>
                     If there are any currently executing motion commands, or if there are any commands waiting in the FIFO, the execution of this command will block and wait for the FIFO to be completely empty and any executing motion commands to finish before allowing the change to FIFO size.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 10 : <b>Enable Future Syntax Mode</b>
+                  <i>Param_Number</i> = 10 : <b>Enable Future Syntax Mode</b>
                   <p>
                     When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
                   </p>
@@ -605,26 +605,26 @@
                     Because part of the response back to the PC is generated before the command is executed, changing the syntax mode with <code>CU,10</code> produces a non-standard response. Sending <code>CU,10,1</code> when in legacy mode will result in a response of <code>&lt;NL&gt;</code>. Sending <code>CU,10,0</code> when in future mode will result in a response of <code>CUOK&lt;CR&gt;&lt;NL&gt;</code>. (For future compatibility of your code, you may want to ensure that either response is acceptable.)
                   </p>
                   <ul>
-                    <li>If <code>Param_Value</code> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
-                    <li>If <code>Param_Value</code> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
+                    <li>If <i>Param_Value</i> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
+                    <li>If <i>Param_Value</i> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 50 : <b>Auto Enable Motors</b>
+                  <i>Param_Number</i> = 50 : <b>Auto Enable Motors</b>
                   <p>
                     The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you to turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
                   </p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motion command.
+                      If <i>Param_Value</i> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motion command.
                     </li>
                     <li>
-                      If <code>Param_Value</code> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
+                      If <i>Param_Value</i> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
                     </li>
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 51 : <b>Limit Switch Mask</b>
+                  <i>Param_Number</i> = 51 : <b>Limit Switch Mask</b>
                   <p>
                     If the Limit Switch Mask is nonzero, the PortB pin states will be checked every 40 &mu;s. For any bit in the mask which is set, if that pin's state matches the corresponding bit state in the Limit Switch Target, then a Limit Switch Stop will be executed immediately.
                   </p>
@@ -636,7 +636,7 @@
                   </p>
                   <ul>
                     <li>
-                      <code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at reset, thus disabling the Limit Switch feature.
+                      <i>Param_Value</i> : Any value from 0 to 255 is allowed. The <i>Param_Value</i> becomes the new Limit Switch Mask value. The default value for the Limit Switch Mask is 0 at reset, thus disabling the Limit Switch feature.
                     </li>
                     <li>
                       <span style="font-weight: bold;">Example 1:</span>
@@ -649,37 +649,37 @@
                   </ul>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 52 : <b>Limit Switch Target</b>
+                  <i>Param_Number</i> = 52 : <b>Limit Switch Target</b>
                   <p>
                     The Limit Switch Target is used along with the Limit Switch Mask (<code>CU,51</code>) to configure the limit switch function. For bits that are set in the limit switch mask, those portB digital input values are compared to the corresponding bits in this Limit Switch Target. If the input value matches the target value, the Limit Switch Stop will be triggered.
                   </p>
                   <ul>
                     <li>
-                      <code>Param_Value</code> : Any value from 0 to 255 is allowed. The <code>Param_Value</code> becomes the new Limit Switch Target value. The default value for the Limit Switch Target is 0 at reset.
+                      <i>Param_Value</i> : Any value from 0 to 255 is allowed. The <i>Param_Value</i> becomes the new Limit Switch Target value. The default value for the Limit Switch Target is 0 at reset.
                     </li>
                   </ul>
                 </li>
                 <li>
-                <code>Param_Number</code> = 53 : <b>Enable Limit Switch Reply</b>
+                <i>Param_Number</i> = 53 : <b>Enable Limit Switch Reply</b>
                   <p></p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boot).
+                      If <i>Param_Value</i> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boot).
                     </li>
                     <li>
-                      If <code>Param_Value</code> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\r\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
+                      If <i>Param_Value</i> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
                     </li>
                   </ul>
                 </li>
                 <li>
-                <code>Param_Number</code> = 54 : <b>Enable Command Checksums</b>
+                <i>Param_Number</i> = 54 : <b>Enable Command Checksums</b>
                   <p></p>
                   <ul>
                     <li>
-                      If <code>Param_Value</code> = 0, then checksums at the end of commands are not required. (Default at boot).
+                      If <i>Param_Value</i> = 0, then checksums at the end of commands are not required. (Default at boot).
                     </li>
                     <li>
-                      If <code>Param_Value</code> = 1, then checksums at the end of commands are required.
+                      If <i>Param_Value</i> = 1, then checksums at the end of commands are required.
                     </li>
                   </ul>
                   <p>
@@ -702,50 +702,50 @@
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 60 : <b>Set new power lost threshold</b>
+                  <i>Param_Number</i> = 60 : <b>Set new power lost threshold</b>
                   <p>
-                    This command will set a new <code>Power_Lost_Threshold</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <code>Power_Lost_Threshold</code> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <code>Power_Lost_Threshold</code>. If V+ is ever less than <code>Power_Lost_Threshold</code>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <code>Power_Lost_Threshold</code> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <code>Power_Lost_Threshold</code> at any time. After setting a new value of <code>Power_Lost_Threshold</code> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. For example to set the <code>Power_Lost_Threshold</code> to 12V you would use <code>CU,60,404</code>.
+                    This command will set a new <i>Power_Lost_Threshold</i>. The <i>Param_Value</i> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <i>Power_Lost_Threshold</i> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <i>Power_Lost_Threshold</i>. If V+ is ever less than <i>Power_Lost_Threshold</i>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <i>Power_Lost_Threshold</i> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <i>Power_Lost_Threshold</i> at any time. After setting a new value of <i>Power_Lost_Threshold</i> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. For example to set the <i>Power_Lost_Threshold</i> to 12V you would use <code>CU,60,404</code>.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 61 : <b>Set new Stepper Disable Timeout value</b>
+                  <i>Param_Number</i> = 61 : <b>Set new Stepper Disable Timeout value</b>
                   <p>
-                    This command will set the <code>Stepper_Disable_Timeout</code>. The <code>Param_Value</code> needs to be a decimal number between 0 and 65534 and is in units of seconds. At boot the <code>Stepper_Disable_Timeout</code> is zero, which disables this feature. Any time <code>Stepper_Disable_Timeout</code> is not zero the feature is enabled.
+                    This command will set the <i>Stepper_Disable_Timeout</i>. The <i>Param_Value</i> needs to be a decimal number between 0 and 65534 and is in units of seconds. At boot the <i>Stepper_Disable_Timeout</i> is zero, which disables this feature. Any time <i>Stepper_Disable_Timeout</i> is not zero the feature is enabled.
                   </p>
                   <p>
-                    When enabled, this feature will count down <code>Stepper_Disable_Timeout</code> seconds after the last motion command. When the count reaches zero, it will disable the two stepper motor drivers. This makes the stepper motors freewheel as well as reduces the current draw of the EBB significantly. If a new <code>Stepper_Disable_Timeout</code> value is set while the countdown is already ongoing, the countdown will begin again using the new value. If a new motion command is executed while counting down, the countdown will be stopped and will start back at <code>Stepper_Disable_Timeout</code> when all motion commands are complete.
+                    When enabled, this feature will count down <i>Stepper_Disable_Timeout</i> seconds after the last motion command. When the count reaches zero, it will disable the two stepper motor drivers. This makes the stepper motors freewheel as well as reduces the current draw of the EBB significantly. If a new <i>Stepper_Disable_Timeout</i> value is set while the countdown is already ongoing, the countdown will begin again using the new value. If a new motion command is executed while counting down, the countdown will be stopped and will start back at <i>Stepper_Disable_Timeout</i> when all motion commands are complete.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 250 : <b>Enable GPIO ISR Debug pins</b>
+                  <i>Param_Number</i> = 250 : <b>Enable GPIO ISR Debug pins</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 251 : <b>Enable debug USART end of move values printing</b>
+                  <i>Param_Number</i> = 251 : <b>Enable debug USART end of move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 252 : <b>Enable debug USART every ISR move values printing</b>
+                  <i>Param_Number</i> = 252 : <b>Enable debug USART every ISR move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 253 : <b>Enable debug UART command echo</b>
+                  <i>Param_Number</i> = 253 : <b>Enable debug UART command echo</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 254 : <b>Enable Lock Up Mode</b>
+                  <i>Param_Number</i> = 254 : <b>Enable Lock Up Mode</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 255 : <b>Enable command parsing USB debug printing</b>
+                  <i>Param_Number</i> = 255 : <b>Enable command parsing USB debug printing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 256 : <b>Disable parsed moves from entering FIFO</b>
+                  <i>Param_Number</i> = 256 : <b>Disable parsed moves from entering FIFO</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 257 : <b>Enable RC7 indicator of command parsing</b>
+                  <i>Param_Number</i> = 257 : <b>Enable RC7 indicator of command parsing</b>
                   <p>This is an internal software debugging and testing command.</p>
                 </li>
               </ul>
@@ -754,7 +754,7 @@
           <li>
             <span style="font-weight: bold;">Version History:</span>  
             <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
-            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code>, <code>CU,251</code>, <code>CU,252</code>, <code>CU,253</code> and <code>CU,254</code> were added in v3.0.0</p>
+            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code> through <code>CU,257</code> were added in v3.0.0</p>
           </li>
 
           <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
@@ -855,19 +855,22 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><br /><code>ES,<i>interrupted</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><br /><code><i>interrupted</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span><br /><code>ES,<i>Interrupted</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><br /><code><i>Interrupted</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
+            <li>
+              <i>DisableMotors</i> This is an optional parameter with a value of 0 or 1. If it is a 1, then both stepper drivers will be disabled. If it is 0 or not present, then the stepper drivers will be left in this current state.
+            </li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Use this query to abort any in-progress stepper motor moves and flush the motion FIFO. It will immediately stop the stepper motors. In addition, if any motion command was currently executing or in the FIFO when the command arrives the <i>interrupted</i> return value will be a 1.
+              Use this query to abort any in-progress stepper motor moves and flush the motion FIFO. It will immediately stop the stepper motors. In addition, if any motion command was currently executing or in the FIFO when the command arrives the <i>Interrupted</i> return value will be a 1.
             </p>
             <p>Returned values:</p>
             <ul>
               <li>
-                <i>interrupted</i>: 0 if no FIFO or in-progress move commands were interrupted, 1 if a motor move command was in progress or in the FIFO
+                <i>Interrupted</i>: 0 if no FIFO or in-progress move commands were interrupted, 1 if a motor move command was in progress or in the FIFO
               </li>
             </ul>
           </li>
@@ -904,7 +907,7 @@
               <i>StepFrequency</i> is an unsigned integer in the range from 2 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.
             </li>
             <li>
-              <i>Position1</i> and <i>Position2</i> (optional) are signed integers in the range of &plusmn;4,294,967. If provided, they represents the position, relative to home, that motor1 and motor 2 will travel to.
+              <i>Position1</i> and <i>Position2</i> (optional) are 32 bit signed integers in the range of -2147483648 to 2147483647. If provided, they represents the position, relative to home, that motor1 and motor2 will travel to. If <i>Position1</i> is provided <i>Position2</i> must also be provided.
             </li>
           </ul>
           <li>
@@ -919,17 +922,17 @@
               The step rate at which the move should happen is specified as a parameter. If no destination position is specified, then the move is towards the Home position (0, 0).
             </p>
             <p>
-              Take note that the move <i>may not be a straight line</i>. There are circumstances (where one axis has many steps to take, and the other has very few) where the homing operation is broken down into to move segments to prevent a step rate on the small axis from being lower than 1.3Hz. The <code>HM</code> command takes care of this internally.
+              The maximum (25000 steps/s) and minimum (0.00001164 steps/s) step speed will not be violated no matter what parameters are used. The <code>HM</code> command will limit its step speeds such that they stay within those bounds.
             </p>
             <p>
               The command will wait until all previous motor motion ceases before executing. There is also a further delay, typically about 5 ms, between when the <code>HM</code> command begins execution and when its motion actually begins.
             </p>
             <p>
-              If either of the global step counter values or the distance to move is greater than 4,294,967, the command will error out. If you need to move a larger distance, multiple normal moves back to zero can be sent to accomplish the same thing.
+              There is a limitation to <i>Position1</i> and <i>Position2</i>. When they are each added to the negative of the respective current global positions to compute the number of steps necessary to complete this <code>HM</code> move, the sum must not overflow a signed 32 bit number. An overflow like this will generate an error. Note that this situation is very unlikely to occur, as 0x7FFFFFFF steps (the maximum number of steps a signed 32 bit int can represent) will take 23 hours to execute at the highest step rate (25Ks/s).
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.7.0
+            <span style="font-weight: bold;">Version History:</span> Available since firmware 2.7.0. In v3.0.0, the command was updated to allow larger input paramters and slower minimum speeds and will now always travel in a straight line.
           </li>
         </ul>
 
@@ -951,7 +954,7 @@
               For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this query will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the processor datasheet) and return all of their values.
             </p>
           </li>
-          <li><span style="font-weight: bold;">Example:</span><code>I\r</code></li>
+          <li><span style="font-weight: bold;">Example:</span><code>I&lt;CR&gt;</code></li>
 
           <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span>
@@ -965,7 +968,6 @@
             <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
             It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
           </li>
-
         </ul>
 
         <hr class="short" />
@@ -1272,7 +1274,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li><i>Address</i>: An integer from 0 to 4095. Represents the address in RAM that <i>Data</i> will be written to.</li>
-              <li><i>Length</i>: An integer from 0 to 255. Represents the byte of data to write to <i>Address</i>.</li>
+              <li><i>Data</i>: An integer from 0 to 255. Represents the byte of data to write to <i>Address</i>.</li>
             </ul>
           </li>
           <li>
@@ -1507,7 +1509,6 @@
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span><code>PI,1&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-
         </ul>
 
         <hr class="short"/>
@@ -1549,14 +1550,14 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QB&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QB,<i>state</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>state</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QB,<i>State</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>State</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>This query checks whether the PRG button on the EBB has been pressed since the last QB query or not. </p>
-            <p>The returned value <i>state</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
+            <p>The returned value <i>State</i> is 1 if the PRG button has been pressed since the last QB query, and 0 otherwise.</p>
             <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event. B0 is normally pulled high, but if it is taken low, then that registers as though the PRG button itself was pressed. To ensure that a "button press" is registered, ensure that B0 is pulled low for at least 40 microseconds. This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
@@ -1686,8 +1687,6 @@
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-
-
         </ul>
 
         <hr class="short" />
@@ -1765,7 +1764,7 @@
               <div style="font-weight:bold;">Bit 1: MTR2 &mdash; Motor 2 moving</div> This bit is 1 when Motor 2 is in motion and 0 when it is idle.
             </p>
             <p>
-              <div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div> This bit will be 1 when a command is executing <i>and</i> a second command is awaiting execution in the 1-deep "FIFO" motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is full, then a command is currently executing. Additional information about the motion queue can be found in the description of the <code><a href="#QM">QM</a></code> query.
+              <div style="font-weight:bold;">Bit 0: FIFO &mdash; FIFO motion queue not empty</div> This bit will be 1 when a command is executing <i>and</i> a one or more commands are awaiting execution in the FIFO motion queue. It is 0 otherwise. The <b>CMD</b> bit will always be 1 when the <b>FIFO</b> bit is 1; if the FIFO is not empty, then a command is currently executing. Additional information about the motion queue can be found in the description of the <code><a href="#QM">QM</a></code> query.
             </p>
           </li>
           <li>
@@ -1840,19 +1839,21 @@
               <li><i>CommandStatus</i> is nonzero if any "motion commands" are presently executing, and zero otherwise.</li>
               <li><i>Motor1Status</i> is 1 if motor 1 is currently moving, and 0 if it is idle.</li>
               <li><i>Motor2Status</i> is 1 if motor 2 is currently moving, and 0 if it is idle.</li>
-              <li><i>FIFOStatus</i> is non zero if the FIFO is not empty, and 0 if the FIFO is empty.</li>
+              <li><i>FIFOStatus</i> is 1 if the FIFO is not empty, and 0 if the FIFO is empty.</li>
             </ul>
             <p>
               The definition of a "motion command" is any command that has a time associated with it. For example, all <code><a href="#SM">SM</a></code> commands. Also, any Command (like <code><a href="#S2">S2</a></code>, <code><a href="#SP">SP</a></code>, or <code><a href="#TP">TP</a></code>) that uses a <i>delay</i> or <i>duration</i> parameter. All of these commands cause the motion processor to perform an action that takes some length of time, which then prevents later motion commands from running until they have finished.
             </p>
             <p>
-              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. In fact, there can only be three. One (the first one) will be actually executing. Another one (the second) will be stored in the 1-deep FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the 1-deep FIFO to be emptied before it can be processed. Once these three motion commands are "filled," the whole USB Command processor will block (i.e. lock up) until the FIFO is cleared, and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM query can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+              It is important to note that with all existing EBB firmware versions, only a very limited number of "motion commands" can be executing or queued simultaneously. By default, with a FIFO size of 1 command, there can only be three motion commands in play at a time. One (the first one) will be actually executing. Another one (the second) will be stored in the FIFO buffer that sits between the USB command processor and the motion engine that executes motion commands. Then the last one (the third) will be stuck in the USB command buffer, waiting for the FIFO to be emptied before it can be processed. Once these three command spots are "filled," the whole USB Command processor will block (i.e. lock up) until there is space in the FIFO and the third motion command can be processed and put into the FIFO. This means that no USB commands can be processed by the EBB once the third motion command gets "stuck" in the USB Command processor. Using the QM query can help prevent this situation by allowing the PC to know when there are no more motion commands to be executed, and so can send the next one on.
+            </p>
+            <p>
+              The same process happens if the FIFO size is increased in size using the <code>CU,4,x</code> command. There can be one command that is being executed, some number of commands in the FIFO, and if the FIFO fills up, then one command 'stuck' in USB parsing until space opens up in the FIFO.
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
           <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
-
 
         <hr class="short" />
         <h4><a name="QN"></a>"QN" &mdash; Query node count</h4>
@@ -1866,7 +1867,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> Query the value of the Node Counter.
             <p>
-              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned long int (4 bytes) value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
+              This command asks the EBB what the current value of the Node Counter is. The Node Counter is an unsigned 32-bit value that gets incremented or decremented with the <code>NI</code> and <code>ND</code> commands, or set to a particular value with the <code>SN</code> command. The Node Counter can be used to keep track of progress during various operations as needed.
             </p>
             <p>
               The value of the node counter can also be manipulated with the following commands:
@@ -1890,7 +1891,6 @@
             Added in v1.9.2
           </li>
           <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
-
         </ul>
 
         <hr class="short" />
@@ -1969,27 +1969,23 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QT&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QT,<i>name</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>QT,<i>Name</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Name</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.5.4 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This query gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. 
-              This command gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.
+            <p>This query gets the EBB's "nickname", which is set with the <code><a href="#ST">ST</a></code> command. It simply prints out the current value of the EBB's nickname. If a nickname has not yet been set, then it will print out an empty line before sending the <code>OK</code>. The name field can be anywhere from 0 to 16 bytes in length.
             </p>
           </li>
-
-        <li>
+          <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span> If the EBB's nickname has been set to "East EBB" then the output of this command would be:
             <code>QT,East EBB&lt;NL&gt;</code>
           </li>
-
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> If the EBB's nickname has been set to "East EBB" then the output of this query would be:
             <code>East EBB&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
-
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.5.4</li>
         </ul>
 
@@ -2016,44 +2012,50 @@
             <p>
               <ul>
                 <li>
-                  <code>Param_Number</code> = 1 : <b>Read out captured PortB pin states at last limit switch trigger</b>
-                  <p><code>Return_Value</code> will be a two digit hexadecimal number from 00 to FF. It represents the state of all PortB pins at the exact time that the last limit switch trigger happened.
+                  <i>Param_Number</i> = 1 : <b>Read out captured PortB pin states at last limit switch trigger</b>
+                  <p><i>Return_Value</i> will be a two digit hexadecimal number from 00 to FF. It represents the state of all PortB pins at the exact time that the last limit switch trigger happened.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 2 : <b>Read out maximum supported FIFO length</b>
+                  <i>Param_Number</i> = 2 : <b>Read out maximum supported FIFO length</b>
                   <p>
-                    <code>Return_Value</code> will be a one to three digit decimal number from 0 to 255. It represents the maximum possible size of the motion FIFO in commands. Before using <code>CU,4,<i>New_FIFO_Size</i></code> to set the FIFO size, be sure to use this query to find out the maximum possible size for the FIFO for this version of firmware.
+                    <i>Return_Value</i> will be a one to three digit decimal number from 0 to 255. It represents the maximum possible size of the motion FIFO in commands. Before using <code>CU,4,<i>New_FIFO_Size</i></code> to set the FIFO size, be sure to use this query to find out the maximum possible size for the FIFO for this version of firmware.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 3 : <b>Read out current FIFO length</b>
+                  <i>Param_Number</i> = 3 : <b>Read out current FIFO length</b>
                   <p>
-                    <code>Return_Value</code> will be a one to three digit decimal number from 0 to 255. It represents the current size of the motion FIFO in commands. On boot it starts out at 1. All firmware versions prior to v3.0.0 had a fixed FIFO size of 1. Starting with v3.0.0 the FIFO size starts out at 1 but can be increased using the <code>CU,4,<i>New_FIFO_Size</i></code> command. Increasing the FIFO size will allow for shorter commands and less chance of FIFO underrun.
+                    <i>Return_Value</i> will be a one to three digit decimal number from 0 to 255. It represents the current size of the motion FIFO in commands. On boot it starts out at 1. All firmware versions prior to v3.0.0 had a fixed FIFO size of 1. Starting with v3.0.0 the FIFO size starts out at 1 but can be increased using the <code>CU,4,<i>New_FIFO_Size</i></code> command. Increasing the FIFO size will allow for shorter commands and less chance of FIFO underrun.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 4 : <b>Read out software stack high water value</b>
+                  <i>Param_Number</i> = 4 : <b>Read out software stack high water value</b>
                   <p>
-                    Every millisecond the EBB samples the software stack pointer. It keeps track of the highest value seen. This is called the stack high water value. This query will return that stack high water value in <code>Return_Value</code> as a three digit hexadecimal number. In v3.0.0 of the firmware the stack starts at 0xE00 and grows up, so if <code>Return_Value</code> is E71, then the maximum stack pointer value seen indicates that 0x71 bytes of stack were used at that point. The stack overflows if it goes over 0xEBF.
+                    Every millisecond the EBB samples the software stack pointer. It keeps track of the highest value seen. This is called the stack high water value. This query will return that stack high water value in <i>Return_Value</i> as a three digit hexadecimal number. In v3.0.0 of the firmware the stack starts at 0xE00 and grows up, so if <i>Return_Value</i> is E71, then the maximum stack pointer value seen indicates that 0x71 bytes of stack were used at that point. The stack overflows if it goes over 0xEBF.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 5 : <b>Read out software stack high water value and reset it to zero</b>
+                  <i>Param_Number</i> = 5 : <b>Read out software stack high water value and reset it to zero</b>
                   <p>
                     This query is identical to <code>QU,4</code> except that it also resets the stack high water value to zero.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 60 : <b>Read out <code>Power_Lost_Threshold</code></b>
+                  <i>Param_Number</i> = 60 : <b>Read out <i>Power_Lost_Threshold</i></b>
                   <p>
-                    This query will print out the current value of <code>Power_Lost_Threshold</code> as a one to four digit decimal number.
+                    This query will print out the current value of <i>Power_Lost_Threshold</i> as a one to four digit decimal number.
                   </p>
                 </li>
                 <li>
-                  <code>Param_Number</code> = 61 : <b>Read out <code>Stepper_Disable_Timeout</code></b>
+                  <i>Param_Number</i> = 61 : <b>Read out <i>Stepper_Disable_Timeout</i></b>
                   <p>
-                    This query will print out the current value of <code>Stepper_Disable_Timeout</code> as a one to five digit decimal number. Note that this is not the current countdown value, but rather the 'starting point' value that was set with the <code>CU,61</code> command.
+                    This query will print out the current value of <i>Stepper_Disable_Timeout</i> as a one to five digit decimal number. Note that this is not the current countdown value, but rather the 'starting point' value that was set with the <code>CU,61</code> command.
+                  </p>
+                </li>
+                <li>
+                  <i>Param_Number</i> = 200 : <b>Read out current value of both axis accumulators</b>
+                  <p>
+                    This query will print out the current value of acc_union[0] and acc_union[1] as 32 bit unsigned decimal numbers. This is really only useful for software verification testing.
                   </p>
                 </li>
               </ul>
@@ -2105,7 +2107,7 @@
         <h4><a name="S2"></a> "S2"  &mdash; General RC Servo Output</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span><code>S2,<i>position</i>,<i>output_pin</i>[,<i>rate</i>[,<i>delay</i>]]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span><code>S2,<i>Position</i>,<i>Output_Pin</i>[,<i>Rate</i>[,<i>Delay</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Command:</span> <code> S2,0&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>S2&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
@@ -2115,19 +2117,19 @@
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li>
-                <i>position</i>, a number in the range 0 to 65535.
+                <i>Position</i>, a number in the range 0 to 65535.
                 <p>The "on time" of the signal, in units of 1/12,000,000th of a second (about 83.3 ns).</p>
               </li>
               <li>
-                <i>output_pin</i>, a number in the range 0 to 24.
+                <i>Output_Pin</i>, a number in the range 0 to 24.
                 <p>The physical RPx pin number to use for generating the servo pulses.<br></p>
               </li>
               <li>
-                <i>rate</i> (optional), a number in the range 0 to 65535.
+                <i>Rate</i> (optional), a number in the range 0 to 65535.
                 <p>The rate at which to change to the new setting.</p>
               </li>
               <li>
-                <i>delay</i> (optional), a number in the range 0 to 65535.
+                <i>Delay</i> (optional), a number in the range 0 to 65535.
                 <p>Delay before next command, milliseconds.</p>
               </li>
             </ul>
@@ -2147,28 +2149,28 @@
               The RC servo system will cycle through each of the four channels. Each gets a 3 ms "slice" of time. Each channel is repeated every 12 ms.
             </p>
             <p>
-              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>position</i> is in units of 1/12,000 of a second, so 32000 for <i>position</i> would be about 2.666 ms. A value of 0 for the <i>position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
+              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>Position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>Position</i> is in units of 1/12,000 of a second, so 32000 for <i>Position</i> would be about 2.666 ms. A value of 0 for the <i>Position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>Position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
             </p>
             <p>
-              The number of available channels at boot is 4 This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>maximum_S2_channels</i> (normally 4), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> which is normally 8 * 3 or 12 ms. Thus, each channel's output pulse will be repeated every 12 ms. However, if you change the <i>maximum_S2_channels</i> you will change the repetition rate of the pulses. The <i>S2_channel_duration_ms</i> parameter can also be adjusted with the RC,9 command.
+              The number of available channels at boot is 4. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>Maximum_S2_Channels</i> (normally 4), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> which is normally 8 * 3 or 12 ms. Thus, each channel's output pulse will be repeated every 12 ms. However, if you change the <i>Maximum_S2_Channels</i> you will change the repetition rate of the pulses. The <i>S2_Channel_Duration_MS</i> parameter can also be adjusted with the RC,9 command.
             </p>
             <p>
-              <b>Delay:</b> The <i>delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
+              <b>Delay:</b> The <i>Delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
             </p>
             <p>
-              <b>Motion Queue:</b> In all cases but one, S2 commands are added to the motion queue, even if their <i>delay</i> parameters are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands. (The special command <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code> disables the servo output for <i>output_pin</i>  immediately and is not added to the queue.)
+              <b>Motion Queue:</b> In all cases but one, S2 commands are added to the motion queue, even if their <i>Delay</i> parameters are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands. (The special command <code>S2,0,<i>Output_Pin</i>&lt;CR&gt;</code> disables the servo output for <i>Output_Pin</i> immediately and is not added to the queue.)
             </p>
             <p>
-              <b>Slew rate:</b> The <i>rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>rate</i> is nonzero, then the value of <i>rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>rate</i> are 1/12,000th of a second per <i>maximum_S2_channels</i> * <i>S2_channel_duration_ms</i> or 1/12,000th of a second per 24 ms. The slew rate is completely independent of the <i>delay</i>.
+              <b>Slew rate:</b> The <i>Rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>Rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>Rate</i> is nonzero, then the value of <i>Rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>Rate</i> are 1/12,000th of a second per <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> or 1/12,000th of a second per 24 ms. The slew rate is completely independent of the <i>Delay</i>.
             </p>
             <p>
               <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use the S2 command to manage their actions through one of the software-defined channels. If desired, you can use the S2 command to disable this channel, for example if you need access to all four channels.
             </p>
             <p>
-              <b>Turn-on condition:</b> Note that the S2 command will always make <i>output_pin</i> an output before it starts outputting pulses to that pin.
+              <b>Turn-on condition:</b> Note that the S2 command will always make <i>Output_Pin</i> an output before it starts outputting pulses to that pin.
             </p>
             <p>
-              <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>output_pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>output_pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
+              <b>Disabling an S2 servo output:</b> A special command, <code>S2,0,<i>Output_Pin</i>&lt;CR&gt;</code>, will turn off the RC servo output for <i>Output_Pin</i>. This special command is executed <i>immediately</i>; unlike regular S2 commands, it is NOT added to the FIFO motion queue.
             </p>
           </li>
           <li>
@@ -2261,7 +2263,7 @@
             <span style="font-weight: bold;">Version History:</span> Added in firmware v2.2.0 
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channels reduced from 24 to 4 in v3.0.0. 
+            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 4 in v3.0.0. 
           </li>
         </ul>
 
@@ -2362,7 +2364,7 @@
         <h4><a name="SE"></a> "SE" &mdash; Set Engraver</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SE,<i>state</i>[,<i>power</i>[,<i>use_motion_queue</i>]]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SE,<i>State</i>[,<i>Power</i>[,<i>Use_Motion_Queue</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SE&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
@@ -2370,9 +2372,9 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>state</i> may be either 0 to disable or 1 to enable the engraver output.</li>
-              <li><i>power</i> is an optional argument, with allowed values of integers in the range 0 to 1023.</li>
-              <li><i>use_motion_queue</i> is an optional argument, with allowed values of 0 (immediate) or 1 (use motion queue).</li>
+              <li><i>State</i> may be either 0 to disable or 1 to enable the engraver output.</li>
+              <li><i>Power</i> is an optional argument, with allowed values of integers in the range 0 to 1023.</li>
+              <li><i>Use_Motion_Queue</i> is an optional argument, with allowed values of 0 (immediate) or 1 (use motion queue).</li>
             </ul>
           </li>
           <li>
@@ -2381,10 +2383,10 @@
               This command is used to enable and disable the engraver PWM output on RB3 (called B3 on the board), and also set its output power. Use SE,0 to disable this feature.
             </p>
             <p>
-              The <i>power</i> argument represents the power (duty cycle of the PWM signal), where 0 is always off and 1023 is always on. If this optional argument is not included, then the power will be set at 512 (50&percnt;) duty cycle.
+              The <i>Power</i> argument represents the power (duty cycle of the PWM signal), where 0 is always off and 1023 is always on. If this optional argument is not included, then the power will be set at 512 (50&percnt;) duty cycle.
             </p>
             <p> 
-              If the <i>use_motion_queue</i> parameter has the value of 1, then this SE command will be added to the motion queue just like SM and SP commands, and thus will be executed when the previous motion commands have finished. Note that if you need to use this argument, the <i>power</i> argument is not optional. If <i>use_motion_queue</i> has value 0 (or if it is omitted) the command is executed immediately, and is not added to the queue.
+              If the <i>Use_Motion_Queue</i> parameter has the value of 1, then this SE command will be added to the motion queue just like SM and SP commands, and thus will be executed when the previous motion commands have finished. Note that if you need to use this argument, the <i>Power</i> argument is not optional. If <i>Use_Motion_Queue</i> has value 0 (or if it is omitted) the command is executed immediately, and is not added to the queue.
             </p>
           </li>   
           <li><span style="font-weight: bold;">Example:</span> <code>SE,1,1023\r</code> Turns on the engraver output with maximum power</li>
@@ -2438,7 +2440,7 @@
               <i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647, giving movement distance in steps.
             </li>
             <li>
-              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared. 
             </li>
           </ul>
           <li>
@@ -2465,6 +2467,7 @@
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
             </p>
             <p>A value of 0 for <i>Duration</i> is invalid and will be rejected.</p>
+            <p>If both <i>AxisStep1</i> and <i>AxisStep2</i> are zero then a <i>Duration</i> value above 100000 will be capped at 100000.</p>
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span> <code>SM,1000,250,-766\r</code> 
@@ -2479,7 +2482,7 @@
         <h4><a name="SN"></a>"SN" &mdash; Set node count </h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SN,<i>value</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SN,<i>Value</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SN&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.5 and newer</li>
@@ -2487,22 +2490,22 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>value</i> is an unsigned long (four byte) integer.</li>
+              <li><i>Value</i> is an unsigned 32-bit integer.</li>
             </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
-            <p>This command sets the Node Counter to <i>value</i>.</p>
+            <p>This command sets the Node Counter to <i>Value</i>.</p>
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
-          <li><span style="font-weight: bold;">Example:</span>  <code>SN,123456789\r</code> Set node counter to 123456789.</li>                    
+          <li><span style="font-weight: bold;">Example:</span> <code>SN,123456789\r</code> Set node counter to 123456789.</li>                    
           <li><span style="font-weight: bold;">Version History:</span>  Added in v1.9.5</li>
-        </ul>    
+        </ul>
 
         <hr class="short" />
         <h4><a name="SP"></a>"SP" &mdash; Set Pen State </h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>value</i>[,<i>duration</i>[,<i>portBpin</i>]]&lt;CR&gt;</code></li>          
+          <li><span style="font-weight: bold;">Command:</span> <code>SP,<i>Value</i>[,<i>Duration</i>[,<i>PortB_Pin</i>]]&lt;CR&gt;</code></li>          
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SP&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
@@ -2510,30 +2513,30 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>value</i> is either 0 or 1, indicating to raise or lower the pen.</li>
-              <li><i>duration</i> (optional) is an integer from 1 to 65535, which gives a delay in milliseconds.</li>
-              <li><i>portBpin</i> (optional) is an integer from 0 through 7.</li>
+              <li><i>Value</i> is either 0 or 1, indicating to raise or lower the pen.</li>
+              <li><i>Duration</i> (optional) is an integer from 1 to 65535, which gives a delay in milliseconds.</li>
+              <li><i>PortB_Pin</i> (optional) is an integer from 0 through 7.</li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>This command instructs the pen to go up or down.</p>
             <ul>
-              <li>When a <i>value</i> of 1 is used, the servo will be moved to the <i>servo_min</i> value (as set by the "SC,4" command).</li>
-              <li>When a <i>value</i> of 0 is used, the servo will be moved to the <i>servo_max</i> value (as set by the "SC,5" command below).</li>
+              <li>When a <i>Value</i> of 1 is used, the servo will be moved to the <i>Servo_Min</i> value (as set by the "SC,4" command).</li>
+              <li>When a <i>Value</i> of 0 is used, the servo will be moved to the <i>Servo_Max</i> value (as set by the "SC,5" command below).</li>
             </ul>
             <p>
-              Note that conventionally, we have used the <i>servo_min</i> ("SC,4") value as the 'Pen up position', and the <i>servo_max</i> ("SC,5") value as the 'Pen down position'.
+              Note that conventionally, we have used the <i>Servo_Min</i> ("SC,4") value as the 'Pen up position', and the <i>Servo_Max</i> ("SC,5") value as the 'Pen down position'.
             </p>
             <p>
-              The <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
+              The <i>Duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>Duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
             </p>
-            <p>If no <i>duration</i> argument is specified, a value of 0 milliseconds is used internally.</p>
+            <p>If no <i>Duration</i> argument is specified, a value of 0 milliseconds is used internally.</p>
             <p>
-              The optional <i>portBpin</i> argument allows one to specify which portB pin of the MCU the output will use. If none is specified, pin 1 (the default) will be used.
+              The optional <i>PortB_Pin</i> argument allows one to specify which portB pin of the MCU the output will use. If none is specified, pin 1 (the default) will be used.
             </p>
             <p>
-              <b>Default positions:</b>The default position for the RC servo output (RB1) on reset is the 'Pen up position' (<i>servo_min</i>), and at boot <i>servo_min</i> is set to 12000 which results in a pulse width of 1.0 ms on boot. <i>servo_max</i> is set to 16000 on boot, so the down position will be 1.33 ms unless changed with the "SC,5" Command.
+              <b>Default positions:</b> The default position for the RC servo output (RB1) on reset is the 'Pen up position' (<i>Servo_Min</i>), and at boot <i>Servo_Min</i> is set to 12000 which results in a pulse width of 1.0 ms on boot. <i>Servo_Max</i> is set to 16000 on boot, so the down position will be 1.33 ms unless changed with the "SC,5" Command.
             </p>
             <p>
               <b>Digital outputs:</b> On older EBB hardware versions 1.1, 1.2 and 1.3, this command will make the solenoid output turn on and off. On all EBB versions it will make the RC servo output on RB1 move to the up or down position. Also, by default, it will turn on RB4 or turn off RB4 as a simple digital output, so that you could use this to trigger a laser for example.
@@ -2552,7 +2555,7 @@
         <h4><a name="SR"></a>"SR" &mdash; Set RC Servo power timeout value</h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>value</i>[,<i>state</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>SR,<i>Value</i>[,<i>State</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SR&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span>v2.6.0 and above</li>
@@ -2560,15 +2563,15 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>value</i> is a decimal unsigned long integer (32-bit) representing the number of milliseconds to wait after the last servo move before shutting off power to the RC Servo (RB1).</li>
-              <li><i>state</i> is value of either 0 or 1, and is optional. It represents an immediate new state for the servo power (1 = on, 0 = off).</li>
+              <li><i>Value</i> is a decimal unsigned long integer (32-bit) representing the number of milliseconds to wait after the last servo move before shutting off power to the RC Servo (RB1).</li>
+              <li><i>State</i> is value of either 0 or 1, and is optional. It represents an immediate new state for the servo power (1 = on, 0 = off).</li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>This command sets a new RC Servo power timeout value and optionally a new immediate power state.</p>
-            <p>The <i>value</i> argument is in milliseconds.</p>
-            <p>If <i>value</i> is 0, then the auto-poweroff feature is disabled and the power will not be turned off to the RC servo once applied.</p>
+            <p>The <i>Value</i> argument is in milliseconds.</p>
+            <p>If <i>Value</i> is 0, then the auto-poweroff feature is disabled and the power will not be turned off to the RC servo once applied.</p>
             <p>On boot, the EBB will use a default value of 60 seconds. This means that 60 seconds after the last servo motion command, the RC servo power will be turned off.</p>
             <p>On boot, the power to the RC Servo (on pin RB1) will be off.</p>
             <p>Whenever any command that moves the RC Servo is received, power will also be turned on to the RC Servo connector (RB1), and the RC Servo countdown timer will be started. When the timer reaches 0, the power to the RC servo connector will be shut off.</p>
@@ -2619,15 +2622,15 @@
         <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Query</h4>
       
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>T,<i>duration</i>,<i>mode</i>&lt;CR&gt;</code></li>  
+          <li><span style="font-weight: bold;">Command:</span> <code>T,<i>Duration</i>,<i>Mode</i>&lt;CR&gt;</code></li>  
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>T&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
-            <li><i>duration</i> is from 1 to 65535 and represents the delay, in milliseconds, between reads for a given mode.</li>
-            <li><i>mode</i> is 0 for digital or 1 for analog.</li>
+            <li><i>Duration</i> is from 1 to 65535 and represents the delay, in milliseconds, between reads for a given mode.</li>
+            <li><i>Mode</i> is 0 for digital or 1 for analog.</li>
           </ul>
           <li>
             <span style="font-weight: bold;">Description:</span> 
@@ -2635,16 +2638,16 @@
               This query turns on (or off) the timed digital (I packet) or analog (A packet) queries of pins. Using the T query you can set up a repeated query of input pins, and the generation of an I or A packet back to the PC. Each of the two modes (analog/digital) is independent of the other and can have a different duration time.
             </p>
             <p>
-              For example, to turn the digital queries of all pins on, with a time of 250 ms between queries, use "T,250,0". Then, every 250 ms, the EBB will query all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an "I" query, and simply contains the binary values of each pin of each port. To turn on the analog queries of any enabled analog inputs every 400 ms, use "T,400,1". This will cause the EBB to query all enabled analog inputs every 400 ms and send back an A packet (exactly the same as the reply to the "A" query) repeatedly. Note that while digital mode will query every pin, analog mode will only query (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be queried - no matter what the pin is set to, the "I" response packet will query the pin's digital state.
+              For example, to turn the digital queries of all pins on, with a time of 250 ms between queries, use <code>T,250,0</code>. Then, every 250 ms, the EBB will query all of the pins, and send an I response packet to the PC. This I response packet is exactly the same as the response to an <code>I</code> query, and simply contains the binary values of each pin of each port. To turn on the analog queries of any enabled analog inputs every 400 ms, use <code>T,400,1</code>. This will cause the EBB to query all enabled analog inputs every 400 ms and send back an A packet (exactly the same as the reply to the <code>A</code> query) repeatedly. Note that while digital mode will query every pin, analog mode will only query (and report) the pins that are current configured as analog inputs. Pins do not have to be set to be digital inputs to be queried - no matter what the pin is set to, the <code>I</code> response packet will query the pin's digital state.
             </p>
             <p>
-              To turn off a mode, use 0 for the duration parameter. Thus "T,0,0" will turn off digital mode, and "T,0,1" will turn off analog mode.
+              To turn off a mode, use 0 for the duration parameter. Thus <code>T,0,0</code> will turn off digital mode, and <code>T,0,1</code> will turn off analog mode.
             </p>
             <p>
-              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T query. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1 ms. Each time the "A" timer times out, the latest set of analog values is used to create a new "A" packet and that is then sent out.
+              The EBB is actually sampling the digital input pins at an extremely precise time interval of whatever you sent in the T query. The values of the pins are stored in a buffer, and then packet responses are generated whenever there is 'free time' on the USB back to the PC. So you can count the I packet responses between rising or falling edges of pin values and know the time between those events to the precision of the value of <i>Duration</i>. This is true for digital mode. For analog mode the inputs are sampled every 1 ms. Each time the <code>A</code> timer times out, the latest set of analog values is used to create a new <code>A</code> packet and that is then sent out.
             </p>
             <p>
-              Just because the EBB can kick out I and A packets every 1 ms (at its fastest) doesn't mean that your PC app can read them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the data coming in. (Realizing that the last packet may not be complete.)
+              Just because the EBB can kick out <code>I</code> and <code>A</code> packets every 1 ms (at its fastest) doesn't mean that your PC app can read them in that fast. Some terminal emulators are not able to keep up with this data rate coming back from the EBB, and what happens is that the EBB's internal buffers overflow. This will generate error messages being sent back from the EBB. If you write your own custom application to receive data from the EBB, make sure to not read in one byte at a time from the serial port - always ask for large amounts (10K or more) and then internally parse the contents of the data coming in. (Realizing that the last packet may not be complete.)
             </p>
             <p>
               If an attempt is made to have all 13 channels of analog be reported any faster than every 4 ms, then an internal EBB buffer overflow occurs. Be careful with the speed you choose for A packets. The maximum speed is based upon how many analog channels are being sent back.
@@ -2652,11 +2655,11 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example:</span><code>T,250,0&lt;CR&gt;</code>
-            Turn on digital reading of pins and generation of I packet every 250 ms.
+            Turn on digital reading of pins and generation of <code>I</code> packet every 250 ms.
           </li>
           <li>
             <span style="font-weight: bold;">Note:</span>
-            If the "I" or "A" packet responses stop coming back after you've done a "T" query, and you didn't stop them yourself (with a "T,0,0" or "T,0,1") then what's happened is that the internal buffer in the EBB for I or A packet data has been filled up. (There is room for 3 I packets and 3 A packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
+            If the <code>I</code> or <code>A</code> packet responses stop coming back after you've done a <code>T</code> query, and you didn't stop them yourself (with a <code>T,0,0</code> or <code>T,0,1</code>) then what's happened is that the internal buffer in the EBB for <code>I</code> or <code>A</code> packet data has been filled up. (There is room for 3 <code>I</code> packets and 3 <code>A</code> packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
           </li>
           <li>
             <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
@@ -2708,7 +2711,7 @@
         <h4><a name="TP"></a> "TP"  &mdash; Toggle Pen </h4>
  
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>TP[,<i>duration</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>TP[,<i>Duration</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>TP&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
@@ -2716,28 +2719,59 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>duration</i>: (Optional) an integer in the range of 1 to 65535, giving an delay in milliseconds.</li>
+              <li><i>Duration</i>: (Optional) an integer in the range of 1 to 65535, giving an delay in milliseconds.</li>
             </ul>
           </li>
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command toggles the state of the pen (up-&gt;down and down-&gt;up). EBB firmware resets with pen in 'up' (<i>servo_min</i>) state.
+              This command toggles the state of the pen (up-&gt;down and down-&gt;up). EBB firmware resets with pen in 'up' (<i>Servo_Min</i>) state.
             </p>
             <p>
-              Note that conventionally, we have used the <i>servo_min</i> ("SC,4") value as the 'Pen up position', and the <i>servo_max</i> ("SC,5") value as the 'Pen down position'.
+              Note that conventionally, we have used the <i>Servo_Min</i> (<code>SC,4</code>) value as the 'Pen up position', and the <i>Servo_Max</i> (<code>SC,5</code>) value as the 'Pen down position'.
             </p>
             <p>
-              The optional <i>duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
+              The optional <i>Duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>Duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
             </p>
             <p>
-              If no <i>duration</i> argument is specified, a value of 0 milliseconds is used internally.
+              If no <i>Duration</i> argument is specified, a value of 0 milliseconds is used internally.
             </p>
             <p>
               <li>
                 <span style="font-weight: bold;">Version History:</span> Unchanged since firmware v2.2.1
               </li>
             </p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="TR"></a> "TR" &mdash; Test Rate</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>TR,<i>StepRate</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>[,<i>Clear</i>]]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>TR&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;TR&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Added in v3.0.0</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li>
+              <i>StepRate</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies step rate in steps/second for the move.
+            </li>
+            <li>
+              <i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647, giving movement distance in steps.
+            </li>
+            <li>
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared. 
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+              This command is used to test some of the refactored math in version 3.0.0.
+            </p>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> Added in v3.0.0.
           </li>
         </ul>
 
@@ -2762,7 +2796,7 @@
         <h4><a name="XM"></a> "XM" &mdash; Stepper Move, for Mixed-axis Geometries</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>XM,<i>duration</i>,<i>AxisStepsA</i>,<i>AxisStepsB</i>&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>XM,<i>Duration</i>,<i>AxisStepsA</i>,<i>AxisStepsB</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>XM&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.3.0 and newer</li>
@@ -2770,13 +2804,20 @@
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>duration</i> is an integer in the range from 1 to 16777215, giving time in milliseconds.</li>
-              <li><i>AxisStepsA</i> and <i>AxisStepsB</i> are integers, each in the range from -16777215 to 16777215, giving movement distances in steps.</li>
+              <li>
+                <i>Duration</i> is an integer in the range from 1 to 2147483647, giving time in milliseconds.
+              </li>
+              <li>
+                <i>AxisStepsA</i> and <i>AxisStepsB</i> are integers, each in the range from -2147483648 to 2147483647, giving movement distances in steps.
+              </li>
+              <li>
+                <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared. 
+              </li>
             </ul>
             <li>
               <span style="font-weight: bold;">Description:</span> 
               <p>
-                This command takes the <i>AxisStepsA</i> and <i>AxisStepsB</i> values, and creates a call to the <code><a href="#SM">SM</a></code> command with the SM command's <i>AxisSteps1</i> value as <i>AxisStepsA</i> + <i>AxisStepsB</i>, and <i>AxisSteps2</i> as <i>AxisStepsA</i> - <i>AxisStepsB</i>.
+                This command takes the <i>AxisStepsA</i> and <i>AxisStepsB</i> values, and creates a call to the <code><a href="#SM">SM</a></code> command with the SM command's <i>AxisSteps1</i> value as <i>AxisStepsA</i> + <i>AxisStepsB</i>, and <i>AxisSteps2</i> as <i>AxisStepsA</i> - <i>AxisStepsB</i>. Because of these additions and subtractions, be certain that the values provided for <i>AxisStepsA</i> and <i>AxisStepsB</i> do not cause an overflow or underflow of a 32 bit signed value when the addition and subtraction happen.
               </p>
               <p>
                 This command is designed to allow cleaner operation of machines with mixed-axis geometry, including CoreXY, H-Bot gantry machines, and current AxiDraw models.
@@ -2785,13 +2826,13 @@
                 If both <i>AxisStepsA</i> and <i>AxisStepsB</i> are zero, then a delay of <i>duration</i> ms is executed.
               </p>
               <p>
-                The minimum speed at which the EBB can generate steps for each motor is 1.31 steps/second. The maximum speed is 25 kSteps/second. If the XM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move. Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.)
-                While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
+                The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the XM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move. Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
               </p>
               <p>
                 Note that internally the EBB generates an ISR at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
               </p>
-              <p>A value of 0 for <i>duration</i> is invalid and will be rejected.</p>
+              <p>A value of 0 for <i>Duration</i> is invalid and will be rejected.</p>
+              <p>If both <i>AxisStepsA</i> and <i>AxisStepsB</i> are zero then a <i>Duration</i> value above 100000 will be capped at 100000.</p>
             </li>
             <li>
               <span style="font-weight: bold;">Example:</span>
@@ -2938,38 +2979,20 @@
         <p>The EBB has some basic performance limits, which do vary with new firmware releases.
         </p>
         
-        <p>One performance aspect is the duration of the step pulses sent to the stepper driver chips. While
-        the pulses produced by the EBB firmware will always be long enough to guarantee proper operation
-        with the built-in drivers, it is possible to use some of the GPIO pins on the EBB to connect external
-        step/dir driver electronics to drive much larger systems. In this case, the external drivers may have
-        a minimum step pulse length, and so it can be important to know this timing information in that case.
+        <p>One performance aspect is the duration of the step pulses sent to the stepper driver chips. While the pulses produced by the EBB firmware will always be long enough to guarantee proper operation with the built-in drivers, it is possible to use some of the GPIO pins on the EBB to connect external step/dir driver electronics to drive much larger systems. In this case, the external drivers may have a minimum step pulse length, and so it can be important to know this timing information in that case.
         </p>
         <p style="padding-left:5%">
         Output step pulse duration for external stepper drivers:
-        <ul style="padding-left:10%">      
+        <ul style="padding-left:10%">
             <li>EBB firmware 2.7.0 and above: 1.6 - 2.3 &mu;s.</li>
             <li>EBB firmware 2.6.5 and below: 2.8 - 3.0 &mu;s.</li>
         </ul>
         </p>
         
-        <p>Another important performance measure is the maximum rate at which sequential movement
-        commands can be
-        streamed to the EBB. This rate is expressed as the shortest move duration that can be sent
-        to the EBB as a continuous stream of identical motion commands, such that there
-        are no gaps between the last step of one move and the first step of the next move.
-        For a high enough sustained rate of sufficiently short movement commands, the EBB will not
-        be able to parse and queue each command prior to starting the subsequent move.
-        The available CPU time available for parsing and queueing commands does depend on the 
-        active step rate, as the EBB shares CPU time between command parsing and step generation.
+        <p>Another important performance measure is the maximum rate at which sequential movement commands can be streamed to the EBB. This rate is expressed as the shortest move duration that can be sent to the EBB as a continuous stream of identical motion commands, such that there are no gaps between the last step of one move and the first step of the next move. For a high enough sustained rate of sufficiently short movement commands, the EBB will not be able to parse and queue each command prior to starting the subsequent move. The available CPU time available for parsing and queueing commands does depend on the active step rate, as the EBB shares CPU time between command parsing and step generation.
         </p>
-        <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain
-        indefinitely without gaps, under different move commands. The worst case
-        values (highest sustained minimum move duration) were measured with step rates of approximately 
-        25 kHz on both motors &mdash; a condition rarely achieved in typical applications. 
-        The best case values
-        (lowest sustained minimum move duration) are for low step rates,
-        and was measured at 2.5 kHz. You may be able to sustain movement at these rates with higher motion
-        frequencies.
+        <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain indefinitely without gaps, under different move commands. The worst case values (highest sustained minimum move duration) were measured with step rates of approximately 25 kHz on both motors &mdash; a condition rarely achieved in typical applications. The best case values
+        (lowest sustained minimum move duration) are for low step rates, and was measured at 2.5 kHz. You may be able to sustain movement at these rates with higher motion frequencies.
         </p>
         
         <p />
@@ -3000,8 +3023,7 @@
           </tbody>
         </table>
         <p>
-        The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same
-        data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and additional factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
+        The times in the table above are measured under conditions where the PC sending the commands is able to sustain the same data rate. In practice, PCs &mdash; especially Windows PCs &mdash; can have occasional brief gaps when sending long strings of USB commands. The incidence of these gaps depend upon the system configuration, CPU speed, load, other USB communication, and additional factors. Best practice is to try and use fewer, longer-duration movement commands (rather than more, shorter-duration commands) whenever possible, to minimize the effects of both EBB CPU time constraints and any USB performance issues on the PC.
         </p>
         <p />
         <br />
@@ -3010,22 +3032,22 @@
         <h2><a name="faq"></a>Frequently Asked Questions</h2>
 
         <p>
-          <b>Q1)</b> How can I calculate how long it will take to move from one RC servo position to another? Specifically in relation to the standard pen-arm servo that is activated with the SP,1 and SP,0 commands.
+          <b>Q1)</b> How can I calculate how long it will take to move from one RC servo position to another? Specifically in relation to the standard pen-arm servo that is activated with the <code>SP,1</code> and <code>SP,0</code> commands.
         </p>
         <p>
-          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24 ms.
+          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 4 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 12 ms. So the rate value gets added or subtracted from the current pulse duration every 12 ms.
         </p>
         <p>
-          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24 ms periods to get from 10000 to 15000, or 1.2 seconds total.
+          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 12 ms periods to get from 10000 to 15000, or 0.6 seconds total.
         </p>
         <p>
-          Now, when you're using the SP,0 and SP,1 commands, the servo_min (defaults to 16000, or 1.33 ms) and servo_max (defaults to 20000, or 1.6 ms) get used as the positions. And the servo_rate_up and servo_rate_down get used as the rates. So the formula is as follows:
+          Now, when you're using the <code>SP,0</code> and <code>SP,1</code> commands, the <i>Servo_Min</i> (defaults to 16000, or 1.33 ms) and <i>Servo_Max</i> (defaults to 20000, or 1.6 ms) get used as the positions. And the <i>Servo_Rate_Up</i> and <i>Servo_Rate_Down</i> get used as the rates. So the formula is as follows:
         </p>
         <p>
-          ((<i>servo_max</i> - <i>servo_min</i>) * .024)/<i>servo_rate</i> = total time to move
+          ((<i>Servo_Max</i> - <i>Servo_Min</i>) * .012)/<i>Servo_Rate</i> = total time to move
         </p>
         <p>
-          For the example above. ((15000 - 10000) * .024)/100 = 1.2 seconds.
+          For the example above. ((15000 - 10000) * .012)/100 = 0.6 seconds.
         </p>
 
         <p>

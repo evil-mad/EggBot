@@ -3030,7 +3030,7 @@ void parse_CM_packet(void)
 // a true 'home' move). If present, they will instruct the EBB to perform
 // a move to the absolute position <Pos1>,<Pos2>.
 // <Pos1> and <Pos2> are both signed 32 bit integers. Values from 
-// -2147483647 to 2147483647 are allowed for each.
+// -2147483648 to 2147483647 are allowed for each.
 //
 // This command uses the current global step counts compute the number of
 // steps necessary to reach the target position. (either 0,0 or Pos1,Pos2)
@@ -4306,10 +4306,10 @@ void parse_SE_packet(void)
         ;
 
       // Set up the motion queue command
-    FIFOPtr[gFIFOIn].m.sm.SEPower = StoredEngraverPower;
-    FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
-    FIFOPtr[gFIFOIn].m.sm.SEState = State;
-    FIFOPtr[gFIFOIn].Command = COMMAND_SE;
+      FIFOPtr[gFIFOIn].m.sm.SEPower = StoredEngraverPower;
+      FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
+      FIFOPtr[gFIFOIn].m.sm.SEState = State;
+      FIFOPtr[gFIFOIn].Command = COMMAND_SE;
 
       gFIFOIn++;
       if (gFIFOIn >= gCurrentFIFOLength)
