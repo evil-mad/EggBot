@@ -855,19 +855,26 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>ES[,DisableMotors]&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span><br /><code>ES,<i>Interrupted</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span><br /><code><i>Interrupted</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>ES,<i>Interrupted</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Interrupted</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.7 and newer (with changes)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
-            <li>
-              <i>DisableMotors</i> This is an optional parameter with a value of 0 or 1. If it is a 1, then both stepper drivers will be disabled. If it is 0 or not present, then the stepper drivers will be left in this current state.
-            </li>
+            <span style="font-weight: bold;">Arguments:</span>
+            <ul>
+              <li>
+                <i>DisableMotors</i> This is an optional parameter with a value of 0 or 1. If it is a 1, then both stepper drivers will be disabled. If it is 0 or not present, then the stepper drivers will be left in this current state.
+              </li>
+            </ul>
+          </li>
+          <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
               Use this query to abort any in-progress stepper motor moves and flush the motion FIFO. It will immediately stop the stepper motors. In addition, if any motion command was currently executing or in the FIFO when the command arrives the <i>Interrupted</i> return value will be a 1.
             </p>
-            <p>Returned values:</p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Returned values:</span>
             <ul>
               <li>
                 <i>Interrupted</i>: 0 if no FIFO or in-progress move commands were interrupted, 1 if a motor move command was in progress or in the FIFO
@@ -991,10 +998,7 @@
               <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
             </li>
             <li>
-              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared.
-            </li>
-            <li>
-              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared.
             </li>
           </ul>
           <li>
@@ -1153,13 +1157,20 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-            <p>
+              [[ TO BE FILLED IN ]]
+            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
+            <p>
+              [[ TO BE FILLED IN ]]
+            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
+            <p>
+              [[ TO BE FILLED IN ]]
+            </p>
           </li>
         </ul>
 
@@ -2697,13 +2708,20 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
+              [[ TO BE FILLED IN ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
+            <p>
+              [[ TO BE FILLED IN ]]
+            </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
+            <p>
+              [[ TO BE FILLED IN ]]
+            </p>
           </li>
         </ul>
 
@@ -2840,6 +2858,7 @@
             </li>
           <li>
             <span style="font-weight: bold;">Version History:</span> Added in v2.3.0
+            <span style="font-weight: bold;">Version History:</span> Increased range of parameters and lowered slowest allowed step rate in v3.0.0
           </li>
         </ul>
 
