@@ -1157,6 +1157,9 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
+              This command is extremely similar to the <code><a href="#LM">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LM">LM</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
+            </p>
+            <p>
               [[ TO BE FILLED IN ]]
             </p>
           </li>
@@ -2151,19 +2154,19 @@
               This command allows you to control the RC servo output system on the EBB, to configure generic RC servo outputs.
             </p>
             <p>
-              <b>Servo channels and time slices:</b> Including the pen-lift servo, there are (by default) four software-defined RC servo 'channels', which have no physical meaning other than we can output up to four separate signals at once. These channels are internally assigned as you use the S2 command to create additional servo outputs, up to a maximum of four (this maximum can be changed with the SC,8,X command).
+              <b>Servo channels and time slices:</b> Including the pen-lift servo, there are (by default) 8 software-defined RC servo 'channels', which have no physical meaning other than we can output up to 8 separate signals at once. These channels are internally assigned as you use the S2 command to create additional servo outputs, up to a maximum of 8 (this maximum can be changed with the SC,8,X command).
             </p>
             <p>
-              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to four of these RPx pins at once.
+              Many I/O pins on the MCU have RPx numbers (please refer to the schematic), and you can output RC servo pulses on up to 8 of these RPx pins at once.
             </p>
             <p>
-              The RC servo system will cycle through each of the four channels. Each gets a 3 ms "slice" of time. Each channel is repeated every 12 ms.
+              The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time. Each channel is repeated every 24 ms.
             </p>
             <p>
               If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>Position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>Position</i> is in units of 1/12,000 of a second, so 32000 for <i>Position</i> would be about 2.666 ms. A value of 0 for the <i>Position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>Position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
             </p>
             <p>
-              The number of available channels at boot is 4. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>Maximum_S2_Channels</i> (normally 4), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> which is normally 8 * 3 or 12 ms. Thus, each channel's output pulse will be repeated every 12 ms. However, if you change the <i>Maximum_S2_Channels</i> you will change the repetition rate of the pulses. The <i>S2_Channel_Duration_MS</i> parameter can also be adjusted with the RC,9 command.
+              The number of available channels at boot is 8. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>Maximum_S2_Channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>Maximum_S2_Channels</i> you will change the repetition rate of the pulses. The <i>S2_Channel_Duration_MS</i> parameter can also be adjusted with the RC,9 command.
             </p>
             <p>
               <b>Delay:</b> The <i>Delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
@@ -2274,7 +2277,7 @@
             <span style="font-weight: bold;">Version History:</span> Added in firmware v2.2.0 
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 4 in v3.0.0. 
+            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 8 in v3.0.0. 
           </li>
         </ul>
 
@@ -2342,9 +2345,9 @@
               Default: 16000 (1.33 ms) on reset.
             </li>
             <li>
-              <code>SC,8,<i>Maximum_S2_Channels</i></code> Sets the number of RC servo PWM channels, each of <i>S2_Channel_Duration_MS</i> before cycling back to channel 1 for S2 command. Values from 1 to 4 are valid for <i>Maximum_S2_Channels</i>.
+              <code>SC,8,<i>Maximum_S2_Channels</i></code> Sets the number of RC servo PWM channels, each of <i>S2_Channel_Duration_MS</i> before cycling back to channel 1 for S2 command. Values from 1 to 8 are valid for <i>Maximum_S2_Channels</i>.
               <br />
-              Default: 4 on reset.
+              Default: 8 on reset.
             </li>
             <li>
               <code>SC,9,<i>S2_Channel_Duration_MS</i></code> Set the number of milliseconds before firing the next enabled channel for the S2 command. Values from 1 to 6 are valid for <i>S2_Channel_Duration_MS</i>.
@@ -2367,7 +2370,7 @@
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
           <li><span style="font-weight: bold;">Example:</span> <code>SC,1,1\r</code> Enable only the RC servo for pen lift; disable solenoid control output.</li> 
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum_S2_Channels maximum value changed from 24 to 4 in version 3.0.0.
+            <span style="font-weight: bold;">Version History:</span> Maximum_S2_Channels maximum value changed from 24 to 8 in version 3.0.0.
           </li>
         </ul>
  
@@ -2708,6 +2711,9 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
+              This command is extremely similar to the <code><a href="#LT">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LT">LM</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
+            </p>
+            <p>
               [[ TO BE FILLED IN ]]
             </p>
           </li>
@@ -2862,10 +2868,6 @@
           </li>
         </ul>
 
-        <p />
-        <br />
-        <p />
-
         <hr>
 
         <h2><a name="states"></a>Initial I/O pin configuration</h2>
@@ -2873,48 +2875,28 @@
         <p>In addition to the stepper motor outputs, many applications make use of one or more digital I/O pins.
         </p>
         
-        <p>The most accessible and commonly used of the I/O pins are those in PortB. The eight pins in PortB are
-        physically arranged into 3-pin "header connections", with ground, +5V power, and the "signal"
-        I/O pin itself, from the edge of the board towards the center. Four of these connectors are located
-        "below" the stepper motor terminals, and are labeled as B1, B0, B2, and B3, in order from the "bottom"
-        edge of the board towards the stepper terminals. These four connections are pre-populated with header 
-        pins. Four additional connections, B4, B5, B6, and B7 are located on the "bottom" edge of the board, 
-        and are not pre-populated with header pins.
+        <p>The most accessible and commonly used of the I/O pins are those in PortB. The eight pins in PortB are physically arranged into 3-pin "header connections", with ground, +5V power, and the "signal" I/O pin itself, from the edge of the board towards the center. Four of these connectors are located "below" the stepper motor terminals, and are labeled as B1, B0, B2, and B3, in order from the "bottom" edge of the board towards the stepper terminals. These four connections are pre-populated with header pins. Four additional connections, B4, B5, B6, and B7 are located on the "bottom" edge of the board, and are not pre-populated with header pins.
         </p>
         
-        <p>On EBB boards v2.5 and above, the 5V power to the pen servo (RB1) is controlled by software,
-        and defaults to an off state at reset; see the <code><a href="#SR">SR</a></code> command.
+        <p>On EBB boards v2.5 and above, the 5V power to the pen servo (RB1) is controlled by software, and defaults to an off state at reset; see the <code><a href="#SR">SR</a></code> command.
         </p>
         
-        <p>Pins B1, B0, B2 and B3 are not 5-volt tolerant and any voltage above about 3.6V will damage them.
-        Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 5.5V.
+        <p>Pins B1, B0, B2 and B3 are not 5-volt tolerant and any voltage above about 3.6V will damage them. Pins B4, B5, B6 and B7 are 5-volt tolerant and will not be damaged by voltages up to 5.5V.
         </p>
 
-        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can  be
-        used to read a switch by connecting a switch between the Port B pin and GND. Use the
-        <code><a href="#PI">PI</a></code> command to read the state of the switch. If that pin is not already 
-        an input at boot (see table below) you can make it an input using the <code><a href="#PD">PD</a></code> 
-        command.
+        <p>Because all Port B pins (B0 through B7) have weak pull up resistors, any of these pins can be used to read a switch by connecting a switch between the Port B pin and GND. Use the
+        <code><a href="#PI">PI</a></code> command to read the state of the switch. If that pin is not already an input at boot (see table below) you can make it an input using the <code><a href="#PD">PD</a></code> command.
         </p>
 
-        <p>In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include:
-        PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0. Every pin on PortB,
-        PortC and RA6 can source or sink up to 25mA each. All other pins can source or sink up to 4mA each.
-        Note that pins RA0, RC1, RD4, RD5, RD6, RD7 and RE0 are brought out to the I/O header but already
-        have existing analog or digital functions mapped to them and so should only be used for monitoring
-        these signals rather than as GPIO.
+        <p>In addition to the pins of PortB, additional broken-out I/O pins accessible on the EBB include: PortA: RA0,1,2,3,5, PortC: RC0,1,2,6,7, PortD: RD: 0,1,4,5,6,7, and PortE: RE0. Every pin on PortB, PortC and RA6 can source or sink up to 25mA each. All other pins can source or sink up to 4mA each. Note that pins RA0, RC1, RD4, RD5, RD6, RD7 and RE0 are brought out to the I/O header but already have existing analog or digital functions mapped to them and so should only be used for monitoring these signals rather than as GPIO.
         </p>
         
-        <p>All pins of PortB have weak pull ups to 3.3V, which can source between 80 and 400 μA, and 
-        are enabled any time the pin is an input. Pull ups are not available on the other (Port A, C, D, E)
-        GPIO pins. Many of the I/O pins can be used for general purpose digital I/O (GPIO), and some can also 
-        be used as RC servo outputs, within the limits of <code><a href="#S2">S2</a></code>. 
-        With the exceptions listed in the table below and RA0, RC1, RD4, RD5, RD6, RD7 and RE0, all of the 
-        broken-out I/O pins are initially configured at boot as digital inputs.
+        <p>All pins of PortB have weak pull ups to 3.3V, which can source between 80 and 400 μA, and are enabled any time the pin is an input. Pull ups are not available on the other (Port A, C, D, E)
+        GPIO pins. Many of the I/O pins can be used for general purpose digital I/O (GPIO), and some can also be used as RC servo outputs, within the limits of <code><a href="#S2">S2</a></code>. 
+        With the exceptions listed in the table below and RA0, RC1, RD4, RD5, RD6, RD7 and RE0, all of the broken-out I/O pins are initially configured at boot as digital inputs.
         </p>
         
-        <p>Certain PortB signal pins are specially configured at boot time for typical applications,
-        as summarized in the table below.
+        <p>Certain PortB signal pins are specially configured at boot time for typical applications, as summarized in the table below.
         </p>
         
         <p />
@@ -3054,19 +3036,19 @@
           <b>Q1)</b> How can I calculate how long it will take to move from one RC servo position to another? Specifically in relation to the standard pen-arm servo that is activated with the <code>SP,1</code> and <code>SP,0</code> commands.
         </p>
         <p>
-          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 4 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 12 ms. So the rate value gets added or subtracted from the current pulse duration every 12 ms.
+          <b>A1)</b> By default, with the latest version of EBB firmware, we add (or subtract) the rate value from the current pulse duration every time the pulse fires until the current pulse duration equals the target duration. Normally we have 8 servo channels available, and each gets 3 ms, so that means that each channel can fire once every 24 ms. So the rate value gets added or subtracted from the current pulse duration every 24 ms.
         </p>
         <p>
-          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 12 ms periods to get from 10000 to 15000, or 0.6 seconds total.
+          For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24 ms periods to get from 10000 to 15000, or 1.2 seconds total.
         </p>
         <p>
           Now, when you're using the <code>SP,0</code> and <code>SP,1</code> commands, the <i>Servo_Min</i> (defaults to 16000, or 1.33 ms) and <i>Servo_Max</i> (defaults to 20000, or 1.6 ms) get used as the positions. And the <i>Servo_Rate_Up</i> and <i>Servo_Rate_Down</i> get used as the rates. So the formula is as follows:
         </p>
         <p>
-          ((<i>Servo_Max</i> - <i>Servo_Min</i>) * .012)/<i>Servo_Rate</i> = total time to move
+          ((<i>Servo_Max</i> - <i>Servo_Min</i>) * .024)/<i>Servo_Rate</i> = total time to move
         </p>
         <p>
-          For the example above. ((15000 - 10000) * .012)/100 = 0.6 seconds.
+          For the example above. ((15000 - 10000) * .024)/100 = 1.2 seconds.
         </p>
 
         <p>

@@ -411,6 +411,38 @@
            </ul>
         </p>
 
+        <h4>3.0.0 &mdash; 03/01/24</h4>
+        <p>
+          Version 3.0.0 represents the largest group of changes ever made to the EBB firmware codebase. Many separate changes (see below) were bundled together into one large release so that PC software could count on all of the v3.0.0 features being present together. Besides new commands, refactoring of critical code sections and other functional changes, a significant effort was put into cleaning up the source code. A unified style was applied to all source files and significant comments were added throughout the codebase and in particular in the critical and complex motion ISR. A significant amount of effort was also undertaken to add in HIL (hardware in the loop) test functionality into the shipping firmware image. This allows PC based test routines to verify all sorts of timing and logic functionality in an automated or semi-automated manner. 
+        </p>
+        <p>
+          Even with all of the changes in this version, many attempts have been made to produce default behavior which is compatible with previous EBB versions.
+        </p>
+        <p>
+          <ul>
+            <li>
+              A 'jerk enabled' version of the LT command was added called the T3 command for time limited moves with jerk control.
+            </li>
+            <li>
+              A 'jerk enabled' version of the LM command was added called the L3 command for rate controlled moves with jerk control.
+            </li>
+            <li>
+              The motion control ISR received a significant re-factorization to add in support for new commands and decrease typical code path time as much as possible.
+            </li>
+            <li>
+              The FIFO was expanded to allow for up to 32 commands to be queued. At boot the FIFO length defaults to 1 for backward compatibility.
+            </li>
+            <li>
+              New low level floating point based routines were added to allow much simpler math as well as larger parameter values for the 'simple' motion control commands SM, XM and HM.
+            </li>
+            <li>
+              In order to free up some RAM for the larger FIFO, the maximum number of simultaneous RC servo outputs was reduced from 24 to 8. This change does not affect which pins are available for RC servo output, only how many can be active at once.
+            </li>
+
+
+           </ul>
+        </p>
+
         <p/>
         <hr/>
         <p/>

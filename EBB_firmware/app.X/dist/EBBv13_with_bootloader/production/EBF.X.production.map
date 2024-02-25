@@ -1,5 +1,5 @@
 MPLINK 5.00, LINKER
-Linker Map File - Created Thu Feb 08 18:03:18 2024
+Linker Map File - Created Sun Feb 25 12:39:13 2024
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -80,18 +80,16 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                  .tmpdata      udata   0x00004e       data   0x000008
               low_ISR_tmp      udata   0x000056       data   0x000004
              high_ISR_tmp      udata   0x00005a       data   0x000004
-         RC2Servo_globals      udata   0x000060       data   0x00002b
-             .udata_UBW.o      udata   0x00008b       data   0x00006f
-             .idata_ebb.o      idata   0x0000fa       data   0x000002
+         RC2Servo_globals      udata   0x000060       data   0x000047
                   ISR_buf      udata   0x000100       data   0x000029
              .udata_ebb.o      udata   0x000129       data   0x00004f
              .idata_UBW.o      idata   0x000178       data   0x000007
-          .idata___init.o      idata   0x00017f       data   0x000000
-          .udata___init.o      udata   0x00017f       data   0x000000
-          .udata_u1baud.o      udata   0x00017f       data   0x000000
- .idata_WriteBytesFlash.o      idata   0x00017f       data   0x000000
-          .idata_u1baud.o      idata   0x00017f       data   0x000000
  .udata_WriteBytesFlash.o      udata   0x00017f       data   0x000000
+ .idata_WriteBytesFlash.o      idata   0x00017f       data   0x000000
+          .udata___init.o      udata   0x00017f       data   0x000000
+          .idata___init.o      idata   0x00017f       data   0x000000
+          .udata_u1baud.o      udata   0x00017f       data   0x000000
+          .idata_u1baud.o      idata   0x00017f       data   0x000000
          .udata_pow2x16.o      udata   0x00017f       data   0x000000
          .idata_pow2x16.o      idata   0x00017f       data   0x000000
           .idata_u1defs.o      idata   0x00017f       data   0x000000
@@ -107,14 +105,14 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
        .udata_ReadFlash.o      udata   0x00017f       data   0x000000
        .idata_ReadFlash.o      idata   0x00017f       data   0x000000
          .udata_u1write.o      udata   0x00017f       data   0x000000
-      .idata_usb_device.o      idata   0x00017f       data   0x000000
 .idata_usb_function_cdc.o      idata   0x00017f       data   0x000000
-       .idata_ebb_print.o      idata   0x00017f       data   0x000000
-           .idata_c018i.o      idata   0x00017f       data   0x000000
- .udata_usb_descriptors.o      udata   0x00017f       data   0x000000
             .idata_main.o      idata   0x00017f       data   0x000000
-        .idata_RCServo2.o      idata   0x00017f       data   0x000000
         .udata_RCServo2.o      udata   0x00017f       data   0x000000
+        .idata_RCServo2.o      idata   0x00017f       data   0x000000
+ .udata_usb_descriptors.o      udata   0x00017f       data   0x000000
+       .idata_ebb_print.o      idata   0x00017f       data   0x000000
+      .idata_usb_device.o      idata   0x00017f       data   0x000000
+           .idata_c018i.o      idata   0x00017f       data   0x000000
               ISR_globals      udata   0x000180       data   0x000071
        .udata_ebb_print.o      udata   0x0001f1       data   0x00000e
           .udata_u1defs.o      udata   0x0001ff       data   0x000001
@@ -123,10 +121,12 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
             .udata_main.o      udata   0x0002fe       data   0x000002
                com_rx_buf      udata   0x000300       data   0x000100
                   USB_BDT      udata   0x000400       data   0x000078
+             .udata_UBW.o      udata   0x000478       data   0x00006f
                   sqrtVar      udata   0x000500       data   0x000014
 .udata_usb_function_cdc.o      udata   0x000514       data   0x0000a8
       .udata_usb_device.o      udata   0x0005bc       data   0x000034
            .udata_c018i.o      udata   0x0005f0       data   0x00000a
+             .idata_ebb.o      idata   0x0005fa       data   0x000002
                  FIFO_scn      udata   0x000600       data   0x000800
                    .stack      udata   0x000e00       data   0x0000c0
               SFR_BANKED0      udata   0x000ec6       data   0x00000e
@@ -1040,11 +1040,11 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
                     ARGA1   0x000501       data     extern source\squareroot.s      
                     ARGA2   0x000502       data     extern source\squareroot.s      
                     ARGA3   0x000503       data     extern source\squareroot.s      
-            A_cur_channel   0x00009f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           A_tick_counter   0x00009d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            A_cur_channel   0x00048c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           A_tick_counter   0x00048a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                   AllDone   0x000000       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-    AnalogEnabledChannels   0x0000a1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           AnalogInitiate   0x0000a0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    AnalogEnabledChannels   0x00048e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           AnalogInitiate   0x00048d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                AxisActive   0x000002       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                   BAUDCON   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  BAUDCON1   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -1093,7 +1093,7 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
              CTMUICONbits   0x000fb1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CVRCON   0x000f53       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                CVRCONbits   0x000f53       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               ChannelBit   0x0000a3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               ChannelBit   0x000490       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
               CommandFIFO   0x000600       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
               CtrlTrfData   0x000438       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                   CurTime   0x0001c4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
@@ -1115,7 +1115,7 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
               DSWAKEHbits   0x000f4b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   DSWAKEL   0x000f4a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               DSWAKELbits   0x000f4a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-           D_tick_counter   0x00009b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           D_tick_counter   0x000488       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
            DemoModeActive   0x0001b4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
       DriverConfiguration   0x000004       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                   ECCP1AS   0x000fbe       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -1133,7 +1133,7 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
                    EECON1   0x000fa6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                EECON1bits   0x000fa6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    EECON2   0x000fa7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  FIFOPtr   0x0000fa       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
+                  FIFOPtr   0x0005fa       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
         FIFO_out_ptr_high   0x000014       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
          FIFO_out_ptr_low   0x000015       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                      FSR0   0x000fe9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -1163,16 +1163,16 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
                      IPR3   0x000fa5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  IPR3bits   0x000fa5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ISR_A_FIFO   0x000100       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            ISR_A_FIFO_in   0x000094       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        ISR_A_FIFO_length   0x000096       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           ISR_A_FIFO_out   0x000095       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         ISR_A_RepeatRate   0x000092       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            ISR_A_FIFO_in   0x000481       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        ISR_A_FIFO_length   0x000483       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           ISR_A_FIFO_out   0x000482       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         ISR_A_RepeatRate   0x00047f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
               ISR_Channel   0x00000a       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                ISR_D_FIFO   0x000120       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            ISR_D_FIFO_in   0x00008f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        ISR_D_FIFO_length   0x000091       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           ISR_D_FIFO_out   0x000090       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         ISR_D_RepeatRate   0x00008d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            ISR_D_FIFO_in   0x00047c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        ISR_D_FIFO_length   0x00047e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           ISR_D_FIFO_out   0x00047d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         ISR_D_RepeatRate   0x00047a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                      LATA   0x000f89       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  LATAbits   0x000f89       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      LATB   0x000f8a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -1281,7 +1281,7 @@ process_simple_rate_move_fp   0x0025c8    program     static D:\Projects\EggBot1
                  PenState   0x0001b9       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 PortBTemp   0x00000b       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
               QC_ms_timer   0x0001be       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-            RC2Difference   0x0000e2       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            RC2Difference   0x0004cf       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                      RCON   0x000fd0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  RCONbits   0x000fd0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     RCREG   0x000faf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -1578,13 +1578,13 @@ dummy_encapsulated_cmd_response   0x0005b4       data     extern D:\Projects\Egg
           endpoint_number   0x0005e2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                ep_data_in   0x0005e4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
               ep_data_out   0x0005e7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
-               error_byte   0x000097       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-    gAutomaticMotorEnable   0x0000d9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- gCommandChecksumRequired   0x0000df       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           gCommand_Char1   0x0000da       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           gCommand_Char2   0x0000db       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               error_byte   0x000484       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    gAutomaticMotorEnable   0x0004c6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ gCommandChecksumRequired   0x0004cc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           gCommand_Char1   0x0004c7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           gCommand_Char2   0x0004c8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
        gCurrentFIFOLength   0x000013       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-        gDeviceStringName   0x0000e8       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        gDeviceStringName   0x0004d5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
              gFIFOCommand   0x000012       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                   gFIFOIn   0x000010       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
               gFIFOLength   0x00000f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
@@ -1604,74 +1604,74 @@ gISRTickCountForThisCommand   0x000026       data     static D:\Projects\EggBot1
                  gInt32_9   0x0001e5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
              gLimitChecks   0x0001c2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
          gLimitSwitchMask   0x00000c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-        gLimitSwitchPortB   0x0000dc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      gLimitSwitchReplies   0x0000dd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- gLimitSwitchReplyPrinted   0x0000de       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        gLimitSwitchPortB   0x0004c9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      gLimitSwitchReplies   0x0004ca       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ gLimitSwitchReplyPrinted   0x0004cb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
        gLimitSwitchTarget   0x00000d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
     gLimitSwitchTriggered   0x00000e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 gMoveTemp   0x000129       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                gOutputStr   0x0001f1       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
                      gPos   0x0001fd       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
-                  gRC2Ptr   0x00007d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-              gRC2RPORPtr   0x000080       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                  gRC2RPn   0x000069       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                 gRC2Rate   0x000075       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-               gRC2SlotMS   0x00007f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                gRC2Slots   0x00007e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-               gRC2Target   0x00006d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                  gRC2Ptr   0x000099       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+              gRC2RPORPtr   0x00009c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                  gRC2RPn   0x000071       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                 gRC2Rate   0x000089       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+               gRC2SlotMS   0x00009b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                gRC2Slots   0x00009a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+               gRC2Target   0x000079       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
                 gRC2Value   0x000061       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
             gRC2msCounter   0x000060       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-gRCServoPoweroffCounterMS   0x0000d1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-gRCServoPoweroffCounterReloadMS   0x0000d5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+gRCServoPoweroffCounterMS   0x0004be       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+gRCServoPoweroffCounterReloadMS   0x0004c2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
          gRedLEDEmptyFIFO   0x000006       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
               gSL_Storage   0x000158       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-          gStackHighWater   0x0000e0       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          gStackHighWater   0x0004cd       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 gStandardizedCommandFormat   0x0001c3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 gUInt32_1   0x0001c5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 gUInt32_2   0x0001c9       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 gUInt32_3   0x0001cd       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
            gUseRCPenServo   0x000005       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
              gUseSolenoid   0x0001c1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-                g_BO_init   0x0000c3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_BO_strobe_delay   0x0000c7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         g_BO_strobe_mask   0x0000c4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_BO_wait_delay   0x0000c6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_BO_wait_mask   0x0000c5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      g_PowerDropDetected   0x0000a7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_PowerMonitorThresholdADC   0x0000a5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            g_RC_next_ptr   0x000099       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_RC_primed_ptr   0x000098       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_RC_timing_ptr   0x00009a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                g_BO_init   0x0004b0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_BO_strobe_delay   0x0004b4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         g_BO_strobe_mask   0x0004b1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_BO_wait_delay   0x0004b3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_BO_wait_mask   0x0004b2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      g_PowerDropDetected   0x000494       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_PowerMonitorThresholdADC   0x000492       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            g_RC_next_ptr   0x000486       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_RC_primed_ptr   0x000485       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_RC_timing_ptr   0x000487       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                  g_RX_buf   0x000300       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              g_RX_buf_in   0x0000ca       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_RX_buf_out   0x0000cb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+              g_RX_buf_in   0x0004b7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_RX_buf_out   0x0004b8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
          g_RX_command_buf   0x000240       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_StepperDisableCountdownS   0x0000ad       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_StepperDisableSecondCounter   0x0000ab       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-    g_StepperDisableState   0x0000a8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- g_StepperDisableTimeoutS   0x0000a9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_StepperDisableCountdownS   0x00049a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_StepperDisableSecondCounter   0x000498       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    g_StepperDisableState   0x000495       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ g_StepperDisableTimeoutS   0x000496       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                  g_TX_buf   0x000200       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              g_TX_buf_in   0x0000c8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_TX_buf_out   0x0000c9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_USART_RX_buf   0x0000af       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_USART_RX_buf_in   0x0000cc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-       g_USART_RX_buf_out   0x0000cd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_USART_TX_buf   0x0000b9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_USART_TX_buf_in   0x0000ce       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-       g_USART_TX_buf_out   0x0000cf       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_ack_enable   0x0000d0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_servo2_RPn   0x00008a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-             g_servo2_max   0x000082       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-             g_servo2_min   0x000084       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-       g_servo2_rate_down   0x000088       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-         g_servo2_rate_up   0x000086       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+              g_TX_buf_in   0x0004b5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_TX_buf_out   0x0004b6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_USART_RX_buf   0x00049c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_USART_RX_buf_in   0x0004b9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+       g_USART_RX_buf_out   0x0004ba       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_USART_TX_buf   0x0004a6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_USART_TX_buf_in   0x0004bb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+       g_USART_TX_buf_out   0x0004bc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_ack_enable   0x0004bd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_servo2_RPn   0x0000a6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+             g_servo2_max   0x00009e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+             g_servo2_min   0x0000a0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+       g_servo2_rate_down   0x0000a4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+         g_servo2_rate_up   0x0000a2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
        globalStepCounter1   0x000016       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
        globalStepCounter2   0x00001a       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                         i   0x0001fe       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
                   inPipes   0x0005d1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                     in_cr   0x000178       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                     isr_i   0x000001       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-           last_fifo_size   0x0000f9       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           last_fifo_size   0x0004e6       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
               line_coding   0x000594       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\CDC Device Driver\usb_function_cdc.c
                       nib   0x000184       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                  outPipes   0x0005d6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
@@ -1688,10 +1688,10 @@ g_StepperDisableSecondCounter   0x0000ab       data     extern D:\Projects\EggBo
                     sd002   0x00029c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
                     sd003   0x0002d4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
         shortPacketStatus   0x0005cf       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
-         tempStackPointer   0x0000e6       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-     tempStackPointerHigh   0x0000e4       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      tempStackPointerLow   0x0000e5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-     time_between_updates   0x00008b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         tempStackPointer   0x0004d3       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+     tempStackPointerHigh   0x0004d1       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      tempStackPointerLow   0x0004d2       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+     time_between_updates   0x000478       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                        xx   0x000180       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
 
 
@@ -2591,10 +2591,10 @@ gISRPosition1ForThisCommand   0x000036       data     static D:\Projects\EggBot1
                  __AARGB7   0x00003c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                   __REMB2   0x00003d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                  __AARGB6   0x00003d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
-                 __AARGB5   0x00003e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                   __REMB1   0x00003e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
-                 __AARGB4   0x00003f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
+                 __AARGB5   0x00003e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                   __REMB0   0x00003f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
+                 __AARGB4   0x00003f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                  __AARGB3   0x000040       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                  __AARGB2   0x000041       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
                  __AARGB1   0x000042       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\aarg.asm
@@ -2608,93 +2608,35 @@ gISRPosition1ForThisCommand   0x000036       data     static D:\Projects\EggBot1
                  __TEMPB3   0x00004a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
                  __TEMPB2   0x00004b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
                  __TEMPB1   0x00004c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
-                   __TEMP   0x00004d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
                  __TEMPB0   0x00004d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
-                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
+                   __TEMP   0x00004d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\temparg.asm
                   __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
-                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                  __tmp_0   0x00004e       data     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\EraseFlash.c
                   __tmp_0   0x00004e       data     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\WriteBytesFlash.c
+                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
+                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
+                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                   __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\CDC Device Driver\usb_function_cdc.c
+                  __tmp_0   0x00004e       data     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\EraseFlash.c
                   __tmp_0   0x00004e       data     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1open.c
                   __tmp_0   0x00004e       data     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\ReadFlash.c
-                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
-                  __tmp_0   0x00004e       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                   __tmp_1   0x000056       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                   __tmp_1   0x00005a       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
             gRC2msCounter   0x000060       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
                 gRC2Value   0x000061       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                  gRC2RPn   0x000069       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-               gRC2Target   0x00006d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                 gRC2Rate   0x000075       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                  gRC2Ptr   0x00007d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                gRC2Slots   0x00007e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-               gRC2SlotMS   0x00007f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-              gRC2RPORPtr   0x000080       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-             g_servo2_max   0x000082       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-             g_servo2_min   0x000084       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-         g_servo2_rate_up   0x000086       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-       g_servo2_rate_down   0x000088       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-             g_servo2_RPn   0x00008a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-     time_between_updates   0x00008b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         ISR_D_RepeatRate   0x00008d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            ISR_D_FIFO_in   0x00008f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           ISR_D_FIFO_out   0x000090       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        ISR_D_FIFO_length   0x000091       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         ISR_A_RepeatRate   0x000092       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            ISR_A_FIFO_in   0x000094       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           ISR_A_FIFO_out   0x000095       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        ISR_A_FIFO_length   0x000096       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-               error_byte   0x000097       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_RC_primed_ptr   0x000098       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            g_RC_next_ptr   0x000099       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_RC_timing_ptr   0x00009a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           D_tick_counter   0x00009b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           A_tick_counter   0x00009d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            A_cur_channel   0x00009f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           AnalogInitiate   0x0000a0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-    AnalogEnabledChannels   0x0000a1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-               ChannelBit   0x0000a3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_PowerMonitorThresholdADC   0x0000a5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      g_PowerDropDetected   0x0000a7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-    g_StepperDisableState   0x0000a8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- g_StepperDisableTimeoutS   0x0000a9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_StepperDisableSecondCounter   0x0000ab       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-g_StepperDisableCountdownS   0x0000ad       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_USART_RX_buf   0x0000af       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_USART_TX_buf   0x0000b9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                g_BO_init   0x0000c3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         g_BO_strobe_mask   0x0000c4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           g_BO_wait_mask   0x0000c5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          g_BO_wait_delay   0x0000c6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_BO_strobe_delay   0x0000c7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              g_TX_buf_in   0x0000c8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_TX_buf_out   0x0000c9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              g_RX_buf_in   0x0000ca       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_RX_buf_out   0x0000cb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_USART_RX_buf_in   0x0000cc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-       g_USART_RX_buf_out   0x0000cd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        g_USART_TX_buf_in   0x0000ce       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-       g_USART_TX_buf_out   0x0000cf       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-             g_ack_enable   0x0000d0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-gRCServoPoweroffCounterMS   0x0000d1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-gRCServoPoweroffCounterReloadMS   0x0000d5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-    gAutomaticMotorEnable   0x0000d9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           gCommand_Char1   0x0000da       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           gCommand_Char2   0x0000db       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        gLimitSwitchPortB   0x0000dc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      gLimitSwitchReplies   0x0000dd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- gLimitSwitchReplyPrinted   0x0000de       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
- gCommandChecksumRequired   0x0000df       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-          gStackHighWater   0x0000e0       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-            RC2Difference   0x0000e2       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-     tempStackPointerHigh   0x0000e4       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-      tempStackPointerLow   0x0000e5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-         tempStackPointer   0x0000e6       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-        gDeviceStringName   0x0000e8       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-           last_fifo_size   0x0000f9       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                  FIFOPtr   0x0000fa       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
+                  gRC2RPn   0x000071       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+               gRC2Target   0x000079       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                 gRC2Rate   0x000089       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                  gRC2Ptr   0x000099       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+                gRC2Slots   0x00009a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+               gRC2SlotMS   0x00009b       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+              gRC2RPORPtr   0x00009c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+             g_servo2_max   0x00009e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+             g_servo2_min   0x0000a0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+         g_servo2_rate_up   0x0000a2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+       g_servo2_rate_down   0x0000a4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
+             g_servo2_RPn   0x0000a6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
                ISR_A_FIFO   0x000100       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                ISR_D_FIFO   0x000120       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                 gMoveTemp   0x000129       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
@@ -2745,6 +2687,63 @@ gStandardizedCommandFormat   0x0001c3       data     extern D:\Projects\EggBot1-
                       BDT   0x000400       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                  SetupPkt   0x000430       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
               CtrlTrfData   0x000438       data     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
+     time_between_updates   0x000478       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         ISR_D_RepeatRate   0x00047a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            ISR_D_FIFO_in   0x00047c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           ISR_D_FIFO_out   0x00047d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        ISR_D_FIFO_length   0x00047e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         ISR_A_RepeatRate   0x00047f       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            ISR_A_FIFO_in   0x000481       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           ISR_A_FIFO_out   0x000482       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        ISR_A_FIFO_length   0x000483       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               error_byte   0x000484       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_RC_primed_ptr   0x000485       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            g_RC_next_ptr   0x000486       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_RC_timing_ptr   0x000487       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           D_tick_counter   0x000488       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           A_tick_counter   0x00048a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            A_cur_channel   0x00048c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           AnalogInitiate   0x00048d       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    AnalogEnabledChannels   0x00048e       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               ChannelBit   0x000490       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_PowerMonitorThresholdADC   0x000492       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      g_PowerDropDetected   0x000494       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    g_StepperDisableState   0x000495       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ g_StepperDisableTimeoutS   0x000496       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_StepperDisableSecondCounter   0x000498       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+g_StepperDisableCountdownS   0x00049a       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_USART_RX_buf   0x00049c       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_USART_TX_buf   0x0004a6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                g_BO_init   0x0004b0       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         g_BO_strobe_mask   0x0004b1       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           g_BO_wait_mask   0x0004b2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          g_BO_wait_delay   0x0004b3       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_BO_strobe_delay   0x0004b4       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+              g_TX_buf_in   0x0004b5       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_TX_buf_out   0x0004b6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+              g_RX_buf_in   0x0004b7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_RX_buf_out   0x0004b8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_USART_RX_buf_in   0x0004b9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+       g_USART_RX_buf_out   0x0004ba       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        g_USART_TX_buf_in   0x0004bb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+       g_USART_TX_buf_out   0x0004bc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+             g_ack_enable   0x0004bd       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+gRCServoPoweroffCounterMS   0x0004be       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+gRCServoPoweroffCounterReloadMS   0x0004c2       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+    gAutomaticMotorEnable   0x0004c6       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           gCommand_Char1   0x0004c7       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           gCommand_Char2   0x0004c8       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        gLimitSwitchPortB   0x0004c9       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      gLimitSwitchReplies   0x0004ca       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ gLimitSwitchReplyPrinted   0x0004cb       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+ gCommandChecksumRequired   0x0004cc       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+          gStackHighWater   0x0004cd       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+            RC2Difference   0x0004cf       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+     tempStackPointerHigh   0x0004d1       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+      tempStackPointerLow   0x0004d2       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+         tempStackPointer   0x0004d3       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+        gDeviceStringName   0x0004d5       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+           last_fifo_size   0x0004e6       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                     ARGA0   0x000500       data     extern source\squareroot.s      
                     ARGA1   0x000501       data     extern source\squareroot.s      
                     ARGA2   0x000502       data     extern source\squareroot.s      
@@ -2809,6 +2808,7 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                 curr_byte   0x0005f3       data     static C:\MCC18\src\traditional\startup\c018i.c
                curr_entry   0x0005f5       data     static C:\MCC18\src\traditional\startup\c018i.c
                  data_ptr   0x0005f7       data     static C:\MCC18\src\traditional\startup\c018i.c
+                  FIFOPtr   0x0005fa       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
               CommandFIFO   0x000600       data     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                     RPOR0   0x000ec6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     RPOR1   0x000ec7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -2847,66 +2847,66 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                   RPINR22   0x000efc       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RPINR23   0x000efd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RPINR24   0x000efe       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   PPSCON   0x000eff       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                PPSCONbits   0x000eff       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   PPSCON   0x000eff       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP0   0x000f26       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP0bits   0x000f26       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP1bits   0x000f27       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP1   0x000f27       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP2bits   0x000f28       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP2   0x000f28       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     UEP3   0x000f29       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP3bits   0x000f29       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     UEP4   0x000f2a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     UEP3   0x000f29       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP4bits   0x000f2a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 UEP5bits   0x000f2b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     UEP4   0x000f2a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP5   0x000f2b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 UEP5bits   0x000f2b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP6   0x000f2c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP6bits   0x000f2c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP7   0x000f2d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP7bits   0x000f2d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEP8bits   0x000f2e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP8   0x000f2e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 UEP9bits   0x000f2f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEP9   0x000f2f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    UEP10   0x000f30       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 UEP9bits   0x000f2f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP10bits   0x000f30       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    UEP10   0x000f30       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP11bits   0x000f31       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UEP11   0x000f31       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    UEP12   0x000f32       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP12bits   0x000f32       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    UEP12   0x000f32       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UEP13   0x000f33       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP13bits   0x000f33       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UEP14   0x000f34       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP14bits   0x000f34       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    UEP15   0x000f35       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UEP15bits   0x000f35       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    UEP15   0x000f35       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                       UIE   0x000f36       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   UIEbits   0x000f36       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     UEIE   0x000f37       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UEIEbits   0x000f37       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     UEIE   0x000f37       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UADDRbits   0x000f38       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UADDR   0x000f38       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     UCFG   0x000f39       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UCFGbits   0x000f39       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     UCFG   0x000f39       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PADCFG1   0x000f3c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               PADCFG1bits   0x000f3c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   REFOCON   0x000f3d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               REFOCONbits   0x000f3d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   RTCCAL   0x000f3e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                RTCCALbits   0x000f3e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   RTCCAL   0x000f3e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                RTCCFGbits   0x000f3f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    RTCCFG   0x000f3f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               ODCON3bits   0x000f40       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ODCON3   0x000f40       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               ODCON2bits   0x000f41       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               ODCON3bits   0x000f40       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ODCON2   0x000f41       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               ODCON1bits   0x000f42       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               ODCON2bits   0x000f41       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ODCON1   0x000f42       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               ODCON1bits   0x000f42       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ANCON0bits   0x000f48       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ANCON0   0x000f48       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   ANCON1   0x000f49       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ANCON1bits   0x000f49       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   ANCON1   0x000f49       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               DSWAKELbits   0x000f4a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   DSWAKEL   0x000f4a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               DSWAKEHbits   0x000f4b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -2919,14 +2919,14 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                    DSGPR1   0x000f4f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   TCLKCON   0x000f52       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               TCLKCONbits   0x000f52       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               CVRCONbits   0x000f53       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CVRCON   0x000f53       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              PMSTATLbits   0x000f54       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               CVRCONbits   0x000f53       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMSTATL   0x000f54       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              PMSTATHbits   0x000f55       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              PMSTATLbits   0x000f54       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMSTATH   0x000f55       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 PMELbits   0x000f56       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              PMSTATHbits   0x000f55       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      PMEL   0x000f56       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 PMELbits   0x000f56       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PMEHbits   0x000f57       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      PMEH   0x000f57       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMDIN2L   0x000f58       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -2937,51 +2937,51 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                   PMMODEL   0x000f5c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               PMMODEHbits   0x000f5d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMMODEH   0x000f5d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   PMCONL   0x000f5e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                PMCONLbits   0x000f5e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               PMCONHbits   0x000f5f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   PMCONL   0x000f5e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    PMCONH   0x000f5f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               PMCONHbits   0x000f5f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UFRMLbits   0x000f60       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UFRML   0x000f60       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UFRM   0x000f60       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 UFRMHbits   0x000f61       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     UFRMH   0x000f61       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  UIRbits   0x000f62       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                       UIR   0x000f62       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 UEIRbits   0x000f63       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  UIRbits   0x000f62       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UEIR   0x000f63       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                USTATbits   0x000f64       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 UEIRbits   0x000f63       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     USTAT   0x000f64       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                USTATbits   0x000f64       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  UCONbits   0x000f65       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      UCON   0x000f65       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   DMABCH   0x000f66       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                DMABCHbits   0x000f66       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   DMABCH   0x000f66       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    DMABCL   0x000f67       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               RXADDRHbits   0x000f68       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RXADDRH   0x000f68       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RXADDRL   0x000f69       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              TXADDRHbits   0x000f6a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   TXADDRH   0x000f6a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              TXADDRHbits   0x000f6a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   TXADDRL   0x000f6b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMDIN1L   0x000f6c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMDIN1H   0x000f6d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 PMDOUT1L   0x000f6e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PMADDRL   0x000f6e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 PMDOUT1L   0x000f6e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  PMADDRH   0x000f6f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PMDOUT1H   0x000f6f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               PMADDRHbits   0x000f6f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  PMADDRH   0x000f6f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   CMSTAT   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 CMSTATUS   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                CMSTATbits   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              CMSTATUSbits   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 CMSTATUS   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   CMSTAT   0x000f70       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              SSP2CON2bits   0x000f71       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  SSP2CON2   0x000f71       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 SSP2CON1   0x000f72       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              SSP2CON1bits   0x000f72       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 SSP2STAT   0x000f73       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 SSP2CON1   0x000f72       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              SSP2STATbits   0x000f73       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              SSP2ADDbits   0x000f74       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 SSP2STAT   0x000f73       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   SSP2ADD   0x000f74       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              SSP2ADDbits   0x000f74       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   SSP2BUF   0x000f75       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     T4CON   0x000f76       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 T4CONbits   0x000f76       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -2991,27 +2991,27 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                     T3CON   0x000f79       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR3L   0x000f7a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR3H   0x000f7b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 BAUDCON2   0x000f7c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              BAUDCON2bits   0x000f7c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 BAUDCON2   0x000f7c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   SPBRGH2   0x000f7d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              BAUDCTLbits   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  BAUDCTL   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              BAUDCONbits   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  BAUDCON   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              BAUDCON1bits   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  BAUDCON1   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  BAUDCON   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              BAUDCONbits   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  BAUDCTL   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              BAUDCTLbits   0x000f7e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    SPBRGH   0x000f7f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   SPBRGH1   0x000f7f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                PORTAbits   0x000f80       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     PORTA   0x000f80       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    PORTB   0x000f81       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                PORTAbits   0x000f80       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 PORTBbits   0x000f81       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    PORTC   0x000f82       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    PORTB   0x000f81       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 PORTCbits   0x000f82       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                PORTDbits   0x000f83       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    PORTC   0x000f82       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     PORTD   0x000f83       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    PORTE   0x000f84       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                PORTDbits   0x000f83       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 PORTEbits   0x000f84       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    PORTE   0x000f84       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   HLVDCON   0x000f85       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               HLVDCONbits   0x000f85       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               DMACON2bits   0x000f86       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -3034,46 +3034,46 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                   ALRMRPT   0x000f90       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   ALRMCFG   0x000f91       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               ALRMCFGbits   0x000f91       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    TRISA   0x000f92       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TRISAbits   0x000f92       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    TRISB   0x000f93       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    TRISA   0x000f92       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TRISBbits   0x000f93       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    TRISB   0x000f93       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TRISCbits   0x000f94       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TRISC   0x000f94       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    TRISD   0x000f95       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TRISDbits   0x000f95       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    TRISE   0x000f96       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    TRISD   0x000f95       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TRISEbits   0x000f96       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    TRISE   0x000f96       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    T3GCON   0x000f97       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                T3GCONbits   0x000f97       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RTCVALL   0x000f98       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   RTCVALH   0x000f99       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   T1GCON   0x000f9a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                T1GCONbits   0x000f9a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              OSCTUNEbits   0x000f9b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   T1GCON   0x000f9a       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   OSCTUNE   0x000f9b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               RCSTA2bits   0x000f9c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              OSCTUNEbits   0x000f9b       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    RCSTA2   0x000f9c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 PIE1bits   0x000f9d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               RCSTA2bits   0x000f9c       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      PIE1   0x000f9d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     PIR1   0x000f9e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 PIE1bits   0x000f9d       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PIR1bits   0x000f9e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     PIR1   0x000f9e       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  IPR1bits   0x000f9f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      IPR1   0x000f9f       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      PIE2   0x000fa0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PIE2bits   0x000fa0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     PIR2   0x000fa1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PIR2bits   0x000fa1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     PIR2   0x000fa1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      IPR2   0x000fa2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  IPR2bits   0x000fa2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     PIE3   0x000fa3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PIE3bits   0x000fa3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     PIE3   0x000fa3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PIR3bits   0x000fa4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      PIR3   0x000fa4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 IPR3bits   0x000fa5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      IPR3   0x000fa5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   EECON1   0x000fa6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 IPR3bits   0x000fa5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                EECON1bits   0x000fa6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   EECON1   0x000fa6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    EECON2   0x000fa7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                TXSTA2bits   0x000fa8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    TXSTA2   0x000fa8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -3085,53 +3085,53 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                RCSTA1bits   0x000fac       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 RCSTAbits   0x000fac       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 TXSTAbits   0x000fad       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               TXSTA1bits   0x000fad       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TXSTA   0x000fad       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    TXSTA1   0x000fad       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   TXREG1   0x000fae       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               TXSTA1bits   0x000fad       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TXREG   0x000fae       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   TXREG1   0x000fae       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    RCREG1   0x000faf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     RCREG   0x000faf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    SPBRG1   0x000fb0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     SPBRG   0x000fb0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  CTMUICON   0x000fb1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              CTMUICONbits   0x000fb1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             CTMUCONLbits   0x000fb2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  CTMUCONL   0x000fb2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             CTMUCONHbits   0x000fb3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             CTMUCONLbits   0x000fb2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  CTMUCONH   0x000fb3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  CCP2CON   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              CCP2CONbits   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             ECCP2CONbits   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             CTMUCONHbits   0x000fb3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  ECCP2CON   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    CCPR2   0x000fb5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             ECCP2CONbits   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              CCP2CONbits   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  CCP2CON   0x000fb4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CCPR2L   0x000fb5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    CCPR2   0x000fb5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CCPR2H   0x000fb6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  ECCP2DEL   0x000fb7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              ECCP2DELbits   0x000fb7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  PWM2CON   0x000fb7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               PWM2CONbits   0x000fb7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              ECCP2ASbits   0x000fb8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  PWM2CON   0x000fb7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   ECCP2AS   0x000fb8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              ECCP2ASbits   0x000fb8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              PSTR2CONbits   0x000fb9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PSTR2CON   0x000fb9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  CCP1CON   0x000fba       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              ECCP1CONbits   0x000fba       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  ECCP1CON   0x000fba       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               CCP1CONbits   0x000fba       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  CCP1CON   0x000fba       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   CCPR1L   0x000fbb       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     CCPR1   0x000fbb       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   CCPR1L   0x000fbb       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CCPR1H   0x000fbc       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 ECCP1DEL   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              ECCP1DELbits   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              PWM1CONbits   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   PWM1CON   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 ECCP1DEL   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              PWM1CONbits   0x000fbd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               ECCP1ASbits   0x000fbe       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   ECCP1AS   0x000fbe       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             PSTR1CONbits   0x000fbf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  PSTR1CON   0x000fbf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               WDTCONbits   0x000fc0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             PSTR1CONbits   0x000fbf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    WDTCON   0x000fc0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               WDTCONbits   0x000fc0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ADCON1bits   0x000fc1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADCON1   0x000fc1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ADCON0bits   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -3139,46 +3139,46 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                     ADRES   0x000fc3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADRESL   0x000fc3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADRESH   0x000fc4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              SSPCON2bits   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  SSPCON2   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             SSP1CON2bits   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  SSP1CON2   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              SSPCON1bits   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  SSPCON1   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-             SSP1CON1bits   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             SSP1CON2bits   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  SSPCON2   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              SSPCON2bits   0x000fc5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  SSP1CON1   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+             SSP1CON1bits   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  SSPCON1   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              SSPCON1bits   0x000fc6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  SSP1STAT   0x000fc7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
              SSP1STATbits   0x000fc7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  SSPSTAT   0x000fc7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               SSPSTATbits   0x000fc7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  SSPSTAT   0x000fc7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                SSPADDbits   0x000fc8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    SSPADD   0x000fc8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               SSP1ADDbits   0x000fc8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   SSP1ADD   0x000fc8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  SSP1BUF   0x000fc9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    SSPBUF   0x000fc9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                T2CONbits   0x000fca       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  SSP1BUF   0x000fc9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     T2CON   0x000fca       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                T2CONbits   0x000fca       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                       PR2   0x000fcb       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      TMR2   0x000fcc       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                T1CONbits   0x000fcd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     T1CON   0x000fcd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                T1CONbits   0x000fcd       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR1L   0x000fce       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR1H   0x000fcf       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                 RCONbits   0x000fd0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                      RCON   0x000fd0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                   CM2CON   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  CM2CON1   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              CM2CON1bits   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                 RCONbits   0x000fd0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                CM2CONbits   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              CM2CON1bits   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  CM2CON1   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                   CM2CON   0x000fd1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                CM1CONbits   0x000fd2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               CM1CON1bits   0x000fd2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   CM1CON1   0x000fd2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    CM1CON   0x000fd2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                OSCCONbits   0x000fd3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    OSCCON   0x000fd3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                    T0CON   0x000fd5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                 T0CONbits   0x000fd5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                    T0CON   0x000fd5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR0L   0x000fd6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     TMR0H   0x000fd7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    STATUS   0x000fd8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -3209,22 +3209,22 @@ USBDeferOUTDataStagePackets   0x0005ef       data     extern D:\Projects\EggBot1
                  POSTDEC0   0x000fed       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                  POSTINC0   0x000fee       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     INDF0   0x000fef       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-              INTCON3bits   0x000ff0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   INTCON3   0x000ff0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+              INTCON3bits   0x000ff0       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
               INTCON2bits   0x000ff1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   INTCON2   0x000ff1       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-               INTCONbits   0x000ff2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    INTCON   0x000ff2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                     PROD   0x000ff3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+               INTCONbits   0x000ff2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     PRODL   0x000ff3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                     PROD   0x000ff3       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                     PRODH   0x000ff4       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    TABLAT   0x000ff5       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                  TBLPTRL   0x000ff6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    TBLPTR   0x000ff6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                  TBLPTRL   0x000ff6       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   TBLPTRH   0x000ff7       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   TBLPTRU   0x000ff8       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                       PC   0x000ff9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                       PCL   0x000ff9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
+                       PC   0x000ff9       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    PCLATH   0x000ffa       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    PCLATU   0x000ffb       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                STKPTRbits   0x000ffc       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
