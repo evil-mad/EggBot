@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a42"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a43"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -326,6 +326,11 @@ void low_ISR(void)
         // we add (or subtract) gRC2Rate[] to try and get there.
         if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
         {
+          if (bittst(TestMode, TEST_MODE_GPIO_NUM))
+          {
+            LATAbits.LATA3 = 1;
+          }
+
           // If the rate is zero, then we always move instantly
           // to the target.
           if (gRC2Rate[gRC2Ptr] == 0u)
@@ -379,6 +384,11 @@ void low_ISR(void)
 
         // Re-enable interrupts
         INTCONbits.GIEH = 1;
+
+        if (bittst(TestMode, TEST_MODE_GPIO_NUM))
+        {
+          LATAbits.LATA3 = 0;
+        }
       }
     }
 
@@ -1979,6 +1989,7 @@ void parse_CU_packet(void)
       TRISDbits.TRISD1 = 0;   // D1 high when in ISR
       TRISDbits.TRISD0 = 0;   // D0 high when loading next command
       TRISAbits.TRISA1 = 0;   // A1 when FIFO empty
+      TRISAbits.TRISA3 = 0;   // A3 when servo is moving
     }
     else
     {

@@ -1797,6 +1797,7 @@
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
            </li>
+          <li><span style="font-weight: bold;">Version History:</span> V3.0.0: bit 7 now reports if the limit switch trigger has fired. Also with v3.0.0 bit 6 now reports the power lost flag. If you have PC code which is relying upon the old meanings of these bits (bit 7 was showing the state of the RB5 pin and bit 6 was showing the state of the RB2 pin) it will need to be updated to use v3.0.0.</li>
         </ul>
 
         <hr class="short" />
@@ -2990,10 +2991,11 @@
         </ul>
         </p>
         
-        <p>Another important performance measure is the maximum rate at which sequential movement commands can be streamed to the EBB. This rate is expressed as the shortest move duration that can be sent to the EBB as a continuous stream of identical motion commands, such that there are no gaps between the last step of one move and the first step of the next move. For a high enough sustained rate of sufficiently short movement commands, the EBB will not be able to parse and queue each command prior to starting the subsequent move. The available CPU time available for parsing and queueing commands does depend on the active step rate, as the EBB shares CPU time between command parsing and step generation.
+        <p>
+          Another important performance measure is the maximum rate at which sequential movement commands can be streamed to the EBB. This rate is expressed as the shortest move duration that can be sent to the EBB as a continuous stream of identical motion commands, such that there are no gaps between the last step of one move and the first step of the next move. For a high enough sustained rate of sufficiently short movement commands, the EBB will not be able to parse and queue each command prior to starting the subsequent move. The available CPU time available for parsing and queueing commands does depend on the active step rate, as the EBB shares CPU time between command parsing and step generation.
         </p>
-        <p>The following table shows the minimum move duration, in milliseconds, which the EBB can sustain indefinitely without gaps, under different move commands. The worst case values (highest sustained minimum move duration) were measured with step rates of approximately 25 kHz on both motors &mdash; a condition rarely achieved in typical applications. The best case values
-        (lowest sustained minimum move duration) are for low step rates, and was measured at 2.5 kHz. You may be able to sustain movement at these rates with higher motion frequencies.
+        <p>
+          The following table shows the minimum move duration, in milliseconds, which the EBB can sustain indefinitely without gaps, using different move commands. All times were measured with step rates of approximately 25 kHz on both motors &mdash; a worst case condition rarely achieved in typical applications. 
         </p>
         
         <p />
@@ -3003,23 +3005,27 @@
           <tbody>
             <tr style="font-weight:bold;">
               <td>Command</td>
-              <td>Firmware &gt;= 2.7.0</td>
+              <td>Firmware &gt;= 3.0.0</td>
+              <td>Firmware &gt;= 2.7.0 and &lt; 3.0.0</td>
               <td>Firmware &lt; 2.7.0</td>
             </tr>
             <tr>
               <td>SM</td>
+              <td>3 ms</td>
               <td>3-4 ms</td>
               <td>4-7 ms</td>
             </tr>
             <tr>
-              <td>XM</td>
+              <td>LM</td>
+              <td>4 ms</td>
               <td>3-4 ms</td>
               <td>4-6 ms</td>
             </tr>
             <tr>
-              <td>LM, LT </td>
-              <td>3-5 ms</td>
-              <td>4-6 ms</td>
+              <td>L3 </td>
+              <td>5 ms</td>
+              <td>---</td>
+              <td>---</td>
             </tr>
           </tbody>
         </table>

@@ -416,31 +416,53 @@
           Version 3.0.0 represents the largest group of changes ever made to the EBB firmware codebase. Many separate changes (see below) were bundled together into one large release so that PC software could count on all of the v3.0.0 features being present together. Besides new commands, refactoring of critical code sections and other functional changes, a significant effort was put into cleaning up the source code. A unified style was applied to all source files and significant comments were added throughout the codebase and in particular in the critical and complex motion ISR. A significant amount of effort was also undertaken to add in HIL (hardware in the loop) test functionality into the shipping firmware image. This allows PC based test routines to verify all sorts of timing and logic functionality in an automated or semi-automated manner. 
         </p>
         <p>
-          Even with all of the changes in this version, many attempts have been made to produce default behavior which is compatible with previous EBB versions.
+          Even with all of the changes in this version, many attempts have been made to produce default behavior which is almost completely compatible with previous EBB versions.
         </p>
         <p>
           <ul>
             <li>
-              A 'jerk enabled' version of the LT command was added called the T3 command for time limited moves with jerk control.
+              A 'jerk enabled' version of the <code>LT</code> command was added called the <code>T3</code> command for time limited moves with jerk control.
             </li>
             <li>
-              A 'jerk enabled' version of the LM command was added called the L3 command for rate controlled moves with jerk control.
+              A 'jerk enabled' version of the <code>LM</code> command was added called the <code>L3</code> command for rate controlled moves with jerk control.
             </li>
             <li>
               The motion control ISR received a significant re-factorization to add in support for new commands and decrease typical code path time as much as possible.
             </li>
             <li>
-              The FIFO was expanded to allow for up to 32 commands to be queued. At boot the FIFO length defaults to 1 for backward compatibility.
+              The FIFO was expanded to allow for up to 32 commands to be queued. At boot the FIFO length defaults to 1 for backward compatibility. See commands <code>CU,4</code> for setting the FIFO depth, <code>QU,2</code> for reading the maximum supported FIFO depth, and <code>CU,3</code> for reading out the current FIFO depth.
             </li>
             <li>
-              New low level floating point based routines were added to allow much simpler math as well as larger parameter values for the 'simple' motion control commands SM, XM and HM.
+              New low level floating point based routines were added to allow much simpler math as well as larger parameter values for the 'simple' motion control commands <code>SM</code>, <code>XM</code> and <code>HM</code>.
             </li>
             <li>
               In order to free up some RAM for the larger FIFO, the maximum number of simultaneous RC servo outputs was reduced from 24 to 8. This change does not affect which pins are available for RC servo output, only how many can be active at once.
             </li>
-
-
-           </ul>
+            <li>
+              Removed <code>PC</code>, <code>PG</code> and <code>T</code> commands as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a>
+            </li>
+            <li>
+              Added "Future Syntax Mode" - see <code>CU,10</code> command - based on <a href="https://github.com/evil-mad/EggBot/issues/139">issue #139</a>. This change allows a user to turn on a mode where every response from the EBB follows the exact same format to make machine parsing of responses more efficient.
+            </li>
+            <li>
+              Added limit switch support - see <code>CU,51</code>, <code>CU,52</code> and <code>CU,53</code> commands - based on <a href="https://github.com/evil-mad/EggBot/issues/58">issue #58</a>. These commands allow for a hardware limit switch (or several) to be enabled which, when triggered, can stop any motor motion.
+            </li>
+            <li>
+              The <code>QG</code> command has been modified. Bit 7 now reports the limit switch triggered value, and bit 6 reports the power lost flag. In particular, the power lost flag allows the PW to know if the EBB's power has dipped low enough to cause a loss of step position, which could be used to alert the user. See <code>CU,60</code> for information relating to setting the <i>Power_Lost_Threshold</i> value.
+            </li>
+            <li>
+              The <code>SL</code> and <code>QL</code> commands have been enhanced to allow up to 32 to 8-bit values to be stored and retrieved.
+            </li>
+            <li>
+              A new mode has been added which requires a checksum at the end of every command sent to the EBB. See <code>CU,54</code> for more information.
+            </li>
+            <li>
+              The ability to more explicitly control which stepper motor drivers are enabled was added as part of command <code>CU,50</code>. This allows for the freewheeling of one motor while the other motor executes a move for example.
+            </li>
+            <li>
+              Software test modes were added and are enabled using <code>CU,250</code> through <code>CU,257</code>.
+            </li>
+          </ul>
         </p>
 
         <p/>
