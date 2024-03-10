@@ -324,6 +324,10 @@ void low_ISR(void)
                 // we add (or subtract) gRC2Rate[] to try and get there.
                 if (gRC2Target[gRC2Ptr] != gRC2Value[gRC2Ptr])
                 {
+#if defined(GPIO_DEBUG)
+                    TRISAbits.TRISA3 = 0;
+                    LATAbits.LATA3 = 1;
+#endif                    
                     // If the rate is zero, then we always move instantly
                     // to the target.
                     if (gRC2Rate[gRC2Ptr] == 0)
@@ -378,6 +382,10 @@ void low_ISR(void)
 
                 // Re-enable interrupts
                 INTCONbits.GIEH = 1;
+
+#if defined(GPIO_DEBUG)
+                LATAbits.LATA3 = 0;
+#endif                    
             }
         }
 		

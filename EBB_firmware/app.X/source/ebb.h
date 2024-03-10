@@ -55,7 +55,7 @@
 #define DEBUG_VALUE_PRINT
 
 // Define this to turn on some GPIO pin timing debug for stepper commands
-//#define GPIO_DEBUG
+#define GPIO_DEBUG
 
 // 	These are used for Enable<X>IO to control the enable lines for the driver
 #define ENABLE_MOTOR        0
