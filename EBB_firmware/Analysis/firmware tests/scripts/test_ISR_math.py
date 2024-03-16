@@ -9,6 +9,7 @@ import time
 
 from pyaxidraw import axidraw
 
+import test_log
 from ebb_serial_utility import query
 from ebb_serial_utility import EBB_version_less_than
 from saleae_capture_one import capture_command
@@ -17,14 +18,10 @@ from analyze_digital_csv import extract_debug_uart
 from analyze_digital_csv import compare_debug_uart
 
 def test_ISR_math_run(test_input_path : str):
-    all_tests_pass = False
+    all_tests_pass = True
 
-    # Create new test artifact directory
-    # Each test will create a directory within this directory with its artifacts
-
-    artifact_dir = os.path.join(os.getcwd(), f'../sample output/output-{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}')
     input_filepath = os.path.join(os.getcwd(), test_input_path)
-    os.makedirs(artifact_dir, exist_ok = True)
+    output_filepath = test_log.artifact_dir + f'test_ISR_math/'
 
     # Connect to EBB
 
@@ -32,20 +29,19 @@ def test_ISR_math_run(test_input_path : str):
     ad.interactive()
 
     if not ad.connect():                # Open serial port to AxiDraw;
-        print("failed to connect")
-        quit()   
+        test_log.tl_print("test_ISR_math: failed to connect")
+        return False
 
     the_port = ad.plot_status.port
     if the_port is None:
-        print("failed to connect")
-        sys.exit() # end script
+        test_log.tl_print("test_ISR_math: failed to connect")
+        return False
 
     the_port.reset_input_buffer()
-    print("connected")
+    test_log.tl_print("test_ISR_math: connected")
     EBB_version = query(the_port, 'V\r')
-    last_command = ""
     if EBB_version_less_than(EBB_version.decode("utf-8"), "3.0.0"):
-        print("EBB version required is 3.0.0 or above, but found :" + EBB_version)
+        test_log.tl_print("test_ISR_math: EBB version required is 3.0.0 or above, but found :" + EBB_version)
         return False
 
     # Turn on the debug features we need in order to run our tests
@@ -66,8 +62,8 @@ def test_ISR_math_run(test_input_path : str):
         for param in reader:
             if (len(param) >= 5):
                 if (param[0] != '0'):
-                    print(param[2] + ": ", end='')
-                    test_dir = os.path.join(artifact_dir, param[2])
+                    test_log.tl_print("test_ISR_math: " + param[2] + ": ", False)
+                    test_dir = os.path.join(output_filepath, param[2])
                     #capture_command(param[1], test_dir, float(param[3]), param[4])
                     capture_command(param[1], test_dir, float(param[3]), the_port)
                     # Now perform the type of analysis appropriate for this test
@@ -77,14 +73,14 @@ def test_ISR_math_run(test_input_path : str):
                     #check_debug_serial(analyzer_export_filepath, expected_params)
                     
                     if compare_debug_uart(extract_debug_uart(test_dir), param[4]):
-                        print("Pass")
+                        test_log.tl_print("Pass")
                     else:
-                        print("Fail")
+                        test_log.tl_print("Fail")
                         all_tests_pass = False
 
     ad.disconnect()             # Close serial port to AxiDraw
     test_input_file.close()
-    print("Complete")
+    test_log.tl_print("test_ISR_math: Complete")
     return all_tests_pass
 
 
