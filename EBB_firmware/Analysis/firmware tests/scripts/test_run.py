@@ -21,13 +21,14 @@
 # This code requires a 16 channel Saleae - either the "Logic 16" or the "Logic Pro 16" as we
 # need more than 8 simultaneous input channels.
 
+import sys
 
 # Our global test result output file
 import test_log
 
 # Import the test function from each test file
 from test_ISR_math import test_ISR_math_run
-
+from test_global_step_counter import test_global_step_counter_run
 
 # Start off assuming all will pass. Any that fail will flip this
 all_tests_pass = True
@@ -36,9 +37,17 @@ all_tests_pass = True
 test_log.tl_init()
 
 # Test
-test_log.tl_print("Run test: test_ISR_math_run()")
-if test_ISR_math_run("..\\test input data\\test_inputs.csv") == False:
-    all_tests_pass = False
+if sys.argv[1] == "" or sys.argv[1] == "test_ISR_math":
+    test_log.tl_print("Run test: test_ISR_math")
+    if test_ISR_math_run("..\\test input data\\test_inputs_simple.csv") == False:
+        all_tests_pass = False
+
+# Test
+if sys.argv[1] == "" or sys.argv[1] == "test_global_step_counter":
+    test_log.tl_print("Run test: test_global_step_counter")
+    if test_global_step_counter_run() == False:
+        all_tests_pass = False
+
 
 # Done running all tests
 if all_tests_pass == True:

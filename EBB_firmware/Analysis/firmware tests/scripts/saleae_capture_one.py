@@ -5,13 +5,8 @@
 from saleae import automation
 import os
 import os.path
-from datetime import datetime
 import time
 from ebb_serial_utility import query
-
-from pyaxidraw import axidraw
-from plotink import ebb_motion
-from plotink import ebb_serial
 
 # Pass in an EBB command a file path name and a time and this function
 # will start the capture (with length of the time), send the EBB command,

@@ -1,11 +1,15 @@
-# Test file to show each function working
-from saleae import automation
+# A test for ISR math in v3.0.0 and above EBB firmware
+#
+# The caller passes in a CSV test file, which contains all of the commands to send
+# as well as the expected results from the testing.
+# We configure the EBB, start a Saleae capture, then send a command. When that
+# command is done, we save the capture, extract the debug ISR UART variable values,
+# and then compare that to the expected results. If they match that test passes.
+# This is repeated for each line in the input test file.
+
 import os
 import os.path
-from datetime import datetime
-import sys
 import csv
-import time
 
 from pyaxidraw import axidraw
 
@@ -13,7 +17,6 @@ import test_log
 from ebb_serial_utility import query
 from ebb_serial_utility import EBB_version_less_than
 from saleae_capture_one import capture_command
-from analyze_digital_csv import analyze_digital_csv
 from analyze_digital_csv import extract_debug_uart
 from analyze_digital_csv import compare_debug_uart
 
@@ -82,8 +85,3 @@ def test_ISR_math_run(test_input_path : str):
     test_input_file.close()
     test_log.tl_print("test_ISR_math: Complete")
     return all_tests_pass
-
-
-# For calling the main function from the command line
-
-#test_ISR_math_run(sys.argv[1])

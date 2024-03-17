@@ -5,10 +5,13 @@ import re
 from plotink import ebb_serial
 
 
-def query(port_name, cmd):
+def query(port_name, cmd : str, flush_first : bool = False):
     if port_name is not None and cmd is not None:
         response = ''
         try:
+            if flush_first:
+                response = port_name.read(port_name.in_waiting)
+
 #             port_name.write(cmd.encode('ascii'))
             port_name.write(cmd.encode('ascii'))
             response = port_name.readline()
