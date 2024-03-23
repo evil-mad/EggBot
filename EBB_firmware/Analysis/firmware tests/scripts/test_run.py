@@ -29,6 +29,7 @@ import test_log
 # Import the test function from each test file
 from test_ISR_math import test_ISR_math_run
 from test_global_step_counter import test_global_step_counter_run
+from test_shortest_move import test_shortest_move_run
 
 # Start off assuming all will pass. Any that fail will flip this
 all_tests_pass = True
@@ -36,18 +37,23 @@ all_tests_pass = True
 # Generate the test run output directory and init the test log file
 test_log.tl_init()
 
-# Test
+# Test ISR math
 if sys.argv[1] == "" or sys.argv[1] == "test_ISR_math":
     test_log.tl_print("Run test: test_ISR_math")
     if test_ISR_math_run("..\\test input data\\test_inputs_simple.csv") == False:
         all_tests_pass = False
 
-# Test
+# Test global step counter
 if sys.argv[1] == "" or sys.argv[1] == "test_global_step_counter":
     test_log.tl_print("Run test: test_global_step_counter")
     if test_global_step_counter_run() == False:
         all_tests_pass = False
 
+# Test shortest move
+if sys.argv[1] == "" or sys.argv[1] == "test_shortest_move":
+    test_log.tl_print("Run test: test_shortest_move")
+    if test_shortest_move_run() == False:
+        all_tests_pass = False
 
 # Done running all tests
 if all_tests_pass == True:

@@ -141,24 +141,41 @@ def analyze_digital_csv(file_pathname : str):
             sys.exit('file {}, line {}: {}'.format(filename, reader.line_num, e))
 
     # Output all statistics we just collected as a dict to the caller
+    if step1_count == 0:
+        step1_aveHighTimeUS = 0
+        step1_aveLowTimeUS = 0
+        step1_aveFreqHZ = 0
+    else:
+        step1_aveHighTimeUS = (step1_ave_high_time_acc/step1_count)*1000000
+        step1_aveLowTimeUS = (step1_ave_low_time_acc/step1_count)*1000000
+        step1_aveFreqHZ = 1.0/(step1_freq_acc/step1_count)
+    
+    if step2_count == 0:
+        step2_aveHighTimeUS = 0
+        step2_aveLowTimeUS = 0
+        step2_aveFreqHZ = 0
+    else:
+        step2_aveHighTimeUS = (step2_ave_high_time_acc/step2_count)*1000000
+        step2_aveLowTimeUS = (step2_ave_low_time_acc/step2_count)*1000000
+        step2_aveFreqHZ = 1.0/(step2_freq_acc/step2_count)
 
     return_dict = {
         "Step1_Count": step1_count,
         "Step1_MaxHighTimeUS" : step1_max_high_time*1000000,
         "Step1_MinHighTimeUS" : step1_min_high_time*1000000,
-        "Step1_AveHigTimeUS" : (step1_ave_high_time_acc/step1_count)*1000000,
+        "Step1_AveHigTimeUS" : step1_aveHighTimeUS,
         "Step1_MaxLowTimeUS" : step1_max_low_time*1000000,
         "Step1_MinLowTimeUS" : step1_min_low_time*1000000,
-        "Step1_AveLowTimeUS" : (step1_ave_low_time_acc/step1_count)*1000000,
-        "Step1_AveFreqHZ" : 1.0/(step1_freq_acc/step1_count),
+        "Step1_AveLowTimeUS" : step1_aveLowTimeUS,
+        "Step1_AveFreqHZ" : step1_aveFreqHZ,
         "Step2_Count": step2_count,
         "Step2_MaxHighTimeUS" : step2_max_high_time*1000000,
         "Step2_MinHighTimeUS" : step2_min_high_time*1000000,
-        "Step2_AveHigTimeUS" : (step2_ave_high_time_acc/step1_count)*1000000,
+        "Step2_AveHigTimeUS" : step2_aveHighTimeUS,
         "Step2_MaxLowTimeUS" : step2_max_low_time*1000000,
         "Step2_MinLowTimeUS" : step2_min_low_time*1000000,
-        "Step2_AveLowTimeUS" : (step2_ave_low_time_acc/step1_count)*1000000,
-        "Step2_AveFreqHZ" : 1.0/(step2_freq_acc/step1_count),
+        "Step2_AveLowTimeUS" : step2_aveLowTimeUS,
+        "Step2_AveFreqHZ" : step2_aveFreqHZ,
     }
 
     return return_dict

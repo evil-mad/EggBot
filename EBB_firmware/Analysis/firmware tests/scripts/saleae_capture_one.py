@@ -14,7 +14,7 @@ from ebb_serial_utility import query
 # .csv file of the bytes on the debug serial port into the capture_dir_name 
 # directory
 
-def capture_command(EBB_command : str, capture_dir_path : str, capture_time : float, the_port):
+def capture_command(EBB_command_function : callable, capture_dir_path : str, capture_time : float, the_port):
     # Connect to the running Logic 2 Application on port `10430`.
     # Alternatively you can use automation.Manager.launch() to launch a new Logic 2 process - see
     # the API documentation for more details.
@@ -39,7 +39,7 @@ def capture_command(EBB_command : str, capture_dir_path : str, capture_time : fl
         #    digital_sample_rate=50_000_000,
         #)
 
-        # Record 5 seconds of data before stopping the capture
+        # Record capture_time seconds of data before stopping the capture
         capture_configuration = automation.CaptureConfiguration(
             capture_mode=automation.TimedCaptureMode(duration_seconds=capture_time)
         )
@@ -56,8 +56,10 @@ def capture_command(EBB_command : str, capture_dir_path : str, capture_time : fl
 
             # The capture has started. We now need to send our EBB command:
             # But wait a bit first in case there is a delay starting up the capture
-            time.sleep(0.2)
-            response = str(query(the_port, EBB_command + '\r'))
+            #time.sleep(0.2)
+            EBB_command_function()
+
+            #response = str(query(the_port, EBB_command + '\r'))
             # TODO: Confirm that response was "OK\r\n", print error and actual response if not
             #print(last_command + " :: " + response.strip())
 
