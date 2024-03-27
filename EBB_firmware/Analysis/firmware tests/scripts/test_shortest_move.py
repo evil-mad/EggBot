@@ -25,6 +25,9 @@
 # all commands (i.e. v3.0.0 has L3) so we have to query the EBB at the
 # start of the run and turn on/off various commands based on which version
 # we see.
+#
+# This test doesn't have pass/fail criteria. It simply measures the state
+# of this firmware version and records the results.
 
 import os
 import os.path
@@ -89,9 +92,21 @@ def test_shortest_move_run():
     stepper_speed_max = 25000   # in steps/second
     stepper_speed_min = 2000    # in steps/second. Since we go down to 1ms move durations, we need at least 2 steps per move
     command_repeats = 20
+    speed_count = 4             # Number of different speeds tested per command
 
+    # Initialize the final output array with default values
+    # The values in this array represent the shortest move for a given command and step speed
+    # where NO interruptions in step rate were observed
+    output = [
+        #25000 12500 6250 3125
+        [16,   16,   16,  16],     # SM
+        [16,   16,   16,  16],     # LM
+        [16,   16,   16,  16]]     # L3
+
+    command_index = 0   # used to index into the output array
     for move_command in move_commands:
         speed_decrement = int(stepper_speed_max/2)
+        speed_index = 0         # Used to index into the output array
 
         stepper_speed = stepper_speed_max
         while stepper_speed >= stepper_speed_min:
@@ -158,13 +173,19 @@ def test_shortest_move_run():
             stepper_speed = stepper_speed - speed_decrement
             speed_decrement = int(stepper_speed/2)
             test_log.tl_print("Shortest smooth move in ms was : " + str(shortest_smooth_move_ms))
+            output[command_index][speed_index] = shortest_smooth_move_ms
+            speed_index += 1
+        command_index +=1 
+        
+    # Test is complete, we've collected all of our output data
+    # Print out output array
 
-
-    #if compare_debug_uart(extract_debug_uart(test_dir), param[4]):
-    #    test_log.tl_print("Pass")
-    #else:
-    #    test_log.tl_print("Fail")
-    #    all_tests_pass = False
+    test_log.tl_print("CMD,25000,12500,6250,3125")      # Hard coded headers for output table because I'm lazy
+    for command_index in range(len(move_commands)):
+        test_log.tl_print(move_commands[command_index] + ",", False)
+        for speed_index in range(speed_count):
+            test_log.tl_print(str(output[command_index][speed_index]) + ",", False)
+        test_log.tl_print("")
 
     ad.disconnect()             # Close serial port to AxiDraw
 
