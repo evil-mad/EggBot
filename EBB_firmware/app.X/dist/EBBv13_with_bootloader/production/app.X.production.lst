@@ -1,6 +1,6 @@
 MP2COD 5.00, COFF to COD File Converter
 Copyright (c) 1998-2013 Microchip Technology Inc.
-Listing File Generated: Sun Feb 25 19:37:04 2024
+Listing File Generated: Wed Mar 27 21:45:06 2024
 
 
 Address  Value    Disassembly              Source                                                                           File
@@ -39,31 +39,31 @@ Address  Value    Disassembly              Source                               
                                            {                                                                                C:\MCC18\src\traditional\startup\c018i.c
                                              _asm                                                                           C:\MCC18\src\traditional\startup\c018i.c
                                                // Initialize the stack pointer                                              C:\MCC18\src\traditional\startup\c018i.c
-008f32   ee1e     LFSR      0x1,0xe00          lfsr 1, _stack                                                               C:\MCC18\src\traditional\startup\c018i.c
+008f2e   ee1e     LFSR      0x1,0xe00          lfsr 1, _stack                                                               C:\MCC18\src\traditional\startup\c018i.c
+008f30   f000                                                                                                               
+008f32   ee2e     LFSR      0x2,0xe00          lfsr 2, _stack                                                               C:\MCC18\src\traditional\startup\c018i.c
 008f34   f000                                                                                                               
-008f36   ee2e     LFSR      0x2,0xe00          lfsr 2, _stack                                                               C:\MCC18\src\traditional\startup\c018i.c
-008f38   f000                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
-008f3a   6af8     CLRF      0xf8,0x0           clrf TBLPTRU, 0 // 1st silicon doesn't do this on POR                        C:\MCC18\src\traditional\startup\c018i.c
+008f36   6af8     CLRF      0xf8,0x0           clrf TBLPTRU, 0 // 1st silicon doesn't do this on POR                        C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
-008f3c   9c3b     BCF       0x3b,0x6,0x0       bcf __FPFLAGS,RND,0 // Initialize rounding flag for floating point libs      C:\MCC18\src\traditional\startup\c018i.c
+008f38   9c3b     BCF       0x3b,0x6,0x0       bcf __FPFLAGS,RND,0 // Initialize rounding flag for floating point libs      C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                                _endasm                                                                      C:\MCC18\src\traditional\startup\c018i.c
-008f3e   ecea     CALL      0x8bd4,0x0         _do_cinit ();                                                                C:\MCC18\src\traditional\startup\c018i.c
-008f40   f045                                                                                                               
+008f3a   ece8     CALL      0x8bd0,0x0         _do_cinit ();                                                                C:\MCC18\src\traditional\startup\c018i.c
+008f3c   f045                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                            loop:                                                                            C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                              // If user defined __init is not found, the one in clib.lib will be used       C:\MCC18\src\traditional\startup\c018i.c
-008f42   ecb2     CALL      0x8f64,0x0       __init ();                                                                     C:\MCC18\src\traditional\startup\c018i.c
-008f44   f047                                                                                                               
+008f3e   ecb0     CALL      0x8f60,0x0       __init ();                                                                     C:\MCC18\src\traditional\startup\c018i.c
+008f40   f047                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                              // Call the user's main routine                                                C:\MCC18\src\traditional\startup\c018i.c
-008f46   ecd1     CALL      0x87a2,0x0       main ();                                                                       C:\MCC18\src\traditional\startup\c018i.c
-008f48   f043                                                                                                               
+008f42   ecd1     CALL      0x87a2,0x0       main ();                                                                       C:\MCC18\src\traditional\startup\c018i.c
+008f44   f043                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
-008f4a   d7fb     BRA       0x8f42           goto loop;                                                                     C:\MCC18\src\traditional\startup\c018i.c
-008f4c   0012     RETURN    0x0            }                               /* end _startup() */                             C:\MCC18\src\traditional\startup\c018i.c
+008f46   d7fb     BRA       0x8f3e           goto loop;                                                                     C:\MCC18\src\traditional\startup\c018i.c
+008f48   0012     RETURN    0x0            }                               /* end _startup() */                             C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                            /* MPLAB-C18 initialized data memory support */                                  C:\MCC18\src\traditional\startup\c018i.c
                                            /* The linker will populate the _cinit table */                                  C:\MCC18\src\traditional\startup\c018i.c
@@ -93,30 +93,30 @@ Address  Value    Disassembly              Source                               
                                              static short long data_ptr;                                                    C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                              // Initialized data...                                                         C:\MCC18\src\traditional\startup\c018i.c
-008bd4   0e2a     MOVLW     0x2a             TBLPTR = (short long)&_cinit;                                                  C:\MCC18\src\traditional\startup\c018i.c
-008bd6   6ef6     MOVWF     0xf6,0x0                                                                                        
-008bd8   0e10     MOVLW     0x10                                                                                            
-008bda   6ef7     MOVWF     0xf7,0x0                                                                                        
-008bdc   0e00     MOVLW     0x0                                                                                             
-008bde   6ef8     MOVWF     0xf8,0x0                                                                                        
+008bd0   0e2a     MOVLW     0x2a             TBLPTR = (short long)&_cinit;                                                  C:\MCC18\src\traditional\startup\c018i.c
+008bd2   6ef6     MOVWF     0xf6,0x0                                                                                        
+008bd4   0e10     MOVLW     0x10                                                                                            
+008bd6   6ef7     MOVWF     0xf7,0x0                                                                                        
+008bd8   0e00     MOVLW     0x0                                                                                             
+008bda   6ef8     MOVWF     0xf8,0x0                                                                                        
                                              _asm                                                                           C:\MCC18\src\traditional\startup\c018i.c
-008be0   0105     MOVLB     0x5                movlb data_ptr                                                               C:\MCC18\src\traditional\startup\c018i.c
-008be2   0009     TBLRDPOSTINC                 tblrdpostinc                                                                 C:\MCC18\src\traditional\startup\c018i.c
-008be4   50f5     MOVF      0xf5,0x0,0x0       movf TABLAT, 0, 0                                                            C:\MCC18\src\traditional\startup\c018i.c
-008be6   6ff5     MOVWF     0xf5,0x1           movwf curr_entry, 1                                                          C:\MCC18\src\traditional\startup\c018i.c
-008be8   0009     TBLRDPOSTINC                 tblrdpostinc                                                                 C:\MCC18\src\traditional\startup\c018i.c
-008bea   50f5     MOVF      0xf5,0x0,0x0       movf TABLAT, 0, 0                                                            C:\MCC18\src\traditional\startup\c018i.c
-008bec   6ff6     MOVWF     0xf6,0x1           movwf curr_entry+1, 1                                                        C:\MCC18\src\traditional\startup\c018i.c
+008bdc   0105     MOVLB     0x5                movlb data_ptr                                                               C:\MCC18\src\traditional\startup\c018i.c
+008bde   0009     TBLRDPOSTINC                 tblrdpostinc                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008be0   50f5     MOVF      0xf5,0x0,0x0       movf TABLAT, 0, 0                                                            C:\MCC18\src\traditional\startup\c018i.c
+008be2   6ff5     MOVWF     0xf5,0x1           movwf curr_entry, 1                                                          C:\MCC18\src\traditional\startup\c018i.c
+008be4   0009     TBLRDPOSTINC                 tblrdpostinc                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008be6   50f5     MOVF      0xf5,0x0,0x0       movf TABLAT, 0, 0                                                            C:\MCC18\src\traditional\startup\c018i.c
+008be8   6ff6     MOVWF     0xf6,0x1           movwf curr_entry+1, 1                                                        C:\MCC18\src\traditional\startup\c018i.c
                                              _endasm                                                                        C:\MCC18\src\traditional\startup\c018i.c
                                                //while (curr_entry)                                                         C:\MCC18\src\traditional\startup\c018i.c
                                                //{                                                                          C:\MCC18\src\traditional\startup\c018i.c
                                                test:                                                                        C:\MCC18\src\traditional\startup\c018i.c
                                                _asm                                                                         C:\MCC18\src\traditional\startup\c018i.c
-008bee   e103     BNZ       0x8bf6              bnz 3                                                                       C:\MCC18\src\traditional\startup\c018i.c
-008bf0   67f5     TSTFSZ    0xf5,0x1           tstfsz curr_entry, 1                                                         C:\MCC18\src\traditional\startup\c018i.c
-008bf2   d001     BRA       0x8bf6             bra 1                                                                        C:\MCC18\src\traditional\startup\c018i.c
+008bea   e103     BNZ       0x8bf2              bnz 3                                                                       C:\MCC18\src\traditional\startup\c018i.c
+008bec   67f5     TSTFSZ    0xf5,0x1           tstfsz curr_entry, 1                                                         C:\MCC18\src\traditional\startup\c018i.c
+008bee   d001     BRA       0x8bf2             bra 1                                                                        C:\MCC18\src\traditional\startup\c018i.c
                                                _endasm                                                                      C:\MCC18\src\traditional\startup\c018i.c
-008bf4   d03d     BRA       0x8c70             goto done;                                                                   C:\MCC18\src\traditional\startup\c018i.c
+008bf0   d03d     BRA       0x8c6c             goto done;                                                                   C:\MCC18\src\traditional\startup\c018i.c
                                                  /* Count down so we only have to look up the data in _cinit                C:\MCC18\src\traditional\startup\c018i.c
                                                   * once.                                                                   C:\MCC18\src\traditional\startup\c018i.c
                                                   *                                                                         C:\MCC18\src\traditional\startup\c018i.c
@@ -126,37 +126,37 @@ Address  Value    Disassembly              Source                               
                                                   */                                                                        C:\MCC18\src\traditional\startup\c018i.c
                                                  _asm                                                                       C:\MCC18\src\traditional\startup\c018i.c
                                            	/* read the source address */                                                   C:\MCC18\src\traditional\startup\c018i.c
-008bf6   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008bf8   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008bfa   6ff0     MOVWF     0xf0,0x1       	movwf prom, 1                                                                   C:\MCC18\src\traditional\startup\c018i.c
-008bfc   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008bfe   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c00   6ff1     MOVWF     0xf1,0x1       	movwf prom+1, 1                                                                 C:\MCC18\src\traditional\startup\c018i.c
-008c02   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c04   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c06   6ff2     MOVWF     0xf2,0x1       	movwf prom+2, 1                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008bf2   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008bf4   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008bf6   6ff0     MOVWF     0xf0,0x1       	movwf prom, 1                                                                   C:\MCC18\src\traditional\startup\c018i.c
+008bf8   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008bfa   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008bfc   6ff1     MOVWF     0xf1,0x1       	movwf prom+1, 1                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008bfe   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c00   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c02   6ff2     MOVWF     0xf2,0x1       	movwf prom+2, 1                                                                 C:\MCC18\src\traditional\startup\c018i.c
                                            	/* skip a byte since it's stored as a 32bit int */                              C:\MCC18\src\traditional\startup\c018i.c
-008c08   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c04   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
                                            	/* read the destination address directly into FSR0 */                           C:\MCC18\src\traditional\startup\c018i.c
-008c0a   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c0c   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c0e   6ee9     MOVWF     0xe9,0x0       	movwf FSR0L, 0                                                                  C:\MCC18\src\traditional\startup\c018i.c
-008c10   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c12   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c14   6eea     MOVWF     0xea,0x0       	movwf FSR0H, 0                                                                  C:\MCC18\src\traditional\startup\c018i.c
+008c06   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c08   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c0a   6ee9     MOVWF     0xe9,0x0       	movwf FSR0L, 0                                                                  C:\MCC18\src\traditional\startup\c018i.c
+008c0c   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c0e   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c10   6eea     MOVWF     0xea,0x0       	movwf FSR0H, 0                                                                  C:\MCC18\src\traditional\startup\c018i.c
                                            	/* skip two bytes since it's stored as a 32bit int */                           C:\MCC18\src\traditional\startup\c018i.c
+008c12   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c14   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+                                           	/* read the destination address directly into FSR0 */                           C:\MCC18\src\traditional\startup\c018i.c
 008c16   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c18   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-                                           	/* read the destination address directly into FSR0 */                           C:\MCC18\src\traditional\startup\c018i.c
-008c1a   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c1c   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c1e   6ff3     MOVWF     0xf3,0x1       	movwf curr_byte, 1                                                              C:\MCC18\src\traditional\startup\c018i.c
-008c20   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c22   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c24   6ff4     MOVWF     0xf4,0x1       	movwf curr_byte+1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
+008c18   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c1a   6ff3     MOVWF     0xf3,0x1       	movwf curr_byte, 1                                                              C:\MCC18\src\traditional\startup\c018i.c
+008c1c   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c1e   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c20   6ff4     MOVWF     0xf4,0x1       	movwf curr_byte+1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
                                            	/* skip two bytes since it's stored as a 32bit int */                           C:\MCC18\src\traditional\startup\c018i.c
-008c26   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c28   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c22   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c24   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
                                                  _endasm                                                                    C:\MCC18\src\traditional\startup\c018i.c
                                                  //prom = data_ptr->from;                                                   C:\MCC18\src\traditional\startup\c018i.c
                                                  //FSR0 = data_ptr->to;                                                     C:\MCC18\src\traditional\startup\c018i.c
@@ -165,61 +165,61 @@ Address  Value    Disassembly              Source                               
                                                   * off since we'll be using the table pointer to do the copying            C:\MCC18\src\traditional\startup\c018i.c
                                                   * for the entry.                                                          C:\MCC18\src\traditional\startup\c018i.c
                                                   */                                                                        C:\MCC18\src\traditional\startup\c018i.c
-008c2a   cff6     MOVFF     0xff6,0x5f7          data_ptr = TBLPTR;                                                         C:\MCC18\src\traditional\startup\c018i.c
-008c2c   f5f7                                                                                                               
-008c2e   cff7     MOVFF     0xff7,0x5f8                                                                                     
-008c30   f5f8                                                                                                               
-008c32   cff8     MOVFF     0xff8,0x5f9                                                                                     
-008c34   f5f9                                                                                                               
+008c26   cff6     MOVFF     0xff6,0x5f7          data_ptr = TBLPTR;                                                         C:\MCC18\src\traditional\startup\c018i.c
+008c28   f5f7                                                                                                               
+008c2a   cff7     MOVFF     0xff7,0x5f8                                                                                     
+008c2c   f5f8                                                                                                               
+008c2e   cff8     MOVFF     0xff8,0x5f9                                                                                     
+008c30   f5f9                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                                  /* now assign the source address to the table pointer */                   C:\MCC18\src\traditional\startup\c018i.c
-008c36   c5f0     MOVFF     0x5f0,0xff6          TBLPTR = prom;                                                             C:\MCC18\src\traditional\startup\c018i.c
-008c38   fff6                                                                                                               
-008c3a   c5f1     MOVFF     0x5f1,0xff7                                                                                     
-008c3c   fff7                                                                                                               
-008c3e   c5f2     MOVFF     0x5f2,0xff8                                                                                     
-008c40   fff8                                                                                                               
+008c32   c5f0     MOVFF     0x5f0,0xff6          TBLPTR = prom;                                                             C:\MCC18\src\traditional\startup\c018i.c
+008c34   fff6                                                                                                               
+008c36   c5f1     MOVFF     0x5f1,0xff7                                                                                     
+008c38   fff7                                                                                                               
+008c3a   c5f2     MOVFF     0x5f2,0xff8                                                                                     
+008c3c   fff8                                                                                                               
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                                  /* do the copy loop */                                                     C:\MCC18\src\traditional\startup\c018i.c
                                                  _asm                                                                       C:\MCC18\src\traditional\startup\c018i.c
                                                    // determine if we have any more bytes to copy                           C:\MCC18\src\traditional\startup\c018i.c
-008c42   0105     MOVLB     0x5            	movlb curr_byte                                                                 C:\MCC18\src\traditional\startup\c018i.c
-008c44   53f3     MOVF      0xf3,0x1,0x1   	movf curr_byte, 1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
+008c3e   0105     MOVLB     0x5            	movlb curr_byte                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008c40   53f3     MOVF      0xf3,0x1,0x1   	movf curr_byte, 1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
                                            copy_loop:                                                                       C:\MCC18\src\traditional\startup\c018i.c
-008c46   e102     BNZ       0x8c4c         	bnz 2 // copy_one_byte                                                          C:\MCC18\src\traditional\startup\c018i.c
-008c48   53f4     MOVF      0xf4,0x1,0x1   	movf curr_byte + 1, 1, 1                                                        C:\MCC18\src\traditional\startup\c018i.c
-008c4a   e007     BZ        0x8c5a         	bz 7 // done_copying                                                            C:\MCC18\src\traditional\startup\c018i.c
+008c42   e102     BNZ       0x8c48         	bnz 2 // copy_one_byte                                                          C:\MCC18\src\traditional\startup\c018i.c
+008c44   53f4     MOVF      0xf4,0x1,0x1   	movf curr_byte + 1, 1, 1                                                        C:\MCC18\src\traditional\startup\c018i.c
+008c46   e007     BZ        0x8c56         	bz 7 // done_copying                                                            C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                            copy_one_byte:                                                                   C:\MCC18\src\traditional\startup\c018i.c
-008c4c   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
-008c4e   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
-008c50   6eee     MOVWF     0xee,0x0       	movwf POSTINC0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c48   0009     TBLRDPOSTINC             	tblrdpostinc                                                                    C:\MCC18\src\traditional\startup\c018i.c
+008c4a   50f5     MOVF      0xf5,0x0,0x0   	movf TABLAT, 0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
+008c4c   6eee     MOVWF     0xee,0x0       	movwf POSTINC0, 0                                                               C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                            	// decrement byte counter                                                       C:\MCC18\src\traditional\startup\c018i.c
-008c52   07f3     DECF      0xf3,0x1,0x1   	decf curr_byte, 1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
-008c54   e2f8     BC        0x8c46         	bc -8 // copy_loop                                                              C:\MCC18\src\traditional\startup\c018i.c
-008c56   07f4     DECF      0xf4,0x1,0x1           decf curr_byte + 1, 1, 1                                                 C:\MCC18\src\traditional\startup\c018i.c
-008c58   d7f9     BRA       0x8c4c         	bra -7 // copy_one_byte                                                         C:\MCC18\src\traditional\startup\c018i.c
+008c4e   07f3     DECF      0xf3,0x1,0x1   	decf curr_byte, 1, 1                                                            C:\MCC18\src\traditional\startup\c018i.c
+008c50   e2f8     BC        0x8c42         	bc -8 // copy_loop                                                              C:\MCC18\src\traditional\startup\c018i.c
+008c52   07f4     DECF      0xf4,0x1,0x1           decf curr_byte + 1, 1, 1                                                 C:\MCC18\src\traditional\startup\c018i.c
+008c54   d7f9     BRA       0x8c48         	bra -7 // copy_one_byte                                                         C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                            done_copying:                                                                    C:\MCC18\src\traditional\startup\c018i.c
                                                                                                                             C:\MCC18\src\traditional\startup\c018i.c
                                                  _endasm                                                                    C:\MCC18\src\traditional\startup\c018i.c
                                                  /* restore the table pointer for the next entry */                         C:\MCC18\src\traditional\startup\c018i.c
-008c5a   c5f7     MOVFF     0x5f7,0xff6          TBLPTR = data_ptr;                                                         C:\MCC18\src\traditional\startup\c018i.c
-008c5c   fff6                                                                                                               
-008c5e   c5f8     MOVFF     0x5f8,0xff7                                                                                     
-008c60   fff7                                                                                                               
-008c62   c5f9     MOVFF     0x5f9,0xff8                                                                                     
-008c64   fff8                                                                                                               
+008c56   c5f7     MOVFF     0x5f7,0xff6          TBLPTR = data_ptr;                                                         C:\MCC18\src\traditional\startup\c018i.c
+008c58   fff6                                                                                                               
+008c5a   c5f8     MOVFF     0x5f8,0xff7                                                                                     
+008c5c   fff7                                                                                                               
+008c5e   c5f9     MOVFF     0x5f9,0xff8                                                                                     
+008c60   fff8                                                                                                               
                                                  /* next entry... */                                                        C:\MCC18\src\traditional\startup\c018i.c
-008c66   0105     MOVLB     0x5                  curr_entry--;                                                              C:\MCC18\src\traditional\startup\c018i.c
-008c68   07f5     DECF      0xf5,0x1,0x1                                                                                    
-008c6a   0e00     MOVLW     0x0                                                                                             
-008c6c   5bf6     SUBWFB    0xf6,0x1,0x1                                                                                    
-008c6e   d7bf     BRA       0x8bee               goto test;                                                                 C:\MCC18\src\traditional\startup\c018i.c
+008c62   0105     MOVLB     0x5                  curr_entry--;                                                              C:\MCC18\src\traditional\startup\c018i.c
+008c64   07f5     DECF      0xf5,0x1,0x1                                                                                    
+008c66   0e00     MOVLW     0x0                                                                                             
+008c68   5bf6     SUBWFB    0xf6,0x1,0x1                                                                                    
+008c6a   d7bf     BRA       0x8bea               goto test;                                                                 C:\MCC18\src\traditional\startup\c018i.c
                                            done:                                                                            C:\MCC18\src\traditional\startup\c018i.c
                                            ;                                                                                C:\MCC18\src\traditional\startup\c018i.c
-008c70   0012     RETURN    0x0            }                                                                                C:\MCC18\src\traditional\startup\c018i.c
+008c6c   0012     RETURN    0x0            }                                                                                C:\MCC18\src\traditional\startup\c018i.c
                                            /********************************************************************            D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                                              File Information:                                                              D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                                                FileName:     	usb_device.c                                                  D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
@@ -3043,7 +3043,7 @@ Address  Value    Disassembly              Source                               
 006d50   0e05     MOVLW     0x5                                                                                             
 006d52   daa2     RCALL     0x7298                                                                                          
 007298   6ee6     MOVWF     0xe6,0x0                                                                                        
-00729a   ec43     CALL      0x8e86,0x0                                                                                      
+00729a   ec41     CALL      0x8e82,0x0                                                                                      
 00729c   f047                                                                                                               
 00729e   6e4e     MOVWF     0x4e,0x0                                                                                        
 0072a0   0e05     MOVLW     0x5                                                                                             
@@ -3145,7 +3145,7 @@ Address  Value    Disassembly              Source                               
                                                                inPipes[0].pSrc.bRom = (ROM BYTE*)&device_dsc;               D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
                                                            #else                                                            D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
 006db4   0105     MOVLB     0x5                                inPipes[0].pSrc.bRom = (ROM BYTE*)USB_USER_DEVICE_DESCRIPTOR; D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
-006db6   0ee6     MOVLW     0xe6                                                                                            
+006db6   0ee2     MOVLW     0xe2                                                                                            
 006db8   6fd1     MOVWF     0xd1,0x1                                                                                        
 006dba   0e8d     MOVLW     0x8d                                                                                            
 006dbc   6fd2     MOVWF     0xd2,0x1                                                                                        
@@ -3162,7 +3162,7 @@ Address  Value    Disassembly              Source                               
 006dc8   90d8     BCF       0xd8,0x0,0x0                                                                                    
 006dca   36f6     RLCF      0xf6,0x1,0x0                                                                                    
 006dcc   36f7     RLCF      0xf7,0x1,0x0                                                                                    
-006dce   0e3b     MOVLW     0x3b                                                                                            
+006dce   0e37     MOVLW     0x37                                                                                            
 006dd0   26f6     ADDWF     0xf6,0x1,0x0                                                                                    
 006dd2   0e8e     MOVLW     0x8e                                                                                            
 006dd4   22f7     ADDWFC    0xf7,0x1,0x0                                                                                    
@@ -11604,7 +11604,7 @@ Address  Value    Disassembly              Source                               
 003720   6846     SETF      0x46,0x0                                                                                        
 003722   6847     SETF      0x47,0x0                                                                                        
 003724   6848     SETF      0x48,0x0                                                                                        
-003726   ecbb     CALL      0x8d76,0x0                                                                                      
+003726   ecb9     CALL      0x8d72,0x0                                                                                      
 003728   f046                                                                                                               
 00372a   503c     MOVF      0x3c,0x0,0x0                                                                                    
 00372c   0012     RETURN    0x0                                                                                             
@@ -12483,7 +12483,7 @@ Address  Value    Disassembly              Source                               
 002866   6a48     CLRF      0x48,0x0                                                                                        
 002868   ec4d     CALL      0x369a,0x0                                                                                      
 00286a   f01b                                                                                                               
-00286c   ecbb     CALL      0x8d76,0x0                                                                                      
+00286c   ecb9     CALL      0x8d72,0x0                                                                                      
 00286e   f046                                                                                                               
 002870   c03c     MOVFF     0x3c,0x12b                                                                                      
 002872   f12b                                                                                                               
@@ -14931,7 +14931,7 @@ Address  Value    Disassembly              Source                               
                                            #pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS               D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                                            void _reset (void)                                                               D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                                            {                                                                                D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
-001000   ef99     GOTO      0x8f32           _asm goto _startup _endasm                                                     D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
+001000   ef97     GOTO      0x8f2e           _asm goto _startup _endasm                                                     D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
 001002   f047                                                                                                               
 001004   0012     RETURN    0x0            }                                                                                D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                                            #endif                                                                           D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
@@ -16384,7 +16384,7 @@ Address  Value    Disassembly              Source                               
 007b86   f042                                                                                                               
 007b88   c051     MOVFF     0x51,0x43                                                                                       
 007b8a   f043                                                                                                               
-007b8c   ecbb     CALL      0x8d76,0x0                                                                                      
+007b8c   ecb9     CALL      0x8d72,0x0                                                                                      
 007b8e   f046                                                                                                               
 007b90   c03c     MOVFF     0x3c,0x4e                                                                                       
 007b92   f04e                                                                                                               
@@ -16661,7 +16661,7 @@ Address  Value    Disassembly              Source                               
                                            volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                                            volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                                                                                                                             D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                                           const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0-a43"}; D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                                           const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.0"};    D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                                                                                                                             D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                                            #pragma udata ISR_buf = 0x100                                                    D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                                            volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -18163,7 +18163,7 @@ Address  Value    Disassembly              Source                               
                                                  {                                                                          D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 0042a2   cfdb     MOVFF     0xfdb,0xfe6            Write1USART(tst_char);                                                   D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 0042a4   ffe6                                                                                                               
-0042a6   ec5d     CALL      0x8eba,0x0                                                                                      
+0042a6   ec5b     CALL      0x8eb6,0x0                                                                                      
 0042a8   f047                                                                                                               
 0042aa   52e5     MOVF      0xe5,0x1,0x0                                                                                    
                                                  }                                                                          D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -18844,7 +18844,7 @@ Address  Value    Disassembly              Source                               
 004630   f4c7                                                                                                               
 00648c   6ee6     MOVWF     0xe6,0x0                                                                                        
 00648e   6ae6     CLRF      0xe6,0x0                                                                                        
-006490   ec74     CALL      0x8ee8,0x0                                                                                      
+006490   ec72     CALL      0x8ee4,0x0                                                                                      
 006492   f047                                                                                                               
 006494   52e5     MOVF      0xe5,0x1,0x0                                                                                    
 006496   52e5     MOVF      0xe5,0x1,0x0                                                                                    
@@ -20543,7 +20543,7 @@ Address  Value    Disassembly              Source                               
                                                    BAUD_AUTO_OFF                                                            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 004fa0   0eec     MOVLW     0xec                 );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 004fa2   6ee6     MOVWF     0xe6,0x0                                                                                        
-004fa4   ec88     CALL      0x8f10,0x0                                                                                      
+004fa4   ec86     CALL      0x8f0c,0x0                                                                                      
 004fa6   f047                                                                                                               
 004fa8   52e5     MOVF      0xe5,0x1,0x0                                                                                    
                                                  Open1USART(                                                                D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -20558,7 +20558,7 @@ Address  Value    Disassembly              Source                               
 004faa   0e02     MOVLW     0x2                    2                   // At 48 MHz, this creates 4 Mbaud output            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 004fac   6ee6     MOVWF     0xe6,0x0             );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 004fae   6ae6     CLRF      0xe6,0x0                                                                                        
-004fb4   ec82     CALL      0x8d04,0x0                                                                                      
+004fb4   ec80     CALL      0x8d00,0x0                                                                                      
 004fb6   f046                                                                                                               
 004fb8   52e5     MOVF      0xe5,0x1,0x0                                                                                    
 004fba   52e5     MOVF      0xe5,0x1,0x0                                                                                    
@@ -20617,7 +20617,7 @@ Address  Value    Disassembly              Source                               
                                                    BAUD_AUTO_OFF                                                            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 00500a   0eec     MOVLW     0xec                 );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 00500c   6ee6     MOVWF     0xe6,0x0                                                                                        
-00500e   ec88     CALL      0x8f10,0x0                                                                                      
+00500e   ec86     CALL      0x8f0c,0x0                                                                                      
 005010   f047                                                                                                               
 005012   52e5     MOVF      0xe5,0x1,0x0                                                                                    
                                                  Open1USART(                                                                D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -20632,7 +20632,7 @@ Address  Value    Disassembly              Source                               
 005014   0e02     MOVLW     0x2                    2                   // At 48 MHz, this creates 4 Mbaud output            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005016   6ee6     MOVWF     0xe6,0x0             );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005018   6ae6     CLRF      0xe6,0x0                                                                                        
-00501e   ec82     CALL      0x8d04,0x0                                                                                      
+00501e   ec80     CALL      0x8d00,0x0                                                                                      
 005020   f046                                                                                                               
 005022   52e5     MOVF      0xe5,0x1,0x0                                                                                    
 005024   52e5     MOVF      0xe5,0x1,0x0                                                                                    
@@ -20689,7 +20689,7 @@ Address  Value    Disassembly              Source                               
                                                    BAUD_AUTO_OFF                                                            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005070   0eec     MOVLW     0xec                 );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005072   6ee6     MOVWF     0xe6,0x0                                                                                        
-005074   ec88     CALL      0x8f10,0x0                                                                                      
+005074   ec86     CALL      0x8f0c,0x0                                                                                      
 005076   f047                                                                                                               
 005078   52e5     MOVF      0xe5,0x1,0x0                                                                                    
                                                  Open1USART(                                                                D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -20704,7 +20704,7 @@ Address  Value    Disassembly              Source                               
 00507a   0e02     MOVLW     0x2                    2                   // At 48 MHz, this creates 4 Mbaud output            D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 00507c   6ee6     MOVWF     0xe6,0x0             );                                                                         D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 00507e   6ae6     CLRF      0xe6,0x0                                                                                        
-005084   ec82     CALL      0x8d04,0x0                                                                                      
+005084   ec80     CALL      0x8d00,0x0                                                                                      
 005086   f046                                                                                                               
 005088   52e5     MOVF      0xe5,0x1,0x0                                                                                    
 00508a   52e5     MOVF      0xe5,0x1,0x0                                                                                    
@@ -21310,7 +21310,7 @@ Address  Value    Disassembly              Source                               
                                              {                                                                              D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 00536e   0efe     MOVLW     0xfe               AnalogEnabledChannels |= ((unsigned int)0x0001 << Channel);                  D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005370   50db     MOVF      0xdb,0x0,0x0                                                                                    
-005372   eca7     CALL      0x8f4e,0x0                                                                                      
+005372   eca5     CALL      0x8f4a,0x0                                                                                      
 005374   f047                                                                                                               
 005376   50f3     MOVF      0xf3,0x0,0x0                                                                                    
 005378   0104     MOVLB     0x4                                                                                             
@@ -21371,7 +21371,7 @@ Address  Value    Disassembly              Source                               
                                              {                                                                              D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 0053c4   0efe     MOVLW     0xfe               AnalogEnabledChannels &= ~((unsigned int)0x0001 << Channel);                 D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 0053c6   50db     MOVF      0xdb,0x0,0x0                                                                                    
-0053c8   eca7     CALL      0x8f4e,0x0                                                                                      
+0053c8   eca5     CALL      0x8f4a,0x0                                                                                      
 0053ca   f047                                                                                                               
 0053cc   cff3     MOVFF     0xff3,0x4e                                                                                      
 0053ce   f04e                                                                                                               
@@ -23098,7 +23098,7 @@ Address  Value    Disassembly              Source                               
 005bb0   ec1a     CALL      0x6634,0x0       ReadFlash(FLASH_NAME_ADDRESS, FLASH_NAME_LENGTH, gDeviceStringName);           D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 005bb2   f033                                                                                                               
 006634   de6c     RCALL     0x630e                                                                                          
-006636   ec39     CALL      0x8c72,0x0                                                                                      
+006636   ec37     CALL      0x8c6e,0x0                                                                                      
 006638   f046                                                                                                               
 00663a   ef33     GOTO      0x6466                                                                                          
 00663c   f032                                                                                                               
@@ -23674,7 +23674,7 @@ Address  Value    Disassembly              Source                               
 005e0c   0e01     MOVLW     0x1                                                                                             
 005e0e   cfdb     MOVFF     0xfdb,0xfe6                                                                                     
 005e10   ffe6                                                                                                               
-005e12   ec74     CALL      0x8ee8,0x0                                                                                      
+005e12   ec72     CALL      0x8ee4,0x0                                                                                      
 005e14   f047                                                                                                               
 005e16   52e5     MOVF      0xe5,0x1,0x0                                                                                    
 005e18   52e5     MOVF      0xe5,0x1,0x0                                                                                    
@@ -23797,7 +23797,7 @@ Address  Value    Disassembly              Source                               
 005eb4   6846     SETF      0x46,0x0                                                                                        
 005eb6   6847     SETF      0x47,0x0                                                                                        
 005eb8   6848     SETF      0x48,0x0                                                                                        
-005eba   ecbb     CALL      0x8d76,0x0                                                                                      
+005eba   ecb9     CALL      0x8d72,0x0                                                                                      
 005ebc   f046                                                                                                               
 005ebe   0e04     MOVLW     0x4                                                                                             
 005ec0   c03c     MOVFF     0x3c,0xfdb                                                                                      
@@ -24076,7 +24076,7 @@ Address  Value    Disassembly              Source                               
 00600e   f042                                                                                                               
 006010   c051     MOVFF     0x51,0x43                                                                                       
 006012   f043                                                                                                               
-006014   ecbb     CALL      0x8d76,0x0                                                                                      
+006014   ecb9     CALL      0x8d72,0x0                                                                                      
 006016   f046                                                                                                               
 006018   c03c     MOVFF     0x3c,0x4e                                                                                       
 00601a   f04e                                                                                                               
@@ -24497,7 +24497,7 @@ Address  Value    Disassembly              Source                               
 0065a4   90d8     BCF       0xd8,0x0,0x0                                                                                    
 0065a6   36f6     RLCF      0xf6,0x1,0x0                                                                                    
 0065a8   36f7     RLCF      0xf7,0x1,0x0                                                                                    
-0065aa   0e89     MOVLW     0x89                                                                                            
+0065aa   0e85     MOVLW     0x85                                                                                            
 0065ac   26f6     ADDWF     0xf6,0x1,0x0                                                                                    
 0065ae   0e8b     MOVLW     0x8b                                                                                            
 0065b0   ef93     GOTO      0x6326                                                                                          
@@ -24563,7 +24563,7 @@ Address  Value    Disassembly              Source                               
 0065b4   90d8     BCF       0xd8,0x0,0x0                                                                                    
 0065b6   36f6     RLCF      0xf6,0x1,0x0                                                                                    
 0065b8   36f7     RLCF      0xf7,0x1,0x0                                                                                    
-0065ba   0e57     MOVLW     0x57                                                                                            
+0065ba   0e53     MOVLW     0x53                                                                                            
 0065bc   26f6     ADDWF     0xf6,0x1,0x0                                                                                    
 0065be   0e8b     MOVLW     0x8b                                                                                            
 0065c0   ef93     GOTO      0x6326                                                                                          
@@ -24586,7 +24586,7 @@ Address  Value    Disassembly              Source                               
 006222   68f7     SETF      0xf7,0x0                                                                                        
 006224   d9c7     RCALL     0x65b4                                                                                          
 006226   12ef     IORWF     0xef,0x1,0x0                                                                                    
-0062ee   0ebb     MOVLW     0xbb                                                                                            
+0062ee   0eb7     MOVLW     0xb7                                                                                            
 0062f0   26f6     ADDWF     0xf6,0x1,0x0                                                                                    
 0062f2   0e8b     MOVLW     0x8b                                                                                            
 0062f4   22f7     ADDWFC    0xf7,0x1,0x0                                                                                    
@@ -25165,7 +25165,7 @@ Address  Value    Disassembly              Source                               
 00857a   6a46     CLRF      0x46,0x0                                                                                        
 00857c   6a47     CLRF      0x47,0x0                                                                                        
 00857e   6a48     CLRF      0x48,0x0                                                                                        
-008580   ef1f     GOTO      0x8e3e                                                                                          
+008580   ef1d     GOTO      0x8e3a                                                                                          
 008582   f047                                                                                                               
                                                                                                                             D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
 00844c   0e30     MOVLW     0x30               gOutputStr[gPos] = i + '0';                                                  D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
@@ -25262,7 +25262,7 @@ Address  Value    Disassembly              Source                               
 0084a4   6846     SETF      0x46,0x0                                                                                        
 0084a6   6847     SETF      0x47,0x0                                                                                        
 0084a8   6848     SETF      0x48,0x0                                                                                        
-0084aa   ecbb     CALL      0x8d76,0x0                                                                                      
+0084aa   ecb9     CALL      0x8d72,0x0                                                                                      
 0084ac   f046                                                                                                               
 0084ae   0efb     MOVLW     0xfb                                                                                            
 0084b0   c03c     MOVFF     0x3c,0xfdb                                                                                      
