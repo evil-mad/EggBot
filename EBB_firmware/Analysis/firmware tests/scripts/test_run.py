@@ -31,6 +31,10 @@ from test_ISR_math import test_ISR_math_run
 from test_global_step_counter import test_global_step_counter_run
 from test_shortest_move import test_shortest_move_run
 
+if len(sys.argv) == 1:
+    print("Error: required parameter missing - try 'all'")
+    sys.exit()
+
 # Start off assuming all will pass. Any that fail will flip this
 all_tests_pass = True
 
@@ -38,19 +42,20 @@ all_tests_pass = True
 test_log.tl_init()
 
 # Test ISR math
-if sys.argv[1] == "" or sys.argv[1] == "test_ISR_math":
+if sys.argv[1] == "all" or sys.argv[1] == "test_ISR_math":
     test_log.tl_print("Run test: test_ISR_math")
-    if test_ISR_math_run("..\\test input data\\test_inputs_simple.csv") == False:
+    #if test_ISR_math_run("..\\test input data\\test_inputs_simple.csv") == False:
+    if test_ISR_math_run("..\\test input data\\test_inputs.csv") == False:
         all_tests_pass = False
 
 # Test global step counter
-if sys.argv[1] == "" or sys.argv[1] == "test_global_step_counter":
+if sys.argv[1] == "all" or sys.argv[1] == "test_global_step_counter":
     test_log.tl_print("Run test: test_global_step_counter")
     if test_global_step_counter_run() == False:
         all_tests_pass = False
 
 # Test shortest move
-if sys.argv[1] == "" or sys.argv[1] == "test_shortest_move":
+if sys.argv[1] == "all" or sys.argv[1] == "test_shortest_move":
     test_log.tl_print("Run test: test_shortest_move")
     if test_shortest_move_run() == False:
         all_tests_pass = False

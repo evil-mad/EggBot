@@ -67,8 +67,12 @@ def test_ISR_math_run(test_input_path : str):
                 if (param[0] != '0'):
                     test_log.tl_print("test_ISR_math: " + param[2] + ": ", False)
                     test_dir = os.path.join(output_filepath, param[2])
-                    #capture_command(param[1], test_dir, float(param[3]), param[4])
-                    capture_command(param[1], test_dir, float(param[3]), the_port)
+
+                    def ebb_command_function():
+                        # Send all the command
+                        query(the_port, param[1] + '\r')
+
+                    capture_command(ebb_command_function, test_dir, float(param[3]), the_port)
                     # Now perform the type of analysis appropriate for this test
                     # In this case, extract the debug UART data
 
