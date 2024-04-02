@@ -105,9 +105,19 @@
 
 typedef enum
 {
-  PEN_DOWN = 0,
-  PEN_UP
+  PEN_DOWN =                0,
+  PEN_UP =                  1,
+  PEN_UP_IMMEDIATE =        2,
+  PEN_UP_IMMEDIATE_CLEAR =  3
 } PenStateType;
+
+typedef enum
+{
+  SOLENOID_OFF = 0,
+  SOLENOID_ON,
+  SOLENOID_PWM
+} SolenoidStateType;
+
 
 // Defines for the CommandType BYTE in the MoveCommandType
 // Note that three USB commands (SM, XM HM) are

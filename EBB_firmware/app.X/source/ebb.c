@@ -302,14 +302,6 @@
 // in the SL and QL commands.
 #define SL_STORAGE_SIZE         32u
 
-typedef enum
-{
-  SOLENOID_OFF = 0,
-  SOLENOID_ON,
-  SOLENOID_PWM
-} SolenoidStateType;
-
-
 // This is the FIFO that stores the motion commands. It spans multiple RAM
 // banks from 0x600 through 0xDFF (length 0x800 or 2048d), and must only be 
 // accessed via pointer.
@@ -333,7 +325,7 @@ static near UINT8 AxisActive[NUMBER_OF_STEPPERS];     // LSb set if an axis is n
 
 near DriverConfigurationType DriverConfiguration;
 // LSb set to enable RC Servo output for pen up/down
-static near UINT8 gUseRCPenServo;
+near UINT8 gUseRCPenServo;
 // LSb set to enable red LED lit when FIFO is empty
 volatile near UINT8 gRedLEDEmptyFIFO;
 // LSb set when user presses the PRG or alternate PRG button
@@ -405,11 +397,11 @@ static UINT8 nib;
 MoveCommandType CurrentCommand;
 
 unsigned int DemoModeActive;
-static SolenoidStateType SolenoidState;
+SolenoidStateType SolenoidState;
 static unsigned int SolenoidDelay;
 
 // track the latest state of the pen
-static PenStateType PenState;
+PenStateType PenState;
 
 static unsigned long NodeCount;
 unsigned char QC_ms_timer;
@@ -1812,7 +1804,7 @@ void parse_SC_packet (void)
       gUseSolenoid = TRUE;
       bitclrzero(gUseRCPenServo);
       // Turn off RC signal on Pen Servo output
-      RCServo2_Move(0, g_servo2_RPn, 0, 0);
+      RCServo2_Move(0, g_servo2_RPn, 0, 0, FALSE);
     }
     // Use just RC servo
     else if (Para2 == 1u)
@@ -3800,10 +3792,15 @@ void parse_TP_packet(void)
 
 // Set Pen
 // Usage: SP,<State>,<Duration>,<PortB_Pin><CR>
-// <State> is 0 (for goto servo_max) or 1 (for goto servo_min)
+// <State> is 
+//   0 : goto servo_max using a command put into FIFO (servo pen down)
+//   1 : goto servo_min using a command put into FIFO (servo pen up)
+//   2 : goto servo_min but skip the FIFO and just force a move immediately
+//   3 : goto servo_min, skip the FIFO, and also set servo_max to servo_min
+//       (this prevents any remaining servo moves in the FIFO from having any effect)
 // <Duration> is how long to wait before the next command in the motion control 
 //      FIFO should start. (defaults to 0mS)
-//      Note that the units of this parameter is either 1ms
+//      Note that the units of this parameter is in units of milliseconds
 // <PortB_Pin> Is a value from 0 to 7 and allows you to re-assign the Pen
 //      RC Servo output to different PortB pins.
 // This is a command that the user can send from the PC to set the pen state.
@@ -3845,9 +3842,9 @@ void parse_SP_packet(void)
     Pin = DEFAULT_EBB_SERVO_PORTB_PIN;
   }
 
-  if (State > 1u)
+  if (State > 3u)
   {
-    State = 1;
+    State = 3;
   }
 
   // Set the PRn of the Pen Servo output
@@ -3856,7 +3853,7 @@ void parse_SP_packet(void)
   {
     // if we are changing which pin the pen servo is on, we need to cancel
     // the servo output on the old channel first
-    RCServo2_Move(0, g_servo2_RPn, 0, 0);
+    RCServo2_Move(0, g_servo2_RPn, 0, 0, FALSE);
     // Now record the new RPn
     g_servo2_RPn = Pin + 3;
   }
@@ -3869,34 +3866,77 @@ void parse_SP_packet(void)
 
 // Internal use function -
 // Perform a state change on the pen RC servo output. Move it up or move it down
-// <NewState> is either PEN_UP or PEN_DOWN.
+// <NewState> is   
+//   PEN_DOWN : Add move to FIFO to start servo towards servo_max
+//   PEN_UP : Add move to FIFO to start servo towards servo_min
+//   PEN_UP_IMMEDIATE : Start servo moving towards servo_min, not on FIFO
+//   PEN_UP_IMMEDIATE_CLEAR : Start servo moving towards servo_min, not on FIFO, and set servo_max = servo_min
 // <CommandDuration> is the number of milliseconds to wait before executing the
-//      next command in the motion control FIFO
+//      next command in the motion control FIFO. Only applies if <NewState> is 0 or 1.
 //
-// This function uses the g_servo2_min, max, rate_up, rate_down variables
+// This function uses the g_servo2_min (servo_min), g_servo2_max (servo_max), rate_up, rate_down variables
 // to schedule an RC Servo change with the RCServo2_Move() function.
 //
 void process_SP(PenStateType NewState, UINT16 CommandDuration)
 {
   UINT16 Position;
   UINT16 Rate;
+  BOOL UseFIFO;
+  UINT8 i;
 
   if (NewState == PEN_UP)
   {
     Position = g_servo2_min;
     Rate = g_servo2_rate_up;
+    UseFIFO = TRUE;
+  }
+  else if (NewState == PEN_UP_IMMEDIATE)
+  {
+    Position = g_servo2_min;
+    Rate = g_servo2_rate_up;
+    UseFIFO = FALSE;
+  }
+  else if (NewState == PEN_UP_IMMEDIATE_CLEAR)
+  {
+    Position = g_servo2_min;
+    Rate = g_servo2_rate_up;
+    UseFIFO = FALSE;
+    g_servo2_max = g_servo2_min;
+    
+    // Need to turn off high priority interrupts briefly here. We need to stop
+    // any changes to the FIFO, then walk through every command currently
+    // in the FIFO. If that command is a servo move, we have to re-write it's
+    // position target to be g_servo2_min (all the way up). This will then
+    // prevent any remaining servo moves in the FIFO from moving the pen down.
+    INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+
+    for (i=0; i < COMMAND_FIFO_MAX_LENGTH; i++)
+    {
+      if (FIFOPtr[i].Command == COMMAND_SERVO_MOVE)
+      {
+        // Check to make sure we only modify moves of the pen servo output
+        if (FIFOPtr[i].m.sm.ServoRPn == g_servo2_RPn)
+        {
+          FIFOPtr[i].m.sm.ServoPosition = g_servo2_min;
+        }
+      }
+    }
+    
+    // Re-enable interrupts
+    INTCONbits.GIEH = 1;  // Turn high priority interrupts on
   }
   else
   {
     Position = g_servo2_max;
     Rate = g_servo2_rate_down;
+    UseFIFO = TRUE;
   }
 
   RCServoPowerIO = RCSERVO_POWER_ON;
   gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
 
   // Now schedule the movement with the RCServo2 function
-  RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration);
+  RCServo2_Move(Position, g_servo2_RPn, Rate, CommandDuration, UseFIFO);
 }
 
 // Enable Motor

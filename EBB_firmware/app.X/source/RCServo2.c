@@ -292,22 +292,24 @@ void RCServo2_S2_command (void)
     return;
   }
 
-  RCServo2_Move(Duration, Pin, Rate, Delay);
+  RCServo2_Move(Duration, Pin, Rate, Delay, TRUE);
 
   print_line_ending(kLE_OK_NORM);
 }
 
 // Function to set up an RC Servo move. Takes Duration, RPn, and Rate
-// and adds them to the motion control fifo.
+// and adds them to the motion control FIFO.
 // <Position> is the new target position for the servo, in 83uS units. So
-//      32,000 is 3ms. To turn off a servo output, use 0 for Duration.
+//      32,000 is 3 ms. To turn off a servo output, use 0 for Duration.
 // <RPn> is the PPS RP# number for the pin that you want to use as the output
 //      (See schematic for a list of each RPn number for each GPIO pin.)
 // <Rate> is how quickly to move to the new position. Use 0 for instant change.
-//      Unit is 83uS of pulse width change every 24ms of time.
-// <Delay> is how many milliseconds after this command is excuted before the
+//      Unit is 83uS of pulse width change every 24 ms of time.
+// <Delay> is how many milliseconds after this command is executed before the
 //      next command in the motion control FIFO is executed. 0 will run the next
-//      command immediatly.
+//      command immediately.
+// <AddToFIFO> Set to TRUE to add move to FIFO or FALSE to have move take effect
+//      immediately. If FALSE, <Delay> is ignored.
 // This function will allocate a new channel for RPn if the pin is not already
 // assigned to a channel. It will return the channel number used when it
 // returns. If you send in 0 for Duration, the channel for RPn will be de-
@@ -319,8 +321,8 @@ UINT8 RCServo2_Move(
   UINT16 Position,
   UINT8  RPn,
   UINT16 Rate,
-  UINT16 Delay
-)
+  UINT16 Delay,
+  BOOL AddToFIFO)
 {
   UINT8 i;
   UINT8 Channel;
@@ -371,46 +373,105 @@ UINT8 RCServo2_Move(
         SetPinLATFromRPn(RPn, 0);
       }
 
-      // Wait until we have a free spot in the FIFO, and add our new
-      // command in
-      while(gFIFOLength >= gCurrentFIFOLength)
-      ;
-      
-      // If the pin we're controlling is B1 (the normal servo output) then
-      // always make sure to turn power on and start the countdown timer
-      // for that servo port. (issue #144)
-      if (RPn == 4u)
+      if (AddToFIFO == TRUE)
       {
-        RCServoPowerIO = RCSERVO_POWER_ON;
-        gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+        // Wait until we have a free spot in the FIFO, and add our new
+        // command in
+        while(gFIFOLength >= gCurrentFIFOLength)
+        ;
+
+        // If the pin we're controlling is B1 (the normal servo output) then
+        // always make sure to turn power on and start the countdown timer
+        // for that servo port. (issue #144)
+        if (RPn == 4u)
+        {
+          RCServoPowerIO = RCSERVO_POWER_ON;
+          gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+        }
+
+        if (!bittst(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM))
+        {
+          // Now copy the values over into the FIFO element
+          FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE;
+          FIFOPtr[gFIFOIn].m.sm.DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
+          FIFOPtr[gFIFOIn].m.sm.ServoChannel = Channel;
+          FIFOPtr[gFIFOIn].m.sm.ServoRPn = RPn;
+          FIFOPtr[gFIFOIn].m.sm.ServoPosition = Position;
+          FIFOPtr[gFIFOIn].m.sm.ServoRate = Rate;
+
+          // Check that DelayCounter doesn't have a crazy high value (this was
+          // being done in the ISR, now moved here for speed)
+          if (FIFOPtr[gFIFOIn].m.sm.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+          {
+            // Ideally we would throw an error to the user here, but since we're in
+            // the helper function that's not so easy. So we just set the delay time
+            // to zero and hope they notice that their delays aren't doing anything.
+            FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
+          }
+
+          gFIFOIn++;
+          if (gFIFOIn >= gCurrentFIFOLength)
+          {
+            gFIFOIn = 0;
+          }
+          gFIFOLength++;
+        }
       }
-
-      if (!bittst(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM))
+      else
       {
-        // Now copy the values over into the FIFO element
-      FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE;
-      FIFOPtr[gFIFOIn].m.sm.DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
-      FIFOPtr[gFIFOIn].m.sm.ServoChannel = Channel;
-      FIFOPtr[gFIFOIn].m.sm.ServoRPn = RPn;
-      FIFOPtr[gFIFOIn].m.sm.ServoPosition = Position;
-      FIFOPtr[gFIFOIn].m.sm.ServoRate = Rate;
+        // We need to 'do all the stuff' that the ISR does to cause the servo
+        // move to begin, right here and now.
 
-        // Check that DelayCounter doesn't have a crazy high value (this was
-        // being done in the ISR, now moved here for speed)
-      if (FIFOPtr[gFIFOIn].m.sm.DelayCounter > HIGH_ISR_TICKS_PER_MS * (UINT32)0x10000)
+        // Check to see if we should change the state of the pen
+        if (bittstzero(gUseRCPenServo))
         {
-          // Ideally we would throw an error to the user here, but since we're in
-          // the helper function that's not so easy. So we just set the delay time
-          // to zero and hope they notice that their delays aren't doing anything.
-        FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
-        }
+          // If the pin we're controlling is B1 (the normal servo output) then
+          // always make sure to turn power on and start the countdown timer
+          // for that servo port. (issue #144)
+          if (RPn == 4u)
+          {
+            RCServoPowerIO = RCSERVO_POWER_ON;
+            gRCServoPoweroffCounterMS = gRCServoPoweroffCounterReloadMS;
+          }
 
-        gFIFOIn++;
-        if (gFIFOIn >= gCurrentFIFOLength)
-        {
-          gFIFOIn = 0;
+          // If the user is trying to turn off this channel's RC servo output
+          if (0u == Position)
+          {
+            // Turn off the PPS routing to the pin
+            *(gRC2RPORPtr + gRC2RPn[Channel - 1]) = 0;
+            // Clear everything else out for this channel
+            gRC2Rate[Channel - 1] = 0;
+            gRC2Target[Channel - 1] = 0;
+            gRC2RPn[Channel - 1] = 0;
+            gRC2Value[Channel - 1] = 0;
+          }
+          else
+          {
+            // Otherwise, set all of the values that start this RC servo moving
+            gRC2Rate[Channel - 1] = Rate;
+            gRC2Target[Channel - 1] = Position;
+            gRC2RPn[Channel - 1] = RPn;
+            if (gRC2Value[Channel - 1] == 0u)
+            {
+              gRC2Value[Channel - 1] = Position;
+            }
+          }
+
+          // If this servo is the pen servo (on g_servo2_RPn)
+          if (RPn == g_servo2_RPn)
+          {
+            // For non-FIFO moves, we ONLY allow moving to g_servo2_min (i.e. up)
+            // and never down. In the ISR version of this code, we check to see
+            // what our destination position is to decide to record going up
+            // or down. Here we just need to record going up.
+            PenState = PEN_UP;
+            SolenoidState = SOLENOID_OFF;
+            if (gUseSolenoid)
+            {
+              PenUpDownIO = 0;
+            }
+          }
         }
-        gFIFOLength++;
       }
     }
   }

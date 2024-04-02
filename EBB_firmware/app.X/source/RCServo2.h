@@ -52,6 +52,7 @@
 #define RCSERVO2_H
 #include "GenericTypeDefs.h"
 #include "Compiler.h"
+#include "ebb.h"
 
 #define MAX_RC2_SERVOS                8u    // While there are 24 RPn pins, we never need more than 8 servos at once
 #define INITAL_RC2_SLOTS              8u    // Initial number of RC2 slots (determines repeat rate of pulses)
@@ -72,9 +73,12 @@ extern UINT16 gRC2Value[MAX_RC2_SERVOS];
 extern UINT8 gRC2RPn[MAX_RC2_SERVOS];
 extern UINT16 gRC2Target[MAX_RC2_SERVOS];
 extern UINT16 gRC2Rate[MAX_RC2_SERVOS];
+extern near UINT8 gUseRCPenServo;
+extern PenStateType PenState;
+extern SolenoidStateType SolenoidState;
 
 void RCServo2_Init(void);
 void RCServo2_S2_command(void);
-UINT8 RCServo2_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay);
+UINT8 RCServo2_Move(UINT16 Position, UINT8 RPn, UINT16 Rate, UINT16 Delay, BOOL AddToFIFO);
 
 #endif

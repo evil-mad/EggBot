@@ -2350,6 +2350,8 @@
               <code>SC,5,<i>Servo_Max</i></code> Set the maximum value for the RC servo output position. <i>Servo_Max</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Down" position. 
               <br />
               Default: 16000 (1.33 ms) on reset.
+              <br />
+              If the <code>SP,3</code> command is sent to the EBB, this <i>Servo_Max</i> value will be set equal to the <i>Servo_Min</i> value.
             </li>
             <li>
               <code>SC,8,<i>Maximum_S2_Channels</i></code> Sets the number of RC servo PWM channels, each of <i>S2_Channel_Duration_MS</i> before cycling back to channel 1 for S2 command. Values from 1 to 8 are valid for <i>Maximum_S2_Channels</i>.
@@ -2530,11 +2532,11 @@
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SP&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All (with changes)</li>
-          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue for some parameter values, not added to FIFO motion queue for others</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
-              <li><i>Value</i> is either 0 or 1, indicating to raise or lower the pen.</li>
+              <li><i>Value</i> is either 0, 1, 2 or 3.</li>
               <li><i>Duration</i> (optional) is an integer from 1 to 65535, which gives a delay in milliseconds.</li>
               <li><i>PortB_Pin</i> (optional) is an integer from 0 through 7.</li>
             </ul>
@@ -2543,11 +2545,13 @@
             <span style="font-weight: bold;">Description:</span> 
             <p>This command instructs the pen to go up or down.</p>
             <ul>
-              <li>When a <i>Value</i> of 1 is used, the servo will be moved to the <i>Servo_Min</i> value (as set by the "SC,4" command).</li>
-              <li>When a <i>Value</i> of 0 is used, the servo will be moved to the <i>Servo_Max</i> value (as set by the "SC,5" command below).</li>
+              <li>When a <i>Value</i> of 0 is used, a servo move will be added to the FIFO motion queue which will move the servo to the <i>Servo_Max</i> position (as set by the <code>SC,5</code> command below, which is normally the pen-down position).</li>
+              <li>When a <i>Value</i> of 1 is used, a servo move will be added to the FIFO motion queue which will move the servo to the <i>Servo_Min</i> position (as set by the <code>SC,4</code> command below, which is normally the pen-up position).</li>
+              <li>When a <i>Value</i> of 2 is used, the servo will be immediately start a move to the <i>Servo_Min</i> position (as set by the <code>SC,4</code> command), bypassing the FIFO motion queue. The <i>Duration</i> parameter is ignored if present.</li>
+              <li>When a <i>Value</i> of 3 is used, the servo will be immediately start a move to the <i>Servo_Min</i> position (as set by the <code>SC,4</code> command), bypassing the FIFO motion queue. The value of <i>Servo_Max</i> will also be set equal to <i>Servo_Min</i>, and any servo commands currently in the FIFO motion queue will have their target positions set to <i>Servo_Min</i>. This not only immediately begins lifting the pen off the paper, but it also prevents any queued servo moves from lowering the pen back down onto the paper.  The <i>Duration</i> parameter is ignored if present.</li>
             </ul>
             <p>
-              Note that conventionally, we have used the <i>Servo_Min</i> ("SC,4") value as the 'Pen up position', and the <i>Servo_Max</i> ("SC,5") value as the 'Pen down position'.
+              Note that conventionally, we have used the <i>Servo_Min</i> (<code>SC,4</code>) value as the 'Pen up position', and the <i>Servo_Max</i> (<code>SC,5</code>) value as the 'Pen down position'.
             </p>
             <p>
               The <i>Duration</i> argument is in milliseconds. It represents the total length of time between when the pen move is started, and when the next command will be executed. Note that this is not related to how fast the pen moves, which is set with the <code><a href="#SC">SC</a></code> command. Rather, it is an intentional delay of a given <i>Duration</i>, to force the EBB not to execute the next command (often an <code><a href="#SM">SM</a></code>) for some length of time, which allows the pen move to complete and possibly some extra settling time before moving the other motors.
@@ -2568,7 +2572,10 @@
             <code>SP,1&lt;CR&gt;</code> Move pen-lift servo motor to <i>servo_min</i> position.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.2.4
+            <span style="font-weight: bold;">Version History:</span> Added in firmware 2.2.4
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> <i>Value</i> parameter values of 2 and 3 added in version 3.0.1.
           </li>
         </ul>
    
