@@ -2005,6 +2005,8 @@ void parse_LM_packet(void)
   gJerk2 = 0;
   
   process_low_level_move(FALSE, ClearRet);
+    
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Low Level third derivative Move command
@@ -2081,10 +2083,92 @@ void parse_L3_packet(void)
   gIntervals = 0;
   
   process_low_level_move(FALSE, ClearRet);
+    
+  print_line_ending(kLE_OK_NORM);
 }
 
+// Low Level Timed third derivative Move command for S-curves
+// Usage: TD,<Intervals>,<Rate1A>,<Rate1B>,<Accel1>,<Jerk1>,<Rate2A>,<Rate2B>,<Accel2>,<Jerk2>,<ClearAccs><CR>
+//
+// This command is for implementing S-curves. It takes its parameters, and
+// creates to T3 commands for adding to the FIFO like this:
+//
+// T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]
+// T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2
+//
+// The parameter values are all explained in the comment header for T3
+void parse_TD_packet(void)
+{
+  ExtractReturnType ClearRet;
+  INT32 Rate1B, Rate2B, Accel1, Accel2;
+
+  clear_parmaeter_globals();
+  
+  print_command(FALSE, FALSE);
+  
+  // Extract each of the values.
+  extract_number(kULONG, &gIntervals, kREQUIRED);
+  extract_number(kLONG,  &gRate1,     kREQUIRED);
+  extract_number(kLONG,  &Rate1B,     kREQUIRED);
+  extract_number(kLONG,  &Accel1,     kREQUIRED);
+  extract_number(kLONG,  &gJerk1,     kREQUIRED);
+  extract_number(kLONG,  &gRate2,     kREQUIRED);
+  extract_number(kLONG,  &Rate2B,     kREQUIRED);
+  extract_number(kLONG,  &Accel2,     kREQUIRED);
+  extract_number(kLONG,  &gJerk2,     kREQUIRED);
+  ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error
+  if (error_byte)
+  {
+    return;
+  }
+
+  if (gLimitChecks)
+  {
+    // Eliminate obvious invalid parameter combinations,
+    // like LT,0,X,X,X,X,X
+    if (gIntervals == 0u)
+    {
+      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
+  }
+
+  // We don't use Steps so clear them here before calling low_level
+  gSteps1 = 0;
+  gSteps2 = 0;
+  
+  // For our first T3 command, we need both accel terms to be zero
+  gAccel1 = 0;
+  gAccel2 = 0;
+  
+  process_low_level_move(TRUE, ClearRet);
+
+  // Now for the second T3 command, use the B rates
+  gRate1 = Rate1B;
+  gRate2 = Rate2B;
+  
+  // And the accels
+  gAccel1 = Accel1;
+  gAccel2 = Accel2;
+  
+  // And the jerks need to switch sign
+  gJerk1 = -gJerk1;
+  gJerk2 = -gJerk2;
+  
+  // Always force no-change to the accumulators for the second move
+  gClearAccs = 0;
+  
+  // We also don't want to do anything to clear the accumulators for the second T3
+  process_low_level_move(TRUE, ClearRet);
+    
+  print_line_ending(kLE_OK_NORM);
+}
+
+
 // Low Level Timed third derivative Move command
-// Usage: L3,<Intervals>,<Rate1>,<Accel1>,<Jerk1>,<Rate2>,<Accel2>,<Jerk2>,<ClearAccs><CR>
+// Usage: T3,<Intervals>,<Rate1>,<Accel1>,<Jerk1>,<Rate2>,<Accel2>,<Jerk2>,<ClearAccs><CR>
 //
 // This command is a modified version of the LM command. Instead of stepping for a certain number of steps
 // on each axis at a given rate (with an acceleration term for each as well), this command will step 
@@ -2141,6 +2225,8 @@ void parse_T3_packet(void)
   gSteps2 = 0;
   
   process_low_level_move(TRUE, ClearRet);
+    
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Low Level Timed Move command
@@ -2199,6 +2285,8 @@ void parse_LT_packet(void)
   gJerk2 = 0;
   
   process_low_level_move(TRUE, ClearRet);
+    
+  print_line_ending(kLE_OK_NORM);
 }
 
 // Because the code for LM, L3, LT and T3 is really the same we call a common 
@@ -2530,8 +2618,6 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
       gFIFOLength++;
     }
   }
-    
-  print_line_ending(kLE_OK_NORM);
 }
 
 // The Stepper Motor command

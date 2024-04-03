@@ -395,6 +395,7 @@ void parse_T3_packet(void);
 void parse_L3_packet(void);
 void parse_CM_packet(void);
 void parse_TR_packet(void);
+void parse_TD_packet(void);
 void EBB_Init(void);
 void process_SP(PenStateType NewState, UINT16 CommandDuration);
 UINT8 process_QM(void);

@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.1_222"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.1_223"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -1334,6 +1334,12 @@ void parse_packet(void)
       {
         // Low Level 3rd derivative (jerk) move
         parse_L3_packet();
+        break;
+      }
+      case ('T' * 256) + 'D':
+      {
+        // Low Level 3rd derivative (jerk) move for S-Curves
+        parse_TD_packet();
         break;
       }
       case ('T' * 256) + '3':
