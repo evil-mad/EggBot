@@ -1,5 +1,5 @@
 MPLINK 5.00, LINKER
-Linker Map File - Created Tue Apr 02 19:55:23 2024
+Linker Map File - Created Tue Apr 02 21:11:04 2024
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -20,61 +20,61 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
              .code_main.o       code   0x008a02    program   0x00014e
                     .code       code   0x008b50    program   0x000140
        .code_EraseFlash.o       code   0x008c90    program   0x0000f8
-           .romdata_UBW.o    romdata   0x008d88    program   0x0000ac
-               _cinit_scn       code   0x008e34    program   0x00009e
-        .code_ReadFlash.o       code   0x008ed2    program   0x000092
-           .code_u1open.o       code   0x008f64    program   0x000072
-          .code_fxm3232.o       code   0x008fd6    program   0x000070
-.romdata_usb_descriptors.o    romdata   0x009046    program   0x000057
-        .idata_u1open.o_i    romdata   0x00909d    program   0x000000
-        .romdata_u1open.o    romdata   0x00909d    program   0x000000
-       .romdata_fxm3232.o    romdata   0x00909d    program   0x000000
-     .idata_ReadFlash.o_i    romdata   0x00909d    program   0x000000
-       .idata_fxm3232.o_i    romdata   0x00909d    program   0x000000
-     .romdata_ReadFlash.o    romdata   0x00909d    program   0x000000
-       .idata_u1write.o_i    romdata   0x00909d    program   0x000000
-       .romdata_u1write.o    romdata   0x00909d    program   0x000000
-       .romdata_pow2x16.o    romdata   0x00909d    program   0x000000
-       .idata_pow2x16.o_i    romdata   0x00909d    program   0x000000
-        .idata_u1defs.o_i    romdata   0x00909d    program   0x000000
-        .romdata_u1defs.o    romdata   0x00909d    program   0x000000
-.idata_WriteBytesFlash.o_i    romdata   0x00909d    program   0x000000
-.romdata_WriteBytesFlash.o    romdata   0x00909d    program   0x000000
-        .idata___init.o_i    romdata   0x00909d    program   0x000000
-        .romdata___init.o    romdata   0x00909d    program   0x000000
-        .idata_u1baud.o_i    romdata   0x00909d    program   0x000000
-        .romdata_u1baud.o    romdata   0x00909d    program   0x000000
-.romdata_usb_function_cdc.o    romdata   0x00909d    program   0x000000
-           .romdata_ebb.o    romdata   0x00909d    program   0x000000
-.idata_usb_function_cdc.o_i    romdata   0x00909d    program   0x000000
-          .idata_main.o_i    romdata   0x00909d    program   0x000000
-          .romdata_main.o    romdata   0x00909d    program   0x000000
-    .romdata_usb_device.o    romdata   0x00909d    program   0x000000
-      .idata_RCServo2.o_i    romdata   0x00909d    program   0x000000
-      .romdata_RCServo2.o    romdata   0x00909d    program   0x000000
-    .idata_usb_device.o_i    romdata   0x00909d    program   0x000000
-         .romdata_c018i.o    romdata   0x00909d    program   0x000000
-     .idata_ebb_print.o_i    romdata   0x00909d    program   0x000000
-     .romdata_ebb_print.o    romdata   0x00909d    program   0x000000
-    .idata_EraseFlash.o_i    romdata   0x00909d    program   0x000000
-    .romdata_EraseFlash.o    romdata   0x00909d    program   0x000000
-      .idata_fxd3232u.o_i    romdata   0x00909d    program   0x000000
-      .romdata_fxd3232u.o    romdata   0x00909d    program   0x000000
-         .idata_c018i.o_i    romdata   0x00909d    program   0x000000
-            .code_c018i.o       code   0x00909e    program   0x000000
-           .code_u1defs.o       code   0x00909e    program   0x000000
-  .code_usb_descriptors.o       code   0x00909e    program   0x000000
-         .code_fxd3232u.o       code   0x00909e    program   0x000048
-                   STRING       code   0x0090e6    program   0x000034
-          .code_u1write.o       code   0x00911a    program   0x00002e
-                    CTYPE       code   0x009148    program   0x000028
-           .code_u1baud.o       code   0x009170    program   0x000022
-             _startup_scn       code   0x009192    program   0x00001c
-          .code_pow2x16.o       code   0x0091ae    program   0x000016
-           .code___init.o       code   0x0091c4    program   0x000002
-.idata_usb_descriptors.o_i    romdata   0x0091c6    program   0x00007e
-           .idata_ebb.o_i    romdata   0x009244    program   0x000002
-           .idata_UBW.o_i    romdata   0x009246    program   0x000007
+           .romdata_UBW.o    romdata   0x008d88    program   0x0000a8
+               _cinit_scn       code   0x008e30    program   0x00009e
+        .code_ReadFlash.o       code   0x008ece    program   0x000092
+           .code_u1open.o       code   0x008f60    program   0x000072
+          .code_fxm3232.o       code   0x008fd2    program   0x000070
+.romdata_usb_descriptors.o    romdata   0x009042    program   0x000057
+        .idata_u1open.o_i    romdata   0x009099    program   0x000000
+        .romdata_u1open.o    romdata   0x009099    program   0x000000
+       .romdata_fxm3232.o    romdata   0x009099    program   0x000000
+     .idata_ReadFlash.o_i    romdata   0x009099    program   0x000000
+       .idata_fxm3232.o_i    romdata   0x009099    program   0x000000
+     .romdata_ReadFlash.o    romdata   0x009099    program   0x000000
+       .idata_u1write.o_i    romdata   0x009099    program   0x000000
+       .romdata_u1write.o    romdata   0x009099    program   0x000000
+       .romdata_pow2x16.o    romdata   0x009099    program   0x000000
+       .idata_pow2x16.o_i    romdata   0x009099    program   0x000000
+        .idata_u1defs.o_i    romdata   0x009099    program   0x000000
+        .romdata_u1defs.o    romdata   0x009099    program   0x000000
+.idata_WriteBytesFlash.o_i    romdata   0x009099    program   0x000000
+.romdata_WriteBytesFlash.o    romdata   0x009099    program   0x000000
+        .idata___init.o_i    romdata   0x009099    program   0x000000
+        .romdata___init.o    romdata   0x009099    program   0x000000
+        .idata_u1baud.o_i    romdata   0x009099    program   0x000000
+        .romdata_u1baud.o    romdata   0x009099    program   0x000000
+.romdata_usb_function_cdc.o    romdata   0x009099    program   0x000000
+           .romdata_ebb.o    romdata   0x009099    program   0x000000
+.idata_usb_function_cdc.o_i    romdata   0x009099    program   0x000000
+          .idata_main.o_i    romdata   0x009099    program   0x000000
+          .romdata_main.o    romdata   0x009099    program   0x000000
+    .romdata_usb_device.o    romdata   0x009099    program   0x000000
+      .idata_RCServo2.o_i    romdata   0x009099    program   0x000000
+      .romdata_RCServo2.o    romdata   0x009099    program   0x000000
+    .idata_usb_device.o_i    romdata   0x009099    program   0x000000
+         .romdata_c018i.o    romdata   0x009099    program   0x000000
+     .idata_ebb_print.o_i    romdata   0x009099    program   0x000000
+     .romdata_ebb_print.o    romdata   0x009099    program   0x000000
+    .idata_EraseFlash.o_i    romdata   0x009099    program   0x000000
+    .romdata_EraseFlash.o    romdata   0x009099    program   0x000000
+      .idata_fxd3232u.o_i    romdata   0x009099    program   0x000000
+      .romdata_fxd3232u.o    romdata   0x009099    program   0x000000
+         .idata_c018i.o_i    romdata   0x009099    program   0x000000
+            .code_c018i.o       code   0x00909a    program   0x000000
+           .code_u1defs.o       code   0x00909a    program   0x000000
+  .code_usb_descriptors.o       code   0x00909a    program   0x000000
+         .code_fxd3232u.o       code   0x00909a    program   0x000048
+                   STRING       code   0x0090e2    program   0x000034
+          .code_u1write.o       code   0x009116    program   0x00002e
+                    CTYPE       code   0x009144    program   0x000028
+           .code_u1baud.o       code   0x00916c    program   0x000022
+             _startup_scn       code   0x00918e    program   0x00001c
+          .code_pow2x16.o       code   0x0091aa    program   0x000016
+           .code___init.o       code   0x0091c0    program   0x000002
+.idata_usb_descriptors.o_i    romdata   0x0091c2    program   0x00007e
+           .idata_ebb.o_i    romdata   0x009240    program   0x000002
+           .idata_UBW.o_i    romdata   0x009242    program   0x000007
                ISR_access      udata   0x000000       data   0x00003a
                 MATH_DATA      udata   0x00003a       data   0x000014
                  .tmpdata      udata   0x00004e       data   0x000008
@@ -150,9 +150,9 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                             0x001000    0x001005      
                             0x001008    0x00100d      
                             0x001018    0x00101d      
-                            0x00102a    0x00909c      
-                            0x00909e    0x00924c      
-            33332 out of 63498 program addresses used, program memory utilization is 52%
+                            0x00102a    0x009098      
+                            0x00909a    0x009248      
+            33328 out of 63498 program addresses used, program memory utilization is 52%
 
 
 
@@ -177,23 +177,23 @@ REMAPPED_LOW_INTERRUPT_VECTOR       code   0x001018    program   0x000006
                     FPD32   0x007b00    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\divFP.asm
                     FPM32   0x007ba6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\mulFP.asm
                  FXD3232S   0x007c80    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxd3232s.asm
-                 FXD3232U   0x00909e    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxd3232u.c
-                  FXM3232   0x008fd6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxm3232.c
+                 FXD3232U   0x00909a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxd3232u.c
+                  FXM3232   0x008fd2    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxm3232.c
                   INT3232   0x007ce8    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
          InitializeSystem   0x008a12    program     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                 LongDelay   0x005b7c    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                   NextBit   0x008ba2    program     static source\squareroot.s      
                   NxtBt16   0x008c0a    program     static source\squareroot.s      
-               Open1USART   0x008f64    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1open.c
+               Open1USART   0x008f60    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1open.c
                 ProcessIO   0x0043b8    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
             RCServo2_Init   0x00765e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
             RCServo2_Move   0x0077f6    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
       RCServo2_S2_command   0x007748    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
 RCServo2_get_channel_from_RPn   0x00770e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
-                   RPnBit   0x008e1b    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-               RPnLATPort   0x008de9    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              RPnTRISPort   0x008db7    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                ReadFlash   0x008ed2    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\ReadFlash.c
+                   RPnBit   0x008e17    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               RPnLATPort   0x008de5    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+              RPnTRISPort   0x008db3    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                ReadFlash   0x008ece    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\ReadFlash.c
         Remapped_High_ISR   0x001008    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
          Remapped_Low_ISR   0x001018    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
          SetPinLATFromRPn   0x00635e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -240,13 +240,13 @@ USBCtrlEPAllowStatusStage   0x006c82    program     extern D:\Projects\EggBot1-G
                USBSuspend   0x0070c0    program     static D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
      USBTransferOnePacket   0x006b8e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
        USBWakeFromSuspend   0x0070d6    program     static D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
-               USB_CD_Ptr   0x00909b    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+               USB_CD_Ptr   0x009097    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
 USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
                  UserInit   0x004242    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              Write1USART   0x00911a    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1write.c
+              Write1USART   0x009116    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1write.c
           WriteBytesFlash   0x008824    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\WriteBytesFlash.c
-              _2jContinue   0x009106    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-                   _3jEnd   0x009110    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+              _2jContinue   0x009102    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                   _3jEnd   0x00910c    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
               __FpCompare   0x007d7a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
                  __FpExit   0x007e30    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\packFP.asm
                  __FpPack   0x007e5c    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\packFP.asm
@@ -369,13 +369,13 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
            ___if_lbl00320   0x00539a    program     static                          
            ___if_lbl00322   0x00539a    program     static                          
        ___return_lbl00000   0x0089ea    program     static                          
-       ___return_lbl00000   0x0090e4    program     static                          
-       ___return_lbl00000   0x009044    program     static                          
-       ___return_lbl00000   0x0091ac    program     static                          
-       ___return_lbl00000   0x0091c2    program     static                          
-       ___return_lbl00000   0x008f4c    program     static                          
+       ___return_lbl00000   0x0090e0    program     static                          
+       ___return_lbl00000   0x009040    program     static                          
+       ___return_lbl00000   0x0091a8    program     static                          
+       ___return_lbl00000   0x0091be    program     static                          
+       ___return_lbl00000   0x008f48    program     static                          
        ___return_lbl00000   0x001004    program     static                          
-       ___return_lbl00001   0x008ed0    program     static                          
+       ___return_lbl00001   0x008ecc    program     static                          
        ___return_lbl00001   0x00100c    program     static                          
        ___return_lbl00002   0x00101c    program     static                          
        ___return_lbl00052   0x0041c8    program     static                          
@@ -385,10 +385,10 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
        ___return_lbl00452   0x005bba    program     static                          
        ___return_lbl00453   0x005bc8    program     static                          
    ___switchexit_lbl00246   0x0050e2    program     static                          
-        ___while_lbl00001   0x008f1a    program     static                          
+        ___while_lbl00001   0x008f16    program     static                          
         ___while_lbl00001   0x00890e    program     static                          
         ___while_lbl00002   0x0089ea    program     static                          
-        ___while_lbl00002   0x008f4c    program     static                          
+        ___while_lbl00002   0x008f48    program     static                          
         ___while_lbl00003   0x008932    program     static                          
         ___while_lbl00004   0x00896e    program     static                          
         ___while_lbl00053   0x00419e    program     static                          
@@ -399,7 +399,7 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
         ___while_lbl00271   0x0052b8    program     static                          
         ___while_lbl00449   0x005b90    program     static                          
         ___while_lbl00450   0x005b9e    program     static                          
-                   __init   0x0091c4    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
+                   __init   0x0091c0    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
                    __pa_0   0x008d7a    program     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\EraseFlash.c
                    __pa_0   0x0079ae    program     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\RCServo2.c
                    __pa_0   0x00741e    program     static D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\usb_device.c
@@ -883,22 +883,22 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
               __tmplbl_83   0x004e38    program     static                          
               __tmplbl_84   0x004e22    program     static                          
             __zero_memory   0x008c70    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-                _do_cinit   0x008e34    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                   _false   0x0090e0    program     static                          
+                _do_cinit   0x008e30    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                   _false   0x0090dc    program     static                          
                    _reset   0x001000    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
-                 _startup   0x009192    program     extern C:\MCC18\src\traditional\startup\c018i.c
-               baud1USART   0x009170    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1baud.c
+                 _startup   0x00918e    program     extern C:\MCC18\src\traditional\startup\c018i.c
+               baud1USART   0x00916c    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1baud.c
    check_and_send_TX_data   0x00464e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
          check_high_water   0x0041dc    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
        clear_StepCounters   0x0032c6    program     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
   clear_parmaeter_globals   0x001928    program     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                 compare_l   0x008c86    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
-        configDescriptor1   0x009058    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
-                copy_loop   0x008ea6    program     static                          
-            copy_one_byte   0x008eac    program     static                          
-               device_dsc   0x009046    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
-                     done   0x008ed0    program     static                          
-             done_copying   0x008eba    program     static                          
+        configDescriptor1   0x009054    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+                copy_loop   0x008ea2    program     static                          
+            copy_one_byte   0x008ea8    program     static                          
+               device_dsc   0x009042    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+                     done   0x008ecc    program     static                          
+             done_copying   0x008eb6    program     static                          
                 ebb_print   0x0085f4    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
             ebb_print_hex   0x00862e    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
             ebb_print_int   0x0086da    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb_print.c
@@ -919,7 +919,7 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
              jBothNotZero   0x007bde    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\mulFP.asm
              jBothNotZero   0x007d98    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
                       jEQ   0x007db4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
-                     jEnd   0x009118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                     jEnd   0x009114    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
                     jExch   0x007dc0    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
                     jExit   0x007d54    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                    jExpEQ   0x007e06    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
@@ -928,7 +928,7 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
                 jI2F32Beg   0x007ae6    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\cast32FP.asm
                     jLoop   0x007b5a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\divFP.asm
                     jLoop   0x007d28    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
-                    jLoop   0x0090fa    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                    jLoop   0x0090f6    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
                 jLoopExit   0x007d3c    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                      jMax   0x007cf8    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                   jMaxNeg   0x007d0a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
@@ -937,7 +937,7 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
                     jNext   0x007b80    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\divFP.asm
                 jNoAdjust   0x007b7e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\divFP.asm
                   jNoExch   0x007de0    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\compFP.asm
-                 jNoMatch   0x00916e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
+                 jNoMatch   0x00916a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
                   jNotInf   0x007d16    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                   jPkLoop   0x007e6a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\packFP.asm
              jPkRoundDone   0x007eb4    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\packFP.asm
@@ -959,13 +959,13 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
                   jWrZ123   0x007d12    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                     jZero   0x007d10    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\castFP32.asm
                jZero1and2   0x007e44    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\math\packFP.asm
-                     loop   0x0091a2    program     static                          
-                     loop   0x0090ac    program     static                          
+                     loop   0x00919e    program     static                          
+                     loop   0x0090a8    program     static                          
                    loop_h   0x008c7e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    loop_l   0x008c88    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                   low_ISR   0x003de0    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
                      main   0x008a02    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\main.c
-                   memset   0x0090e6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                   memset   0x0090e2    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
           parse_AC_packet   0x005610    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
            parse_A_packet   0x0056ea    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
           parse_BL_packet   0x005bac    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -1019,7 +1019,7 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
           parse_XM_packet   0x002836    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
              parse_packet   0x00469a    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
 populateDeviceStringWithName   0x005d88    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                  pow2x16   0x0091ae    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\pow2x16.c
+                  pow2x16   0x0091aa    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\pow2x16.c
             print_command   0x004cd0    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
         print_line_ending   0x004d0c    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
              print_status   0x006270    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
@@ -1032,8 +1032,8 @@ process_simple_rate_move_fp   0x0026a0    program     static D:\Projects\EggBot1
             putrsUSBUSART   0x008120    program     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\CDC Device Driver\usb_function_cdc.c
              putsUSBUSART   0x0080e0    program     extern D:\Projects\EggBot1-GH\EBB_firmware\Microchip\USB\CDC Device Driver\usb_function_cdc.c
                st_version   0x008d88    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                     test   0x008e4e    program     static                          
-                  toupper   0x009148    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
+                     test   0x008e4a    program     static                          
+                  toupper   0x009144    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
                zero_block   0x008c7e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                    ADCON0   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
                ADCON0bits   0x000fc2       data     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\proc\p18f46j50.asm
@@ -2556,45 +2556,45 @@ USER_USB_CALLBACK_EVENT_HANDLER   0x008abc    program     extern D:\Projects\Egg
                EraseFlash   0x008c90    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\EraseFlash.c
                    __pa_0   0x008d7a    program     static E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\EraseFlash.c
                st_version   0x008d88    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-              RPnTRISPort   0x008db7    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-               RPnLATPort   0x008de9    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                   RPnBit   0x008e1b    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
-                _do_cinit   0x008e34    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     test   0x008e4e    program     static                          
-                copy_loop   0x008ea6    program     static                          
-            copy_one_byte   0x008eac    program     static                          
-             done_copying   0x008eba    program     static                          
-       ___return_lbl00001   0x008ed0    program     static                          
-                     done   0x008ed0    program     static                          
-                ReadFlash   0x008ed2    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\ReadFlash.c
-        ___while_lbl00001   0x008f1a    program     static                          
-        ___while_lbl00002   0x008f4c    program     static                          
-       ___return_lbl00000   0x008f4c    program     static                          
-               Open1USART   0x008f64    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1open.c
-                  FXM3232   0x008fd6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxm3232.c
-       ___return_lbl00000   0x009044    program     static                          
-               device_dsc   0x009046    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
-        configDescriptor1   0x009058    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
-               USB_CD_Ptr   0x00909b    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
-                 FXD3232U   0x00909e    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxd3232u.c
-                     loop   0x0090ac    program     static                          
-                   _false   0x0090e0    program     static                          
-       ___return_lbl00000   0x0090e4    program     static                          
-                   memset   0x0090e6    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-                    jLoop   0x0090fa    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-              _2jContinue   0x009106    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-                   _3jEnd   0x009110    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-                     jEnd   0x009118    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
-              Write1USART   0x00911a    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1write.c
-                  toupper   0x009148    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
-                 jNoMatch   0x00916e    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
-               baud1USART   0x009170    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1baud.c
-                 _startup   0x009192    program     extern C:\MCC18\src\traditional\startup\c018i.c
-                     loop   0x0091a2    program     static                          
-       ___return_lbl00000   0x0091ac    program     static                          
-                  pow2x16   0x0091ae    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\pow2x16.c
-       ___return_lbl00000   0x0091c2    program     static                          
-                   __init   0x0091c4    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
+              RPnTRISPort   0x008db3    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+               RPnLATPort   0x008de5    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                   RPnBit   0x008e17    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\UBW.c
+                _do_cinit   0x008e30    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     test   0x008e4a    program     static                          
+                copy_loop   0x008ea2    program     static                          
+            copy_one_byte   0x008ea8    program     static                          
+             done_copying   0x008eb6    program     static                          
+       ___return_lbl00001   0x008ecc    program     static                          
+                     done   0x008ecc    program     static                          
+                ReadFlash   0x008ece    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\Flash\ReadFlash.c
+        ___while_lbl00001   0x008f16    program     static                          
+        ___while_lbl00002   0x008f48    program     static                          
+       ___return_lbl00000   0x008f48    program     static                          
+               Open1USART   0x008f60    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1open.c
+                  FXM3232   0x008fd2    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxm3232.c
+       ___return_lbl00000   0x009040    program     static                          
+               device_dsc   0x009042    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+        configDescriptor1   0x009054    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+               USB_CD_Ptr   0x009097    program     extern D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\usb_descriptors.c
+                 FXD3232U   0x00909a    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\fxd3232u.c
+                     loop   0x0090a8    program     static                          
+                   _false   0x0090dc    program     static                          
+       ___return_lbl00000   0x0090e0    program     static                          
+                   memset   0x0090e2    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                    jLoop   0x0090f6    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+              _2jContinue   0x009102    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                   _3jEnd   0x00910c    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+                     jEnd   0x009114    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\memset.asm
+              Write1USART   0x009116    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1write.c
+                  toupper   0x009144    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
+                 jNoMatch   0x00916a    program     static E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\toupper.asm
+               baud1USART   0x00916c    program     extern E:\3.46\pic18-lt\cxx-framework\src\pmc_common\USART\u1baud.c
+                 _startup   0x00918e    program     extern C:\MCC18\src\traditional\startup\c018i.c
+                     loop   0x00919e    program     static                          
+       ___return_lbl00000   0x0091a8    program     static                          
+                  pow2x16   0x0091aa    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\math\pow2x16.c
+       ___return_lbl00000   0x0091be    program     static                          
+                   __init   0x0091c0    program     extern E:\3.46\pic18-lt\cxx-framework\src\traditional\stdclib\__init.c
                   AllDone   0x000000       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                     isr_i   0x000001       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
                AxisActive   0x000002       data     static D:\Projects\EggBot1-GH\EBB_firmware\app.X\source\ebb.c
