@@ -66,25 +66,28 @@ def test_shortest_move_run():
     EBB_version = query(the_port, 'V\r')
     # Put the version string of the currently attached EBB into the test log
     test_log.tl_print(EBB_version.decode("utf-8"), False)
-    if EBB_version_less_than(EBB_version.decode("utf-8"), "3.0.0"):
-        version_3_or_above = False
+    if EBB_version_less_than(EBB_version.decode("utf-8"), "3.0.1"):
+        version_3_0_1_or_above = False
     else:
-        version_3_or_above = True
+        version_3_0_1_or_above = True
         
 
     # Turn on the debug features we need in order to run our tests
     # Note that for this test, we turn all debug outputs off, to give as accurate a result
     # as possible. This means there is a lot less data in the captures, but we can still
     # get a good 'signal' by looking for overly long gaps in the step signals
-    response = str(query(the_port, "CU,250,0" + '\r'))
+    response = str(query(the_port, "CU,250,1" + '\r'))
     #print(last_command + " :: " + response.strip())
     response = str(query(the_port, "CU,251,0" + '\r'))
     #print(last_command + " :: " + response.strip())
-    response = str(query(the_port, "CU,257,0" + '\r'))
+    response = str(query(the_port, "CU,257,1" + '\r'))
+    #print(last_command + " :: " + response.strip())
+    response = str(query(the_port, "CU,4,16" + '\r'))
     #print(last_command + " :: " + response.strip())
 
-    if version_3_or_above:
-        move_commands = ["SM", "LM", "L3"]
+    if version_3_0_1_or_above:
+#        move_commands = ["SM", "LM", "L3", "TD"]
+        move_commands = ["L3", "TD"]
     else:
         move_commands = ["SM", "LM"]
 
@@ -141,9 +144,22 @@ def test_shortest_move_run():
                     l3_accel = 1            # Hard coding 1 as our accel, so that the math in the ISR has something to do, but don't actually change the rate much
                     l3_jerk = 1             # Hard coding 1 as our jerk, so that the math in the ISR has something to do, but don't actually change the rate much
                     full_command = move_command + "," + str(l3_rate) + "," + str(l3_steps) + "," + str(l3_accel) + "," + str(l3_jerk) + "," + str(l3_rate) + "," + str(l3_steps) + "," + str(l3_accel) + "," + str(l3_jerk)
+                if move_command == "TD":
+                    # TD,Intervals,Rate1A,Rate1B,Accel1,Jerk1,Rate2A,Rate2B,Accel2,Jerk2[,Clear]
+                    # which creates
+                    # T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]
+                    # T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2
+
+                    td_rate = int(85899.35 * stepper_speed)
+                    if td_rate > 2147483647:
+                        td_rate = 2147483647
+                    td_intervals = int(((move_duration/1000.0)*25000)/2)
+                    td_accel = 1            # Hard coding 1 as our accel, so that the math in the ISR has something to do, but don't actually change the rate much
+                    td_jerk = 1             # Hard coding 1 as our jerk, so that the math in the ISR has something to do, but don't actually change the rate much
+                    full_command = move_command + "," + str(td_intervals) + "," + str(td_rate) + "," + str(td_rate) + "," + str(td_accel) + "," + str(td_jerk) + "," + str(td_rate) + "," + str(td_rate) + "," + str(td_accel) + "," + str(td_jerk)
                 #print(full_command)
 
-                test_log.tl_print("test_shortest_move: " + full_command + " (" + str(stepper_speed) + "): ", False)
+                test_log.tl_print("test_shortest_move: " + full_command + " (" + str(move_duration) + "," + str(stepper_speed) + "): ", False)
                 test_dir = os.path.join(output_filepath, move_command + "-" + str(stepper_speed) + "-" + str(move_duration))
                 
                 def ebb_command_function():

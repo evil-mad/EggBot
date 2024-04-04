@@ -4,16 +4,16 @@
 # A single sub test can be run by naming that test as the first parameter
 #
 # The EBB must be connected to the Saleae in the following manner:
-# Saleae    EBB     Label
-# D0        D6      Step1
-# D1        D7      Dir1
-# D2        D4      Step2
-# D3        D5      Dir2
-# D4        D1      In ISR
-# D5        D0      Next Cmd
-# D6        A1      FIFO Empty
-# D7        C6      Dbg Serial
-# D8        C0      Parsing
+# Saleae    EBB         Label
+# D0        D6 (J5,6)   Step1
+# D1        D7 (J4,6)   Dir1
+# D2        D4 (J5,4)   Step2
+# D3        D5 (J4,5)   Dir2
+# D4        D1 (J4,2)   In ISR
+# D5        D0 (J4,3)   Next Cmd
+# D6        A1 (J4,8)   FIFO Empty
+# D7        C6 (J5,1)   Dbg Serial
+# D8        C0 (J4,4)   Parsing
 #
 # This code requires version 3.0.0-a40 or above on the EBB
 # This code requires that the Saleae Logic2 software have the Automation feature turned on and 
