@@ -4606,3 +4606,78 @@ void parse_CS_packet(void)
   
   print_line_ending(kLE_OK_NORM);
 }
+
+void parse_Y_packet(void)
+{
+  UINT32 tmp;
+  
+  // We should now have 
+  // AAAABBBBCCCCDDDDEEEEFFFFGGGG
+  // in g_RX_buf[] starting at g_RX_buf_out
+  //
+  // T3 command
+  // T3,Intervals,Rate1,Accel1,Jerk1,Rate2,Accel2,Jerk2[,Clear]
+  // Intervals = unsigned 32 bit
+  // Rate = signed 32
+  // Accel = signed 32 bit
+  // Jerk = signed 32 bit
+  // Clear = 2 bits
+  // 
+  // A = Intervals
+  // B = Rate1
+  // C = Accel1
+  // D = Jerk1
+  // E = Rate2
+  // F = Accel2
+  // G = Jerk2
+  // For the Clear parameter, Y command should assume NEVER clear accumulators.
+  // YAAAABBBBCCCCDDDDEEEEFFFFGGGG
+  // 1 bytes command
+  // 28 bytes data
+  // No carriage return
+
+  // For now, just print out all of the parameters to the debug UART
+  tmp = g_RX_buf[0];
+  tmp = (tmp << 8) | g_RX_buf[1];
+  tmp = (tmp << 8) | g_RX_buf[2];
+  tmp = (tmp << 8) | g_RX_buf[3];
+  HexPrint(tmp);
+
+  tmp = g_RX_buf[4];
+  tmp = (tmp << 8) | g_RX_buf[5];
+  tmp = (tmp << 8) | g_RX_buf[6];
+  tmp = (tmp << 8) | g_RX_buf[7];
+  HexPrint(tmp);
+  
+  tmp = g_RX_buf[8];
+  tmp = (tmp << 8) | g_RX_buf[9];
+  tmp = (tmp << 8) | g_RX_buf[10];
+  tmp = (tmp << 8) | g_RX_buf[11];
+  HexPrint(tmp);
+  
+  tmp = g_RX_buf[12];
+  tmp = (tmp << 8) | g_RX_buf[13];
+  tmp = (tmp << 8) | g_RX_buf[14];
+  tmp = (tmp << 8) | g_RX_buf[15];
+  HexPrint(tmp);
+  
+  tmp = g_RX_buf[16];
+  tmp = (tmp << 8) | g_RX_buf[17];
+  tmp = (tmp << 8) | g_RX_buf[18];
+  tmp = (tmp << 8) | g_RX_buf[19];
+  HexPrint(tmp);
+  
+  tmp = g_RX_buf[20];
+  tmp = (tmp << 8) | g_RX_buf[21];
+  tmp = (tmp << 8) | g_RX_buf[22];
+  tmp = (tmp << 8) | g_RX_buf[23];
+  HexPrint(tmp);
+  
+  tmp = g_RX_buf[24];
+  tmp = (tmp << 8) | g_RX_buf[25];
+  tmp = (tmp << 8) | g_RX_buf[26];
+  tmp = (tmp << 8) | g_RX_buf[27];
+  HexPrint(tmp);
+  
+  
+}
