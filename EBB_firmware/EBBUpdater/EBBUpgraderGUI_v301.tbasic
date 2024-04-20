@@ -258,6 +258,7 @@ CallBack Function cbButton() As Long
                     ' New (4/20/24) : Read out EBB nickname tag, and write it back after update is complete
                     ' Use "QT" and "ST" commands. Note that they only appeared in v2.5.5. So if we are updating from a version
                     ' before that, then there will be an "!8 Err: Unknown command" error, which is fine.
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Checking for EBB nickname " + Chr$(13) + Chr$(10)
                     Comm_print(hComm, "QT" & Chr$(13))
                     Sleep 100
                     nBytes = COMM_Get(hComm, %COMM_RXQUE)
