@@ -31,6 +31,7 @@ Global sFirmwareNumber As String
 Global bConsole        As Boolean
 Global bUpdaterConsole As Boolean
 Global sCommandLine    As String
+global sNicknameTag    as String
                                   
 ' Replace the filename in the next two lines to change which HEX file gets programmed
 #BUNDLE File "HEX", ".\EBF_v301.hex", "", ReplaceExisting=1
@@ -138,6 +139,45 @@ function DoFirmwareUpdate() as Long
   DoFirmwareUpdate = pID
 end function
 
+' We can get all kinds of funky version numbers because Brian isn't consistent with
+' development version numbers. For example
+' 0.0.0
+' 1.2.3
+' 10.11.12
+' 2.8.0a
+' 1.5.5.0
+' 9.9.9_dev1
+' Are all (I guess) possible valid version numbers. 
+' This function expects a string of the form 'EBBv13_and_above EB Firmware Version 3.0.1.1'
+' and it's job is to chop off everything except the actual version number at the right and 
+' return just that version number. So it looks for the first occurance of a decimal point,
+' then walks back to the left of that until it finds a space, and then uses that as the
+' starting point of the returned string.
+function ParseFirmwareVersion(sVer as String) as String
+  local sTemp as string
+  local i as integer
+  local VerLen as integer
+  
+  VerLen = len(sVer)
+  sTemp = ""
+  
+  for i = 1 to VerLen
+    if mid$(sVer, i, 1) = "." then
+      exit for
+    endif
+  next i
+  
+  ' Here, i will be the place of the first decimal point, or the end of the string
+  while Mid$(sVer, i, 1) <> " " and i > 1
+    i = i - 1
+  wend
+  
+  ' Here, i will be at the place of the first space character preceeding the first decimal, or the beginning of the string
+  sTemp = right$(sVer, VerLen - i)
+  
+  ParseFirmwareVersion = sTemp
+end function
+
 '------------------------------------------------------------------------------
 ' Callback procedure for button control
 '------------------------------------------------------------------------------
@@ -145,6 +185,7 @@ CallBack Function cbButton() As Long
   Local sComPort As String
   Local sTemp As String
   Local dFloat As Double
+  local sNickTemp as string
 
   If CBMSG = %WM_COMMAND Then
 
@@ -209,8 +250,25 @@ CallBack Function cbButton() As Long
 
                   sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
                   If LEFT$(sBuffer, 3) = "EBB" Then
-                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & RIGHT$(sBuffer, 5) + Chr$(13) + Chr$(10)
+                    sBuffer = ParseFirmwareVersion(sBuffer)
+                  
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found an EBB with firmware version " & sBuffer + Chr$(13) + Chr$(10)
                     Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Attempting update to version " & sFirmwareNumber + Chr$(13) + Chr$(10)
+                    
+                    ' New (4/20/24) : Read out EBB nickname tag, and write it back after update is complete
+                    ' Use "QT" and "ST" commands. Note that they only appeared in v2.5.5. So if we are updating from a version
+                    ' before that, then there will be an "!8 Err: Unknown command" error, which is fine.
+                    Comm_print(hComm, "QT" & Chr$(13))
+                    Sleep 100
+                    nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                    COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                    sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
+                    ' Only if the last two characters (other than line endings) are "OK" did we get a valid response from "QT"
+                    if right$(sBuffer,2) = "OK" and len(sBuffer) > 2 then
+                      sNicknameTag = Left$(sBuffer, len(sBuffer) - 2)
+                      Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found EBB nickname " & sNicknameTag + Chr$(13) + Chr$(10)
+                    endif
+                    
                     COMM_Print(hComm, "BL" & Chr$(13))
                     Sleep 1000
                     COMM_Close(hComm)
@@ -237,6 +295,32 @@ CallBack Function cbButton() As Long
                         Else
                           Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB=" & RIGHT$(sBuffer,5) & " File=" & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
                         EndIf
+                        
+                        ' Write the nickname tag back, if it existed
+                        if len(sNicknameTag) > 0 then
+                          Comm_print(hComm, "ST," & sNicknameTag & Chr$(13))
+                          Sleep 250
+                          nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                          COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                          sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
+                          ' Now read back the nickname to make sure it was set correctly
+                          sNickTemp = ""
+                          Comm_print(hComm, "QT" & Chr$(13))
+                          Sleep 100
+                          nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                          COMM_TRecv(hComm, nBytes, sNickTemp, 1000)
+                          sNickTemp = Trim$(sNickTemp, Any Chr$(13) & Chr$(10))
+                        
+                          if right$(sNickTemp,2) = "OK" and len(sNickTemp) > 2 then
+                            sNickTemp = Left$(sNickTemp, len(sNickTemp) - 2)
+                            if sNickTemp = sNicknameTag then
+                              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Wrote nickname successfully " & sNickTemp + Chr$(13) + Chr$(10)
+                            else
+                              Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Nickname written but did not verify:" & sNicknameTag & ":" & kNickTemp + Chr$(13) + Chr$(10)
+                            endif
+                          endif
+                        endif
+                        
                         COMM_Close(hComm)
                       EndIf
                     Else
