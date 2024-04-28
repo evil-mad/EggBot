@@ -237,16 +237,23 @@ CallBack Function cbButton() As Long
                 Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Testing port " & Ports(Counter) & " ... "
                 COMM_Open("\\.\" & Ports(Counter), hComm)
                 If Err = 0 Then
+                  ' New as of 4/28/2024: Force 'future syntax mode' off so we're always speaking to EBB in legacy mode
+                  ' If this EBB doesn't support this command, and error will be generated, which we will simply ignore.
                   COMM_Set(hComm, %COMM_BAUD, 123)
+                  COMM_Print(hComm, "CU,10,0" & Chr$(13))
+                  Sleep 100
+                  nBytes = COMM_Get(hComm, %COMM_RXQUE)
+                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)    ' Eat any response, ignoring it
+                
                   COMM_Print(hComm, "V" & Chr$(13))
                   Sleep 100
                   nBytes = COMM_Get(hComm, %COMM_RXQUE)
-                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)    ' Eat the first version string response, ignoring it.
                   
                   COMM_Print(hComm, "V" & Chr$(13))
                   Sleep 100
                   nBytes = COMM_Get(hComm, %COMM_RXQUE)
-                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                  COMM_TRecv(hComm, nBytes, sBuffer, 1000)    ' This is the version response we actually use
 
                   sBuffer = Trim$(sbuffer, Any Chr$(13) & Chr$(10))
                   If LEFT$(sBuffer, 3) = "EBB" Then
@@ -268,6 +275,8 @@ CallBack Function cbButton() As Long
                     if right$(sBuffer,2) = "OK" and len(sBuffer) > 2 then
                       sNicknameTag = Left$(sBuffer, len(sBuffer) - 2)
                       Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Found EBB nickname " & sNicknameTag + Chr$(13) + Chr$(10)
+                    else
+                      Control Append Text CBHNDL, %ID_CommandOutputTexBox, "No nickname available" + Chr$(13) + Chr$(10)
                     endif
                     
                     COMM_Print(hComm, "BL" & Chr$(13))
