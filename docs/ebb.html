@@ -116,19 +116,19 @@
         <h2><a name="introduction"></a>Introduction to the EBB firmware</h2>
  
         <p>
-          The documentation on this page is for the to EiBotBoard Firmware v3.0.0 and above. If you are using an older version of the firmware (most likely in the 2.0 series), please refer to the <a href="ebb2.html">EBB 2.8.1 documentation</a> which documents prior syntax and prior changes to the syntax between versions.
+          The documentation on this page is for the to EiBotBoard Firmware v3.0.0 and above. If you are using an older version of the firmware (most likely in the 2.0 series), please refer to the <a href="ebb2.html">EBB 2.8.1 documentation</a> which documents prior syntax and prior changes to the syntax between versions (for versions prior to EBB 3.0). Individual command descriptions in this document may note changes between EBB 2.8.1 and 3.0, but generally do not describe version history prior to 2.8.1.
         </p>
         <p>
           The EBB firmware was originally based on the UBW firmware. Its <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">command documentation</a> has an introduction to the UBW command processing framework, but this stand-alone document does not refer to it further.
         </p>
         <p>
-          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
+          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to minimize compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines and it is working well for you, there is generally no requirement to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. 
        </p>
         <p>
-        There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we do encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+        There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
         <p>
-        As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and the future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with EBB firmware v4.0. 
+        As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and planned future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with EBB firmware v4.0. 
         </p>
 
 
@@ -139,32 +139,50 @@
         <h2><a name="version_differences"></a>Major Changes in Firmware v3.0</h2>
 
         <p>
-        EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in v4.0, and deprecating some commands and queries. 
+        EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in v4.0, and deprecating some commands and queries. If you are updating a custom application that uses the EBB firmware and are migrating it from a pre-3.0 version, please read this section carefully as it does describe potentially breaking changes.
         </p>
         <p>
-        The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for firmware v4.0 and higher, rather than the default "legacy" response format. The legacy response format will be removed in firmware v4.0, and should be considered to be deprecated. 
+        The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for firmware v4.0 and higher, rather than the default "legacy" response format. The legacy response format will be removed in firmware v4.0, and should be considered to be deprecated. (See notes on the <code><a href="#CU">CU</a></code> command.)
         </p>
-        <p>
 
-        The following three queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but should be migrated to use <a href="#QG">QG</a> (Query General) instead.
+        <p>
+        The following are potentially breaking changes in the command and structure, and commands:
         <ul>
-          <li><a href="#QB">QB</a> &mdash; Query Button</li>
-          <li><a href="#QM">QM</a> &mdash; Query Motors</li>
-          <li><a href="#QP">QP</a> &mdash; Query Pen</li>
+          <li><code><a href="#QG">QG</a></code> &mdash; Query General. The meanings of bits 6 and 7 has changed.</li>
+          <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
+          <li>
+<code><a href="#PC">PC</a></code>,
+<code><a href="#PG">PG</a></code>,
+<code><a href="#T">T</a></code>, and  commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
         </ul>
-     </p>
-        <p>
-        The following three commands and queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but applications that use them should be migrated to use <a href="#SL">SL</a> and <a href="#QL">QL</a> instead.
-        <ul>
-          <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
-          <li><a href="#NI">NI</a> &mdash; Node count Increment</li>
-          <li><a href="#QN">QN</a> &mdash; Query Node count</li>
-        </ul>
-
-
         </p>
+
+        <p>
+        The following commands and queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
+       but should be migrated to use suggested alternatives instead.
+        <ul>
+          <li><code><a href="#QB">QB</a></code> &mdash; Query Button. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>. </li>
+          <li><code><a href="#QM">QM</a></code> &mdash; Query Motors. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+          <li><code><a href="#QP">QP</a></code> &mdash; Query Pen.  <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+          <li><code><a href="#ND">ND</a></code> &mdash; Node count Decrement. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+          <li><code><a href="#NI">NI</a></code> &mdash; Node count Increment. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+          <li><code><a href="#QN">QN</a></code> &mdash; Query Node count. <i>Migrate to:</i> <code><a href="#QL">QL</a></code></li>
+          <li><code><a href="#I">I</a></code> &mdash; Input (digital).  <i>Migrate to:</i> <code><a href="#PI">PI</a></code></li>
+          <li><code><a href="#O">O</a></code> &mdash; Output (digital). <i>Migrate to:</i> <code><a href="#PO">PO</a></code></li>
+        </ul>
+        </p>
+
+        <p>
+        Additional deprecated commands that will be removed as of firmware v4.0:
+        <ul>
+          <li><code><a href="#A">A</a></code> &mdash; Analog value get</li>
+          <li><code><a href="#AC">AC</a></code> &mdash; Analog configure</li>
+          <li><code><a href="#CU">CU,1</a></code> &mdash; Legacy syntax</li>
+        </ul>
+        </p>
+
+
+
         <p>
         Please see the <a href="EBBReleaseNotes.html">release notes</a> for additional information about differences between versions.
         </p>
@@ -399,14 +417,6 @@
               Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A special bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
             </p>
           </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
-            Added in v1.9.5.
-            <p>
-              This command will ONLY work if you have a EBB bootloader version later than 7/3/2010 (the version released on 7/3/2010 has a distinct LED blink mode - the USB LED
-              stays on 3 times longer than the USR LED). With a previous version of the bootloader code, this command may cause the EBB to become unresponsive.
-            </p>
-          </li>
         </ul>
 
         <hr class="short" />
@@ -457,10 +467,6 @@
             <span style="font-weight: bold;">Description:</span>
             <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
             <p>See the <code><a href="#QS">QS</a></code> command for a description of the global step positions.</p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
-            <p>Added in v2.4.3</p>
           </li>
         </ul>
 
@@ -753,7 +759,6 @@
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
             <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code> through <code>CU,257</code> were added in v3.0.0</p>
           </li>
 
@@ -1160,19 +1165,19 @@
               This command is extremely similar to the <code><a href="#LM">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LM">LM</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
             </p>
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
         </ul>
@@ -1788,7 +1793,7 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QG,3E&lt;NL&gt;</code>
             <p>
               This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
             </p>
@@ -1801,7 +1806,7 @@
         </ul>
 
         <hr class="short" />
-        <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
+        <h4><a name="QL"></a>"QL" &mdash; Query Variable</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QL[,<i>VariableIndex</i>]&lt;CR&gt;</code></li>
@@ -2728,19 +2733,19 @@
               This command is extremely similar to the <code><a href="#LT">LT</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LT">LT</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
             </p>
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
         </ul>
