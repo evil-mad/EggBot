@@ -286,7 +286,7 @@
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
           <li><a href="#QE">QE</a> &mdash; Query motor Enables and microstep resolutions</li>
           <li><a href="#QG">QG</a> &mdash; Query General</li>
-          <li><a href="#QL">QL</a> &mdash; Query Layer</li>
+          <li><a href="#QL">QL</a> &mdash; Query Variable</li>
           <li><a href="#QM">QM</a> &mdash; Query Motors</li>
           <li><a href="#QN">QN</a> &mdash; Query Node count</li>
           <li><a href="#QP">QP</a> &mdash; Query Pen</li>
@@ -299,7 +299,7 @@
           <li><a href="#S2">S2</a> &mdash; General RC Servo Output</li>
           <li><a href="#SC">SC</a> &mdash; Stepper and servo mode Configure</li>
           <li><a href="#SE">SE</a> &mdash; Set Engraver</li>
-          <li><a href="#SL">SL</a> &mdash; Set Layer</li>
+          <li><a href="#SL">SL</a> &mdash; Set Variable</li>
           <li><a href="#SM">SM</a> &mdash; Stepper Move</li>
           <li><a href="#SN">SN</a> &mdash; Set Node count</li>
           <li><a href="#SP">SP</a> &mdash; Set Pen State</li>
@@ -1765,7 +1765,7 @@
               <div style="font-weight:bold;">Bit 7: Limit Switch Triggered</div> This bit is 1 if the limit switch triggered. It will be a 0 if the Limit Switch Trigger has not fired or if the limit switch feature is disabled. If set, executing this query will clear the bit.
             </p>
             <p>
-              <div style="font-weight:bold;">Bit 6: Post Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
+              <div style="font-weight:bold;">Bit 6: Power Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
             </p>
             <p>
               <div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div> This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.
