@@ -123,14 +123,13 @@
         </p>
         <p>
           Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to minimize compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines and it is working well for you, there is generally no requirement to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. 
-       </p>
-        <p>
-        There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
         <p>
-        As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and planned future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with EBB firmware v4.0. 
+          There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
-
+        <p>
+          As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and planned future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with a future firmware version.
+        </p>
 
         <p />
         <hr />
@@ -139,54 +138,51 @@
         <h2><a name="version_differences"></a>Major Changes in Firmware v3.0</h2>
 
         <p>
-        EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in v4.0, and deprecating some commands and queries. If you are updating a custom application that uses the EBB firmware and are migrating it from a pre-3.0 version, please read this section carefully as it does describe potentially breaking changes.
+          EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in a future firmware version, and deprecating some commands and queries. If you are updating a custom application that uses the EBB firmware and are migrating it from a pre-3.0 version, please read this section carefully as it does describe potentially breaking changes.
         </p>
         <p>
-        The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for firmware v4.0 and higher, rather than the default "legacy" response format. The legacy response format will be removed in firmware v4.0, and should be considered to be deprecated. (See notes on the <code><a href="#CU">CU</a></code> command.)
-        </p>
-
-        <p>
-        The following are potentially breaking changes in the command and structure, and commands:
-        <ul>
-          <li><code><a href="#QG">QG</a></code> &mdash; Query General. The meanings of bits 6 and 7 has changed.</li>
-          <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
-          <li>
-<code><a href="#PC">PC</a></code>,
-<code><a href="#PG">PG</a></code>,
-<code><a href="#T">T</a></code>, and  commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
-        </ul>
+          The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for a future firmware version, rather than the default "legacy" response format. The legacy response format will be removed in that future firmware version and should be considered to be deprecated. (See notes on the <code><a href="#CU">CU</a></code> command.)
         </p>
 
         <p>
-        The following commands and queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but should be migrated to use suggested alternatives instead.
-        <ul>
-          <li><code><a href="#QB">QB</a></code> &mdash; Query Button. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>. </li>
-          <li><code><a href="#QM">QM</a></code> &mdash; Query Motors. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
-          <li><code><a href="#QP">QP</a></code> &mdash; Query Pen.  <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
-          <li><code><a href="#ND">ND</a></code> &mdash; Node count Decrement. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
-          <li><code><a href="#NI">NI</a></code> &mdash; Node count Increment. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
-          <li><code><a href="#QN">QN</a></code> &mdash; Query Node count. <i>Migrate to:</i> <code><a href="#QL">QL</a></code></li>
-          <li><code><a href="#I">I</a></code> &mdash; Input (digital).  <i>Migrate to:</i> <code><a href="#PI">PI</a></code></li>
-          <li><code><a href="#O">O</a></code> &mdash; Output (digital). <i>Migrate to:</i> <code><a href="#PO">PO</a></code></li>
-        </ul>
+          The following are potentially breaking changes in the command and structure, and commands:
+          <ul>
+            <li><code><a href="#QG">QG</a></code> &mdash; Query General. The meanings of bits 6 and 7 has changed.</li>
+            <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
+            <li>
+              <code><a href="#PC">PC</a></code>,
+              <code><a href="#PG">PG</a></code>,
+              <code><a href="#T">T</a></code>, and  commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
+          </ul>
         </p>
 
         <p>
-        Additional deprecated commands that will be removed as of firmware v4.0:
-        <ul>
-          <li><code><a href="#A">A</a></code> &mdash; Analog value get</li>
-          <li><code><a href="#AC">AC</a></code> &mdash; Analog configure</li>
-          <li><code><a href="#CU">CU,1</a></code> &mdash; Legacy syntax</li>
-        </ul>
+          The following commands and queries have been deprecated as of EBB firmware v3.0, and will be removed in a future firmware version. They are functional,
+          but should be migrated to use suggested alternatives instead.
+          <ul>
+            <li><code><a href="#QB">QB</a></code> &mdash; Query Button. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>. </li>
+            <li><code><a href="#QM">QM</a></code> &mdash; Query Motors. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+            <li><code><a href="#QP">QP</a></code> &mdash; Query Pen.  <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+            <li><code><a href="#ND">ND</a></code> &mdash; Node count Decrement. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+            <li><code><a href="#NI">NI</a></code> &mdash; Node count Increment. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+            <li><code><a href="#QN">QN</a></code> &mdash; Query Node count. <i>Migrate to:</i> <code><a href="#QL">QL</a></code></li>
+            <li><code><a href="#I">I</a></code> &mdash; Input (digital).  <i>Migrate to:</i> <code><a href="#PI">PI</a></code></li>
+            <li><code><a href="#O">O</a></code> &mdash; Output (digital). <i>Migrate to:</i> <code><a href="#PO">PO</a></code></li>
+          </ul>
         </p>
 
-
+        <p>
+          Additional deprecated commands that will be removed in a future firmware version:
+          <ul>
+            <li><code><a href="#A">A</a></code> &mdash; Analog value get</li>
+            <li><code><a href="#AC">AC</a></code> &mdash; Analog configure</li>
+            <li><code><a href="#CU">CU,1</a></code> &mdash; Legacy syntax</li>
+          </ul>
+        </p>
 
         <p>
         Please see the <a href="EBBReleaseNotes.html">release notes</a> for additional information about differences between versions.
         </p>
-
 
         <p />
         <hr />
@@ -362,7 +358,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
    
@@ -394,7 +390,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -596,7 +592,7 @@
                 <li>
                   <i>Param_Number</i> = 10 : <b>Enable Future Syntax Mode</b>
                   <p>
-                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
+                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default in a future firmware version.) 
                   </p>
                   <p>
                     When the EBB boots up, future syntax mode is disabled; which we can abbreviate as being in <b>legacy syntax mode</b>. Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor line endings in those responses. However, it is backward compatible with previous EBB firmware versions. 
@@ -762,7 +758,7 @@
             <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code> through <code>CU,257</code> were added in v3.0.0</p>
           </li>
 
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. <code>CU,10</code> will be allowed, but will have no effect in that future firmware version. (What is now "future" syntax will be the default syntax in future firmware version)</li>
         </ul>
 
         <hr class="short" />
@@ -978,7 +974,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -1123,7 +1119,7 @@
             <span style="font-weight: bold;">Version History:</span> Added in firmware v2.7.0.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> As of firmware v3.0.0, using a negative number for either <i>Rate</i> argument to control motion direction is depreciated. It will still work, but this functionality has been replaced by using a negative number to either <i>Step</i> argument. In version v4.0.0 the ability to use negative <i>Rate</i> arguments will be removed.
+            <span style="font-weight: bold;">Version History:</span> As of firmware v3.0.0, using a negative number for either <i>Rate</i> argument to control motion direction is depreciated. It will still work, but this functionality has been replaced by using a negative number to either <i>Step</i> argument. In a future firmware version the ability to use negative <i>Rate</i> arguments will be removed.
           </li>
         </ul>
 
@@ -1320,7 +1316,7 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>ND</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>ND</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1338,7 +1334,7 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>NI</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>NI</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short"/>
@@ -1367,7 +1363,7 @@
           </li>
           <li>
             <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -1580,7 +1576,7 @@
             <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event. B0 is normally pulled high, but if it is taken low, then that registers as though the PRG button itself was pressed. To ensure that a "button press" is registered, ensure that B0 is pulled low for at least 40 microseconds. This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QB</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QB</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1872,7 +1868,7 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1910,7 +1906,7 @@
             <span style="font-weight: bold;">Version History:</span>  
             Added in v1.9.2
           </li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1932,7 +1928,7 @@
           <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
 
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
