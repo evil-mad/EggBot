@@ -588,6 +588,9 @@
                   <p>
                     If there are any currently executing motion commands, or if there are any commands waiting in the FIFO, the execution of this command will block and wait for the FIFO to be completely empty and any executing motion commands to finish before allowing the change to FIFO size.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 10 : <b>Enable Future Syntax Mode</b>
@@ -610,6 +613,9 @@
                     <li>If <i>Param_Value</i> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
                     <li>If <i>Param_Value</i> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 50 : <b>Auto Enable Motors</b>
@@ -624,6 +630,9 @@
                       If <i>Param_Value</i> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 51 : <b>Limit Switch Mask</b>
@@ -649,6 +658,9 @@
                       There are three limit switches on PortB pins 2, 5 and 7. Each is normally low and high once closed. Send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target, and <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use  <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask, which enables the feature. If any of the three limit switches closes, the Limit Switch Stop would occur and the Limit Switch Reply would be sent. If it is important to know exactly which limit switch was the one that triggered the Limit Switch Stop, examine the response packet from the Limit Switch Reply.
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 52 : <b>Limit Switch Target</b>
@@ -660,6 +672,9 @@
                       <i>Param_Value</i> : Any value from 0 to 255 is allowed. The <i>Param_Value</i> becomes the new Limit Switch Target value. The default value for the Limit Switch Target is 0 at reset.
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                 <i>Param_Number</i> = 53 : <b>Enable Limit Switch Reply</b>
@@ -672,6 +687,9 @@
                       If <i>Param_Value</i> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                 <i>Param_Number</i> = 54 : <b>Enable Command Checksums</b>
@@ -702,11 +720,17 @@
                   <p>
                     <span style="font-weight: bold;">Example 2:</span> If you want to send the command <code>CU,54,0</code> (to turn off checksums) with a checksum but you don't know what the checksum should be, you could send an invalid checksum like <code>CU,54,0,0</code>. This will result in the response <code>!8 Err: Checksum incorrect, expected 119</code>. So you would know that the proper checksum value for this command is 119 and could send <code>CU,4,0,119</code>.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 60 : <b>Set new power lost threshold</b>
                   <p>
                     This command will set a new <i>Power_Lost_Threshold</i>. The <i>Param_Value</i> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <i>Power_Lost_Threshold</i> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <i>Power_Lost_Threshold</i>. If V+ is ever less than <i>Power_Lost_Threshold</i>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <i>Power_Lost_Threshold</i> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <i>Power_Lost_Threshold</i> at any time. After setting a new value of <i>Power_Lost_Threshold</i> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. For example to set the <i>Power_Lost_Threshold</i> to 12V you would use <code>CU,60,404</code>.
+                  </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
                   </p>
                 </li>
                 <li>
@@ -717,38 +741,65 @@
                   <p>
                     When enabled, this feature will count down <i>Stepper_Disable_Timeout</i> seconds after the last motion command. When the count reaches zero, it will disable the two stepper motor drivers. This makes the stepper motors freewheel as well as reduces the current draw of the EBB significantly. If a new <i>Stepper_Disable_Timeout</i> value is set while the countdown is already ongoing, the countdown will begin again using the new value. If a new motion command is executed while counting down, the countdown will be stopped and will start back at <i>Stepper_Disable_Timeout</i> when all motion commands are complete.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 250 : <b>Enable GPIO ISR Debug pins</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 251 : <b>Enable debug USART end of move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 252 : <b>Enable debug USART every ISR move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 253 : <b>Enable debug UART command echo</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 254 : <b>Enable Lock Up Mode</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 255 : <b>Enable command parsing USB debug printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 256 : <b>Disable parsed moves from entering FIFO</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 257 : <b>Enable RC7 indicator of command parsing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.0.
+                  </p>
                 </li>
               </ul>
             </p>
