@@ -303,6 +303,7 @@
           <li><a href="#ST">ST</a> &mdash; Set EBB nickname Tag</li>
           <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
           <li><a href="#T3">T3</a> &mdash; Low-level Move with Jerk, Time Limited</li>
+          <li><a href="#TD">TD</a> &mdash; Low-level Move, Time Limited, for S-curves</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
           <li><a href="#TR">TR</a> &mdash; Test Rate</li>
           <li><a href="#V">V</a> &mdash; Version Query</li>
@@ -2778,6 +2779,57 @@
             <span style="font-weight: bold;">Description:</span> 
             <p>
               This command is extremely similar to the <code><a href="#LT">LT</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LT">LT</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
+            </p>
+            <p>
+              [[ coming soon ]]
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 1:</span> 
+            <p>
+              [[ coming soon ]]
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> 
+            <p>
+              [[ coming soon ]]
+            </p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="TD"></a>"TD" &mdash; Low-level Move With Jerk, Time-limited, for S-Curves</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>TD,<i>Intervals</i>,<i>Rate1A</i>,<i>Rate1B</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2A</i>,<i>Rate2B</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>TD&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> 3.0.1 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li>
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+            </li>
+            <li>
+              <i>Rate1A</i>, <i>Rate1B</i>, <i>Rate2A</i> and <i>Rate2B</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction. See below for an explanation of where each set of rates is used.
+            </li>
+            <li>
+              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+            </li>
+            <li>
+              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control jerk during a move.
+            </li>
+            <li>
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+              This command is extremely similar to the <code><a href="#T3">T3</a></code> command. In fact, internally, the <code>TD</code> command simply takes its parameter values and creates
+              two <code>T3</code> commands. It is a faster way to create S-curves than sending two <code>T3</code> commands back to back.
             </p>
             <p>
               [[ coming soon ]]
