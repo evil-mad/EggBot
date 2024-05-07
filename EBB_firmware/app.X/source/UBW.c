@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.1.1"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.2"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -2267,7 +2267,7 @@ void parse_CU_packet(void)
 // certain values from the EBB.
 // "QU,<parameter_number><CR>"
 // Returns: Some value(s), dependant on what parameter_number is.
-// <parameter_number> <return_packet>
+// <return_packet>
 // 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
 //              the PortB pins at the time of the last limit switch trigger
 // 2   QU,2,ddd to read back the maximum supported FIFO length for this version
@@ -2297,8 +2297,6 @@ void parse_QU_packet(void)
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gLimitSwitchPortB, 2);
     print_line_ending(kLE_NORM);
   }
@@ -2306,8 +2304,6 @@ void parse_QU_packet(void)
   // Returns "QU,2,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (2u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(COMMAND_FIFO_MAX_LENGTH);
     print_line_ending(kLE_NORM);
   }
@@ -2315,8 +2311,6 @@ void parse_QU_packet(void)
   // Returns "QU,3,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (3u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(gCurrentFIFOLength);
     print_line_ending(kLE_NORM);
   }
@@ -2324,16 +2318,12 @@ void parse_QU_packet(void)
   else if (4u == parameter_number)
   {
     check_high_water();
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
   }
   // CU,5 prints out current stack high water value and resets it to zero
   else if (5u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
     INTCONbits.GIEL = 0;  // Turn low priority interrupts off
@@ -2343,32 +2333,24 @@ void parse_QU_packet(void)
   // CU,6 prints out the number of commands currently waiting in the FIFO
   else if (6u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(gFIFOLength);
     print_line_ending(kLE_NORM);
   }  
   // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
   else if (60u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(g_PowerMonitorThresholdADC);
     print_line_ending(kLE_NORM);
   }
   // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
   else if (61u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(g_StepperDisableTimeoutS);
     print_line_ending(kLE_NORM);
   }
 // 200 QU,200,dddddddddd,dddddddddd prints out the current value of acc_union[0] and acc_union[1] (the accumulators)
   else if (200u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     INTCONbits.GIEH = 0;    // Turn high priority interrupts off
     ebb_print_uint(acc_union[0].value);
     ebb_print_char(',');

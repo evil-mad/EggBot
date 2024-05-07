@@ -462,7 +462,7 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
+            <p>This command zeros out (i.e. clears) the global motor 1 step position and global motor 2 step position. It also zeros out both step accumulators.</p>
             <p>See the <code><a href="#QS">QS</a></code> command for a description of the global step positions.</p>
           </li>
         </ul>
@@ -2062,8 +2062,8 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>QU,<i>Param_Number</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode): </span><code>QU,<i>Return_Value</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>QU,<i>Return_Value</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions: </span>v3.0 and above</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
@@ -2831,17 +2831,16 @@
               This command is for creating specially-crafted back-to-back time-limited moves with jerk. Internally, the <code>TD</code> command takes its parameter values and creates
               two <code>T3</code> commands that are loaded into the FIFO. It is a faster way to create "S-curves" accelerations than sending two <code>T3</code> commands separately.
             </p>
-<p>The <code>TD</code> command loads the two <code>T3</code> commands as follows:
-<OL>
-<LI>
-<code>T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]&lt;CR&gt;</code>
-</LI>
-<LI>
-<code>T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2[,Clear]&lt;CR&gt;</code>
-
-</LI>
-</OL>
-</p>
+            <p>The <code>TD</code> command loads the two <code>T3</code> commands as follows:
+              <ol>
+                <li>
+                  <code>T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]&lt;CR&gt;</code>
+                </li>
+                <li>
+                  <code>T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2[,Clear]&lt;CR&gt;</code>
+                </li>
+              </ol>
+            </p>
 
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
