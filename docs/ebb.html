@@ -1850,7 +1850,7 @@
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that the limit switch has not been triggered, the power has not gone below the set threshold, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
            </li>
-          <li><span style="font-weight: bold;">Version History:</span> V3.0: bit 7 now reports if the limit switch trigger has fired. Also with v3.0 bit 6 now reports the power lost flag. If you have PC code which is relying upon the old meanings of these bits (bit 7 was showing the state of the RB5 pin and bit 6 was showing the state of the RB2 pin) it will need to be updated to use v3.0. On 5/7/2024 the meaning of bit 4 was corrected. Previous versions had the state inverted.
+          <li><span style="font-weight: bold;">Version History:</span> V3.0: bit 7 now reports if the limit switch trigger has fired. Also with v3.0 bit 6 now reports the power lost flag. If you have PC code which is relying upon the old meanings of these bits (bit 7 was showing the state of the RB5 pin and bit 6 was showing the state of the RB2 pin) it will need to be updated to use v3.0.  The meaning of bit 4 has been corrected. Previous documentation versions had the state inverted.
           </li>
         </ul>
 
