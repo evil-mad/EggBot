@@ -1506,8 +1506,8 @@ ul.no_bullets {
                 This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. 
                 Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.</p>
 
-            <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div>
-                This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift
+            <p><div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is up</div>
+                This bit is 1 when the pen is up, and 0 when the pen is down. The pen status is given by the position of the pen-lift
                 servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read 
                 with the <code><a href="#QP">QP</a></code> query.
                 Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
@@ -1542,6 +1542,7 @@ ul.no_bullets {
             <code>3E&lt;CR&gt;&lt;NL&gt;</code>
             <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
           </li>
+          <li><span style="font-weight: bold;">Version History:</span> On 5/7/2024 the meaning of bit 4 was corrected. Previous versions had the state inverted.</li>
         </ul>
 
         <hr class="short" />
