@@ -51,7 +51,7 @@ Function TBMain() As Long
 
   gPortOpen = FALSE
   '---Create a new dialog
-    hDlg = Dialog_New Pixels, 0, "EBB Update to firmware v" & sFirmwareNumber, -1, -1, 400, 400,
+    hDlg = Dialog_New Pixels, 0, "EBB Update to firmware v" & sFirmwareNumber, -1, -1, 600, 600,
                                                   %WS_DLGFRAME  | 
                                                   %DS_CENTER    | 
                                                   %WS_CAPTION   | 
@@ -59,7 +59,7 @@ Function TBMain() As Long
                                                   %WS_OVERLAPPEDWINDOW
 
   '---Set window minimum size
-    Dialog Set Minsize hDlg, 400, 400
+    Dialog Set Minsize hDlg, 600, 600
 
   '---Show dialog in modal mode
   '---cbDialog function is the callback function handling dialog events
@@ -86,10 +86,10 @@ CallBack Function cbDialog() As Long
     Case %WM_INITDIALOG
       If (bConsole) Then Console_WriteLine Time$, "Fired %WM_INITDIALOG dialog message"
       '---Add controls
-      Control Add Button,  CBHNDL, %ID_StartUpdateButton, "Start Update", 160,  10,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
-      Control Add Button,  CBHNDL, %ID_ExitButton, "Exit"               , 160, 350,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
+      Control Add Button,  CBHNDL, %ID_StartUpdateButton, "Start Update", 260,  10,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
+      Control Add Button,  CBHNDL, %ID_ExitButton, "Exit"               , 260, 550,  80,  25, %BS_NOTIFY | %WS_TABSTOP Call cbButton
       
-      Control Add Textbox, CBHNDL, %ID_CommandOutputTexBox, ""          ,  10, 40,  380, 300, %ES_MULTILINE | %ES_AUTOVSCROLL | %WS_HSCROLL | %ES_AUTOHSCROLL | %WS_VSCROLL |%ES_READONLY 
+      Control Add Textbox, CBHNDL, %ID_CommandOutputTexBox, ""          ,  10, 40,  580, 500, %ES_MULTILINE | %ES_AUTOVSCROLL | %WS_HSCROLL | %ES_AUTOHSCROLL | %WS_VSCROLL |%ES_READONLY 
 
     Case %WM_COMMAND
       'If (bConsole) Then Console_Writeline Time$, "Fired %WM_COMMAND dialog message", CBCTL
@@ -286,7 +286,7 @@ CallBack Function cbButton() As Long
             
                     DoFirmwareUpdate()
 
-                    Sleep 2000
+                    Sleep 5000
 
                     If pID = 0 Then
                       COMM_Open("\\.\" & Ports(Counter), hComm)
@@ -295,15 +295,21 @@ CallBack Function cbButton() As Long
                         Sleep 500
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "DBG1:" & sBuffer & ":" + Chr$(13) + Chr$(10)
                         COMM_Print(hComm, "V" & Chr$(13))
                         Sleep 500
                         nBytes = COMM_Get(hComm, %COMM_RXQUE)
                         COMM_TRecv(hComm, nBytes, sBuffer, 1000)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "DBG2:" & sBuffer & ":" + Chr$(13) + Chr$(10)
                         sBuffer = Trim$(sBuffer, Any Chr$(13) & Chr$(10))
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "DBG3:" & sBuffer & ":" + Chr$(13) + Chr$(10)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "DBG4:" & Right$(sBuffer,5) & ":" + Chr$(13) + Chr$(10)
+                    Control Append Text CBHNDL, %ID_CommandOutputTexBox, "DBG5:" & sFirmwareNumber & ":" + Chr$(13) + Chr$(10)
+
                         If (RIGHT$(sBuffer,5) = sFirmwareNumber) Then
                           Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Updated to version " & RIGHT$(sBuffer,5) & " successfully" + Chr$(13) + Chr$(10)
                         Else
-                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB=" & RIGHT$(sBuffer,5) & " File=" & sFirmwareNumber & " Updated failed." + Chr$(13) + Chr$(10)
+                          Control Append Text CBHNDL, %ID_CommandOutputTexBox, "Incorrect version detected. EBB=" & RIGHT$(sBuffer,5) & " File=" & sFirmwareNumber & " Update failed." + Chr$(13) + Chr$(10)
                         EndIf
                         
                         ' Write the nickname tag back, if it existed
