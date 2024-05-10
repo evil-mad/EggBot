@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.1"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.2"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -918,6 +918,11 @@ void ProcessIO(void)
   static BYTE last_fifo_size;
   static unsigned char button_state = 0;
   static unsigned int button_ctr = 0;
+  static BOOL first_byte = TRUE;          // True whenever we are looking for
+                                          //   the first byte of the next cmd
+  static BYTE binary_bytes_left = 0;      // When not zero, stores the number
+                                          //   of bytes left to copy over for
+                                          //   this binary command
 
   BYTE i;
   BOOL done = FALSE;
@@ -976,70 +981,133 @@ void ProcessIO(void)
     {
       tst_char = g_RX_command_buf[byte_cnt];
       
+      if (binary_bytes_left)
+      {
+        g_RX_buf[g_RX_buf_in] = tst_char;
+        g_RX_buf_in++;
+        byte_cnt++;
+        binary_bytes_left--;
+        if (!binary_bytes_left)
+        {
+          if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+          {
+            LATCbits.LATC0 = 1;
+          }
+          parse_Y_packet();
+          if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+          {
+            LATCbits.LATC0 = 0;
+          }
+          g_RX_buf_in = 0;
+          g_RX_buf_out = 0;
+          first_byte = TRUE;
+        }
+      }
+      else if (first_byte)
+      {
+        // Check for binary command. If we see a 'Y' then we know we have a 
+        // binary command, and so we need to copy the right number of bytes
+        // over to the binary command temp storage
+        if (tst_char == 'Y')
+        {
+          first_byte = FALSE;
+          binary_bytes_left = 28;
+          
+          if ((rx_bytes - byte_cnt) >= 28u)
+          {
+            byte_cnt++; // Advance past the "Y"
+            while (binary_bytes_left)
+            {
+              g_RX_buf[g_RX_buf_in] = g_RX_command_buf[byte_cnt];
+              g_RX_buf_in++;
+              byte_cnt++;
+              binary_bytes_left--;
+            }
+            if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+            {
+              LATCbits.LATC0 = 1;
+            }
+            parse_Y_packet();
+            if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+            {
+              LATCbits.LATC0 = 0;
+            }
+            g_RX_buf_in = 0;
+            g_RX_buf_out = 0;
+            first_byte = TRUE;
+          }
+        }
+      }
+      
       if (bittst(TestMode, TEST_MODE_USART_COMMAND_NUM))
       {
         Write1USART(tst_char);
       }
-        
-      // Check to see if we are in a CR/LF situation
-      if (
-        !in_cr 
-        && 
-        (
-          kCR == tst_char
-          ||
-          kLF == tst_char
-        )
-      )
-      {
-        in_cr = TRUE;
-        g_RX_buf[g_RX_buf_in] = kCR;
-        g_RX_buf_in++;
       
-        // At this point, we know we have a full packet
-        // of information from the PC to parse
+      if (!binary_bytes_left)
+      {
+        // Check to see if we are in a CR/LF situation
+        if (
+          !in_cr 
+          && 
+          (
+            kCR == tst_char
+            ||
+            kLF == tst_char
+          )
+        )
+        {
+          in_cr = TRUE;
+          g_RX_buf[g_RX_buf_in] = kCR;
+          g_RX_buf_in++;
 
-        // Now, if we've gotten a full command (user send <CR>) then
-        // go call the code that deals with that command, and then
-        // keep parsing. (This allows multiple small commands per packet)
-        if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
-        {
-          LATCbits.LATC0 = 1;
+          // At this point, we know we have a full packet
+          // of information from the PC to parse
+
+          // Now, if we've gotten a full command (user send <CR>) then
+          // go call the code that deals with that command, and then
+          // keep parsing. (This allows multiple small commands per packet)
+          if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+          {
+            LATCbits.LATC0 = 1;
+          }
+          parse_packet();
+          if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+          {
+            LATCbits.LATC0 = 0;
+          }
+          g_RX_buf_in = 0;
+          g_RX_buf_out = 0;
+          first_byte = TRUE;
         }
-        parse_packet();
-        if (bittstzero(TestMode)) // TEST_MODE_PARSING_COMMAND_NUM
+        else if (tst_char == 8u && g_RX_buf_in > 0u)
         {
-          LATCbits.LATC0 = 0;
+          // Handle the backspace thing
+          g_RX_buf_in--;
+          g_RX_buf[g_RX_buf_in] = 0x00;
+          ebb_print((far rom char *)" \b");
         }
-        g_RX_buf_in = 0;
-        g_RX_buf_out = 0;
-      }
-      else if (tst_char == 8u && g_RX_buf_in > 0u)
-      {
-        // Handle the backspace thing
-        g_RX_buf_in--;
-        g_RX_buf[g_RX_buf_in] = 0x00;
-        ebb_print((far rom char *)" \b");
-      }
-      else if (
-        tst_char != kCR
-        &&
-        tst_char != kLF
-        &&
-        tst_char >= 32u
-      )
-      {
-        // Only add a byte if it is not a CR or LF
-        g_RX_buf[g_RX_buf_in] = tst_char;
-        in_cr = FALSE;
-        g_RX_buf_in++;
-      }
-      // Check for buffer wraparound
-      if (kRX_BUF_SIZE == g_RX_buf_in)
-      {
-        bitset(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN);
-        g_RX_buf_in = 0;
-        g_RX_buf_out = 0;
+        else if (
+          tst_char != kCR
+          &&
+          tst_char != kLF
+          &&
+          tst_char >= 32u
+        )
+        {
+          // Only add a byte if it is not a CR or LF
+          g_RX_buf[g_RX_buf_in] = tst_char;
+          in_cr = FALSE;
+          first_byte = FALSE;
+          g_RX_buf_in++;
+        }
+        // Check for buffer wraparound
+        if (kRX_BUF_SIZE == g_RX_buf_in)
+        {
+          bitset(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN);
+          g_RX_buf_in = 0;
+          g_RX_buf_out = 0;
+        }
       }
     }
   }
@@ -2199,7 +2267,7 @@ void parse_CU_packet(void)
 // certain values from the EBB.
 // "QU,<parameter_number><CR>"
 // Returns: Some value(s), dependant on what parameter_number is.
-// <parameter_number> <return_packet>
+// <return_packet>
 // 1   QU,1,XX  where XX is a value from 00 to FF, representing the contents of 
 //              the PortB pins at the time of the last limit switch trigger
 // 2   QU,2,ddd to read back the maximum supported FIFO length for this version
@@ -2229,8 +2297,6 @@ void parse_QU_packet(void)
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
   if (1u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gLimitSwitchPortB, 2);
     print_line_ending(kLE_NORM);
   }
@@ -2238,8 +2304,6 @@ void parse_QU_packet(void)
   // Returns "QU,2,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (2u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(COMMAND_FIFO_MAX_LENGTH);
     print_line_ending(kLE_NORM);
   }
@@ -2247,8 +2311,6 @@ void parse_QU_packet(void)
   // Returns "QU,3,ddd" where ddd is one to three digit decimal value from 0 to 255
   else if (3u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(gCurrentFIFOLength);
     print_line_ending(kLE_NORM);
   }
@@ -2256,16 +2318,12 @@ void parse_QU_packet(void)
   else if (4u == parameter_number)
   {
     check_high_water();
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
   }
   // CU,5 prints out current stack high water value and resets it to zero
   else if (5u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_hex(gStackHighWater, 3);
     print_line_ending(kLE_NORM);
     INTCONbits.GIEL = 0;  // Turn low priority interrupts off
@@ -2275,32 +2333,24 @@ void parse_QU_packet(void)
   // CU,6 prints out the number of commands currently waiting in the FIFO
   else if (6u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(gFIFOLength);
     print_line_ending(kLE_NORM);
   }  
   // 60  QU,60,dddd prints out current value of g_PowerMonitorThresholdADC
   else if (60u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(g_PowerMonitorThresholdADC);
     print_line_ending(kLE_NORM);
   }
   // 61  QU,61,dddddd prints out current value of g_StepperDisableTimeoutS
   else if (61u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     ebb_print_uint(g_StepperDisableTimeoutS);
     print_line_ending(kLE_NORM);
   }
 // 200 QU,200,dddddddddd,dddddddddd prints out the current value of acc_union[0] and acc_union[1] (the accumulators)
   else if (200u == parameter_number)
   {
-    ebb_print_uint(parameter_number);
-    ebb_print_char(',');
     INTCONbits.GIEH = 0;    // Turn high priority interrupts off
     ebb_print_uint(acc_union[0].value);
     ebb_print_char(',');

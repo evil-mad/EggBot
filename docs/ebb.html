@@ -40,7 +40,7 @@
         </h1>
 
         <p>
-          This document details the serial command protocol used by the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard) with firmware v3.0.0 and higher. Legacy documentation for prior versions is <a href="ebb2.html">available here</a>.
+          This document details the serial command protocol used by the <a href="http://www.schmalzhaus.com/EBB/">EBB</a> (EiBotBoard) with firmware v3.0 and higher. Legacy documentation for prior versions is <a href="ebb2.html">available here</a>.
         </p>
         <p>
           The EBB is an open source USB-based motor control board, designed to drive two stepper motors. The EBB may be used on its own, or found as the control board of such machines as <a href="http://egg-bot.com">The Original Egg-Bot</a>, <a href="http://watercolorbot.com">The WaterColorBot</a>, or <a href="http://axidraw.com">AxiDraw</a>.
@@ -116,21 +116,20 @@
         <h2><a name="introduction"></a>Introduction to the EBB firmware</h2>
  
         <p>
-          The documentation on this page is for the to EiBotBoard Firmware v3.0.0 and above. If you are using an older version of the firmware (most likely in the 2.0 series), please refer to the <a href="ebb2.html">EBB 2.8.1 documentation</a> which documents prior syntax and prior changes to the syntax between versions.
+          The documentation on this page is for the to EiBotBoard Firmware v3.0 and above. If you are using an older version of the firmware (most likely in the 2.0 series), please refer to the <a href="ebb2.html">EBB 2.8.1 documentation</a> which documents prior syntax and prior changes to the syntax between versions (for versions prior to EBB 3.0). Individual command descriptions in this document may note changes between EBB 2.8.1 and 3.0, but generally do not describe version history prior to 2.8.1.
         </p>
         <p>
           The EBB firmware was originally based on the UBW firmware. Its <a href="http://www.schmalzhaus.com/UBW/Doc/FirmwareDDocumentation_v145.html">command documentation</a> has an introduction to the UBW command processing framework, but this stand-alone document does not refer to it further.
         </p>
         <p>
-          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to avoid compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines, there is generally no particular benefit or compelling reason for you to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. (Older machines with older firmware will continue to work just fine with that older firmware.)
-       </p>
-        <p>
-        There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we do encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
+          Although the EBB firmware is a continuously evolving code base, we have, since version 2.0.1, taken care to minimize compatibility changes that would affect the most common machines using the EBB: The AxiDraw, EggBot, and WaterColorBot. If you are using one of these machines and it is working well for you, there is generally no requirement to <a href="https://wiki.evilmadscientist.com/Updating_EBB_firmware">update your firmware</a> to a newer version. 
         </p>
         <p>
-        As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and the future v4.x syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the 4.x syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with EBB firmware v4.0. 
+          There are, of course, many <a href="EBBReleaseNotes.html">smaller changes</a> in the code between the versions on older EBB firmware and the latest versions. If you are developing new applications with the EBB, we encourage you to update to the newest version. On the other hand, if you are writing new software that targets machines of various ages (for example, new EggBot software), please be aware that many of the machines out there are still using older firmware revisions. 
         </p>
-
+        <p>
+          As we will note in the next section, EBB firmware v3.x labels a <i>transitional</i> version between the v2.x syntax and planned future version syntax. While it maintains compatibility for existing applications that use the EBB (with firmware 2.x), it also introduces changes for compatibility with the future version syntax. These include deprecations of some commands and queries. There is also a new "unified" syntax -- disabled by default -- for responses to commands and queries. Enabling this syntax allows one to develop or adapt programs that use the EBB for future compatibility with a future firmware version.
+        </p>
 
         <p />
         <hr />
@@ -139,36 +138,51 @@
         <h2><a name="version_differences"></a>Major Changes in Firmware v3.0</h2>
 
         <p>
-        EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in v4.0, and deprecating some commands and queries. 
+          EBB firmware v3.x is a transitional series introducing new features, optional in v3.x, which will become standard in a future firmware version, and deprecating some commands and queries. If you are updating a custom application that uses the EBB firmware and are migrating it from a pre-3.0 version, please read this section carefully as it does describe potentially breaking changes.
         </p>
         <p>
-        The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for firmware v4.0 and higher, rather than the default "legacy" response format. The legacy response format will be removed in firmware v4.0, and should be considered to be deprecated. 
+          The most important change is the introduction of a <b>future syntax mode</b>, which is off by default, and which can be enabled by the command <a href="#CU"><code>CU,10,1</code></a>. Future syntax mode does not change the syntax that is used to send commands or queries to the EBB; it changes the format of <i>responses</i> to commands and queries. With future syntax mode enabled, these responses will use the format that is planned for a future firmware version, rather than the default "legacy" response format. The legacy response format will be removed in that future firmware version and should be considered to be deprecated. (See notes on the <code><a href="#CU">CU</a></code> command.)
         </p>
+
         <p>
-
-        The following three queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but should be migrated to use <a href="#QG">QG</a> (Query General) instead.
-        <ul>
-          <li><a href="#QB">QB</a> &mdash; Query Button</li>
-          <li><a href="#QM">QM</a> &mdash; Query Motors</li>
-          <li><a href="#QP">QP</a> &mdash; Query Pen</li>
-        </ul>
-     </p>
-        <p>
-        The following three commands and queries have been deprecated as of EBB firmware v3.0, and will be removed as of EBB firmware v4.0. They are functional,
-       but applications that use them should be migrated to use <a href="#SL">SL</a> and <a href="#QL">QL</a> instead.
-        <ul>
-          <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
-          <li><a href="#NI">NI</a> &mdash; Node count Increment</li>
-          <li><a href="#QN">QN</a> &mdash; Query Node count</li>
-        </ul>
-
-
+          The following are potentially breaking changes in the command and structure, and commands:
+          <ul>
+            <li><code><a href="#QG">QG</a></code> &mdash; Query General. The meanings of bits 6 and 7 has changed.</li>
+            <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
+            <li>
+              <code><a href="#PC">PC</a></code>,
+              <code><a href="#PG">PG</a></code>,
+              <code><a href="#T">T</a></code>, and  commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
+          </ul>
         </p>
+
+        <p>
+          The following commands and queries have been deprecated as of EBB firmware v3.0, and will be removed in a future firmware version. They are functional,
+          but should be migrated to use suggested alternatives instead.
+          <ul>
+            <li><code><a href="#QB">QB</a></code> &mdash; Query Button. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>. </li>
+            <li><code><a href="#QM">QM</a></code> &mdash; Query Motors. <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+            <li><code><a href="#QP">QP</a></code> &mdash; Query Pen.  <i>Migrate to:</i> <code><a href="#QG">QG</a></code>.</li>
+            <li><code><a href="#ND">ND</a></code> &mdash; Node count Decrement. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+            <li><code><a href="#NI">NI</a></code> &mdash; Node count Increment. <i>Migrate to:</i> <code><a href="#SL">SL</a></code></li>
+            <li><code><a href="#QN">QN</a></code> &mdash; Query Node count. <i>Migrate to:</i> <code><a href="#QL">QL</a></code></li>
+            <li><code><a href="#I">I</a></code> &mdash; Input (digital).  <i>Migrate to:</i> <code><a href="#PI">PI</a></code></li>
+            <li><code><a href="#O">O</a></code> &mdash; Output (digital). <i>Migrate to:</i> <code><a href="#PO">PO</a></code></li>
+          </ul>
+        </p>
+
+        <p>
+          Additional deprecated commands that will be removed in a future firmware version:
+          <ul>
+            <li><code><a href="#A">A</a></code> &mdash; Analog value get</li>
+            <li><code><a href="#AC">AC</a></code> &mdash; Analog configure</li>
+            <li><code><a href="#CU">CU,1</a></code> &mdash; Legacy syntax</li>
+          </ul>
+        </p>
+
         <p>
         Please see the <a href="EBBReleaseNotes.html">release notes</a> for additional information about differences between versions.
         </p>
-
 
         <p />
         <hr />
@@ -268,7 +282,7 @@
           <li><a href="#QC">QC</a> &mdash; Query Current</li>
           <li><a href="#QE">QE</a> &mdash; Query motor Enables and microstep resolutions</li>
           <li><a href="#QG">QG</a> &mdash; Query General</li>
-          <li><a href="#QL">QL</a> &mdash; Query Layer</li>
+          <li><a href="#QL">QL</a> &mdash; Query Variable</li>
           <li><a href="#QM">QM</a> &mdash; Query Motors</li>
           <li><a href="#QN">QN</a> &mdash; Query Node count</li>
           <li><a href="#QP">QP</a> &mdash; Query Pen</li>
@@ -281,7 +295,7 @@
           <li><a href="#S2">S2</a> &mdash; General RC Servo Output</li>
           <li><a href="#SC">SC</a> &mdash; Stepper and servo mode Configure</li>
           <li><a href="#SE">SE</a> &mdash; Set Engraver</li>
-          <li><a href="#SL">SL</a> &mdash; Set Layer</li>
+          <li><a href="#SL">SL</a> &mdash; Set Variable</li>
           <li><a href="#SM">SM</a> &mdash; Stepper Move</li>
           <li><a href="#SN">SN</a> &mdash; Set Node count</li>
           <li><a href="#SP">SP</a> &mdash; Set Pen State</li>
@@ -289,6 +303,7 @@
           <li><a href="#ST">ST</a> &mdash; Set EBB nickname Tag</li>
           <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
           <li><a href="#T3">T3</a> &mdash; Low-level Move with Jerk, Time Limited</li>
+          <li><a href="#TD">TD</a> &mdash; Paired "Dual T3" Low-level Move With Jerk, Time-limited</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
           <li><a href="#TR">TR</a> &mdash; Test Rate</li>
           <li><a href="#V">V</a> &mdash; Version Query</li>
@@ -343,8 +358,8 @@
             <span style="font-weight: bold;">Unchanged since firmware v2.2.3.
           </li>
           <li>
-            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            <span style="font-weight: bold;">This command is deprecated in v3.0:</span>
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
    
@@ -375,8 +390,8 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            <span style="font-weight: bold;">This command is deprecated in v3.0:</span>
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -397,14 +412,6 @@
             </p>
             <p>
               Once in bootloader mode, the EBB will not be able to communicate using the same USB serial port method that the normal firmware commands use. A special bootloader PC application (that uses USB HID to communicate with the bootloader on the EBB) must be run in order to upload new firmware HEX files to the EBB.
-            </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
-            Added in v1.9.5.
-            <p>
-              This command will ONLY work if you have a EBB bootloader version later than 7/3/2010 (the version released on 7/3/2010 has a distinct LED blink mode - the USB LED
-              stays on 3 times longer than the USR LED). With a previous version of the bootloader code, this command may cause the EBB to become unresponsive.
             </p>
           </li>
         </ul>
@@ -455,12 +462,8 @@
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Description:</span>
-            <p>This command zeroes out (i.e. clears) the global motor 1 step position and global motor 2 step position.</p>
+            <p>This command zeros out (i.e. clears) the global motor 1 step position and global motor 2 step position. It also zeros out both step accumulators.</p>
             <p>See the <code><a href="#QS">QS</a></code> command for a description of the global step positions.</p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Version History:</span>
-            <p>Added in v2.4.3</p>
           </li>
         </ul>
 
@@ -586,11 +589,14 @@
                   <p>
                     If there are any currently executing motion commands, or if there are any commands waiting in the FIFO, the execution of this command will block and wait for the FIFO to be completely empty and any executing motion commands to finish before allowing the change to FIFO size.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 10 : <b>Enable Future Syntax Mode</b>
                   <p>
-                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default as of EBB firmware v4.0.) 
+                    When enabled, <b>future syntax mode</b> changes the response sent after each command or query to have a relatively consistent format.  (This syntax is said to be "future syntax" because it is the formatting that will be default in a future firmware version.) 
                   </p>
                   <p>
                     When the EBB boots up, future syntax mode is disabled; which we can abbreviate as being in <b>legacy syntax mode</b>. Legacy syntax mode <i>does not</i> have a consistent pattern of responses nor line endings in those responses. However, it is backward compatible with previous EBB firmware versions. 
@@ -608,6 +614,9 @@
                     <li>If <i>Param_Value</i> = 0, Legacy syntax mode: line endings and responses consistent with previous EBB firmware versions will be used (default at boot).</li>
                     <li>If <i>Param_Value</i> = 1, Future syntax mode: consistent line endings and responses will be used for all commands and queries.</li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 50 : <b>Auto Enable Motors</b>
@@ -622,6 +631,9 @@
                       If <i>Param_Value</i> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 51 : <b>Limit Switch Mask</b>
@@ -647,6 +659,9 @@
                       There are three limit switches on PortB pins 2, 5 and 7. Each is normally low and high once closed. Send <code>CU,52,164</code> to set bits 2, 5 and 7 of the Limit Switch Target, and <code>CU,53,1</code> to enable the Limit Switch Reply. Then, use  <code>CU,51,164</code> to set bits 2, 5, and 7 of the Limit Switch Mask, which enables the feature. If any of the three limit switches closes, the Limit Switch Stop would occur and the Limit Switch Reply would be sent. If it is important to know exactly which limit switch was the one that triggered the Limit Switch Stop, examine the response packet from the Limit Switch Reply.
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 52 : <b>Limit Switch Target</b>
@@ -658,6 +673,9 @@
                       <i>Param_Value</i> : Any value from 0 to 255 is allowed. The <i>Param_Value</i> becomes the new Limit Switch Target value. The default value for the Limit Switch Target is 0 at reset.
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                 <i>Param_Number</i> = 53 : <b>Enable Limit Switch Reply</b>
@@ -670,6 +688,9 @@
                       If <i>Param_Value</i> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
                     </li>
                   </ul>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                 <i>Param_Number</i> = 54 : <b>Enable Command Checksums</b>
@@ -700,11 +721,17 @@
                   <p>
                     <span style="font-weight: bold;">Example 2:</span> If you want to send the command <code>CU,54,0</code> (to turn off checksums) with a checksum but you don't know what the checksum should be, you could send an invalid checksum like <code>CU,54,0,0</code>. This will result in the response <code>!8 Err: Checksum incorrect, expected 119</code>. So you would know that the proper checksum value for this command is 119 and could send <code>CU,4,0,119</code>.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 60 : <b>Set new power lost threshold</b>
                   <p>
                     This command will set a new <i>Power_Lost_Threshold</i>. The <i>Param_Value</i> needs to be a decimal number between 0 and 1023 and is in units of 0.295V. At boot the <i>Power_Lost_Threshold</i> will be zero. Every 2ms the EBB will compare the voltage at the barrel jack (V+) with <i>Power_Lost_Threshold</i>. If V+ is ever less than <i>Power_Lost_Threshold</i>, then bit 6 in the result of the <code>QG</code> command will be set. Setting <i>Power_Lost_Threshold</i> to zero (as it is at boot) effectively disables this feature. If bit 6 of the <code>QG</code> result is set, then after the execution of <code>QG</code> it will be cleared. The <code>QU,60</code> query can be used to read back the current value of <i>Power_Lost_Threshold</i> at any time. After setting a new value of <i>Power_Lost_Threshold</i> with <code>CU,60</code> make sure to execute a <code>QG</code> query to clear bit 6 in case it was set. For example to set the <i>Power_Lost_Threshold</i> to 12V you would use <code>CU,60,404</code>.
+                  </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
                   </p>
                 </li>
                 <li>
@@ -715,49 +742,75 @@
                   <p>
                     When enabled, this feature will count down <i>Stepper_Disable_Timeout</i> seconds after the last motion command. When the count reaches zero, it will disable the two stepper motor drivers. This makes the stepper motors freewheel as well as reduces the current draw of the EBB significantly. If a new <i>Stepper_Disable_Timeout</i> value is set while the countdown is already ongoing, the countdown will begin again using the new value. If a new motion command is executed while counting down, the countdown will be stopped and will start back at <i>Stepper_Disable_Timeout</i> when all motion commands are complete.
                   </p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 250 : <b>Enable GPIO ISR Debug pins</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 251 : <b>Enable debug USART end of move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 252 : <b>Enable debug USART every ISR move values printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 253 : <b>Enable debug UART command echo</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 254 : <b>Enable Lock Up Mode</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 255 : <b>Enable command parsing USB debug printing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 256 : <b>Disable parsed moves from entering FIFO</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 257 : <b>Enable RC7 indicator of command parsing</b>
                   <p>This is an internal software debugging and testing command.</p>
+                  <p>
+                    This parameter is new for <code>CU</code> in EBB firmware v3.0.
+                  </p>
                 </li>
               </ul>
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Version History:</span>  
-            <p><code>CU,3,0</code> and <code>CU,3,1</code> were added in v2.8.1</p>
-            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code> through <code>CU,257</code> were added in v3.0.0</p>
+            <p><code>CU,50</code>, <code>CU,51</code>, <code>CU,52</code>, <code>CU,53</code>, <code>CU,250</code> through <code>CU,257</code> were added in v3.0.</p>
           </li>
 
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. <code>CU,10</code> will be allowed, but will have no effect, as of EBB firmware v4.0. (What is now "future" syntax will be the default syntax as of v4.0.)</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>CU,1</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. <code>CU,10</code> will be allowed, but will have no effect in that future firmware version. (What is now "future" syntax will be the default syntax in future firmware version)</li>
         </ul>
 
         <hr class="short" />
@@ -939,7 +992,7 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Available since firmware 2.7.0. In v3.0.0, the command was updated to allow larger input paramters and slower minimum speeds and will now always travel in a straight line.
+            <span style="font-weight: bold;">Version History:</span> Available since firmware 2.7.0. In v3.0, the command was updated to allow larger input paramters and slower minimum speeds and will now always travel in a straight line.
           </li>
         </ul>
 
@@ -972,8 +1025,8 @@
             <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li>
-            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            <span style="font-weight: bold;">This command is deprecated in v3.0:</span>
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -1118,7 +1171,7 @@
             <span style="font-weight: bold;">Version History:</span> Added in firmware v2.7.0.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> As of firmware v3.0.0, using a negative number for either <i>Rate</i> argument to control motion direction is depreciated. It will still work, but this functionality has been replaced by using a negative number to either <i>Step</i> argument. In version v4.0.0 the ability to use negative <i>Rate</i> arguments will be removed.
+            <span style="font-weight: bold;">Version History:</span> As of firmware v3.0, using a negative number for either <i>Rate</i> argument to control motion direction is deprecated. It will still work, but this functionality has been replaced by using a negative number to either <i>Step</i> argument. In a future firmware version the ability to use negative <i>Rate</i> arguments will be removed.
           </li>
         </ul>
 
@@ -1129,7 +1182,7 @@
           <li><span style="font-weight: bold;">Command:</span><code>L3,<i>Rate1</i>,<i>Steps1</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2</i>,<i>Steps2</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>L3&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v3.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
@@ -1160,19 +1213,19 @@
               This command is extremely similar to the <code><a href="#LM">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LM">LM</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
             </p>
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
         </ul>
@@ -1315,7 +1368,7 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>ND</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>ND</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1333,7 +1386,7 @@
             <p>See the <code><a href="#QN">QN</a></code> command for a description of the node counter and its operations.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.5</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>NI</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>NI</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short"/>
@@ -1361,8 +1414,8 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">This command is depreciated in v3.0.0:</span>
-            It will continue to work up until v4.0.0, but the plan is to remove it in v4.0.0.
+            <span style="font-weight: bold;">This command is deprecated in v3.0:</span>
+            It will continue to work up until a future firmware version, but it will be removed in that future firmware version.
           </li>
         </ul>
 
@@ -1422,7 +1475,7 @@
             <span style="font-weight: bold;">Version History:</span> Unchanged since firmware 2.6.6
           </li>
           <li>
-            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            <span style="font-weight: bold;">This command is not included in v3.0:</span>
             Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
@@ -1486,7 +1539,7 @@
             <span style="font-weight: bold;">Example:</span> <code>PG,0\r</code> This command would turn off pulse generation on any pins (RB0, RB1, RB2 or RB3) which have non-zero Length and Period values from the latest <code>PC</code> command.
           </li>
           <li>
-            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            <span style="font-weight: bold;">This command is not included in v3.0:</span>
             Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
@@ -1575,7 +1628,7 @@
             <p>One of the GPIO input pins, B0, can also be used to initiate a "button press" event. B0 is normally pulled high, but if it is taken low, then that registers as though the PRG button itself was pressed. To ensure that a "button press" is registered, ensure that B0 is pulled low for at least 40 microseconds. This "alt_prg" feature is enabled by default but can be disabled with the <code><a href="#SC">SC</a></code> command.</p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QB</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QB</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1760,13 +1813,13 @@
               <div style="font-weight:bold;">Bit 7: Limit Switch Triggered</div> This bit is 1 if the limit switch triggered. It will be a 0 if the Limit Switch Trigger has not fired or if the limit switch feature is disabled. If set, executing this query will clear the bit.
             </p>
             <p>
-              <div style="font-weight:bold;">Bit 6: Post Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
+              <div style="font-weight:bold;">Bit 6: Power Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
             </p>
             <p>
               <div style="font-weight:bold;">Bit 5: PRG &mdash; PRG Button Pressed</div> This bit will be 1 if the PRG button has been pushed since the last <code>QG</code> or <code><a href="#QB">QB</a></code> query. Otherwise it will be 0. Note that input B0 can be used to trigger a "button push" event; see the description of <code><a href="#QB">QB</a></code> for more information.
             </p>
             <p>
-              <div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is down</div> This bit is 1 when the pen is down, and 0 when the pen is up. The pen status is given by the position of the pen-lift servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read with the <code><a href="#QP">QP</a></code> query. Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
+              <div style="font-weight:bold;">Bit 4: PEN &mdash; Pen is up</div> This bit is 1 when the pen is up, and 0 when the pen is down. The pen status is given by the position of the pen-lift servo output, which can be controlled with the <code><a href="#SP">SP</a></code> command and can be read with the <code><a href="#QP">QP</a></code> query. Note that this is the <i>commanded state</i> of the pen, and that it does physically take time to lift from or lower to the page.
             </p>
             <p>
               <div style="font-weight:bold;">Bit 3: CMD &mdash; Command Executing</div> This bit will be 1 when a command is being executed, and 0 otherwise. The command may be a command that causes motion (like a motor move command) or any other command listed in this document as 'Execution: Added to FIFO motion queue'.
@@ -1788,26 +1841,27 @@
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QE,3E&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>QG,3E&lt;NL&gt;</code>
             <p>
-              This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
+              This query return value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that the limit switch has not been triggered, the power has not gone below the set threshold, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>3E&lt;CR&gt;&lt;NL&gt;</code>
-            <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that RB5 and RB2 are low, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
+            <p>This query returns value of <code>3E</code>, which corresponds to <code>0011 1110</code> in binary, indicates that the limit switch has not been triggered, the power has not gone below the set threshold, the PRG button has been pressed, the pen is down, a command is being executed, Motor 1 and Motor 2 are moving, and the FIFO motion queue is empty.</p>
            </li>
-          <li><span style="font-weight: bold;">Version History:</span> V3.0.0: bit 7 now reports if the limit switch trigger has fired. Also with v3.0.0 bit 6 now reports the power lost flag. If you have PC code which is relying upon the old meanings of these bits (bit 7 was showing the state of the RB5 pin and bit 6 was showing the state of the RB2 pin) it will need to be updated to use v3.0.0.</li>
+          <li><span style="font-weight: bold;">Version History:</span> V3.0: bit 7 now reports if the limit switch trigger has fired. Also with v3.0 bit 6 now reports the power lost flag. If you have PC code which is relying upon the old meanings of these bits (bit 7 was showing the state of the RB5 pin and bit 6 was showing the state of the RB2 pin) it will need to be updated to use v3.0.  The meaning of bit 4 has been corrected. Previous documentation versions had the state inverted.
+          </li>
         </ul>
 
         <hr class="short" />
-        <h4><a name="QL"></a>"QL" &mdash; Query Layer</h4>
+        <h4><a name="QL"></a>"QL" &mdash; Query Variable</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QL[,<i>VariableIndex</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>QL,<i>VariableValue</i>&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>VariableValue</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0.0 has added <i>VariableIndex</i></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0 has added <i>VariableIndex</i></li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
@@ -1816,7 +1870,7 @@
           </li>
           <li><span style="font-weight: bold;">Description:</span>
             <p>
-              This query allows retrieval of a temporary <i>VariableValue</i> stored in EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. Set the value of any of the variables with the <code><a href="#SL">SL</a></code> command. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>QL</code> command is backward compatible with the older version before v3.0.0. The <i>VariableValue</i> in the response is a decimal value from 0 to 255. All 32 values are set to 0 at reset.
+              This query allows retrieval of a temporary <i>VariableValue</i> stored in EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. Set the value of any of the variables with the <code><a href="#SL">SL</a></code> command. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>QL</code> command is backward compatible with the older version before v3.0. The <i>VariableValue</i> in the response is a decimal value from 0 to 255. All 32 values are set to 0 at reset.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>QL&lt;CR&gt;</code></li>
@@ -1834,7 +1888,7 @@
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>242&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-          <li><span style="font-weight: bold;">Version History:</span> V3.0.0 adds the <i>VariableIndex</i> parameter.</li>
+          <li><span style="font-weight: bold;">Version History:</span> V3.0 adds the <i>VariableIndex</i> parameter.</li>
         </ul>
 
         <hr class="short" />
@@ -1867,7 +1921,7 @@
             </p>
           </li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v2.4.4</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QM</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1905,7 +1959,7 @@
             <span style="font-weight: bold;">Version History:</span>  
             Added in v1.9.2
           </li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QN</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#SL">SL</a>/<a href="#QL">QL</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -1927,7 +1981,7 @@
           <li><span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>1&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
 
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9</li>
-          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in EBB firmware v4.0. It is recommended to use <a href="#QG">QG</a> instead.</li>
+          <li><span style="font-weight: bold;">Deprecation notice:</span> <code>QP</code> is deprecated as of EBB firmware v3.0 and will be removed in a future firmware version. It is recommended to use <a href="#QG">QG</a> instead.</li>
         </ul>
 
         <hr class="short" />
@@ -2009,9 +2063,9 @@
 
         <ul>
           <li><span style="font-weight: bold;">Command: </span><code>QU,<i>Param_Number</i>&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>QU,<i>Param_Number</i>,<i>Return_Value</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions: </span>v3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Response (future mode): </span><code>QU,<i>Return_Value</i>&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default): </span><code>QU,<i>Return_Value</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions: </span>v3.0 and above</li>
           <li><span style="font-weight: bold;">Execution: </span>Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
@@ -2040,13 +2094,13 @@
                 <li>
                   <i>Param_Number</i> = 3 : <b>Read out current FIFO length</b>
                   <p>
-                    <i>Return_Value</i> will be a one to three digit decimal number from 0 to 255. It represents the current size of the motion FIFO in commands. On boot it starts out at 1. All firmware versions prior to v3.0.0 had a fixed FIFO size of 1. Starting with v3.0.0 the FIFO size starts out at 1 but can be increased using the <code>CU,4,<i>New_FIFO_Size</i></code> command. Increasing the FIFO size will allow for shorter commands and less chance of FIFO underrun.
+                    <i>Return_Value</i> will be a one to three digit decimal number from 0 to 255. It represents the current size of the motion FIFO in commands. On boot it starts out at 1. All firmware versions prior to v3.0 had a fixed FIFO size of 1. Starting with v3.0 the FIFO size starts out at 1 but can be increased using the <code>CU,4,<i>New_FIFO_Size</i></code> command. Increasing the FIFO size will allow for shorter commands and less chance of FIFO underrun.
                   </p>
                 </li>
                 <li>
                   <i>Param_Number</i> = 4 : <b>Read out software stack high water value</b>
                   <p>
-                    Every millisecond the EBB samples the software stack pointer. It keeps track of the highest value seen. This is called the stack high water value. This query will return that stack high water value in <i>Return_Value</i> as a three digit hexadecimal number. In v3.0.0 of the firmware the stack starts at 0xE00 and grows up, so if <i>Return_Value</i> is E71, then the maximum stack pointer value seen indicates that 0x71 bytes of stack were used at that point. The stack overflows if it goes over 0xEBF.
+                    Every millisecond the EBB samples the software stack pointer. It keeps track of the highest value seen. This is called the stack high water value. This query will return that stack high water value in <i>Return_Value</i> as a three digit hexadecimal number. In v3.0 of the firmware the stack starts at 0xE00 and grows up, so if <i>Return_Value</i> is E71, then the maximum stack pointer value seen indicates that 0x71 bytes of stack were used at that point. The stack overflows if it goes over 0xEBF.
                   </p>
                 </li>
                 <li>
@@ -2284,7 +2338,7 @@
             <span style="font-weight: bold;">Version History:</span> Added in firmware v2.2.0 
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 8 in v3.0.0. 
+            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 8 in v3.0. 
           </li>
         </ul>
 
@@ -2379,7 +2433,7 @@
           <li><span style="font-weight: bold;">Example:</span> <code>SC,4,8000\r</code> Set the pen-up position to give a servo output of 8000, about 0.66 ms.</li> 
           <li><span style="font-weight: bold;">Example:</span> <code>SC,1,1\r</code> Enable only the RC servo for pen lift; disable solenoid control output.</li> 
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum_S2_Channels maximum value changed from 24 to 8 in version 3.0.0.
+            <span style="font-weight: bold;">Version History:</span> Maximum_S2_Channels maximum value changed from 24 to 8 in version 3.0.
           </li>
         </ul>
  
@@ -2425,7 +2479,7 @@
           <li><span style="font-weight: bold;">Command:</span> <code>SL,<i>VariableValue</i>[,<i>VariableIndex</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SL&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0.0 has added <i>VariableIndex</i></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> v1.9.2 and newer, v3.0 has added <i>VariableIndex</i></li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
             <ul>
@@ -2436,13 +2490,13 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command allows storage of temporary values in the EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. The values can be read out by using the <code><a href="#QL">QL[,<i>VariableIndex</i>]</a></code> query. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>SL</code> command is backward compatible with the older version before v3.0.0. The values are not retained across EBB reboots or resets; they are all cleared to 0 at reset.
+              This command allows storage of temporary values in the EBB RAM. Each variable value is an unsigned byte, and up to 32 of theses values can be stored in the 32 possible <i>VariableIndex</i> locations. The values can be read out by using the <code><a href="#QL">QL[,<i>VariableIndex</i>]</a></code> query. Because <i>VariableIndex</i> is optional and is assumed to be zero if not supplied, this new version of the <code>SL</code> command is backward compatible with the older version before v3.0. The values are not retained across EBB reboots or resets; they are all cleared to 0 at reset.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>SL,4\r</code> Sets the value of variable zero to the value of 4.</li>
           <li><span style="font-weight: bold;">Example:</span> <code>SL,125,19\r</code> Sets the value of variable 19 to the value of 125.</li>
           <li><span style="font-weight: bold;">Version History:</span> Added in v1.9.2</li>
-          <li><span style="font-weight: bold;">Version History:</span> In v3.0.0 the optional <i>VariableIndex</i> parameter was added.</li>
+          <li><span style="font-weight: bold;">Version History:</span> In v3.0 the optional <i>VariableIndex</i> parameter was added.</li>
         </ul>
 
         <hr class="short" />
@@ -2497,7 +2551,7 @@
             Move axis 1 by 250 steps and axis2 by -766 steps, in 1000 ms of duration.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Parameter values expanded to 32 bits and minimum speed lowered in v3.0.0
+            <span style="font-weight: bold;">Version History:</span> Parameter values expanded to 32 bits and minimum speed lowered in v3.0.
           </li>
         </ul>
       
@@ -2690,7 +2744,7 @@
             If the <code>I</code> or <code>A</code> packet responses stop coming back after you've done a <code>T</code> query, and you didn't stop them yourself (with a <code>T,0,0</code> or <code>T,0,1</code>) then what's happened is that the internal buffer in the EBB for <code>I</code> or <code>A</code> packet data has been filled up. (There is room for 3 <code>I</code> packets and 3 <code>A</code> packets.) This means that the USB system is too busy to get the packet responses back to the PC fast enough. You need to have less USB traffic (from other devices) or increase the time between packet responses.
           </li>
           <li>
-            <span style="font-weight: bold;">This command is not included in v3.0.0:</span>
+            <span style="font-weight: bold;">This command is not included in v3.0:</span>
             Commands PC, PG, T have been marked as "not in use" and tentatively removed in this firmware release.  If your application does use one or more of these commands, please contact us and let us know. If we don't hear from at least a couple of users that these are important, we'll go ahead and remove them permanently in a future firmware version.
           </li>
         </ul>
@@ -2702,7 +2756,7 @@
           <li><span style="font-weight: bold;">Command:</span> <code>T3,<i>Intervals</i>,<i>Rate1</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>T3&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> 3.0.0 and above</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> 3.0 and above</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
@@ -2728,19 +2782,77 @@
               This command is extremely similar to the <code><a href="#LT">LT</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LT">LT</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
             </p>
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 1:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Example 2:</span> 
             <p>
-              [[ TO BE FILLED IN ]]
+              [[ coming soon ]]
+            </p>
+          </li>
+        </ul>
+
+        <hr class="short" />
+        <h4><a name="TD"></a>"TD" &mdash; Paired "Dual T3" Low-level Move With Jerk, Time-limited</h4>
+
+        <ul>
+          <li><span style="font-weight: bold;">Command:</span> <code>TD,<i>Intervals</i>,<i>Rate1A</i>,<i>Rate1B</i>,<i>Accel1</i>,<i>Jerk1</i>,<i>Rate2A</i>,<i>Rate2B</i>,<i>Accel2</i>,<i>Jerk2</i>[,<i>Clear</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>TD&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> 3.0.1 and above</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Arguments:</span>
+          <ul>
+            <li>
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+            </li>
+            <li>
+              <i>Rate1A</i>, <i>Rate1B</i>, <i>Rate2A</i> and <i>Rate2B</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction. See below for an explanation of where each set of rates is used.
+            </li>
+            <li>
+              <i>Accel1</i> and <i>Accel2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Rate</i> values every 40 &mu;s and control acceleration or deceleration during a move.
+            </li>
+            <li>
+              <i>Jerk1</i> and <i>Jerk2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. These values are added to their respective <i>Accel</i> values every 40 &mu;s and control jerk during a move.
+            </li>
+            <li>
+              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command.  If it is 3, then both accumulators are cleared. 
+            </li>
+          </ul>
+          <li>
+            <span style="font-weight: bold;">Description:</span> 
+            <p>
+              This command is for creating specially-crafted back-to-back time-limited moves with jerk. Internally, the <code>TD</code> command takes its parameter values and creates
+              two <code>T3</code> commands that are loaded into the FIFO. It is a faster way to create "S-curves" accelerations than sending two <code>T3</code> commands separately.
+            </p>
+            <p>The <code>TD</code> command loads the two <code>T3</code> commands as follows:
+              <ol>
+                <li>
+                  <code>T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]&lt;CR&gt;</code>
+                </li>
+                <li>
+                  <code>T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2[,Clear]&lt;CR&gt;</code>
+                </li>
+              </ol>
+            </p>
+
+          <li>
+            <span style="font-weight: bold;">Example 1:</span> 
+            <p>
+              [[ coming soon ]]
+            </p>
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> 
+            <p>
+              [[ coming soon ]]
             </p>
           </li>
         </ul>
@@ -2789,7 +2901,7 @@
           <li><span style="font-weight: bold;">Command:</span> <code>TR,<i>StepRate</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>[,<i>Clear</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>TR&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;TR&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> Added in v3.0.0</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Added in v3.0</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
@@ -2806,10 +2918,10 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This command is used to test some of the refactored math in version 3.0.0.
+              This command is used to test some of the refactored math in version 3.0.
             </p>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Added in v3.0.0.
+            <span style="font-weight: bold;">Version History:</span> Added in v3.0.
           </li>
         </ul>
 
@@ -2878,7 +2990,7 @@
             </li>
           <li>
             <span style="font-weight: bold;">Version History:</span> Added in v2.3.0
-            <span style="font-weight: bold;">Version History:</span> Increased range of parameters and lowered slowest allowed step rate in v3.0.0
+            <span style="font-weight: bold;">Version History:</span> Increased range of parameters and lowered slowest allowed step rate in v3.0.
           </li>
         </ul>
 

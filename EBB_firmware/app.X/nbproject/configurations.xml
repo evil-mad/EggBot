@@ -21,6 +21,11 @@
       <itemPath>source/usb_config.h</itemPath>
       <itemPath>source/ebb_print.h</itemPath>
     </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="true">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
                    projectFiles="true">
@@ -51,11 +56,6 @@
       <itemPath>source/isr_helpers.asm</itemPath>
       <itemPath>source/ebb_print.c</itemPath>
       <itemPath>source/squareroot.s</itemPath>
-    </logicalFolder>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="false">
-      <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
