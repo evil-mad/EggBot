@@ -127,12 +127,12 @@ class Maze(inkex.Effect):
 
         inkex.Effect.__init__(self)
 
-        self.OptionParser.add_option(
-                "--tab", action="store", type="string",
+        self.arg_parser.add_argument(
+                "--tab", action="store", type=str,
                 dest="tab", default="controls",
                 help="The active tab when Apply was pressed")
-        self.OptionParser.add_option(
-                "--mazeSize", action="store", type="string", dest="mazeSize",
+        self.arg_parser.add_argument(
+                "--mazeSize", action="store", type=str, dest="mazeSize",
                 default="MEDIUM", help="Difficulty of maze to build")
 
         self.hpp = False
