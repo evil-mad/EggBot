@@ -84,7 +84,7 @@
 
 #elif defined(EBB_V11)
 /** U S B ***********************************************************/
-//#define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
+#define tris_usb_bus_sense  TRISCbits.TRISC7    // Input
 
 #if defined(USE_USB_BUS_SENSE_IO)
 #define usb_bus_sense       PORTCbits.RC7

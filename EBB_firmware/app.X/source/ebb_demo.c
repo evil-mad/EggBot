@@ -1,4 +1,3 @@
-//#include "system\typedefs.h"
 #include "ebb_demo.h"
 
 packet_type far rom packet_list[] = 

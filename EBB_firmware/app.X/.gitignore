@@ -1,0 +1,5 @@
+nbproject/Makefile-*
+nbproject/Package-*
+nbproject/private/
+.generated_files/
+dist/

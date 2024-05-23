@@ -32,8 +32,19 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>Bitfield</word>
+            <word>bootup</word>
             <word>breifly</word>
+            <word>codebase</word>
+            <word>comamnds</word>
+            <word>Fosc</word>
+            <word>init</word>
+            <word>microstep</word>
+            <word>ms</word>
             <word>paramters</word>
+            <word>Prescale</word>
+            <word>refactor</word>
+            <word>struct</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

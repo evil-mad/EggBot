@@ -11,7 +11,7 @@
  *
  * Software License Agreement
  *
- * Copyright (c) 2014, Brian Schmalz of Schmalz Haus LLC
+ * Copyright (c) 2014-2023, Brian Schmalz of Schmalz Haus LLC
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -53,67 +53,6 @@
 
 #define DEMO_BOARD
 
-#if defined(UBW)
-	#include "HardwareProfile_UBW.h"
-#elif defined(BOARD_EBB_V10)
-	#include "HardwareProfile_EBB_V10.h"
-#elif defined(BOARD_EBB_V11)
-	#include "HardwareProfile_EBB_V11.h"
-#elif defined(BOARD_EBB_V12)
-	#include "HardwareProfile_EBB_V12.h"
-#elif defined(BOARD_EBB_V13_AND_ABOVE)
-	#include "HardwareProfile_EBB_V13_and_above.h"
-#endif
-
-#if !defined(DEMO_BOARD)
-    #if defined(__C32__)
-        #if defined(__32MX460F512L__)
-            #if defined(PIC32MX460F512L_PIM)
-                #include "HardwareProfile - PIC32MX460F512L PIM.h"
-            #elif defined(PIC32_USB_STARTER_KIT)
-                #include "HardwareProfile - PIC32 USB Starter Kit.h"
-            #endif
-        #elif defined(__32MX795F512L__)
-            #if defined(PIC32MX795F512L_PIM)
-                #include "HardwareProfile - PIC32MX795F512L PIM.h"
-            #elif defined(PIC32_USB_STARTER_KIT)
-                //PIC32 USB Starter Kit II
-                #include "HardwareProfile - PIC32 USB Starter Kit.h"
-            #endif
-        #endif
-    #endif
-
-    #if defined(__C30__)
-        #if defined(__PIC24FJ256GB110__)
-            #include "HardwareProfile - PIC24FJ256GB110 PIM.h"
-        #elif defined(__PIC24FJ256GB106__)
-            #include "HardwareProfile - PIC24F Starter Kit.h"
-        #elif defined(__PIC24FJ64GB004__)
-            #include "HardwareProfile - PIC24FJ64GB004 PIM.h"
-        #elif defined(__PIC24FJ256DA210__)
-            #include "HardwareProfile - PIC24FJ256DA210 Development Board.h"
-        #endif
-    #endif
-
-    #if defined(__18CXX)
-        #if defined(__18F4550)
-            #include "HardwareProfile - PICDEM FSUSB.h"
-        #elif defined(__18F87J50)
-            #include "HardwareProfile - PIC18F87J50 PIM.h"
-        #elif defined(__18F14K50)
-            #include "HardwareProfile - Low Pin Count USB Development Kit.h"
-        #elif defined(__18F46J50)
-            #if defined(PIC18F_STARTER_KIT_1)
-                #include "HardwareProfile - PIC18F Starter Kit 1.h"
-            #else
-                #include "HardwareProfile - PIC18F46J50 PIM.h"
-            #endif
-        #endif
-    #endif
-#endif
-
-#if !defined(DEMO_BOARD)
-    #error "Demo board not defined.  Either define DEMO_BOARD for a custom board or select the correct processor for the demo board."
-#endif
+#include "HardwareProfile_EBB_V13_and_above.h"
 
 #endif  //HARDWARE_PROFILE_H
