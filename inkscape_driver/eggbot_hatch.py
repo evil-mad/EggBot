@@ -110,7 +110,7 @@
 import math
 from lxml import etree
 
-from axidrawinternal.plot_utils_import import from_dependency_import # plotink
+from plot_utils_import import from_dependency_import # plotink
 inkex = from_dependency_import('ink_extensions.inkex')
 simplepath = from_dependency_import('ink_extensions.simplepath')
 simpletransform = from_dependency_import('ink_extensions.simpletransform')
