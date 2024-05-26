@@ -3004,28 +3004,30 @@
           what causes the error. Once the first error is detected while parsing a command, the parsing is aborted, the command is aborted, the error is printed, and then 
           the proper line ending is printed, taking into account Future vs. Legacy mode.
         </p>
-        
         <p>
           When an error is found, the line ending after printing out the error will either be <code>\n</code> when in Future Syntax Mode, or will be <code>OK\r\n</code>
           when in Legacy Syntax Mode. When in Legacy Syntax Mode, the <code>OK\r\n</code> used when there is an error overrides whatever other line ending there may be for
           the current command.
         </p>
+        <p>
+          Not every possible syntax error will result in the correct error code being reported.</p>
+        </p>
 
         <ul>
           <li>
-            <code>!0 Err: <axis1> step rate too high</code> 
+            <code>!0 Err: &lt;axis1&gt; step rate too high</code> 
             <p>This error indicates an internal math error happened during move command processing.</p>
           </li>
           <li>
-            <code>!0 Err: <axis1> step rate too low</code> 
+            <code>!0 Err: &lt;axis1&gt; step rate too low</code> 
             <p>This error indicates an internal math error happened during move command processing.</p>
           </li>
           <li>
-            <code>!0 Err: <axis2> step rate too high</code> 
+            <code>!0 Err: &lt;axis2&gt; step rate too high</code> 
             <p>This error indicates an internal math error happened during move command processing.</p>
           </li>
           <li>
-            <code>!0 Err: <axis2> step rate too low</code> 
+            <code>!0 Err: &lt;axis2&gt; step rate too low</code> 
             <p>This error indicates an internal math error happened during move command processing.</p>
           </li>
           <li>
