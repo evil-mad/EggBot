@@ -127,8 +127,8 @@ volatile unsigned char ISR_A_FIFO_in;         // In pointer
 volatile unsigned char ISR_A_FIFO_out;        // Out pointer
 volatile unsigned char ISR_A_FIFO_length;     // Current FIFO depth
 
-// This byte has each of its bits used as a separate error flag
-BYTE error_byte;
+// This byte stores the current error code from parsing commands
+ErrorType error_byte;
 
 // RC servo variables
 // First the main array of data for each servo
@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.2"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.0.3"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -276,6 +276,8 @@ void parse_SR_packet(void);    // SR Set RC Servo power timeout
 void parse_QU_packet(void);    // QU General Query
 
 void check_and_send_TX_data(void); // See if there is any data to send to PC, and if so, do it
+void CheckForAndPrintErrors(void);
+void CheckForLimitSwitchReplies(void);
 
 /** D E C L A R A T I O N S **************************************************/
 #pragma code
@@ -752,7 +754,7 @@ void UserInit(void)
 
   // This has been missing for a long time and created problems on boot if not
   // set to zero.
-  error_byte = 0;
+  error_byte = kERROR_NO_ERROR;
   
   // Initialize all of the ISR FIFOs
   ISR_A_FIFO_out = 0;
@@ -887,6 +889,91 @@ void UserInit(void)
   INTCONbits.GIEL = 1;  // Turn low priority interrupts on
 }
 
+void CheckForAndPrintErrors(void)
+{
+   // Check for any errors logged in error_byte that need to be sent out
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    // If we are in 'future syntax mode', then the current command will have
+    // already been echoed back to the PC. Since we're about to add an 
+    // extra bit of data to the end of that return packet (the error message)
+    // we need to add a comma so that the PC knows where the echoed command
+    // ends and the error begins.
+    if (bittstzero(gStandardizedCommandFormat) && (error_byte != kERROR_PRINTED_ERROR))
+    {
+      ebb_print_char(',');
+    }
+
+    switch (error_byte)
+    {
+      case kERROR_STEP_RATE_INVALID:
+        ebb_print((far rom char *)"!1 Err: Invalid step rate");
+        break;
+        
+      case kERROR_TX_BUF_OVERRUN:
+        ebb_print((far rom char *)"!2 Err: TX Buffer overrun");
+        break;
+        
+      case kERROR_RX_BUFFER_OVERRUN:
+        ebb_print((far rom char *)"!3 Err: RX Buffer overrun");
+        break;
+        
+      case kERROR_MISSING_PARAMETER:
+        ebb_print((far rom char *)"!4 Err: Missing parameter(s)");
+        break;
+        
+      case kERROR_PRINTED_ERROR:
+        // We don't need to do anything since something has already been printed out
+        // Normally this is used when we have some value we want to print out
+        // with the error message, right where the error is detected, to help 
+        // the user know what went wrong.
+        // The trick with this error code is that when in Future Syntax Mode,
+        // the code that detected the error and printed out the error message
+        // will have already printed out the comma before the error message,
+        // so we need to suppress the extra comma above (At the top of this
+        // function).
+        break;
+        
+      case kERROR_PARAMETER_OUTSIDE_LIMIT:
+        ebb_print((far rom char *)"!6 Err: Invalid parameter value");
+        break;
+        
+      case kERROR_EXTRA_CHARACTERS:
+        ebb_print((far rom char *)"!7 Err: Extra parameter");
+        break;
+        
+      case kERROR_CHECKSUM_NOT_FOUND_BUT_REQUIRED:
+        ebb_print((far rom char *)"!10 Err: No checksum found but required");
+        break;
+        
+      deafault:
+        break;
+    }
+    print_line_ending(kLE_NORM);
+    error_byte = kERROR_NO_ERROR;
+  }
+}
+
+void CheckForLimitSwitchReplies(void)
+{
+  // Check to see if we need to print out a "Limit switch triggered" packet to the PC
+  if (gLimitSwitchReplies)
+  {
+    if (bittstzero(gLimitSwitchTriggered) && !gLimitSwitchReplyPrinted)
+    {
+      ebb_print((far rom char *)"Limit switch triggered. PortB=");
+      // We want 2 characters of hex
+      ebb_print_hex(gLimitSwitchPortB, 2);
+      print_line_ending(kLE_NORM);
+      gLimitSwitchReplyPrinted = TRUE;
+    }
+    else if (!bittstzero(gLimitSwitchTriggered) && gLimitSwitchReplyPrinted)
+    {
+      gLimitSwitchReplyPrinted = FALSE;
+    }
+  }
+}
+
 /******************************************************************************
  * Function:        void ProcessIO(void)
  *
@@ -980,7 +1067,7 @@ void ProcessIO(void)
     for (byte_cnt = 0; byte_cnt < rx_bytes; byte_cnt++)
     {
       tst_char = g_RX_command_buf[byte_cnt];
-      
+#if 0 // For Binary packets
       if (binary_bytes_left)
       {
         g_RX_buf[g_RX_buf_in] = tst_char;
@@ -1038,6 +1125,7 @@ void ProcessIO(void)
           }
         }
       }
+#endif
       
       if (bittst(TestMode, TEST_MODE_USART_COMMAND_NUM))
       {
@@ -1079,6 +1167,11 @@ void ProcessIO(void)
           g_RX_buf_in = 0;
           g_RX_buf_out = 0;
           first_byte = TRUE;
+
+          // As of Issue #233, we want to do these things after every command
+          CheckForAndPrintErrors();
+          CheckForLimitSwitchReplies();
+          check_and_send_TX_data();
         }
         else if (tst_char == 8u && g_RX_buf_in > 0u)
         {
@@ -1104,7 +1197,7 @@ void ProcessIO(void)
         // Check for buffer wraparound
         if (kRX_BUF_SIZE == g_RX_buf_in)
         {
-          bitset(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN);
+          ErrorSet(kERROR_RX_BUFFER_OVERRUN);
           g_RX_buf_in = 0;
           g_RX_buf_out = 0;
         }
@@ -1112,71 +1205,6 @@ void ProcessIO(void)
     }
   }
 
-  // Check for any errors logged in error_byte that need to be sent out
-  if (error_byte)
-  {
-    if (bittstzero(error_byte))
-    {
-      ebb_print((far rom char *)"!0 ");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_STEPS_TO_FAST))
-    {
-      // Unused as of yet
-      ebb_print((far rom char *)"!1 Err: Can't step that fast");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_TX_BUF_OVERRUN))
-    {
-      ebb_print((far rom char *)"!2 Err: TX Buffer overrun");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_RX_BUFFER_OVERRUN))
-    {
-      ebb_print((far rom char *)"!3 Err: RX Buffer overrun");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_MISSING_PARAMETER))
-    {
-      ebb_print((far rom char *)"!4 Err: Missing parameter(s)");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_PRINTED_ERROR))
-    {
-      // We don't need to do anything since something has already been printed out
-      //printf ((rom char *)"!5");
-      //print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT))
-    {
-      ebb_print((far rom char *)"!6 Err: Invalid parameter value");
-      print_line_ending(kLE_NORM);
-    }
-    if (bittst(error_byte, kERROR_BYTE_EXTRA_CHARACTERS))
-    {
-      ebb_print((far rom char *)"!7 Err: Extra parameter");
-      print_line_ending(kLE_NORM);
-    }
-    error_byte = 0;
-  }
-
-  // Check to see if we need to print out a "Limit switch triggered" packet to the PC
-  if (gLimitSwitchReplies)
-  {
-    if (bittstzero(gLimitSwitchTriggered) && !gLimitSwitchReplyPrinted)
-    {
-      ebb_print((far rom char *)"Limit switch triggered. PortB=");
-      // We want 2 characters of hex
-      ebb_print_hex(gLimitSwitchPortB, 2);
-      print_line_ending(kLE_NORM);
-      gLimitSwitchReplyPrinted = TRUE;
-    }
-    else if (!bittstzero(gLimitSwitchTriggered) && gLimitSwitchReplyPrinted)
-    {
-      gLimitSwitchReplyPrinted = FALSE;
-    }
-  }
-  
   // Go send any data that needs sending to PC
   check_and_send_TX_data();
 }
@@ -1212,7 +1240,7 @@ int ebb_putc(char c)
   // Also check to see if we bumped up against our output pointer
   if (g_TX_buf_in == g_TX_buf_out)
   {
-    bitset(error_byte, kERROR_BYTE_TX_BUF_OVERRUN);
+    ErrorSet(kERROR_TX_BUF_OVERRUN);
   }
   return(c);
 }
@@ -1262,6 +1290,27 @@ void check_and_send_TX_data(void)
     }
     CDCTxService();
   }
+}
+
+// This function exists as part of parse_packet() because it is needed in 
+// two places.
+UINT16 find_command(void)
+{
+  UINT16 tmp_cmd;
+  
+  // Always grab the first character (which is the first byte of the command)
+  gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
+  advance_RX_buf_out();
+  tmp_cmd = gCommand_Char1;
+
+  // Only grab second one if it is not a comma
+  if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
+  {
+    gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
+    advance_RX_buf_out();
+    tmp_cmd = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
+  }
+  return(tmp_cmd);
 }
 
 // Look at the new packet, see what command it is, and 
@@ -1356,33 +1405,29 @@ void parse_packet(void)
       }
       else
       {
-        ebb_print((far rom char *)"!8 Err: Checksum incorrect, expected ");
+        if (bittstzero(gStandardizedCommandFormat))
+        {
+          find_command();
+          print_command(FALSE, TRUE);
+        }
+        ebb_print((far rom char *)"!9 Err: Checksum incorrect, expected ");
         ebb_print_uint(checksum_calc);
-        print_line_ending(kLE_NORM);
+        ErrorSet(kERROR_PRINTED_ERROR);
+        return;
       }
     }
     else
     {
-      ebb_print((far rom char *)"!8 Err: Checksum not found but required.");
-      print_line_ending(kLE_NORM);
+      find_command();
+      print_command(FALSE, FALSE);
+      ErrorSet(kERROR_CHECKSUM_NOT_FOUND_BUT_REQUIRED);
     }
   }
 
   if (checksumOK)
   {
-    // Always grab the first character (which is the first byte of the command)
-    gCommand_Char1 = toupper(g_RX_buf[g_RX_buf_out]);
-    advance_RX_buf_out();
-    command = gCommand_Char1;
-
-    // Only grab second one if it is not a comma
-    if (g_RX_buf[g_RX_buf_out] != (BYTE)',' && g_RX_buf[g_RX_buf_out] != kCR && g_RX_buf[g_RX_buf_out] != kLF)
-    {
-      gCommand_Char2 = toupper(g_RX_buf[g_RX_buf_out]);
-      advance_RX_buf_out();
-      command = ((unsigned int)(gCommand_Char1) << 8) + gCommand_Char2;
-    }
-
+    command = find_command();
+    
     // Now 'command' is equal to one or two bytes of our command
     switch (command)
     {
@@ -1720,21 +1765,32 @@ void parse_packet(void)
         break;
       }
 
-
       default:
       {
         if (0u == gCommand_Char2)
         {
           // Send back 'unknown command' error
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(gCommand_Char1);
+            ebb_print_char(',');
+          }
           ebb_print((far rom char *)"!8 Err: Unknown command '");
           ebb_print_char(gCommand_Char1);
           ebb_print_char(':');
           ebb_print_hex(gCommand_Char1, 2);
           ebb_print_char(0x27); // the ' character
+          ErrorSet(kERROR_PRINTED_ERROR);
         }
         else
         {
           // Send back 'unknown command' error
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(gCommand_Char1);
+            ebb_print_char(gCommand_Char2);
+            ebb_print_char(',');
+          }
           ebb_print((far rom char *)"!8 Err: Unknown command '");
           ebb_print_char(gCommand_Char1);
           ebb_print_char(gCommand_Char2);
@@ -1742,8 +1798,8 @@ void parse_packet(void)
           ebb_print_hex(gCommand_Char1, 2);
           ebb_print_hex(gCommand_Char2, 2);
           ebb_print_char(0x27); // the ' character
+          ErrorSet(kERROR_PRINTED_ERROR);
         }
-        print_line_ending(kLE_NORM);
         break;
       }
     }
@@ -1753,12 +1809,13 @@ void parse_packet(void)
     // the command parsing routine didn't eat. This would be an error and needs
     // to be reported. (Ignore for Reset command because FIFO pointers get cleared.)
     if (
-      (g_RX_buf[g_RX_buf_out] != kCR && 0u == error_byte)
+      ((g_RX_buf[g_RX_buf_out] != kCR) && (error_byte == kERROR_NO_ERROR))
       &&
       ('R' != command)
     )
     {
-      bitset(error_byte, kERROR_BYTE_EXTRA_CHARACTERS);
+      print_command(FALSE, FALSE);
+      ErrorSet(kERROR_EXTRA_CHARACTERS);
     }
   }
   
@@ -1876,7 +1933,7 @@ void parse_CU_packet(void)
   extract_number(kINT, &paramater_value, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -1890,7 +1947,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,2,1 or CU,2,0 to turn on/off parameter limit checks
@@ -1902,7 +1960,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,3,1 or CU,3,0 to turn on/off red LED FIFO empty indicator
@@ -1920,7 +1979,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,4,<new_FIFO_size>
@@ -1950,7 +2010,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,50,1 or CU,50,0 to turn on/off automatic motor enable
@@ -2067,7 +2128,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,251,1 or CU,251,0 to turn on/off ISR end of move values printing (On RC6)
@@ -2101,7 +2163,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,252,1 or CU,252,0 to turn on/off every ISR tick values printing (on RC6)
@@ -2135,7 +2198,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,253,1 or CU,253,0 to turn on/off move command extra debug printing (on RC6)
@@ -2167,7 +2231,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,254 turns on 'lock up mode' for measuring true ISR timing by cycling
@@ -2218,7 +2283,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,256,1 or CU,256,0 to turn on/off sending parsed commands to FIFO
@@ -2234,7 +2300,8 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
   }
   // CU,257,1 or CU,257,0 to turn on/off RC0 as indicator of command is parsing
@@ -2252,13 +2319,15 @@ void parse_CU_packet(void)
     }
     else
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT); 
+      return;
     }
   }
   else
   {
     // parameter_number is not understood
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
   }
   print_line_ending(kLE_OK_NORM);
 }
@@ -2288,7 +2357,7 @@ void parse_QU_packet(void)
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2361,7 +2430,8 @@ void parse_QU_packet(void)
   else
   {
     // parameter_number is not understood
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
   }
 
   print_line_ending(kLE_OK_NORM);
@@ -2389,7 +2459,7 @@ void parse_T_packet(void)
   extract_number(kUCHAR, &mode, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2455,7 +2525,7 @@ void parse_C_packet(void)
   extract_number(kUCHAR, &PE, kREQUIRED);
     
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2536,7 +2606,7 @@ void parse_AC_packet(void)
   extract_number(kUCHAR, &Enable, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2557,31 +2627,31 @@ void parse_O_packet(void)
 
   // Extract each of the values.
   RetVal = extract_number(kUCHAR,  &Value, kREQUIRED);
-  if (error_byte) return;
+  if (error_byte != kERROR_NO_ERROR) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATA = Value;
   }
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
+  if (error_byte != kERROR_NO_ERROR) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATB = Value;
   }
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
+  if (error_byte != kERROR_NO_ERROR) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATC = Value;
   }
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
+  if (error_byte != kERROR_NO_ERROR) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATD = Value;
   }
   RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte) return;
+  if (error_byte != kERROR_NO_ERROR) return;
   if (kEXTRACT_OK == RetVal)
   {
     LATE = Value;
@@ -2668,7 +2738,7 @@ void parse_MW_packet(void)
   extract_number(kUCHAR, &value, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2697,7 +2767,7 @@ void parse_MR_packet(void)
   extract_number(kUINT, &location, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2731,7 +2801,7 @@ void parse_PD_packet(void)
   extract_number(kUCHAR, &direction, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2739,12 +2809,12 @@ void parse_PD_packet(void)
   // Limit check the parameters
   if (direction > 1u)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   if (pin > 7u)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   if ('A' == port)
@@ -2804,7 +2874,7 @@ void parse_PD_packet(void)
   }
   else
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
@@ -2830,7 +2900,7 @@ void parse_PI_packet(void)
   extract_number(kUCHAR, &pin, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2838,7 +2908,7 @@ void parse_PI_packet(void)
   // Limit check the parameters
   if (pin > 7u)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
@@ -2865,7 +2935,7 @@ void parse_PI_packet(void)
   }
   else
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
@@ -2898,7 +2968,7 @@ void parse_PO_packet(void)
   extract_number(kUCHAR, &value, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2906,12 +2976,12 @@ void parse_PO_packet(void)
   // Limit check the parameters
   if (value > 1u)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   if (pin > 7u)
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
   if ('A' == port)
@@ -2971,7 +3041,7 @@ void parse_PO_packet(void)
   }
   else
   {
-    bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
@@ -2998,7 +3068,7 @@ void parse_PC_packet(void)
 
   extract_number(kUINT, &Length, kREQUIRED);
   extract_number(kUINT, &Rate, kREQUIRED);
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   { 
     return;
   }
@@ -3012,7 +3082,7 @@ void parse_PC_packet(void)
   {
     RetVal1 = extract_number(kUINT, &Length, kOPTIONAL);
     RetVal2 = extract_number(kUINT, &Rate, kOPTIONAL);
-    if (error_byte) 
+    if (error_byte != kERROR_NO_ERROR) 
     { 
       return;
     }
@@ -3046,7 +3116,7 @@ void parse_PG_packet(void)
   extract_number(kUCHAR, &Value, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -3162,7 +3232,7 @@ void parse_SR_packet(void)
   GotState = extract_number(kUCHAR, &State, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -3373,18 +3443,21 @@ UINT8 extract_string (
   // Check to see if we're already at the end
   if (kCR == g_RX_buf[g_RX_buf_out])
   {
-    bitset(error_byte, kERROR_BYTE_MISSING_PARAMETER);
+    ErrorSet(kERROR_MISSING_PARAMETER);
     return(0);
   }
 
   // Check for comma where ptr points
   if (g_RX_buf[g_RX_buf_out] != ',')
   {
+    if (bittstzero(gStandardizedCommandFormat))
+    {
+      ebb_print_char(',');
+    }
     ebb_print((rom char far *)"!5 Err: Need comma next, found: '");
     ebb_print_char(g_RX_buf[g_RX_buf_out]);
     ebb_print_char(0x27); // The ' character
-    print_line_ending(kLE_NORM);
-    bitset(error_byte, kERROR_BYTE_PRINTED_ERROR);
+    ErrorSet(kERROR_PRINTED_ERROR);
     return(0);
   }
 
@@ -3432,12 +3505,19 @@ ExtractReturnType extract_number(
   signed long Accumulator;
   BOOL Negative = FALSE;
 
+  // Issue #233: If we already have any errors, then don't try to parse this
+  // next parameter at all, simply return.
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    return(kEXTRACT_SKIPPING_BECAUSE_EXISTING_ERROR);
+  }
+  
   // Check to see if we're already at the end
   if (kCR == g_RX_buf[g_RX_buf_out])
   {
     if (0u == Required)
     {
-      bitset(error_byte, kERROR_BYTE_MISSING_PARAMETER);
+      ErrorSet(kERROR_MISSING_PARAMETER);
     }
     return(kEXTRACT_MISSING_PARAMETER);
   }
@@ -3447,11 +3527,14 @@ ExtractReturnType extract_number(
   {
     if (0u == Required)
     {
+      if (bittstzero(gStandardizedCommandFormat))
+      {
+        ebb_print_char(',');
+      }
       ebb_print((rom char far *)"!5 Err: Need comma next, found: '");
       ebb_print_char(g_RX_buf[g_RX_buf_out]);
       ebb_print_char(0x27);     // The ' character
-      print_line_ending(kLE_NORM);
-      bitset (error_byte, kERROR_BYTE_PRINTED_ERROR);
+      ErrorSet(kERROR_PRINTED_ERROR);
     }
     return(kEXTRACT_COMMA_MISSING);
   }
@@ -3464,7 +3547,7 @@ ExtractReturnType extract_number(
   {
     if (0u == Required)
     {
-      bitset(error_byte, kERROR_BYTE_MISSING_PARAMETER);
+      ErrorSet(kERROR_MISSING_PARAMETER);
     }
     return(kEXTRACT_MISSING_PARAMETER);
   }
@@ -3489,7 +3572,7 @@ ExtractReturnType extract_number(
       (kULONG == Type)
     )
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return(kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
     }
     else
@@ -3547,7 +3630,7 @@ ExtractReturnType extract_number(
       )
     )
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return(kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
     }
 
@@ -3592,7 +3675,7 @@ ExtractReturnType extract_number(
       )
     )
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return(kEXTRACT_PARAMETER_OUTSIDE_LIMIT);
     }
 
@@ -3908,6 +3991,18 @@ void SetPinTRISFromRPn(char Pin, char State)
   else
   {
     bitset (*RPnTRISPort[Pin], RPnBit[Pin]);
+  }
+}
+
+/* This is a function which allows you to set a bit within the error_byte.
+ * Once there is an error in error_byte (i.e. it is non-zero) then no
+ * other errors are recorded until the next command is parsed.
+ */
+void ErrorSet(ErrorType new_error)
+{
+  if (error_byte == kERROR_NO_ERROR)
+  {
+    error_byte = new_error;
   }
 }
 

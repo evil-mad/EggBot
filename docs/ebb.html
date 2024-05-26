@@ -62,6 +62,7 @@
             <li><a href="#syntax">Syntax and conventions</a></li>
             <li><a href="#commands">List of commands</a></li>
           </ol>
+          <li><a href="#states">Returned Errors</a></li>
           <li><a href="#states">Initial I/O pin configuration</a></li>
           <li><a href="#performance">Performance</a></li>
           <li><a href="#faq">FAQ</a></li>
@@ -2995,6 +2996,108 @@
         </ul>
 
         <hr>
+
+        <h2><a name="states"></a>Returned Errors</h2>
+        
+        <p>
+          When the EBB detects an error while it is parsing a command, it will return an error code. All possible error codes are listed here, along with a description of
+          what causes the error. Once the first error is detected while parsing a command, the parsing is aborted, the command is aborted, the error is printed, and then 
+          the proper line ending is printed, taking into account Future vs. Legacy mode.
+        </p>
+        
+        <p>
+          When an error is found, the line ending after printing out the error will either be <code>\n</code> when in Future Syntax Mode, or will be <code>OK\r\n</code>
+          when in Legacy Syntax Mode. When in Legacy Syntax Mode, the <code>OK\r\n</code> used when there is an error overrides whatever other line ending there may be for
+          the current command.
+        </p>
+
+        <ul>
+          <li>
+            <code>!0 Err: <axis1> step rate too high</code> 
+            <p>This error indicates an internal math error happened during move command processing.</p>
+          </li>
+          <li>
+            <code>!0 Err: <axis1> step rate too low</code> 
+            <p>This error indicates an internal math error happened during move command processing.</p>
+          </li>
+          <li>
+            <code>!0 Err: <axis2> step rate too high</code> 
+            <p>This error indicates an internal math error happened during move command processing.</p>
+          </li>
+          <li>
+            <code>!0 Err: <axis2> step rate too low</code> 
+            <p>This error indicates an internal math error happened during move command processing.</p>
+          </li>
+          <li>
+            <code>!1 Err: Invalid step rate</code>
+            <p>This error indicates an internal math error happened during move command processing.</p>
+          </li>
+          <li>
+            <code>!2 Err: TX Buffer overrun</code>
+            <p>This error indicates that the buffered return data to the PC exceeded 63 bytes in length. This is an internal EBB firmware error as there are no commands that return this much data.</p>
+          </li>
+          <li>
+            <code>!3 Err: RX Buffer overrun</code>
+            <p>This error indicates that the current command exceeded 255 bytes in length. This error is an internal EBB firmware error.</p>
+          </li>
+          <li>
+            <code>!4 Err: Missing parameter(s)</code>
+            <p>This error indicates that the parser found a line ending in the current command but expected a comma followed by at least one more parameter.</p>
+            <p>For example, if you sent <code>SM,100</code> the EBB will respond with <code>SM,!4 Err: Missing parameter(s)</code> (in Future Syntax Mode).</p>
+          </li>
+          <li>
+            <code>!5 Err: Need comma next, found: 'X'</code>
+            <p>This error indicates that the parser was expecting to see a comma next in the command but instead saw character 'X'.</p>
+            <p>For example, if you sent <code>SM,100A</code> the EBB will respond with <code>SM,!5 Err: Need comma next, found: 'A'</code> (in Future Syntax Mode).</p>
+          </li>
+          <li>
+            <code>!6 Err: Invalid parameter value</code>
+            <p>This error indicates that one of the parameters to the current command is too large, too small, or of the wrong type.</p>
+            <p>For example if you sent <code>TP,-1</code> the EBB will respond with <code>TP,!6 Err: Invalid parameter value</code> (in Future Syntax Mode).</p>
+          </li>
+          <li>
+            <code>!7 Err: Extra parameter</code>
+            <p>This error indicates that the parser found an extra comma in the current command when it expected a line ending.</p>
+            <p>For example if you sent <code>SM,1,1,1,0,0</code> the EBB will respond with <code>SM,!7 Err: Extra parameter</code> (in Future Syntax Mode).</p>
+          </li>
+          <li>
+            <code>!8 Err: Unknown command 'X:YY'</code>
+            <p>
+              This error indicates that the one character command 'X' was not recognized as a valid command name. It also prints out the hexadecimal value of the 
+              character that was sent. This can be useful if a non-printable character was sent, where the X will be just a blank space.
+            </p>
+            <p>
+              As an example, if the command <code>B</code> is sent, the reply is a single line <code>B,!8 Err: Unknown command 'B:42'</code> 
+              (in Future Syntax mode).
+            </p>
+          </li>
+          <li>
+            <code>!8 Err: Unknown command 'XX:YYYY'</code>
+            <p>
+              This error indicates that the two character command 'XX' was not recognized as a valid command name. It also prints out the hexadecimal value of
+              each of the two characters that were sent. This can be useful if non-printable characters were sent, where one or both of the Xs will print as blank
+              spaces.
+            </p>
+            <p>
+              As an example, if the command <code>BB</code> is sent, the reply is a single line <code>BB,!8 Err: Unknown command 'BB:4242'</code> 
+              (in Future Syntax mode).
+            </p>
+          </li>
+          <li>
+            <code>!9 Err: Checksum incorrect, expected XXX</code>
+            <p>When checksums are turned on (<code>CU,54,1</code>), this error indicates that a checksum was found but that it was incorrect, and it prints out the expected checksum as XXX.</p>
+            <p>For example, if you send <code>V,100</code> when checksums are turned on, the EBB will reply with <code>V,!9 Err: Checksum incorrect, expected 170</code> (in Future Syntax Mode).</p>
+          </li>
+          <li>
+            <code>!10 Err: No checksum found but required</code>
+            <p>When checksums are turned on (<code>CU,54,1</code>), this error indicates that there was no checksum found at the end of the command.</p>
+            <p>For example, if you send <code>V</code> when checksums are turned on, the EBB will reply with <code>V,!10 Err: No checksum found but required</code> (in Future Syntax Mode).</p>
+          </li>
+        </ul>
+
+        <p />
+        <br />
+        <p />
 
         <h2><a name="states"></a>Initial I/O pin configuration</h2>
         
