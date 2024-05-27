@@ -74,15 +74,23 @@
 #define bittstzero(var)     (((var) & 1) != 0u)               // Use this for testing bit zero of a byte
 
 
-// defines for the error_byte byte - each bit has a meaning
-#define kERROR_BYTE_STEPS_TO_FAST           1u   // If you ask us to step more than 25 steps/ms
-#define kERROR_BYTE_TX_BUF_OVERRUN          2u
-#define kERROR_BYTE_RX_BUFFER_OVERRUN       3u
-#define kERROR_BYTE_MISSING_PARAMETER       4u
-#define kERROR_BYTE_PRINTED_ERROR           5u   // We've already printed out an error
-#define kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT 6u
-#define kERROR_BYTE_EXTRA_CHARACTERS        7u
-#define kERROR_BYTE_UNKNOWN_COMMAND         8u   // Part of command parser, not error handler
+// Possible values for the variable error_byte
+// Only one is allowed at once. This is a change in v3.0.2 (Issue #233)
+// As soon as error_byte is non-zero, no other errors are recorded until the
+// next command begins. Thus these are an enum which will fit into a byte,
+// but unlike using bitfields will allow us to have more than 8 possible 
+// errors.
+typedef enum {
+   kERROR_NO_ERROR = 0u
+  ,kERROR_STEP_RATE_INVALID        // If you ask us to step more than 25 steps/ms
+  ,kERROR_TX_BUF_OVERRUN
+  ,kERROR_RX_BUFFER_OVERRUN
+  ,kERROR_MISSING_PARAMETER
+  ,kERROR_PRINTED_ERROR            // We've already printed out an error, so don't print anything else out in error parser
+  ,kERROR_PARAMETER_OUTSIDE_LIMIT
+  ,kERROR_EXTRA_CHARACTERS
+  ,kERROR_CHECKSUM_NOT_FOUND_BUT_REQUIRED
+} ErrorType;
 
 // Enum for extract_num() function parameter
 typedef enum {
@@ -102,6 +110,7 @@ typedef enum {
   ,kEXTRACT_COMMA_MISSING
   ,kEXTRACT_MISSING_PARAMETER
   ,kEXTRACT_INVALID_TYPE
+  ,kEXTRACT_SKIPPING_BECAUSE_EXISTING_ERROR
 } ExtractReturnType;
 
 #define advance_RX_buf_out()          \
@@ -125,7 +134,7 @@ typedef enum {
   ,kTIMING
 } tRC_state;
 
-// Use as the <type> parmaeters to the print_line_ending() call.
+// Use as the <type> parameters to the print_line_ending() call.
 // These values only have meaning in "Legacy" mode, not in "New" mode.
 typedef enum {
     kLE_OK_NORM
@@ -145,8 +154,7 @@ extern unsigned char g_RX_buf[kRX_BUF_SIZE];
 extern unsigned char g_TX_buf_out;
 extern volatile unsigned int ISR_A_FIFO[16];      // Stores the most recent analog conversions
 
-extern unsigned char error_byte;
-//extern unsigned char error_byte;
+extern ErrorType error_byte;
 extern BOOL	g_ack_enable;
 
 extern volatile unsigned long int gRCServoPoweroffCounterMS;
@@ -184,5 +192,6 @@ void SetPinLATFromRPn (char Pin, char State);
 void AnalogConfigure (unsigned char Channel, unsigned char Enable);
 void populateDeviceStringWithName(void);
 int ebb_putc(char c);        // Our USB based stream character printer
+void ErrorSet(ErrorType new_error);
 
 #endif //UBW_H

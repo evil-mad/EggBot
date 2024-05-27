@@ -18,6 +18,11 @@
       <itemPath>source/usbdsc.h</itemPath>
       <itemPath>source/usbmmap.h</itemPath>
     </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="true">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
                    projectFiles="true">
@@ -43,11 +48,6 @@
       <itemPath>source/usbdrv.c</itemPath>
       <itemPath>source/usbdsc.c</itemPath>
       <itemPath>source/usbmmap.c</itemPath>
-    </logicalFolder>
-    <logicalFolder name="ExternalFiles"
-                   displayName="Important Files"
-                   projectFiles="false">
-      <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>

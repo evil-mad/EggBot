@@ -1790,7 +1790,7 @@ void parse_SC_packet (void)
   extract_number(kUINT, &Para2, kREQUIRED);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -1971,7 +1971,7 @@ void parse_LM_packet(void)
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -1994,7 +1994,7 @@ void parse_LM_packet(void)
       )
     )
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -2051,7 +2051,7 @@ void parse_L3_packet(void)
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2074,7 +2074,7 @@ void parse_L3_packet(void)
       )
     )
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -2119,7 +2119,7 @@ void parse_TD_packet(void)
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2130,7 +2130,7 @@ void parse_TD_packet(void)
     // like LT,0,X,X,X,X,X
     if (gIntervals == 0u)
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -2204,7 +2204,7 @@ void parse_T3_packet(void)
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2215,7 +2215,7 @@ void parse_T3_packet(void)
     // like LT,0,X,X,X,X,X
     if (gIntervals == 0u)
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -2262,7 +2262,7 @@ void parse_LT_packet(void)
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -2273,7 +2273,7 @@ void parse_LT_packet(void)
     // like LT,0,X,X,X,X,X
     if (gIntervals == 0u)
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -2341,7 +2341,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     {
       if (gRate1 < 0)
       {
-        bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
         return;
       }
       else
@@ -2355,7 +2355,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     {
       if (gRate2 < 0)
       {
-        bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+        ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
         return;
       }
       else
@@ -2646,13 +2646,18 @@ void parse_SM_packet(void)
   extract_number(kLONG,  &gSteps2,  kOPTIONAL);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
 
   // Input parameters: gDurationMS, gSteps1, gSteps2, gClearAccs
   process_simple_motor_move_fp();
+
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    return;
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -2704,33 +2709,39 @@ void parse_CM_packet(void)
     // direction can only be 0 or 1
     if (direction > 1u) 
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     // Rate has to be from 1 to 25000
     if ((frequency < 1u) || (frequency > 25000u))
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     // Check four positions for out of bounds
     if ((dest_x > 32768) || (dest_x < -32768))
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     if ((dest_y > 32768) || (dest_y < -32768))
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     if ((center_x > 32768) || (center_x < -32768))
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     if ((center_y > 32768) || (center_y < -32768))
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     
     // Bail if a there is a parameter limit error
-    if (error_byte)
+    if (error_byte != kERROR_NO_ERROR)
     {
       return;
     }
@@ -3261,8 +3272,7 @@ void process_simple_rate_move_fp(void)
   // And check for a bad rate value
   if ((gHM_StepRate > 25000u) || (gHM_StepRate == 0u))
   {
-    ebb_print((far rom char *)"!0 Err: StepRate invalid value.");
-    print_line_ending(kLE_REV);
+    ErrorSet(kERROR_STEP_RATE_INVALID);
     return;
   }
   // If, for some reason, we're called with zero steps for both axis, then bail
@@ -3507,14 +3517,12 @@ static void process_simple_motor_move_fp(void)
     // Check for invalid duration
     if (gDurationMS == 0u) 
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
     }
     if (gClearAccs > 3u)
     {
-      bitset(error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
-    }
-    if (error_byte)
-    {
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
       return;
     }
   }
@@ -3573,8 +3581,13 @@ static void process_simple_motor_move_fp(void)
       {
         if (gLimitChecks)
         {
-          ebb_print((far rom char *)"!0 Err: <axis1> step rate too high.");
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(',');
+          }
+          ebb_print((far rom char *)"!0 Err: <axis1> step rate too high");
           print_line_ending(kLE_REV);
+          ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 0x80000000;
@@ -3583,8 +3596,13 @@ static void process_simple_motor_move_fp(void)
       {
         if (gLimitChecks)
         {
-          ebb_print((far rom char *)"!0 Err: <axis1> step rate too slow.");
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(',');
+          }
+          ebb_print((far rom char *)"!0 Err: <axis1> step rate too slow");
           print_line_ending(kLE_REV);
+          ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 1;
@@ -3606,8 +3624,13 @@ static void process_simple_motor_move_fp(void)
       {
         if (gLimitChecks)
         {
-          ebb_print((far rom char *)"!0 Err: <axis2> step rate too high.");
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(',');
+          }
+          ebb_print((far rom char *)"!0 Err: <axis2> step rate too high");
           print_line_ending(kLE_REV);
+          ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 0x80000000;
@@ -3616,8 +3639,13 @@ static void process_simple_motor_move_fp(void)
       {
         if (gLimitChecks)
         {
-          ebb_print((far rom char *)"!0 Err: <axis2> step rate too slow.");
+          if (bittstzero(gStandardizedCommandFormat))
+          {
+            ebb_print_char(',');
+          }
+          ebb_print((far rom char *)"!0 Err: <axis2> step rate too slow");
           print_line_ending(kLE_REV);
+          ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 1;
@@ -3692,7 +3720,7 @@ void parse_ES_packet(void)
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -3859,7 +3887,7 @@ void parse_TP_packet(void)
   extract_number (kUINT, &CommandDuration, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -3917,7 +3945,7 @@ void parse_SP_packet(void)
   Ret = extract_number(kUCHAR, &Pin, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -4056,13 +4084,13 @@ void parse_EM_packet(void)
   // Extract each of the values.
   RetVal1 = extract_number (kUCHAR, &EA1, kREQUIRED);
   // Bail if we got a conversion error
-  if (error_byte || kEXTRACT_OK != RetVal1)
+  if ((error_byte != kERROR_NO_ERROR) || (kEXTRACT_OK != RetVal1))
   {
     return;
   }
   RetVal2 = extract_number (kUCHAR, &EA2, kOPTIONAL);
   // Bail if we got a conversion error
-  if (error_byte || kEXTRACT_OK != RetVal2)
+  if ((error_byte != kERROR_NO_ERROR) || (kEXTRACT_OK != RetVal2))
   {
     return;
   }
@@ -4169,7 +4197,7 @@ void parse_SL_packet(void)
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -4199,7 +4227,7 @@ void parse_QL_packet(void)
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
@@ -4347,7 +4375,7 @@ void parse_SE_packet(void)
   extract_number(kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }

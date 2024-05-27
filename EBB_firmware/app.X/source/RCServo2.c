@@ -281,14 +281,14 @@ void RCServo2_S2_command (void)
   print_command(FALSE, FALSE);
 
   // Bail if we got a conversion error
-  if (error_byte)
+  if (error_byte != kERROR_NO_ERROR)
   {
     return;
   }
 
   if (Pin > 24u)
   {
-    bitset (error_byte, kERROR_BYTE_PARAMETER_OUTSIDE_LIMIT);
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
     return;
   }
 
