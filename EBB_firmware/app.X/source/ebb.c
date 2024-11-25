@@ -2068,7 +2068,7 @@ void parse_L3_packet(void)
       )
       &&
       (
-        ((gRate2 == 0) && (gAccel2 == 0) && (gJerk1 == 0))
+        ((gRate2 == 0) && (gAccel2 == 0) && (gJerk2 == 0))
         ||
         (gSteps2 == 0)
       )
@@ -2349,6 +2349,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
         gSteps1 = -gSteps1;
         gRate1 = -gRate1;
         gAccel1 = -gAccel1;
+        gJerk1 = -gJerk1;
       }
     }
     if (gSteps2 < 0)
@@ -2363,6 +2364,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
         gSteps2 = -gSteps2;
         gRate2 = -gRate2;
         gAccel2 = -gAccel2;
+        gJerk2 = -gJerk2;
       }
     }
   }
