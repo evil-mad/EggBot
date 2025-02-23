@@ -2225,19 +2225,19 @@
               The RC servo system will cycle through each of the 8 channels. Each gets a 3 ms "slice" of time. Each channel is repeated every 24 ms.
             </p>
             <p>
-              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>Position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>Position</i> is in units of 1/12,000 of a second, so 32000 for <i>Position</i> would be about 2.666 ms. A value of 0 for the <i>Position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>Position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
+              If a given servo output is enabled, then at the beginning of its 3 ms time slot, its RPx pin is set high. Then, <i>Position</i> time later, the RPx pin is set low. This time is controlled by hardware (the ECCP2 in the CPU) so there is very little jitter in the pulse durations. <i>Position</i> is in units of 1/12,000,000 of a second, so 32000 for <i>Position</i> would be about 2.666 ms. A value of 0 for the <i>Position</i> parameter will disable servo output on the given RPn pin, and that internal servo channel will be deallocated. If the <i>Position</i> value is greater than the amount of time allocated for each channel (by default, 3 ms) then the smaller of the two values will be used to generate the pulse.
             </p>
             <p>
               The number of available channels at boot is 8. This can be changed with the SC,8 command. The S2 RC servo output command cycles from channel 1 through channel <i>Maximum_S2_Channels</i> (normally 8), outputting any enabled channel's pulse from 0 ms to 3 ms. For a given channel, the repetition rate is determined by <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> which is normally 8 * 3 or 24 ms. Thus, each channel's output pulse will be repeated every 24 ms. However, if you change the <i>Maximum_S2_Channels</i> you will change the repetition rate of the pulses. The <i>S2_Channel_Duration_MS</i> parameter can also be adjusted with the RC,9 command.
+            </p>
+            <p>
+              <b>Slew rate:</b> The optional <i>Rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>Rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>Rate</i> is nonzero, then the value of <i>Rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>Rate</i> are 1/12,000,000th of a second per <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> or 1/12,000,000th of a second per 24 ms. The slew rate is completely independent of the <i>Delay</i>.
             </p>
             <p>
               <b>Delay:</b> The <i>Delay</i> argument gives the number of milliseconds to delay the start of the next command in the motion queue. This is an optional argument that defaults to 0, giving no added delay, thus allowing the next motion command to begin immediately after the S2 command has started.
             </p>
             <p>
               <b>Motion Queue:</b> In all cases but one, S2 commands are added to the motion queue, even if their <i>Delay</i> parameters are 0. This means that they will always execute in their correct place in the stream of SM, TP, etc. commands. (The special command <code>S2,0,<i>Output_Pin</i>&lt;CR&gt;</code> disables the servo output for <i>Output_Pin</i> immediately and is not added to the queue.)
-            </p>
-            <p>
-              <b>Slew rate:</b> The <i>Rate</i> argument is used to control how quickly the output changes from the current pulse width (servo position) to the new pulse width. If <i>Rate</i> is zero, then the move is made on the next PWM cycle (i.e. the next time the pin is pulsed). If <i>Rate</i> is nonzero, then the value of <i>Rate</i> is added to (or subtracted from) the current pulse width each time the pulse is generated until the new target is reached. This means that the units of <i>Rate</i> are 1/12,000th of a second per <i>Maximum_S2_Channels</i> * <i>S2_Channel_Duration_MS</i> or 1/12,000th of a second per 24 ms. The slew rate is completely independent of the <i>Delay</i>.
             </p>
             <p>
               <b>Collisions with SP and TP:</b> The normal pen up/down servo control (SP and TP) commands internally use the S2 command to manage their actions through one of the software-defined channels. If desired, you can use the S2 command to disable this channel, for example if you need access to all four channels.
@@ -2330,16 +2330,16 @@
             <span style="font-weight: bold;">Example:</span> <code>S2,0,5\r</code> Turn off the output on RP5 (which is pin RB2) so it stops sending any pulses.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,100\r</code> Send a 0.83 ms pulse out pin RB2, and force a pause of 100 ms before the next motion command can start.
+            <span style="font-weight: bold;">Example:</span> <code>S2,10000,5,0,100\r</code> Send a 0.83 ms pulse out pin RB2 immediately, and force a pause of 100 ms before the next motion command can start.
           </li>
           <li>
-            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,10,50\r</code> Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin. 
+            <span style="font-weight: bold;">Example:</span> <code>S2,27500,5,50,10\r</code> Start the pulse on RB2 moving from wherever it is at now towards 2.28 ms at a rate of 0.173 ms/S, with a 10 ms delay before the next motion command can begin.
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Added in firmware v2.2.0 
+            <span style="font-weight: bold;">Version History:</span> Added in firmware v2.2.0
           </li>
           <li>
-            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 8 in v3.0. 
+            <span style="font-weight: bold;">Version History:</span> Maximum RC servo channel count reduced from 24 to 8 in v3.0.
           </li>
         </ul>
 
