@@ -780,17 +780,16 @@ void high_ISR(void)
         gISRTickCountForThisCommand++;
       }
       
-      // A simple optimization: we only have one 'count' for LT, to know
-      // when we're done, so we can directly clear AllDone here if we are
-      // not yet done with this move.
-      bitclrzero(AllDone);
-
-      // Nope not done. So count this ISR tick, and then see if we need to take 
-      // a step
+      // Only clear AllDone if we are not yet done with this move.
+      // Count this ISR tick, and then see if we need to take a step.
       CurrentCommand.m.sm.Steps[0]--;
       if (CurrentCommand.m.sm.Steps[0] == 0u)
       {
         bitclrzero(AxisActive[0]);
+      }
+      else
+      {
+        bitclrzero(AllDone);
       }
 
       //// MOTOR 1   LT ////
