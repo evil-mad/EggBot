@@ -965,7 +965,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>StepFrequency</i> is an unsigned integer in the range from 2 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.
+              <i>StepFrequency</i> is an unsigned integer in the range from 1 to 25000. It represents the step frequency, in steps per second, representing typical speed during the movement.
             </li>
             <li>
               <i>Position1</i> and <i>Position2</i> (optional) are 32 bit signed integers in the range of -2147483648 to 2147483647. If provided, they represents the position, relative to home, that motor1 and motor2 will travel to. If <i>Position1</i> is provided <i>Position2</i> must also be provided.
@@ -1211,23 +1211,43 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command is extremely similar to the <code><a href="#LM">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LM">LM</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
+              This command is extremely similar to the <code><a href="#LM">LM</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly the <code><a href="#LM">LM</a></code> command. The difference is in the addition of the two jerk parameters.
             </p>
             <p>
-              [[ coming soon ]]
+              <b>Methods and consequences:</b>
+              As with <code><a href="#LM">LM</a></code>, each axis has a separate 32 bit Accumulator. The initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 and adding <i>Jerk</i>/6. Then, every 40 &mu;s (at a rate of 25 kHz) the following operations are executed for each axis, if the total number of steps to be taken is nonzero:
+            </p>
+          <ol>
+            <li>Update the value <i>Accel</i> = <i>Accel</i> + <i>Jerk</i>.</li>
+            <li>Update the value <i>Rate</i> = <i>Rate</i> + <i>Accel</i>.</li>
+            <li>If the new (<i>Rate</i> < 0), then "roll it over" with <i>Rate</i> = <i>Rate</i> + 2<sup>31</sup>.</li>
+            <li>The value of <i>Rate</i> is added to the Accumulator.</li>
+            <li>If the new Accumulator value is greater than or equal to 2<sup>31</sup>, then:
+              <ul>
+              <li>The motor on that axis moves one step.</li>
+              <li>2<sup>31</sup> is subtracted from the Accumulator for that axis.</li>
+            </ul></li>
+            <li>Check to see if the total number of steps moved equals <i>Steps</i>.
+              If true, the move is complete for this axis.</li>
+            <li>Check if the move is complete for both axes. If so, exit the L3 command.</li>
+          </ol>
+            <p>
+              The <i>Accel</i>/2 and <i>Jerk</i>/6 pre-adjustments ensure that the user-provided <i>Rate</i>, <i>Accel</i>, and <i>Jerk</i> values correspond to the initial conditions of the cubic motion profile. All of the formulas from the <code><a href="#LM">LM</a></code> command description remain applicable, with the addition of the jerk terms.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example 1:</span> 
-            <p>
-              [[ coming soon ]]
-            </p>
+            <span style="font-weight: bold;">Example 1:</span> Move axis 1 forward 500 steps with constant jerk, axis 2 stationary, accumulators cleared:
+            <ul class="no_bullets">
+              <li><code>L3,0,500,0,100,0,0,0,0,3</code></li>
+            </ul>
+            Axis 1 starts from rest with zero acceleration and jerk of 100. Motion terminates after 500 steps on axis 1.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> 
-            <p>
-              [[ coming soon ]]
-            </p>
+            <span style="font-weight: bold;">Example 2:</span> Move both axes with initial velocity and jerk:
+            <ul class="no_bullets">
+              <li><code>L3,80000000,1000,0,50,40000000,600,0,-30</code></li>
+            </ul>
+            Axis 1 moves 1000 steps and axis 2 moves 600 steps, both with initial rates and jerk but zero initial acceleration. Accumulators are not cleared.
           </li>
         </ul>
 
@@ -1243,7 +1263,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
             </li>
             <li>
               <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. The sign of each <i>Rate</i> parameter controls <i>the direction</i> that the axis should turn initially. The absolute value abs(<i>Rate</i>) of each <i>Rate</i> is added to its axis step Accumulator every 40 &mu;s to determine when steps are taken.
@@ -2512,17 +2532,17 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Duration</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of milliseconds, that the command executes for.
+              <i>Duration</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of milliseconds, that the command executes for.
             </li>
             <li>
               <i>AxisSteps1</i> and <i>AxisSteps2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647, giving movement distance in steps.
             </li>
             <li>
-              <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared. 
+              <i>Clear</i> is an optional integer in the range 0 to 3. A value of 0 (or if not provided) leaves both accumulators unchanged. A value of 1 clears the axis 1 step accumulator to zero before the move begins. A value of 2 clears the axis 2 step accumulator. A value of 3 clears both accumulators.
             </li>
           </ul>
           <li>
-            <span style="font-weight: bold;">Description:</span> 
+            <span style="font-weight: bold;">Description:</span>
             <p>
               Use this command to make the motors draw a straight line at constant velocity, or to add a delay to the motion queue.
             </p>
@@ -2533,7 +2553,7 @@
               The sign of <i>AxisSteps1</i> and <i>AxisSteps2</i> represent the direction each motor should turn.
             </p>
             <p>
-              The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that this speed range will be violated on either axis, it will use the maximum (or minimum) speed to complete the move.
+              The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that the step rate for either axis falls outside the allowed range, it will return an error and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,1,0</code>, the rate will be silently clamped to the nearest limit instead.)
             </p>
             <p>
               While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
@@ -2543,6 +2563,9 @@
             </p>
             <p>
               Note that internally the EBB generates an Interrupt Service Routine (ISR) at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
+            </p>
+            <p>
+              Note that internally, <i>Duration</i> is converted to a 32-bit floating point value during rate calculation. Floating point values can exactly represent integers only up to 16,777,216 (approximately 4 hours 39 minutes). For <i>Duration</i> values above this threshold, small rounding errors may occur in the computed step rate. In practice, this is unlikely to matter for typical use cases.
             </p>
             <p>A value of 0 for <i>Duration</i> is invalid and will be rejected.</p>
             <p>If both <i>AxisStep1</i> and <i>AxisStep2</i> are zero then a <i>Duration</i> value above 100000 will be capped at 100000.</p>
@@ -2762,7 +2785,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
             </li>
             <li>
               <i>Rate1</i> and <i>Rate2</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction.
@@ -2778,25 +2801,31 @@
             </li>
           </ul>
           <li>
-            <span style="font-weight: bold;">Description:</span> 
+            <span style="font-weight: bold;">Description:</span>
             <p>
-              This command is extremely similar to the <code><a href="#LT">LT</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is exactly <code><a href="#LT">LT</a></code> command. The difference is in the addition of the two jerk parameters. When there are non-zero values for the jerk parameters, an additional step before step 1 (see the 'Methods and consequences' section in the <code><a href="#LM">LM</a></code> command description) adds the jerk term to the accel term.
+              This command is extremely similar to the <code><a href="#LT">LT</a></code> command. In fact, if both <i>Jerk1</i> and <i>Jerk2</i> are zero, this command is identical to the <code><a href="#LT">LT</a></code> command. The difference is in the addition of the two jerk parameters.
             </p>
             <p>
-              [[ coming soon ]]
+              <b>Methods and consequences:</b>
+              As with <code><a href="#LT">LT</a></code> (and <code><a href="#LM">LM</a></code>), the initial value of <i>Rate</i> for each axis is adjusted by subtracting <i>Accel</i>/2 and adding <i>Jerk</i>/6 before the move begins. Then, on each 40 &mu;s tick, the jerk value is added to the acceleration, the acceleration is added to the rate, and the rate is added to the step accumulator. The command terminates after the specified number of <i>Intervals</i> has elapsed.
             </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example 1:</span> 
             <p>
-              [[ coming soon ]]
+              The <i>Accel</i>/2 and <i>Jerk</i>/6 pre-adjustments ensure that the user-provided <i>Rate</i>, <i>Accel</i>, and <i>Jerk</i> values correspond to the initial conditions of the cubic motion profile. All formulas from the <code><a href="#LM">LM</a></code> command description remain applicable, with the addition of the jerk terms.
             </p>
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> 
-            <p>
-              [[ coming soon ]]
-            </p>
+            <span style="font-weight: bold;">Example 1:</span> Axis 1 accelerates from rest with constant jerk for 5000 intervals (0.2 s), axis 2 stationary, accumulators cleared:
+            <ul class="no_bullets">
+              <li><code>T3,5000,0,0,100,0,0,0,3</code></li>
+            </ul>
+            Axis 1 starts with zero rate and zero acceleration; jerk of 100 causes the acceleration to increase linearly.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Example 2:</span> Both axes move with initial rates, acceleration, and jerk for 10000 intervals (0.4 s):
+            <ul class="no_bullets">
+              <li><code>T3,10000,50000000,10000,5,30000000,8000,-3</code></li>
+            </ul>
+            Accumulators are not cleared, allowing continuation from a prior move.
           </li>
         </ul>
 
@@ -2812,7 +2841,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Intervals</i> is an unsigned 32 bit integer in the range from 0 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that the command executes for.
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that each of the two  <code><a href="#T3">T3</a></code> commands executes for. The full execution time of the <code>TD</code>code> command is 2 &times; <i>Intervals</i>.
             </li>
             <li>
               <i>Rate1A</i>, <i>Rate1B</i>, <i>Rate2A</i> and <i>Rate2B</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction. See below for an explanation of where each set of rates is used.
@@ -2833,28 +2862,26 @@
               This command is for creating specially-crafted back-to-back time-limited moves with jerk. Internally, the <code>TD</code> command takes its parameter values and creates
               two <code>T3</code> commands that are loaded into the FIFO. It is a faster way to create "S-curves" accelerations than sending two <code>T3</code> commands separately.
             </p>
+            <p>
+              Note that each <code>T3</code> command created by <code>TD</code> independently receives the <i>Rate</i> pre-adjustment described in the <code><a href="#T3">T3</a></code> documentation (subtracting <i>Accel</i>/2 and adding <i>Jerk</i>/6).
+            </p>
             <p>The <code>TD</code> command loads the two <code>T3</code> commands as follows:
               <ol>
                 <li>
                   <code>T3,Intervals,Rate1A,0,Jerk1,Rate2A,0,Jerk2[,Clear]&lt;CR&gt;</code>
                 </li>
                 <li>
-                  <code>T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2[,Clear]&lt;CR&gt;</code>
+                  <code>T3,Intervals,Rate1B,Accel1,-Jerk1,Rate2B,Accel2,-Jerk2,0&lt;CR&gt;</code>
                 </li>
               </ol>
             </p>
 
           <li>
-            <span style="font-weight: bold;">Example 1:</span> 
-            <p>
-              [[ coming soon ]]
-            </p>
-          </li>
-          <li>
-            <span style="font-weight: bold;">Example 2:</span> 
-            <p>
-              [[ coming soon ]]
-            </p>
+            <span style="font-weight: bold;">Example:</span> S-curve acceleration on axis 1 from rest, 1000 intervals per half (2000 total = 0.08 s), axis 2 stationary, accumulators cleared:
+            <ul class="no_bullets">
+              <li><code>TD,1000,0,49950016,100000,100,0,0,0,0,3</code></li>
+            </ul>
+            First half: jerk = +100, zero initial acceleration. Second half: jerk = &minus;100, peak acceleration = 100000. <i>Rate1B</i> = 49950016 is the exact discrete midpoint rate.
           </li>
         </ul>
 
@@ -2962,11 +2989,11 @@
                 <i>AxisStepsA</i> and <i>AxisStepsB</i> are integers, each in the range from -2147483648 to 2147483647, giving movement distances in steps.
               </li>
               <li>
-                <i>Clear</i> is an optional integer in the range 0 - 3. If it is 0 then neither accumulator are cleared at the start of the command. If it is 1 then the step accumulator for motor1 is zeroed at the start of the command. If it is 2, then the step accumulator for motor2 is zeroed at the start of the command. If it is 3, then both accumulators are cleared. 
+                <i>Clear</i> is an optional integer in the range 0 to 3. A value of 0 (or if not provided) leaves both accumulators unchanged. A value of 1 clears the axis 1 step accumulator to zero before the move begins. A value of 2 clears the axis 2 step accumulator. A value of 3 clears both accumulators.
               </li>
             </ul>
             <li>
-              <span style="font-weight: bold;">Description:</span> 
+              <span style="font-weight: bold;">Description:</span>
               <p>
                 This command takes the <i>AxisStepsA</i> and <i>AxisStepsB</i> values, and creates a call to the <code><a href="#SM">SM</a></code> command with the SM command's <i>AxisSteps1</i> value as <i>AxisStepsA</i> + <i>AxisStepsB</i>, and <i>AxisSteps2</i> as <i>AxisStepsA</i> - <i>AxisStepsB</i>. Because of these additions and subtractions, be certain that the values provided for <i>AxisStepsA</i> and <i>AxisStepsB</i> do not cause an overflow or underflow of a 32 bit signed value when the addition and subtraction happen.
               </p>
@@ -2977,10 +3004,16 @@
                 If both <i>AxisStepsA</i> and <i>AxisStepsB</i> are zero, then a delay of <i>duration</i> ms is executed.
               </p>
               <p>
-                The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the XM command finds that this speed range will be violated on either axis, it will output an error message declaring such and it will not complete the move. Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
+                The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the XM command finds that the step rate for either axis falls outside the allowed range, it will output an error message and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,1,0</code>, the rate will be silently clamped to the nearest limit instead.) Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
+              </p>
+              <p>
+                Note: In current firmware, if a rate error is detected, the error message may be followed by an OK response.
               </p>
               <p>
                 Note that internally the EBB generates an ISR at the 25 kHz rate. Each time the ISR fires, the EBB determines if a step needs to be taken for a given axis or not. The practical result of this is that all steps will be 'quantized' to the 25 kHz (40 &mu;s) time intervals, and thus as the step rate gets close to 25 kHz the 'correct' time between steps will not be generated, but instead each step will land on a 40 &mu;s tick in time. In almost all cases normally used by the EBB, this doesn't make any difference because the overall proper length for the entire move will be correct.
+              </p>
+              <p>
+                Note that internally, <i>Duration</i> is converted to a 32-bit floating point value during rate calculation. Floating point values can exactly represent integers only up to 16,777,216 (approximately 4 hours 39 minutes). For <i>Duration</i> values above this threshold, small rounding errors may occur in the computed step rate. In practice, this is unlikely to matter for typical use cases.
               </p>
               <p>A value of 0 for <i>Duration</i> is invalid and will be rejected.</p>
               <p>If both <i>AxisStepsA</i> and <i>AxisStepsB</i> are zero then a <i>Duration</i> value above 100000 will be capped at 100000.</p>
