@@ -2799,9 +2799,9 @@ void parse_CM_packet(void)
   
   // Once m_alpha is computed, each straight subsegment around the circle spans an arc of
   //   alpha = 1/(2^m_alpha) radians between its vertices. 
-  // Since m_alpha is in the range 0-6, each arc angle is between 0.9° and 57.3° degrees:
-  //   At smallest radius, (1/2^0) = 1; angle between vertices is 1 radian (57.3°).
-  //   At largest radius, (1/2^6) = 1/64; angle between vertices is 1/64 =0.15625 radian, (0.9°).
+  // Since m_alpha is in the range 0-6, each arc angle is between 0.9ï¿½ and 57.3ï¿½ degrees:
+  //   At smallest radius, (1/2^0) = 1; angle between vertices is 1 radian (57.3ï¿½).
+  //   At largest radius, (1/2^6) = 1/64; angle between vertices is 1/64 =0.15625 radian, (0.9ï¿½).
   
   // Rather than computing alpha (usually fractional), we keep track of m_alpha, and use it
   //   with bit shifts.
@@ -3198,7 +3198,7 @@ void parse_HM_packet(void)
   gSteps1 = -globalStepCounter1 + gHM_Pos1;
   gSteps2 = -globalStepCounter2 + gHM_Pos2;
   
-  // Always clear accumulators for this type of move
+  // Never clear accumulators for this type of move
   gClearAccs = 0;
   
   // Set up these values as input parameters
