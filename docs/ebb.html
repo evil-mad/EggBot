@@ -1205,7 +1205,7 @@
           </ul>
           <li>
             <span style="font-weight: bold;">Direction note:</span>
-            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i> and <i>Steps</i> as well as <i>Accel</i> to make the math work out.
+            <p>Normally the sign of the <i>Rate</i> parameters are used to indicate initial motor direction. When <i>Rate</i> signs are used for direction, then <i>Steps</i> parameters should be positive. However, if the sign of <i>Rate</i> is positive, then the sign of the <i>Steps</i> parameters can be used to control initial motor direction instead. Internally, if an axis has a negative <i>Steps</i> and a positive <i>Rate</i>, the EBB code will flip the sign on <i>Rate</i>, <i>Steps</i>, <i>Accel</i>, and <i>Jerk</i> to make the math work out.
             </p>
           </li>
           <li>
@@ -1248,6 +1248,12 @@
               <li><code>L3,80000000,1000,0,50,40000000,600,0,-30</code></li>
             </ul>
             Axis 1 moves 1000 steps and axis 2 moves 600 steps, both with initial rates and jerk but zero initial acceleration. Accumulators are not cleared.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> Added in firmware v3.0.
+          </li>
+          <li>
+            <span style="font-weight: bold;">Version History:</span> As of firmware v3.1.0, <i>Jerk</i> parameters are included in the sign flip when negative <i>Steps</i> is used to control direction. Previously, only <i>Rate</i>, <i>Steps</i>, and <i>Accel</i> were sign-flipped.
           </li>
         </ul>
 
