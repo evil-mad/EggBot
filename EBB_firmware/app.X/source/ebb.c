@@ -271,6 +271,8 @@
 //                  Massive refactor of motion ISR to improve performance
 //                  Proper formatting/indenting of entire EBB codebase for readability
 //                  Turned all warnings/messages on in compiler, fixed all
+// Note that all versions newer than the above are listed here: 
+//   https://evil-mad.github.io/EggBot/EBBReleaseNotes.html 
 
 #include <p18cxxx.h>
 #include <usart.h>

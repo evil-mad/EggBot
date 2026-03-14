@@ -1,0 +1,1499 @@
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  1
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+A                                 C   P18F46J50.INC                       46*
+ABDEN                             C   P18F46J50.INC                      860*  870*  880*  890*
+ABDOVF                            C   P18F46J50.INC                      866*  876*  886*  896*
+ACCESS                            C   SQUAREROOT.S                       170.  172.  174.  192.  219.  231.  243.  268.  270.  272.
+                                                                         277.  279.  281.
+                                      P18F46J50.INC                       47*
+ACKDT                             C   P18F46J50.INC                      792* 1775* 1792*
+ACKEN                             C   P18F46J50.INC                      791* 1774* 1791*
+ACKSTAT                           C   P18F46J50.INC                      793* 1776* 1793*
+ACQT0                             C   P18F46J50.INC                     1745*
+ACQT1                             C   P18F46J50.INC                     1746*
+ACQT2                             C   P18F46J50.INC                     1747*
+ACTVIE                            C   P18F46J50.INC                      481*
+ACTVIF                            C   P18F46J50.INC                      737*
+ADCAL                             C   P18F46J50.INC                     1739*
+ADCON0                            C   P18F46J50.INC                      270*
+ADCON1                            C   P18F46J50.INC                      269*
+ADCS0                             C   P18F46J50.INC                     1742*
+ADCS1                             C   P18F46J50.INC                     1743*
+ADCS2                             C   P18F46J50.INC                     1744*
+ADDEN                             C   P18F46J50.INC                     1271* 1436* 1464*
+ADDEN1                            C   P18F46J50.INC                     1453* 1481*
+ADDEN2                            C   P18F46J50.INC                     1280*
+ADDR0                             C   P18F46J50.INC                      498*
+ADDR1                             C   P18F46J50.INC                      499*
+ADDR2                             C   P18F46J50.INC                      500*
+ADDR3                             C   P18F46J50.INC                      501*
+ADDR4                             C   P18F46J50.INC                      502*
+ADDR5                             C   P18F46J50.INC                      503*
+ADDR6                             C   P18F46J50.INC                      504*
+ADEN                              C   P18F46J50.INC                     1443* 1471*
+ADFM                              C   P18F46J50.INC                     1740*
+ADIE                              C   P18F46J50.INC                     1294*
+ADIF                              C   P18F46J50.INC                     1309*
+ADIP                              C   P18F46J50.INC                     1324*
+ADMSK1                            C   P18F46J50.INC                      796* 1779* 1796*
+ADMSK2                            C   P18F46J50.INC                      797* 1780* 1797*
+ADMSK3                            C   P18F46J50.INC                      798* 1781* 1798*
+ADMSK4                            C   P18F46J50.INC                      799* 1782* 1799*
+ADMSK5                            C   P18F46J50.INC                      800* 1783* 1800*
+ADON                              C   P18F46J50.INC                     1751*
+ADRES                             C   P18F46J50.INC                      271*
+ADRESH                            C   P18F46J50.INC                      273*
+ADRESL                            C   P18F46J50.INC                      272*
+ADRMUX0                           C   P18F46J50.INC                      711*
+ADRMUX1                           C   P18F46J50.INC                      712*
+ALP                               C   P18F46J50.INC                      702*
+ALRMCFG                           C   P18F46J50.INC                      210*
+ALRMEN                            C   P18F46J50.INC                     1167*
+ALRMPTR0                          C   P18F46J50.INC                     1169*
+ALRMPTR1                          C   P18F46J50.INC                     1170*
+ALRMRPT                           C   P18F46J50.INC                      209*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  2
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+ALRMVALH                          C   P18F46J50.INC                      208*
+ALRMVALL                          C   P18F46J50.INC                      207*
+AMASK0                            C   P18F46J50.INC                     1171*
+AMASK1                            C   P18F46J50.INC                     1172*
+AMASK2                            C   P18F46J50.INC                     1173*
+AMASK3                            C   P18F46J50.INC                     1174*
+AN0                               C   P18F46J50.INC                      908*
+AN1                               C   P18F46J50.INC                      909*
+AN10                              C   P18F46J50.INC                      950*
+AN11                              C   P18F46J50.INC                     1001*
+AN12                              C   P18F46J50.INC                      949*
+AN2                               C   P18F46J50.INC                      910*
+AN3                               C   P18F46J50.INC                      911*
+AN4                               C   P18F46J50.INC                      912*
+AN5                               C   P18F46J50.INC                     1063*
+AN6                               C   P18F46J50.INC                     1064*
+AN7                               C   P18F46J50.INC                     1065*
+AN8                               C   P18F46J50.INC                      951*
+AN9                               C   P18F46J50.INC                      952*
+ANCON0                            C   P18F46J50.INC                      132*
+ANCON1                            C   P18F46J50.INC                      133*
+ARG1H                             A   SQUAREROOT.S                       113*  117*  209.  260.  261.  266.  274.
+ARG1L                             A   SQUAREROOT.S                       114*  117*  208.  255.  256.  265.  275.
+ARG2H                             A   SQUAREROOT.S                       115*  117*
+ARG2L                             A   SQUAREROOT.S                       116*  117*
+ARGA0                             A   SQUAREROOT.S                       108*  112*  147.  171.  212.
+ARGA1                             A   SQUAREROOT.S                       109*  112*  149.  173.  214.
+ARGA2                             A   SQUAREROOT.S                       110*  112*  151.  156.  216.
+ARGA3                             A   SQUAREROOT.S                       111*  112*  153.  154.  218.
+ARPT0                             C   P18F46J50.INC                     1155*
+ARPT1                             C   P18F46J50.INC                     1156*
+ARPT2                             C   P18F46J50.INC                     1157*
+ARPT3                             C   P18F46J50.INC                     1158*
+ARPT4                             C   P18F46J50.INC                     1159*
+ARPT5                             C   P18F46J50.INC                     1160*
+ARPT6                             C   P18F46J50.INC                     1161*
+ARPT7                             C   P18F46J50.INC                     1162*
+BANKED                            C   SQUAREROOT.S                       154.  156.  164.  166.  167.  168.  169.  171.  173.  178.
+                                                                         179.  180.  181.  185.  186.  187.  188.  201.  202.  203.
+                                                                         204.  206.  207.  211.  212.  213.  214.  215.  216.  217.
+                                                                         218.  225.  226.  227.  228.  229.  230.  237.  238.  239.
+                                                                         240.  241.  242.  255.  260.  265.  269.  271.  273.  274.
+                                                                         278.  280.  282.
+                                      P18F46J50.INC                       48*
+BAUDCON                           C   P18F46J50.INC                      189*
+BAUDCON1                          C   P18F46J50.INC                      190*
+BAUDCON2                          C   P18F46J50.INC                      187*
+BAUDCTL                           C   P18F46J50.INC                      191*
+BCL1IE                            C   P18F46J50.INC                     1336*
+BCL1IF                            C   P18F46J50.INC                     1349*
+BCL1IP                            C   P18F46J50.INC                     1362*
+BCL2IE                            C   P18F46J50.INC                     1378*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  3
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+BCL2IF                            C   P18F46J50.INC                     1389*
+BCL2IP                            C   P18F46J50.INC                     1400*
+BCLIE                             C   P18F46J50.INC                     1342*
+BCLIF                             C   P18F46J50.INC                     1355*
+BCLIP                             C   P18F46J50.INC                     1368*
+BEP                               C   P18F46J50.INC                      699*
+BF                                C   P18F46J50.INC                      816* 1846* 1906*
+BF1                               C   P18F46J50.INC                     1875* 1935*
+BGVST                             C   P18F46J50.INC                     1075*
+BITLOC0                           A   SQUAREROOT.S                       129*  166.  178.  179.  181.  185.  186.  188.  203.  226.
+                                                                         229.  238.  241.
+BITLOC1                           A   SQUAREROOT.S                       130*  206.  225.  227.  237.  239.
+BOR                               C   P18F46J50.INC                     2045*
+BRG16                             C   P18F46J50.INC                      862*  872*  882*  892*
+BRGH                              C   P18F46J50.INC                     1415* 1491* 1516*
+BRGH1                             C   P18F46J50.INC                     1505* 1530*
+BRGH2                             C   P18F46J50.INC                     1424*
+BSR                               C   P18F46J50.INC                      309*
+BTOEE                             C   P18F46J50.INC                      493*
+BTOEF                             C   P18F46J50.INC                      749*
+BTSEE                             C   P18F46J50.INC                      494*
+BTSEF                             C   P18F46J50.INC                      750*
+BUSY                              C   P18F46J50.INC                      693*
+C                                 C   SQUAREROOT.S                       174.  219.  231.  243.
+                                      P18F46J50.INC                     2143*
+C1INA                             C   P18F46J50.INC                      916*
+C1INB                             C   P18F46J50.INC                      927*
+C2INA                             C   P18F46J50.INC                      917*
+C2INB                             C   P18F46J50.INC                      932*
+CAL0                              C   P18F46J50.INC                      535*
+CAL1                              C   P18F46J50.INC                      536*
+CAL2                              C   P18F46J50.INC                      537*
+CAL3                              C   P18F46J50.INC                      538*
+CAL4                              C   P18F46J50.INC                      539*
+CAL5                              C   P18F46J50.INC                      540*
+CAL6                              C   P18F46J50.INC                      541*
+CAL7                              C   P18F46J50.INC                      542*
+CCH0                              C   P18F46J50.INC                     2059* 2071* 2083* 2104*
+CCH01                             C   P18F46J50.INC                     2088* 2109*
+CCH1                              C   P18F46J50.INC                     2060* 2072* 2084* 2105*
+CCH11                             C   P18F46J50.INC                     2089* 2110*
+CCP1CON                           C   P18F46J50.INC                      259*
+CCP1IE                            C   P18F46J50.INC                     1290*
+CCP1IF                            C   P18F46J50.INC                     1305*
+CCP1IP                            C   P18F46J50.INC                     1320*
+CCP1M0                            C   P18F46J50.INC                     1653* 1667*
+CCP1M1                            C   P18F46J50.INC                     1654* 1668*
+CCP1M2                            C   P18F46J50.INC                     1655* 1669*
+CCP1M3                            C   P18F46J50.INC                     1656* 1670*
+CCP1X                             C   P18F46J50.INC                     1663* 1677*
+CCP1Y                             C   P18F46J50.INC                     1662* 1676*
+CCP2CON                           C   P18F46J50.INC                      250*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  4
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+CCP2IE                            C   P18F46J50.INC                     1333*
+CCP2IF                            C   P18F46J50.INC                     1346*
+CCP2IP                            C   P18F46J50.INC                     1359*
+CCP2M0                            C   P18F46J50.INC                     1571* 1585*
+CCP2M1                            C   P18F46J50.INC                     1572* 1586*
+CCP2M2                            C   P18F46J50.INC                     1573* 1587*
+CCP2M3                            C   P18F46J50.INC                     1574* 1588*
+CCP2X                             C   P18F46J50.INC                     1581* 1595*
+CCP2Y                             C   P18F46J50.INC                     1580* 1594*
+CCPR1                             C   P18F46J50.INC                      261*
+CCPR1H                            C   P18F46J50.INC                      263*
+CCPR1L                            C   P18F46J50.INC                      262*
+CCPR2                             C   P18F46J50.INC                      252*
+CCPR2H                            C   P18F46J50.INC                      254*
+CCPR2L                            C   P18F46J50.INC                      253*
+CHIME                             C   P18F46J50.INC                     1166*
+CHS0                              C   P18F46J50.INC                     1755*
+CHS1                              C   P18F46J50.INC                     1756*
+CHS2                              C   P18F46J50.INC                     1757*
+CHS3                              C   P18F46J50.INC                     1758*
+CK1                               C   P18F46J50.INC                     1018*
+CKE                               C   P18F46J50.INC                      822* 1852* 1912*
+CKE1                              C   P18F46J50.INC                     1881* 1941*
+CKP                               C   P18F46J50.INC                      804* 1804* 1825*
+CKP1                              C   P18F46J50.INC                     1818* 1839*
+CLKI                              C   P18F46J50.INC                      922*
+CLKO                              C   P18F46J50.INC                      921*
+CM                                C   P18F46J50.INC                     2050*
+CM1CON                            C   P18F46J50.INC                      294*
+CM1CON1                           C   P18F46J50.INC                      295*
+CM1IE                             C   P18F46J50.INC                     1338*
+CM1IF                             C   P18F46J50.INC                     1351*
+CM1IP                             C   P18F46J50.INC                     1364*
+CM2CON                            C   P18F46J50.INC                      292*
+CM2CON1                           C   P18F46J50.INC                      293*
+CM2IE                             C   P18F46J50.INC                     1339*
+CM2IF                             C   P18F46J50.INC                     1352*
+CM2IP                             C   P18F46J50.INC                     1365*
+CMPL0                             C   P18F46J50.INC                     1640* 1722*
+CMPL1                             C   P18F46J50.INC                     1641* 1723*
+CMSTAT                            C   P18F46J50.INC                      173*
+CMSTATUS                          C   P18F46J50.INC                      174*
+COE                               C   P18F46J50.INC                     2056* 2068* 2080* 2101*
+COE1                              C   P18F46J50.INC                     2094* 2115*
+CON                               C   P18F46J50.INC                     2057* 2069* 2081* 2102*
+CON1                              C   P18F46J50.INC                     2095* 2116*
+COUT1                             C   P18F46J50.INC                      777*  782*
+COUT2                             C   P18F46J50.INC                      778*  783*
+CPOL                              C   P18F46J50.INC                     2055* 2067* 2079* 2100*
+CPOL1                             C   P18F46J50.INC                     2093* 2114*
+CRC16EE                           C   P18F46J50.INC                      491*
+CRC16EF                           C   P18F46J50.INC                      747*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  5
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+CRC5EE                            C   P18F46J50.INC                      490*
+CRC5EF                            C   P18F46J50.INC                      746*
+CREF                              C   P18F46J50.INC                     2054* 2066* 2078* 2099*
+CREF1                             C   P18F46J50.INC                     2090* 2111*
+CREN                              C   P18F46J50.INC                     1272* 1437* 1465*
+CREN1                             C   P18F46J50.INC                     1454* 1482*
+CREN2                             C   P18F46J50.INC                     1281*
+CS1                               C   P18F46J50.INC                      773*
+CS1P                              C   P18F46J50.INC                      700*
+CS2P                              C   P18F46J50.INC                      701*
+CSF0                              C   P18F46J50.INC                      703*
+CSF1                              C   P18F46J50.INC                      704*
+CSRC                              C   P18F46J50.INC                     1420* 1496* 1521*
+CSRC1                             C   P18F46J50.INC                     1510* 1535*
+CSRC2                             C   P18F46J50.INC                     1429*
+CTEDG1                            C   P18F46J50.INC                      960*
+CTEDG2                            C   P18F46J50.INC                      961*
+CTMUCONH                          C   P18F46J50.INC                      249*
+CTMUCONL                          C   P18F46J50.INC                      248*
+CTMUEN                            C   P18F46J50.INC                     1567*
+CTMUICON                          C   P18F46J50.INC                      247*
+CTMUIE                            C   P18F46J50.INC                     1374*
+CTMUIF                            C   P18F46J50.INC                     1385*
+CTMUIP                            C   P18F46J50.INC                     1396*
+CTMUSIDL                          C   P18F46J50.INC                     1566*
+CTPLS                             C   P18F46J50.INC                     1009*
+CTTRIG                            C   P18F46J50.INC                     1561*
+CVR0                              C   P18F46J50.INC                      628*
+CVR1                              C   P18F46J50.INC                      629*
+CVR2                              C   P18F46J50.INC                      630*
+CVR3                              C   P18F46J50.INC                      631*
+CVRCON                            C   P18F46J50.INC                      141*
+CVREF_MINUS                       C   P18F46J50.INC                      926*
+CVREN                             C   P18F46J50.INC                      626*
+CVROE                             C   P18F46J50.INC                      625*
+CVRR                              C   P18F46J50.INC                      624*
+CVRSS                             C   P18F46J50.INC                      623*
+D                                 C   P18F46J50.INC                     1856* 1916*
+D1                                C   P18F46J50.INC                     1885* 1945*
+DATA_ADDRESS                      C   P18F46J50.INC                     1868* 1928*
+DATA_ADDRESS1                     C   P18F46J50.INC                     1897* 1957*
+DC                                C   P18F46J50.INC                     2144*
+DC1B0                             C   P18F46J50.INC                     1657* 1671*
+DC1B1                             C   P18F46J50.INC                     1658* 1672*
+DC2B0                             C   P18F46J50.INC                     1575* 1589*
+DC2B1                             C   P18F46J50.INC                     1576* 1590*
+DDRA                              M   P18F46J50.INC                       54*
+DDRB                              M   P18F46J50.INC                       55*
+DDRC                              M   P18F46J50.INC                       56*
+DDRD                              M   P18F46J50.INC                       57*
+DDRE                              M   P18F46J50.INC                       58*
+DFN8EE                            C   P18F46J50.INC                      492*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  6
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+DFN8EF                            C   P18F46J50.INC                      748*
+DIR                               C   P18F46J50.INC                      755*
+DLYCYC0                           C   P18F46J50.INC                     1089*
+DLYCYC1                           C   P18F46J50.INC                     1090*
+DLYCYC2                           C   P18F46J50.INC                     1091*
+DLYCYC3                           C   P18F46J50.INC                     1092*
+DLYINTEN                          C   P18F46J50.INC                     1097*
+DMABCH                            C   P18F46J50.INC                      161*
+DMABCL                            C   P18F46J50.INC                      162*
+DMACON1                           C   P18F46J50.INC                      201*
+DMACON2                           C   P18F46J50.INC                      200*
+DMAEN                             C   P18F46J50.INC                     1096*
+DONE                              C   P18F46J50.INC                     1762*
+DS                                C   P18F46J50.INC                     1730*
+DSBOR                             C   P18F46J50.INC                      606*
+DSCONH                            C   P18F46J50.INC                      137*
+DSCONL                            C   P18F46J50.INC                      136*
+DSEN                              C   P18F46J50.INC                      613*
+DSFLT                             C   P18F46J50.INC                      597*
+DSGPR0                            C   P18F46J50.INC                      138*
+DSGPR1                            C   P18F46J50.INC                      139*
+DSINT0                            C   P18F46J50.INC                      601*
+DSMCLR                            C   P18F46J50.INC                      593*
+DSPOR                             C   P18F46J50.INC                      592*
+DSRTC                             C   P18F46J50.INC                      594*
+DSULP                             C   P18F46J50.INC                      596*
+DSULPEN                           C   P18F46J50.INC                      612*
+DSWAKEH                           C   P18F46J50.INC                      135*
+DSWAKEL                           C   P18F46J50.INC                      134*
+DSWDT                             C   P18F46J50.INC                      595*
+DT1                               C   P18F46J50.INC                     1019*
+DUPLEX0                           C   P18F46J50.INC                     1098*
+DUPLEX1                           C   P18F46J50.INC                     1099*
+D_A                               C   P18F46J50.INC                     1859* 1919*
+D_A1                              C   P18F46J50.INC                     1887* 1947*
+D_MINUS                           C   P18F46J50.INC                     1002*
+D_NOT_A                           C   P18F46J50.INC                      821* 1851* 1911*
+D_NOT_A1                          C   P18F46J50.INC                     1880* 1940*
+D_PLUS                            C   P18F46J50.INC                     1003*
+Done                              A   SQUAREROOT.S                       182.  189.  191*
+Done32                            A   SQUAREROOT.S                       232.  244.  246*
+ECCP1AS                           C   P18F46J50.INC                      266*
+ECCP1AS0                          C   P18F46J50.INC                     1711*
+ECCP1AS1                          C   P18F46J50.INC                     1712*
+ECCP1AS2                          C   P18F46J50.INC                     1713*
+ECCP1ASE                          C   P18F46J50.INC                     1705*
+ECCP1CON                          C   P18F46J50.INC                      260*
+ECCP1DEL                          C   P18F46J50.INC                      264*
+ECCP1OD                           C   P18F46J50.INC                      566*
+ECCP2AS                           C   P18F46J50.INC                      257*
+ECCP2AS0                          C   P18F46J50.INC                     1629*
+ECCP2AS1                          C   P18F46J50.INC                     1630*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  7
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+ECCP2AS2                          C   P18F46J50.INC                     1631*
+ECCP2ASE                          C   P18F46J50.INC                     1623*
+ECCP2CON                          C   P18F46J50.INC                      251*
+ECCP2DEL                          C   P18F46J50.INC                      255*
+ECCP2OD                           C   P18F46J50.INC                      567*
+EDG1POL                           C   P18F46J50.INC                     1554*
+EDG1SEL0                          C   P18F46J50.INC                     1552*
+EDG1SEL1                          C   P18F46J50.INC                     1553*
+EDG1STAT                          C   P18F46J50.INC                     1550*
+EDG2POL                           C   P18F46J50.INC                     1557*
+EDG2SEL0                          C   P18F46J50.INC                     1555*
+EDG2SEL1                          C   P18F46J50.INC                     1556*
+EDG2STAT                          C   P18F46J50.INC                     1551*
+EDGEN                             C   P18F46J50.INC                     1564*
+EDGSEQEN                          C   P18F46J50.INC                     1563*
+EECON1                            C   P18F46J50.INC                      231*
+EECON2                            C   P18F46J50.INC                      232*
+ENDP0                             C   P18F46J50.INC                      757*
+ENDP1                             C   P18F46J50.INC                      758*
+ENDP2                             C   P18F46J50.INC                      759*
+ENDP3                             C   P18F46J50.INC                      760*
+EPCONDIS                          C   P18F46J50.INC                      354*  362*  370*  378*  386*  394*  402*  410*  418*  426*
+                                                                         434*  442*  450*  458*  466*  474*
+EPHSHK                            C   P18F46J50.INC                      355*  363*  371*  379*  387*  395*  403*  411*  419*  427*
+                                                                         435*  443*  451*  459*  467*  475*
+EPINEN                            C   P18F46J50.INC                      352*  360*  368*  376*  384*  392*  400*  408*  416*  424*
+                                                                         432*  440*  448*  456*  464*  472*
+EPOUTEN                           C   P18F46J50.INC                      353*  361*  369*  377*  385*  393*  401*  409*  417*  425*
+                                                                         433*  441*  449*  457*  465*  473*
+EPSTALL                           C   P18F46J50.INC                      351*  359*  367*  375*  383*  391*  399*  407*  415*  423*
+                                                                         431*  439*  447*  455*  463*  471*
+EVPOL0                            C   P18F46J50.INC                     2061* 2073* 2085* 2106*
+EVPOL01                           C   P18F46J50.INC                     2091* 2112*
+EVPOL1                            C   P18F46J50.INC                     2062* 2074* 2086* 2107*
+EVPOL11                           C   P18F46J50.INC                     2092* 2113*
+FAST                              C   P18F46J50.INC                       43*
+FERR                              C   P18F46J50.INC                     1270* 1435* 1463*
+FERR1                             C   P18F46J50.INC                     1452* 1480*
+FERR2                             C   P18F46J50.INC                     1279*
+FREE                              C   P18F46J50.INC                     1408*
+FRM0                              C   P18F46J50.INC                      718*
+FRM1                              C   P18F46J50.INC                      719*
+FRM10                             C   P18F46J50.INC                      731*
+FRM2                              C   P18F46J50.INC                      720*
+FRM3                              C   P18F46J50.INC                      721*
+FRM4                              C   P18F46J50.INC                      722*
+FRM5                              C   P18F46J50.INC                      723*
+FRM6                              C   P18F46J50.INC                      724*
+FRM7                              C   P18F46J50.INC                      725*
+FRM8                              C   P18F46J50.INC                      729*
+FRM9                              C   P18F46J50.INC                      730*
+FSEN                              C   P18F46J50.INC                      510*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  8
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+FSR0                              C   P18F46J50.INC                       39*
+FSR0H                             C   P18F46J50.INC                      319*
+FSR0L                             C   P18F46J50.INC                      318*
+FSR1                              C   P18F46J50.INC                       40*
+FSR1H                             C   P18F46J50.INC                      311*
+FSR1L                             C   P18F46J50.INC                      310*
+FSR2                              C   P18F46J50.INC                       41*
+FSR2H                             C   P18F46J50.INC                      303*
+FSR2L                             C   P18F46J50.INC                      302*
+GCEN                              C   P18F46J50.INC                      794* 1777* 1794*
+GIE                               C   P18F46J50.INC                     2200*
+GIEH                              C   P18F46J50.INC                     2203*
+GIEL                              C   P18F46J50.INC                     2202*
+GIE_GIEH                          C   P18F46J50.INC                     2193*
+GO                                C   P18F46J50.INC                     1764*
+GO_DONE                           C   P18F46J50.INC                     1754*
+GO_NOT_DONE                       C   P18F46J50.INC                     1752*
+HALFSEC                           C   P18F46J50.INC                      549*
+HLVDCON                           C   P18F46J50.INC                      199*
+HLVDEN                            C   P18F46J50.INC                     1073*
+HLVDIN                            C   P18F46J50.INC                      928*
+HLVDL0                            C   P18F46J50.INC                     1078*
+HLVDL1                            C   P18F46J50.INC                     1079*
+HLVDL2                            C   P18F46J50.INC                     1080*
+HLVDL3                            C   P18F46J50.INC                     1081*
+I2C_DAT                           C   P18F46J50.INC                     1873* 1933*
+I2C_DAT1                          C   P18F46J50.INC                     1902* 1962*
+I2C_READ                          C   P18F46J50.INC                     1870* 1930*
+I2C_READ1                         C   P18F46J50.INC                     1899* 1959*
+I2C_START                         C   P18F46J50.INC                     1871* 1931*
+I2C_START1                        C   P18F46J50.INC                     1900* 1960*
+I2C_STOP                          C   P18F46J50.INC                     1872* 1932*
+I2C_STOP1                         C   P18F46J50.INC                     1901* 1961*
+IB0F                              C   P18F46J50.INC                      644*
+IB1F                              C   P18F46J50.INC                      645*
+IB2F                              C   P18F46J50.INC                      646*
+IB3F                              C   P18F46J50.INC                      647*
+IBF                               C   P18F46J50.INC                      649*
+IBOV                              C   P18F46J50.INC                      648*
+IDISSEN                           C   P18F46J50.INC                     1562*
+IDLEIE                            C   P18F46J50.INC                      483*
+IDLEIF                            C   P18F46J50.INC                      739*
+IDLEN                             C   P18F46J50.INC                     2121*
+INCM0                             C   P18F46J50.INC                      689*
+INCM1                             C   P18F46J50.INC                      690*
+INDF0                             C   P18F46J50.INC                      324*
+INDF1                             C   P18F46J50.INC                      316*
+INDF2                             C   P18F46J50.INC                      308*
+INT0                              C   P18F46J50.INC                      958*
+INT0E                             C   P18F46J50.INC                     2197*
+INT0F                             C   P18F46J50.INC                     2195*
+INT0IE                            C   P18F46J50.INC                     2190*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  9
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+INT0IF                            C   P18F46J50.INC                     2187*
+INT1E                             C   P18F46J50.INC                     2163*
+INT1F                             C   P18F46J50.INC                     2160*
+INT1IE                            C   P18F46J50.INC                     2154*
+INT1IF                            C   P18F46J50.INC                     2151*
+INT1IP                            C   P18F46J50.INC                     2157*
+INT1P                             C   P18F46J50.INC                     2166*
+INT2E                             C   P18F46J50.INC                     2164*
+INT2F                             C   P18F46J50.INC                     2161*
+INT2IE                            C   P18F46J50.INC                     2155*
+INT2IF                            C   P18F46J50.INC                     2152*
+INT2IP                            C   P18F46J50.INC                     2158*
+INT2P                             C   P18F46J50.INC                     2167*
+INT3E                             C   P18F46J50.INC                     2165*
+INT3F                             C   P18F46J50.INC                     2162*
+INT3IE                            C   P18F46J50.INC                     2156*
+INT3IF                            C   P18F46J50.INC                     2153*
+INT3IP                            C   P18F46J50.INC                     2172*
+INT3P                             C   P18F46J50.INC                     2180*
+INTCON                            C   P18F46J50.INC                      327*
+INTCON2                           C   P18F46J50.INC                      326*
+INTCON3                           C   P18F46J50.INC                      325*
+INTEDG0                           C   P18F46J50.INC                     2177*
+INTEDG1                           C   P18F46J50.INC                     2176*
+INTEDG2                           C   P18F46J50.INC                     2175*
+INTEDG3                           C   P18F46J50.INC                     2174*
+INTLVL0                           C   P18F46J50.INC                     1085*
+INTLVL1                           C   P18F46J50.INC                     1086*
+INTLVL2                           C   P18F46J50.INC                     1087*
+INTLVL3                           C   P18F46J50.INC                     1088*
+INTSRC                            C   P18F46J50.INC                     1257*
+IOLOCK                            C   P18F46J50.INC                      347*
+IPEN                              C   P18F46J50.INC                     2043*
+IPR1                              C   P18F46J50.INC                      224*
+IPR2                              C   P18F46J50.INC                      227*
+IPR3                              C   P18F46J50.INC                      230*
+IRCF0                             C   P18F46J50.INC                     2125*
+IRCF1                             C   P18F46J50.INC                     2126*
+IRCF2                             C   P18F46J50.INC                     2127*
+IRNG0                             C   P18F46J50.INC                     1539*
+IRNG1                             C   P18F46J50.INC                     1540*
+IRQM0                             C   P18F46J50.INC                      691*
+IRQM1                             C   P18F46J50.INC                      692*
+IRVST                             C   P18F46J50.INC                     1074*
+ITRIM0                            C   P18F46J50.INC                     1541*
+ITRIM1                            C   P18F46J50.INC                     1542*
+ITRIM2                            C   P18F46J50.INC                     1543*
+ITRIM3                            C   P18F46J50.INC                     1544*
+ITRIM4                            C   P18F46J50.INC                     1545*
+ITRIM5                            C   P18F46J50.INC                     1546*
+KBI0                              C   P18F46J50.INC                      962*
+KBI1                              C   P18F46J50.INC                      963*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 10
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+KBI2                              C   P18F46J50.INC                      955*
+KBI3                              C   P18F46J50.INC                      956*
+LATA                              C   P18F46J50.INC                      202*
+LATA0                             C   P18F46J50.INC                     1107*
+LATA1                             C   P18F46J50.INC                     1108*
+LATA2                             C   P18F46J50.INC                     1109*
+LATA3                             C   P18F46J50.INC                     1110*
+LATA5                             C   P18F46J50.INC                     1111*
+LATA6                             C   P18F46J50.INC                     1112*
+LATA7                             C   P18F46J50.INC                     1113*
+LATB                              C   P18F46J50.INC                      203*
+LATB0                             C   P18F46J50.INC                     1117*
+LATB1                             C   P18F46J50.INC                     1118*
+LATB2                             C   P18F46J50.INC                     1119*
+LATB3                             C   P18F46J50.INC                     1120*
+LATB4                             C   P18F46J50.INC                     1121*
+LATB5                             C   P18F46J50.INC                     1122*
+LATB6                             C   P18F46J50.INC                     1123*
+LATB7                             C   P18F46J50.INC                     1124*
+LATC                              C   P18F46J50.INC                      204*
+LATC0                             C   P18F46J50.INC                     1128*
+LATC1                             C   P18F46J50.INC                     1129*
+LATC2                             C   P18F46J50.INC                     1130*
+LATC4                             C   P18F46J50.INC                     1131*
+LATC5                             C   P18F46J50.INC                     1132*
+LATC6                             C   P18F46J50.INC                     1133*
+LATC7                             C   P18F46J50.INC                     1134*
+LATD                              C   P18F46J50.INC                      205*
+LATD0                             C   P18F46J50.INC                     1138*
+LATD1                             C   P18F46J50.INC                     1139*
+LATD2                             C   P18F46J50.INC                     1140*
+LATD3                             C   P18F46J50.INC                     1141*
+LATD4                             C   P18F46J50.INC                     1142*
+LATD5                             C   P18F46J50.INC                     1143*
+LATD6                             C   P18F46J50.INC                     1144*
+LATD7                             C   P18F46J50.INC                     1145*
+LATE                              C   P18F46J50.INC                      206*
+LATE0                             C   P18F46J50.INC                     1149*
+LATE1                             C   P18F46J50.INC                     1150*
+LATE2                             C   P18F46J50.INC                     1151*
+LVDIE                             C   P18F46J50.INC                     1335*
+LVDIF                             C   P18F46J50.INC                     1348*
+LVDIP                             C   P18F46J50.INC                     1361*
+LVDSTAT                           C   P18F46J50.INC                     1732*
+MODE0                             C   P18F46J50.INC                      686*
+MODE1                             C   P18F46J50.INC                      687*
+MODE16                            C   P18F46J50.INC                      688*
+MSK0                              C   P18F46J50.INC                      827* 1966* 1986*
+MSK01                             C   P18F46J50.INC                     1975* 1995*
+MSK1                              C   P18F46J50.INC                      828* 1967* 1987*
+MSK11                             C   P18F46J50.INC                     1976* 1996*
+MSK2                              C   P18F46J50.INC                      829* 1968* 1988*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 11
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+MSK21                             C   P18F46J50.INC                     1977* 1997*
+MSK3                              C   P18F46J50.INC                      830* 1969* 1989*
+MSK31                             C   P18F46J50.INC                     1978* 1998*
+MSK4                              C   P18F46J50.INC                      831* 1970* 1990*
+MSK41                             C   P18F46J50.INC                     1979* 1999*
+MSK5                              C   P18F46J50.INC                      832* 1971* 1991*
+MSK51                             C   P18F46J50.INC                     1980* 2000*
+MSK6                              C   P18F46J50.INC                      833* 1972* 1992*
+MSK61                             C   P18F46J50.INC                     1981* 2001*
+MSK7                              C   P18F46J50.INC                      834* 1973* 1993*
+MSK71                             C   P18F46J50.INC                     1982* 2002*
+N                                 C   P18F46J50.INC                     2147*
+NOT_A                             C   P18F46J50.INC                     1862* 1922*
+NOT_A1                            C   P18F46J50.INC                     1891* 1951*
+NOT_ADDRESS                       C   P18F46J50.INC                     1865* 1925*
+NOT_ADDRESS1                      C   P18F46J50.INC                     1894* 1954*
+NOT_BOR                           C   P18F46J50.INC                     2037*
+NOT_CM                            C   P18F46J50.INC                     2042*
+NOT_DONE                          C   P18F46J50.INC                     1766*
+NOT_PD                            C   P18F46J50.INC                     2039*
+NOT_POR                           C   P18F46J50.INC                     2038*
+NOT_RBPU                          C   P18F46J50.INC                     2178*
+NOT_RC8                           C   P18F46J50.INC                     1446* 1474*
+NOT_RI                            C   P18F46J50.INC                     2041*
+NOT_SS1                           C   P18F46J50.INC                      920*
+NOT_TO                            C   P18F46J50.INC                     2040*
+NOT_TX8                           C   P18F46J50.INC                     1501* 1526*
+NOT_UOE                           C   P18F46J50.INC                     1008*
+NOT_W                             C   P18F46J50.INC                     1861* 1921*
+NOT_W1                            C   P18F46J50.INC                     1890* 1950*
+NOT_WRITE                         C   P18F46J50.INC                     1864* 1924*
+NOT_WRITE1                        C   P18F46J50.INC                     1893* 1953*
+NextBit                           A   SQUAREROOT.S                       175.  184*
+NxtBt16                           A   SQUAREROOT.S                       220.  234*
+OB0E                              C   P18F46J50.INC                      635*
+OB1E                              C   P18F46J50.INC                      636*
+OB2E                              C   P18F46J50.INC                      637*
+OB3E                              C   P18F46J50.INC                      638*
+OBE                               C   P18F46J50.INC                      640*
+OBUF                              C   P18F46J50.INC                      639*
+ODCON1                            C   P18F46J50.INC                      131*
+ODCON2                            C   P18F46J50.INC                      130*
+ODCON3                            C   P18F46J50.INC                      129*
+OERR                              C   P18F46J50.INC                     1269* 1434* 1462*
+OERR1                             C   P18F46J50.INC                     1451* 1479*
+OERR2                             C   P18F46J50.INC                     1278*
+OSC1                              C   P18F46J50.INC                      914*
+OSC2                              C   P18F46J50.INC                      913*
+OSCCON                            C   P18F46J50.INC                      296*
+OSCFIE                            C   P18F46J50.INC                     1340*
+OSCFIF                            C   P18F46J50.INC                     1353*
+OSCFIP                            C   P18F46J50.INC                     1366*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 12
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+OSCTUNE                           C   P18F46J50.INC                      220*
+OSTS                              C   P18F46J50.INC                     2120*
+OV                                C   P18F46J50.INC                     2146*
+P                                 C   P18F46J50.INC                      820* 1850* 1910*
+P1                                C   P18F46J50.INC                     1879* 1939*
+P1DC0                             C   P18F46J50.INC                     1683* 1695*
+P1DC1                             C   P18F46J50.INC                     1684* 1696*
+P1DC2                             C   P18F46J50.INC                     1685* 1697*
+P1DC3                             C   P18F46J50.INC                     1686* 1698*
+P1DC4                             C   P18F46J50.INC                     1687* 1699*
+P1DC5                             C   P18F46J50.INC                     1688* 1700*
+P1DC6                             C   P18F46J50.INC                     1689* 1701*
+P1M0                              C   P18F46J50.INC                     1659* 1673*
+P1M1                              C   P18F46J50.INC                     1660* 1674*
+P1RSEN                            C   P18F46J50.INC                     1681* 1693*
+P2DC0                             C   P18F46J50.INC                     1601* 1613* 1643*
+P2DC1                             C   P18F46J50.INC                     1602* 1614* 1644*
+P2DC2                             C   P18F46J50.INC                     1603* 1615* 1645*
+P2DC3                             C   P18F46J50.INC                     1604* 1616* 1646*
+P2DC4                             C   P18F46J50.INC                     1605* 1617* 1647*
+P2DC5                             C   P18F46J50.INC                     1606* 1618* 1648*
+P2DC6                             C   P18F46J50.INC                     1607* 1619* 1649*
+P2M0                              C   P18F46J50.INC                     1577* 1591*
+P2M1                              C   P18F46J50.INC                     1578* 1592*
+P2RSEN                            C   P18F46J50.INC                     1599* 1611*
+PADCFG1                           C   P18F46J50.INC                      125*
+PC                                C   P18F46J50.INC                      336*
+PCFG0                             C   P18F46J50.INC                      571*
+PCFG1                             C   P18F46J50.INC                      572*
+PCFG10                            C   P18F46J50.INC                      584*
+PCFG11                            C   P18F46J50.INC                      585*
+PCFG12                            C   P18F46J50.INC                      586*
+PCFG2                             C   P18F46J50.INC                      573*
+PCFG3                             C   P18F46J50.INC                      574*
+PCFG4                             C   P18F46J50.INC                      575*
+PCFG5                             C   P18F46J50.INC                      576*
+PCFG6                             C   P18F46J50.INC                      577*
+PCFG7                             C   P18F46J50.INC                      578*
+PCFG8                             C   P18F46J50.INC                      582*
+PCFG9                             C   P18F46J50.INC                      583*
+PCL                               C   P18F46J50.INC                      337*
+PCLATH                            C   P18F46J50.INC                      338*
+PCLATU                            C   P18F46J50.INC                      339*
+PD                                C   P18F46J50.INC                     2047*
+PEIE                              C   P18F46J50.INC                     2199*
+PEIE_GIEL                         C   P18F46J50.INC                     2192*
+PEN                               C   P18F46J50.INC                      789* 1772* 1789*
+PGC                               C   P18F46J50.INC                      964*
+PGD                               C   P18F46J50.INC                      965*
+PIDEE                             C   P18F46J50.INC                      489*
+PIDEF                             C   P18F46J50.INC                      745*
+PIE1                              C   P18F46J50.INC                      222*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 13
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+PIE2                              C   P18F46J50.INC                      225*
+PIE3                              C   P18F46J50.INC                      228*
+PIR1                              C   P18F46J50.INC                      223*
+PIR2                              C   P18F46J50.INC                      226*
+PIR3                              C   P18F46J50.INC                      229*
+PKTDIS                            C   P18F46J50.INC                      767*
+PLLEN                             C   P18F46J50.INC                     1256*
+PLUSW0                            C   P18F46J50.INC                      320*
+PLUSW1                            C   P18F46J50.INC                      312*
+PLUSW2                            C   SQUAREROOT.S                       147.  149.  151.  153.
+                                      P18F46J50.INC                      304*
+PMA0                              C   P18F46J50.INC                      954*
+PMA1                              C   P18F46J50.INC                      953*
+PMA2                              C   P18F46J50.INC                      970*
+PMA3                              C   P18F46J50.INC                      969*
+PMA4                              C   P18F46J50.INC                     1005*
+PMA5                              C   P18F46J50.INC                     1004*
+PMA6                              C   P18F46J50.INC                      924*
+PMA7                              C   P18F46J50.INC                      925*
+PMADDRH                           C   P18F46J50.INC                      171*
+PMADDRL                           C   P18F46J50.INC                      169*
+PMCONH                            C   P18F46J50.INC                      153*
+PMCONL                            C   P18F46J50.INC                      152*
+PMD0                              C   P18F46J50.INC                     1037*
+PMD1                              C   P18F46J50.INC                     1038*
+PMD2                              C   P18F46J50.INC                     1039*
+PMD3                              C   P18F46J50.INC                     1040*
+PMD4                              C   P18F46J50.INC                     1041*
+PMD5                              C   P18F46J50.INC                     1042*
+PMD6                              C   P18F46J50.INC                     1043*
+PMD7                              C   P18F46J50.INC                     1044*
+PMDIN1H                           C   P18F46J50.INC                      168*
+PMDIN1L                           C   P18F46J50.INC                      167*
+PMDIN2H                           C   P18F46J50.INC                      147*
+PMDIN2L                           C   P18F46J50.INC                      146*
+PMDOUT1H                          C   P18F46J50.INC                      172*
+PMDOUT1L                          C   P18F46J50.INC                      170*
+PMDOUT2H                          C   P18F46J50.INC                      149*
+PMDOUT2L                          C   P18F46J50.INC                      148*
+PMEH                              C   P18F46J50.INC                      145*
+PMEL                              C   P18F46J50.INC                      144*
+PMMODEH                           C   P18F46J50.INC                      151*
+PMMODEL                           C   P18F46J50.INC                      150*
+PMPBE                             C   P18F46J50.INC                      959*
+PMPCS                             C   P18F46J50.INC                     1069*
+PMPEN                             C   P18F46J50.INC                      714*
+PMPIE                             C   P18F46J50.INC                     1295*
+PMPIF                             C   P18F46J50.INC                     1310*
+PMPIP                             C   P18F46J50.INC                     1325*
+PMPRD                             C   P18F46J50.INC                     1067*
+PMPTTL                            C   P18F46J50.INC                      518*
+PMPWR                             C   P18F46J50.INC                     1068*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 14
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+PMSTATH                           C   P18F46J50.INC                      143*
+PMSTATL                           C   P18F46J50.INC                      142*
+POR                               C   P18F46J50.INC                     2046*
+PORTA                             C   P18F46J50.INC                      194*
+PORTB                             C   P18F46J50.INC                      195*
+PORTC                             C   P18F46J50.INC                      196*
+PORTD                             C   P18F46J50.INC                      197*
+PORTE                             C   P18F46J50.INC                      198*
+POSTDEC0                          C   P18F46J50.INC                      322*
+POSTDEC1                          C   P18F46J50.INC                      314*
+POSTDEC2                          C   P18F46J50.INC                      306*
+POSTINC0                          C   P18F46J50.INC                      323*
+POSTINC1                          C   P18F46J50.INC                      315*
+POSTINC2                          C   P18F46J50.INC                      307*
+PPB0                              C   P18F46J50.INC                      508*
+PPB1                              C   P18F46J50.INC                      509*
+PPBI                              C   P18F46J50.INC                      754*
+PPBRST                            C   P18F46J50.INC                      769*
+PPSCON                            C   P18F46J50.INC                      104*
+PR2                               C   P18F46J50.INC                      285*
+PR4                               C   P18F46J50.INC                      181*
+PREINC0                           C   P18F46J50.INC                      321*
+PREINC1                           C   P18F46J50.INC                      313*
+PREINC2                           C   P18F46J50.INC                      305*
+PROD                              C   P18F46J50.INC                      328*
+PRODH                             C   SQUAREROOT.S                       172.  192.  247.  258.  263.  270.  279.
+                                      P18F46J50.INC                      330*
+PRODL                             C   SQUAREROOT.S                       170.  191.  246.  259.  264.  268.  277.
+                                      P18F46J50.INC                      329*
+PSA                               C   P18F46J50.INC                     2131*
+PSIDL                             C   P18F46J50.INC                      713*
+PSS1AC0                           C   P18F46J50.INC                     1709*
+PSS1AC1                           C   P18F46J50.INC                     1710*
+PSS1BD0                           C   P18F46J50.INC                     1707*
+PSS1BD1                           C   P18F46J50.INC                     1708*
+PSS2AC0                           C   P18F46J50.INC                     1627*
+PSS2AC1                           C   P18F46J50.INC                     1628*
+PSS2BD0                           C   P18F46J50.INC                     1625*
+PSS2BD1                           C   P18F46J50.INC                     1626*
+PSTR1CON                          C   P18F46J50.INC                      267*
+PSTR2CON                          C   P18F46J50.INC                      258*
+PTBEEN                            C   P18F46J50.INC                      710*
+PTEN0                             C   P18F46J50.INC                      653*
+PTEN1                             C   P18F46J50.INC                      654*
+PTEN10                            C   P18F46J50.INC                      666*
+PTEN11                            C   P18F46J50.INC                      667*
+PTEN12                            C   P18F46J50.INC                      668*
+PTEN13                            C   P18F46J50.INC                      669*
+PTEN14                            C   P18F46J50.INC                      670*
+PTEN15                            C   P18F46J50.INC                      671*
+PTEN2                             C   P18F46J50.INC                      655*
+PTEN3                             C   P18F46J50.INC                      656*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 15
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+PTEN4                             C   P18F46J50.INC                      657*
+PTEN5                             C   P18F46J50.INC                      658*
+PTEN6                             C   P18F46J50.INC                      659*
+PTEN7                             C   P18F46J50.INC                      660*
+PTEN8                             C   P18F46J50.INC                      664*
+PTEN9                             C   P18F46J50.INC                      665*
+PTRDEN                            C   P18F46J50.INC                      708*
+PTWREN                            C   P18F46J50.INC                      709*
+PWM1CON                           C   P18F46J50.INC                      265*
+PWM2CON                           C   P18F46J50.INC                      256*
+R                                 C   P18F46J50.INC                     1855* 1915*
+R1                                C   P18F46J50.INC                     1884* 1944*
+RA0                               C   P18F46J50.INC                      900*
+RA1                               C   P18F46J50.INC                      901*
+RA2                               C   P18F46J50.INC                      902*
+RA3                               C   P18F46J50.INC                      903*
+RA5                               C   P18F46J50.INC                      904*
+RA6                               C   P18F46J50.INC                      905*
+RA7                               C   P18F46J50.INC                      906*
+RB0                               C   P18F46J50.INC                      940*
+RB1                               C   P18F46J50.INC                      941*
+RB2                               C   P18F46J50.INC                      942*
+RB3                               C   P18F46J50.INC                      943*
+RB4                               C   P18F46J50.INC                      944*
+RB5                               C   P18F46J50.INC                      945*
+RB6                               C   P18F46J50.INC                      946*
+RB7                               C   P18F46J50.INC                      947*
+RBIE                              C   P18F46J50.INC                     2189*
+RBIF                              C   P18F46J50.INC                     2186*
+RBIP                              C   P18F46J50.INC                     2171*
+RBPU                              C   P18F46J50.INC                     2182*
+RC0                               C   P18F46J50.INC                      991*
+RC1                               C   P18F46J50.INC                      992*
+RC1IE                             C   P18F46J50.INC                     1293*
+RC1IF                             C   P18F46J50.INC                     1308*
+RC1IP                             C   P18F46J50.INC                     1323*
+RC2                               C   P18F46J50.INC                      993*
+RC2IE                             C   P18F46J50.INC                     1377*
+RC2IF                             C   P18F46J50.INC                     1388*
+RC2IP                             C   P18F46J50.INC                     1399*
+RC4                               C   P18F46J50.INC                      994*
+RC5                               C   P18F46J50.INC                      995*
+RC6                               C   P18F46J50.INC                      996*
+RC7                               C   P18F46J50.INC                      997*
+RC8_9                             C   P18F46J50.INC                     1448* 1476*
+RC9                               C   P18F46J50.INC                     1444* 1472*
+RCD8                              C   P18F46J50.INC                     1442* 1470*
+RCEN                              C   P18F46J50.INC                      790* 1773* 1790*
+RCIDL                             C   P18F46J50.INC                      865*  875*  885*  895*
+RCIE                              C   P18F46J50.INC                     1299*
+RCIF                              C   P18F46J50.INC                     1314*
+RCIP                              C   P18F46J50.INC                     1329*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 16
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+RCON                              C   P18F46J50.INC                      291*
+RCREG                             C   P18F46J50.INC                      243*
+RCREG1                            C   P18F46J50.INC                      244*
+RCREG2                            C   P18F46J50.INC                      235*
+RCSTA                             C   P18F46J50.INC                      237*
+RCSTA1                            C   P18F46J50.INC                      238*
+RCSTA2                            C   P18F46J50.INC                      221*
+RCV                               C   P18F46J50.INC                      933*
+RD0                               C   P18F46J50.INC                     1028*
+RD1                               C   P18F46J50.INC                     1029*
+RD16                              C   P18F46J50.INC                      850* 2018*
+RD161                             C   P18F46J50.INC                     2027*
+RD2                               C   P18F46J50.INC                     1030*
+RD3                               C   P18F46J50.INC                     1031*
+RD4                               C   P18F46J50.INC                     1032*
+RD5                               C   P18F46J50.INC                     1033*
+RD6                               C   P18F46J50.INC                     1034*
+RD7                               C   P18F46J50.INC                     1035*
+RDPU                              C   P18F46J50.INC                     1061*
+RDSP                              C   P18F46J50.INC                      697*
+RE0                               C   P18F46J50.INC                     1057*
+RE1                               C   P18F46J50.INC                     1058*
+RE2                               C   P18F46J50.INC                     1059*
+READ_WRITE                        C   P18F46J50.INC                     1867* 1927*
+READ_WRITE1                       C   P18F46J50.INC                     1896* 1956*
+REFO                              C   P18F46J50.INC                      982*
+REFOCON                           C   P18F46J50.INC                      126*
+REGSLP                            C   P18F46J50.INC                     1733*
+RELEASE                           C   P18F46J50.INC                      605*
+REPU                              C   P18F46J50.INC                     1060*
+RES0                              A   SQUAREROOT.S                       122*  123*  167.  168.  169.  177.  180.  184.  187.  204.
+                                                                         208.  223.  230.  235.  242.
+RES1                              A   SQUAREROOT.S                       121*  123*  207.  209.  224.  228.  236.  240.
+RESUME                            C   P18F46J50.INC                      765*
+RI                                C   P18F46J50.INC                     2049*
+RODIV0                            C   P18F46J50.INC                      528*
+RODIV1                            C   P18F46J50.INC                      529*
+RODIV2                            C   P18F46J50.INC                      530*
+RODIV3                            C   P18F46J50.INC                      531*
+ROON                              C   P18F46J50.INC                      526*
+ROSEL                             C   P18F46J50.INC                      524*
+ROSSLP                            C   P18F46J50.INC                      525*
+RP0                               C   P18F46J50.INC                      930*
+RP1                               C   P18F46J50.INC                      931*
+RP10                              C   P18F46J50.INC                      974*
+RP11                              C   P18F46J50.INC                     1015*
+RP12                              C   P18F46J50.INC                     1016*
+RP13                              C   P18F46J50.INC                     1017*
+RP17                              C   P18F46J50.INC                     1021*
+RP18                              C   P18F46J50.INC                     1024*
+RP19                              C   P18F46J50.INC                     1048*
+RP2                               C   P18F46J50.INC                      936*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 17
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+RP20                              C   P18F46J50.INC                     1049*
+RP21                              C   P18F46J50.INC                     1050*
+RP22                              C   P18F46J50.INC                     1051*
+RP23                              C   P18F46J50.INC                     1052*
+RP24                              C   P18F46J50.INC                     1053*
+RP3                               C   P18F46J50.INC                      967*
+RP4                               C   P18F46J50.INC                      976*
+RP5                               C   P18F46J50.INC                      987*
+RP6                               C   P18F46J50.INC                      983*
+RP7                               C   P18F46J50.INC                      984*
+RP8                               C   P18F46J50.INC                      985*
+RP9                               C   P18F46J50.INC                      973*
+RPINR1                            C   P18F46J50.INC                       89*
+RPINR12                           C   P18F46J50.INC                       96*
+RPINR13                           C   P18F46J50.INC                       97*
+RPINR16                           C   P18F46J50.INC                       98*
+RPINR17                           C   P18F46J50.INC                       99*
+RPINR2                            C   P18F46J50.INC                       90*
+RPINR21                           C   P18F46J50.INC                      100*
+RPINR22                           C   P18F46J50.INC                      101*
+RPINR23                           C   P18F46J50.INC                      102*
+RPINR24                           C   P18F46J50.INC                      103*
+RPINR3                            C   P18F46J50.INC                       91*
+RPINR4                            C   P18F46J50.INC                       92*
+RPINR6                            C   P18F46J50.INC                       93*
+RPINR7                            C   P18F46J50.INC                       94*
+RPINR8                            C   P18F46J50.INC                       95*
+RPOR0                             C   P18F46J50.INC                       67*
+RPOR1                             C   P18F46J50.INC                       68*
+RPOR10                            C   P18F46J50.INC                       77*
+RPOR11                            C   P18F46J50.INC                       78*
+RPOR12                            C   P18F46J50.INC                       79*
+RPOR13                            C   P18F46J50.INC                       80*
+RPOR17                            C   P18F46J50.INC                       81*
+RPOR18                            C   P18F46J50.INC                       82*
+RPOR19                            C   P18F46J50.INC                       83*
+RPOR2                             C   P18F46J50.INC                       69*
+RPOR20                            C   P18F46J50.INC                       84*
+RPOR21                            C   P18F46J50.INC                       85*
+RPOR22                            C   P18F46J50.INC                       86*
+RPOR23                            C   P18F46J50.INC                       87*
+RPOR24                            C   P18F46J50.INC                       88*
+RPOR3                             C   P18F46J50.INC                       70*
+RPOR4                             C   P18F46J50.INC                       71*
+RPOR5                             C   P18F46J50.INC                       72*
+RPOR6                             C   P18F46J50.INC                       73*
+RPOR7                             C   P18F46J50.INC                       74*
+RPOR8                             C   P18F46J50.INC                       75*
+RPOR9                             C   P18F46J50.INC                       76*
+RSEN                              C   P18F46J50.INC                      788* 1771* 1788*
+RTCC                              C   P18F46J50.INC                      968*
+RTCCAL                            C   P18F46J50.INC                      127*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 18
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+RTCCFG                            C   P18F46J50.INC                      128*
+RTCCIE                            C   P18F46J50.INC                     1372*
+RTCCIF                            C   P18F46J50.INC                     1383*
+RTCCIP                            C   P18F46J50.INC                     1394*
+RTCEN                             C   P18F46J50.INC                      552*
+RTCOE                             C   P18F46J50.INC                      548*
+RTCPTR0                           C   P18F46J50.INC                      546*
+RTCPTR1                           C   P18F46J50.INC                      547*
+RTCSYNC                           C   P18F46J50.INC                      550*
+RTCVALH                           C   P18F46J50.INC                      218*
+RTCVALL                           C   P18F46J50.INC                      217*
+RTCWDIS                           C   P18F46J50.INC                      611*
+RTCWREN                           C   P18F46J50.INC                      551*
+RTSECSEL0                         C   P18F46J50.INC                      519*
+RTSECSEL1                         C   P18F46J50.INC                      520*
+RX1                               C   P18F46J50.INC                     1013*
+RX9                               C   P18F46J50.INC                     1274* 1439* 1467*
+RX91                              C   P18F46J50.INC                     1456* 1484*
+RX92                              C   P18F46J50.INC                     1283*
+RX9D                              C   P18F46J50.INC                     1268* 1433* 1461*
+RX9D1                             C   P18F46J50.INC                     1450* 1478*
+RX9D2                             C   P18F46J50.INC                     1277*
+RXADDRH                           C   P18F46J50.INC                      163*
+RXADDRL                           C   P18F46J50.INC                      164*
+RXDTP                             C   P18F46J50.INC                      864*  874*  884*  894*
+RXINC                             C   P18F46J50.INC                     1100*
+R_NOT_W                           C   P18F46J50.INC                      818* 1848* 1908*
+R_NOT_W1                          C   P18F46J50.INC                     1877* 1937*
+R_W                               C   P18F46J50.INC                     1858* 1918*
+R_W1                              C   P18F46J50.INC                     1888* 1948*
+S                                 C   P18F46J50.INC                      819* 1849* 1909*
+S1                                C   P18F46J50.INC                     1878* 1938*
+SARG1                             A   SQUAREROOT.S                       118*  120*
+SARG2                             A   SQUAREROOT.S                       119*  120*
+SCK1                              C   P18F46J50.INC                      971*
+SCL1                              C   P18F46J50.INC                      979*
+SCL2                              C   P18F46J50.INC                     1046*
+SCS0                              C   P18F46J50.INC                     2123*
+SCS1                              C   P18F46J50.INC                     2124*
+SDA1                              C   P18F46J50.INC                      980*
+SDA2                              C   P18F46J50.INC                     1047*
+SDI1                              C   P18F46J50.INC                      972*
+SDO1                              C   P18F46J50.INC                     1022*
+SE0                               C   P18F46J50.INC                      768*
+SEN                               C   P18F46J50.INC                      787* 1770* 1787*
+SENDB                             C   P18F46J50.INC                     1416* 1492* 1517*
+SENDB1                            C   P18F46J50.INC                     1506* 1531*
+SENDB2                            C   P18F46J50.INC                     1425*
+SMP                               C   P18F46J50.INC                      823* 1853* 1913*
+SMP1                              C   P18F46J50.INC                     1882* 1942*
+SOFIE                             C   P18F46J50.INC                      485*
+SOFIF                             C   P18F46J50.INC                      741*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 19
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+SP0                               C   P18F46J50.INC                     2210*
+SP1                               C   P18F46J50.INC                     2211*
+SP2                               C   P18F46J50.INC                     2212*
+SP3                               C   P18F46J50.INC                     2213*
+SP4                               C   P18F46J50.INC                     2214*
+SPBRG                             C   P18F46J50.INC                      245*
+SPBRG1                            C   P18F46J50.INC                      246*
+SPBRG2                            C   P18F46J50.INC                      236*
+SPBRGH                            C   P18F46J50.INC                      192*
+SPBRGH1                           C   P18F46J50.INC                      193*
+SPBRGH2                           C   P18F46J50.INC                      188*
+SPEN                              C   P18F46J50.INC                     1275* 1440* 1468*
+SPEN1                             C   P18F46J50.INC                     1457* 1485*
+SPEN2                             C   P18F46J50.INC                     1284*
+SPI1OD                            C   P18F46J50.INC                      556*
+SPI2OD                            C   P18F46J50.INC                      557*
+SQRES0                            A   SQUAREROOT.S                       124*  128*  211.  259.
+SQRES1                            A   SQUAREROOT.S                       125*  128*  213.  258.  269.  278.
+SQRES2                            A   SQUAREROOT.S                       126*  128*  215.  264.  271.  280.
+SQRES3                            A   SQUAREROOT.S                       127*  128*  217.  263.  273.  282.
+SREN                              C   P18F46J50.INC                     1273* 1438* 1466*
+SREN1                             C   P18F46J50.INC                     1455* 1483*
+SREN2                             C   P18F46J50.INC                     1282*
+SSCON0                            C   P18F46J50.INC                     1102*
+SSCON1                            C   P18F46J50.INC                     1103*
+SSP1ADD                           C   P18F46J50.INC                      280*
+SSP1BUF                           C   P18F46J50.INC                      282*
+SSP1CON1                          C   P18F46J50.INC                      276*
+SSP1CON2                          C   P18F46J50.INC                      274*
+SSP1IE                            C   P18F46J50.INC                     1291*
+SSP1IF                            C   P18F46J50.INC                     1306*
+SSP1IP                            C   P18F46J50.INC                     1321*
+SSP1STAT                          C   P18F46J50.INC                      278*
+SSP2ADD                           C   P18F46J50.INC                      178*
+SSP2BUF                           C   P18F46J50.INC                      179*
+SSP2CON1                          C   P18F46J50.INC                      176*
+SSP2CON2                          C   P18F46J50.INC                      175*
+SSP2IE                            C   P18F46J50.INC                     1379*
+SSP2IF                            C   P18F46J50.INC                     1390*
+SSP2IP                            C   P18F46J50.INC                     1401*
+SSP2STAT                          C   P18F46J50.INC                      177*
+SSPADD                            C   P18F46J50.INC                      281*
+SSPBUF                            C   P18F46J50.INC                      283*
+SSPCON1                           C   P18F46J50.INC                      277*
+SSPCON2                           C   P18F46J50.INC                      275*
+SSPEN                             C   P18F46J50.INC                      805* 1805* 1826*
+SSPEN1                            C   P18F46J50.INC                     1819* 1840*
+SSPIE                             C   P18F46J50.INC                     1297*
+SSPIF                             C   P18F46J50.INC                     1312*
+SSPIP                             C   P18F46J50.INC                     1327*
+SSPM0                             C   P18F46J50.INC                      809* 1809* 1830*
+SSPM01                            C   P18F46J50.INC                     1814* 1835*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 20
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+SSPM1                             C   P18F46J50.INC                      810* 1810* 1831*
+SSPM11                            C   P18F46J50.INC                     1815* 1836*
+SSPM2                             C   P18F46J50.INC                      811* 1811* 1832*
+SSPM21                            C   P18F46J50.INC                     1816* 1837*
+SSPM3                             C   P18F46J50.INC                      812* 1812* 1833*
+SSPM31                            C   P18F46J50.INC                     1817* 1838*
+SSPOV                             C   P18F46J50.INC                      806* 1806* 1827*
+SSPOV1                            C   P18F46J50.INC                     1820* 1841*
+SSPSTAT                           C   P18F46J50.INC                      279*
+STALLIE                           C   P18F46J50.INC                      484*
+STALLIF                           C   P18F46J50.INC                      740*
+STATUS                            C   SQUAREROOT.S                       174.  219.  231.  243.
+                                      P18F46J50.INC                      301*
+STKFUL                            C   P18F46J50.INC                     2208*
+STKOVF                            C   P18F46J50.INC                     2215*
+STKPTR                            C   P18F46J50.INC                      340*
+STKUNF                            C   P18F46J50.INC                     2207*
+STRA                              C   P18F46J50.INC                     1635* 1717*
+STRB                              C   P18F46J50.INC                     1636* 1718*
+STRC                              C   P18F46J50.INC                     1637* 1719*
+STRD                              C   P18F46J50.INC                     1638* 1720*
+STRSYNC                           C   P18F46J50.INC                     1639* 1721*
+SUSPND                            C   P18F46J50.INC                      764*
+SWDTE                             C   P18F46J50.INC                     1735*
+SWDTEN                            C   P18F46J50.INC                     1727*
+SYNC                              C   P18F46J50.INC                     1417* 1493* 1518*
+SYNC1                             C   P18F46J50.INC                     1507* 1532*
+SYNC2                             C   P18F46J50.INC                     1426*
+Sq16                              A   SQUAREROOT.S                       210.  255*
+Sqrt                              A   SQUAREROOT.S                       142*  286*
+Sqrt16                            A   SQUAREROOT.S                       163*
+Sqrt32                            A   SQUAREROOT.S                       155.  157.  200*
+Squar16                           A   SQUAREROOT.S                       208*  233.  245.
+Square8                           A   SQUAREROOT.S                       168*  183.  190.
+T08BIT                            C   P18F46J50.INC                     2134*
+T0CON                             C   P18F46J50.INC                      297*
+T0CS                              C   P18F46J50.INC                     2133*
+T0IE                              C   P18F46J50.INC                     2198*
+T0IF                              C   P18F46J50.INC                     2196*
+T0IP                              C   P18F46J50.INC                     2181*
+T0PS0                             C   P18F46J50.INC                     2137*
+T0PS1                             C   P18F46J50.INC                     2138*
+T0PS2                             C   P18F46J50.INC                     2139*
+T0SE                              C   P18F46J50.INC                     2132*
+T1CK                              C   P18F46J50.INC                     1007*
+T1CKPS0                           C   P18F46J50.INC                     2022*
+T1CKPS01                          C   P18F46J50.INC                     2030*
+T1CKPS1                           C   P18F46J50.INC                     2023*
+T1CKPS11                          C   P18F46J50.INC                     2031*
+T1CON                             C   P18F46J50.INC                      287*
+T1DONE                            C   P18F46J50.INC                     1252*
+T1GCON                            C   P18F46J50.INC                      219*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 21
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+T1GGO                             C   P18F46J50.INC                     1250*
+T1GGO_T1DONE                      C   P18F46J50.INC                     1244*
+T1GPOL                            C   P18F46J50.INC                     1247*
+T1GSPM                            C   P18F46J50.INC                     1245*
+T1GSS0                            C   P18F46J50.INC                     1241*
+T1GSS1                            C   P18F46J50.INC                     1242*
+T1GTM                             C   P18F46J50.INC                     1246*
+T1GVAL                            C   P18F46J50.INC                     1243*
+T1OSCEN                           C   P18F46J50.INC                     2020*
+T1OSCEN1                          C   P18F46J50.INC                     2029*
+T1OSI                             C   P18F46J50.INC                     1000*
+T1OSO                             C   P18F46J50.INC                      999*
+T1RUN                             C   P18F46J50.INC                      619*
+T1SYNC                            C   P18F46J50.INC                     2019*
+T1SYNC1                           C   P18F46J50.INC                     2028*
+T2CKPS0                           C   P18F46J50.INC                     2008*
+T2CKPS1                           C   P18F46J50.INC                     2009*
+T2CON                             C   P18F46J50.INC                      284*
+T2OUTPS0                          C   P18F46J50.INC                     2010*
+T2OUTPS1                          C   P18F46J50.INC                     2011*
+T2OUTPS2                          C   P18F46J50.INC                     2012*
+T2OUTPS3                          C   P18F46J50.INC                     2013*
+T3CCP1                            C   P18F46J50.INC                      617*
+T3CCP2                            C   P18F46J50.INC                      618*
+T3CKPS0                           C   P18F46J50.INC                      853*
+T3CKPS1                           C   P18F46J50.INC                      854*
+T3CON                             C   P18F46J50.INC                      183*
+T3DONE                            C   P18F46J50.INC                     1237*
+T3GCON                            C   P18F46J50.INC                      216*
+T3GGO                             C   P18F46J50.INC                     1235*
+T3GGO_T3DONE                      C   P18F46J50.INC                     1229*
+T3GPOL                            C   P18F46J50.INC                     1232*
+T3GSPM                            C   P18F46J50.INC                     1230*
+T3GSS0                            C   P18F46J50.INC                     1226*
+T3GSS1                            C   P18F46J50.INC                     1227*
+T3GTM                             C   P18F46J50.INC                     1231*
+T3GVAL                            C   P18F46J50.INC                     1228*
+T3SYNC                            C   P18F46J50.INC                      851*
+T4CKPS0                           C   P18F46J50.INC                      840*
+T4CKPS1                           C   P18F46J50.INC                      841*
+T4CON                             C   P18F46J50.INC                      180*
+T4OUTPS0                          C   P18F46J50.INC                      842*
+T4OUTPS1                          C   P18F46J50.INC                      843*
+T4OUTPS2                          C   P18F46J50.INC                      844*
+T4OUTPS3                          C   P18F46J50.INC                      845*
+TABLAT                            C   P18F46J50.INC                      331*
+TBLPTR                            C   P18F46J50.INC                      332*
+TBLPTRH                           C   P18F46J50.INC                      334*
+TBLPTRL                           C   P18F46J50.INC                      333*
+TBLPTRU                           C   P18F46J50.INC                      335*
+TCLKCON                           C   P18F46J50.INC                      140*
+TEMP0                             A   SQUAREROOT.S                       131*  164.  177.  184.  191.  201.  223.  235.  246.
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 22
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+TEMP1                             A   SQUAREROOT.S                       132*  202.  224.  236.  247.
+TGEN                              C   P18F46J50.INC                     1565*
+TMR0                              C   P18F46J50.INC                      298*
+TMR0H                             C   P18F46J50.INC                      300*
+TMR0IE                            C   P18F46J50.INC                     2191*
+TMR0IF                            C   P18F46J50.INC                     2188*
+TMR0IP                            C   P18F46J50.INC                     2173*
+TMR0L                             C   P18F46J50.INC                      299*
+TMR0ON                            C   P18F46J50.INC                     2135*
+TMR1                              C   P18F46J50.INC                      288*
+TMR1CS0                           C   P18F46J50.INC                     2024*
+TMR1CS01                          C   P18F46J50.INC                     2032*
+TMR1CS1                           C   P18F46J50.INC                     2025*
+TMR1CS11                          C   P18F46J50.INC                     2033*
+TMR1GE                            C   P18F46J50.INC                     1248*
+TMR1H                             C   P18F46J50.INC                      290*
+TMR1IE                            C   P18F46J50.INC                     1288*
+TMR1IF                            C   P18F46J50.INC                     1303*
+TMR1IP                            C   P18F46J50.INC                     1318*
+TMR1L                             C   P18F46J50.INC                      289*
+TMR1ON                            C   P18F46J50.INC                     2017*
+TMR2                              C   P18F46J50.INC                      286*
+TMR2IE                            C   P18F46J50.INC                     1289*
+TMR2IF                            C   P18F46J50.INC                     1304*
+TMR2IP                            C   P18F46J50.INC                     1319*
+TMR2ON                            C   P18F46J50.INC                     2006*
+TMR3                              C   P18F46J50.INC                      184*
+TMR3CS0                           C   P18F46J50.INC                      855*
+TMR3CS1                           C   P18F46J50.INC                      856*
+TMR3GE                            C   P18F46J50.INC                     1233*
+TMR3GIE                           C   P18F46J50.INC                     1373*
+TMR3GIF                           C   P18F46J50.INC                     1384*
+TMR3GIP                           C   P18F46J50.INC                     1395*
+TMR3H                             C   P18F46J50.INC                      186*
+TMR3IE                            C   P18F46J50.INC                     1334*
+TMR3IF                            C   P18F46J50.INC                     1347*
+TMR3IP                            C   P18F46J50.INC                     1360*
+TMR3L                             C   P18F46J50.INC                      185*
+TMR3ON                            C   P18F46J50.INC                      849*
+TMR4                              C   P18F46J50.INC                      182*
+TMR4IE                            C   P18F46J50.INC                     1375*
+TMR4IF                            C   P18F46J50.INC                     1386*
+TMR4IP                            C   P18F46J50.INC                     1397*
+TMR4ON                            C   P18F46J50.INC                      838*
+TO                                C   P18F46J50.INC                     2048*
+TOS                               C   P18F46J50.INC                      341*
+TOSH                              C   P18F46J50.INC                      343*
+TOSL                              C   P18F46J50.INC                      342*
+TOSU                              C   P18F46J50.INC                      344*
+TRISA                             C   P18F46J50.INC                      211*
+TRISA0                            C   P18F46J50.INC                     1178*
+TRISA1                            C   P18F46J50.INC                     1179*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 23
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+TRISA2                            C   P18F46J50.INC                     1180*
+TRISA3                            C   P18F46J50.INC                     1181*
+TRISA5                            C   P18F46J50.INC                     1182*
+TRISA6                            C   P18F46J50.INC                     1183*
+TRISA7                            C   P18F46J50.INC                     1184*
+TRISB                             C   P18F46J50.INC                      212*
+TRISB0                            C   P18F46J50.INC                     1188*
+TRISB1                            C   P18F46J50.INC                     1189*
+TRISB2                            C   P18F46J50.INC                     1190*
+TRISB3                            C   P18F46J50.INC                     1191*
+TRISB4                            C   P18F46J50.INC                     1192*
+TRISB5                            C   P18F46J50.INC                     1193*
+TRISB6                            C   P18F46J50.INC                     1194*
+TRISB7                            C   P18F46J50.INC                     1195*
+TRISC                             C   P18F46J50.INC                      213*
+TRISC0                            C   P18F46J50.INC                     1199*
+TRISC1                            C   P18F46J50.INC                     1200*
+TRISC2                            C   P18F46J50.INC                     1201*
+TRISC4                            C   P18F46J50.INC                     1202*
+TRISC5                            C   P18F46J50.INC                     1203*
+TRISC6                            C   P18F46J50.INC                     1204*
+TRISC7                            C   P18F46J50.INC                     1205*
+TRISD                             C   P18F46J50.INC                      214*
+TRISD0                            C   P18F46J50.INC                     1209*
+TRISD1                            C   P18F46J50.INC                     1210*
+TRISD2                            C   P18F46J50.INC                     1211*
+TRISD3                            C   P18F46J50.INC                     1212*
+TRISD4                            C   P18F46J50.INC                     1213*
+TRISD5                            C   P18F46J50.INC                     1214*
+TRISD6                            C   P18F46J50.INC                     1215*
+TRISD7                            C   P18F46J50.INC                     1216*
+TRISE                             C   P18F46J50.INC                      215*
+TRISE0                            C   P18F46J50.INC                     1220*
+TRISE1                            C   P18F46J50.INC                     1221*
+TRISE2                            C   P18F46J50.INC                     1222*
+TRMT                              C   P18F46J50.INC                     1414* 1490* 1515*
+TRMT1                             C   P18F46J50.INC                     1504* 1529*
+TRMT2                             C   P18F46J50.INC                     1423*
+TRNIE                             C   P18F46J50.INC                      482*
+TRNIF                             C   P18F46J50.INC                      738*
+TUN0                              C   P18F46J50.INC                     1259*
+TUN1                              C   P18F46J50.INC                     1260*
+TUN2                              C   P18F46J50.INC                     1261*
+TUN3                              C   P18F46J50.INC                     1262*
+TUN4                              C   P18F46J50.INC                     1263*
+TUN5                              C   P18F46J50.INC                     1264*
+TX1                               C   P18F46J50.INC                     1012*
+TX1IE                             C   P18F46J50.INC                     1292*
+TX1IF                             C   P18F46J50.INC                     1307*
+TX1IP                             C   P18F46J50.INC                     1322*
+TX2IE                             C   P18F46J50.INC                     1376*
+TX2IF                             C   P18F46J50.INC                     1387*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 24
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+TX2IP                             C   P18F46J50.INC                     1398*
+TX8_9                             C   P18F46J50.INC                     1499* 1524*
+TX9                               C   P18F46J50.INC                     1419* 1495* 1520*
+TX91                              C   P18F46J50.INC                     1509* 1534*
+TX92                              C   P18F46J50.INC                     1428*
+TX9D                              C   P18F46J50.INC                     1413* 1489* 1514*
+TX9D1                             C   P18F46J50.INC                     1503* 1528*
+TX9D2                             C   P18F46J50.INC                     1422*
+TXADDRH                           C   P18F46J50.INC                      165*
+TXADDRL                           C   P18F46J50.INC                      166*
+TXCKP                             C   P18F46J50.INC                      863*  873*  883*  893*
+TXD8                              C   P18F46J50.INC                     1498* 1523*
+TXEN                              C   P18F46J50.INC                     1418* 1494* 1519*
+TXEN1                             C   P18F46J50.INC                     1508* 1533*
+TXEN2                             C   P18F46J50.INC                     1427*
+TXIE                              C   P18F46J50.INC                     1298*
+TXIF                              C   P18F46J50.INC                     1313*
+TXINC                             C   P18F46J50.INC                     1101*
+TXIP                              C   P18F46J50.INC                     1328*
+TXREG                             C   P18F46J50.INC                      241*
+TXREG1                            C   P18F46J50.INC                      242*
+TXREG2                            C   P18F46J50.INC                      234*
+TXSTA                             C   P18F46J50.INC                      239*
+TXSTA1                            C   P18F46J50.INC                      240*
+TXSTA2                            C   P18F46J50.INC                      233*
+U1OD                              C   P18F46J50.INC                      561*
+U2OD                              C   P18F46J50.INC                      562*
+UA                                C   P18F46J50.INC                      817* 1847* 1907*
+UA1                               C   P18F46J50.INC                     1876* 1936*
+UADDR                             C   P18F46J50.INC                      123*
+UCFG                              C   P18F46J50.INC                      124*
+UCON                              C   P18F46J50.INC                      160*
+UEIE                              C   P18F46J50.INC                      122*
+UEIR                              C   P18F46J50.INC                      158*
+UEP0                              C   P18F46J50.INC                      105*
+UEP1                              C   P18F46J50.INC                      106*
+UEP10                             C   P18F46J50.INC                      115*
+UEP11                             C   P18F46J50.INC                      116*
+UEP12                             C   P18F46J50.INC                      117*
+UEP13                             C   P18F46J50.INC                      118*
+UEP14                             C   P18F46J50.INC                      119*
+UEP15                             C   P18F46J50.INC                      120*
+UEP2                              C   P18F46J50.INC                      107*
+UEP3                              C   P18F46J50.INC                      108*
+UEP4                              C   P18F46J50.INC                      109*
+UEP5                              C   P18F46J50.INC                      110*
+UEP6                              C   P18F46J50.INC                      111*
+UEP7                              C   P18F46J50.INC                      112*
+UEP8                              C   P18F46J50.INC                      113*
+UEP9                              C   P18F46J50.INC                      114*
+UERRIE                            C   P18F46J50.INC                      480*
+UERRIF                            C   P18F46J50.INC                      736*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 25
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+UFRM                              C   P18F46J50.INC                      154*
+UFRMH                             C   P18F46J50.INC                      156*
+UFRML                             C   P18F46J50.INC                      155*
+UIE                               C   P18F46J50.INC                      121*
+UIR                               C   P18F46J50.INC                      157*
+ULPEN                             C   P18F46J50.INC                     1729*
+ULPLVL                            C   P18F46J50.INC                     1731*
+ULPSINK                           C   P18F46J50.INC                     1728*
+ULPWDIS                           C   P18F46J50.INC                      607*
+ULPWU                             C   P18F46J50.INC                      935*
+UOEMON                            C   P18F46J50.INC                      513*
+UPUEN                             C   P18F46J50.INC                      512*
+URSTIE                            C   P18F46J50.INC                      479*
+URSTIF                            C   P18F46J50.INC                      735*
+USBEN                             C   P18F46J50.INC                      766*
+USBIE                             C   P18F46J50.INC                     1337*
+USBIF                             C   P18F46J50.INC                     1350*
+USBIP                             C   P18F46J50.INC                     1363*
+USTAT                             C   P18F46J50.INC                      159*
+UTEYE                             C   P18F46J50.INC                      514*
+UTRDIS                            C   P18F46J50.INC                      511*
+VBG2EN                            C   P18F46J50.INC                      587*
+VBGEN                             C   P18F46J50.INC                      588*
+VCFG0                             C   P18F46J50.INC                     1759*
+VCFG1                             C   P18F46J50.INC                     1760*
+VDIRMAG                           C   P18F46J50.INC                     1076*
+VM                                C   P18F46J50.INC                     1010*
+VMO                               C   P18F46J50.INC                      977*
+VP                                C   P18F46J50.INC                     1011*
+VPO                               C   P18F46J50.INC                      978*
+VREF_MINUS                        C   P18F46J50.INC                      918*
+VREF_PLUS                         C   P18F46J50.INC                      919*
+W                                 C   P18F46J50.INC                       45*
+WAITB0                            C   P18F46J50.INC                      681*
+WAITB1                            C   P18F46J50.INC                      682*
+WAITE0                            C   P18F46J50.INC                      675*
+WAITE1                            C   P18F46J50.INC                      676*
+WAITM0                            C   P18F46J50.INC                      677*
+WAITM1                            C   P18F46J50.INC                      678*
+WAITM2                            C   P18F46J50.INC                      679*
+WAITM3                            C   P18F46J50.INC                      680*
+WCOL                              C   P18F46J50.INC                      807* 1807* 1828*
+WCOL1                             C   P18F46J50.INC                     1821* 1842*
+WDTCON                            C   P18F46J50.INC                      268*
+WPROG                             C   P18F46J50.INC                     1409*
+WR                                C   P18F46J50.INC                     1405*
+WREG                              C   SQUAREROOT.S                       272.  281.
+                                      P18F46J50.INC                      317*
+WREN                              C   P18F46J50.INC                     1406*
+WRERR                             C   P18F46J50.INC                     1407*
+WRSP                              C   P18F46J50.INC                      698*
+WUE                               C   P18F46J50.INC                      861*  871*  881*  891*
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 26
+
+                          MPASM Cross Reference File
+
+LABEL                            TYPE FILE NAME                  SOURCE FILE REFERENCES
+-----                            ---- ---------                  ----------------------
+
+Z                                 C   P18F46J50.INC                     2145*
+_DEVID1                           C   P18F46J50.INC                     2447*
+_DEVID2                           C   P18F46J50.INC                     2448*
+__18F46J50                        V   SQUAREROOT.S                         0*
+                                      P18F46J50.INC                       32.
+
+
+LABEL TYPES
+-----------
+A  Address 
+C  Constant
+E  External
+M  Macro   
+S  Segment 
+U  Unknown 
+V  Variable
+X  Other   

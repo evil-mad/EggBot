@@ -1,0 +1,1772 @@
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 #include <p18F46J50.inc>
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC18F46J50 processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      02451         LIST
+                      00002 
+                      00003 ; When assembly code is placed in a psect, it can be manipulated as a
+                      00004 ; whole by the linker and placed in memory.  
+                      00005 ;
+                      00006 ; In this example, barfunc is the program section (psect) name, 'local' means
+                      00007 ; that the section will not be combined with other sections even if they have
+                      00008 ; the same name.  class=CODE means the barfunc must go in the CODE container.
+                      00009 ; PIC18 should have a delta (addressible unit size) of 1 (default) since they
+                      00010 ; are byte addressible.  PIC10/12/16 have a delta of 2 since they are word
+                      00011 ; addressible.  PIC18 should have a reloc (alignment) flag of 2 for any
+                      00012 ; psect which contains executable code.  PIC10/12/16 can use the default
+                      00013 ; reloc value of 1.  Use one of the psects below for the device you use:
+                      00014 
+                      00015 ; psect   barfunc,local,class=CODE,delta=2 ; PIC10/12/16
+                      00016 ;;;psect   barfunc,local,class=CODE,reloc=2 ; PIC18
+                      00017 
+                      00018 ;;;global _bar ; extern of bar function goes in the C source file
+                      00019 ;;;_bar:
+                      00020 ;;;    movf PORTA,w    ; here we use a symbol defined via xc.inc
+                      00021 ;;;    return
+                      00022 
+                      00023     
+                      00024     
+                      00025     
+                      00026 ;;;    RES0, RES1
+                      00027 ;;;EXTERN Sqrt
+                      00028 ; *******************************************************************
+                      00029 ; *******************************************************************
+                      00030 ;;;W equ 0 ; Standard constants
+                      00031 ;;;F equ 1
+                      00032 ;;;a equ 0
+                      00033 ; *******************************************************************
+                      00034 ; *******************************************************************
+                      00035 ;;;R_Vctr CODE 0x0000
+                      00036 ;;;goto Main
+                      00037 ; *******************************************************************
+                      00038 ;Software License Agreement
+                      00039 ;The software supplied herewith by Microchip Technology Incorporated 
+                      00040 ;(the ?Company?) for its PICmicro® Microcontroller is intended and 
+                      00041 ;supplied to you, the Company?s customer, for use solely and 
+                      00042 ;exclusively on Microchip PICmicro Microcontroller products. The 
+                      00043 ;software is owned by the Company and/or its supplier, and is 
+                      00044 ;protected under applicable copyright laws. All rights are reserved.
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00045 ;Any use in violation of the foregoing restrictions may subject the 
+                      00046 ;user to criminal sanctions under applicable laws, as well as to civil
+                      00047 ;liability for the breach of the terms and conditions of this license.
+                      00048 ;THIS SOFTWARE IS PROVIDED IN AN ?AS IS? CONDITION. NO WARRANTIES, 
+                      00049 ;WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, 
+                      00050 ;IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+                      00051 ;PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT, IN ANY 
+                      00052 ;CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR CONSEQUENTIAL 
+                      00053 ;DAMAGES, FOR ANY REASON WHATSOEVER.
+                      00054 ; *******************************************************************
+                      00055 ; Calling Routine
+                      00056 ;;;SRoot CODE
+                      00057 ;;;Main
+                      00058 ;;;movlw 0xCF
+                      00059 ;;;movwf ARGA1, a
+                      00060 ;;;movlw 0x48
+                      00061 ;;;movwf ARGA0, a
+                      00062 ;;;call Sqrt ; Sqrt(0xCF48)
+                      00063 ; RES0 should now contain 0xE6
+                      00064 ;;;movlw 0xE0
+                      00065 ;;;movwf ARGA3, a
+                      00066 ;;;movlw 0x12
+                      00067 ;;;movwf ARGA2, a
+                      00068 ;;;movlw 0xA1
+                      00069 ;;;movwf ARGA1, a
+                      00070 ;;;movlw 0x40
+                      00071 ;;;movwf ARGA0, a
+                      00072 ;;;call Sqrt ; Sqrt(0xE012A140)
+                      00073 ; RES1:RES0 should now contain 0xEF81
+                      00074 ;;;bra Main
+                      00075 ; *******************************************************************
+                      00076 ;;;END
+                      00077 
+                      00078 ; *******************************************************************
+                      00079     Title"16/32 bit Integer Square Root"
+                      00080 ; *******************************************************************
+                      00081 ; *******************************************************************
+                      00082 ; *** ***
+                      00083 ; *** Author: Ross Fosler ***
+                      00084 ; *** Applications Engineer ***
+                      00085 ; *** Microchip Technology Inc. ***
+                      00086 ; *** ***
+                      00087 ; *** Program:sqrt.asm ***
+                      00088 ; *** This module contains code to perform fast integer ***
+                      00089 ; *** square root functions on either 16 or 32 bit ***
+                      00090 ; *** values. ***
+                      00091 ; *** ***
+                      00092 ; *** Last Rev:August 10, 2000 ***
+                      00093 ; *** Ver 1.00 ***
+                      00094 ; *** ***
+                      00095 ; *******************************************************************
+                      00096 ; *******************************************************************
+                      00097 ;;;#include P18C252.INC
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  3
+16/32 bit Integer Square Root
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00098 ; *******************************************************************
+                      00099 ; *******************************************************************
+                      00100 ;;;MSB  equ 7               ; general literal constants
+                      00101 ;;;LSB  equ 0
+                      00102 ;;;W    equ 0
+                      00103 ;;;F    equ 1
+                      00104 ;;;a    equ 0
+                      00105 ; *******************************************************************
+                      00106 ; *******************************************************************
+                      00107 sqrtVar UDATA   0x500               ; allocate RAM in grp5 section
+000500                00108 ARGA0   res 1                       ; various argument registers
+000501                00109 ARGA1   res 1
+000502                00110 ARGA2   res 1
+000503                00111 ARGA3   res 1
+  0000                00112     GLOBAL ARGA0, ARGA1, ARGA2, ARGA3
+000504                00113 ARG1H   res 1
+000505                00114 ARG1L   res 1
+000506                00115 ARG2H   res 1
+000507                00116 ARG2L   res 1
+  0000                00117     GLOBAL ARG1H, ARG1L, ARG2H, ARG2L
+000508                00118 SARG1   res 1                       ; signed arguments
+000509                00119 SARG2   res 1
+  0000                00120     GLOBAL SARG1, SARG2
+00050A                00121 RES1    res 1                       ; result registers
+00050B                00122 RES0    res 1
+  0000                00123     GLOBAL RES0, RES1
+00050C                00124 SQRES0  res 1
+00050D                00125 SQRES1  res 1
+00050E                00126 SQRES2  res 1
+00050F                00127 SQRES3  res 1
+  0000                00128     GLOBAL SQRES0, SQRES1, SQRES2, SQRES3
+000510                00129 BITLOC0 res 1                       ; temporary registers
+000511                00130 BITLOC1 res 1
+000512                00131 TEMP0   res 1
+000513                00132 TEMP1   res 1
+                      00133 ; *******************************************************************
+                      00134 ; *******************************************************************
+                      00135 ; The function of this square root routine is to determine the root
+                      00136 ; to the nearest integer. At the same time the root is found at the
+                      00137 ; best possible speed; therefore, the root is found a little differently
+                      00138 ; for the two basic sizes of numbers, 16-bit and 32-bit. The following
+                      00139 ; differentiates the two and jumps to the appropriate function.
+                      00140 ; Sqrt(ARGA3:ARGA2:ARGA1:ARGA0) = PRODH:PRODL
+                      00141         CODE
+000000                00142 Sqrt    
+000000 CFD9 FFE6      00143         movff   0xfd9, 0xfe6
+000004 CFE1 FFD9      00144         movff   0xfe1, 0xfd9
+000008 0105           00145         movlb   5                   ; All our RAM is in bank 5
+00000A 0EFB           00146         movlw   0xFB                ; load -1 into W
+00000C CFDB F???      00147         movff   PLUSW2, ARGA0       ; And offset FSR1 by W and store in ARGA3 
+000010 0EFC           00148         movlw   0xFC                ; load -2 into W and do the same for the
+000012 CFDB F???      00149         movff   PLUSW2, ARGA1       ; other bytes in the input parameter
+000016 0EFD           00150         movlw   0xFD
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  4
+16/32 bit Integer Square Root
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000018 CFDB F???      00151         movff   PLUSW2, ARGA2
+00001C 0EFE           00152         movlw   0xFE
+00001E CFDB F???      00153         movff   PLUSW2, ARGA3
+000022 6700           00154         tstfsz  ARGA3, BANKED       ; determine if the number is 16-bit
+000024 D???           00155         bra     Sqrt32              ; or 32-bit and call the best function
+000026 6700           00156         tstfsz  ARGA2, BANKED
+000028 D???           00157         bra     Sqrt32
+                      00158                                     ; Fallthrough to Sqrt16
+                      00159 
+                      00160 ; *******************************************************************
+                      00161 ; ******************** Square Root **********************************
+                      00162 ; Sqrt16(ARGA1:ARGA0) = PRODL
+00002A                00163 Sqrt16  
+00002A 6B00           00164         clrf    TEMP0, BANKED       ; clear the temp solution
+00002C 0E80           00165         movlw   0x80                ; setup the first bit
+00002E 6F00           00166         movwf   BITLOC0, BANKED
+000030 6F00           00167         movwf   RES0, BANKED
+000032 5100           00168 Square8 movf    RES0, W, BANKED     ; square the guess
+000034 0300           00169         mulwf   RES0, BANKED
+000036 50F3           00170         movf    PRODL, W, ACCESS    ; ARGA - PROD test
+000038 5D00           00171         subwf   ARGA0, W, BANKED
+00003A 50F4           00172         movf    PRODH, W, ACCESS
+00003C 5900           00173         subwfb  ARGA1, W, BANKED
+00003E B0D8           00174         btfsc   STATUS, C, ACCESS
+000040 D???           00175         bra     NextBit             ; if positive then next bit
+                      00176                                     ; if negative then rotate right
+000042 C??? F???      00177         movff   TEMP0, RES0         ; move last good value back into RES0
+000046 4300           00178         rrncf   BITLOC0, F, BANKED  ; then rotote the bit and put it
+000048 5100           00179         movf    BITLOC0, W, BANKED  ; back into RES0
+00004A 1300           00180         iorwf   RES0, F, BANKED
+00004C BF00           00181         btfsc   BITLOC0, 7, BANKED  ; if last value was tested then get
+00004E D???           00182         bra     Done                ; out
+000050 D???           00183         bra     Square8             ; elso go back for another test
+000052 C??? F???      00184 NextBit movff   RES0, TEMP0         ; copy the last good approximation
+000056 4300           00185         rrncf   BITLOC0, F, BANKED  ; rotate the bit location register
+000058 5100           00186         movf    BITLOC0, W, BANKED
+00005A 1300           00187         iorwf   RES0, F, BANKED
+00005C BF00           00188         btfsc   BITLOC0, 7, BANKED  ; if last value was tested then get
+00005E D???           00189         bra     Done                ; out
+000060 D???           00190         bra     Square8
+000062 C??? FFF3      00191 Done    movff   TEMP0,PRODL         ; put the final result in PRODL
+000066 6AF4           00192         clrf    PRODH, ACCESS       ; clear out upper byte to be nice
+000068 52E5           00193         movf    0xe5, 0x1, 0x0
+00006A CFE7 FFD9      00194         movff   0xfe7, 0xfd9
+00006E 0012           00195         return
+                      00196 
+                      00197 ; *******************************************************************
+                      00198 ; ******************** Square Root **********************************
+                      00199 ; Sqrt32(ARGA3:ARGA2:ARGA1:ARGA0) = PRODH:PRODL
+000070                00200 Sqrt32  
+000070 6B00           00201         clrf    TEMP0, BANKED       ; clear the temp solution
+000072 6B00           00202         clrf    TEMP1, BANKED
+000074 6B00           00203         clrf    BITLOC0, BANKED     ; setup the first bit
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  5
+16/32 bit Integer Square Root
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000076 6B00           00204         clrf    RES0, BANKED
+000078 0E80           00205         movlw   0x80
+00007A 6F00           00206         movwf   BITLOC1, BANKED     ; BitLoc = 0x8000
+00007C 6F00           00207         movwf   RES1, BANKED        ; RES = 0x8000
+00007E C??? F???      00208 Squar16 movff   RES0, ARG1L         ; square the guess
+000082 C??? F???      00209         movff   RES1, ARG1H
+000086 EC?? F???      00210         call    Sq16
+00008A 5100           00211         movf    SQRES0, W, BANKED   ; ARGA - PROD test
+00008C 5D00           00212         subwf   ARGA0, W, BANKED
+00008E 5100           00213         movf    SQRES1, W, BANKED
+000090 5900           00214         subwfb  ARGA1, W, BANKED
+000092 5100           00215         movf    SQRES2, W, BANKED
+000094 5900           00216         subwfb  ARGA2, W, BANKED
+000096 5100           00217         movf    SQRES3, W, BANKED
+000098 5900           00218         subwfb  ARGA3, W, BANKED
+00009A B0D8           00219         btfsc   STATUS, C, ACCESS
+00009C D???           00220         bra     NxtBt16             ; if positive then next bit
+                      00221                                     ; if negative then rotate right
+00009E 0F00           00222         addlw   0x00                ; clear carry
+0000A0 C??? F???      00223         movff   TEMP0, RES0         ; move last good value back into RES0
+0000A4 C??? F???      00224         movff   TEMP1, RES1
+0000A8 3300           00225         rrcf    BITLOC1, F, BANKED  ; then rotote the bit and put it
+0000AA 3300           00226         rrcf    BITLOC0, F, BANKED
+0000AC 5100           00227         movf    BITLOC1, W, BANKED  ; back into RES1:RES0
+0000AE 1300           00228         iorwf   RES1, F, BANKED
+0000B0 5100           00229         movf    BITLOC0, W, BANKED
+0000B2 1300           00230         iorwf   RES0, F, BANKED
+0000B4 B0D8           00231         btfsc   STATUS, C, ACCESS   ; if last value was tested then get
+0000B6 D???           00232         bra     Done32              ; out
+0000B8 D???           00233         bra     Squar16             ; elso go back for another test
+0000BA 0F00           00234 NxtBt16 addlw   0x00                ; clear carry
+0000BC C??? F???      00235         movff   RES0, TEMP0         ; copy the last good approximation
+0000C0 C??? F???      00236         movff   RES1, TEMP1
+0000C4 3300           00237         rrcf    BITLOC1, F, BANKED  ; rotate the bit location register
+0000C6 3300           00238         rrcf    BITLOC0, F, BANKED
+0000C8 5100           00239         movf    BITLOC1, W, BANKED  ; and put back into RES1:RES0
+0000CA 1300           00240         iorwf   RES1, F, BANKED
+0000CC 5100           00241         movf    BITLOC0, W, BANKED
+0000CE 1300           00242         iorwf   RES0, F, BANKED
+0000D0 B0D8           00243         btfsc   STATUS, C, ACCESS   ; if last value was tested then get
+0000D2 D???           00244         bra     Done32              ; out
+0000D4 D???           00245         bra     Squar16
+0000D6 C??? FFF3      00246 Done32  movff   TEMP0,PRODL         ; put the final result in PRODL:PRODH
+0000DA C??? FFF4      00247         movff   TEMP1,PRODH
+0000DE 52E5           00248         movf    0xe5, 0x1, 0x0
+0000E0 CFE7 FFD9      00249         movff   0xfe7, 0xfd9
+0000E4 0012           00250         return
+                      00251 
+                      00252 ; *******************************************************************
+                      00253 ; *********** 16 X 16 Unsigned Square *****************************
+                      00254 ; SQRES3:SQRES0 = ARG1H:ARG1L ^2
+0000E6 5100           00255 Sq16    movf    ARG1L, W, BANKED
+0000E8 02??           00256         mulwf   ARG1L               ; ARG1L * ARG2L ->
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  6
+16/32 bit Integer Square Root
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00257                                     ; PRODH:PRODL
+0000EA CFF4 F???      00258         movff   PRODH, SQRES1
+0000EE CFF3 F???      00259         movff   PRODL, SQRES0
+0000F2 5100           00260         movf    ARG1H, W, BANKED
+0000F4 02??           00261         mulwf   ARG1H               ; ARG1H * ARG2H ->
+                      00262                                     ; PRODH:PRODL
+0000F6 CFF4 F???      00263         movff   PRODH, SQRES3
+0000FA CFF3 F???      00264         movff   PRODL, SQRES2
+0000FE 5100           00265         movf    ARG1L, W, BANKED
+000100 02??           00266         mulwf   ARG1H               ; ARG1L * ARG2H ->
+                      00267                                     ; PRODH:PRODL
+000102 50F3           00268         movf    PRODL, W, ACCESS
+000104 2700           00269         addwf   SQRES1, F, BANKED   ; Add cross
+000106 50F4           00270         movf    PRODH, W, ACCESS    ; products
+000108 2300           00271         addwfc  SQRES2, F, BANKED
+00010A 6AE8           00272         clrf    WREG, ACCESS
+00010C 2300           00273         addwfc  SQRES3, F, BANKED
+00010E 5100           00274         movf    ARG1H, W, BANKED
+000110 02??           00275         mulwf   ARG1L               ; ARG1H * ARG2L ->
+                      00276                                     ; PRODH:PRODL
+000112 50F3           00277         movf    PRODL, W, ACCESS
+000114 2700           00278         addwf   SQRES1, F, BANKED   ; Add cross
+000116 50F4           00279         movf    PRODH, W, ACCESS    ; products
+000118 2300           00280         addwfc  SQRES2, F, BANKED
+00011A 6AE8           00281         clrf    WREG, ACCESS
+00011C 2300           00282         addwfc  SQRES3, F, BANKED
+00011E 0012           00283         return
+                      00284         
+                      00285 ; *******************************************************************
+  0000                00286         GLOBAL  Sqrt
+                      00287 
+                      00288         end
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  7
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+A                                 00000000
+ABDEN                             00000000
+ABDOVF                            00000007
+ACCESS                            00000000
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ACQT0                             00000003
+ACQT1                             00000004
+ACQT2                             00000005
+ACTVIE                            00000002
+ACTVIF                            00000002
+ADCAL                             00000006
+ADCON0                            00000FC2
+ADCON1                            00000FC1
+ADCS0                             00000000
+ADCS1                             00000001
+ADCS2                             00000002
+ADDEN                             00000003
+ADDEN1                            00000003
+ADDEN2                            00000003
+ADDR0                             00000000
+ADDR1                             00000001
+ADDR2                             00000002
+ADDR3                             00000003
+ADDR4                             00000004
+ADDR5                             00000005
+ADDR6                             00000006
+ADEN                              00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADIP                              00000006
+ADMSK1                            00000001
+ADMSK2                            00000002
+ADMSK3                            00000003
+ADMSK4                            00000004
+ADMSK5                            00000005
+ADON                              00000000
+ADRES                             00000FC3
+ADRESH                            00000FC4
+ADRESL                            00000FC3
+ADRMUX0                           00000003
+ADRMUX1                           00000004
+ALP                               00000005
+ALRMCFG                           00000F91
+ALRMEN                            00000007
+ALRMPTR0                          00000000
+ALRMPTR1                          00000001
+ALRMRPT                           00000F90
+ALRMVALH                          00000F8F
+ALRMVALL                          00000F8E
+AMASK0                            00000002
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  8
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+AMASK1                            00000003
+AMASK2                            00000004
+AMASK3                            00000005
+AN0                               00000000
+AN1                               00000001
+AN10                              00000001
+AN11                              00000002
+AN12                              00000000
+AN2                               00000002
+AN3                               00000003
+AN4                               00000005
+AN5                               00000000
+AN6                               00000001
+AN7                               00000002
+AN8                               00000002
+AN9                               00000003
+ANCON0                            00000F48
+ANCON1                            00000F49
+ARG1H                             00000504
+ARG1L                             00000505
+ARG2H                             00000506
+ARG2L                             00000507
+ARGA0                             00000500
+ARGA1                             00000501
+ARGA2                             00000502
+ARGA3                             00000503
+ARPT0                             00000000
+ARPT1                             00000001
+ARPT2                             00000002
+ARPT3                             00000003
+ARPT4                             00000004
+ARPT5                             00000005
+ARPT6                             00000006
+ARPT7                             00000007
+BANKED                            00000001
+BAUDCON                           00000F7E
+BAUDCON1                          00000F7E
+BAUDCON2                          00000F7C
+BAUDCTL                           00000F7E
+BCL1IE                            00000003
+BCL1IF                            00000003
+BCL1IP                            00000003
+BCL2IE                            00000006
+BCL2IF                            00000006
+BCL2IP                            00000006
+BCLIE                             00000003
+BCLIF                             00000003
+BCLIP                             00000003
+BEP                               00000002
+BF                                00000000
+BF1                               00000000
+BGVST                             00000006
+BITLOC0                           00000510
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  9
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+BITLOC1                           00000511
+BOR                               00000000
+BRG16                             00000003
+BRGH                              00000002
+BRGH1                             00000002
+BRGH2                             00000002
+BSR                               00000FE0
+BTOEE                             00000004
+BTOEF                             00000004
+BTSEE                             00000007
+BTSEF                             00000007
+BUSY                              00000007
+C                                 00000000
+C1INA                             00000000
+C1INB                             00000003
+C2INA                             00000001
+C2INB                             00000002
+CAL0                              00000000
+CAL1                              00000001
+CAL2                              00000002
+CAL3                              00000003
+CAL4                              00000004
+CAL5                              00000005
+CAL6                              00000006
+CAL7                              00000007
+CCH0                              00000000
+CCH01                             00000000
+CCH1                              00000001
+CCH11                             00000001
+CCP1CON                           00000FBA
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1IP                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           00000FB4
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2IP                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000FBB
+CCPR1H                            00000FBC
+CCPR1L                            00000FBB
+CCPR2                             00000FB5
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 10
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CCPR2H                            00000FB6
+CCPR2L                            00000FB5
+CHIME                             00000006
+CHS0                              00000002
+CHS1                              00000003
+CHS2                              00000004
+CHS3                              00000005
+CK1                               00000006
+CKE                               00000006
+CKE1                              00000006
+CKP                               00000004
+CKP1                              00000004
+CLKI                              00000007
+CLKO                              00000006
+CM                                00000005
+CM1CON                            00000FD2
+CM1CON1                           00000FD2
+CM1IE                             00000005
+CM1IF                             00000005
+CM1IP                             00000005
+CM2CON                            00000FD1
+CM2CON1                           00000FD1
+CM2IE                             00000006
+CM2IF                             00000006
+CM2IP                             00000006
+CMPL0                             00000006
+CMPL1                             00000007
+CMSTAT                            00000F70
+CMSTATUS                          00000F70
+COE                               00000006
+COE1                              00000006
+CON                               00000007
+CON1                              00000007
+COUT1                             00000000
+COUT2                             00000001
+CPOL                              00000005
+CPOL1                             00000005
+CRC16EE                           00000002
+CRC16EF                           00000002
+CRC5EE                            00000001
+CRC5EF                            00000001
+CREF                              00000002
+CREF1                             00000002
+CREN                              00000004
+CREN1                             00000004
+CREN2                             00000004
+CS1                               00000006
+CS1P                              00000003
+CS2P                              00000004
+CSF0                              00000006
+CSF1                              00000007
+CSRC                              00000007
+CSRC1                             00000007
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 11
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CSRC2                             00000007
+CTEDG1                            00000002
+CTEDG2                            00000003
+CTMUCONH                          00000FB3
+CTMUCONL                          00000FB2
+CTMUEN                            00000007
+CTMUICON                          00000FB1
+CTMUIE                            00000002
+CTMUIF                            00000002
+CTMUIP                            00000002
+CTMUSIDL                          00000005
+CTPLS                             00000002
+CTTRIG                            00000000
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            00000F53
+CVREF_MINUS                       00000002
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+CVRSS                             00000004
+D                                 00000005
+D1                                00000005
+DATA_ADDRESS                      00000005
+DATA_ADDRESS1                     00000005
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+DC2B0                             00000004
+DC2B1                             00000005
+DDRA                              TRISA
+DDRB                              TRISB
+DDRC                              TRISC
+DDRD                              TRISD
+DDRE                              TRISE
+DFN8EE                            00000003
+DFN8EF                            00000003
+DIR                               00000002
+DLYCYC0                           00000004
+DLYCYC1                           00000005
+DLYCYC2                           00000006
+DLYCYC3                           00000007
+DLYINTEN                          00000001
+DMABCH                            00000F66
+DMABCL                            00000F67
+DMACON1                           00000F88
+DMACON2                           00000F86
+DMAEN                             00000000
+DONE                              00000001
+DS                                00000003
+DSBOR                             00000001
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 12
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+DSCONH                            00000F4D
+DSCONL                            00000F4C
+DSEN                              00000007
+DSFLT                             00000007
+DSGPR0                            00000F4E
+DSGPR1                            00000F4F
+DSINT0                            00000000
+DSMCLR                            00000002
+DSPOR                             00000000
+DSRTC                             00000003
+DSULP                             00000005
+DSULPEN                           00000001
+DSWAKEH                           00000F4B
+DSWAKEL                           00000F4A
+DSWDT                             00000004
+DT1                               00000007
+DUPLEX0                           00000002
+DUPLEX1                           00000003
+D_A                               00000005
+D_A1                              00000002
+D_MINUS                           00000004
+D_NOT_A                           00000005
+D_NOT_A1                          00000005
+D_PLUS                            00000005
+Done                              00000062
+Done32                            000000D6
+ECCP1AS                           00000FBE
+ECCP1AS0                          00000004
+ECCP1AS1                          00000005
+ECCP1AS2                          00000006
+ECCP1ASE                          00000007
+ECCP1CON                          00000FBA
+ECCP1DEL                          00000FBD
+ECCP1OD                           00000000
+ECCP2AS                           00000FB8
+ECCP2AS0                          00000004
+ECCP2AS1                          00000005
+ECCP2AS2                          00000006
+ECCP2ASE                          00000007
+ECCP2CON                          00000FB4
+ECCP2DEL                          00000FB7
+ECCP2OD                           00000001
+EDG1POL                           00000004
+EDG1SEL0                          00000002
+EDG1SEL1                          00000003
+EDG1STAT                          00000000
+EDG2POL                           00000007
+EDG2SEL0                          00000005
+EDG2SEL1                          00000006
+EDG2STAT                          00000001
+EDGEN                             00000003
+EDGSEQEN                          00000002
+EECON1                            00000FA6
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 13
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+EECON2                            00000FA7
+ENDP0                             00000003
+ENDP1                             00000004
+ENDP2                             00000005
+ENDP3                             00000006
+EPCONDIS                          00000003
+EPHSHK                            00000004
+EPINEN                            00000001
+EPOUTEN                           00000002
+EPSTALL                           00000000
+EVPOL0                            00000003
+EVPOL01                           00000003
+EVPOL1                            00000004
+EVPOL11                           00000004
+FAST                              00000001
+FERR                              00000002
+FERR1                             00000002
+FERR2                             00000002
+FREE                              00000004
+FRM0                              00000000
+FRM1                              00000001
+FRM10                             00000002
+FRM2                              00000002
+FRM3                              00000003
+FRM4                              00000004
+FRM5                              00000005
+FRM6                              00000006
+FRM7                              00000007
+FRM8                              00000000
+FRM9                              00000001
+FSEN                              00000002
+FSR0                              00000000
+FSR0H                             00000FEA
+FSR0L                             00000FE9
+FSR1                              00000001
+FSR1H                             00000FE2
+FSR1L                             00000FE1
+FSR2                              00000002
+FSR2H                             00000FDA
+FSR2L                             00000FD9
+GCEN                              00000007
+GIE                               00000007
+GIEH                              00000007
+GIEL                              00000006
+GIE_GIEH                          00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HALFSEC                           00000003
+HLVDCON                           00000F85
+HLVDEN                            00000004
+HLVDIN                            00000005
+HLVDL0                            00000000
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 14
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+HLVDL1                            00000001
+HLVDL2                            00000002
+HLVDL3                            00000003
+I2C_DAT                           00000005
+I2C_DAT1                          00000005
+I2C_READ                          00000002
+I2C_READ1                         00000002
+I2C_START                         00000003
+I2C_START1                        00000003
+I2C_STOP                          00000004
+I2C_STOP1                         00000004
+IB0F                              00000000
+IB1F                              00000001
+IB2F                              00000002
+IB3F                              00000003
+IBF                               00000007
+IBOV                              00000006
+IDISSEN                           00000001
+IDLEIE                            00000004
+IDLEIF                            00000004
+IDLEN                             00000007
+INCM0                             00000003
+INCM1                             00000004
+INDF0                             00000FEF
+INDF1                             00000FE7
+INDF2                             00000FDF
+INT0                              00000000
+INT0E                             00000004
+INT0F                             00000001
+INT0IE                            00000004
+INT0IF                            00000001
+INT1E                             00000003
+INT1F                             00000000
+INT1IE                            00000003
+INT1IF                            00000000
+INT1IP                            00000006
+INT1P                             00000006
+INT2E                             00000004
+INT2F                             00000001
+INT2IE                            00000004
+INT2IF                            00000001
+INT2IP                            00000007
+INT2P                             00000007
+INT3E                             00000005
+INT3F                             00000002
+INT3IE                            00000005
+INT3IF                            00000002
+INT3IP                            00000001
+INT3P                             00000001
+INTCON                            00000FF2
+INTCON2                           00000FF1
+INTCON3                           00000FF0
+INTEDG0                           00000006
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 15
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTEDG1                           00000005
+INTEDG2                           00000004
+INTEDG3                           00000003
+INTLVL0                           00000000
+INTLVL1                           00000001
+INTLVL2                           00000002
+INTLVL3                           00000003
+INTSRC                            00000007
+IOLOCK                            00000000
+IPEN                              00000007
+IPR1                              00000F9F
+IPR2                              00000FA2
+IPR3                              00000FA5
+IRCF0                             00000004
+IRCF1                             00000005
+IRCF2                             00000006
+IRNG0                             00000000
+IRNG1                             00000001
+IRQM0                             00000005
+IRQM1                             00000006
+IRVST                             00000005
+ITRIM0                            00000002
+ITRIM1                            00000003
+ITRIM2                            00000004
+ITRIM3                            00000005
+ITRIM4                            00000006
+ITRIM5                            00000007
+KBI0                              00000004
+KBI1                              00000005
+KBI2                              00000006
+KBI3                              00000007
+LATA                              00000F89
+LATA0                             00000000
+LATA1                             00000001
+LATA2                             00000002
+LATA3                             00000003
+LATA5                             00000005
+LATA6                             00000006
+LATA7                             00000007
+LATB                              00000F8A
+LATB0                             00000000
+LATB1                             00000001
+LATB2                             00000002
+LATB3                             00000003
+LATB4                             00000004
+LATB5                             00000005
+LATB6                             00000006
+LATB7                             00000007
+LATC                              00000F8B
+LATC0                             00000000
+LATC1                             00000001
+LATC2                             00000002
+LATC4                             00000004
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 16
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+LATC5                             00000005
+LATC6                             00000006
+LATC7                             00000007
+LATD                              00000F8C
+LATD0                             00000000
+LATD1                             00000001
+LATD2                             00000002
+LATD3                             00000003
+LATD4                             00000004
+LATD5                             00000005
+LATD6                             00000006
+LATD7                             00000007
+LATE                              00000F8D
+LATE0                             00000000
+LATE1                             00000001
+LATE2                             00000002
+LVDIE                             00000002
+LVDIF                             00000002
+LVDIP                             00000002
+LVDSTAT                           00000006
+MODE0                             00000000
+MODE1                             00000001
+MODE16                            00000002
+MSK0                              00000000
+MSK01                             00000000
+MSK1                              00000001
+MSK11                             00000001
+MSK2                              00000002
+MSK21                             00000002
+MSK3                              00000003
+MSK31                             00000003
+MSK4                              00000004
+MSK41                             00000004
+MSK5                              00000005
+MSK51                             00000005
+MSK6                              00000006
+MSK61                             00000006
+MSK7                              00000007
+MSK71                             00000007
+N                                 00000004
+NOT_A                             00000005
+NOT_A1                            00000005
+NOT_ADDRESS                       00000005
+NOT_ADDRESS1                      00000005
+NOT_BOR                           00000000
+NOT_CM                            00000005
+NOT_DONE                          00000001
+NOT_PD                            00000002
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_RI                            00000004
+NOT_SS1                           00000005
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 17
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+NOT_TO                            00000003
+NOT_TX8                           00000006
+NOT_UOE                           00000001
+NOT_W                             00000002
+NOT_W1                            00000002
+NOT_WRITE                         00000002
+NOT_WRITE1                        00000002
+NextBit                           00000052
+NxtBt16                           000000BA
+OB0E                              00000000
+OB1E                              00000001
+OB2E                              00000002
+OB3E                              00000003
+OBE                               00000007
+OBUF                              00000006
+ODCON1                            00000F42
+ODCON2                            00000F41
+ODCON3                            00000F40
+OERR                              00000001
+OERR1                             00000001
+OERR2                             00000001
+OSC1                              00000007
+OSC2                              00000006
+OSCCON                            00000FD3
+OSCFIE                            00000007
+OSCFIF                            00000007
+OSCFIP                            00000007
+OSCTUNE                           00000F9B
+OSTS                              00000003
+OV                                00000003
+P                                 00000004
+P1                                00000004
+P1DC0                             00000000
+P1DC1                             00000001
+P1DC2                             00000002
+P1DC3                             00000003
+P1DC4                             00000004
+P1DC5                             00000005
+P1DC6                             00000006
+P1M0                              00000006
+P1M1                              00000007
+P1RSEN                            00000007
+P2DC0                             00000000
+P2DC1                             00000001
+P2DC2                             00000002
+P2DC3                             00000003
+P2DC4                             00000004
+P2DC5                             00000005
+P2DC6                             00000006
+P2M0                              00000006
+P2M1                              00000007
+P2RSEN                            00000007
+PADCFG1                           00000F3C
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 18
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PC                                00000FF9
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG10                            00000002
+PCFG11                            00000003
+PCFG12                            00000004
+PCFG2                             00000002
+PCFG3                             00000003
+PCFG4                             00000004
+PCFG5                             00000005
+PCFG6                             00000006
+PCFG7                             00000007
+PCFG8                             00000000
+PCFG9                             00000001
+PCL                               00000FF9
+PCLATH                            00000FFA
+PCLATU                            00000FFB
+PD                                00000002
+PEIE                              00000006
+PEIE_GIEL                         00000006
+PEN                               00000002
+PGC                               00000006
+PGD                               00000007
+PIDEE                             00000000
+PIDEF                             00000000
+PIE1                              00000F9D
+PIE2                              00000FA0
+PIE3                              00000FA3
+PIR1                              00000F9E
+PIR2                              00000FA1
+PIR3                              00000FA4
+PKTDIS                            00000004
+PLLEN                             00000006
+PLUSW0                            00000FEB
+PLUSW1                            00000FE3
+PLUSW2                            00000FDB
+PMA0                              00000005
+PMA1                              00000004
+PMA2                              00000003
+PMA3                              00000002
+PMA4                              00000007
+PMA5                              00000006
+PMA6                              00000000
+PMA7                              00000001
+PMADDRH                           00000F6F
+PMADDRL                           00000F6E
+PMCONH                            00000F5F
+PMCONL                            00000F5E
+PMD0                              00000000
+PMD1                              00000001
+PMD2                              00000002
+PMD3                              00000003
+PMD4                              00000004
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 19
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PMD5                              00000005
+PMD6                              00000006
+PMD7                              00000007
+PMDIN1H                           00000F6D
+PMDIN1L                           00000F6C
+PMDIN2H                           00000F59
+PMDIN2L                           00000F58
+PMDOUT1H                          00000F6F
+PMDOUT1L                          00000F6E
+PMDOUT2H                          00000F5B
+PMDOUT2L                          00000F5A
+PMEH                              00000F57
+PMEL                              00000F56
+PMMODEH                           00000F5D
+PMMODEL                           00000F5C
+PMPBE                             00000001
+PMPCS                             00000002
+PMPEN                             00000007
+PMPIE                             00000007
+PMPIF                             00000007
+PMPIP                             00000007
+PMPRD                             00000000
+PMPTTL                            00000000
+PMPWR                             00000001
+PMSTATH                           00000F55
+PMSTATL                           00000F54
+POR                               00000001
+PORTA                             00000F80
+PORTB                             00000F81
+PORTC                             00000F82
+PORTD                             00000F83
+PORTE                             00000F84
+POSTDEC0                          00000FED
+POSTDEC1                          00000FE5
+POSTDEC2                          00000FDD
+POSTINC0                          00000FEE
+POSTINC1                          00000FE6
+POSTINC2                          00000FDE
+PPB0                              00000000
+PPB1                              00000001
+PPBI                              00000001
+PPBRST                            00000006
+PPSCON                            00000EFF
+PR2                               00000FCB
+PR4                               00000F77
+PREINC0                           00000FEC
+PREINC1                           00000FE4
+PREINC2                           00000FDC
+PROD                              00000FF3
+PRODH                             00000FF4
+PRODL                             00000FF3
+PSA                               00000003
+PSIDL                             00000005
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 20
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSS1AC0                           00000002
+PSS1AC1                           00000003
+PSS1BD0                           00000000
+PSS1BD1                           00000001
+PSS2AC0                           00000002
+PSS2AC1                           00000003
+PSS2BD0                           00000000
+PSS2BD1                           00000001
+PSTR1CON                          00000FBF
+PSTR2CON                          00000FB9
+PTBEEN                            00000002
+PTEN0                             00000000
+PTEN1                             00000001
+PTEN10                            00000002
+PTEN11                            00000003
+PTEN12                            00000004
+PTEN13                            00000005
+PTEN14                            00000006
+PTEN15                            00000007
+PTEN2                             00000002
+PTEN3                             00000003
+PTEN4                             00000004
+PTEN5                             00000005
+PTEN6                             00000006
+PTEN7                             00000007
+PTEN8                             00000000
+PTEN9                             00000001
+PTRDEN                            00000000
+PTWREN                            00000001
+PWM1CON                           00000FBD
+PWM2CON                           00000FB7
+R                                 00000002
+R1                                00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RBIP                              00000000
+RBPU                              00000007
+RC0                               00000000
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 21
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RC1                               00000001
+RC1IE                             00000005
+RC1IF                             00000005
+RC1IP                             00000005
+RC2                               00000002
+RC2IE                             00000005
+RC2IF                             00000005
+RC2IP                             00000005
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIDL                             00000006
+RCIE                              00000005
+RCIF                              00000005
+RCIP                              00000005
+RCON                              00000FD0
+RCREG                             00000FAF
+RCREG1                            00000FAF
+RCREG2                            00000FAA
+RCSTA                             00000FAC
+RCSTA1                            00000FAC
+RCSTA2                            00000F9C
+RCV                               00000005
+RD0                               00000000
+RD1                               00000001
+RD16                              00000001
+RD161                             00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RDPU                              00000007
+RDSP                              00000000
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+READ_WRITE                        00000002
+READ_WRITE1                       00000002
+REFO                              00000002
+REFOCON                           00000F3D
+REGSLP                            00000007
+RELEASE                           00000000
+REPU                              00000006
+RES0                              0000050B
+RES1                              0000050A
+RESUME                            00000002
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 22
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RI                                00000004
+RODIV0                            00000000
+RODIV1                            00000001
+RODIV2                            00000002
+RODIV3                            00000003
+ROON                              00000007
+ROSEL                             00000004
+ROSSLP                            00000005
+RP0                               00000000
+RP1                               00000001
+RP10                              00000007
+RP11                              00000000
+RP12                              00000001
+RP13                              00000002
+RP17                              00000006
+RP18                              00000007
+RP19                              00000002
+RP2                               00000005
+RP20                              00000003
+RP21                              00000004
+RP22                              00000005
+RP23                              00000006
+RP24                              00000007
+RP3                               00000000
+RP4                               00000001
+RP5                               00000002
+RP6                               00000003
+RP7                               00000004
+RP8                               00000005
+RP9                               00000006
+RPINR1                            00000EE7
+RPINR12                           00000EF2
+RPINR13                           00000EF3
+RPINR16                           00000EF6
+RPINR17                           00000EF7
+RPINR2                            00000EE8
+RPINR21                           00000EFB
+RPINR22                           00000EFC
+RPINR23                           00000EFD
+RPINR24                           00000EFE
+RPINR3                            00000EE9
+RPINR4                            00000EEA
+RPINR6                            00000EEC
+RPINR7                            00000EED
+RPINR8                            00000EEE
+RPOR0                             00000EC6
+RPOR1                             00000EC7
+RPOR10                            00000ED0
+RPOR11                            00000ED1
+RPOR12                            00000ED2
+RPOR13                            00000ED3
+RPOR17                            00000ED7
+RPOR18                            00000ED8
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 23
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RPOR19                            00000ED9
+RPOR2                             00000EC8
+RPOR20                            00000EDA
+RPOR21                            00000EDB
+RPOR22                            00000EDC
+RPOR23                            00000EDD
+RPOR24                            00000EDE
+RPOR3                             00000EC9
+RPOR4                             00000ECA
+RPOR5                             00000ECB
+RPOR6                             00000ECC
+RPOR7                             00000ECD
+RPOR8                             00000ECE
+RPOR9                             00000ECF
+RSEN                              00000001
+RTCC                              00000001
+RTCCAL                            00000F3E
+RTCCFG                            00000F3F
+RTCCIE                            00000000
+RTCCIF                            00000000
+RTCCIP                            00000000
+RTCEN                             00000007
+RTCOE                             00000002
+RTCPTR0                           00000000
+RTCPTR1                           00000001
+RTCSYNC                           00000004
+RTCVALH                           00000F99
+RTCVALL                           00000F98
+RTCWDIS                           00000000
+RTCWREN                           00000005
+RTSECSEL0                         00000001
+RTSECSEL1                         00000002
+RX1                               00000007
+RX9                               00000006
+RX91                              00000006
+RX92                              00000006
+RX9D                              00000000
+RX9D1                             00000000
+RX9D2                             00000000
+RXADDRH                           00000F68
+RXADDRL                           00000F69
+RXDTP                             00000005
+RXINC                             00000004
+R_NOT_W                           00000002
+R_NOT_W1                          00000002
+R_W                               00000002
+R_W1                              00000005
+S                                 00000003
+S1                                00000003
+SARG1                             00000508
+SARG2                             00000509
+SCK1                              00000004
+SCL1                              00000004
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 24
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SCL2                              00000000
+SCS0                              00000000
+SCS1                              00000001
+SDA1                              00000005
+SDA2                              00000001
+SDI1                              00000005
+SDO1                              00000007
+SE0                               00000005
+SEN                               00000000
+SENDB                             00000003
+SENDB1                            00000003
+SENDB2                            00000003
+SMP                               00000007
+SMP1                              00000007
+SOFIE                             00000006
+SOFIF                             00000006
+SP0                               00000000
+SP1                               00000001
+SP2                               00000002
+SP3                               00000003
+SP4                               00000004
+SPBRG                             00000FB0
+SPBRG1                            00000FB0
+SPBRG2                            00000FAB
+SPBRGH                            00000F7F
+SPBRGH1                           00000F7F
+SPBRGH2                           00000F7D
+SPEN                              00000007
+SPEN1                             00000007
+SPEN2                             00000007
+SPI1OD                            00000000
+SPI2OD                            00000001
+SQRES0                            0000050C
+SQRES1                            0000050D
+SQRES2                            0000050E
+SQRES3                            0000050F
+SREN                              00000005
+SREN1                             00000005
+SREN2                             00000005
+SSCON0                            00000006
+SSCON1                            00000007
+SSP1ADD                           00000FC8
+SSP1BUF                           00000FC9
+SSP1CON1                          00000FC6
+SSP1CON2                          00000FC5
+SSP1IE                            00000003
+SSP1IF                            00000003
+SSP1IP                            00000003
+SSP1STAT                          00000FC7
+SSP2ADD                           00000F74
+SSP2BUF                           00000F75
+SSP2CON1                          00000F72
+SSP2CON2                          00000F71
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 25
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SSP2IE                            00000007
+SSP2IF                            00000007
+SSP2IP                            00000007
+SSP2STAT                          00000F73
+SSPADD                            00000FC8
+SSPBUF                            00000FC9
+SSPCON1                           00000FC6
+SSPCON2                           00000FC5
+SSPEN                             00000005
+SSPEN1                            00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPIP                             00000003
+SSPM0                             00000000
+SSPM01                            00000000
+SSPM1                             00000001
+SSPM11                            00000001
+SSPM2                             00000002
+SSPM21                            00000002
+SSPM3                             00000003
+SSPM31                            00000003
+SSPOV                             00000006
+SSPOV1                            00000006
+SSPSTAT                           00000FC7
+STALLIE                           00000005
+STALLIF                           00000005
+STATUS                            00000FD8
+STKFUL                            00000007
+STKOVF                            00000007
+STKPTR                            00000FFC
+STKUNF                            00000006
+STRA                              00000000
+STRB                              00000001
+STRC                              00000002
+STRD                              00000003
+STRSYNC                           00000004
+SUSPND                            00000001
+SWDTE                             00000000
+SWDTEN                            00000000
+SYNC                              00000004
+SYNC1                             00000004
+SYNC2                             00000004
+Sq16                              000000E6
+Sqrt                              00000000
+Sqrt16                            0000002A
+Sqrt32                            00000070
+Squar16                           0000007E
+Square8                           00000032
+T08BIT                            00000006
+T0CON                             00000FD5
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 26
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T0IP                              00000002
+T0PS0                             00000000
+T0PS1                             00000001
+T0PS2                             00000002
+T0SE                              00000004
+T1CK                              00000000
+T1CKPS0                           00000004
+T1CKPS01                          00000004
+T1CKPS1                           00000005
+T1CKPS11                          00000005
+T1CON                             00000FCD
+T1DONE                            00000003
+T1GCON                            00000F9A
+T1GGO                             00000003
+T1GGO_T1DONE                      00000003
+T1GPOL                            00000006
+T1GSPM                            00000004
+T1GSS0                            00000000
+T1GSS1                            00000001
+T1GTM                             00000005
+T1GVAL                            00000002
+T1OSCEN                           00000003
+T1OSCEN1                          00000003
+T1OSI                             00000001
+T1OSO                             00000000
+T1RUN                             00000004
+T1SYNC                            00000002
+T1SYNC1                           00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000FCA
+T2OUTPS0                          00000003
+T2OUTPS1                          00000004
+T2OUTPS2                          00000005
+T2OUTPS3                          00000006
+T3CCP1                            00000000
+T3CCP2                            00000001
+T3CKPS0                           00000004
+T3CKPS1                           00000005
+T3CON                             00000F79
+T3DONE                            00000003
+T3GCON                            00000F97
+T3GGO                             00000003
+T3GGO_T3DONE                      00000003
+T3GPOL                            00000006
+T3GSPM                            00000004
+T3GSS0                            00000000
+T3GSS1                            00000001
+T3GTM                             00000005
+T3GVAL                            00000002
+T3SYNC                            00000002
+T4CKPS0                           00000000
+T4CKPS1                           00000001
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 27
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T4CON                             00000F76
+T4OUTPS0                          00000003
+T4OUTPS1                          00000004
+T4OUTPS2                          00000005
+T4OUTPS3                          00000006
+TABLAT                            00000FF5
+TBLPTR                            00000FF6
+TBLPTRH                           00000FF7
+TBLPTRL                           00000FF6
+TBLPTRU                           00000FF8
+TCLKCON                           00000F52
+TEMP0                             00000512
+TEMP1                             00000513
+TGEN                              00000004
+TMR0                              00000FD6
+TMR0H                             00000FD7
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR0IP                            00000002
+TMR0L                             00000FD6
+TMR0ON                            00000007
+TMR1                              00000FCE
+TMR1CS0                           00000006
+TMR1CS01                          00000006
+TMR1CS1                           00000007
+TMR1CS11                          00000007
+TMR1GE                            00000007
+TMR1H                             00000FCF
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1IP                            00000000
+TMR1L                             00000FCE
+TMR1ON                            00000000
+TMR2                              00000FCC
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2IP                            00000001
+TMR2ON                            00000002
+TMR3                              00000F7A
+TMR3CS0                           00000006
+TMR3CS1                           00000007
+TMR3GE                            00000007
+TMR3GIE                           00000001
+TMR3GIF                           00000001
+TMR3GIP                           00000001
+TMR3H                             00000F7B
+TMR3IE                            00000001
+TMR3IF                            00000001
+TMR3IP                            00000001
+TMR3L                             00000F7A
+TMR3ON                            00000000
+TMR4                              00000F78
+TMR4IE                            00000003
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 28
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TMR4IF                            00000003
+TMR4IP                            00000003
+TMR4ON                            00000002
+TO                                00000003
+TOS                               00000FFD
+TOSH                              00000FFE
+TOSL                              00000FFD
+TOSU                              00000FFF
+TRISA                             00000F92
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000F93
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000F94
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000F95
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000F96
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TRMT1                             00000001
+TRMT2                             00000001
+TRNIE                             00000003
+TRNIF                             00000003
+TUN0                              00000000
+TUN1                              00000001
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 29
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TUN5                              00000005
+TX1                               00000006
+TX1IE                             00000004
+TX1IF                             00000004
+TX1IP                             00000004
+TX2IE                             00000004
+TX2IF                             00000004
+TX2IP                             00000004
+TX8_9                             00000006
+TX9                               00000006
+TX91                              00000006
+TX92                              00000006
+TX9D                              00000000
+TX9D1                             00000000
+TX9D2                             00000000
+TXADDRH                           00000F6A
+TXADDRL                           00000F6B
+TXCKP                             00000004
+TXD8                              00000000
+TXEN                              00000005
+TXEN1                             00000005
+TXEN2                             00000005
+TXIE                              00000004
+TXIF                              00000004
+TXINC                             00000005
+TXIP                              00000004
+TXREG                             00000FAE
+TXREG1                            00000FAE
+TXREG2                            00000FA9
+TXSTA                             00000FAD
+TXSTA1                            00000FAD
+TXSTA2                            00000FA8
+U1OD                              00000000
+U2OD                              00000001
+UA                                00000001
+UA1                               00000001
+UADDR                             00000F38
+UCFG                              00000F39
+UCON                              00000F65
+UEIE                              00000F37
+UEIR                              00000F63
+UEP0                              00000F26
+UEP1                              00000F27
+UEP10                             00000F30
+UEP11                             00000F31
+UEP12                             00000F32
+UEP13                             00000F33
+UEP14                             00000F34
+UEP15                             00000F35
+UEP2                              00000F28
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 30
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+UEP3                              00000F29
+UEP4                              00000F2A
+UEP5                              00000F2B
+UEP6                              00000F2C
+UEP7                              00000F2D
+UEP8                              00000F2E
+UEP9                              00000F2F
+UERRIE                            00000001
+UERRIF                            00000001
+UFRM                              00000F60
+UFRMH                             00000F61
+UFRML                             00000F60
+UIE                               00000F36
+UIR                               00000F62
+ULPEN                             00000002
+ULPLVL                            00000005
+ULPSINK                           00000001
+ULPWDIS                           00000002
+ULPWU                             00000000
+UOEMON                            00000006
+UPUEN                             00000004
+URSTIE                            00000000
+URSTIF                            00000000
+USBEN                             00000003
+USBIE                             00000004
+USBIF                             00000004
+USBIP                             00000004
+USTAT                             00000F64
+UTEYE                             00000007
+UTRDIS                            00000003
+VBG2EN                            00000006
+VBGEN                             00000007
+VCFG0                             00000006
+VCFG1                             00000007
+VDIRMAG                           00000007
+VM                                00000004
+VMO                               00000002
+VP                                00000005
+VPO                               00000003
+VREF_MINUS                        00000002
+VREF_PLUS                         00000003
+W                                 00000000
+WAITB0                            00000006
+WAITB1                            00000007
+WAITE0                            00000000
+WAITE1                            00000001
+WAITM0                            00000002
+WAITM1                            00000003
+WAITM2                            00000004
+WAITM3                            00000005
+WCOL                              00000007
+WCOL1                             00000007
+WDTCON                            00000FC0
+MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 31
+16/32 bit Integer Square Root
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WPROG                             00000005
+WR                                00000001
+WREG                              00000FE8
+WREN                              00000002
+WRERR                             00000003
+WRSP                              00000001
+WUE                               00000001
+Z                                 00000002
+_DEVID1                           003FFFFE
+_DEVID2                           003FFFFF
+__18F46J50                        00000001
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+
