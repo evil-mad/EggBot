@@ -20,6 +20,8 @@ Need help?
 Visit http://wiki.evilmadscientist.com/eggbot
 
 </label>
+<param indent="1" name="commandLog" type="path"
+gui-text="Log commands to the following file:"></param>
 </page>
 
 <page name='setup' gui-text='Setup'>
