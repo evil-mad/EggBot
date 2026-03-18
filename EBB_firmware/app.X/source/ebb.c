@@ -782,16 +782,17 @@ void high_ISR(void)
         gISRTickCountForThisCommand++;
       }
       
-      // Only clear AllDone if we are not yet done with this move.
-      // Count this ISR tick, and then see if we need to take a step.
+      // A simple optimization: we only have one 'count' for LT, to know
+      // when we're done, so we can directly clear AllDone here if we are
+      // not yet done with this move.
+      bitclrzero(AllDone);
+
+      // Nope not done. So count this ISR tick, and then see if we need to take
+      // a step
       CurrentCommand.m.sm.Steps[0]--;
       if (CurrentCommand.m.sm.Steps[0] == 0u)
       {
         bitclrzero(AxisActive[0]);
-      }
-      else
-      {
-        bitclrzero(AllDone);
       }
 
       //// MOTOR 1   LT ////
@@ -1341,82 +1342,88 @@ CheckForNextCommand:
 //      FIFO_COPY();
 
       // Check to see if the FIFO_out_ptr needs wrapping
-      
+
 #if defined(USE_C_ISR)
       // Instead of copying over the entire MoveCommandType every time, to save
-      // time we will check which command is next in the FIFO, and then only 
+      // time we will check which command is next in the FIFO, and then only
       // copy over those fields that the new command actually uses.
       // The order that we check these is the same as the main ISR check order
       // above, where we want to have the most common commands checked first
       // since they will then happen faster.
-      gFIFOCommand = FIFOPtr[gFIFOOut].Command;
+
+      // Compute source pointer once to avoid repeated volatile reads of
+      // gFIFOOut and repeated multiply-by-47 (struct size) address computation.
+      {
+      MoveCommandType * const src = &FIFOPtr[gFIFOOut];
+
+      gFIFOCommand = src->Command;
       
       if (gFIFOCommand == COMMAND_SM_XM_HM_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.Rate[0]        = src->m.sm.Rate[0];
+        CurrentCommand.m.sm.Rate[1]        = src->m.sm.Rate[1];
+        CurrentCommand.m.sm.Steps[0]       = src->m.sm.Steps[0];
+        CurrentCommand.m.sm.Steps[1]       = src->m.sm.Steps[1];
+        CurrentCommand.m.sm.DirBits        = src->m.sm.DirBits;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
+        CurrentCommand.m.sm.SEState        = src->m.sm.SEState;
       }
       else if (gFIFOCommand == COMMAND_LM_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.Rate[0]        = src->m.sm.Rate[0];
+        CurrentCommand.m.sm.Rate[1]        = src->m.sm.Rate[1];
+        CurrentCommand.m.sm.Accel[0]       = src->m.sm.Accel[0];
+        CurrentCommand.m.sm.Accel[1]       = src->m.sm.Accel[1];
+        CurrentCommand.m.sm.Jerk[0]        = src->m.sm.Jerk[0];
+        CurrentCommand.m.sm.Jerk[1]        = src->m.sm.Jerk[1];
+        CurrentCommand.m.sm.Steps[0]       = src->m.sm.Steps[0];
+        CurrentCommand.m.sm.Steps[1]       = src->m.sm.Steps[1];
+        CurrentCommand.m.sm.DirBits        = src->m.sm.DirBits;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
+        CurrentCommand.m.sm.SEState        = src->m.sm.SEState;
       }
       else if (gFIFOCommand == COMMAND_LT_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.Rate[0]        = src->m.sm.Rate[0];
+        CurrentCommand.m.sm.Rate[1]        = src->m.sm.Rate[1];
+        CurrentCommand.m.sm.Accel[0]       = src->m.sm.Accel[0];
+        CurrentCommand.m.sm.Accel[1]       = src->m.sm.Accel[1];
+        CurrentCommand.m.sm.Jerk[0]        = src->m.sm.Jerk[0];
+        CurrentCommand.m.sm.Jerk[1]        = src->m.sm.Jerk[1];
+        CurrentCommand.m.sm.Steps[0]       = src->m.sm.Steps[0];
+        CurrentCommand.m.sm.DirBits        = src->m.sm.DirBits;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
+        CurrentCommand.m.sm.SEState        = src->m.sm.SEState;
       }
       else if (gFIFOCommand == COMMAND_SERVO_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.ServoPosition  = FIFOPtr[gFIFOOut].m.sm.ServoPosition;
-        CurrentCommand.m.sm.ServoRPn       = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
-        CurrentCommand.m.sm.ServoChannel   = FIFOPtr[gFIFOOut].m.sm.ServoChannel;
-        CurrentCommand.m.sm.ServoRate      = FIFOPtr[gFIFOOut].m.sm.ServoRate;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
+        CurrentCommand.m.sm.ServoPosition  = src->m.sm.ServoPosition;
+        CurrentCommand.m.sm.ServoRPn       = src->m.sm.ServoRPn;
+        CurrentCommand.m.sm.ServoChannel   = src->m.sm.ServoChannel;
+        CurrentCommand.m.sm.ServoRate      = src->m.sm.ServoRate;
       }
       else if (gFIFOCommand == COMMAND_DELAY)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
       }
       else if (gFIFOCommand == COMMAND_SE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-        CurrentCommand.m.sm.SEPower        = FIFOPtr[gFIFOOut].m.sm.SEPower;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.DelayCounter   = src->m.sm.DelayCounter;
+        CurrentCommand.m.sm.SEState        = src->m.sm.SEState;
+        CurrentCommand.m.sm.SEPower        = src->m.sm.SEPower;
       }
       else if (gFIFOCommand == COMMAND_EM)
       {
-        CurrentCommand.Command       = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DirBits       = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.ServoRPn      = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
+        CurrentCommand.Command             = src->Command;
+        CurrentCommand.m.sm.DirBits        = src->m.sm.DirBits;
+        CurrentCommand.m.sm.ServoRPn       = src->m.sm.ServoRPn;
       }
       else
       {
@@ -1490,7 +1497,8 @@ CheckForNextCommand:
       }
 
       // Zero out command in FIFO we just copied, but leave the rest of the fields alone
-      FIFOPtr[gFIFOOut].Command = COMMAND_NONE;
+      src->Command = COMMAND_NONE;
+      } // end of src pointer scope
       
       // Increment gFIFO_Out
       gFIFOOut++;
