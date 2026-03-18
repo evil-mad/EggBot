@@ -1340,6 +1340,21 @@ CheckForNextCommand:
       
 //      FIFO_COPY();
 
+      // Clear step pins now, before the FIFO copy. This ensures a consistent
+      // step pulse width on command transition ticks, where the FIFO copy
+      // would otherwise stretch the pulse. The end-of-ISR clear still runs
+      // but is harmless (clearing an already-LOW pin).
+      if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+      {
+        Step1IO = 0;
+        Step2IO = 0;
+      }
+      else
+      {
+        Step1AltIO = 0;
+        Step2AltIO = 0;
+      }
+
       // Check to see if the FIFO_out_ptr needs wrapping
 
 #if defined(USE_C_ISR)
