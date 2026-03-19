@@ -1340,6 +1340,21 @@ CheckForNextCommand:
         g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
       }
       
+      // Clear step pins now, before the FIFO copy. This ensures a consistent
+      // step pulse width on command transition ticks, where the FIFO copy
+      // would otherwise stretch the pulse. The end-of-ISR clear still runs
+      // but is harmless (clearing an already-LOW pin).
+      if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+      {
+        Step1IO = 0;
+        Step2IO = 0;
+      }
+      else
+      {
+        Step1AltIO = 0;
+        Step2AltIO = 0;
+      }
+
       // Read the command type from the FIFO using the pre-computed pointer.
       // This avoids the multiply-by-47 that FIFOPtr[gFIFOOut].Command would require.
       gFIFOCommand = *(UINT8 *)((UINT16)FIFO_out_ptr_high << 8 | FIFO_out_ptr_low);
