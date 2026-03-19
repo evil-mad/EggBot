@@ -1308,6 +1308,8 @@ CheckForNextCommand:
       gFIFOLength = 0;
       gFIFOIn = 0;
       gFIFOOut = 0;
+      FIFO_out_ptr_high = (UINT8)((UINT16)FIFOPtr >> 8);
+      FIFO_out_ptr_low  = (UINT8)((UINT16)FIFOPtr);
 
       // Flush the whole FIFO by clearing each element's Command field
       for (isr_i=0; isr_i < COMMAND_FIFO_MAX_LENGTH; isr_i++)
@@ -1338,91 +1340,142 @@ CheckForNextCommand:
         g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
       }
       
-//      FIFO_COPY();
+      // Read the command type from the FIFO using the pre-computed pointer.
+      // This avoids the multiply-by-47 that FIFOPtr[gFIFOOut].Command would require.
+      gFIFOCommand = *(UINT8 *)((UINT16)FIFO_out_ptr_high << 8 | FIFO_out_ptr_low);
 
-      // Check to see if the FIFO_out_ptr needs wrapping
-      
-#if defined(USE_C_ISR)
-      // Instead of copying over the entire MoveCommandType every time, to save
-      // time we will check which command is next in the FIFO, and then only 
-      // copy over those fields that the new command actually uses.
-      // The order that we check these is the same as the main ISR check order
-      // above, where we want to have the most common commands checked first
-      // since they will then happen faster.
-      gFIFOCommand = FIFOPtr[gFIFOOut].Command;
-      
-      if (gFIFOCommand == COMMAND_SM_XM_HM_MOVE)
+      // Motor commands that use the sm struct for step generation (SM/XM/HM=5, LM=6, LT=7).
+      // CM commands (8, 9) use the cm struct and must NOT enter this path.
+      if (gFIFOCommand >= COMMAND_SM_XM_HM_MOVE && gFIFOCommand <= COMMAND_LT_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-      }
-      else if (gFIFOCommand == COMMAND_LM_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-      }
-      else if (gFIFOCommand == COMMAND_LT_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
+        // Fast 39-byte copy from FIFO to CurrentCommand using inline asm.
+        // FSR0 = source (FIFO element via pre-computed pointer).
+        // Uses unrolled MOVFF POSTINC0 for guaranteed timing: 39 x 2 = 78 cycles.
+        // The ISR prologue saves/restores FSR0 because C code elsewhere in the
+        // ISR uses pointer operations (e.g., FIFOPtr[gFIFOOut] for COMMAND_NONE write).
+        //
+        // Inline asm uses MPASM syntax (C18 passes _asm blocks to MPASM).
+        // Decimal literals use dot prefix: .8 = decimal 8.
+        // Offsets match isr_helpers.asm reference implementation.
+        _asm
+          MOVFF FIFO_out_ptr_low, FSR0L
+          MOVFF FIFO_out_ptr_high, FSR0H
+          MOVFF POSTINC0, CurrentCommand         ; Command
+          MOVFF POSTINC0, CurrentCommand+.1      ; DirBits
+          MOVFF POSTINC0, CurrentCommand+.2      ; DelayCounter byte 0
+          MOVFF POSTINC0, CurrentCommand+.3      ; DelayCounter byte 1
+          MOVFF POSTINC0, CurrentCommand+.4      ; DelayCounter byte 2
+          MOVFF POSTINC0, CurrentCommand+.5      ; DelayCounter byte 3
+          MOVFF POSTINC0, CurrentCommand+.6      ; SEState
+          MOVFF POSTINC0, CurrentCommand+.7      ; Rate[0] byte 0
+          MOVFF POSTINC0, CurrentCommand+.8      ; Rate[0] byte 1
+          MOVFF POSTINC0, CurrentCommand+.9      ; Rate[0] byte 2
+          MOVFF POSTINC0, CurrentCommand+.10     ; Rate[0] byte 3
+          MOVFF POSTINC0, CurrentCommand+.11     ; Rate[1] byte 0
+          MOVFF POSTINC0, CurrentCommand+.12     ; Rate[1] byte 1
+          MOVFF POSTINC0, CurrentCommand+.13     ; Rate[1] byte 2
+          MOVFF POSTINC0, CurrentCommand+.14     ; Rate[1] byte 3
+          MOVFF POSTINC0, CurrentCommand+.15     ; Steps[0] byte 0
+          MOVFF POSTINC0, CurrentCommand+.16     ; Steps[0] byte 1
+          MOVFF POSTINC0, CurrentCommand+.17     ; Steps[0] byte 2
+          MOVFF POSTINC0, CurrentCommand+.18     ; Steps[0] byte 3
+          MOVFF POSTINC0, CurrentCommand+.19     ; Steps[1] byte 0
+          MOVFF POSTINC0, CurrentCommand+.20     ; Steps[1] byte 1
+          MOVFF POSTINC0, CurrentCommand+.21     ; Steps[1] byte 2
+          MOVFF POSTINC0, CurrentCommand+.22     ; Steps[1] byte 3
+          MOVFF POSTINC0, CurrentCommand+.23     ; Jerk[0] byte 0
+          MOVFF POSTINC0, CurrentCommand+.24     ; Jerk[0] byte 1
+          MOVFF POSTINC0, CurrentCommand+.25     ; Jerk[0] byte 2
+          MOVFF POSTINC0, CurrentCommand+.26     ; Jerk[0] byte 3
+          MOVFF POSTINC0, CurrentCommand+.27     ; Jerk[1] byte 0
+          MOVFF POSTINC0, CurrentCommand+.28     ; Jerk[1] byte 1
+          MOVFF POSTINC0, CurrentCommand+.29     ; Jerk[1] byte 2
+          MOVFF POSTINC0, CurrentCommand+.30     ; Jerk[1] byte 3
+          MOVFF POSTINC0, CurrentCommand+.31     ; Accel[0] byte 0
+          MOVFF POSTINC0, CurrentCommand+.32     ; Accel[0] byte 1
+          MOVFF POSTINC0, CurrentCommand+.33     ; Accel[0] byte 2
+          MOVFF POSTINC0, CurrentCommand+.34     ; Accel[0] byte 3
+          MOVFF POSTINC0, CurrentCommand+.35     ; Accel[1] byte 0
+          MOVFF POSTINC0, CurrentCommand+.36     ; Accel[1] byte 1
+          MOVFF POSTINC0, CurrentCommand+.37     ; Accel[1] byte 2
+          MOVFF POSTINC0, CurrentCommand+.38     ; Accel[1] byte 3
+          ; FSR0 now points to byte 39. Advance 8 more to reach next element.
+          MOVLW .8
+          ADDWF FSR0L, F, ACCESS
+          MOVLW .0
+          ADDWFC FSR0H, F, ACCESS
+          ; Store advanced pointer for next FIFO load
+          MOVFF FSR0L, FIFO_out_ptr_low
+          MOVFF FSR0H, FIFO_out_ptr_high
+        _endasm
       }
       else if (gFIFOCommand == COMMAND_SERVO_MOVE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Command             = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
         CurrentCommand.m.sm.ServoPosition  = FIFOPtr[gFIFOOut].m.sm.ServoPosition;
         CurrentCommand.m.sm.ServoRPn       = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
         CurrentCommand.m.sm.ServoChannel   = FIFOPtr[gFIFOOut].m.sm.ServoChannel;
         CurrentCommand.m.sm.ServoRate      = FIFOPtr[gFIFOOut].m.sm.ServoRate;
+        // Advance pre-computed pointer by one element (47 bytes)
+        {
+          UINT16 ptr = ((UINT16)FIFO_out_ptr_high << 8) | FIFO_out_ptr_low;
+          ptr += 47u;
+          FIFO_out_ptr_high = (UINT8)(ptr >> 8);
+          FIFO_out_ptr_low  = (UINT8)(ptr);
+        }
       }
       else if (gFIFOCommand == COMMAND_DELAY)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Command             = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
+        // Advance pre-computed pointer by one element (47 bytes)
+        {
+          UINT16 ptr = ((UINT16)FIFO_out_ptr_high << 8) | FIFO_out_ptr_low;
+          ptr += 47u;
+          FIFO_out_ptr_high = (UINT8)(ptr >> 8);
+          FIFO_out_ptr_low  = (UINT8)(ptr);
+        }
       }
       else if (gFIFOCommand == COMMAND_SE)
       {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.Command             = FIFOPtr[gFIFOOut].Command;
         CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
         CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
         CurrentCommand.m.sm.SEPower        = FIFOPtr[gFIFOOut].m.sm.SEPower;
+        // Advance pre-computed pointer by one element (47 bytes)
+        {
+          UINT16 ptr = ((UINT16)FIFO_out_ptr_high << 8) | FIFO_out_ptr_low;
+          ptr += 47u;
+          FIFO_out_ptr_high = (UINT8)(ptr >> 8);
+          FIFO_out_ptr_low  = (UINT8)(ptr);
+        }
       }
       else if (gFIFOCommand == COMMAND_EM)
       {
-        CurrentCommand.Command       = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DirBits       = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.ServoRPn      = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
+        CurrentCommand.Command             = FIFOPtr[gFIFOOut].Command;
+        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
+        CurrentCommand.m.sm.ServoRPn       = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
+        // Advance pre-computed pointer by one element (47 bytes)
+        {
+          UINT16 ptr = ((UINT16)FIFO_out_ptr_high << 8) | FIFO_out_ptr_low;
+          ptr += 47u;
+          FIFO_out_ptr_high = (UINT8)(ptr >> 8);
+          FIFO_out_ptr_low  = (UINT8)(ptr);
+        }
       }
       else
       {
-        // gFIFOCommand had a value that is not allowed
+        // gFIFOCommand had a value that is not allowed (or is a CM command
+        // which has its own ISR processing path). Still must advance the
+        // pre-computed pointer to stay in sync with gFIFOOut.
+        {
+          UINT16 ptr = ((UINT16)FIFO_out_ptr_high << 8) | FIFO_out_ptr_low;
+          ptr += 47u;
+          FIFO_out_ptr_high = (UINT8)(ptr >> 8);
+          FIFO_out_ptr_low  = (UINT8)(ptr);
+        }
       }
-#endif
 
       // Take care of clearing the step accumulators for the next move if
       // it's a motor move (of any type) - if the command requests it
@@ -1489,14 +1542,20 @@ CheckForNextCommand:
         gISRPosition1ForThisCommand = 0;
       }
 
-      // Zero out command in FIFO we just copied, but leave the rest of the fields alone
+      // Zero out command in FIFO we just copied, but leave the rest of the fields alone.
+      // This still uses FIFOPtr[gFIFOOut] (one multiply-by-47) because for motor
+      // commands FIFO_out_ptr was already advanced past this element by the inline asm.
+      // This is not time-critical — the step-pin clear (Build 5) fires before this point.
       FIFOPtr[gFIFOOut].Command = COMMAND_NONE;
-      
+
       // Increment gFIFO_Out
       gFIFOOut++;
       if (gFIFOOut >= gCurrentFIFOLength)
       {
+        // Wrap: reset index and pre-computed pointer to FIFO base
         gFIFOOut = 0;
+        FIFO_out_ptr_high = (UINT8)((UINT16)FIFOPtr >> 8);
+        FIFO_out_ptr_low  = (UINT8)((UINT16)FIFOPtr);
       }
       if (gFIFOLength)
       {
@@ -1711,10 +1770,9 @@ void EBB_Init(void)
   gCurrentFIFOLength = 1; // Default the FIFO length to 1 on boot
   //isr_FSR0L_temp = 0;
   //isr_FSR0H_temp = 0;
-  // Start out FIFO out pointer on first element in FIFO array, which starts at
-  // address 0x500
-  FIFO_out_ptr_high = 0x05;
-  FIFO_out_ptr_low  = 0x00;
+  // Start FIFO out pointer at first element in FIFO array
+  FIFO_out_ptr_high = (UINT8)((UINT16)FIFOPtr >> 8);
+  FIFO_out_ptr_low  = (UINT8)((UINT16)FIFOPtr);
   
   // Default RB0 to be an input, with the pull-up enabled, for use as alternate
   // PAUSE button (just like PRG)
@@ -3758,6 +3816,8 @@ void parse_ES_packet(void)
   }
   gFIFOIn = 0;
   gFIFOOut = 0;
+  FIFO_out_ptr_high = (UINT8)((UINT16)FIFOPtr >> 8);
+  FIFO_out_ptr_low  = (UINT8)((UINT16)FIFOPtr);
   gFIFOLength = 0;
 
   if (disable_motors == 1u)
