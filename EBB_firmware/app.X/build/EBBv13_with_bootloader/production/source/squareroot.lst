@@ -1,4 +1,4 @@
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  1
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00042 ;exclusively on Microchip PICmicro Microcontroller products. The 
                       00043 ;software is owned by the Company and/or its supplier, and is 
                       00044 ;protected under applicable copyright laws. All rights are reserved.
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  2
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -116,7 +116,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00095 ; *******************************************************************
                       00096 ; *******************************************************************
                       00097 ;;;#include P18C252.INC
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  3
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  3
 16/32 bit Integer Square Root
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -175,7 +175,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 000010 0EFC           00148         movlw   0xFC                ; load -2 into W and do the same for the
 000012 CFDB F???      00149         movff   PLUSW2, ARGA1       ; other bytes in the input parameter
 000016 0EFD           00150         movlw   0xFD
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  4
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  4
 16/32 bit Integer Square Root
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -234,7 +234,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
 000070 6B00           00201         clrf    TEMP0, BANKED       ; clear the temp solution
 000072 6B00           00202         clrf    TEMP1, BANKED
 000074 6B00           00203         clrf    BITLOC0, BANKED     ; setup the first bit
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  5
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  5
 16/32 bit Integer Square Root
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -293,7 +293,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00254 ; SQRES3:SQRES0 = ARG1H:ARG1L ^2
 0000E6 5100           00255 Sq16    movf    ARG1L, W, BANKED
 0000E8 02??           00256         mulwf   ARG1L               ; ARG1L * ARG2L ->
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  6
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  6
 16/32 bit Integer Square Root
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -331,7 +331,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
   0000                00286         GLOBAL  Sqrt
                       00287 
                       00288         end
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  7
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  7
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -390,7 +390,7 @@ ALRMRPT                           00000F90
 ALRMVALH                          00000F8F
 ALRMVALL                          00000F8E
 AMASK0                            00000002
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  8
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  8
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -449,7 +449,7 @@ BF                                00000000
 BF1                               00000000
 BGVST                             00000006
 BITLOC0                           00000510
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE  9
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE  9
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -508,7 +508,7 @@ CCPR1                             00000FBB
 CCPR1H                            00000FBC
 CCPR1L                            00000FBB
 CCPR2                             00000FB5
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 10
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 10
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -567,7 +567,7 @@ CSF0                              00000006
 CSF1                              00000007
 CSRC                              00000007
 CSRC1                             00000007
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 11
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 11
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -626,7 +626,7 @@ DMAEN                             00000000
 DONE                              00000001
 DS                                00000003
 DSBOR                             00000001
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 12
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 12
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -685,7 +685,7 @@ EDG2STAT                          00000001
 EDGEN                             00000003
 EDGSEQEN                          00000002
 EECON1                            00000FA6
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 13
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 13
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -744,7 +744,7 @@ HLVDCON                           00000F85
 HLVDEN                            00000004
 HLVDIN                            00000005
 HLVDL0                            00000000
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 14
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 14
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -803,7 +803,7 @@ INTCON                            00000FF2
 INTCON2                           00000FF1
 INTCON3                           00000FF0
 INTEDG0                           00000006
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 15
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 15
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -862,7 +862,7 @@ LATC0                             00000000
 LATC1                             00000001
 LATC2                             00000002
 LATC4                             00000004
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 16
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 16
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -921,7 +921,7 @@ NOT_RBPU                          00000007
 NOT_RC8                           00000006
 NOT_RI                            00000004
 NOT_SS1                           00000005
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 17
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 17
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -980,7 +980,7 @@ P2M0                              00000006
 P2M1                              00000007
 P2RSEN                            00000007
 PADCFG1                           00000F3C
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 18
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 18
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1039,7 +1039,7 @@ PMD1                              00000001
 PMD2                              00000002
 PMD3                              00000003
 PMD4                              00000004
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 19
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 19
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1098,7 +1098,7 @@ PRODH                             00000FF4
 PRODL                             00000FF3
 PSA                               00000003
 PSIDL                             00000005
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 20
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 20
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1157,7 +1157,7 @@ RBIF                              00000000
 RBIP                              00000000
 RBPU                              00000007
 RC0                               00000000
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 21
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 21
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1216,7 +1216,7 @@ REPU                              00000006
 RES0                              0000050B
 RES1                              0000050A
 RESUME                            00000002
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 22
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 22
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1275,7 +1275,7 @@ RPOR12                            00000ED2
 RPOR13                            00000ED3
 RPOR17                            00000ED7
 RPOR18                            00000ED8
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 23
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 23
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1334,7 +1334,7 @@ SARG1                             00000508
 SARG2                             00000509
 SCK1                              00000004
 SCL1                              00000004
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 24
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 24
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1393,7 +1393,7 @@ SSP2ADD                           00000F74
 SSP2BUF                           00000F75
 SSP2CON1                          00000F72
 SSP2CON2                          00000F71
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 25
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 25
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1452,7 +1452,7 @@ T0CON                             00000FD5
 T0CS                              00000005
 T0IE                              00000005
 T0IF                              00000002
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 26
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 26
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1511,7 +1511,7 @@ T3GVAL                            00000002
 T3SYNC                            00000002
 T4CKPS0                           00000000
 T4CKPS1                           00000001
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 27
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 27
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1570,7 +1570,7 @@ TMR3L                             00000F7A
 TMR3ON                            00000000
 TMR4                              00000F78
 TMR4IE                            00000003
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 28
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 28
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1629,7 +1629,7 @@ TRNIE                             00000003
 TRNIF                             00000003
 TUN0                              00000000
 TUN1                              00000001
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 29
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 29
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1688,7 +1688,7 @@ UEP13                             00000F33
 UEP14                             00000F34
 UEP15                             00000F35
 UEP2                              00000F28
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 30
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 30
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
@@ -1747,7 +1747,7 @@ WAITM3                            00000005
 WCOL                              00000007
 WCOL1                             00000007
 WDTCON                            00000FC0
-MPASM 5.54                      SQUAREROOT.S   3-13-2026  16:53:28         PAGE 31
+MPASM 5.54                      SQUAREROOT.S   3-19-2026  20:00:40         PAGE 31
 16/32 bit Integer Square Root
 
 SYMBOL TABLE
