@@ -353,9 +353,6 @@ volatile near UINT8 gFIFOLength;
 volatile near UINT8 gFIFOIn;
 volatile near UINT8 gFIFOOut;
 
-// Holds a local copy of the Command from CommandFIFO[gFIFOOut].Command 
-static near UINT8 gFIFOCommand;
-
 // Current length of FIFO
 volatile near UINT8 gCurrentFIFOLength;
 
