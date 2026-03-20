@@ -1338,91 +1338,12 @@ CheckForNextCommand:
         g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
       }
       
-//      FIFO_COPY();
-
-      // Check to see if the FIFO_out_ptr needs wrapping
-      
-#if defined(USE_C_ISR)
-      // Instead of copying over the entire MoveCommandType every time, to save
-      // time we will check which command is next in the FIFO, and then only 
-      // copy over those fields that the new command actually uses.
-      // The order that we check these is the same as the main ISR check order
-      // above, where we want to have the most common commands checked first
-      // since they will then happen faster.
-      gFIFOCommand = FIFOPtr[gFIFOOut].Command;
-      
-      if (gFIFOCommand == COMMAND_SM_XM_HM_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-      }
-      else if (gFIFOCommand == COMMAND_LM_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.Steps[1]       = FIFOPtr[gFIFOOut].m.sm.Steps[1];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-      }
-      else if (gFIFOCommand == COMMAND_LT_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.Rate[0]        = FIFOPtr[gFIFOOut].m.sm.Rate[0];
-        CurrentCommand.m.sm.Rate[1]        = FIFOPtr[gFIFOOut].m.sm.Rate[1];
-        CurrentCommand.m.sm.Accel[0]       = FIFOPtr[gFIFOOut].m.sm.Accel[0];
-        CurrentCommand.m.sm.Accel[1]       = FIFOPtr[gFIFOOut].m.sm.Accel[1];
-        CurrentCommand.m.sm.Jerk[0]        = FIFOPtr[gFIFOOut].m.sm.Jerk[0];
-        CurrentCommand.m.sm.Jerk[1]        = FIFOPtr[gFIFOOut].m.sm.Jerk[1];
-        CurrentCommand.m.sm.Steps[0]       = FIFOPtr[gFIFOOut].m.sm.Steps[0];
-        CurrentCommand.m.sm.DirBits        = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-      }
-      else if (gFIFOCommand == COMMAND_SERVO_MOVE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.ServoPosition  = FIFOPtr[gFIFOOut].m.sm.ServoPosition;
-        CurrentCommand.m.sm.ServoRPn       = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
-        CurrentCommand.m.sm.ServoChannel   = FIFOPtr[gFIFOOut].m.sm.ServoChannel;
-        CurrentCommand.m.sm.ServoRate      = FIFOPtr[gFIFOOut].m.sm.ServoRate;
-      }
-      else if (gFIFOCommand == COMMAND_DELAY)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-      }
-      else if (gFIFOCommand == COMMAND_SE)
-      {
-        CurrentCommand.Command        = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DelayCounter   = FIFOPtr[gFIFOOut].m.sm.DelayCounter;
-        CurrentCommand.m.sm.SEState        = FIFOPtr[gFIFOOut].m.sm.SEState;
-        CurrentCommand.m.sm.SEPower        = FIFOPtr[gFIFOOut].m.sm.SEPower;
-      }
-      else if (gFIFOCommand == COMMAND_EM)
-      {
-        CurrentCommand.Command       = FIFOPtr[gFIFOOut].Command;
-        CurrentCommand.m.sm.DirBits       = FIFOPtr[gFIFOOut].m.sm.DirBits;
-        CurrentCommand.m.sm.ServoRPn      = FIFOPtr[gFIFOOut].m.sm.ServoRPn;
-      }
-      else
-      {
-        // gFIFOCommand had a value that is not allowed
-      }
-#endif
+      // Copy entire FIFO element to CurrentCommand in one struct assignment.
+      // C18 generates this as one MULLW (address computation) plus unrolled
+      // MOVFF POSTINC instructions — the same pattern it uses for the enqueue
+      // side (FIFOPtr[gFIFOIn] = gMoveTemp). This replaces the per-command-type
+      // field-by-field copy which required a separate MULLW for every field.
+      CurrentCommand = FIFOPtr[gFIFOOut];
 
       // Take care of clearing the step accumulators for the next move if
       // it's a motor move (of any type) - if the command requests it
