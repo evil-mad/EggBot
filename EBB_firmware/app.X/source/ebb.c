@@ -1354,9 +1354,7 @@ CheckForNextCommand:
         // The ISR prologue saves/restores FSR0 because C code elsewhere in the
         // ISR uses pointer operations (e.g., FIFOPtr[gFIFOOut] for COMMAND_NONE write).
         //
-        // Inline asm uses MPASM syntax (C18 passes _asm blocks to MPASM).
-        // Decimal literals use dot prefix: .8 = decimal 8.
-        // Offsets match isr_helpers.asm reference implementation.
+        // C18 inline asm uses C radix notation (default radix is decimal).
         // Byte map: 0=Command, 1=DirBits, 2-5=DelayCounter, 6=SEState,
         // 7-10=Rate[0], 11-14=Rate[1], 15-18=Steps[0], 19-22=Steps[1],
         // 23-26=Jerk[0], 27-30=Jerk[1], 31-34=Accel[0], 35-38=Accel[1]
@@ -1364,47 +1362,47 @@ CheckForNextCommand:
           MOVFF FIFO_out_ptr_low, FSR0L
           MOVFF FIFO_out_ptr_high, FSR0H
           MOVFF POSTINC0, CurrentCommand
-          MOVFF POSTINC0, CurrentCommand+.1
-          MOVFF POSTINC0, CurrentCommand+.2
-          MOVFF POSTINC0, CurrentCommand+.3
-          MOVFF POSTINC0, CurrentCommand+.4
-          MOVFF POSTINC0, CurrentCommand+.5
-          MOVFF POSTINC0, CurrentCommand+.6
-          MOVFF POSTINC0, CurrentCommand+.7
-          MOVFF POSTINC0, CurrentCommand+.8
-          MOVFF POSTINC0, CurrentCommand+.9
-          MOVFF POSTINC0, CurrentCommand+.10
-          MOVFF POSTINC0, CurrentCommand+.11
-          MOVFF POSTINC0, CurrentCommand+.12
-          MOVFF POSTINC0, CurrentCommand+.13
-          MOVFF POSTINC0, CurrentCommand+.14
-          MOVFF POSTINC0, CurrentCommand+.15
-          MOVFF POSTINC0, CurrentCommand+.16
-          MOVFF POSTINC0, CurrentCommand+.17
-          MOVFF POSTINC0, CurrentCommand+.18
-          MOVFF POSTINC0, CurrentCommand+.19
-          MOVFF POSTINC0, CurrentCommand+.20
-          MOVFF POSTINC0, CurrentCommand+.21
-          MOVFF POSTINC0, CurrentCommand+.22
-          MOVFF POSTINC0, CurrentCommand+.23
-          MOVFF POSTINC0, CurrentCommand+.24
-          MOVFF POSTINC0, CurrentCommand+.25
-          MOVFF POSTINC0, CurrentCommand+.26
-          MOVFF POSTINC0, CurrentCommand+.27
-          MOVFF POSTINC0, CurrentCommand+.28
-          MOVFF POSTINC0, CurrentCommand+.29
-          MOVFF POSTINC0, CurrentCommand+.30
-          MOVFF POSTINC0, CurrentCommand+.31
-          MOVFF POSTINC0, CurrentCommand+.32
-          MOVFF POSTINC0, CurrentCommand+.33
-          MOVFF POSTINC0, CurrentCommand+.34
-          MOVFF POSTINC0, CurrentCommand+.35
-          MOVFF POSTINC0, CurrentCommand+.36
-          MOVFF POSTINC0, CurrentCommand+.37
-          MOVFF POSTINC0, CurrentCommand+.38
-          MOVLW .8
+          MOVFF POSTINC0, CurrentCommand+1
+          MOVFF POSTINC0, CurrentCommand+2
+          MOVFF POSTINC0, CurrentCommand+3
+          MOVFF POSTINC0, CurrentCommand+4
+          MOVFF POSTINC0, CurrentCommand+5
+          MOVFF POSTINC0, CurrentCommand+6
+          MOVFF POSTINC0, CurrentCommand+7
+          MOVFF POSTINC0, CurrentCommand+8
+          MOVFF POSTINC0, CurrentCommand+9
+          MOVFF POSTINC0, CurrentCommand+10
+          MOVFF POSTINC0, CurrentCommand+11
+          MOVFF POSTINC0, CurrentCommand+12
+          MOVFF POSTINC0, CurrentCommand+13
+          MOVFF POSTINC0, CurrentCommand+14
+          MOVFF POSTINC0, CurrentCommand+15
+          MOVFF POSTINC0, CurrentCommand+16
+          MOVFF POSTINC0, CurrentCommand+17
+          MOVFF POSTINC0, CurrentCommand+18
+          MOVFF POSTINC0, CurrentCommand+19
+          MOVFF POSTINC0, CurrentCommand+20
+          MOVFF POSTINC0, CurrentCommand+21
+          MOVFF POSTINC0, CurrentCommand+22
+          MOVFF POSTINC0, CurrentCommand+23
+          MOVFF POSTINC0, CurrentCommand+24
+          MOVFF POSTINC0, CurrentCommand+25
+          MOVFF POSTINC0, CurrentCommand+26
+          MOVFF POSTINC0, CurrentCommand+27
+          MOVFF POSTINC0, CurrentCommand+28
+          MOVFF POSTINC0, CurrentCommand+29
+          MOVFF POSTINC0, CurrentCommand+30
+          MOVFF POSTINC0, CurrentCommand+31
+          MOVFF POSTINC0, CurrentCommand+32
+          MOVFF POSTINC0, CurrentCommand+33
+          MOVFF POSTINC0, CurrentCommand+34
+          MOVFF POSTINC0, CurrentCommand+35
+          MOVFF POSTINC0, CurrentCommand+36
+          MOVFF POSTINC0, CurrentCommand+37
+          MOVFF POSTINC0, CurrentCommand+38
+          MOVLW 8
           ADDWF FSR0L, 1, 0
-          MOVLW .0
+          MOVLW 0
           ADDWFC FSR0H, 1, 0
           MOVFF FSR0L, FIFO_out_ptr_low
           MOVFF FSR0H, FIFO_out_ptr_high
