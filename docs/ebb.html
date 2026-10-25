@@ -622,16 +622,22 @@
                 <li>
                   <i>Param_Number</i> = 50 : <b>Auto Enable Motors</b>
                   <p>
-                    The stepper motor drivers are normally enabled any time any stepper motor command is executed. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you to turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
+                    By default, both stepper motor drivers are automatically enabled by every stepper motion command. However, there may be times when it is desired to leave one or the other disabled while a stepper motion command is executing. The Auto Enable Motors setting allows you to turn off the automatic enabling of stepper motor drivers. This will then require you to manually enable whichever stepper driver you want using the <code>EM</code> command.
                   </p>
                   <ul>
                     <li>
-                      If <i>Param_Value</i> = 0, then the stepper motor drivers will not be automatically enabled at the beginning of every stepper motion command.
+                      If <i>Param_Value</i> = 0, then the stepper motor drivers will not be automatically enabled by stepper motion commands.
                     </li>
                     <li>
-                      If <i>Param_Value</i> = 1, then the stepper motor drivers will be automatically enabled at the beginning of every stepper motion command. (Default at boot)
+                      If <i>Param_Value</i> = 1, then the stepper motor drivers will be automatically enabled by every stepper motion command. (Default at boot)
                     </li>
                   </ul>
+                  <p>
+                    Automatic enabling takes place when a motion command is received and added to the motion queue, not when the command begins executing. If other commands are already waiting in the FIFO, the motors will be enabled before those earlier commands execute. Both motors are enabled, regardless of which axes the command moves. <code>SM</code>, <code>XM</code>, and <code>HM</code> commands that take no steps (pure delays) do not enable the motors.
+                  </p>
+                  <p>
+                    Because <code>EM</code> is itself added to the motion queue and takes effect only when it executes, an <code>EM</code> command that disables a motor can interact unpredictably with motion commands sent after it while automatic enabling is on: the result depends on whether the <code>EM</code> has already executed when the motion command is received. To control the motor enable states with <code>EM</code> &mdash; for example, to move only one motor while the other is disabled &mdash; first turn off automatic enabling with <code>CU,50,0</code>.
+                  </p>
                   <p>
                     This parameter is new for <code>CU</code> in EBB firmware v3.0.
                   </p>
@@ -851,7 +857,7 @@
               When enabled, the stepper motor driver actively drives current through the coils, causing the motors to 'lock' (i.e. be very difficult to turn by external torques).
             </p>
             <p>
-              Each of the motor movement commands (like SM, XM, and LM) automatically enable both motors before they begin their motion, but do not change the global step mode.
+              When automatic motor enabling is on (the default; see <code><a href="#CU">CU,50</a></code>), each of the motor movement commands (like SM, XM, and LM) automatically enables both motors, but does not change the global step mode. This enabling happens when the motion command is received and queued, which may be before an earlier <code>EM</code> command in the motion queue has executed. To control motor enables reliably with <code>EM</code>, turn off automatic enabling with <code>CU,50,0</code>.
             </p>
             <p>
               The stepper motors may be configured to be in whole, half, quarter, eighth, or sixteenth step modes. When using a motor with a native resolution of 200 steps per revolution, these settings would produce effective stepping resolutions of 200, 400, 800, 1600, and 3200 steps per revolution, respectively. Using fine sub-steps ("microstepping") gives higher resolution at the cost of decreasing step size reproducibility and decreasing maximum step speed. Note that the microstep mode is set for both motors simultaneously, using the parameter value of <i>Enable1</i>. It is not possible to set the step mode separately for each motor. Thus there is just one global step mode, and it is set by the value of <i>Enable1</i>.
