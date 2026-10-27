@@ -2205,7 +2205,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command re-initializes the the internal state of the EBB to the default power on state. This includes setting the I/O pins of ports A, B and C to their power on states, and stopping any ongoing timers or servo outputs, etc. On ports D and E, only the pins that the EBB itself uses are re-initialized; other pins on those ports keep their direction and output values. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not re-initialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
+              This command re-initializes the internal state of the EBB to the default power on state. This includes setting the I/O pins of ports A, B and C to their power on states, and stopping any ongoing timers or servo outputs, etc. On ports D and E, only the pins that the EBB itself uses are re-initialized; other pins on those ports keep their direction and output values. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not re-initialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
@@ -3054,7 +3054,8 @@
         <p>
           When an error is found, the line ending after printing out the error will be <code>\n</code> when in Future Syntax Mode, or <code>\r\n</code>
           when in Legacy Syntax Mode. In Legacy Syntax Mode, a command that reports an error does not also send <code>OK</code>; the error line, ending in
-          <code>\r\n</code>, replaces the command's usual response.
+          <code>\r\n</code>, replaces the command's usual response. (One exception in current firmware: an <code><a href="#XM">XM</a></code> rate error may be
+          followed by an <code>OK</code> response; see the note under <code><a href="#XM">XM</a></code>.)
         </p>
         <p>
           Not every possible syntax error will result in the correct error code being reported.</p>
