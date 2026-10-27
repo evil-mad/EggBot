@@ -152,8 +152,8 @@
             <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
             <li>
               <code><a href="#PC">PC</a></code>,
-              <code><a href="#PG">PG</a></code>,
-              <code><a href="#T">T</a></code>, and  commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
+              <code><a href="#PG">PG</a></code> and
+              <code><a href="#T">T</a></code> commands removed as per <a href="https://github.com/evil-mad/EggBot/issues/216">issue #216</a></li>
           </ul>
         </p>
 
@@ -274,9 +274,9 @@
           <li><a href="#ND">ND</a> &mdash; Node count Decrement</li>
           <li><a href="#NI">NI</a> &mdash; Node count Increment</li>
           <li><a href="#O">O</a> &mdash; Output</li>
-          <li><a href="#PC">PC</a> &mdash; Pulse Configure</li>
+          <li><a href="#PC">PC</a> &mdash; Pulse Configure (versions &lt; 3)</li>
           <li><a href="#PD">PD</a> &mdash; Pin Direction</li>
-          <li><a href="#PG">PG</a> &mdash; Pulse Go</li>
+          <li><a href="#PG">PG</a> &mdash; Pulse Go (versions &lt; 3)</li>
           <li><a href="#PI">PI</a> &mdash; Pin Input</li>
           <li><a href="#PO">PO</a> &mdash; Pin Output</li>
           <li><a href="#QB">QB</a> &mdash; Query Button</li>
@@ -302,7 +302,7 @@
           <li><a href="#SP">SP</a> &mdash; Set Pen State</li>
           <li><a href="#SR">SR</a> &mdash; Set RC Servo power timeout</li>
           <li><a href="#ST">ST</a> &mdash; Set EBB nickname Tag</li>
-          <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read</li>
+          <li><a href="#T">T</a> &mdash; Timed Digital/Analog Read (versions &lt; 3)</li>
           <li><a href="#T3">T3</a> &mdash; Low-level Move with Jerk, Time Limited</li>
           <li><a href="#TD">TD</a> &mdash; Paired "Dual T3" Low-level Move With Jerk, Time-limited</li>
           <li><a href="#TP">TP</a> &mdash; Toggle Pen</li>
@@ -565,7 +565,7 @@
                   </p>
                   <ul>
                     <li>
-                      If <i>Param_Value</i> = 0, then stepper motor motion commands (<code>SM</code>,<code>XM</code>,<code>HM</code>,<code>LM</code>,<code>LT</code>,<code>T3</code>,<code>L3</code>,) will limit their parameter limit checking.
+                      If <i>Param_Value</i> = 0, then stepper motor motion commands (<code>SM</code>, <code>XM</code>, <code>LM</code>, <code>LT</code>, <code>L3</code>, <code>T3</code>, <code>TD</code>) will limit their parameter limit checking. (<code>HM</code> is not affected.)
                     </li>
                     <li>
                       If <i>Param_Value</i> = 1, then stepper motor motion commands will perform all parameter limit checking and return error messages if any parameter limits are exceeded (default at boot).
@@ -1453,7 +1453,7 @@
         </ul>
 
         <hr class="short"/>
-        <h4><a name="PC"></a>"PC" &mdash; Pulse Configure</h4>
+        <h4><a name="PC"></a>"PC" &mdash; Pulse Configure (Removed in v3.0)</h4>
 
         <ul>
           <li>
@@ -1461,7 +1461,7 @@
           </li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>PC&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Before 3.0 (removed in 3.0)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
@@ -1542,13 +1542,13 @@
         </ul>
 
         <hr class="short"/>
-        <h4><a name="PG"></a>"PG" &mdash; Pulse Go</h4>
+        <h4><a name="PG"></a>"PG" &mdash; Pulse Go (Removed in v3.0)</h4>
 
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>PG,<i>Value</i>&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>PG&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Before 3.0 (removed in 3.0)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
@@ -2736,13 +2736,13 @@
         </ul>
      
         <hr class="short"/>
-        <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Query</h4>
+        <h4><a name="T"></a>"T" &mdash; Timed Analog/Digital Query (Removed in v3.0)</h4>
       
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>T,<i>Duration</i>,<i>Mode</i>&lt;CR&gt;</code></li>  
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>T&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
+          <li><span style="font-weight: bold;">Firmware versions:</span> Before 3.0 (removed in 3.0)</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
@@ -2969,8 +2969,8 @@
         
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>V&lt;CR&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (future mode):</span> <code>V,EBBv13_and_above EB Firmware Version 2.4.2&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>EBBv13_and_above EB Firmware Version 2.4.2&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (future mode):</span> <code>V,EBBv13_and_above EB Firmware Version 3.1.7&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>EBBv13_and_above EB Firmware Version 3.1.7&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate </li>
           <li>
@@ -2994,7 +2994,7 @@
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
               <li>
-                <i>Duration</i> is an integer in the range from 1 to 2147483647, giving time in milliseconds.
+                <i>Duration</i> is an integer in the range from 1 to 4294967295, giving time in milliseconds.
               </li>
               <li>
                 <i>AxisStepsA</i> and <i>AxisStepsB</i> are integers, each in the range from -2147483648 to 2147483647, giving movement distances in steps.
