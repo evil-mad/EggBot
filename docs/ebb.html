@@ -248,8 +248,11 @@
         <ul>
           <li>All commands are composed of ASCII characters</li>
           <li>All commands are case insensitive.</li>
-          <li>No whitespace (including spaces, tabs, or returns) is allowed within a command.</li>
+          <li>No spaces are allowed within a command.</li>
+          <li>A command ends with a <code>&lt;CR&gt;</code> or a <code>&lt;NL&gt;</code>. A <code>&lt;CR&gt;</code> and <code>&lt;NL&gt;</code> together, in either order, or several in a row, end just one command.</li>
+          <li>Other control characters, such as tabs, are ignored. A backspace (0x08) deletes the previous character, and the EBB echoes a space and a backspace.</li>
           <li>All commands must have a total length of 256 bytes or fewer, including the terminating <code>&lt;CR&gt;</code> .</li>
+          <li>Numeric parameters may have at most 10 digits.</li>
         </ul>
 
         <h3><a name="commands"></a>The EBB Command Set<br></h3>
@@ -1097,7 +1100,7 @@
             </ol>
           
             <p>
-             A restriction on the parameters is that motion must be possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion, or no motion will occur.
+             A restriction on the parameters is that motion must be possible on at least one axis. That is to say, you must ensure that both <i>Steps</i> is nonzero <i>and</i> that either <i>Rate</i> or <i>Accel</i> are nonzero for at least one axis of motion. Otherwise, with limit checking on (the default; see <code><a href="#CU">CU,2</a></code>), the EBB returns <code>!6 Err: Invalid parameter value</code>; with limit checking off, the command is accepted and no motion occurs.
             </p>
             <p>
               Because the parameters for each axis determine how long the move will take <i>for that axis</i>, one axis may finish stepping before the other. In extreme cases, one axis will finish moving long before the other, which can lead to (correct but) unintuitive behavior. For example, in an XY movement command both axes could travel same distance yet have axis 1 finish well before axis 2.  The apparent motion would be a diagonal XY movement for the first part of the transit time, followed by a straight movement along axis 2. To the eye, that transit appears as a "bent" line, or perhaps as two distinct movement events. 
@@ -1843,7 +1846,7 @@
               </tbody>
             </table>
             <p>
-              <div style="font-weight:bold;">Bit 7: Limit Switch Triggered</div> This bit is 1 if the limit switch triggered. It will be a 0 if the Limit Switch Trigger has not fired or if the limit switch feature is disabled. If set, executing this query will clear the bit.
+              <div style="font-weight:bold;">Bit 7: Limit Switch Triggered</div> This bit is 1 if the limit switch triggered. It will be a 0 if the Limit Switch Trigger has not fired or if the limit switch feature is disabled. This bit stays set (reading <code>QG</code> does not clear it) until the limit switch feature is turned off with <code><a href="#CU">CU,51,0</a></code> or the EBB is reset with <code><a href="#R">R</a></code>. While it is set, motion commands are acknowledged but ignored.
             </p>
             <p>
               <div style="font-weight:bold;">Bit 6: Power Lost Flag</code></div> This bit is 1 if the V+ power input has gone below <code>Power_Lost_Threshold</code> since the last time the <code>QG</code> query was executed. If set, executing this query will clear the bit. See <code>CU,60</code>.
