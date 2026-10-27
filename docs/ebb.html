@@ -930,14 +930,14 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              Use this query to abort any in-progress stepper motor moves and flush the motion FIFO. It will immediately stop the stepper motors. In addition, if any motion command was currently executing or in the FIFO when the command arrives the <i>Interrupted</i> return value will be a 1.
+              Use this query to abort any in-progress stepper motor moves and flush the motion FIFO. It will immediately stop the stepper motors. <i>Interrupted</i> is 1 if a stepper motor move was executing, or if any command was waiting in the FIFO, when the command arrived. Stopping only a delay (an <code><a href="#SM">SM</a></code> or <code><a href="#XM">XM</a></code> move with no steps) gives 0.
             </p>
           </li>
           <li>
             <span style="font-weight: bold;">Returned values:</span>
             <ul>
               <li>
-                <i>Interrupted</i>: 0 if no FIFO or in-progress move commands were interrupted, 1 if a motor move command was in progress or in the FIFO
+                <i>Interrupted</i>: 1 if a stepper motor move was in progress or any command was waiting in the FIFO; otherwise 0.
               </li>
             </ul>
           </li>
@@ -1977,7 +1977,6 @@
                 <li><code>SN</code> &mdash; Set Node count</li>
                 <li><code>NI</code> &mdash; Node count Increment</li>
                 <li><code>ND</code> &mdash; Node count Decrement</li>
-                <li><code>CN</code> &mdash; Clear node count [obsolete]</li>
               </ul>
             </p>
           </li>
@@ -2203,7 +2202,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span>
             <p>
-              This command re-initializes the the internal state of the EBB to the default power on state. This includes setting all I/O pins in their power on states, stopping any ongoing timers or servo outputs, etc. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not re-initialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
+              This command re-initializes the the internal state of the EBB to the default power on state. This includes setting the I/O pins of ports A, B and C to their power on states, and stopping any ongoing timers or servo outputs, etc. On ports D and E, only the pins that the EBB itself uses are re-initialized; other pins on those ports keep their direction and output values. It does NOT do a complete reset of the EBB - this command does not cause the EBB to drop off the USB and come back, it does not re-initialize the processor's internal register, etc. It is simply a high level EBB-application reset. If you want to completely reset the board, use the <code>RB</code> command.
             </p>
           </li>
           <li><span style="font-weight: bold;">Example:</span> <code>R&lt;CR&gt;</code></li>
@@ -2478,7 +2477,7 @@
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>SE&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.1.0 and newer (with changes) </li>
-          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
+          <li><span style="font-weight: bold;">Execution:</span> Immediate, or added to FIFO motion queue if <i>Use_Motion_Queue</i> is 1</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
@@ -2905,7 +2904,7 @@
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>TP&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v1.9 and newer </li>
-          <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
+          <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li>
             <span style="font-weight: bold;">Arguments:</span>
             <ul>
