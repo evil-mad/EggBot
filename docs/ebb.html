@@ -803,7 +803,7 @@
                   </p>
                 </li>
                 <li>
-                  <i>Param_Number</i> = 257 : <b>Enable RC7 indicator of command parsing</b>
+                  <i>Param_Number</i> = 257 : <b>Enable RC0 indicator of command parsing</b>
                   <p>This is an internal software debugging and testing command.</p>
                   <p>
                     This parameter is new for <code>CU</code> in EBB firmware v3.0.
@@ -2431,12 +2431,12 @@
             <li>
               <code>SC,4,<i>Servo_Min</i></code> Set the minimum value for the RC servo output position. <i>Servo_Min</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Up" position. 
               <br />
-              Default: 12000 (1.0 ms) on reset.
+              Default: 22565 (1.878 ms) on reset. (This default changed in v2.6.0; earlier firmware used 12000.)
             </li>
             <li>
               <code>SC,5,<i>Servo_Max</i></code> Set the maximum value for the RC servo output position. <i>Servo_Max</i> may be in the range 1 to 65535, in units of 83.3 ns intervals. This sets the "Pen Down" position. 
               <br />
-              Default: 16000 (1.33 ms) on reset.
+              Default: 15302 (1.274 ms) on reset. (This default changed in v2.6.0; earlier firmware used 16000.)
               <br />
               If the <code>SP,3</code> command is sent to the EBB, this <i>Servo_Max</i> value will be set equal to the <i>Servo_Min</i> value.
             </li>
@@ -2565,7 +2565,7 @@
               The sign of <i>AxisSteps1</i> and <i>AxisSteps2</i> represent the direction each motor should turn.
             </p>
             <p>
-              The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that the step rate for either axis falls outside the allowed range, it will return an error and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,1,0</code>, the rate will be silently clamped to the nearest limit instead.)
+              The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the SM command finds that the step rate for either axis falls outside the allowed range, it will return an error and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,2,0</code>, the rate will be silently clamped to the nearest limit instead.)
             </p>
             <p>
               While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
@@ -2651,7 +2651,7 @@
               The optional <i>PortB_Pin</i> argument allows one to specify which portB pin of the MCU the output will use. If none is specified, pin 1 (the default) will be used.
             </p>
             <p>
-              <b>Default positions:</b> The default position for the RC servo output (RB1) on reset is the 'Pen up position' (<i>Servo_Min</i>), and at boot <i>Servo_Min</i> is set to 12000 which results in a pulse width of 1.0 ms on boot. <i>Servo_Max</i> is set to 16000 on boot, so the down position will be 1.33 ms unless changed with the "SC,5" Command.
+              <b>Default positions:</b> The default position for the RC servo output (RB1) on reset is the 'Pen up position' (<i>Servo_Min</i>), and at boot <i>Servo_Min</i> is set to 22565, which results in a pulse width of 1.878 ms. <i>Servo_Max</i> is set to 15302 at boot, so the down position will be 1.274 ms unless changed with the "SC,5" Command. (These defaults changed in v2.6.0; earlier firmware used 12000 and 16000.)
             </p>
             <p>
               <b>Digital outputs:</b> On older EBB hardware versions 1.1, 1.2 and 1.3, this command will make the solenoid output turn on and off. On all EBB versions it will make the RC servo output on RB1 move to the up or down position. Also, by default, it will turn on RB4 or turn off RB4 as a simple digital output, so that you could use this to trigger a laser for example.
@@ -2940,7 +2940,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>TR,<i>StepRate</i>,<i>AxisSteps1</i>[,<i>AxisSteps2</i>[,<i>Clear</i>]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>TR&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;TR&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> Added in v3.0</li>
           <li><span style="font-weight: bold;">Execution:</span> Added to FIFO motion queue</li>
           <li><span style="font-weight: bold;">Arguments:</span>
@@ -3016,7 +3016,7 @@
                 If both <i>AxisStepsA</i> and <i>AxisStepsB</i> are zero, then a delay of <i>duration</i> ms is executed.
               </p>
               <p>
-                The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the XM command finds that the step rate for either axis falls outside the allowed range, it will output an error message and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,1,0</code>, the rate will be silently clamped to the nearest limit instead.) Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
+                The minimum speed at which the EBB can generate steps for each motor is 0.00001164 steps/second. The maximum speed is 25,000 steps/second. If the XM command finds that the step rate for either axis falls outside the allowed range, it will output an error message and the move will not execute. (If limit checks have been disabled with <code><a href="#CU">CU</a>,2,0</code>, the rate will be silently clamped to the nearest limit instead.) Note that the range is checked on Axis 1 and Axis 2, NOT on Axis A and Axis B. (That is, the range is checked after performing the sum and difference.) While individual movement commands may be as short as a single step, there are practical limits to the rate at which commands can be issued, as discussed under <a href="#performance">Performance</a>.
               </p>
               <p>
                 Note: In current firmware, if a rate error is detected, the error message may be followed by an OK response.
@@ -3061,19 +3061,19 @@
         <ul>
           <li>
             <code>!0 Err: &lt;axis1&gt; step rate too high</code> 
-            <p>This error indicates an internal math error happened during move command processing.</p>
+            <p>Returned by <code><a href="#SM">SM</a></code> and <code><a href="#XM">XM</a></code> when limit checking is on (see <code><a href="#CU">CU,2</a></code>) and the step rate needed for the move on this axis is above the maximum of 25,000 steps per second.</p>
           </li>
           <li>
-            <code>!0 Err: &lt;axis1&gt; step rate too low</code> 
-            <p>This error indicates an internal math error happened during move command processing.</p>
+            <code>!0 Err: &lt;axis1&gt; step rate too slow</code> 
+            <p>Returned by <code><a href="#SM">SM</a></code> and <code><a href="#XM">XM</a></code> when limit checking is on (see <code><a href="#CU">CU,2</a></code>) and the step rate needed for the move on this axis is below the minimum step rate (see <code><a href="#SM">SM</a></code>).</p>
           </li>
           <li>
             <code>!0 Err: &lt;axis2&gt; step rate too high</code> 
-            <p>This error indicates an internal math error happened during move command processing.</p>
+            <p>Returned by <code><a href="#SM">SM</a></code> and <code><a href="#XM">XM</a></code> when limit checking is on (see <code><a href="#CU">CU,2</a></code>) and the step rate needed for the move on this axis is above the maximum of 25,000 steps per second.</p>
           </li>
           <li>
-            <code>!0 Err: &lt;axis2&gt; step rate too low</code> 
-            <p>This error indicates an internal math error happened during move command processing.</p>
+            <code>!0 Err: &lt;axis2&gt; step rate too slow</code> 
+            <p>Returned by <code><a href="#SM">SM</a></code> and <code><a href="#XM">XM</a></code> when limit checking is on (see <code><a href="#CU">CU,2</a></code>) and the step rate needed for the move on this axis is below the minimum step rate (see <code><a href="#SM">SM</a></code>).</p>
           </li>
           <li>
             <code>!1 Err: Invalid step rate</code>
@@ -3323,7 +3323,7 @@
           For example, if you're currently at a position (pulse duration) of 10000 and you send a new command to move to position 15000, then you have a 'distance' of 5000 to go. So when we start out, our current duration is 10000 and our target is 15000. If our rate value is 100, then it will take 50 of these 24 ms periods to get from 10000 to 15000, or 1.2 seconds total.
         </p>
         <p>
-          Now, when you're using the <code>SP,0</code> and <code>SP,1</code> commands, the <i>Servo_Min</i> (defaults to 16000, or 1.33 ms) and <i>Servo_Max</i> (defaults to 20000, or 1.6 ms) get used as the positions. And the <i>Servo_Rate_Up</i> and <i>Servo_Rate_Down</i> get used as the rates. So the formula is as follows:
+          Now, when you're using the <code>SP,0</code> and <code>SP,1</code> commands, the <i>Servo_Min</i> (defaults to 22565, or 1.878 ms) and <i>Servo_Max</i> (defaults to 15302, or 1.274 ms) get used as the positions. And the <i>Servo_Rate_Up</i> and <i>Servo_Rate_Down</i> get used as the rates. So the formula is as follows:
         </p>
         <p>
           ((<i>Servo_Max</i> - <i>Servo_Min</i>) * .024)/<i>Servo_Rate</i> = total time to move
