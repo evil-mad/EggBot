@@ -320,7 +320,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>A&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>A,<i>Channel</i>:<i>Value</i>,<i>Channel</i>:<i>Value</i></code> . . . <code>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>Channel</i>:<i>Value</i>,<i>Channel</i>:<i>Value</i></code> . . . <code>&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>A,<i>Channel</i>:<i>Value</i>,<i>Channel</i>:<i>Value</i></code> . . . <code>&lt;NL&gt;&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.2.3 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li><span style="font-weight: bold;">Description:</span>
@@ -331,22 +331,22 @@
               When one or more analog channels are enabled (see <code><a href="#AC">AC</a></code> command below), the "A" query will cause the EBB to return a list of all enabled channels and their associated 10 bit values.
             </p>
             <p>
-              The list of channels and their data will always be in sorted order from least (channel) to greatest. Only enabled channels will be present in the list.
+              The list of channels and their data will always be in sorted order from least (channel) to greatest. Only enabled channels will be present in the list. Channels 0 and 11 are enabled at boot (they are used by the <code><a href="#QC">QC</a></code> command), so they are included in the response unless disabled with <code><a href="#AC">AC</a></code>. If no channels are enabled, the response is <code>A</code> followed by the line ending.
             </p>
             <p>
               The <i>Value</i> returned for each enabled channel will range from 0 (for 0.0 V on the input) to 1023 (for 3.3 V on the input).
             </p>
             <p>
-              The channel number and ADC value are both padded to 2 and 4 characters respectively in the A response.
+              The channel number and ADC value are printed as decimal numbers.
             </p>
           </li>
 
           <li>
-            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet (future mode):</span> <code>A,0:713,2:241,5:89,9:1004&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
 
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>A,00:0713,02:0241,05:0089:09:1004&lt;CR&gt;&lt;NL&gt;</code> if channels 0, 2, 5 and 9 are enabled.
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>A,0:713,2:241,5:89,9:1004&lt;NL&gt;&lt;CR&gt;</code> if channels 0, 2, 5 and 9 are enabled.
           </li>
 
           <li>
@@ -692,7 +692,7 @@
                       If <i>Param_Value</i> = 0, then no Limit Switch Reply packet will be sent when a limit switch condition is triggered (default at boot).
                     </li>
                     <li>
-                      If <i>Param_Value</i> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX\n</code> where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
+                      If <i>Param_Value</i> = 1, then, when a Limit Switch Stop is triggered, a packet will be sent from the EBB to the PC of the form <code>Limit switch triggered. PortB=XX</code>, followed by the line ending (<code>\r\n</code> in legacy mode, <code>\n</code> in future mode), where <code>XX</code> is the value of the PortB inputs at the moment of the Limit Switch Stop, as two hexadecimal digits. Unlike regular EBB responses, this response is asynchronous, at the moment of the Limit Switch Stop, and not directly in response to a command or query. (The response will be made between replies from command parsing, so as to not interrupt the reply from a command.)
                     </li>
                   </ul>
                   <p>
@@ -1015,7 +1015,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This query reads every PORTx register (where x is A through E) and prints out each byte-wide register value as a three digit decimal number. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
+              This query reads every PORTx register (where x is A through E) and prints out each byte-wide register value as a decimal number from 0 to 255. This effectively reads the digital values on each and every pin of the processor and prints them out. If you need the value of a particular pin, you can extract it from the value printed for that port by looking at the binary bit within the byte for that pin. For example, if you wanted to read the value of RB4, you would look at the 5th bit (0x10) of the PortB byte in the return packet.
             </p>
             <p>
               For pins that are set as outputs, or are set as analog inputs, or are set as something other than digital inputs, this query will still convert the voltage on the pin to a digital value of 1 or 0 (using the standard voltage thresholds specified in the processor datasheet) and return all of their values.
@@ -1025,11 +1025,11 @@
 
           <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>I,128,255,130,000,007&lt;NL&gt;</code>
+            <code>I,128,255,130,0,7&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
-            <code>I,128,255,130,000,007&lt;CR&gt;&lt;NL&gt;</code>
+            <code>I,128,255,130,0,7&lt;CR&gt;&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">This command is deprecated in v3.0:</span>
@@ -1343,7 +1343,7 @@
           <li>
             <span style="font-weight: bold;">Description:</span> 
             <p>
-              This query reads one byte from RAM and prints it out. The <i>Data</i> is always printed as a three digit decimal number.
+              This query reads one byte from RAM and prints it out. The <i>Data</i> is printed as a decimal number from 0 to 255.
             </p>
           </li>
           <li>
@@ -1352,11 +1352,11 @@
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (future mode):</span>
-            <code>MR,071&lt;NL&gt;</code>
+            <code>MR,71&lt;NL&gt;</code>
           </li>
           <li>
             <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span>
-            <code>MR,071&lt;CR&gt;&lt;NL&gt;</code>
+            <code>MR,71&lt;CR&gt;&lt;NL&gt;</code>
           </li>
 
         </ul>
@@ -1681,7 +1681,7 @@
             <p>The two returned values are:</p>
             <ul>
               <li>
-                <i>RA0_VOLTAGE</i>, the voltage on the REF_RA0 net. It is expressed as a zero-padded 4-digit 10 bit number where 0 = 0.0V and 1023 = 3.3V
+                <i>RA0_VOLTAGE</i>, the voltage on the REF_RA0 net. It is expressed as a decimal number from 0 to 1023, where 0 = 0.0V and 1023 = 3.3V
                 <p>
                   This value yields the voltage level at the REF_RA0 input to the stepper driver chip. This is the control voltage that sets the maximum instantaneous (not average) current that the driver chips allow into the motor coils.
                 </p>
@@ -1690,7 +1690,7 @@
                 </p>
               </li>
               <li>
-                <i>V+_VOLTAGE</i> is the voltage on the V+ net, scaled by a voltage divider. It is expressed as a zero-padded 4-digit 10 bit number where 0 = 0.0V and 1023 = 3.3V
+                <i>V+_VOLTAGE</i> is the voltage on the V+ net, scaled by a voltage divider. It is expressed as a decimal number from 0 to 1023, where 0 = 0.0V and 1023 = 3.3V
                 <p>  
                   This value yields the voltage level at on the EBB's V+ power net, which is the "motor" power coming into the board, as measured after the first input protection diode.
                 </p>
@@ -1736,7 +1736,7 @@
         <ul>
           <li><span style="font-weight: bold;">Command:</span> <code>QE&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>QE,<i>Motor1_State</i>,<i>Motor2_State</i>&lt;NL&gt;</code></li>
-          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Motor1_State</i>,<i>Motor2_State</i>&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
+          <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code><i>Motor1_State</i>,<i>Motor2_State</i>&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> v2.8.0 and newer</li>
           <li><span style="font-weight: bold;">Execution:</span> Immediate</li>
           <li>
@@ -1776,7 +1776,7 @@
           </li>
 
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>16,16&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>16,16&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
 
           <li>
@@ -1785,7 +1785,7 @@
           </li>
 
           <li>
-            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0,4&lt;CR&gt;&lt;NL&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
+            <span style="font-weight: bold;">Example Return Packet (legacy mode; default):</span> <code>0,4&lt;NL&gt;&lt;CR&gt;OK&lt;CR&gt;&lt;NL&gt;</code>
           </li>
         </ul>
 
@@ -2145,7 +2145,7 @@
                 <li>
                   <i>Param_Number</i> = 6 : <b>Read out number of commands currently waiting in the FIFO</b>
                   <p>
-                    This query returns the instantaneous number of waiting commands in the FIFO as a two digit decimal number.
+                    This query returns the instantaneous number of waiting commands in the FIFO as a decimal number.
                   </p>
                 </li>
                 <li>
@@ -3050,9 +3050,9 @@
           the proper line ending is printed, taking into account Future vs. Legacy mode.
         </p>
         <p>
-          When an error is found, the line ending after printing out the error will either be <code>\n</code> when in Future Syntax Mode, or will be <code>OK\r\n</code>
-          when in Legacy Syntax Mode. When in Legacy Syntax Mode, the <code>OK\r\n</code> used when there is an error overrides whatever other line ending there may be for
-          the current command.
+          When an error is found, the line ending after printing out the error will be <code>\n</code> when in Future Syntax Mode, or <code>\r\n</code>
+          when in Legacy Syntax Mode. In Legacy Syntax Mode, a command that reports an error does not also send <code>OK</code>; the error line, ending in
+          <code>\r\n</code>, replaces the command's usual response.
         </p>
         <p>
           Not every possible syntax error will result in the correct error code being reported.</p>
