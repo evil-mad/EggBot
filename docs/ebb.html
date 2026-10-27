@@ -149,7 +149,7 @@
           The following are potentially breaking changes in the command and structure, and commands:
           <ul>
             <li><code><a href="#QG">QG</a></code> &mdash; Query General. The meanings of bits 6 and 7 has changed.</li>
-            <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output.</li> Maximum number of simultaneous RC servo outputs reduced from 24 to 8.
+            <li><code><a href="#S2">S2</a></code> &mdash; General RC Servo Output. Maximum number of simultaneous RC servo outputs reduced from 24 to 8.</li>
             <li>
               <code><a href="#PC">PC</a></code>,
               <code><a href="#PG">PG</a></code> and
@@ -444,7 +444,7 @@
               This command takes five bytes worth of parameters, one for each TRISx register in the processor, and writes those values down into the TRIS registers. There is a TRIS register for each 8-bit wide I/O port on the processor, and it controls each pin's direction (input or output). A 0 in a pin's bit in the TRIS register sets the pin to be an output, and a 1 sets it to be an input.
             </p>
             <p>
-              This command is useful if you want to set up the pin directions for each and every pin on the processor at once. If you just one to set one pin at a time, use the <code>PC</code> command.
+              This command is useful if you want to set up the pin directions for each and every pin on the processor at once. If you just want to set one pin at a time, use the <code><a href="#PD">PD</a></code> command.
             </p>
             <p>
               This command does not need to be used to configure analog inputs. The <code>AC</code> command is used for that.
@@ -1157,7 +1157,7 @@
             Notice that we are only using axis 1 in this example. You can of course use both axes at the same time, but you usually need to be careful that the times for each axis match up.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LM,33865471,1000,0,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
+            <span style="font-weight: bold;">Example 2:</span> <code>LM,3865471,1000,0,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for 1000 steps. Axis 2 does not move.
           </li>
           <li>
             <span style="font-weight: bold;">Example 3:</span> <code>LM,85899346,10,0,17180814,2,0\r</code> This example will cause a 10 ms long move, where axis 1 takes a step every 1 ms, and axis 2 takes a step every 5 ms. Axis 1 will step for 10 steps, and axis 2 will step for 2 steps, and they will both finish together at the end of the 10 ms. This is a constant-rate move without acceleration or deceleration on either axis.
@@ -1315,7 +1315,7 @@
             Since this command does not explicitly specify the number of steps to be traveled, you may want to carefully check your math, or use tools like <code><a href="#QS">QS</a></code> or <code><a href="#HM">HM</a></code> command following a move like this.
           </li>
           <li>
-            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,33865471,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
+            <span style="font-weight: bold;">Example 2:</span> <code>LT,25000,3865471,0,0,0\r</code> This example will move axis 1 at a constant speed of 45 steps/s for one second (25000 intervals). Axis 2 does not move.
           </li>
           <li>
             <span style="font-weight: bold;">Example 3:</span> <code>LT,12500,17179000,-687,8592000,687\r</code> This example will start with axis 1 at 200 steps/second, and axis 2 at 100 steps/second. Over the course of 500 ms, they will end at a speed of 100 steps/second for axis 1 (that is, decelerating) and 200 steps/second for axis 2. The move will cover 75 steps on each axis. 
@@ -1426,7 +1426,7 @@
         <h4><a name="O"></a>"O" &mdash; Output (digital)</h4>
 
         <ul>
-          <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>,[<i>PortB</i>,<i>PortC</i>,<i>PortD</i>,<i>PortE</i>]&lt;CR&gt;</code></li>
+          <li><span style="font-weight: bold;">Command:</span> <code>O,<i>PortA</i>[,<i>PortB</i>[,<i>PortC</i>[,<i>PortD</i>[,<i>PortE</i>]]]]&lt;CR&gt;</code></li>
           <li><span style="font-weight: bold;">Response (future mode):</span> <code>O&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Response (legacy mode; default):</span> <code>OK&lt;CR&gt;&lt;NL&gt;</code></li>
           <li><span style="font-weight: bold;">Firmware versions:</span> All</li>
@@ -2852,7 +2852,7 @@
           <li><span style="font-weight: bold;">Arguments:</span>
           <ul>
             <li>
-              <i>Intervals</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that each of the two  <code><a href="#T3">T3</a></code> commands executes for. The full execution time of the <code>TD</code>code> command is 2 &times; <i>Intervals</i>.
+              <i>Intervals</i> is an unsigned 32 bit integer in the range from 1 to 4294967295, which specifies the duration of time, in units of 40 &mu;s intervals, that each of the two  <code><a href="#T3">T3</a></code> commands executes for. The full execution time of the <code>TD</code> command is 2 &times; <i>Intervals</i>.
             </li>
             <li>
               <i>Rate1A</i>, <i>Rate1B</i>, <i>Rate2A</i> and <i>Rate2B</i> are signed 32 bit integers in the range from -2147483648 to 2147483647. They represent step rates for axis 1 and 2, and are added to each axis step accumulator every 40 &mu;s to determine when steps are taken. The sign of each <i>Rate</i> parameter determines the initial motor direction. See below for an explanation of where each set of rates is used.
