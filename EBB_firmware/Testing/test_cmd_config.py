@@ -67,7 +67,13 @@ def test_qu(ebb, r):
     r.item = "QU,200"
     ebb.ok("CS")
     r.check("accumulators 0,0 after CS", qu(ebb, 200) == "0,0")
-    r.omit("QU (future mode)", "future-mode replies end with two newlines (D7)")
+    r.item = "QU (future mode)"
+    ebb.raw("CU,10,1")
+    for n in (1, 2, 3, 4, 5, 6, 60, 61, 200):
+        resp = ebb.raw(f"QU,{n}")
+        r.check(f"QU,{n}: one line, QU,<value><NL>",
+                re.fullmatch(rb"QU,[0-9A-Fa-f,]+\n", resp), resp)
+    ebb.raw("CU,10,0")
 
 
 def test_cu_fifo(ebb, r):

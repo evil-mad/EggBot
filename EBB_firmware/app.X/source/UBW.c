@@ -2488,7 +2488,11 @@ void parse_QU_packet(void)
     return;
   }
 
-  print_line_ending(kLE_OK_NORM);
+  // Each value above already ended its line; future mode adds no more (#266)
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_OK_NORM);
+  }
 }
 
 #if PC_PG_T_COMMANDS_ENABLED
