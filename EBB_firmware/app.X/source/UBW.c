@@ -1860,6 +1860,24 @@ void print_command(BOOL print_always, BOOL print_comma)
   }
 }
 
+// For a command whose reply starts with its name: call print_command(FALSE,
+// FALSE) before parsing, then this once all of the command's checks have
+// passed, just before the reply's values. It adds the comma after the name
+// in future syntax mode, or in legacy mode prints the name and comma if
+// print_always is TRUE. An error found earlier is then printed in the same
+// form as for every other command (#254).
+void finish_command_prefix(BOOL print_always)
+{
+  if (bittstzero(gStandardizedCommandFormat))
+  {
+    ebb_putc(',');
+  }
+  else if (print_always)
+  {
+    print_command(TRUE, TRUE);
+  }
+}
+
 // This function prints out the common endings needed on text lines sent back
 // to the PC. It operates in two modes, Legacy and New. Legacy mode is used
 // when we need to emulate how the EBB's line endings have been done since
@@ -2372,7 +2390,7 @@ void parse_QU_packet(void)
 {
   UINT8 parameter_number;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
@@ -2381,6 +2399,22 @@ void parse_QU_packet(void)
   {
     return;
   }
+
+  // Reject an unknown parameter number before printing the reply
+  if (
+    ((parameter_number < 1u) || (parameter_number > 6u))
+    &&
+    (parameter_number != 60u)
+    &&
+    (parameter_number != 61u)
+    &&
+    (parameter_number != 200u)
+  )
+  {
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+  finish_command_prefix(TRUE);
 
   // QU,1 to read back current value of gLimitSwitchPortB
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
@@ -2789,7 +2823,7 @@ void parse_MR_packet(void)
   unsigned int location;
   unsigned char value;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUINT, &location, kREQUIRED);
 
@@ -2806,6 +2840,7 @@ void parse_MR_packet(void)
   }
 
   // Now send back the MR packet
+  finish_command_prefix(TRUE);
   ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }
@@ -2921,7 +2956,7 @@ void parse_PI_packet(void)
   UINT8 pin;
   UINT8 value = 0;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
@@ -2973,6 +3008,7 @@ void parse_PI_packet(void)
   }
 
   // Now send back our response
+  finish_command_prefix(TRUE);
   ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }

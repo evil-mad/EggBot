@@ -217,7 +217,23 @@ def test_errors_without_ok(ebb, r):
         r.check(f"{mode}: XM,1,15,15 does not move", pos == before, f"{before!r} -> {pos!r}")
 
 
+def test_error_format(ebb, r):
+    # Commands whose replies start with their name report errors in the
+    # same form as every other command (#254)
+    missing, bad = b"!4 Err: Missing parameter(s)", b"!6 Err: Invalid parameter value"
+    run_cases(ebb, r, "Returned Errors (format)", [
+        dict(cmd="PI,B3", want=b"!5 Err: Need comma next, found: '3'"),
+        dict(cmd="PI,B,9", want=bad),
+        dict(cmd="PI", want=missing),
+        dict(cmd="MR", want=missing),
+        dict(cmd="QU", want=missing),
+        dict(cmd="QU,0", want=bad),
+        dict(cmd="QL,-1", want=bad),
+        dict(cmd="ES,-1", want=bad),
+    ])
+
+
 if __name__ == "__main__":
     u.run("EBB Returned Errors: an erroring command is aborted and sends no OK",
           [test_extra_motion, test_extra_pen_servo, test_extra_config, test_extra_io,
-           test_extra_queries, test_errors_without_ok])
+           test_extra_queries, test_errors_without_ok, test_error_format])

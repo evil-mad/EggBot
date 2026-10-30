@@ -3666,7 +3666,7 @@ void parse_ES_packet(void)
   UINT8 command_interrupted = 0;
   UINT8 i;
 
-  print_command(FALSE, TRUE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
@@ -3726,6 +3726,7 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
+  finish_command_prefix(FALSE);
   ebb_print_uint(command_interrupted);
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -4201,7 +4202,7 @@ void parse_QL_packet(void)
   UINT8 Value = 0;
   UINT8 Index = 0;
   
-  print_command(FALSE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
@@ -4216,6 +4217,7 @@ void parse_QL_packet(void)
     Index = (SL_STORAGE_SIZE - 1);
   }
   
+  finish_command_prefix(FALSE);
   ebb_print_uint(gSL_Storage[Index]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
