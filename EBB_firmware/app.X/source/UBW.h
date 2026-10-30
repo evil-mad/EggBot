@@ -187,6 +187,8 @@ ExtractReturnType extract_number (ExtractType Type, void * ReturnValue, unsigned
 UINT8 extract_string (unsigned char * ReturnValue, UINT8 MaxBytes);
 void print_command(BOOL print_always, BOOL print_comma);
 void print_line_ending(tLineEnding);
+BOOL parameters_ok(void);
+BOOL no_parameters(void);
 void SetPinTRISFromRPn (char Pin, char State);
 void SetPinLATFromRPn (char Pin, char State);
 void AnalogConfigure (unsigned char Channel, unsigned char Enable);

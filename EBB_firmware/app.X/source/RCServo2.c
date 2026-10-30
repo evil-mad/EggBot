@@ -280,8 +280,8 @@ void RCServo2_S2_command (void)
 
   print_command(FALSE, FALSE);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }

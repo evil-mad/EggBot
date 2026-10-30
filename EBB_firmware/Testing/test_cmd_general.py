@@ -104,7 +104,7 @@ def test_errors(ebb, r):
     r.omit("Returned Errors !1", "only TR reports it, and only after OK (D17)")
     r.omit("Returned Errors !2", "internal TX buffer overrun; not reachable by command")
     r.omit("Returned Errors !3", "the RX overflow check can never fire (D45)")
-    r.omit("Returned Errors !7", "commands with an extra parameter run, then report !7 (D3)")
+    # Returned Errors !7 (extra parameter): see test_error_abort.py
 
 
 def test_checksums(ebb, r):

@@ -1724,8 +1724,8 @@ void parse_SC_packet (void)
   extract_number(kUCHAR, &Para1, kREQUIRED);
   extract_number(kUINT, &Para2, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -1905,8 +1905,8 @@ void parse_LM_packet(void)
   extract_number(kLONG,  &gAccel2,    kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -1985,8 +1985,8 @@ void parse_L3_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2053,8 +2053,8 @@ void parse_TD_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2138,8 +2138,8 @@ void parse_T3_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2196,8 +2196,8 @@ void parse_LT_packet(void)
   extract_number(kLONG,  &gAccel2,    kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2582,7 +2582,8 @@ void parse_SM_packet(void)
   extract_number(kLONG,  &gSteps2,  kOPTIONAL);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3099,6 +3100,12 @@ void parse_HM_packet(void)
   extract_number(kLONG,  &gHM_Pos1,     kOPTIONAL);
   extract_number(kLONG,  &gHM_Pos2,     kOPTIONAL);
 
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
+
   // StepRate must be from 1 to 25000
   if (gHM_StepRate < 1u)
   {
@@ -3161,6 +3168,12 @@ void parse_TR_packet(void)
   extract_number(kLONG,  &gSteps1,      kREQUIRED);
   extract_number(kLONG,  &gSteps2,      kREQUIRED);
   extract_number(kULONG, &gClearAccs,   kOPTIONAL);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
 
   // Set up these values as input parameters
   //  gHM_StepRate
@@ -3386,6 +3399,12 @@ void parse_XM_packet(void)
   extract_number(kLONG, &gXM_ASteps, kREQUIRED);
   extract_number(kLONG, &gXM_BSteps, kREQUIRED);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
   
   // Do the math to convert to Axis1 and Axis2
   gSteps1 = gXM_ASteps + gXM_BSteps;
@@ -3652,8 +3671,8 @@ void parse_ES_packet(void)
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3721,6 +3740,11 @@ void parse_ES_packet(void)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(PenState);
@@ -3748,6 +3772,11 @@ void parse_QE_packet(void)
   UINT8 motor2_state = 0;
   UINT8 temp;
   
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   if (MS1_IO_PORT == 0u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
@@ -3819,8 +3848,8 @@ void parse_TP_packet(void)
   // Extract each of the values.
   extract_number (kUINT, &CommandDuration, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3877,8 +3906,8 @@ void parse_SP_packet(void)
   extract_number(kUINT, &CommandDuration, kOPTIONAL);
   Ret = extract_number(kUCHAR, &Pin, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4023,7 +4052,7 @@ void parse_EM_packet(void)
   }
   RetVal2 = extract_number (kUCHAR, &EA2, kOPTIONAL);
   // Bail if we got a conversion error
-  if ((error_byte != kERROR_NO_ERROR) || (kEXTRACT_OK != RetVal2))
+  if (!parameters_ok() || (kEXTRACT_OK != RetVal2))
   {
     return;
   }
@@ -4054,6 +4083,11 @@ void parse_EM_packet(void)
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   if (NodeCount < 0xFFFFFFFEUL)
@@ -4067,6 +4101,11 @@ void parse_NI_packet(void)
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   if (NodeCount)
@@ -4082,15 +4121,17 @@ void parse_ND_packet(void)
 void parse_SN_packet(void)
 {
   unsigned long Temp;
-  ExtractReturnType RetVal;
 
   print_command(FALSE, FALSE);
 
-  RetVal = extract_number(kULONG, &Temp, kREQUIRED);
-  if (kEXTRACT_OK == RetVal)
+  extract_number(kULONG, &Temp, kREQUIRED);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
-    NodeCount = Temp;
+    return;
   }
+  NodeCount = Temp;
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -4100,6 +4141,11 @@ void parse_SN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(NodeCount);
@@ -4129,8 +4175,8 @@ void parse_SL_packet(void)
   extract_number(kUCHAR, &Value, kREQUIRED);
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4159,8 +4205,8 @@ void parse_QL_packet(void)
 
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4184,6 +4230,11 @@ void parse_QL_packet(void)
 // OK<CR>
 void  parse_QB_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(ButtonPushed);
@@ -4211,6 +4262,11 @@ void  parse_QB_packet(void)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
   // mainline code accessing at the same time, we will just wait for
   // the cycle of ADC readings to finish before we spit out our value.
@@ -4245,6 +4301,11 @@ void parse_QC_packet(void)
 void parse_QG_packet(void)
 {
   UINT8 result = process_QM();
+
+  if (!no_parameters())
+  {
+    return;
+  }
 
   print_command(FALSE, TRUE);
 
@@ -4307,8 +4368,8 @@ void parse_SE_packet(void)
   PowerExtract = extract_number(kUINT, &Power, kOPTIONAL);
   extract_number(kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4472,6 +4533,11 @@ void parse_QM_packet(void)
   UINT8 FIFOStatus = 0;
   UINT8 result = process_QM();
 
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(TRUE, TRUE);
 
   if (result & 0x01)
@@ -4512,6 +4578,11 @@ void parse_QM_packet(void)
 void parse_QS_packet(void)
 {
   INT32 step1, step2;
+
+  if (!no_parameters())
+  {
+    return;
+  }
 
   print_command(FALSE, TRUE);
 
@@ -4594,6 +4665,11 @@ void clear_StepCounters(void)
 // Note, as of 2.7.0 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   clear_StepCounters();
