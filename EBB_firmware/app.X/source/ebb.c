@@ -511,6 +511,7 @@ static void process_low_level_move(BOOL TimedMove,  ExtractReturnType ClearRet);
 static void process_simple_motor_move_fp(void);
 static void clear_parmaeter_globals(void);
 static void process_simple_rate_move_fp(void);
+static void auto_enable_motors(void);
 
 
 extern void FIFO_COPY(void);
@@ -2473,8 +2474,7 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
     // Enable both motors when we want to move them
     // (To be more logical this should happen in the ISR when this move
     // is loaded rather than here.)
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
+    auto_enable_motors();
   }
 
   // Load up the move structure with all needed values
@@ -2983,8 +2983,7 @@ void parse_CM_packet(void)
   if (gAutomaticMotorEnable == TRUE)
   {
     // Enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
+    auto_enable_motors();
   }
 
   // First, set the direction bits
@@ -3225,8 +3224,7 @@ void process_simple_rate_move_fp(void)
   if (gAutomaticMotorEnable == TRUE)
   {
     // Enable both motors when we want to move them
-    Enable1IO = ENABLE_MOTOR;
-    Enable2IO = ENABLE_MOTOR;
+    auto_enable_motors();
   }
 
   // First, set the direction bits
@@ -3485,8 +3483,7 @@ static void process_simple_motor_move_fp(void)
     if (gAutomaticMotorEnable == TRUE)
     {
       // Enable both motors when we want to move them
-      Enable1IO = ENABLE_MOTOR;
-      Enable2IO = ENABLE_MOTOR;
+      auto_enable_motors();
     }
     
     // First, set the direction bits
@@ -4536,6 +4533,39 @@ void parse_QS_packet(void)
     print_line_ending(kLE_REV);
   }
   print_line_ending(kLE_OK_NORM);
+}
+
+// Enable both motor drivers at the start of a motion command, for the
+// automatic motor enable feature (CU,50). Used by all motion commands.
+// The enable pins are selected by DriverConfiguration, the same way the EM
+// command selects them. (With EXTERNAL_CONTROLS_DRIVERS, the EBB does not
+// drive the enable pins, so nothing is done.)
+// If the stepper idle timeout (CU,61) is counting down or has fired, its state
+// is set back to primed before the drivers are enabled, so that the timeout
+// can not disable the drivers between this enable and the time the ISR loads
+// the new move. (While the FIFO is empty, the ISR restarts the countdown from
+// the primed state; it is primed again when the move is loaded.)
+static void auto_enable_motors(void)
+{
+  if (
+    (g_StepperDisableState == kSTEPPER_TIMEOUT_TIMING)
+    ||
+    (g_StepperDisableState == kSTEPPER_TIMEOUT_FIRED)
+  )
+  {
+    g_StepperDisableState = kSTEPPER_TIMEOUT_PRIMED;
+  }
+
+  if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
+  {
+    Enable1IO = ENABLE_MOTOR;
+    Enable2IO = ENABLE_MOTOR;
+  }
+  else if (DriverConfiguration == PIC_CONTROLS_EXTERNAL)
+  {
+    Enable1AltIO = ENABLE_MOTOR;
+    Enable2AltIO = ENABLE_MOTOR;
+  }
 }
 
 // Perform the actual clearing of the step counters (used from several places)
