@@ -1050,7 +1050,7 @@ NonStepperCommands:
     {
       // Set RB3 to StoredEngraverPower
       CCPR1L = CurrentCommand.m.sm.SEPower >> 2;
-      CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+      CCP1CON = (CCP1CON & 0b11001111) | ((CurrentCommand.m.sm.SEPower << 4) & 0b00110000);
     }
     else
     {

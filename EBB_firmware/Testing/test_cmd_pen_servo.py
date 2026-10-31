@@ -413,8 +413,16 @@ def test_se(ebb, r):
     r.check("  ...and turns the engraver off", engraver_power(ebb) == 0 and high_fraction(ebb, 3) == 0)
     r.check("future format: SE<NL>", future(ebb, "SE,0") == b"SE\n")
     r.omit("SE (after S2 on RB3)", "SE has no output on RB3 after S2 used RP6, until a reboot (D59)")
-    r.omit("SE (queued, different Power)",
-           "a queued SE takes the two low Power bits from the most recent SE (D20)")
+    # A queued SE uses all ten bits of its own Power, even when another SE
+    # arrives before it runs (#261)
+    ebb.ok("SE,0")
+    busy_for(ebb, 600)
+    ebb.ok("SE,1,601,1")
+    ebb.ok("SE,1,1022")
+    ebb.wait_idle()
+    r.check("queued SE,1,601,1 after an immediate SE,1,1022: power 601",
+            engraver_power(ebb) == 601, engraver_power(ebb))
+    ebb.ok("SE,0")
 
 
 def test_sr_qr(ebb, r):
