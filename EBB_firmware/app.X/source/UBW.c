@@ -1059,6 +1059,11 @@ void ProcessIO(void)
     return;
   }
 
+  // Send a Limit Switch Reply as soon as the stop happens, between
+  // command replies, not only after the next command (#267). With
+  // replies off (the default) this returns at its first test.
+  CheckForLimitSwitchReplies();
+
   // Pull in some new data if there is new data to pull in
   // And we aren't waiting for the current move to finish
   rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);

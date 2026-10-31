@@ -209,6 +209,34 @@ def test_cu_limit_switch(ebb, r):
     ebb.ok("CU,51,0")
     r.omit("CU,51 (EM clears a Limit Switch Stop)", "EM does not clear it (D55)")
 
+    # The reply is sent when the stop happens, with no command needed, and
+    # before a following CU,51,0 clears the stop (#267). RB1, the pen servo
+    # output, pulses high once the servo runs. With RB1 quiet (S2,0,4), the
+    # stop is armed on RB1 high and an SP,1 is queued behind a 300 ms delay,
+    # so the trip happens later, while nothing is being sent.
+    r.item = "CU,53"
+    reply = re.compile(rb"Limit switch triggered\. PortB=[0-9A-F]{2}\r\n")
+    for then in ("nothing", "CU,51,0"):
+        ebb.ok("S2,0,4")
+        ebb.ok("CU,52,2")
+        ebb.ok("CU,53,1")
+        got = ebb.raw("CU,51,2")
+        got += ebb.raw("SM,300,0,0")
+        got += ebb.raw("SP,1")
+        time.sleep(1.0)
+        if then == "nothing":
+            got += ebb.raw(b"", timeout=0.3, quiet=0.1)
+            r.check(f"RB1 trip while idle, then {then}: the reply is sent", reply.search(got), got)
+            status = ebb.raw("QG")
+            r.check("  ...and the stop did trip (QG bit 7)", int(status[:2], 16) & 0x80, status)
+        else:
+            got += ebb.raw("CU,51,0")
+            r.check(f"RB1 trip while idle, then {then}: the reply is sent", reply.search(got), got)
+        ebb.raw("CU,51,0")
+        ebb.raw("CU,53,0")
+        ebb.raw(b"", timeout=0.2, quiet=0.1)
+        ebb.wait_idle()
+
 
 def test_cu_power(ebb, r):
     r.item = "CU,60"
