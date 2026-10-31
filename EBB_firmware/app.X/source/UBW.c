@@ -1329,6 +1329,7 @@ void parse_packet(void)
   UINT8 checksum_calc = 0;
   UINT8 checksum_ptr;
   UINT8 checksum_len = 0;
+  ExtractReturnType checksum_ret;
   BOOL checksumOK = TRUE;   // Starts out true for no checksum case
   UINT8 old_rx_buf_out;
   UINT8 i;
@@ -1375,9 +1376,18 @@ void parse_packet(void)
       // processing)
       old_rx_buf_out = g_RX_buf_out;
       g_RX_buf_out = checksum_ptr;
-      // We're going to ignore the return value from extract_number() since
-      // we'll get a failure anyway since the checksum value won't match.
-      extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      // A checksum value that is not a byte (above 255) is reported as an
+      // incorrect checksum, with the expected value, rather than as a
+      // second error (#263). An error recorded before this one is kept.
+      checksum_ret = extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      if (
+        (kEXTRACT_OK != checksum_ret)
+        &&
+        (kEXTRACT_SKIPPING_BECAUSE_EXISTING_ERROR != checksum_ret)
+      )
+      {
+        error_byte = kERROR_NO_ERROR;
+      }
       g_RX_buf_out = old_rx_buf_out;
       
       // Compute the checksum of the packet up to checksum_ptr
@@ -1394,7 +1404,7 @@ void parse_packet(void)
       checksum_calc = (~checksum_calc)+1;
       
       // See if it matches
-      if (checksum_calc == checksum_cmd)
+      if ((kEXTRACT_OK == checksum_ret) && (checksum_calc == checksum_cmd))
       {
         // All is good, allow command to proceed
         checksumOK = TRUE;

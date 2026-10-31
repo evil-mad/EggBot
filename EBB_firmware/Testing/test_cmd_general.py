@@ -125,6 +125,10 @@ def test_checksums(ebb, r):
             resp == b"!9 Err: Checksum incorrect, expected 170\r\n", resp)
     resp = ebb.raw("V,170")
     r.check("correct checksum (V,170) accepted", VERSION.match(resp), resp)
+    for value in (256, 300, 999):
+        resp = ebb.raw(f"V,{value}")
+        r.check(f"checksum above 255 (V,{value}): one !9 error with the expected value",
+                resp == b"!9 Err: Checksum incorrect, expected 170\r\n", resp)
     body = "SL,7,2"
     cs = (0x100 - sum(body.encode())) & 0xFF
     r.check(f"command with parameters and checksum ({body},{cs})", ebb.raw(f"{body},{cs}") == b"OK\r\n")
@@ -137,6 +141,9 @@ def test_checksums(ebb, r):
     r.check("future: !10", resp == b"V,!10 Err: No checksum found but required\n", resp)
     resp = ebb.raw("V,0")
     r.check("future: !9", resp == b"V,!9 Err: Checksum incorrect, expected 170\n", resp)
+    resp = ebb.raw("V,300")
+    r.check("future: checksum above 255 gives one !9 error",
+            resp == b"V,!9 Err: Checksum incorrect, expected 170\n", resp)
     ebb.raw("CU,54,0,119")
     ebb.raw("CU,10,0")
 
