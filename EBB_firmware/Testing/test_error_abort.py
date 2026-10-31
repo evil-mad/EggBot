@@ -198,6 +198,10 @@ def test_errors_without_ok(ebb, r):
              want=b"!6 Err: Invalid parameter value"),
         dict(cmd="L3,-85899346,-10,0,0,0,0,0,0", setup=zero, probe=qs,
              want=b"!6 Err: Invalid parameter value"),
+        # SN parse errors: no OK, node count unchanged (#262)
+        dict(cmd="SN", setup=("SN,7",), probe=query("QN"), want=b"!4 Err: Missing parameter(s)"),
+        dict(cmd="SN,-5", setup=("SN,7",), probe=query("QN"),
+             want=b"!6 Err: Invalid parameter value"),
     ])
     # XM rate error: no OK, and no motion. The line ending after !0 is
     # covered by the !0 tests (#265), not here.
