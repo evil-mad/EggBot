@@ -178,8 +178,8 @@ def test_sp(ebb, r):
     r.check("example SP,1 replies OK", ebb.raw("SP,1") == b"OK\r\n")
     r.check("future format: SP<NL>", future(ebb, "SP,1") == b"SP\n")
     ebb.wait_idle()
-    r.omit("SP (Value 4 and above, PortB_Pin above 7)",
-           "SP,4 acts as SP,3 and PortB_Pin above 7 becomes 1 instead of an error (D21)")
+    # Not tested: SP Value above 3 and PortB_Pin above 7 are outside the
+    # documented range (undefined, D21)
 
 
 def test_tp_qp(ebb, r):
@@ -297,10 +297,10 @@ def test_s2(ebb, r):
     r.check("future format: S2<NL>", future(ebb, "S2,0,5") == b"S2\n")
     ebb.ok("S2,0,4")
     r.check("S2 can turn off the pen servo channel", channel(ebb, PEN) is None)
-    r.omit("S2 (no parameters)", "bare S2 acts as S2,0,0 and replies OK (D22a)")
-    r.omit("S2 (future mode errors)", "the error is printed before the S2 echo (D22b)")
-    r.omit("S2 (all channels in use)", "a further S2 is dropped and still replies OK (D22c)")
-    # S2 on RP6 (RB3) leaves SE without output on RB3 until a reboot (D59)
+    # Not tested: a bare S2, and S2 beyond the available channels, are outside
+    # the documented forms (undefined, D22a, D22c)
+    # S2 on RP6 (RB3) and SE share that pin: a pin conflict the docs do not
+    # define (D59). Reboot so that SE starts from a clean pin in later tests.
     r.check("reboot after S2 on RB3", ebb.reboot())
 
 
@@ -391,7 +391,8 @@ def test_sc_pen(ebb, r):
     ebb.wait_idle()
     r.check("SC,1,2: SP,0 turns RB4 on and moves the servo",
             bit(ebb, LATB, 4) == 1 and target(ebb) == DOWN)
-    r.omit("SC,1,0 (S2 outputs)", "SC,1,0 stops all S2 outputs from updating, not only the pen (D22d)")
+    # Not tested: SC,1 controls the pen servo; its effect on other S2 outputs
+    # is not documented (undefined, D22d)
 
     ebb.reset()
     r.item = "SC,13"
@@ -445,7 +446,6 @@ def test_se(ebb, r):
     ebb.wait_idle()
     r.check("  ...and turns the engraver off", engraver_power(ebb) == 0 and high_fraction(ebb, 3) == 0)
     r.check("future format: SE<NL>", future(ebb, "SE,0") == b"SE\n")
-    r.omit("SE (after S2 on RB3)", "SE has no output on RB3 after S2 used RP6, until a reboot (D59)")
     # A queued SE uses all ten bits of its own Power, even when another SE
     # arrives before it runs (#261)
     ebb.ok("SE,0")

@@ -207,7 +207,24 @@ def test_cu_limit_switch(ebb, r):
     time.sleep(0.05)
     r.check("no trip when B0 does not match the target", qg_bits(ebb, 0x80) == 0)
     ebb.ok("CU,51,0")
-    r.omit("CU,51 (EM clears a Limit Switch Stop)", "EM does not clear it (D55)")
+    # EM clears a Limit Switch Stop, but only once the input no longer
+    # matches the target; while it still matches, the stop re-arms at once (D55)
+    ebb.ok("PD,B,0,0")
+    ebb.ok("PO,B,0,0")                  # drive B0 low
+    ebb.ok("CU,52,0")
+    ebb.ok("CU,51,1")                   # stop when B0 is low
+    time.sleep(0.05)
+    r.check("Limit Switch Stop on B0 driven low (QG bit 7)", qg_bits(ebb, 0x80) == 0x80)
+    ebb.ok("EM,1,1")
+    time.sleep(0.05)
+    r.check("EM while B0 still matches: the stop stays set", qg_bits(ebb, 0x80) == 0x80)
+    ebb.ok("PO,B,0,1")
+    ebb.ok("PD,B,0,1")                  # release B0 (input with pull-up)
+    ebb.ok("EM,1,1")
+    time.sleep(0.05)
+    r.check("EM after B0 no longer matches: the stop is cleared", qg_bits(ebb, 0x80) == 0)
+    ebb.ok("CU,51,0")
+    ebb.raw("QB")                       # B0 low also registered a PRG button press
 
     # The reply is sent when the stop happens, with no command needed, and
     # before a following CU,51,0 clears the stop (#267). RB1, the pen servo
