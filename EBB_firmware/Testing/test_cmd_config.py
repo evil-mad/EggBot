@@ -385,9 +385,18 @@ def test_nickname(ebb, r):
     ebb.raw("CU,10,0")
     r.check("future format: QT,Name<NL>", resp == b"QT,Regression Test\n", resp)
     r.item = "ST"
+    # No string: only the error, and the name is not erased (#256)
+    resp = ebb.raw("ST")
+    r.check("ST with no string: only !4", resp == b"!4 Err: Missing parameter(s)\r\n", resp)
+    resp = ebb.raw("QT")
+    r.check("  ...and the name is unchanged", resp == b"Regression Test\r\nOK\r\n", resp)
+    # A longer name is truncated to 16 characters, with a plain OK (#256)
+    resp = ebb.raw("ST,ABCDEFGHIJKLMNOPQ")
+    r.check("ST with 17 characters: OK only", resp == b"OK\r\n", resp)
+    resp = ebb.raw("QT")
+    r.check("  ...and QT reads the first 16", resp == b"ABCDEFGHIJKLMNOP\r\nOK\r\n", resp)
     r.check(f"ST restores the original name {original!r}", ebb.raw(f"ST,{original}") == b"OK\r\n")
     r.check("QT reads the original name", ebb.raw("QT") == (original + "\r\nOK\r\n").encode())
-    r.omit("ST (no parameter, or over 16 characters)", "writes flash before reporting the error (D24)")
 
 
 def test_ck(ebb, r):

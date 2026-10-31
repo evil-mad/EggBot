@@ -3479,6 +3479,15 @@ void parse_ST_packet(void)
   
   bytes = extract_string(gDeviceStringName, FLASH_NAME_LENGTH);
 
+  // A longer name is truncated: skip the rest of it (#256)
+  if (bytes >= FLASH_NAME_LENGTH)
+  {
+    while ((g_RX_buf[g_RX_buf_out] != kCR) && (g_RX_buf[g_RX_buf_out] != ','))
+    {
+      advance_RX_buf_out();
+    }
+  }
+
   // Bail if we got a conversion error or an extra parameter
   if (!parameters_ok())
   {
