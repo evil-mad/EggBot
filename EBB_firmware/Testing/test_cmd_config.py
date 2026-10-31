@@ -83,6 +83,17 @@ def test_cu_fifo(ebb, r):
     r.check("CU,4,8 then QU,3 is 8", qu(ebb, 3) == "8")
     ebb.ok("CU,4,1000")
     r.check("a size above the maximum sets the maximum (QU,2)", qu(ebb, 3) == maximum, maximum)
+    # Sizes below 1 are rejected (#270). On firmware that accepts them, the
+    # size is put back to 1 at once: a motion command at size 0 would wait
+    # forever, and USB with it.
+    for value in (0, -5):
+        ebb.ok("CU,4,2")
+        resp = ebb.raw(f"CU,4,{value}")
+        size = qu(ebb, 3)
+        if size != "2":
+            ebb.ok("CU,4,1")
+        r.check(f"CU,4,{value} replies only !6", resp == b"!6 Err: Invalid parameter value\r\n", resp)
+        r.check(f"CU,4,{value} leaves the size unchanged (QU,3 is 2)", size == "2", size)
     ebb.ok("CU,4,4")
     t0 = time.monotonic()
     for _ in range(4):
@@ -94,7 +105,6 @@ def test_cu_fifo(ebb, r):
     r.check("commands waiting in the FIFO (delays queued behind the first)", v in ("2", "3"), v)
     ebb.wait_idle()
     r.check("no commands waiting after they finish", qu(ebb, 6) == "0")
-    r.omit("CU,4 (values below 1)", "CU,4,0 is accepted and stops all motion (fixed in v3.2.0)")
 
 
 def test_cu_limits(ebb, r):

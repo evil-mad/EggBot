@@ -2024,6 +2024,11 @@ void parse_CU_packet(void)
   // CU,4,<new_FIFO_size>
   else if (4u == parameter_number)
   {
+    if (paramater_value < 1)
+    {
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
     if (paramater_value > (INT16)COMMAND_FIFO_MAX_LENGTH)
     {
       paramater_value = COMMAND_FIFO_MAX_LENGTH;
