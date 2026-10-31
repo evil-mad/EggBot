@@ -200,8 +200,40 @@ def test_tp_qp(ebb, r):
     r.check("Duration 400: the next command waits 400 ms", 0.35 < dt < 0.7, f"{dt:.2f} s")
     r.check("future format: TP<NL>", future(ebb, "TP") == b"TP\n")
     ebb.wait_idle()
-    r.omit("TP (two TPs queued behind a move)",
-           "the direction is chosen when TP is received, so both can go the same way (D19)")
+    # Queued TPs alternate: each toggles from the state the queue will leave (#260)
+    for depth in (1, 4):
+        ebb.ok(f"CU,4,{depth}")
+        for _ in range(depth):          # clean entries first (on firmware with #253)
+            ebb.ok("SM,20,2,2")
+            ebb.ok("SM,20,-2,-2")
+        ebb.wait_idle()
+        for count in ((2,) if depth == 1 else (2, 3, 4)):
+            ebb.ok("SP,1")
+            ebb.wait_idle()
+            busy_for(ebb, 500)
+            for _ in range(count):
+                ebb.ok("TP")
+            ebb.wait_idle()
+            want = UP if count % 2 == 0 else DOWN
+            r.check(f"depth {depth}: {count} TPs queued behind a move end "
+                    f"{'up' if want == UP else 'down'}", target(ebb) == want, target(ebb))
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    busy_for(ebb, 500)
+    ebb.ok("SP,0")
+    ebb.ok("TP")
+    ebb.wait_idle()
+    r.check("TP queued after a queued SP,0 toggles up", target(ebb) == UP, target(ebb))
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    busy_for(ebb, 500)
+    ebb.ok("SP,0")
+    ebb.raw("ES")
+    ebb.ok("TP")
+    ebb.wait_idle()
+    r.check("after ES flushes a queued SP,0, TP toggles from the real state (down)",
+            target(ebb) == DOWN, target(ebb))
+    ebb.ok("CU,4,1")
 
     r.item = "QP"
     ebb.ok("SP,1")

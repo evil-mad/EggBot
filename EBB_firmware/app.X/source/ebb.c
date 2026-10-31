@@ -3917,6 +3917,9 @@ void parse_QE_packet(void)
 void parse_TP_packet(void)
 {
   UINT16 CommandDuration = 0;
+  PenStateType NextState;
+  UINT8 i;
+  UINT8 n;
 
   print_command(FALSE, FALSE);
 
@@ -3929,7 +3932,38 @@ void parse_TP_packet(void)
     return;
   }
 
-  if (PenState == PEN_UP)
+  // Toggle from the pen state as it will be once the queue has run: the
+  // last queued move of the pen servo, or PenState if none is queued
+  // (#260). The ISR is held off so that the queue can't change meanwhile.
+  NextState = PenState;
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+  i = gFIFOOut;
+  for (n = gFIFOLength; n != 0u; n--)
+  {
+    if (
+      (FIFOPtr[i].Command == COMMAND_SERVO_MOVE)
+      &&
+      (FIFOPtr[i].m.sm.ServoRPn == g_servo2_RPn)
+    )
+    {
+      if (FIFOPtr[i].m.sm.ServoPosition == g_servo2_min)
+      {
+        NextState = PEN_UP;
+      }
+      else
+      {
+        NextState = PEN_DOWN;
+      }
+    }
+    i++;
+    if (i >= gCurrentFIFOLength)
+    {
+      i = 0;
+    }
+  }
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+
+  if (NextState == PEN_UP)
   {
     process_SP(PEN_DOWN, CommandDuration);
   }
