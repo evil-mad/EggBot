@@ -393,6 +393,7 @@ UINT8 RCServo2_Move(
         {
           // Now copy the values over into the FIFO element
           FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE;
+          FIFOPtr[gFIFOIn].m.sm.DirBits = 0;      // No step bits (#253)
           FIFOPtr[gFIFOIn].m.sm.DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
           FIFOPtr[gFIFOIn].m.sm.ServoChannel = Channel;
           FIFOPtr[gFIFOIn].m.sm.ServoRPn = RPn;

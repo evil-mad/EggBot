@@ -475,6 +475,46 @@ def test_sr_qr(ebb, r):
     r.omit("SR (60 s default timeout)", "takes 60 s to observe")
 
 
+# The motion queue (FIFO_scn) starts at 0x600; DirBits is byte 1 of each
+# entry, and its step bits are 0x40 (axis 1) and 0x10 (axis 2). After R the
+# queue depth is 1, so every queued command goes through entry 0.
+SLOT0_DIRBITS = 0x601
+
+
+def qs_pos(ebb):
+    return ebb.raw("QS").split(b"\n")[0]
+
+
+def test_fifo_leftover_bits(ebb, r):
+    # A step bit left in a queue entry must not make a queued pen move, SE or
+    # delay be skipped, nor cause a step (#253). MW plants the leftover bit.
+    r.item = "Motion queue (leftover step bits)"
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    ebb.ok("CS")
+    before = qs_pos(ebb)
+    ebb.ok(f"MW,{SLOT0_DIRBITS},64")
+    ebb.ok("SP,0")
+    ebb.wait_idle()
+    r.check("SP,0 after a leftover step bit: pen down (QP 0)", ebb.raw("QP").startswith(b"0"),
+            ebb.raw("QP"))
+    r.check("  ...and no step (QS unchanged)", qs_pos(ebb) == before, qs_pos(ebb))
+    ebb.ok(f"MW,{SLOT0_DIRBITS},16")
+    ebb.ok("SE,1,1023,1")
+    ebb.wait_idle()
+    r.check("queued SE,1,1023,1 after a leftover step bit: engraver on",
+            engraver_power(ebb) == 1023, engraver_power(ebb))
+    r.check("  ...and no step (QS unchanged)", qs_pos(ebb) == before, qs_pos(ebb))
+    ebb.ok("SE,0")
+    r.omit("Motion queue (SM delay after a leftover step bit)",
+           "a delay copies the parser's template entry, whose RAM address depends on the build")
+    ebb.ok(f"MW,{SLOT0_DIRBITS},80")
+    ebb.reset()
+    r.check("R clears the queue entry (DirBits 0)", ebb.mr(SLOT0_DIRBITS) == 0,
+            ebb.mr(SLOT0_DIRBITS))
+
+
 if __name__ == "__main__":
     u.run("EBB pen, servo and engraver commands",
-          [test_defaults, test_sp, test_tp_qp, test_s2, test_sc_slots, test_sc_pen, test_se, test_sr_qr])
+          [test_defaults, test_sp, test_tp_qp, test_s2, test_sc_slots, test_sc_pen, test_se, test_sr_qr,
+           test_fifo_leftover_bits])

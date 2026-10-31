@@ -1530,6 +1530,26 @@ static void clear_parmaeter_globals(void)
 void EBB_Init(void)
 {
   UINT8 i;
+  UINT16 j;
+  UINT8 gieh;
+
+  // Clear the whole motion queue, the parser's template entry and the
+  // running command, so that no leftover byte (such as a step bit in
+  // DirBits) can affect a later command. Neither the bootloader nor R
+  // clears this RAM otherwise (#253). The motion ISR is held off while
+  // this is done (R runs this with interrupts on).
+  gieh = INTCONbits.GIEH;
+  INTCONbits.GIEH = 0;
+  for (j = 0; j < COMMAND_FIFO_SIZE_BYTES; j++)
+  {
+    CommandFIFO[j] = 0;
+  }
+  for (j = 0; j < sizeof(MoveCommandType); j++)
+  {
+    ((UINT8 *)&gMoveTemp)[j] = 0;
+    ((UINT8 *)&CurrentCommand)[j] = 0;
+  }
+  INTCONbits.GIEH = gieh;
 
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
@@ -3525,6 +3545,7 @@ static void process_simple_motor_move_fp(void)
   if (gSteps1 == 0 && gSteps2 == 0)
   {
     gMoveTemp.Command = COMMAND_DELAY;
+    gMoveTemp.m.sm.DirBits = 0;                 // No step bits (#253)
     
     // Delays over 100000ms long are capped at 100000ms.
     if (gDurationMS >= 100000u)
@@ -4518,6 +4539,7 @@ void parse_SE_packet(void)
       FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
       FIFOPtr[gFIFOIn].m.sm.SEState = State;
       FIFOPtr[gFIFOIn].Command = COMMAND_SE;
+      FIFOPtr[gFIFOIn].m.sm.DirBits = 0;        // No step bits (#253)
 
       gFIFOIn++;
       if (gFIFOIn >= gCurrentFIFOLength)
