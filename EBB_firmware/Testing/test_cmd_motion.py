@@ -206,8 +206,27 @@ def test_tr(ebb, r):
     pos, _, dt = run_move(ebb, "TR,1000,100,50")
     r.check("TR,1000,100,50 moves 100,50", pos == (100, 50), pos)
     r.check("  ...at about 1000 steps/s (0.1 s)", dt < 0.5, f"{dt:.2f} s")
-    r.omit("TR (AxisSteps2 omitted, StepRate 0 or above 25000)",
-           "AxisSteps2 is required, and rate errors come after OK (D17)")
+    # AxisSteps2 is optional, and errors come without OK or motion (#259)
+    ebb.ok("CS")
+    resp = ebb.raw("TR,1000,100")
+    ebb.wait_idle()
+    r.check("TR,1000,100 (AxisSteps2 omitted) replies OK", resp == b"OK\r\n", resp)
+    r.check("  ...and moves 100,0", qs(ebb) == (100, 0), qs(ebb))
+    for cmd, err in (("TR,0,100,0", b"!1 Err: Invalid step rate"),
+                     ("TR,30000,100,0", b"!1 Err: Invalid step rate"),
+                     ("TR,abc,100,0", b"!5 Err: Need comma next, found: 'a'"),
+                     ("TR", b"!4 Err: Missing parameter(s)")):
+        for mode in ("legacy", "future"):
+            ebb.ok("CS")
+            if mode == "future":
+                ebb.raw("CU,10,1")
+            resp = ebb.raw(cmd)
+            if mode == "future":
+                ebb.raw("CU,10,0")
+            ebb.wait_idle()
+            want = err + b"\r\n" if mode == "legacy" else b"TR," + err + b"\n"
+            r.check(f"{mode}: {cmd} replies only the error", resp == want, f"{resp!r} (expected {want!r})")
+            r.check(f"  ...and {cmd} does not move", qs(ebb) == (0, 0), qs(ebb))
 
 
 def test_es(ebb, r):

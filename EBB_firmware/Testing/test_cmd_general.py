@@ -108,7 +108,7 @@ def test_errors(ebb, r):
             resp = ebb.raw(cmd)
             r.check(f"{mode}: {cmd} replies one line", resp == want, f"{resp!r} (expected {want!r})")
     ebb.wait_idle()
-    r.omit("Returned Errors !1", "only TR reports it, and only after OK (D17)")
+    # Returned Errors !1: only TR reports it; see test_tr in test_cmd_motion.py
     r.omit("Returned Errors !2", "internal TX buffer overrun; not reachable by command")
     r.omit("Returned Errors !3", "the RX overflow check can never fire (D45)")
     # Returned Errors !7 (extra parameter): see test_error_abort.py

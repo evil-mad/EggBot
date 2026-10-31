@@ -3166,7 +3166,7 @@ void parse_TR_packet(void)
   // Extract the three parameters
   extract_number(kULONG, &gHM_StepRate, kREQUIRED);
   extract_number(kLONG,  &gSteps1,      kREQUIRED);
-  extract_number(kLONG,  &gSteps2,      kREQUIRED);
+  extract_number(kLONG,  &gSteps2,      kOPTIONAL);
   extract_number(kULONG, &gClearAccs,   kOPTIONAL);
 
   // Bail if we got a conversion error or an extra parameter
@@ -3181,6 +3181,12 @@ void parse_TR_packet(void)
   //  gSteps2
   //  gClearAccs
   process_simple_rate_move_fp();
+
+  // Bail if the move was rejected (invalid step rate)
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    return;
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
