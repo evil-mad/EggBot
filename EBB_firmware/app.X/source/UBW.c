@@ -3443,7 +3443,11 @@ void parse_CK_packet(void)
   ebb_print_char(UCaseChar);
   print_line_ending(kLE_NORM);
 
-  print_line_ending(kLE_OK_NORM);
+  // Each value above already ended its line; future mode adds no more (#273)
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_OK_NORM);
+  }
 }
 
 void populateDeviceStringWithName(void)

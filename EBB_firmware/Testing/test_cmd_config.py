@@ -436,7 +436,12 @@ def test_ck(ebb, r):
     resp = ebb.raw("CK," + ",".join(values))
     want = ("\r\n" + "".join(l + "\r\n" for l in lines) + "OK\r\n").encode()
     r.check("legacy: documented types, values and lines", resp == want, resp)
-    r.omit("CK (future mode)", "the reply ends with an extra newline (#273)")
+    # Future mode: the reply ends right after Param8 (#273)
+    ebb.raw("CU,10,1")
+    resp = ebb.raw("CK," + ",".join(values))
+    ebb.raw("CU,10,0")
+    want = ("CK\n" + "".join(l + "\n" for l in lines)).encode()
+    r.check("future: documented types, values and lines", resp == want, resp)
     for cmd, err in (("CK,1,2,3,4,5,6,a", b"!4 Err: Missing parameter(s)"),
                      ("CK,300,2,3,4,5,6,a,b", b"!6 Err: Invalid parameter value"),
                      ("CK,1,-200,3,4,5,6,a,b", b"!6 Err: Invalid parameter value")):
