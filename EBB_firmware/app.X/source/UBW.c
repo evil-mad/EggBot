@@ -246,6 +246,7 @@ static unsigned char gDeviceStringName[FLASH_NAME_LENGTH+1];
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
 BOOL SwitchIsPressed(void);    // Check to see if the user (PRG) switch is pressed
 void parse_packet(void);       // Take a full packet and dispatch it to the right function
+UINT16 find_command(void);     // Read the one or two character command name
 signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void parse_R_packet(void);     // R for resetting UBW
 void parse_C_packet(void);     // C for configuring I/O and analog pins
@@ -1134,8 +1135,33 @@ void ProcessIO(void)
       
       if (!binary_bytes_left)
       {
+        // Receive buffer overrun (#257): the rest of an over-long line is
+        // discarded. At its line ending, report !3 and end the line as for
+        // any other command; nothing from the line is parsed.
+        if (kERROR_RX_BUFFER_OVERRUN == error_byte)
+        {
+          if (kCR == tst_char || kLF == tst_char)
+          {
+            in_cr = TRUE;
+
+            // Name the command (future syntax mode), as for other errors
+            g_RX_buf_out = 0;
+            gCommand_Char1 = 0;
+            gCommand_Char2 = 0;
+            find_command();
+            print_command(FALSE, FALSE);
+
+            g_RX_buf_in = 0;
+            g_RX_buf_out = 0;
+            first_byte = TRUE;
+
+            CheckForAndPrintErrors();
+            CheckForLimitSwitchReplies();
+            check_and_send_TX_data();
+          }
+        }
         // Check to see if we are in a CR/LF situation
-        if (
+        else if (
           !in_cr 
           && 
           (
@@ -1188,18 +1214,21 @@ void ProcessIO(void)
           tst_char >= 32u
         )
         {
-          // Only add a byte if it is not a CR or LF
-          g_RX_buf[g_RX_buf_in] = tst_char;
-          in_cr = FALSE;
-          first_byte = FALSE;
-          g_RX_buf_in++;
-        }
-        // Check for buffer wraparound
-        if (kRX_BUF_SIZE == g_RX_buf_in)
-        {
-          ErrorSet(kERROR_RX_BUFFER_OVERRUN);
-          g_RX_buf_in = 0;
-          g_RX_buf_out = 0;
+          // A character that would leave no room for the line ending's CR
+          // means the command is longer than 256 bytes: an overrun (#257).
+          // (Set directly, so that no earlier error can mask this state.)
+          if ((kRX_BUF_SIZE - 1u) == g_RX_buf_in)
+          {
+            error_byte = kERROR_RX_BUFFER_OVERRUN;
+          }
+          else
+          {
+            // Only add a byte if it is not a CR or LF
+            g_RX_buf[g_RX_buf_in] = tst_char;
+            in_cr = FALSE;
+            first_byte = FALSE;
+            g_RX_buf_in++;
+          }
         }
       }
     }

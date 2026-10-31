@@ -67,8 +67,36 @@ def test_syntax(ebb, r):
     r.check("numbers have at most 10 digits (11 digits: !6)",
             resp == b"!6 Err: Invalid parameter value\r\n", resp)
     r.check("10 digit number accepted", ebb.raw("SL,0000000005,0") == b"OK\r\n")
-    r.omit("Syntax conventions (256 byte limit)",
-           "longer commands are not reported (the overflow check can never fire, D45)")
+    # 256 byte limit, CR included (#257): 255 characters are parsed; one more
+    # is an overrun, reported as !3, with nothing from the line run
+    r.item = "Syntax conventions (256 byte limit)"
+    ebb.ok("CS")
+    resp = ebb.raw(b"x" * 255 + b"\r")
+    r.check("255 characters + CR are parsed (unknown command XX)",
+            resp == b"!8 Err: Unknown command 'XX:5858'\r\n", resp)
+    resp = ebb.raw(b"x" * 256 + b"\r")
+    r.check("256 characters + CR: only !3", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    resp = ebb.raw(b"x" * 256 + b"SM,300,40,40\r")
+    ebb.wait_idle()
+    r.check("an SM after 256 characters is not run: only !3",
+            resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("  ...and nothing moved (QS 0,0)", ebb.raw("QS").startswith(b"0,0"))
+    resp = ebb.raw(b"A" * 300 + b"\r")
+    r.check("300 characters + CR: only !3", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("the next command after an overrun is parsed normally", ebb.raw("V") == version)
+    resp = ebb.raw(b"x" * 300 + b"\x08" * 50 + b"\r")
+    r.check("backspaces do not undo an overrun", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("ignored characters (300 NULs) do not count", ebb.raw(b"\x00" * 300 + b"V\r") == version)
+    ebb.ok("CS")
+    resp = ebb.raw(b"SM,300,40,40" + b"\t" * 300 + b"\r")
+    ebb.wait_idle()
+    r.check("ignored characters (300 tabs) inside a command do not count", resp == b"OK\r\n", resp)
+    r.check("  ...and the command ran (QS 40,40)", ebb.raw("QS").startswith(b"40,40"))
+    ebb.raw("CU,10,1")
+    resp = ebb.raw(b"x" * 256 + b"\r")
+    ebb.raw("CU,10,0")
+    r.check("future: XX,!3 Err: RX Buffer overrun<NL>",
+            resp == b"XX,!3 Err: RX Buffer overrun\n", resp)
 
 
 def test_errors(ebb, r):
@@ -110,7 +138,7 @@ def test_errors(ebb, r):
     ebb.wait_idle()
     # Returned Errors !1: only TR reports it; see test_tr in test_cmd_motion.py
     r.omit("Returned Errors !2", "internal TX buffer overrun; not reachable by command")
-    r.omit("Returned Errors !3", "the RX overflow check can never fire (D45)")
+    # Returned Errors !3: see test_syntax (256 byte limit)
     # Returned Errors !7 (extra parameter): see test_error_abort.py
 
 
