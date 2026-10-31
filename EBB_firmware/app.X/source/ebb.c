@@ -3448,6 +3448,7 @@ void parse_XM_packet(void)
 static void process_simple_motor_move_fp(void)
 {
   float tempF;
+  float rateF;
   
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
@@ -3527,9 +3528,14 @@ static void process_simple_motor_move_fp(void)
       // rate = (steps/duration)*85899.34592
       // Rearranging a bit, we can also use:
       // rate = steps * ((85899.34592 * 1000)/duration)
-      gIntervals = (UINT32)((float)(gSteps1) * tempF);
+      rateF = (float)(gSteps1) * tempF;
       
-      if (gIntervals > 0x80000000u)
+      // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
+      // conversion is out of range and slipped past an integer check (#268).
+      // rateF is not negative, so comparing its IEEE bits with those of 2^31
+      // gives the same answer as a float compare, without the time it takes.
+      gIntervals = *(UINT32 *)&rateF;
+      if (gIntervals > 0x4F000000UL)
       {
         if (gLimitChecks)
         {
@@ -3542,6 +3548,10 @@ static void process_simple_motor_move_fp(void)
           return;
         }
         gIntervals = 0x80000000;
+      }
+      else
+      {
+        gIntervals = (UINT32)rateF;
       }
       if (gIntervals == 0u)
       {
@@ -3568,9 +3578,14 @@ static void process_simple_motor_move_fp(void)
 
     if (gSteps2 != 0)
     {
-      gIntervals = (UINT32)((float)(gSteps2) * tempF);
+      rateF = (float)(gSteps2) * tempF;
 
-      if (gIntervals > 0x80000000u)
+      // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
+      // conversion is out of range and slipped past an integer check (#268).
+      // rateF is not negative, so comparing its IEEE bits with those of 2^31
+      // gives the same answer as a float compare, without the time it takes.
+      gIntervals = *(UINT32 *)&rateF;
+      if (gIntervals > 0x4F000000UL)
       {
         if (gLimitChecks)
         {
@@ -3583,6 +3598,10 @@ static void process_simple_motor_move_fp(void)
           return;
         }
         gIntervals = 0x80000000;
+      }
+      else
+      {
+        gIntervals = (UINT32)rateF;
       }
       if (gIntervals == 0u)
       {

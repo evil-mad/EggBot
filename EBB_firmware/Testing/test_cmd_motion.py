@@ -93,8 +93,18 @@ def test_sm(ebb, r):
     r.check("future format: SM<NL>", resp == b"SM\n", resp)
     ebb.wait_idle()
     r.omit("SM (delay capped at 100000 ms)", "takes 100 s to observe")
-    r.omit("SM (step rates above 25,000 steps/s)",
-           "rates above about 50,000 steps/s are accepted (D51); 25,000-50,000 are tested in test_cmd_general.py")
+    # Rates of 50,000 steps/s and above are rejected too, not only those
+    # just over 25,000 (#268; 25,000-50,000 are also in test_cmd_general.py)
+    for cmd, axis in (("SM,1000,50000,0", 1), ("SM,1000,60000,0", 1), ("SM,1000,0,100000", 2),
+                      ("XM,1000,40000,20000", 1)):
+        ebb.ok("CS")
+        resp = ebb.raw(cmd)
+        ebb.wait_idle()
+        r.item = cmd[:2]
+        r.check(f"{cmd} is rejected (!0, axis {axis} too high)",
+                resp.startswith(f"!0 Err: <axis{axis}> step rate too high".encode()), resp)
+        r.check(f"  ...and {cmd} did not move", qs(ebb) == (0, 0), qs(ebb))
+    r.item = "SM"
 
 
 def test_xm(ebb, r):
@@ -109,7 +119,7 @@ def test_xm(ebb, r):
             resp.startswith(b"!0 Err: <axis1> step rate too high"), resp)
     ebb.wait_idle()
     r.check("  ...and the move did not run", qs(ebb) == (0, 0))
-    r.omit("XM (parse errors)", "XM runs after a parse error, then reports it (D16)")
+    # XM parse errors: see test_error_abort.py
 
 
 def test_hm(ebb, r):

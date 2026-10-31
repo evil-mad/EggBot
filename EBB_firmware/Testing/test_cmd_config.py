@@ -117,6 +117,17 @@ def test_cu_limits(ebb, r):
     ebb.wait_idle()
     ebb.ok("CU,2,1")
     r.check("the accepted move ran (QS 30,0)", ebb.raw("QS").startswith(b"30,0"))
+    # Limit checks off: a rate far above the maximum runs at the maximum
+    # (25,000 steps/s), so 60,000 steps take about 2.4 s
+    ebb.ok("CS")
+    ebb.ok("CU,2,0")
+    t0 = time.monotonic()
+    ebb.ok("SM,1000,60000,0")
+    ebb.wait_idle()
+    dt = time.monotonic() - t0
+    ebb.ok("CU,2,1")
+    r.check("limit checks off: SM,1000,60000,0 runs at the maximum rate (about 2.4 s)",
+            2.3 < dt < 2.9 and ebb.raw("QS").startswith(b"60000,0"), f"{dt:.2f} s")
 
 
 def test_cu_led(ebb, r):
