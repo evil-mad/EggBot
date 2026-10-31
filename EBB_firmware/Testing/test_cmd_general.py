@@ -86,8 +86,7 @@ def test_errors(ebb, r):
             want = text + b"\r\n" if mode == "legacy" else name.encode() + b"," + text + b"\n"
             r.check(f"{mode}: {cmd}", resp == want, f"{resp!r} (expected {want!r})")
     # !0: SM step rate above 25,000 steps/s. The text, and that the move is
-    # not executed, are checked; the line ending is not (an extra blank line
-    # follows the error, D2).
+    # not executed, are checked here; the complete reply below.
     r.item = "Returned Errors !0"
     ebb.ok("CS")
     for cmd, text in (("SM,1,26", b"!0 Err: <axis1> step rate too high"),
@@ -100,7 +99,15 @@ def test_errors(ebb, r):
     r.check("rejected moves did not run (QS 0,0)", ebb.raw("QS").startswith(b"0,0"))
     r.check("SM,1,25 (25,000 steps/s) is accepted", ebb.raw("SM,1,25") == b"OK\r\n")
     ebb.wait_idle()
-    r.omit("Returned Errors !0 (line ending)", "an extra line ending follows !0 errors (D2)")
+    # The complete !0 reply is one line with the documented ending (#265).
+    # Only "too high" is sent: "too slow" needs a move hours long.
+    for mode in legacy_and_future(ebb):
+        for cmd, axis in (("SM,1,26", 1), ("SM,1,0,26", 2), ("XM,1,15,15", 1)):
+            text = f"!0 Err: <axis{axis}> step rate too high".encode()
+            want = text + b"\r\n" if mode == "legacy" else cmd[:2].encode() + b"," + text + b"\n"
+            resp = ebb.raw(cmd)
+            r.check(f"{mode}: {cmd} replies one line", resp == want, f"{resp!r} (expected {want!r})")
+    ebb.wait_idle()
     r.omit("Returned Errors !1", "only TR reports it, and only after OK (D17)")
     r.omit("Returned Errors !2", "internal TX buffer overrun; not reachable by command")
     r.omit("Returned Errors !3", "the RX overflow check can never fire (D45)")

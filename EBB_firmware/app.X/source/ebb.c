@@ -3538,7 +3538,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis1> step rate too high");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
@@ -3553,7 +3552,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis1> step rate too slow");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
@@ -3581,7 +3579,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis2> step rate too high");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
@@ -3596,7 +3593,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis2> step rate too slow");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
