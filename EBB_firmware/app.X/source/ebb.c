@@ -512,6 +512,7 @@ static void process_simple_motor_move_fp(void);
 static void clear_parmaeter_globals(void);
 static void process_simple_rate_move_fp(void);
 static void auto_enable_motors(void);
+static void set_timed_axis_flags(void);
 
 
 extern void FIFO_COPY(void);
@@ -2532,6 +2533,8 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
   }
   gMoveTemp.m.sm.Accel[1] = gAccel2;
   gMoveTemp.m.sm.Jerk[1] = gJerk2;
+  // Which axes a time-limited move steps, for QM and QG (#252)
+  set_timed_axis_flags();
   if (TimedMove)
   {
     gMoveTemp.Command = COMMAND_LT_MOVE;
@@ -4596,16 +4599,19 @@ UINT8 process_QM(void)
   UINT8 Motor1Running = 0;
   UINT8 Motor2Running = 0;
   UINT8 FIFOStatus = 0;
+  UINT8 Command;
 
   // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+
+  Command = CurrentCommand.Command;
 
   // Create our output values to print back to the PC
   if (CurrentCommand.m.sm.DelayCounter != 0u) 
   {
     CommandExecuting = 1;
   }
-  if (CurrentCommand.Command != COMMAND_NONE)
+  if (Command != COMMAND_NONE)
   {
     CommandExecuting = 1;
   }
@@ -4614,13 +4620,22 @@ UINT8 process_QM(void)
     CommandExecuting = 1;
     FIFOStatus = 1;
   }
-  if (CommandExecuting && CurrentCommand.m.sm.Steps[0] != 0u) 
+  // Motor status depends on the kind of command now running (#252). Step-
+  // limited moves: each axis that still has steps to take. Time-limited
+  // moves: the axes the move steps, while time remains. Anything else
+  // (delays, servo moves, SE, EM): no motor is moving.
+  if ((Command == COMMAND_SM_XM_HM_MOVE) || (Command == COMMAND_LM_MOVE))
   {
-    Motor1Running = 1;
+    Motor1Running = AxisActive[0] & 0x01;
+    Motor2Running = AxisActive[1] & 0x01;
   }
-  if (CommandExecuting && CurrentCommand.m.sm.Steps[1] != 0u) 
+  else if (Command == COMMAND_LT_MOVE)
   {
-    Motor2Running = 1;
+    if (AxisActive[0] & 0x01)
+    {
+      Motor1Running = CurrentCommand.m.sm.ServoChannel & 0x01;
+      Motor2Running = (CurrentCommand.m.sm.ServoChannel >> 1) & 0x01;
+    }
   }
 
   // Re-enable interrupts
@@ -4721,6 +4736,38 @@ void parse_QS_packet(void)
     print_line_ending(kLE_REV);
   }
   print_line_ending(kLE_OK_NORM);
+}
+
+// For a time-limited move (LT, T3, TD), record which axes it steps, for QM
+// and QG: bit 0 for axis 1, bit 1 for axis 2, set when that axis has a
+// nonzero Rate, Accel or Jerk. Call once gMoveTemp holds the move's final
+// values. The bits go in ServoChannel, which these moves don't otherwise
+// use, so they travel through the FIFO with the move (#252).
+static void set_timed_axis_flags(void)
+{
+  UINT8 flags = 0;
+
+  if (
+    (gMoveTemp.m.sm.Rate[0].value != 0)
+    ||
+    (gMoveTemp.m.sm.Accel[0] != 0)
+    ||
+    (gMoveTemp.m.sm.Jerk[0] != 0)
+  )
+  {
+    flags = 0x01;
+  }
+  if (
+    (gMoveTemp.m.sm.Rate[1].value != 0)
+    ||
+    (gMoveTemp.m.sm.Accel[1] != 0)
+    ||
+    (gMoveTemp.m.sm.Jerk[1] != 0)
+  )
+  {
+    flags |= 0x02;
+  }
+  gMoveTemp.m.sm.ServoChannel = flags;
 }
 
 // Enable both motor drivers at the start of a motion command, for the

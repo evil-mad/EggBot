@@ -346,7 +346,34 @@ def test_qm_qs_cs(ebb, r):
     time.sleep(0.1)
     r.check("axis 1 moving with a command queued: QM,1,1,0,1", ebb.raw("QM") == b"QM,1,1,0,1\n\r")
     ebb.wait_idle()
-    r.omit("QM (motor status during a delay)", "a delay (SM with no steps) reports both motors as moving (D57)")
+    # Motor status follows the command now running (#252): 0,0 during a
+    # delay or pen move; for a time-limited move, the axes with a nonzero
+    # Rate, Accel or Jerk. QG bits 2 and 1 report the same.
+    cases = (("SM,200,30,0", "SM,500,0,0", (0, 0)),
+             ("SM,200,0,30", "SM,500,0,0", (0, 0)),
+             ("SM,200,30,30", "SP,0,500", (0, 0)),
+             ("SM,200,0,30", "SM,500,30,0", (1, 0)),
+             ("SM,200,30,0", "LM,85899346,500,0,0,0,0", (1, 0)),
+             (None, "LT,12500,0,0,85899346,0", (0, 1)),
+             (None, "LT,12500,85899346,0,0,0", (1, 0)),
+             (None, "LT,12500,85899346,0,85899346,0", (1, 1)),
+             (None, "T3,12500,0,0,0,85899346,0,0", (0, 1)))
+    for before, cmd, (m1, m2) in cases:
+        ebb.ok("SP,1")
+        if before:
+            ebb.ok(before)
+        ebb.wait_idle()
+        ebb.ok(cmd)
+        time.sleep(0.1)
+        qm = ebb.raw("QM")
+        qg = ebb.raw("QG")
+        ebb.wait_idle()
+        after = f" after {before}" if before else ""
+        r.check(f"during {cmd}{after}: QM,1,{m1},{m2},0", qm == f"QM,1,{m1},{m2},0\n\r".encode(), qm)
+        r.item = "QG"
+        r.check(f"  ...QG bits 3-0 match", qg[:2].isalnum() and int(qg[:2], 16) & 0x0F == (8 | m1 << 2 | m2 << 1),
+                qg)
+        r.item = "QM"
     ebb.raw("CU,10,1")
     resp = ebb.raw("QM")
     ebb.raw("CU,10,0")
