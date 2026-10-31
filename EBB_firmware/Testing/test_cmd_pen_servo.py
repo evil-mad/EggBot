@@ -25,6 +25,7 @@ import ebb_test_util as u
 
 PORTB, LATA, LATB, TRISB = 3969, 3977, 3978, 3987
 CCP1CON, CCPR1L = 4026, 4027
+T2CON, RPOR6 = 4042, 3788         # Timer2 control; RB3 (RP6) output routing
 
 # RC servo channel table (RCServo2.c, "RC2Servo_globals" at 0x060)
 CHANNELS = 8
@@ -422,6 +423,18 @@ def test_se(ebb, r):
     ebb.wait_idle()
     r.check("queued SE,1,601,1 after an immediate SE,1,1022: power 601",
             engraver_power(ebb) == 601, engraver_power(ebb))
+    ebb.ok("SE,0")
+    # R turns the engraver off, and the next SE turns it on again (#269)
+    r.item = "R"
+    ebb.ok("SE,1,1023")
+    ebb.reset()
+    r.check("after SE,1,1023 and R: RB3 off", high_fraction(ebb, 3) == 0)
+    r.check("  ...engraver power 0", engraver_power(ebb) == 0, engraver_power(ebb))
+    r.check("  ...Timer2 stopped", ebb.mr(T2CON) & 0x04 == 0, ebb.mr(T2CON))
+    r.check("  ...RB3 output routing removed (RPOR6 0)", ebb.mr(RPOR6) == 0, ebb.mr(RPOR6))
+    r.item = "SE"
+    ebb.ok("SE,1,1023")
+    r.check("SE,1,1023 after R: on again", engraver_on(ebb))
     ebb.ok("SE,0")
 
 

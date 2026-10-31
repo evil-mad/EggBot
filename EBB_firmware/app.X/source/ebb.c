@@ -1660,6 +1660,14 @@ void EBB_Init(void)
   TRISBbits.TRISB3 = 0;       // Make RB3 an output (for engraver)
   PORTBbits.RB3 = 0;          // And make sure it starts out off
 
+  // Turn the engraver PWM off too, so that R leaves RB3 off (#269): duty
+  // cycle zero, Timer2 stopped, and RB3's output routing removed. The next
+  // SE sets the PWM up again.
+  CCPR1L = 0;
+  CCP1CON = (CCP1CON & 0b11001111);
+  T2CONbits.TMR2ON = 0;
+  RPOR6 = 0;
+
   // These are ISR variables, can't set them to zero in their definitions or
   // the linker puts them in a different bank and ISR expands with more MOVLB
   // instructions.
