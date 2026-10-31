@@ -138,8 +138,27 @@ def test_hm(ebb, r):
     ebb.ok("HM,25000")
     ebb.wait_idle()
     r.check("HM at the maximum rate returns home", qs(ebb) == (0, 0))
-    r.omit("HM (Position1 without Position2, overflow, parse errors)",
-           "Position1 alone is accepted, overflow is not reported, and parse errors still move (D15)")
+    # Parse errors and a distance that overflows 32 bits: only the error, and
+    # no motion (#250). Firmware that moves anyway is stopped with ES. A
+    # parse error was taken as rate 0 (clamped to 1 step/s), so those cases
+    # wait 1.5 s to see a step.
+    # (Position1 without Position2 is outside the documented forms: not tested.)
+    cases = (("HM", (5, 5), b"!4 Err: Missing parameter(s)", 1.5),
+             ("HM,-5", (5, 5), b"!6 Err: Invalid parameter value", 1.5),
+             ("HM,abc", (5, 5), b"!7 Err: Extra parameter", 1.5),
+             ("HM,25000,2147483647,0", (-10, 0), b"!6 Err: Invalid parameter value", 0.3),
+             ("HM,25000,0,-2147483648", (0, 10), b"!6 Err: Invalid parameter value", 0.3))
+    for cmd, start, err, wait in cases:
+        ebb.ok("CS")
+        ebb.ok(f"SM,100,{start[0]},{start[1]}")
+        ebb.wait_idle()
+        resp = ebb.raw(cmd)
+        time.sleep(wait)
+        pos = qs(ebb)
+        ebb.raw("ES")
+        ebb.wait_idle()
+        r.check(f"{cmd} from {start}: only the error", resp == err + b"\r\n", resp)
+        r.check(f"  ...and {cmd} does not move", pos == start, pos)
 
 
 def test_lm_l3(ebb, r):

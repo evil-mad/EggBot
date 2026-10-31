@@ -3137,8 +3137,28 @@ void parse_HM_packet(void)
   }
 
   // Make a local copy of the things we care about. This is how far we need to move.
-  gSteps1 = -globalStepCounter1 + gHM_Pos1;
-  gSteps2 = -globalStepCounter2 + gHM_Pos2;
+  // (Subtracting as unsigned is defined even for the most negative position.)
+  gSteps1 = (INT32)((UINT32)gHM_Pos1 - (UINT32)globalStepCounter1);
+  gSteps2 = (INT32)((UINT32)gHM_Pos2 - (UINT32)globalStepCounter2);
+
+  // The distance must fit in a signed 32-bit number (#250). It has
+  // overflowed if Position and the current position have different signs
+  // and the distance's sign differs from Position's. (Written as sign tests
+  // because 32-bit expressions here would use compiler temporaries, and
+  // access RAM has no room for more of those.)
+  if (
+    ((gHM_Pos1 < 0) && (globalStepCounter1 >= 0) && (gSteps1 >= 0))
+    ||
+    ((gHM_Pos1 >= 0) && (globalStepCounter1 < 0) && (gSteps1 < 0))
+    ||
+    ((gHM_Pos2 < 0) && (globalStepCounter2 >= 0) && (gSteps2 >= 0))
+    ||
+    ((gHM_Pos2 >= 0) && (globalStepCounter2 < 0) && (gSteps2 < 0))
+  )
+  {
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
   
   // Never clear accumulators for this type of move
   gClearAccs = 0;
