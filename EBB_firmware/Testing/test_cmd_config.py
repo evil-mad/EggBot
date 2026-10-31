@@ -391,7 +391,20 @@ def test_nickname(ebb, r):
 
 
 def test_ck(ebb, r):
-    r.omit("CK", "parameter types are swapped within each pair, and extra lines are printed (D8)")
+    # Each parameter in its documented type, and only the documented lines (#258)
+    r.item = "CK"
+    values = ("200", "-100", "60000", "-30000", "4000000000", "-2000000000", "x", "y")
+    shown = values[:7] + ("Y",)
+    lines = [f"Param{i}={v}" for i, v in enumerate(shown, 1)]
+    resp = ebb.raw("CK," + ",".join(values))
+    want = ("\r\n" + "".join(l + "\r\n" for l in lines) + "OK\r\n").encode()
+    r.check("legacy: documented types, values and lines", resp == want, resp)
+    r.omit("CK (future mode)", "the reply ends with an extra newline (#273)")
+    for cmd, err in (("CK,1,2,3,4,5,6,a", b"!4 Err: Missing parameter(s)"),
+                     ("CK,300,2,3,4,5,6,a,b", b"!6 Err: Invalid parameter value"),
+                     ("CK,1,-200,3,4,5,6,a,b", b"!6 Err: Invalid parameter value")):
+        resp = ebb.raw(cmd)
+        r.check(f"{cmd}: only the error, no values", resp == err + b"\r\n", resp)
 
 
 if __name__ == "__main__":

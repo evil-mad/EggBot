@@ -3366,14 +3366,14 @@ void parse_CK_packet(void)
   unsigned char UCaseChar;
 
   print_command(FALSE, FALSE);
-  print_line_ending(kLE_NORM);
 
-  extract_number(kCHAR, &SByte, kREQUIRED);
+  // Each parameter in its documented type and order (#258)
   extract_number(kUCHAR, &UByte, kREQUIRED);
-  extract_number(kINT, &SInt, kREQUIRED);
+  extract_number(kCHAR, &SByte, kREQUIRED);
   extract_number(kUINT, &UInt, kREQUIRED);
-  extract_number(kLONG, &SLong, kREQUIRED);
+  extract_number(kINT, &SInt, kREQUIRED);
   extract_number(kULONG, &ULong, kREQUIRED);
+  extract_number(kLONG, &SLong, kREQUIRED);
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
@@ -3383,35 +3383,30 @@ void parse_CK_packet(void)
     return;
   }
 
-  ebb_print((rom char far *)"Param1=");
-  ebb_print_int(SByte);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param2=");
+  ebb_print((rom char far *)"Param1=");
   ebb_print_uint(UByte);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param3=");
-  ebb_print_int(SInt);
+  ebb_print((rom char far *)"Param2=");
+  ebb_print_int(SByte);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param4=");
+  ebb_print((rom char far *)"Param3=");
   ebb_print_uint(UInt);
   print_line_ending(kLE_NORM);
+  ebb_print((rom char far *)"Param4=");
+  ebb_print_int(SInt);
+  print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param5=");
-  ebb_print_int(SLong);
+  ebb_print_uint(ULong);
   print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param6=");
-  ebb_print_uint(ULong);
+  ebb_print_int(SLong);
   print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param7=");
   ebb_print_char(UChar);
   print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param8=");
   ebb_print_char(UCaseChar);
-  print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param6=");
-  ebb_print_hex(ULong, 8);
-  print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param6=");
-  ebb_print_hex(ULong, 0);
   print_line_ending(kLE_NORM);
 
   print_line_ending(kLE_OK_NORM);
