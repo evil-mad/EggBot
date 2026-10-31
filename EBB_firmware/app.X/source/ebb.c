@@ -1124,7 +1124,11 @@ NonStepperCommands:
       }
     }
 
-    if (CurrentCommand.m.sm.ServoRPn > 0u)
+    if (CurrentCommand.m.sm.ServoRPn == EM_MOTOR2_UNCHANGED)
+    {
+      // Enable2 was omitted: leave motor 2 as it is (#251)
+    }
+    else if (CurrentCommand.m.sm.ServoRPn > 0u)
     {
       if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
       {
@@ -4101,10 +4105,15 @@ void parse_EM_packet(void)
     return;
   }
   RetVal2 = extract_number (kUCHAR, &EA2, kOPTIONAL);
-  // Bail if we got a conversion error
-  if (!parameters_ok() || (kEXTRACT_OK != RetVal2))
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
+  }
+  // Enable2 omitted: leave motor 2 as it is (#251)
+  if (kEXTRACT_OK != RetVal2)
+  {
+    EA2 = EM_MOTOR2_UNCHANGED;
   }
 
   if (!bittst(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM))

@@ -133,6 +133,10 @@ typedef enum
 #define COMMAND_CM_OUTER_MOVE         8u
 #define COMMAND_CM_INNER_MOVE         9u
 
+// Enable2 value in a queued EM meaning "leave motor 2 as it is" (EM with
+// Enable2 omitted)
+#define EM_MOTOR2_UNCHANGED         0xFFu
+
 typedef enum
 {
   PIC_CONTROLS_DRIVERS = 0,

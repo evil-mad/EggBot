@@ -304,7 +304,22 @@ def test_em_qe(ebb, r):
     resp = ebb.raw("QE")
     ebb.raw("CU,10,0")
     r.check("future format: QE,16,16<NL>", resp == b"QE,16,16\n", resp)
-    r.omit("EM (Enable2 omitted, e.g. EM,2)", "the command is ignored and nothing is sent (D9)")
+    # Enable2 omitted: motor 1 and the step mode change, motor 2 stays as
+    # it was, whether off or on (#251)
+    r.item = "EM"
+    for setup, before, after in (("EM,0,0", b"0,0", b"8,0"), ("EM,3,1", b"4,4", b"8,8")):
+        ebb.ok(setup)
+        r.check(f"{setup}: QE {before.decode()}", ebb.raw("QE") == before + b"\n\rOK\r\n")
+        resp = ebb.raw("EM,2")
+        time.sleep(0.05)
+        r.check(f"EM,2 after {setup} replies OK", resp == b"OK\r\n", resp)
+        resp = ebb.raw("QE")
+        r.check(f"  ...motor 1 at 1/8, motor 2 unchanged: QE {after.decode()}",
+                resp == after + b"\n\rOK\r\n", resp)
+    ebb.raw("CU,10,1")
+    resp = ebb.raw("EM,2")
+    ebb.raw("CU,10,0")
+    r.check("future: EM,2 replies EM<NL>", resp == b"EM\n", resp)
 
 
 def test_qm_qs_cs(ebb, r):
