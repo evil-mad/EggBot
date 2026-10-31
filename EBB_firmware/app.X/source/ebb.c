@@ -3315,9 +3315,11 @@ void process_simple_rate_move_fp(void)
   
   // Both Steps values are now positive because our directions are set. From 
   // now on we're dealing only with step counts and rates, no directions.
+  // They are read as unsigned below: negating -2147483648 leaves 0x80000000,
+  // which is the right count only when read that way (#274).
   
   // Figure out which axis is major
-  if (gSteps1 >= gSteps2)
+  if ((UINT32)gSteps1 >= (UINT32)gSteps2)
   {
     // Axis1 is major, Axis2 is minor
     // Computing the gMoveTemp.m.sm.Rate value for the primary axis is simple.
@@ -3342,8 +3344,8 @@ void process_simple_rate_move_fp(void)
       // even that slow - both the above primary rate multiply and the following
       // two multiplies and a divide, this whole function take less than 350 uS.
       
-      tempF = (float)gSteps2 * (float)gHM_StepRate;
-      tempF /= (float)gSteps1;
+      tempF = (float)(UINT32)gSteps2 * (float)gHM_StepRate;
+      tempF /= (float)(UINT32)gSteps1;
       tempF *= 85899.34592f;
       
       // Limit check out results
@@ -3373,8 +3375,8 @@ void process_simple_rate_move_fp(void)
 
     if (gSteps1 != 0)
     {
-      tempF = (float)gSteps1 * (float)gHM_StepRate;
-      tempF /= (float)gSteps2;
+      tempF = (float)(UINT32)gSteps1 * (float)gHM_StepRate;
+      tempF /= (float)(UINT32)gSteps2;
       tempF *= 85899.34592f;
       
       if (tempF < 1.0f)
@@ -3574,6 +3576,9 @@ static void process_simple_motor_move_fp(void)
       gSteps2 = -gSteps2;
     }
 
+    // The counts are read as unsigned below: negating -2147483648 leaves
+    // 0x80000000, which is the right count only when read that way (#274).
+
     // As an optimization, pre-compute the common term used for both axes
     tempF = 85899345.92f / (float)gDurationMS;
     
@@ -3584,7 +3589,7 @@ static void process_simple_motor_move_fp(void)
       // rate = (steps/duration)*85899.34592
       // Rearranging a bit, we can also use:
       // rate = steps * ((85899.34592 * 1000)/duration)
-      rateF = (float)(gSteps1) * tempF;
+      rateF = (float)(UINT32)gSteps1 * tempF;
       
       // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
       // conversion is out of range and slipped past an integer check (#268).
@@ -3634,7 +3639,7 @@ static void process_simple_motor_move_fp(void)
 
     if (gSteps2 != 0)
     {
-      rateF = (float)(gSteps2) * tempF;
+      rateF = (float)(UINT32)gSteps2 * tempF;
 
       // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
       // conversion is out of range and slipped past an integer check (#268).

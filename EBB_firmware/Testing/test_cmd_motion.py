@@ -161,6 +161,34 @@ def test_hm(ebb, r):
         r.check(f"  ...and {cmd} does not move", pos == start, pos)
 
 
+def test_extreme_steps(ebb, r):
+    # The documented step range includes -2147483648. Moves there run at the
+    # requested rate in the right direction (#274); each is stopped with ES.
+    # Expected rates: HM 1000 steps/s; SM 2^31 steps in 100000 s, about
+    # 21,475 steps/s.
+    r.item = "SM/HM (step count -2147483648)"
+    cases = (("HM,1000,-2147483648,0", 0, -1000), ("HM,1000,0,-2147483648", 1, -1000),
+             ("SM,100000000,-2147483648,0", 0, -21475), ("SM,100000000,0,-2147483648", 1, -21475),
+             ("SM,100000000,2147483647,0", 0, 21475))
+    for cmd, axis, rate in cases:
+        ebb.ok("EM,1,1")
+        ebb.ok("CS")
+        ebb.wait_idle()
+        t0 = time.monotonic()
+        resp = ebb.raw(cmd)
+        time.sleep(0.8)
+        pos = qs(ebb)
+        dt = time.monotonic() - t0
+        ebb.raw("ES")
+        ebb.wait_idle()
+        r.check(f"{cmd} replies OK", resp == b"OK\r\n", resp)
+        steps = pos[axis] if pos else 0
+        want = rate * dt
+        r.check(f"  ...and moves at about {abs(rate)} steps/s, {'negative' if rate < 0 else 'positive'}",
+                0.6 * abs(want) < abs(steps) < 1.4 * abs(want) and (steps < 0) == (rate < 0),
+                f"{steps} steps in {dt:.2f} s (expected about {want:.0f})")
+
+
 def test_lm_l3(ebb, r):
     r.item = "LM"
     pos, _, _ = run_move(ebb, "LM,3865471,60,1732,0,0,0")
@@ -413,5 +441,5 @@ def test_sc_drivers(ebb, r):
 
 if __name__ == "__main__":
     u.run("EBB motion commands and queries",
-          [test_sm, test_xm, test_hm, test_lm_l3, test_lt_t3_td, test_tr, test_es,
+          [test_sm, test_xm, test_hm, test_extreme_steps, test_lm_l3, test_lt_t3_td, test_tr, test_es,
            test_em_qe, test_qm_qs_cs, test_sc_drivers])
