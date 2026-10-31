@@ -3559,12 +3559,6 @@ static void process_simple_motor_move_fp(void)
     gMoveTemp.m.sm.DelayCounter = 0; // No delay for motor moves
     gMoveTemp.m.sm.DirBits = 0;
 
-    if (gAutomaticMotorEnable == TRUE)
-    {
-      // Enable both motors when we want to move them
-      auto_enable_motors();
-    }
-    
     // First, set the direction bits
     if (gSteps1 < 0)
     {
@@ -3685,6 +3679,13 @@ static void process_simple_motor_move_fp(void)
     gMoveTemp.m.sm.Steps[1] = (UINT32)gSteps2;
     gMoveTemp.m.sm.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
+
+    // Enable both motors when we want to move them. This comes after the
+    // rate checks, so that a rejected move does not enable them (#272).
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      auto_enable_motors();
+    }
 
     if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
     {

@@ -320,6 +320,22 @@ def test_em_qe(ebb, r):
     resp = ebb.raw("EM,2")
     ebb.raw("CU,10,0")
     r.check("future: EM,2 replies EM<NL>", resp == b"EM\n", resp)
+    # A move rejected with a step rate error does not enable the motors;
+    # automatic enabling happens only when a move is queued (#272)
+    r.item = "CU,50"
+    ebb.ok("EM,1,1")                    # 1/16 step mode, so enabled motors read 16
+    for cmd in ("SM,1,26", "SM,1,0,26", "XM,1,15,15", "SM,4294967295,1"):
+        ebb.ok("EM,0,0")
+        ebb.wait_idle()
+        resp = ebb.raw(cmd)
+        ebb.wait_idle()
+        r.check(f"{cmd} (rejected, !0) leaves the motors off (QE 0,0)",
+                resp.startswith(b"!0") and ebb.raw("QE") == b"0,0\n\rOK\r\n", (resp, ebb.raw("QE")))
+    ebb.ok("EM,0,0")
+    ebb.wait_idle()
+    ebb.ok("SM,100,10,0")
+    ebb.wait_idle()
+    r.check("a valid SM still enables both motors (QE 16,16)", ebb.raw("QE") == b"16,16\n\rOK\r\n")
 
 
 def test_qm_qs_cs(ebb, r):
