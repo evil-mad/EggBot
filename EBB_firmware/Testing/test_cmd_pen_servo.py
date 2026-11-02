@@ -203,10 +203,6 @@ def test_tp_qp(ebb, r):
     # Queued TPs alternate: each toggles from the state the queue will leave (#260)
     for depth in (1, 4):
         ebb.ok(f"CU,4,{depth}")
-        for _ in range(depth):          # clean entries first (on firmware with #253)
-            ebb.ok("SM,20,2,2")
-            ebb.ok("SM,20,-2,-2")
-        ebb.wait_idle()
         for count in ((2,) if depth == 1 else (2, 3, 4)):
             ebb.ok("SP,1")
             ebb.wait_idle()

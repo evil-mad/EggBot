@@ -138,11 +138,6 @@ def test_extra_motion(ebb, r):
 
 
 def test_extra_pen_servo(ebb, r):
-    # One stepping move first, so the FIFO slot holds no stale step bits (#253)
-    ebb.raw("EM,1,1")
-    ebb.raw("SM,50,10")
-    ebb.raw("SM,50,-10")
-    settle(ebb)
     qp = query("QP")
     run_cases(ebb, r, "Returned Errors !7 (pen and servo)", [
         dict(cmd="SP,0,0,4,9", setup=("SP,1",), probe=qp),
