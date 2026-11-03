@@ -295,6 +295,7 @@ def test_s2(ebb, r):
     r.check("S2 can turn off the pen servo channel", channel(ebb, PEN) is None)
     # Not tested: a bare S2, and S2 beyond the available channels, are outside
     # the documented forms (undefined, D22a, D22c)
+    r.omit("S2 (two queued to new pins)", "they share one servo channel (#255)")
     # S2 on RP6 (RB3) and SE share that pin: a pin conflict the docs do not
     # define (D59). Reboot so that SE starts from a clean pin in later tests.
     r.check("reboot after S2 on RB3", ebb.reboot())
