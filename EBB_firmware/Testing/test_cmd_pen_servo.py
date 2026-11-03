@@ -25,6 +25,7 @@ import ebb_test_util as u
 
 PORTB, LATA, LATB, TRISB = 3969, 3977, 3978, 3987
 CCP1CON, CCPR1L = 4026, 4027
+T2CON, RPOR6 = 4042, 3788         # Timer2 control; RB3 (RP6) output routing
 
 # RC servo channel table (RCServo2.c, "RC2Servo_globals" at 0x060)
 CHANNELS = 8
@@ -177,8 +178,8 @@ def test_sp(ebb, r):
     r.check("example SP,1 replies OK", ebb.raw("SP,1") == b"OK\r\n")
     r.check("future format: SP<NL>", future(ebb, "SP,1") == b"SP\n")
     ebb.wait_idle()
-    r.omit("SP (Value 4 and above, PortB_Pin above 7)",
-           "SP,4 acts as SP,3 and PortB_Pin above 7 becomes 1 instead of an error (D21)")
+    # Not tested: SP Value above 3 and PortB_Pin above 7 are outside the
+    # documented range (undefined, D21)
 
 
 def test_tp_qp(ebb, r):
@@ -199,8 +200,36 @@ def test_tp_qp(ebb, r):
     r.check("Duration 400: the next command waits 400 ms", 0.35 < dt < 0.7, f"{dt:.2f} s")
     r.check("future format: TP<NL>", future(ebb, "TP") == b"TP\n")
     ebb.wait_idle()
-    r.omit("TP (two TPs queued behind a move)",
-           "the direction is chosen when TP is received, so both can go the same way (D19)")
+    # Queued TPs alternate: each toggles from the state the queue will leave (#260)
+    for depth in (1, 4):
+        ebb.ok(f"CU,4,{depth}")
+        for count in ((2,) if depth == 1 else (2, 3, 4)):
+            ebb.ok("SP,1")
+            ebb.wait_idle()
+            busy_for(ebb, 500)
+            for _ in range(count):
+                ebb.ok("TP")
+            ebb.wait_idle()
+            want = UP if count % 2 == 0 else DOWN
+            r.check(f"depth {depth}: {count} TPs queued behind a move end "
+                    f"{'up' if want == UP else 'down'}", target(ebb) == want, target(ebb))
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    busy_for(ebb, 500)
+    ebb.ok("SP,0")
+    ebb.ok("TP")
+    ebb.wait_idle()
+    r.check("TP queued after a queued SP,0 toggles up", target(ebb) == UP, target(ebb))
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    busy_for(ebb, 500)
+    ebb.ok("SP,0")
+    ebb.raw("ES")
+    ebb.ok("TP")
+    ebb.wait_idle()
+    r.check("after ES flushes a queued SP,0, TP toggles from the real state (down)",
+            target(ebb) == DOWN, target(ebb))
+    ebb.ok("CU,4,1")
 
     r.item = "QP"
     ebb.ok("SP,1")
@@ -264,10 +293,11 @@ def test_s2(ebb, r):
     r.check("future format: S2<NL>", future(ebb, "S2,0,5") == b"S2\n")
     ebb.ok("S2,0,4")
     r.check("S2 can turn off the pen servo channel", channel(ebb, PEN) is None)
-    r.omit("S2 (no parameters)", "bare S2 acts as S2,0,0 and replies OK (D22a)")
-    r.omit("S2 (future mode errors)", "the error is printed before the S2 echo (D22b)")
-    r.omit("S2 (all channels in use)", "a further S2 is dropped and still replies OK (D22c)")
-    # S2 on RP6 (RB3) leaves SE without output on RB3 until a reboot (D59)
+    # Not tested: a bare S2, and S2 beyond the available channels, are outside
+    # the documented forms (undefined, D22a, D22c)
+    r.omit("S2 (two queued to new pins)", "they share one servo channel (#255)")
+    # S2 on RP6 (RB3) and SE share that pin: a pin conflict the docs do not
+    # define (D59). Reboot so that SE starts from a clean pin in later tests.
     r.check("reboot after S2 on RB3", ebb.reboot())
 
 
@@ -358,7 +388,8 @@ def test_sc_pen(ebb, r):
     ebb.wait_idle()
     r.check("SC,1,2: SP,0 turns RB4 on and moves the servo",
             bit(ebb, LATB, 4) == 1 and target(ebb) == DOWN)
-    r.omit("SC,1,0 (S2 outputs)", "SC,1,0 stops all S2 outputs from updating, not only the pen (D22d)")
+    # Not tested: SC,1 controls the pen servo; its effect on other S2 outputs
+    # is not documented (undefined, D22d)
 
     ebb.reset()
     r.item = "SC,13"
@@ -412,9 +443,28 @@ def test_se(ebb, r):
     ebb.wait_idle()
     r.check("  ...and turns the engraver off", engraver_power(ebb) == 0 and high_fraction(ebb, 3) == 0)
     r.check("future format: SE<NL>", future(ebb, "SE,0") == b"SE\n")
-    r.omit("SE (after S2 on RB3)", "SE has no output on RB3 after S2 used RP6, until a reboot (D59)")
-    r.omit("SE (queued, different Power)",
-           "a queued SE takes the two low Power bits from the most recent SE (D20)")
+    # A queued SE uses all ten bits of its own Power, even when another SE
+    # arrives before it runs (#261)
+    ebb.ok("SE,0")
+    busy_for(ebb, 600)
+    ebb.ok("SE,1,601,1")
+    ebb.ok("SE,1,1022")
+    ebb.wait_idle()
+    r.check("queued SE,1,601,1 after an immediate SE,1,1022: power 601",
+            engraver_power(ebb) == 601, engraver_power(ebb))
+    ebb.ok("SE,0")
+    # R turns the engraver off, and the next SE turns it on again (#269)
+    r.item = "R"
+    ebb.ok("SE,1,1023")
+    ebb.reset()
+    r.check("after SE,1,1023 and R: RB3 off", high_fraction(ebb, 3) == 0)
+    r.check("  ...engraver power 0", engraver_power(ebb) == 0, engraver_power(ebb))
+    r.check("  ...Timer2 stopped", ebb.mr(T2CON) & 0x04 == 0, ebb.mr(T2CON))
+    r.check("  ...RB3 output routing removed (RPOR6 0)", ebb.mr(RPOR6) == 0, ebb.mr(RPOR6))
+    r.item = "SE"
+    ebb.ok("SE,1,1023")
+    r.check("SE,1,1023 after R: on again", engraver_on(ebb))
+    ebb.ok("SE,0")
 
 
 def test_sr_qr(ebb, r):
@@ -454,6 +504,46 @@ def test_sr_qr(ebb, r):
     r.omit("SR (60 s default timeout)", "takes 60 s to observe")
 
 
+# The motion queue (FIFO_scn) starts at 0x600; DirBits is byte 1 of each
+# entry, and its step bits are 0x40 (axis 1) and 0x10 (axis 2). After R the
+# queue depth is 1, so every queued command goes through entry 0.
+SLOT0_DIRBITS = 0x601
+
+
+def qs_pos(ebb):
+    return ebb.raw("QS").split(b"\n")[0]
+
+
+def test_fifo_leftover_bits(ebb, r):
+    # A step bit left in a queue entry must not make a queued pen move, SE or
+    # delay be skipped, nor cause a step (#253). MW plants the leftover bit.
+    r.item = "Motion queue (leftover step bits)"
+    ebb.ok("SP,1")
+    ebb.wait_idle()
+    ebb.ok("CS")
+    before = qs_pos(ebb)
+    ebb.ok(f"MW,{SLOT0_DIRBITS},64")
+    ebb.ok("SP,0")
+    ebb.wait_idle()
+    r.check("SP,0 after a leftover step bit: pen down (QP 0)", ebb.raw("QP").startswith(b"0"),
+            ebb.raw("QP"))
+    r.check("  ...and no step (QS unchanged)", qs_pos(ebb) == before, qs_pos(ebb))
+    ebb.ok(f"MW,{SLOT0_DIRBITS},16")
+    ebb.ok("SE,1,1023,1")
+    ebb.wait_idle()
+    r.check("queued SE,1,1023,1 after a leftover step bit: engraver on",
+            engraver_power(ebb) == 1023, engraver_power(ebb))
+    r.check("  ...and no step (QS unchanged)", qs_pos(ebb) == before, qs_pos(ebb))
+    ebb.ok("SE,0")
+    r.omit("Motion queue (SM delay after a leftover step bit)",
+           "a delay copies the parser's template entry, whose RAM address depends on the build")
+    ebb.ok(f"MW,{SLOT0_DIRBITS},80")
+    ebb.reset()
+    r.check("R clears the queue entry (DirBits 0)", ebb.mr(SLOT0_DIRBITS) == 0,
+            ebb.mr(SLOT0_DIRBITS))
+
+
 if __name__ == "__main__":
     u.run("EBB pen, servo and engraver commands",
-          [test_defaults, test_sp, test_tp_qp, test_s2, test_sc_slots, test_sc_pen, test_se, test_sr_qr])
+          [test_defaults, test_sp, test_tp_qp, test_s2, test_sc_slots, test_sc_pen, test_se, test_sr_qr,
+           test_fifo_leftover_bits])

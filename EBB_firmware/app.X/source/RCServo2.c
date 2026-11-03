@@ -280,8 +280,8 @@ void RCServo2_S2_command (void)
 
   print_command(FALSE, FALSE);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -393,6 +393,7 @@ UINT8 RCServo2_Move(
         {
           // Now copy the values over into the FIFO element
           FIFOPtr[gFIFOIn].Command = COMMAND_SERVO_MOVE;
+          FIFOPtr[gFIFOIn].m.sm.DirBits = 0;      // No step bits (#253)
           FIFOPtr[gFIFOIn].m.sm.DelayCounter = HIGH_ISR_TICKS_PER_MS * (UINT32)Delay;
           FIFOPtr[gFIFOIn].m.sm.ServoChannel = Channel;
           FIFOPtr[gFIFOIn].m.sm.ServoRPn = RPn;

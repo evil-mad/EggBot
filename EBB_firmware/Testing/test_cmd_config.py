@@ -67,7 +67,13 @@ def test_qu(ebb, r):
     r.item = "QU,200"
     ebb.ok("CS")
     r.check("accumulators 0,0 after CS", qu(ebb, 200) == "0,0")
-    r.omit("QU (future mode)", "future-mode replies end with two newlines (D7)")
+    r.item = "QU (future mode)"
+    ebb.raw("CU,10,1")
+    for n in (1, 2, 3, 4, 5, 6, 60, 61, 200):
+        resp = ebb.raw(f"QU,{n}")
+        r.check(f"QU,{n}: one line, QU,<value><NL>",
+                re.fullmatch(rb"QU,[0-9A-Fa-f,]+\n", resp), resp)
+    ebb.raw("CU,10,0")
 
 
 def test_cu_fifo(ebb, r):
@@ -77,6 +83,17 @@ def test_cu_fifo(ebb, r):
     r.check("CU,4,8 then QU,3 is 8", qu(ebb, 3) == "8")
     ebb.ok("CU,4,1000")
     r.check("a size above the maximum sets the maximum (QU,2)", qu(ebb, 3) == maximum, maximum)
+    # Sizes below 1 are rejected (#270). On firmware that accepts them, the
+    # size is put back to 1 at once: a motion command at size 0 would wait
+    # forever, and USB with it.
+    for value in (0, -5):
+        ebb.ok("CU,4,2")
+        resp = ebb.raw(f"CU,4,{value}")
+        size = qu(ebb, 3)
+        if size != "2":
+            ebb.ok("CU,4,1")
+        r.check(f"CU,4,{value} replies only !6", resp == b"!6 Err: Invalid parameter value\r\n", resp)
+        r.check(f"CU,4,{value} leaves the size unchanged (QU,3 is 2)", size == "2", size)
     ebb.ok("CU,4,4")
     t0 = time.monotonic()
     for _ in range(4):
@@ -88,7 +105,6 @@ def test_cu_fifo(ebb, r):
     r.check("commands waiting in the FIFO (delays queued behind the first)", v in ("2", "3"), v)
     ebb.wait_idle()
     r.check("no commands waiting after they finish", qu(ebb, 6) == "0")
-    r.omit("CU,4 (values below 1)", "CU,4,0 is accepted and stops all motion (fixed in v3.2.0)")
 
 
 def test_cu_limits(ebb, r):
@@ -101,6 +117,17 @@ def test_cu_limits(ebb, r):
     ebb.wait_idle()
     ebb.ok("CU,2,1")
     r.check("the accepted move ran (QS 30,0)", ebb.raw("QS").startswith(b"30,0"))
+    # Limit checks off: a rate far above the maximum runs at the maximum
+    # (25,000 steps/s), so 60,000 steps take about 2.4 s
+    ebb.ok("CS")
+    ebb.ok("CU,2,0")
+    t0 = time.monotonic()
+    ebb.ok("SM,1000,60000,0")
+    ebb.wait_idle()
+    dt = time.monotonic() - t0
+    ebb.ok("CU,2,1")
+    r.check("limit checks off: SM,1000,60000,0 runs at the maximum rate (about 2.4 s)",
+            2.3 < dt < 2.9 and ebb.raw("QS").startswith(b"60000,0"), f"{dt:.2f} s")
 
 
 def test_cu_led(ebb, r):
@@ -180,7 +207,52 @@ def test_cu_limit_switch(ebb, r):
     time.sleep(0.05)
     r.check("no trip when B0 does not match the target", qg_bits(ebb, 0x80) == 0)
     ebb.ok("CU,51,0")
-    r.omit("CU,51 (EM clears a Limit Switch Stop)", "EM does not clear it (D55)")
+    # EM clears a Limit Switch Stop, but only once the input no longer
+    # matches the target; while it still matches, the stop re-arms at once (D55)
+    ebb.ok("PD,B,0,0")
+    ebb.ok("PO,B,0,0")                  # drive B0 low
+    ebb.ok("CU,52,0")
+    ebb.ok("CU,51,1")                   # stop when B0 is low
+    time.sleep(0.05)
+    r.check("Limit Switch Stop on B0 driven low (QG bit 7)", qg_bits(ebb, 0x80) == 0x80)
+    ebb.ok("EM,1,1")
+    time.sleep(0.05)
+    r.check("EM while B0 still matches: the stop stays set", qg_bits(ebb, 0x80) == 0x80)
+    ebb.ok("PO,B,0,1")
+    ebb.ok("PD,B,0,1")                  # release B0 (input with pull-up)
+    ebb.ok("EM,1,1")
+    time.sleep(0.05)
+    r.check("EM after B0 no longer matches: the stop is cleared", qg_bits(ebb, 0x80) == 0)
+    ebb.ok("CU,51,0")
+    ebb.raw("QB")                       # B0 low also registered a PRG button press
+
+    # The reply is sent when the stop happens, with no command needed, and
+    # before a following CU,51,0 clears the stop (#267). RB1, the pen servo
+    # output, pulses high once the servo runs. With RB1 quiet (S2,0,4), the
+    # stop is armed on RB1 high and an SP,1 is queued behind a 300 ms delay,
+    # so the trip happens later, while nothing is being sent.
+    r.item = "CU,53"
+    reply = re.compile(rb"Limit switch triggered\. PortB=[0-9A-F]{2}\r\n")
+    for then in ("nothing", "CU,51,0"):
+        ebb.ok("S2,0,4")
+        ebb.ok("CU,52,2")
+        ebb.ok("CU,53,1")
+        got = ebb.raw("CU,51,2")
+        got += ebb.raw("SM,300,0,0")
+        got += ebb.raw("SP,1")
+        time.sleep(1.0)
+        if then == "nothing":
+            got += ebb.raw(b"", timeout=0.3, quiet=0.1)
+            r.check(f"RB1 trip while idle, then {then}: the reply is sent", reply.search(got), got)
+            status = ebb.raw("QG")
+            r.check("  ...and the stop did trip (QG bit 7)", int(status[:2], 16) & 0x80, status)
+        else:
+            got += ebb.raw("CU,51,0")
+            r.check(f"RB1 trip while idle, then {then}: the reply is sent", reply.search(got), got)
+        ebb.raw("CU,51,0")
+        ebb.raw("CU,53,0")
+        ebb.raw(b"", timeout=0.2, quiet=0.1)
+        ebb.wait_idle()
 
 
 def test_cu_power(ebb, r):
@@ -358,13 +430,40 @@ def test_nickname(ebb, r):
     ebb.raw("CU,10,0")
     r.check("future format: QT,Name<NL>", resp == b"QT,Regression Test\n", resp)
     r.item = "ST"
+    # No string: only the error, and the name is not erased (#256)
+    resp = ebb.raw("ST")
+    r.check("ST with no string: only !4", resp == b"!4 Err: Missing parameter(s)\r\n", resp)
+    resp = ebb.raw("QT")
+    r.check("  ...and the name is unchanged", resp == b"Regression Test\r\nOK\r\n", resp)
+    # A longer name is truncated to 16 characters, with a plain OK (#256)
+    resp = ebb.raw("ST,ABCDEFGHIJKLMNOPQ")
+    r.check("ST with 17 characters: OK only", resp == b"OK\r\n", resp)
+    resp = ebb.raw("QT")
+    r.check("  ...and QT reads the first 16", resp == b"ABCDEFGHIJKLMNOP\r\nOK\r\n", resp)
     r.check(f"ST restores the original name {original!r}", ebb.raw(f"ST,{original}") == b"OK\r\n")
     r.check("QT reads the original name", ebb.raw("QT") == (original + "\r\nOK\r\n").encode())
-    r.omit("ST (no parameter, or over 16 characters)", "writes flash before reporting the error (D24)")
 
 
 def test_ck(ebb, r):
-    r.omit("CK", "parameter types are swapped within each pair, and extra lines are printed (D8)")
+    # Each parameter in its documented type, and only the documented lines (#258)
+    r.item = "CK"
+    values = ("200", "-100", "60000", "-30000", "4000000000", "-2000000000", "x", "y")
+    shown = values[:7] + ("Y",)
+    lines = [f"Param{i}={v}" for i, v in enumerate(shown, 1)]
+    resp = ebb.raw("CK," + ",".join(values))
+    want = ("\r\n" + "".join(l + "\r\n" for l in lines) + "OK\r\n").encode()
+    r.check("legacy: documented types, values and lines", resp == want, resp)
+    # Future mode: the reply ends right after Param8 (#273)
+    ebb.raw("CU,10,1")
+    resp = ebb.raw("CK," + ",".join(values))
+    ebb.raw("CU,10,0")
+    want = ("CK\n" + "".join(l + "\n" for l in lines)).encode()
+    r.check("future: documented types, values and lines", resp == want, resp)
+    for cmd, err in (("CK,1,2,3,4,5,6,a", b"!4 Err: Missing parameter(s)"),
+                     ("CK,300,2,3,4,5,6,a,b", b"!6 Err: Invalid parameter value"),
+                     ("CK,1,-200,3,4,5,6,a,b", b"!6 Err: Invalid parameter value")):
+        resp = ebb.raw(cmd)
+        r.check(f"{cmd}: only the error, no values", resp == err + b"\r\n", resp)
 
 
 if __name__ == "__main__":

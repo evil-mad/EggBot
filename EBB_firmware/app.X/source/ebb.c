@@ -512,6 +512,7 @@ static void process_simple_motor_move_fp(void);
 static void clear_parmaeter_globals(void);
 static void process_simple_rate_move_fp(void);
 static void auto_enable_motors(void);
+static void set_timed_axis_flags(void);
 
 
 extern void FIFO_COPY(void);
@@ -1050,7 +1051,7 @@ NonStepperCommands:
     {
       // Set RB3 to StoredEngraverPower
       CCPR1L = CurrentCommand.m.sm.SEPower >> 2;
-      CCP1CON = (CCP1CON & 0b11001111) | ((StoredEngraverPower << 4) & 0b00110000);
+      CCP1CON = (CCP1CON & 0b11001111) | ((CurrentCommand.m.sm.SEPower << 4) & 0b00110000);
     }
     else
     {
@@ -1124,7 +1125,11 @@ NonStepperCommands:
       }
     }
 
-    if (CurrentCommand.m.sm.ServoRPn > 0u)
+    if (CurrentCommand.m.sm.ServoRPn == EM_MOTOR2_UNCHANGED)
+    {
+      // Enable2 was omitted: leave motor 2 as it is (#251)
+    }
+    else if (CurrentCommand.m.sm.ServoRPn > 0u)
     {
       if (DriverConfiguration == PIC_CONTROLS_DRIVERS)
       {
@@ -1526,6 +1531,26 @@ static void clear_parmaeter_globals(void)
 void EBB_Init(void)
 {
   UINT8 i;
+  UINT16 j;
+  UINT8 gieh;
+
+  // Clear the whole motion queue, the parser's template entry and the
+  // running command, so that no leftover byte (such as a step bit in
+  // DirBits) can affect a later command. Neither the bootloader nor R
+  // clears this RAM otherwise (#253). The motion ISR is held off while
+  // this is done (R runs this with interrupts on).
+  gieh = INTCONbits.GIEH;
+  INTCONbits.GIEH = 0;
+  for (j = 0; j < COMMAND_FIFO_SIZE_BYTES; j++)
+  {
+    CommandFIFO[j] = 0;
+  }
+  for (j = 0; j < sizeof(MoveCommandType); j++)
+  {
+    ((UINT8 *)&gMoveTemp)[j] = 0;
+    ((UINT8 *)&CurrentCommand)[j] = 0;
+  }
+  INTCONbits.GIEH = gieh;
 
   // Initialize all Current Command values
   for (i = 0; i < NUMBER_OF_STEPPERS; i++)
@@ -1660,6 +1685,14 @@ void EBB_Init(void)
   TRISBbits.TRISB3 = 0;       // Make RB3 an output (for engraver)
   PORTBbits.RB3 = 0;          // And make sure it starts out off
 
+  // Turn the engraver PWM off too, so that R leaves RB3 off (#269): duty
+  // cycle zero, Timer2 stopped, and RB3's output routing removed. The next
+  // SE sets the PWM up again.
+  CCPR1L = 0;
+  CCP1CON = (CCP1CON & 0b11001111);
+  T2CONbits.TMR2ON = 0;
+  RPOR6 = 0;
+
   // These are ISR variables, can't set them to zero in their definitions or
   // the linker puts them in a different bank and ISR expands with more MOVLB
   // instructions.
@@ -1724,8 +1757,8 @@ void parse_SC_packet (void)
   extract_number(kUCHAR, &Para1, kREQUIRED);
   extract_number(kUINT, &Para2, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -1905,8 +1938,8 @@ void parse_LM_packet(void)
   extract_number(kLONG,  &gAccel2,    kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -1985,8 +2018,8 @@ void parse_L3_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2053,8 +2086,8 @@ void parse_TD_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2138,8 +2171,8 @@ void parse_T3_packet(void)
   extract_number(kLONG,  &gJerk2,     kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2196,8 +2229,8 @@ void parse_LT_packet(void)
   extract_number(kLONG,  &gAccel2,    kREQUIRED);
   ClearRet = extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2500,6 +2533,8 @@ void process_low_level_move(BOOL TimedMove, ExtractReturnType ClearRet)
   }
   gMoveTemp.m.sm.Accel[1] = gAccel2;
   gMoveTemp.m.sm.Jerk[1] = gJerk2;
+  // Which axes a time-limited move steps, for QM and QG (#252)
+  set_timed_axis_flags();
   if (TimedMove)
   {
     gMoveTemp.Command = COMMAND_LT_MOVE;
@@ -2582,7 +2617,8 @@ void parse_SM_packet(void)
   extract_number(kLONG,  &gSteps2,  kOPTIONAL);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
 
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3099,6 +3135,12 @@ void parse_HM_packet(void)
   extract_number(kLONG,  &gHM_Pos1,     kOPTIONAL);
   extract_number(kLONG,  &gHM_Pos2,     kOPTIONAL);
 
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
+
   // StepRate must be from 1 to 25000
   if (gHM_StepRate < 1u)
   {
@@ -3130,8 +3172,28 @@ void parse_HM_packet(void)
   }
 
   // Make a local copy of the things we care about. This is how far we need to move.
-  gSteps1 = -globalStepCounter1 + gHM_Pos1;
-  gSteps2 = -globalStepCounter2 + gHM_Pos2;
+  // (Subtracting as unsigned is defined even for the most negative position.)
+  gSteps1 = (INT32)((UINT32)gHM_Pos1 - (UINT32)globalStepCounter1);
+  gSteps2 = (INT32)((UINT32)gHM_Pos2 - (UINT32)globalStepCounter2);
+
+  // The distance must fit in a signed 32-bit number (#250). It has
+  // overflowed if Position and the current position have different signs
+  // and the distance's sign differs from Position's. (Written as sign tests
+  // because 32-bit expressions here would use compiler temporaries, and
+  // access RAM has no room for more of those.)
+  if (
+    ((gHM_Pos1 < 0) && (globalStepCounter1 >= 0) && (gSteps1 >= 0))
+    ||
+    ((gHM_Pos1 >= 0) && (globalStepCounter1 < 0) && (gSteps1 < 0))
+    ||
+    ((gHM_Pos2 < 0) && (globalStepCounter2 >= 0) && (gSteps2 >= 0))
+    ||
+    ((gHM_Pos2 >= 0) && (globalStepCounter2 < 0) && (gSteps2 < 0))
+  )
+  {
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
   
   // Never clear accumulators for this type of move
   gClearAccs = 0;
@@ -3159,8 +3221,14 @@ void parse_TR_packet(void)
   // Extract the three parameters
   extract_number(kULONG, &gHM_StepRate, kREQUIRED);
   extract_number(kLONG,  &gSteps1,      kREQUIRED);
-  extract_number(kLONG,  &gSteps2,      kREQUIRED);
+  extract_number(kLONG,  &gSteps2,      kOPTIONAL);
   extract_number(kULONG, &gClearAccs,   kOPTIONAL);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
 
   // Set up these values as input parameters
   //  gHM_StepRate
@@ -3168,6 +3236,12 @@ void parse_TR_packet(void)
   //  gSteps2
   //  gClearAccs
   process_simple_rate_move_fp();
+
+  // Bail if the move was rejected (invalid step rate)
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    return;
+  }
 
   print_line_ending(kLE_OK_NORM);
 }
@@ -3241,9 +3315,11 @@ void process_simple_rate_move_fp(void)
   
   // Both Steps values are now positive because our directions are set. From 
   // now on we're dealing only with step counts and rates, no directions.
+  // They are read as unsigned below: negating -2147483648 leaves 0x80000000,
+  // which is the right count only when read that way (#274).
   
   // Figure out which axis is major
-  if (gSteps1 >= gSteps2)
+  if ((UINT32)gSteps1 >= (UINT32)gSteps2)
   {
     // Axis1 is major, Axis2 is minor
     // Computing the gMoveTemp.m.sm.Rate value for the primary axis is simple.
@@ -3268,8 +3344,8 @@ void process_simple_rate_move_fp(void)
       // even that slow - both the above primary rate multiply and the following
       // two multiplies and a divide, this whole function take less than 350 uS.
       
-      tempF = (float)gSteps2 * (float)gHM_StepRate;
-      tempF /= (float)gSteps1;
+      tempF = (float)(UINT32)gSteps2 * (float)gHM_StepRate;
+      tempF /= (float)(UINT32)gSteps1;
       tempF *= 85899.34592f;
       
       // Limit check out results
@@ -3299,8 +3375,8 @@ void process_simple_rate_move_fp(void)
 
     if (gSteps1 != 0)
     {
-      tempF = (float)gSteps1 * (float)gHM_StepRate;
-      tempF /= (float)gSteps2;
+      tempF = (float)(UINT32)gSteps1 * (float)gHM_StepRate;
+      tempF /= (float)(UINT32)gSteps2;
       tempF *= 85899.34592f;
       
       if (tempF < 1.0f)
@@ -3386,6 +3462,12 @@ void parse_XM_packet(void)
   extract_number(kLONG, &gXM_ASteps, kREQUIRED);
   extract_number(kLONG, &gXM_BSteps, kREQUIRED);
   extract_number(kULONG, &gClearAccs, kOPTIONAL);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
   
   // Do the math to convert to Axis1 and Axis2
   gSteps1 = gXM_ASteps + gXM_BSteps;
@@ -3429,6 +3511,7 @@ void parse_XM_packet(void)
 static void process_simple_motor_move_fp(void)
 {
   float tempF;
+  float rateF;
   
   // If we have a triggered limit switch, then ignore this move command
   if (bittstzero(gLimitSwitchTriggered))
@@ -3467,6 +3550,7 @@ static void process_simple_motor_move_fp(void)
   if (gSteps1 == 0 && gSteps2 == 0)
   {
     gMoveTemp.Command = COMMAND_DELAY;
+    gMoveTemp.m.sm.DirBits = 0;                 // No step bits (#253)
     
     // Delays over 100000ms long are capped at 100000ms.
     if (gDurationMS >= 100000u)
@@ -3480,12 +3564,6 @@ static void process_simple_motor_move_fp(void)
     gMoveTemp.m.sm.DelayCounter = 0; // No delay for motor moves
     gMoveTemp.m.sm.DirBits = 0;
 
-    if (gAutomaticMotorEnable == TRUE)
-    {
-      // Enable both motors when we want to move them
-      auto_enable_motors();
-    }
-    
     // First, set the direction bits
     if (gSteps1 < 0)
     {
@@ -3498,6 +3576,9 @@ static void process_simple_motor_move_fp(void)
       gSteps2 = -gSteps2;
     }
 
+    // The counts are read as unsigned below: negating -2147483648 leaves
+    // 0x80000000, which is the right count only when read that way (#274).
+
     // As an optimization, pre-compute the common term used for both axes
     tempF = 85899345.92f / (float)gDurationMS;
     
@@ -3508,9 +3589,14 @@ static void process_simple_motor_move_fp(void)
       // rate = (steps/duration)*85899.34592
       // Rearranging a bit, we can also use:
       // rate = steps * ((85899.34592 * 1000)/duration)
-      gIntervals = (UINT32)((float)(gSteps1) * tempF);
+      rateF = (float)(UINT32)gSteps1 * tempF;
       
-      if (gIntervals > 0x80000000u)
+      // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
+      // conversion is out of range and slipped past an integer check (#268).
+      // rateF is not negative, so comparing its IEEE bits with those of 2^31
+      // gives the same answer as a float compare, without the time it takes.
+      gIntervals = *(UINT32 *)&rateF;
+      if (gIntervals > 0x4F000000UL)
       {
         if (gLimitChecks)
         {
@@ -3519,11 +3605,14 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis1> step rate too high");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 0x80000000;
+      }
+      else
+      {
+        gIntervals = (UINT32)rateF;
       }
       if (gIntervals == 0u)
       {
@@ -3534,7 +3623,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis1> step rate too slow");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
@@ -3551,9 +3639,14 @@ static void process_simple_motor_move_fp(void)
 
     if (gSteps2 != 0)
     {
-      gIntervals = (UINT32)((float)(gSteps2) * tempF);
+      rateF = (float)(UINT32)gSteps2 * tempF;
 
-      if (gIntervals > 0x80000000u)
+      // 2^31 is 25,000 steps/s. Compare before converting: from 2^32 up the
+      // conversion is out of range and slipped past an integer check (#268).
+      // rateF is not negative, so comparing its IEEE bits with those of 2^31
+      // gives the same answer as a float compare, without the time it takes.
+      gIntervals = *(UINT32 *)&rateF;
+      if (gIntervals > 0x4F000000UL)
       {
         if (gLimitChecks)
         {
@@ -3562,11 +3655,14 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis2> step rate too high");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
         gIntervals = 0x80000000;
+      }
+      else
+      {
+        gIntervals = (UINT32)rateF;
       }
       if (gIntervals == 0u)
       {
@@ -3577,7 +3673,6 @@ static void process_simple_motor_move_fp(void)
             ebb_print_char(',');
           }
           ebb_print((far rom char *)"!0 Err: <axis2> step rate too slow");
-          print_line_ending(kLE_REV);
           ErrorSet(kERROR_PRINTED_ERROR);
           return;
         }
@@ -3592,6 +3687,13 @@ static void process_simple_motor_move_fp(void)
     gMoveTemp.m.sm.Steps[1] = (UINT32)gSteps2;
     gMoveTemp.m.sm.Accel[1] = 0;
     gMoveTemp.Command = COMMAND_SM_XM_HM_MOVE;
+
+    // Enable both motors when we want to move them. This comes after the
+    // rate checks, so that a rejected move does not enable them (#272).
+    if (gAutomaticMotorEnable == TRUE)
+    {
+      auto_enable_motors();
+    }
 
     if(bittst(TestMode, TEST_MODE_DEBUG_COMMAND_NUM))
     {
@@ -3647,13 +3749,13 @@ void parse_ES_packet(void)
   UINT8 command_interrupted = 0;
   UINT8 i;
 
-  print_command(FALSE, TRUE);
+  print_command(FALSE, FALSE);
 
   // Extract each of the value.
   extract_number(kUCHAR, &disable_motors, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3707,6 +3809,7 @@ void parse_ES_packet(void)
   // Re-enable interrupts
   INTCONbits.GIEH = 1;    // Turn high priority interrupts on
 
+  finish_command_prefix(FALSE);
   ebb_print_uint(command_interrupted);
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -3721,6 +3824,11 @@ void parse_ES_packet(void)
 // Returns: 0 for down, 1 for up, then OK<CR>
 void parse_QP_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(PenState);
@@ -3748,6 +3856,11 @@ void parse_QE_packet(void)
   UINT8 motor2_state = 0;
   UINT8 temp;
   
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   if (MS1_IO_PORT == 0u && MS2_IO_PORT == 0u && MS3_IO_PORT == 0u)
@@ -3813,19 +3926,53 @@ void parse_QE_packet(void)
 void parse_TP_packet(void)
 {
   UINT16 CommandDuration = 0;
+  PenStateType NextState;
+  UINT8 i;
+  UINT8 n;
 
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
   extract_number (kUINT, &CommandDuration, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
 
-  if (PenState == PEN_UP)
+  // Toggle from the pen state as it will be once the queue has run: the
+  // last queued move of the pen servo, or PenState if none is queued
+  // (#260). The ISR is held off so that the queue can't change meanwhile.
+  NextState = PenState;
+  INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+  i = gFIFOOut;
+  for (n = gFIFOLength; n != 0u; n--)
+  {
+    if (
+      (FIFOPtr[i].Command == COMMAND_SERVO_MOVE)
+      &&
+      (FIFOPtr[i].m.sm.ServoRPn == g_servo2_RPn)
+    )
+    {
+      if (FIFOPtr[i].m.sm.ServoPosition == g_servo2_min)
+      {
+        NextState = PEN_UP;
+      }
+      else
+      {
+        NextState = PEN_DOWN;
+      }
+    }
+    i++;
+    if (i >= gCurrentFIFOLength)
+    {
+      i = 0;
+    }
+  }
+  INTCONbits.GIEH = 1;  // Turn high priority interrupts on
+
+  if (NextState == PEN_UP)
   {
     process_SP(PEN_DOWN, CommandDuration);
   }
@@ -3877,8 +4024,8 @@ void parse_SP_packet(void)
   extract_number(kUINT, &CommandDuration, kOPTIONAL);
   Ret = extract_number(kUCHAR, &Pin, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4022,10 +4169,15 @@ void parse_EM_packet(void)
     return;
   }
   RetVal2 = extract_number (kUCHAR, &EA2, kOPTIONAL);
-  // Bail if we got a conversion error
-  if ((error_byte != kERROR_NO_ERROR) || (kEXTRACT_OK != RetVal2))
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
+  }
+  // Enable2 omitted: leave motor 2 as it is (#251)
+  if (kEXTRACT_OK != RetVal2)
+  {
+    EA2 = EM_MOTOR2_UNCHANGED;
   }
 
   if (!bittst(TestMode, TEST_MODE_DEBUG_BLOCK_FIFO_NUM))
@@ -4054,6 +4206,11 @@ void parse_EM_packet(void)
 // Usage: NI<CR>
 void parse_NI_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   if (NodeCount < 0xFFFFFFFEUL)
@@ -4067,6 +4224,11 @@ void parse_NI_packet(void)
 // Usage: ND<CR>
 void parse_ND_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   if (NodeCount)
@@ -4082,15 +4244,17 @@ void parse_ND_packet(void)
 void parse_SN_packet(void)
 {
   unsigned long Temp;
-  ExtractReturnType RetVal;
 
   print_command(FALSE, FALSE);
 
-  RetVal = extract_number(kULONG, &Temp, kREQUIRED);
-  if (kEXTRACT_OK == RetVal)
+  extract_number(kULONG, &Temp, kREQUIRED);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
-    NodeCount = Temp;
+    return;
   }
+  NodeCount = Temp;
   print_line_ending(kLE_OK_NORM);
 }
 
@@ -4100,6 +4264,11 @@ void parse_SN_packet(void)
 // OK<CR>
 void parse_QN_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(NodeCount);
@@ -4129,8 +4298,8 @@ void parse_SL_packet(void)
   extract_number(kUCHAR, &Value, kREQUIRED);
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4155,12 +4324,12 @@ void parse_QL_packet(void)
   UINT8 Value = 0;
   UINT8 Index = 0;
   
-  print_command(FALSE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &Index, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4170,6 +4339,7 @@ void parse_QL_packet(void)
     Index = (SL_STORAGE_SIZE - 1);
   }
   
+  finish_command_prefix(FALSE);
   ebb_print_uint(gSL_Storage[Index]);
   if (!bittstzero(gStandardizedCommandFormat))
   {
@@ -4184,6 +4354,11 @@ void parse_QL_packet(void)
 // OK<CR>
 void  parse_QB_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(ButtonPushed);
@@ -4211,6 +4386,11 @@ void  parse_QB_packet(void)
 // V+ comes in on AN11 (RC2)
 void parse_QC_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   // Since access to ISR_A_FIFO[] is not protected in any way from ISR and
   // mainline code accessing at the same time, we will just wait for
   // the cycle of ADC readings to finish before we spit out our value.
@@ -4245,6 +4425,11 @@ void parse_QC_packet(void)
 void parse_QG_packet(void)
 {
   UINT8 result = process_QM();
+
+  if (!no_parameters())
+  {
+    return;
+  }
 
   print_command(FALSE, TRUE);
 
@@ -4307,8 +4492,8 @@ void parse_SE_packet(void)
   PowerExtract = extract_number(kUINT, &Power, kOPTIONAL);
   extract_number(kUCHAR, &SEUseMotionQueue, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -4397,6 +4582,7 @@ void parse_SE_packet(void)
       FIFOPtr[gFIFOIn].m.sm.DelayCounter = 0;
       FIFOPtr[gFIFOIn].m.sm.SEState = State;
       FIFOPtr[gFIFOIn].Command = COMMAND_SE;
+      FIFOPtr[gFIFOIn].m.sm.DirBits = 0;        // No step bits (#253)
 
       gFIFOIn++;
       if (gFIFOIn >= gCurrentFIFOLength)
@@ -4418,16 +4604,19 @@ UINT8 process_QM(void)
   UINT8 Motor1Running = 0;
   UINT8 Motor2Running = 0;
   UINT8 FIFOStatus = 0;
+  UINT8 Command;
 
   // Need to turn off high priority interrupts briefly here to read out value that ISR uses
   INTCONbits.GIEH = 0;  // Turn high priority interrupts off
+
+  Command = CurrentCommand.Command;
 
   // Create our output values to print back to the PC
   if (CurrentCommand.m.sm.DelayCounter != 0u) 
   {
     CommandExecuting = 1;
   }
-  if (CurrentCommand.Command != COMMAND_NONE)
+  if (Command != COMMAND_NONE)
   {
     CommandExecuting = 1;
   }
@@ -4436,13 +4625,22 @@ UINT8 process_QM(void)
     CommandExecuting = 1;
     FIFOStatus = 1;
   }
-  if (CommandExecuting && CurrentCommand.m.sm.Steps[0] != 0u) 
+  // Motor status depends on the kind of command now running (#252). Step-
+  // limited moves: each axis that still has steps to take. Time-limited
+  // moves: the axes the move steps, while time remains. Anything else
+  // (delays, servo moves, SE, EM): no motor is moving.
+  if ((Command == COMMAND_SM_XM_HM_MOVE) || (Command == COMMAND_LM_MOVE))
   {
-    Motor1Running = 1;
+    Motor1Running = AxisActive[0] & 0x01;
+    Motor2Running = AxisActive[1] & 0x01;
   }
-  if (CommandExecuting && CurrentCommand.m.sm.Steps[1] != 0u) 
+  else if (Command == COMMAND_LT_MOVE)
   {
-    Motor2Running = 1;
+    if (AxisActive[0] & 0x01)
+    {
+      Motor1Running = CurrentCommand.m.sm.ServoChannel & 0x01;
+      Motor2Running = (CurrentCommand.m.sm.ServoChannel >> 1) & 0x01;
+    }
   }
 
   // Re-enable interrupts
@@ -4471,6 +4669,11 @@ void parse_QM_packet(void)
   UINT8 Motor2Running = 0;
   UINT8 FIFOStatus = 0;
   UINT8 result = process_QM();
+
+  if (!no_parameters())
+  {
+    return;
+  }
 
   print_command(TRUE, TRUE);
 
@@ -4513,6 +4716,11 @@ void parse_QS_packet(void)
 {
   INT32 step1, step2;
 
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   // Need to turn off high priority interrupts briefly here to read out value that ISR uses
@@ -4533,6 +4741,38 @@ void parse_QS_packet(void)
     print_line_ending(kLE_REV);
   }
   print_line_ending(kLE_OK_NORM);
+}
+
+// For a time-limited move (LT, T3, TD), record which axes it steps, for QM
+// and QG: bit 0 for axis 1, bit 1 for axis 2, set when that axis has a
+// nonzero Rate, Accel or Jerk. Call once gMoveTemp holds the move's final
+// values. The bits go in ServoChannel, which these moves don't otherwise
+// use, so they travel through the FIFO with the move (#252).
+static void set_timed_axis_flags(void)
+{
+  UINT8 flags = 0;
+
+  if (
+    (gMoveTemp.m.sm.Rate[0].value != 0)
+    ||
+    (gMoveTemp.m.sm.Accel[0] != 0)
+    ||
+    (gMoveTemp.m.sm.Jerk[0] != 0)
+  )
+  {
+    flags = 0x01;
+  }
+  if (
+    (gMoveTemp.m.sm.Rate[1].value != 0)
+    ||
+    (gMoveTemp.m.sm.Accel[1] != 0)
+    ||
+    (gMoveTemp.m.sm.Jerk[1] != 0)
+  )
+  {
+    flags |= 0x02;
+  }
+  gMoveTemp.m.sm.ServoChannel = flags;
 }
 
 // Enable both motor drivers at the start of a motion command, for the
@@ -4594,6 +4834,11 @@ void clear_StepCounters(void)
 // Note, as of 2.7.0 this also clears out the step accumulators as well
 void parse_CS_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
 
   clear_StepCounters();

@@ -151,7 +151,7 @@ volatile UINT16 g_StepperDisableTimeoutS;       // Seconds of no motion before m
 volatile UINT16 g_StepperDisableSecondCounter;  // Counts milliseconds up to 1 s for stepper disable timeout
 volatile UINT16 g_StepperDisableCountdownS;     // After motion is done, counts down in seconds from g_StepperDisableTimeoutS to zero
 
-const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.1.10"};
+const rom char st_version[] = {"EBBv13_and_above EB Firmware Version 3.1.11"};
 
 #pragma udata ISR_buf = 0x100
 volatile unsigned int ISR_A_FIFO[16];                     // Stores the most recent analog conversions
@@ -246,6 +246,7 @@ static unsigned char gDeviceStringName[FLASH_NAME_LENGTH+1];
 void BlinkUSBStatus(void);     // Handles blinking the USB status LED
 BOOL SwitchIsPressed(void);    // Check to see if the user (PRG) switch is pressed
 void parse_packet(void);       // Take a full packet and dispatch it to the right function
+UINT16 find_command(void);     // Read the one or two character command name
 signed char extract_digit(unsigned long * acc, unsigned char digits); // Pull a character out of the packet
 void parse_R_packet(void);     // R for resetting UBW
 void parse_C_packet(void);     // C for configuring I/O and analog pins
@@ -1058,6 +1059,11 @@ void ProcessIO(void)
     return;
   }
 
+  // Send a Limit Switch Reply as soon as the stop happens, between
+  // command replies, not only after the next command (#267). With
+  // replies off (the default) this returns at its first test.
+  CheckForLimitSwitchReplies();
+
   // Pull in some new data if there is new data to pull in
   // And we aren't waiting for the current move to finish
   rx_bytes = getsUSBUSART((char *)g_RX_command_buf, kRX_COMMAND_BUF_SIZE);
@@ -1134,8 +1140,33 @@ void ProcessIO(void)
       
       if (!binary_bytes_left)
       {
+        // Receive buffer overrun (#257): the rest of an over-long line is
+        // discarded. At its line ending, report !3 and end the line as for
+        // any other command; nothing from the line is parsed.
+        if (kERROR_RX_BUFFER_OVERRUN == error_byte)
+        {
+          if (kCR == tst_char || kLF == tst_char)
+          {
+            in_cr = TRUE;
+
+            // Name the command (future syntax mode), as for other errors
+            g_RX_buf_out = 0;
+            gCommand_Char1 = 0;
+            gCommand_Char2 = 0;
+            find_command();
+            print_command(FALSE, FALSE);
+
+            g_RX_buf_in = 0;
+            g_RX_buf_out = 0;
+            first_byte = TRUE;
+
+            CheckForAndPrintErrors();
+            CheckForLimitSwitchReplies();
+            check_and_send_TX_data();
+          }
+        }
         // Check to see if we are in a CR/LF situation
-        if (
+        else if (
           !in_cr 
           && 
           (
@@ -1188,18 +1219,21 @@ void ProcessIO(void)
           tst_char >= 32u
         )
         {
-          // Only add a byte if it is not a CR or LF
-          g_RX_buf[g_RX_buf_in] = tst_char;
-          in_cr = FALSE;
-          first_byte = FALSE;
-          g_RX_buf_in++;
-        }
-        // Check for buffer wraparound
-        if (kRX_BUF_SIZE == g_RX_buf_in)
-        {
-          ErrorSet(kERROR_RX_BUFFER_OVERRUN);
-          g_RX_buf_in = 0;
-          g_RX_buf_out = 0;
+          // A character that would leave no room for the line ending's CR
+          // means the command is longer than 256 bytes: an overrun (#257).
+          // (Set directly, so that no earlier error can mask this state.)
+          if ((kRX_BUF_SIZE - 1u) == g_RX_buf_in)
+          {
+            error_byte = kERROR_RX_BUFFER_OVERRUN;
+          }
+          else
+          {
+            // Only add a byte if it is not a CR or LF
+            g_RX_buf[g_RX_buf_in] = tst_char;
+            in_cr = FALSE;
+            first_byte = FALSE;
+            g_RX_buf_in++;
+          }
         }
       }
     }
@@ -1329,6 +1363,7 @@ void parse_packet(void)
   UINT8 checksum_calc = 0;
   UINT8 checksum_ptr;
   UINT8 checksum_len = 0;
+  ExtractReturnType checksum_ret;
   BOOL checksumOK = TRUE;   // Starts out true for no checksum case
   UINT8 old_rx_buf_out;
   UINT8 i;
@@ -1375,9 +1410,18 @@ void parse_packet(void)
       // processing)
       old_rx_buf_out = g_RX_buf_out;
       g_RX_buf_out = checksum_ptr;
-      // We're going to ignore the return value from extract_number() since
-      // we'll get a failure anyway since the checksum value won't match.
-      extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      // A checksum value that is not a byte (above 255) is reported as an
+      // incorrect checksum, with the expected value, rather than as a
+      // second error (#263). An error recorded before this one is kept.
+      checksum_ret = extract_number(kUCHAR, &checksum_cmd, kREQUIRED);
+      if (
+        (kEXTRACT_OK != checksum_ret)
+        &&
+        (kEXTRACT_SKIPPING_BECAUSE_EXISTING_ERROR != checksum_ret)
+      )
+      {
+        error_byte = kERROR_NO_ERROR;
+      }
       g_RX_buf_out = old_rx_buf_out;
       
       // Compute the checksum of the packet up to checksum_ptr
@@ -1394,7 +1438,7 @@ void parse_packet(void)
       checksum_calc = (~checksum_calc)+1;
       
       // See if it matches
-      if (checksum_calc == checksum_cmd)
+      if ((kEXTRACT_OK == checksum_ret) && (checksum_calc == checksum_cmd))
       {
         // All is good, allow command to proceed
         checksumOK = TRUE;
@@ -1493,8 +1537,12 @@ void parse_packet(void)
       }
       case 'I':
       {
-        // Input command (return the current status of the ports)
-        parse_I_packet();
+        // Input command (return the current status of the ports). The check
+        // is made here because parse_I_packet() also sends timed I packets.
+        if (no_parameters())
+        {
+          parse_I_packet();
+        }
         break;
       }
       case 'V':
@@ -1505,8 +1553,12 @@ void parse_packet(void)
       }
       case 'A':
       {
-        // Analog command
-        parse_A_packet();
+        // Analog command. The check is made here because parse_A_packet()
+        // also sends timed A packets.
+        if (no_parameters())
+        {
+          parse_A_packet();
+        }
         break;
       }
   #if PC_PG_T_COMMANDS_ENABLED
@@ -1852,6 +1904,24 @@ void print_command(BOOL print_always, BOOL print_comma)
   }
 }
 
+// For a command whose reply starts with its name: call print_command(FALSE,
+// FALSE) before parsing, then this once all of the command's checks have
+// passed, just before the reply's values. It adds the comma after the name
+// in future syntax mode, or in legacy mode prints the name and comma if
+// print_always is TRUE. An error found earlier is then printed in the same
+// form as for every other command (#254).
+void finish_command_prefix(BOOL print_always)
+{
+  if (bittstzero(gStandardizedCommandFormat))
+  {
+    ebb_putc(',');
+  }
+  else if (print_always)
+  {
+    print_command(TRUE, TRUE);
+  }
+}
+
 // This function prints out the common endings needed on text lines sent back
 // to the PC. It operates in two modes, Legacy and New. Legacy mode is used
 // when we need to emulate how the EBB's line endings have been done since
@@ -1867,6 +1937,13 @@ void print_command(BOOL print_always, BOOL print_comma)
 //     Regardless of the value of <type>, always print "\n"
 void print_line_ending(tLineEnding le_type)
 {
+  // A command that reports an error does not also reply OK (#264). The
+  // error message, printed after the command returns, ends the line.
+  if ((le_type == kLE_OK_NORM) && (error_byte != kERROR_NO_ERROR))
+  {
+    return;
+  }
+
   if (bittstzero(gStandardizedCommandFormat))
   {
     ebb_print((far rom char *)"\n");
@@ -1892,6 +1969,11 @@ void print_line_ending(tLineEnding le_type)
 // Return all I/Os to their default power-on values
 void parse_R_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, FALSE);
   print_line_ending(kLE_OK_NORM);
   check_and_send_TX_data();
@@ -1932,8 +2014,8 @@ void parse_CU_packet(void)
   extract_number(kUINT, &parameter_number, kREQUIRED);
   extract_number(kINT, &paramater_value, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -1986,6 +2068,11 @@ void parse_CU_packet(void)
   // CU,4,<new_FIFO_size>
   else if (4u == parameter_number)
   {
+    if (paramater_value < 1)
+    {
+      ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+      return;
+    }
     if (paramater_value > (INT16)COMMAND_FIFO_MAX_LENGTH)
     {
       paramater_value = COMMAND_FIFO_MAX_LENGTH;
@@ -2352,15 +2439,31 @@ void parse_QU_packet(void)
 {
   UINT8 parameter_number;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCHAR, &parameter_number, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
+
+  // Reject an unknown parameter number before printing the reply
+  if (
+    ((parameter_number < 1u) || (parameter_number > 6u))
+    &&
+    (parameter_number != 60u)
+    &&
+    (parameter_number != 61u)
+    &&
+    (parameter_number != 200u)
+  )
+  {
+    ErrorSet(kERROR_PARAMETER_OUTSIDE_LIMIT);
+    return;
+  }
+  finish_command_prefix(TRUE);
 
   // QU,1 to read back current value of gLimitSwitchPortB
   // Returns "QU,1,XX" where XX is two digit hex value from 00 to FF
@@ -2434,7 +2537,11 @@ void parse_QU_packet(void)
     return;
   }
 
-  print_line_ending(kLE_OK_NORM);
+  // Each value above already ended its line; future mode adds no more (#266)
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_OK_NORM);
+  }
 }
 
 #if PC_PG_T_COMMANDS_ENABLED
@@ -2524,8 +2631,8 @@ void parse_C_packet(void)
   extract_number(kUCHAR, &PD, kREQUIRED);
   extract_number(kUCHAR, &PE, kREQUIRED);
     
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2605,8 +2712,8 @@ void parse_AC_packet(void)
   extract_number(kUCHAR, &Channel, kREQUIRED);
   extract_number(kUCHAR, &Enable, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2620,41 +2727,43 @@ void parse_AC_packet(void)
 // Example "O,121,224,002<CR>"
 void parse_O_packet(void)
 {
-  unsigned char Value;
-  ExtractReturnType RetVal;
+  unsigned char Value[5];
+  ExtractReturnType RetVal[5];
 
   print_command(FALSE, FALSE);
 
   // Extract each of the values.
-  RetVal = extract_number(kUCHAR,  &Value, kREQUIRED);
-  if (error_byte != kERROR_NO_ERROR) return;
-  if (kEXTRACT_OK == RetVal)
+  RetVal[0] = extract_number(kUCHAR,  &Value[0], kREQUIRED);
+  RetVal[1] = extract_number(kUCHAR,  &Value[1], kOPTIONAL);
+  RetVal[2] = extract_number(kUCHAR,  &Value[2], kOPTIONAL);
+  RetVal[3] = extract_number(kUCHAR,  &Value[3], kOPTIONAL);
+  RetVal[4] = extract_number(kUCHAR,  &Value[4], kOPTIONAL);
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
-    LATA = Value;
+    return;
   }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte != kERROR_NO_ERROR) return;
-  if (kEXTRACT_OK == RetVal)
+
+  if (kEXTRACT_OK == RetVal[0])
   {
-    LATB = Value;
+    LATA = Value[0];
   }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte != kERROR_NO_ERROR) return;
-  if (kEXTRACT_OK == RetVal)
+  if (kEXTRACT_OK == RetVal[1])
   {
-    LATC = Value;
+    LATB = Value[1];
   }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte != kERROR_NO_ERROR) return;
-  if (kEXTRACT_OK == RetVal)
+  if (kEXTRACT_OK == RetVal[2])
   {
-    LATD = Value;
+    LATC = Value[2];
   }
-  RetVal = extract_number(kUCHAR,  &Value, kOPTIONAL);
-  if (error_byte != kERROR_NO_ERROR) return;
-  if (kEXTRACT_OK == RetVal)
+  if (kEXTRACT_OK == RetVal[3])
   {
-    LATE = Value;
+    LATD = Value[3];
+  }
+  if (kEXTRACT_OK == RetVal[4])
+  {
+    LATE = Value[4];
   }
 
   print_line_ending(kLE_OK_NORM);
@@ -2682,6 +2791,11 @@ void parse_I_packet(void)
 // All we do here is just print out our version number
 void parse_V_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
   
   ebb_print((far rom char *)st_version);
@@ -2737,8 +2851,8 @@ void parse_MW_packet(void)
   extract_number(kUINT, &location, kREQUIRED);
   extract_number(kUCHAR, &value, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2762,12 +2876,12 @@ void parse_MR_packet(void)
   unsigned int location;
   unsigned char value;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUINT, &location, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2779,6 +2893,7 @@ void parse_MR_packet(void)
   }
 
   // Now send back the MR packet
+  finish_command_prefix(TRUE);
   ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }
@@ -2800,8 +2915,8 @@ void parse_PD_packet(void)
   extract_number(kUCHAR, &pin, kREQUIRED);
   extract_number(kUCHAR, &direction, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2894,13 +3009,13 @@ void parse_PI_packet(void)
   UINT8 pin;
   UINT8 value = 0;
 
-  print_command(TRUE, TRUE);
+  print_command(FALSE, FALSE);
 
   extract_number(kUCASE_ASCII_CHAR, &port, kREQUIRED);
   extract_number(kUCHAR, &pin, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -2946,6 +3061,7 @@ void parse_PI_packet(void)
   }
 
   // Now send back our response
+  finish_command_prefix(TRUE);
   ebb_print_uint(value);
   print_line_ending(kLE_NORM);
 }
@@ -2967,8 +3083,8 @@ void parse_PO_packet(void)
   extract_number(kUCHAR, &pin, kREQUIRED);
   extract_number(kUCHAR, &value, kREQUIRED);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3164,6 +3280,11 @@ void LongDelay(void)
 // Example: "BL<CR>"
 void parse_BL_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   // First, kill interrupts though
   INTCONbits.GIEH = 0;    // Turn high priority interrupts off
   INTCONbits.GIEL = 0;    // Turn low priority interrupts off
@@ -3180,6 +3301,11 @@ void parse_BL_packet(void)
 // Example: "RB<CR>"
 void parse_RB_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   // First, kill interrupts though
   INTCONbits.GIEH = 0;    // Turn high priority interrupts off
   INTCONbits.GIEL = 0;    // Turn low priority interrupts off
@@ -3199,6 +3325,11 @@ void parse_RB_packet(void)
 // 1 = power to RC servo on
 void parse_QR_packet(void)
 {
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   ebb_print_uint(RCServoPowerIO_PORT);
@@ -3231,8 +3362,8 @@ void parse_SR_packet(void)
   extract_number(kULONG, &Value, kREQUIRED);
   GotState = extract_number(kUCHAR, &State, kOPTIONAL);
 
-  // Bail if we got a conversion error
-  if (error_byte != kERROR_NO_ERROR)
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
   {
     return;
   }
@@ -3269,34 +3400,41 @@ void parse_CK_packet(void)
   unsigned char UCaseChar;
 
   print_command(FALSE, FALSE);
-  print_line_ending(kLE_NORM);
 
-  extract_number(kCHAR, &SByte, kREQUIRED);
+  // Each parameter in its documented type and order (#258)
   extract_number(kUCHAR, &UByte, kREQUIRED);
-  extract_number(kINT, &SInt, kREQUIRED);
+  extract_number(kCHAR, &SByte, kREQUIRED);
   extract_number(kUINT, &UInt, kREQUIRED);
-  extract_number(kLONG, &SLong, kREQUIRED);
+  extract_number(kINT, &SInt, kREQUIRED);
   extract_number(kULONG, &ULong, kREQUIRED);
+  extract_number(kLONG, &SLong, kREQUIRED);
   extract_number(kASCII_CHAR, &UChar, kREQUIRED);
   extract_number(kUCASE_ASCII_CHAR, &UCaseChar, kREQUIRED);
 
-  ebb_print((rom char far *)"Param1=");
-  ebb_print_int(SByte);
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
+
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param2=");
+  ebb_print((rom char far *)"Param1=");
   ebb_print_uint(UByte);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param3=");
-  ebb_print_int(SInt);
+  ebb_print((rom char far *)"Param2=");
+  ebb_print_int(SByte);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param4=");
+  ebb_print((rom char far *)"Param3=");
   ebb_print_uint(UInt);
   print_line_ending(kLE_NORM);
+  ebb_print((rom char far *)"Param4=");
+  ebb_print_int(SInt);
+  print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param5=");
-  ebb_print_int(SLong);
+  ebb_print_uint(ULong);
   print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param6=");
-  ebb_print_uint(ULong);
+  ebb_print_int(SLong);
   print_line_ending(kLE_NORM);
   ebb_print((rom char far *)"Param7=");
   ebb_print_char(UChar);
@@ -3304,14 +3442,12 @@ void parse_CK_packet(void)
   ebb_print((rom char far *)"Param8=");
   ebb_print_char(UCaseChar);
   print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param6=");
-  ebb_print_hex(ULong, 8);
-  print_line_ending(kLE_NORM);
-  ebb_print((rom char far *)"Param6=");
-  ebb_print_hex(ULong, 0);
-  print_line_ending(kLE_NORM);
 
-  print_line_ending(kLE_OK_NORM);
+  // Each value above already ended its line; future mode adds no more (#273)
+  if (!bittstzero(gStandardizedCommandFormat))
+  {
+    print_line_ending(kLE_OK_NORM);
+  }
 }
 
 void populateDeviceStringWithName(void)
@@ -3380,6 +3516,21 @@ void parse_ST_packet(void)
   }
   
   bytes = extract_string(gDeviceStringName, FLASH_NAME_LENGTH);
+
+  // A longer name is truncated: skip the rest of it (#256)
+  if (bytes >= FLASH_NAME_LENGTH)
+  {
+    while ((g_RX_buf[g_RX_buf_out] != kCR) && (g_RX_buf[g_RX_buf_out] != ','))
+    {
+      advance_RX_buf_out();
+    }
+  }
+
+  // Bail if we got a conversion error or an extra parameter
+  if (!parameters_ok())
+  {
+    return;
+  }
   
   // We have reserved FLASH addresses 0xF800 to 0xFBFF (1024 bytes) for
   // storing persistent variables like the EEB's name. Note that no wear-leveling
@@ -3403,6 +3554,11 @@ void parse_QT_packet(void)
 {
   UINT8 i;
   
+  if (!no_parameters())
+  {
+    return;
+  }
+
   print_command(FALSE, TRUE);
 
   // Clear out our name array
@@ -3486,6 +3642,39 @@ UINT8 extract_string (
   return(bytes);
 }
 
+
+// Call after extracting a command's last parameter (including any optional
+// ones), before the command acts or prints its reply. Returns TRUE if no
+// error has been recorded and the command ends here. Otherwise records an
+// error (!7 if anything follows the last parameter) and returns FALSE: the
+// command must then return without acting or replying, so that the error
+// is its only reply (#264).
+BOOL parameters_ok(void)
+{
+  if (error_byte != kERROR_NO_ERROR)
+  {
+    return(FALSE);
+  }
+  if (g_RX_buf[g_RX_buf_out] != kCR)
+  {
+    ErrorSet(kERROR_EXTRA_CHARACTERS);
+    return(FALSE);
+  }
+  return(TRUE);
+}
+
+// The same check for commands that take no parameters, called before
+// anything is printed. On an error the command name is echoed (future
+// syntax mode), so that the error reply has its usual form.
+BOOL no_parameters(void)
+{
+  if (parameters_ok())
+  {
+    return(TRUE);
+  }
+  print_command(FALSE, FALSE);
+  return(FALSE);
+}
 
 // Look at the string pointed to by g_RX_buf[g_RX_buf_out]
 // There should be a comma where g_RX_buf[g_RX_buf_out] points to upon entry.

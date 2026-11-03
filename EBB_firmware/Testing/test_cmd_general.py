@@ -67,8 +67,36 @@ def test_syntax(ebb, r):
     r.check("numbers have at most 10 digits (11 digits: !6)",
             resp == b"!6 Err: Invalid parameter value\r\n", resp)
     r.check("10 digit number accepted", ebb.raw("SL,0000000005,0") == b"OK\r\n")
-    r.omit("Syntax conventions (256 byte limit)",
-           "longer commands are not reported (the overflow check can never fire, D45)")
+    # 256 byte limit, CR included (#257): 255 characters are parsed; one more
+    # is an overrun, reported as !3, with nothing from the line run
+    r.item = "Syntax conventions (256 byte limit)"
+    ebb.ok("CS")
+    resp = ebb.raw(b"x" * 255 + b"\r")
+    r.check("255 characters + CR are parsed (unknown command XX)",
+            resp == b"!8 Err: Unknown command 'XX:5858'\r\n", resp)
+    resp = ebb.raw(b"x" * 256 + b"\r")
+    r.check("256 characters + CR: only !3", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    resp = ebb.raw(b"x" * 256 + b"SM,300,40,40\r")
+    ebb.wait_idle()
+    r.check("an SM after 256 characters is not run: only !3",
+            resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("  ...and nothing moved (QS 0,0)", ebb.raw("QS").startswith(b"0,0"))
+    resp = ebb.raw(b"A" * 300 + b"\r")
+    r.check("300 characters + CR: only !3", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("the next command after an overrun is parsed normally", ebb.raw("V") == version)
+    resp = ebb.raw(b"x" * 300 + b"\x08" * 50 + b"\r")
+    r.check("backspaces do not undo an overrun", resp == b"!3 Err: RX Buffer overrun\r\n", resp)
+    r.check("ignored characters (300 NULs) do not count", ebb.raw(b"\x00" * 300 + b"V\r") == version)
+    ebb.ok("CS")
+    resp = ebb.raw(b"SM,300,40,40" + b"\t" * 300 + b"\r")
+    ebb.wait_idle()
+    r.check("ignored characters (300 tabs) inside a command do not count", resp == b"OK\r\n", resp)
+    r.check("  ...and the command ran (QS 40,40)", ebb.raw("QS").startswith(b"40,40"))
+    ebb.raw("CU,10,1")
+    resp = ebb.raw(b"x" * 256 + b"\r")
+    ebb.raw("CU,10,0")
+    r.check("future: XX,!3 Err: RX Buffer overrun<NL>",
+            resp == b"XX,!3 Err: RX Buffer overrun\n", resp)
 
 
 def test_errors(ebb, r):
@@ -86,8 +114,7 @@ def test_errors(ebb, r):
             want = text + b"\r\n" if mode == "legacy" else name.encode() + b"," + text + b"\n"
             r.check(f"{mode}: {cmd}", resp == want, f"{resp!r} (expected {want!r})")
     # !0: SM step rate above 25,000 steps/s. The text, and that the move is
-    # not executed, are checked; the line ending is not (an extra blank line
-    # follows the error, D2).
+    # not executed, are checked here; the complete reply below.
     r.item = "Returned Errors !0"
     ebb.ok("CS")
     for cmd, text in (("SM,1,26", b"!0 Err: <axis1> step rate too high"),
@@ -100,11 +127,19 @@ def test_errors(ebb, r):
     r.check("rejected moves did not run (QS 0,0)", ebb.raw("QS").startswith(b"0,0"))
     r.check("SM,1,25 (25,000 steps/s) is accepted", ebb.raw("SM,1,25") == b"OK\r\n")
     ebb.wait_idle()
-    r.omit("Returned Errors !0 (line ending)", "an extra line ending follows !0 errors (D2)")
-    r.omit("Returned Errors !1", "only TR reports it, and only after OK (D17)")
+    # The complete !0 reply is one line with the documented ending (#265).
+    # Only "too high" is sent: "too slow" needs a move hours long.
+    for mode in legacy_and_future(ebb):
+        for cmd, axis in (("SM,1,26", 1), ("SM,1,0,26", 2), ("XM,1,15,15", 1)):
+            text = f"!0 Err: <axis{axis}> step rate too high".encode()
+            want = text + b"\r\n" if mode == "legacy" else cmd[:2].encode() + b"," + text + b"\n"
+            resp = ebb.raw(cmd)
+            r.check(f"{mode}: {cmd} replies one line", resp == want, f"{resp!r} (expected {want!r})")
+    ebb.wait_idle()
+    # Returned Errors !1: only TR reports it; see test_tr in test_cmd_motion.py
     r.omit("Returned Errors !2", "internal TX buffer overrun; not reachable by command")
-    r.omit("Returned Errors !3", "the RX overflow check can never fire (D45)")
-    r.omit("Returned Errors !7", "commands with an extra parameter run, then report !7 (D3)")
+    # Returned Errors !3: see test_syntax (256 byte limit)
+    # Returned Errors !7 (extra parameter): see test_error_abort.py
 
 
 def test_checksums(ebb, r):
@@ -118,6 +153,10 @@ def test_checksums(ebb, r):
             resp == b"!9 Err: Checksum incorrect, expected 170\r\n", resp)
     resp = ebb.raw("V,170")
     r.check("correct checksum (V,170) accepted", VERSION.match(resp), resp)
+    for value in (256, 300, 999):
+        resp = ebb.raw(f"V,{value}")
+        r.check(f"checksum above 255 (V,{value}): one !9 error with the expected value",
+                resp == b"!9 Err: Checksum incorrect, expected 170\r\n", resp)
     body = "SL,7,2"
     cs = (0x100 - sum(body.encode())) & 0xFF
     r.check(f"command with parameters and checksum ({body},{cs})", ebb.raw(f"{body},{cs}") == b"OK\r\n")
@@ -130,6 +169,9 @@ def test_checksums(ebb, r):
     r.check("future: !10", resp == b"V,!10 Err: No checksum found but required\n", resp)
     resp = ebb.raw("V,0")
     r.check("future: !9", resp == b"V,!9 Err: Checksum incorrect, expected 170\n", resp)
+    resp = ebb.raw("V,300")
+    r.check("future: checksum above 255 gives one !9 error",
+            resp == b"V,!9 Err: Checksum incorrect, expected 170\n", resp)
     ebb.raw("CU,54,0,119")
     ebb.raw("CU,10,0")
 
